@@ -23,11 +23,11 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
   return (
     <form
       onSubmit={handleSearch}
-      className="relative w-full md:max-w-2xl mx-auto mb-8 glass dark:glass-dark rounded-full shadow-sm overflow-hidden"
+      className="relative w-full md:max-w-2xl mx-auto mb-0 glass dark:glass-dark rounded-full shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
     >
       <div className="flex items-center">
         <div className="flex items-center justify-center pl-4">
-          <Search className="h-5 w-5 text-muted-foreground" />
+          <Search className="h-5 w-5 text-muted-foreground transition-all duration-300" />
         </div>
         <input
           type="text"
@@ -43,7 +43,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
             variant="ghost"
             size="icon"
             onClick={clearSearch}
-            className="mr-1"
+            className="mr-1 transition-all duration-200 hover:rotate-90"
             aria-label="Clear search"
           >
             <X className="h-4 w-4" />
@@ -51,7 +51,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
         )}
         <Button
           type="submit"
-          className="m-1 bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 transition-all duration-300"
+          className="m-1 bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 transition-all duration-300 hover:shadow-md"
         >
           Search
         </Button>

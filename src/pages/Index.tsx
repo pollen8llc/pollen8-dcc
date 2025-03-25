@@ -20,7 +20,7 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative pt-32 px-4">
+      <section className="relative pt-32 px-4 transition-all duration-300">
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
@@ -39,15 +39,15 @@ const Index = () => {
       </section>
       
       {/* Communities Section */}
-      <section className="px-4 pb-20">
+      <section className="px-4 pb-20 transition-all duration-300">
         <div className="container mx-auto">
           <div>
             {searchQuery ? (
-              <h2 className="text-2xl font-semibold">
+              <h2 className="text-2xl font-semibold animate-fade-in">
                 Search Results for "{searchQuery}"
               </h2>
             ) : (
-              <Separator className="bg-gray-300 dark:bg-gray-700" />
+              <Separator className="bg-gray-300 dark:bg-gray-700 transition-all duration-300" />
             )}
           </div>
           
@@ -56,7 +56,7 @@ const Index = () => {
       </section>
       
       {/* Footer */}
-      <footer className="py-8 border-t border-border/20">
+      <footer className="py-8 border-t border-border/20 transition-all duration-300">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
