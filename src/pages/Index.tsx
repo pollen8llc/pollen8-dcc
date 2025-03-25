@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { communities } from "@/data/mockData";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
 import CommunityList from "@/components/CommunityList";
-import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,12 +29,6 @@ const Index = () => {
             <div className="appear-animate" style={{animationDelay: "0.2s"}}>
               <SearchBar onSearch={handleSearch} />
             </div>
-            
-            <div className="mt-8 appear-animate" style={{animationDelay: "0.3s"}}>
-              <Button className="bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 transition-all duration-300 shadow-md">
-                Create a Community
-              </Button>
-            </div>
           </div>
         </div>
       </section>
@@ -44,25 +36,13 @@ const Index = () => {
       {/* Communities Section */}
       <section className="px-4 pb-20">
         <div className="container mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="mb-8">
             <h2 className="text-2xl font-semibold">
               {searchQuery 
                 ? `Search Results for "${searchQuery}"`
-                : "Featured Communities"
+                : "Communities"
               }
             </h2>
-            
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
-                All
-              </Button>
-              <Button variant="ghost" size="sm">
-                Recent
-              </Button>
-              <Button variant="ghost" size="sm">
-                Popular
-              </Button>
-            </div>
           </div>
           
           <CommunityList communities={communities} searchQuery={searchQuery} />
