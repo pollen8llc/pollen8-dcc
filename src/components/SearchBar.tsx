@@ -1,0 +1,63 @@
+
+import { useState } from "react";
+import { Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface SearchBarProps {
+  onSearch: (query: string) => void;
+}
+
+const SearchBar = ({ onSearch }: SearchBarProps) => {
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(query);
+  };
+
+  const clearSearch = () => {
+    setQuery("");
+    onSearch("");
+  };
+
+  return (
+    <form
+      onSubmit={handleSearch}
+      className="relative w-full md:max-w-2xl mx-auto mb-8 glass dark:glass-dark rounded-full shadow-sm overflow-hidden"
+    >
+      <div className="flex items-center">
+        <div className="flex items-center justify-center pl-4">
+          <Search className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search communities..."
+          className="flex-grow px-4 py-3 bg-transparent border-none outline-none focus:ring-0 transition-all duration-300"
+          aria-label="Search communities"
+        />
+        {query && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={clearSearch}
+            className="mr-1"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+        <Button
+          type="submit"
+          className="m-1 bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 transition-all duration-300"
+        >
+          Search
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+export default SearchBar;
