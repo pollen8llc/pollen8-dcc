@@ -5,9 +5,11 @@ import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
 import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
+import { FilterArea, FilterValues } from "@/components/FilterArea";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<FilterValues>({});
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -18,7 +20,7 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 md:pb-24 px-4">
+      <section className="relative pt-32 px-4">
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
@@ -30,6 +32,7 @@ const Index = () => {
             
             <div className="appear-animate" style={{animationDelay: "0.2s"}}>
               <SearchBar onSearch={handleSearch} />
+              <FilterArea onFilterChange={setFilters} />
             </div>
           </div>
         </div>
@@ -38,13 +41,13 @@ const Index = () => {
       {/* Communities Section */}
       <section className="px-4 pb-20">
         <div className="container mx-auto">
-          <div className="mb-8">
+          <div>
             {searchQuery ? (
               <h2 className="text-2xl font-semibold">
                 Search Results for "{searchQuery}"
               </h2>
             ) : (
-              <Separator className="my-4 bg-gray-300 dark:bg-gray-700" />
+              <Separator className="bg-gray-300 dark:bg-gray-700" />
             )}
           </div>
           
