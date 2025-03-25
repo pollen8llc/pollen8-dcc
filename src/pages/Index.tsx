@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { communities } from "@/data/mockData";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
 import CommunityList from "@/components/CommunityList";
+import { Separator } from "@/components/ui/separator";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,12 +39,13 @@ const Index = () => {
       <section className="px-4 pb-20">
         <div className="container mx-auto">
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold">
-              {searchQuery 
-                ? `Search Results for "${searchQuery}"`
-                : "Communities"
-              }
-            </h2>
+            {searchQuery ? (
+              <h2 className="text-2xl font-semibold">
+                Search Results for "{searchQuery}"
+              </h2>
+            ) : (
+              <Separator className="my-4 bg-gray-300 dark:bg-gray-700" />
+            )}
           </div>
           
           <CommunityList communities={communities} searchQuery={searchQuery} />
