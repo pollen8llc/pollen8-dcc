@@ -11,7 +11,7 @@ interface CommunityHeaderProps {
 
 const CommunityHeader = ({ community }: CommunityHeaderProps) => {
   return (
-    <div className="relative pt-20">
+    <div className="relative">
       <div className="h-56 sm:h-64 md:h-80 relative overflow-hidden">
         <img
           src={community.imageUrl}
