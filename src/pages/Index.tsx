@@ -2,9 +2,9 @@
 import { useState } from "react";
 import { communities } from "@/data/communities";
 import Navbar from "@/components/Navbar";
-import SearchBar from "@/components/SearchBar";
 import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
+import CallToActionBanner from "@/components/CallToActionBanner";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,23 +17,12 @@ const Index = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="relative pt-10 px-4 transition-all duration-300">
-        <div className="container mx-auto text-center">
-          <div className="max-w-3xl mx-auto w-full">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
-              <span className="text-aquamarine">Dot Connector Collective</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto appear-animate" style={{animationDelay: "0.1s"}}>
-              Resources and insights powered by community
-            </p>
-            
-            <div className="appear-animate w-full" style={{animationDelay: "0.2s"}}>
-              <SearchBar onSearch={handleSearch} />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section - Now using CallToActionBanner component */}
+      <CallToActionBanner 
+        title="Dot Connector Collective"
+        subtitle="Resources and insights powered by community"
+        onSearch={handleSearch}
+      />
       
       {/* Communities Section */}
       <section className="px-4 pb-20 transition-all duration-300">
