@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 
@@ -42,10 +41,10 @@ const Navbar = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="transition-all duration-300 rounded-full w-10 h-10 flex items-center justify-center"
+          className="p-0 h-auto w-auto"
           aria-label="Menu"
         >
-          <LayoutGrid className="h-[18px] w-[18px]" />
+          <span className="material-icons" style={{ fontSize: '18px' }}>linear_scale</span>
         </Button>
       </div>
     </header>
