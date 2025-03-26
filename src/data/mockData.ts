@@ -1,4 +1,3 @@
-
 import { User, Community, Role } from "./types";
 
 export const communities: Community[] = [
@@ -73,6 +72,18 @@ export const communities: Community[] = [
     memberIds: ["2", "8", "23", "24"],
     tags: ["R&D", "Innovation", "Emerging Tech"],
     isPublic: false,
+  },
+  {
+    id: "7",
+    name: "Humanize HQ",
+    description: "Supporting early-stage founders through community, resources, and meaningful connections that emphasize the human element of entrepreneurship.",
+    location: "Remote",
+    imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+    memberCount: 67,
+    organizerIds: ["25"],
+    memberIds: [],
+    tags: ["Entrepreneurship", "Networking", "Founder Support"],
+    isPublic: true,
   },
 ];
 
@@ -292,6 +303,15 @@ export const users: User[] = [
     email: "emerson.clark@example.com",
     bio: "Prototyping specialist building proof of concepts",
     communities: ["6"],
+  },
+  {
+    id: "25",
+    name: "Larissa Carrera",
+    role: Role.ORGANIZER,
+    imageUrl: "https://randomuser.me/api/portraits/women/25.jpg",
+    email: "larissa.carrera@humanizehq.com",
+    bio: "Operations professional with experience in family office and venture investments. Founder of Humanize HQ, supporting early-stage founders through community and resources.",
+    communities: ["7"],
   },
 ];
 
