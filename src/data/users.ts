@@ -222,7 +222,7 @@ export const users: User[] = [
     id: "25",
     name: "Larissa Carrera",
     role: Role.ORGANIZER,
-    imageUrl: "https://randomuser.me/api/portraits/women/25.jpg",
+    imageUrl: "https://www.pollen8.app/wp-content/uploads/2025/03/image_processing20200620-21668-36w7bn-meP1QD85VeTwpBD7.gif",
     email: "larissa.carrera@humanizehq.com",
     bio: "Operations professional with experience in family office and venture investments. Founder of Humanize HQ, supporting early-stage founders through community and resources.",
     communities: ["7"],
