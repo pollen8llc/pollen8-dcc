@@ -1,6 +1,7 @@
 
 import React from "react";
 import SearchBar from "@/components/SearchBar";
+import { Button } from "@/components/ui/button";
 
 interface CallToActionBannerProps {
   title: string;
@@ -17,6 +18,13 @@ const CallToActionBanner = ({
     <section className="relative pt-10 px-4 transition-all duration-300">
       <div className="container mx-auto text-center">
         <div className="max-w-3xl mx-auto w-full">
+          <div className="mb-6 appear-animate">
+            <Button 
+              className="bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 font-bold text-sm tracking-wider"
+            >
+              POLLEN8 LABS PRESENT
+            </Button>
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
             <span className="text-aquamarine">{title}</span>
           </h1>
