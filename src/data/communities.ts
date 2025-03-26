@@ -65,8 +65,8 @@ export const communities: Community[] = [
   {
     id: "7",
     name: "Humanize HQ",
-    description: "Supporting early-stage founders through community, resources, and meaningful connections that emphasize the human element of entrepreneurship.",
-    location: "Remote",
+    description: "Humanize HQ focuses on providing support, networking, and resources to early-stage founders who lack established networks. The organization emphasizes the human element of entrepreneurship, recognizing that while monetary investments are important, the people building companies often get overlooked.",
+    location: "NY",
     imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
     memberCount: 67,
     organizerIds: ["25"],

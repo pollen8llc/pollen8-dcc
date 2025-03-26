@@ -22,7 +22,7 @@ const CommunityMetaInfo = () => {
       { 
         icon: <MessageSquare className="h-5 w-5" />, 
         title: "Mission and Purpose", 
-        value: "Supporting early-stage founders, emphasizing the human element of entrepreneurship" 
+        value: "Providing support, networking, and resources to early-stage founders, putting people first in entrepreneurship" 
       },
       { 
         icon: <Users className="h-5 w-5" />, 
