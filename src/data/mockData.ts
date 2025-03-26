@@ -2,18 +2,6 @@ import { User, Community, Role } from "./types";
 
 export const communities: Community[] = [
   {
-    id: "1",
-    name: "Product Development",
-    description: "Team focused on building and improving our product offerings",
-    location: "Global (Remote)",
-    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
-    memberCount: 24,
-    organizerIds: ["1", "2"],
-    memberIds: ["3", "4", "5", "6", "7", "8"],
-    tags: ["Engineering", "Design", "Product Management"],
-    isPublic: true,
-  },
-  {
     id: "2",
     name: "Marketing Team",
     description: "Promoting our brand and driving customer engagement strategies",
@@ -95,7 +83,7 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/1.jpg",
     email: "alex.morgan@example.com",
     bio: "Product leader with 8+ years of experience in SaaS",
-    communities: ["1"],
+    communities: [],
   },
   {
     id: "2",
@@ -104,7 +92,7 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
     email: "jordan.lee@example.com",
     bio: "Engineering Director focused on scalable architecture",
-    communities: ["1", "6"],
+    communities: ["6"],
   },
   {
     id: "3",
@@ -158,7 +146,7 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/8.jpg",
     email: "cameron.smith@example.com",
     bio: "Full-stack developer specializing in React and Node.js",
-    communities: ["1", "6"],
+    communities: ["6"],
   },
   {
     id: "9",
