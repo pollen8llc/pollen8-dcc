@@ -1,21 +1,52 @@
+
 import { Link } from "react-router-dom";
 import { Users, MapPin } from "lucide-react";
 import { Community } from "@/data/types";
 import { Badge } from "@/components/ui/badge";
+import { useRef, useEffect, useState } from "react";
 
 interface CommunityCardProps {
   community: Community;
 }
 
 const CommunityCard = ({ community }: CommunityCardProps) => {
-  // Only show first two tags
-  const displayTags = community.tags.slice(0, 2);
+  const [displayTagCount, setDisplayTagCount] = useState(2);
+  const tagContainerRef = useRef<HTMLDivElement>(null);
   
-  // Simplify the location display to just state code or "Remote"/"Global"
+  // Check if tags would overflow and adjust count if needed
+  useEffect(() => {
+    const checkTagOverflow = () => {
+      const container = tagContainerRef.current;
+      if (!container || community.tags.length === 0) return;
+      
+      // Reset to show two tags first
+      setDisplayTagCount(2);
+      
+      // Check if tags overflow to a second line
+      const firstTagHeight = container.firstElementChild?.getBoundingClientRect().height || 0;
+      const containerHeight = container.getBoundingClientRect().height;
+      
+      // If the container height is greater than a single tag's height (plus a small margin),
+      // we have overflow to a second line
+      if (containerHeight > firstTagHeight * 1.5 && community.tags.length > 1) {
+        setDisplayTagCount(1);
+      }
+    };
+    
+    // Check on mount and when window resizes
+    checkTagOverflow();
+    window.addEventListener('resize', checkTagOverflow);
+    return () => window.removeEventListener('resize', checkTagOverflow);
+  }, [community.tags]);
+  
+  // Get tags to display based on calculated count
+  const displayTags = community.tags.slice(0, displayTagCount);
+  
+  // Simplify the location display to just state code or full "Remote"/"Global"
   const simplifiedLocation = () => {
     const location = community.location.trim();
     if (location.toLowerCase() === "remote" || location.toLowerCase() === "global") {
-      return location;
+      return location; // Show full word for Remote or Global
     }
     
     // Check if there's a comma indicating city, state format
@@ -56,7 +87,7 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-1 mt-2">
+          <div ref={tagContainerRef} className="flex flex-wrap gap-1 mt-2 min-h-[24px]">
             {displayTags.map((tag) => (
               <Badge
                 key={tag}
