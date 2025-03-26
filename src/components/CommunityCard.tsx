@@ -15,7 +15,7 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
   return (
     <Link
       to={`/community/${community.id}`}
-      className="group relative h-full"
+      className="group relative h-full w-full"
     >
       <div className="relative h-full overflow-hidden rounded-xl glass dark:glass-dark border border-border/40 transition-all duration-300 group-hover:shadow-md transform group-hover:translate-y-[-4px] p-4">
         <h3 className="text-lg font-semibold line-clamp-1">{community.name}</h3>

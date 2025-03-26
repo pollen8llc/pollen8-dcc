@@ -22,7 +22,7 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative pt-32 px-4 transition-all duration-300">
         <div className="container mx-auto text-center">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto w-full">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
               Find Your <span className="text-aquamarine">Community</span>
             </h1>
@@ -30,7 +30,7 @@ const Index = () => {
               Discover, connect, and engage with teams and departments in your organization
             </p>
             
-            <div className="appear-animate" style={{animationDelay: "0.2s"}}>
+            <div className="appear-animate w-full" style={{animationDelay: "0.2s"}}>
               <SearchBar onSearch={handleSearch} />
               <FilterArea onFilterChange={setFilters} />
             </div>
@@ -42,11 +42,12 @@ const Index = () => {
       <section className="px-4 pb-20 transition-all duration-300">
         <div className="container mx-auto">
           <div>
-            {searchQuery ? (
+            {searchQuery && (
               <h2 className="text-2xl font-semibold animate-fade-in">
                 Search Results for "{searchQuery}"
               </h2>
-            ) : (
+            )}
+            {!searchQuery && (
               <Separator className="bg-gray-300 dark:bg-gray-700 transition-all duration-300" />
             )}
           </div>
