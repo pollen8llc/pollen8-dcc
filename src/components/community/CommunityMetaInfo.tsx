@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Tag, Users, Globe, Shield } from "lucide-react";
+import { Calendar, Users, Target, Activity, Code, Award, MessageSquare } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { getCommunityById } from "@/data/dataUtils";
 
@@ -15,17 +15,19 @@ const CommunityMetaInfo = () => {
   const community = getCommunityById(id || "");
   
   const communityMeta: MetaItem[] = [
+    { icon: <MessageSquare className="h-5 w-5" />, title: "Mission and Purpose", value: "Supporting founders" },
     { icon: <Users className="h-5 w-5" />, title: "Community Size", value: community?.memberCount + "+ members" },
+    { icon: <Award className="h-5 w-5" />, title: "Current Following", value: "350+ followers" },
+    { icon: <Activity className="h-5 w-5" />, title: "Event Turnout", value: "30-50 attendees" },
     { icon: <Calendar className="h-5 w-5" />, title: "Events Organized", value: "12 this year" },
-    { icon: <MapPin className="h-5 w-5" />, title: "Location", value: community?.location || "Remote" },
-    { icon: <Tag className="h-5 w-5" />, title: "Primary Focus", value: community?.tags[0] || "General" },
-    { icon: <Globe className="h-5 w-5" />, title: "Visibility", value: community?.isPublic ? "Public" : "Private" },
-    { icon: <Shield className="h-5 w-5" />, title: "Organization Type", value: "Community" }
+    { icon: <MessageSquare className="h-5 w-5" />, title: "Event Formats", value: "Workshops, Fireside Chats" },
+    { icon: <Target className="h-5 w-5" />, title: "Target Audience", value: "Early-stage founders" },
+    { icon: <Code className="h-5 w-5" />, title: "Tech Stack", value: "Discord, Notion, Luma" }
   ];
 
   return (
     <div className="container mx-auto px-4 mb-12">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 appear-animate" style={{animationDelay: "0.3s"}}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 appear-animate" style={{animationDelay: "0.3s"}}>
         {communityMeta.map((meta, index) => (
           <Card key={index} className="overflow-hidden transition-all duration-300 hover:shadow-md">
             <CardContent className="p-4 flex items-center gap-3">
