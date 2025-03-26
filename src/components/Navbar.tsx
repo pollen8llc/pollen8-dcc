@@ -44,7 +44,7 @@ const Navbar = () => {
           className="p-0 h-auto w-auto"
           aria-label="Menu"
         >
-          <span className="material-icons" style={{ fontSize: '18px' }}>linear_scale</span>
+          <span className="material-icons" style={{ fontSize: '20px', width: '20px' }}>linear_scale</span>
         </Button>
       </div>
     </header>
