@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { communities } from "@/data/communities";
 import Navbar from "@/components/Navbar";
@@ -61,15 +62,15 @@ const Index = () => {
                 <img 
                   src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans-300x52.png" 
                   alt="Pollen8 Logo" 
-                  width={47} 
-                  height={18} 
+                  width={100} 
+                  height={30} 
                   className="mr-2" 
                 />
               </div>
             </div>
             
-            <div className="text-sm text-muted-foreground">
-              © Powered by POLLEN8 LABS, All rights reserved 2024.
+            <div className="text-xs text-gray-500">
+              © Powered by pollen8 labs, all rights reserved 2024.
             </div>
           </div>
         </div>
