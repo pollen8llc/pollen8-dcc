@@ -25,7 +25,7 @@ const CallToActionBanner = ({
               POLLEN8 LABS PRESENTS
             </Button>
           </div>
-          <h3 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
+          <h3 className="text-4xl md:text-5xl font-bold mb-6 appear-animate tracking-tight leading-tight">
             <span className="text-aquamarine">{title}</span>
           </h3>
           <p 
