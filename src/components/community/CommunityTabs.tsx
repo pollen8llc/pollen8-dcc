@@ -29,36 +29,11 @@ const CommunityTabs = ({ communityId, organizers, members, memberCount }: Commun
   
   return (
     <div className="container mx-auto px-4 pb-16">
-      <Tabs defaultValue="members" className="appear-animate" style={{animationDelay: "0.2s"}}>
+      <Tabs defaultValue="organizers" className="appear-animate" style={{animationDelay: "0.2s"}}>
         <TabsList className="mb-8 glass dark:glass-dark">
-          <TabsTrigger value="members">All Members</TabsTrigger>
           <TabsTrigger value="organizers">Organizers</TabsTrigger>
           <TabsTrigger value="events">Upcoming Events</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="members" className="space-y-6">
-          <h2 className="text-2xl font-semibold mb-6">Members ({memberCount})</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {organizers.map((organizer) => (
-              <div key={organizer.id} className="slide-up-animate" style={{animationDelay: `${parseInt(organizer.id) * 0.1}s`}}>
-                <MemberCard 
-                  member={organizer}
-                  onClick={handleMemberClick}
-                />
-              </div>
-            ))}
-            
-            {members.map((member) => (
-              <div key={member.id} className="slide-up-animate" style={{animationDelay: `${parseInt(member.id) * 0.1}s`}}>
-                <MemberCard 
-                  member={member}
-                  onClick={handleMemberClick}
-                />
-              </div>
-            ))}
-          </div>
-        </TabsContent>
         
         <TabsContent value="organizers" className="space-y-6">
           <h2 className="text-2xl font-semibold mb-6">Organizers ({organizers.length})</h2>
