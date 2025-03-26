@@ -22,7 +22,7 @@ const CallToActionBanner = ({
             <Button 
               className="bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 font-bold text-sm tracking-wider"
             >
-              POLLEN8 LABS PRESENT
+              POLLEN8 LABS PRESENTS
             </Button>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
