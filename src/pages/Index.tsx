@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { communities } from "@/data/communities";
 import Navbar from "@/components/Navbar";
@@ -70,7 +69,7 @@ const Index = () => {
             </div>
             
             <div className="text-sm text-muted-foreground">
-              © 2023 Digital Community Center. All rights reserved.
+              © Powered by POLLEN8 LABS, All rights reserved 2024.
             </div>
           </div>
         </div>
