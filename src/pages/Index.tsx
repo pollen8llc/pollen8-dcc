@@ -5,7 +5,6 @@ import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
 import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
-import Logo from "@/components/Logo";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,7 +59,13 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <div className="text-xl font-semibold flex items-center">
-                <Logo width={47} height={18} showText={false} className="mr-2" />
+                <img 
+                  src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans-300x52.png" 
+                  alt="Pollen8 Logo" 
+                  width={47} 
+                  height={18} 
+                  className="mr-2" 
+                />
               </div>
             </div>
             

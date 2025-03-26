@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Logo from "./Logo";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -33,12 +32,12 @@ const Navbar = () => {
             to="/"
             className="text-xl font-semibold flex items-center space-x-2"
           >
-            <Logo 
+            <img 
+              src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans-300x52.png" 
+              alt="Pollen8 Logo" 
               width={150} 
               height={30} 
-              showText={false} 
               className="text-foreground" 
-              customImageUrl="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans-300x52.png"
             />
           </Link>
         </div>
