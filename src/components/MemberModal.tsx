@@ -1,6 +1,6 @@
 
 import { User } from "@/data/types";
-import { X, Mail, Users } from "lucide-react";
+import { Mail, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,15 +18,6 @@ const MemberModal = ({ member, open, onClose }: MemberModalProps) => {
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md glass dark:glass-dark border border-border/40 sm:rounded-xl shadow-xl transition-all duration-500 animate-fade-in">
         <DialogHeader className="relative">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 top-0"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </Button>
           <div className="flex flex-col items-center">
             <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-aquamarine/30 mb-4">
               <img
