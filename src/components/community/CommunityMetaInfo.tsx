@@ -76,7 +76,7 @@ const CommunityMetaInfo = () => {
 
   return (
     <div className="container mx-auto px-4 mb-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 appear-animate" style={{animationDelay: "0.3s"}}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 appear-animate" style={{animationDelay: "0.3s"}}>
         {communityMeta.map((meta, index) => (
           <Card key={index} className="glass dark:glass-dark rounded-xl overflow-hidden border border-border/40 transition-all duration-300 hover:shadow-md">
             <CardContent className="p-4 flex items-start gap-3">
