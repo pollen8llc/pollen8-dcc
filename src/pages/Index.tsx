@@ -26,7 +26,7 @@ const Index = () => {
               <span className="text-aquamarine">Dot Connector Collective</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto appear-animate" style={{animationDelay: "0.1s"}}>
-              Resources and insights powered by community organizers
+              Resources and insights powered by a network of community
             </p>
             
             <div className="appear-animate w-full" style={{animationDelay: "0.2s"}}>
