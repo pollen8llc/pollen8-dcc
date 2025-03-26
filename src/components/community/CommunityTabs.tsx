@@ -36,8 +36,6 @@ const CommunityTabs = ({ communityId, organizers, members, memberCount }: Commun
         </TabsList>
         
         <TabsContent value="organizers" className="space-y-6">
-          <h2 className="text-2xl font-semibold mb-6">Organizers ({organizers.length})</h2>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {organizers.map((organizer) => (
               <div key={organizer.id}>
