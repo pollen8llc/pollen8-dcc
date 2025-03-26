@@ -3,8 +3,20 @@ import { Community } from "./types";
 
 export const communities: Community[] = [
   {
+    id: "7",
+    name: "Humanize HQ",
+    description: "Humanize HQ focuses on providing support, networking, and resources to early-stage founders who lack established networks. The organization emphasizes the human element of entrepreneurship, recognizing that while monetary investments are important, the people building companies often get overlooked.",
+    location: "NY",
+    imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+    memberCount: 67,
+    organizerIds: ["25"],
+    memberIds: [],
+    tags: ["Entrepreneurship", "Networking", "Founder Support"],
+    isPublic: true,
+  },
+  {
     id: "2",
-    name: "Marketing Team",
+    name: "Sample Community",
     description: "Promoting our brand and driving customer engagement strategies",
     location: "New York, NY",
     imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -16,7 +28,7 @@ export const communities: Community[] = [
   },
   {
     id: "3",
-    name: "Customer Success",
+    name: "Sample Community",
     description: "Supporting customers and ensuring satisfaction with our services",
     location: "San Francisco, CA",
     imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -28,7 +40,7 @@ export const communities: Community[] = [
   },
   {
     id: "4",
-    name: "Design Studio",
+    name: "Sample Community",
     description: "Creating beautiful and functional design solutions",
     location: "London, UK",
     imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -40,7 +52,7 @@ export const communities: Community[] = [
   },
   {
     id: "5",
-    name: "Sales Department",
+    name: "Sample Community",
     description: "Driving revenue and building client relationships",
     location: "Chicago, IL",
     imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -52,7 +64,7 @@ export const communities: Community[] = [
   },
   {
     id: "6",
-    name: "Research & Innovation",
+    name: "Sample Community",
     description: "Exploring new technologies and future product directions",
     location: "Berlin, Germany",
     imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -61,17 +73,5 @@ export const communities: Community[] = [
     memberIds: ["2", "8", "23", "24"],
     tags: ["R&D", "Innovation", "Emerging Tech"],
     isPublic: false,
-  },
-  {
-    id: "7",
-    name: "Humanize HQ",
-    description: "Humanize HQ focuses on providing support, networking, and resources to early-stage founders who lack established networks. The organization emphasizes the human element of entrepreneurship, recognizing that while monetary investments are important, the people building companies often get overlooked.",
-    location: "NY",
-    imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-    memberCount: 67,
-    organizerIds: ["25"],
-    memberIds: [],
-    tags: ["Entrepreneurship", "Networking", "Founder Support"],
-    isPublic: true,
   },
 ];
