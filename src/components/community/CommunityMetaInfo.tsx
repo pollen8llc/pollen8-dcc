@@ -1,8 +1,8 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Users, Activity, Code, MessageSquare, Link } from "lucide-react";
-import { useParams } from "react-router-dom";
-import { getCommunityById } from "@/data/dataUtils";
+import { useQuery } from "@tanstack/react-query";
+import * as communityService from "@/services/communityService";
 
 interface MetaItem {
   icon: React.ReactNode;
@@ -10,14 +10,21 @@ interface MetaItem {
   value: string;
 }
 
-const CommunityMetaInfo = () => {
-  const { id } = useParams<{ id: string }>();
-  const community = getCommunityById(id || "");
+interface CommunityMetaInfoProps {
+  communityId: string;
+}
+
+const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
+  const { data: community } = useQuery({
+    queryKey: ['community', communityId],
+    queryFn: () => communityService.getCommunityById(communityId),
+    enabled: !!communityId
+  });
   
   // Define different meta information based on community ID
   let communityMeta: MetaItem[] = [];
   
-  if (id === "7") { // Humanize HQ
+  if (communityId === "7") { // Humanize HQ
     communityMeta = [
       { 
         icon: <Users className="h-5 w-5" />, 

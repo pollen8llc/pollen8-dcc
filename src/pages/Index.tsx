@@ -1,13 +1,20 @@
 
 import { useState } from "react";
-import { communities } from "@/data/communities";
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
 import CallToActionBanner from "@/components/CallToActionBanner";
+import * as communityService from "@/services/communityService";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Pre-fetch communities for better UX
+  useQuery({
+    queryKey: ['communities'],
+    queryFn: communityService.getAllCommunities
+  });
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -17,7 +24,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      {/* Hero Section - Now using CallToActionBanner component */}
+      {/* Hero Section */}
       <CallToActionBanner 
         title="Dot Connector Collective"
         subtitle="DCC a directory of Resources and insights powered by community"
@@ -38,7 +45,7 @@ const Index = () => {
             )}
           </div>
           
-          <CommunityList communities={communities} searchQuery={searchQuery} />
+          <CommunityList searchQuery={searchQuery} />
         </div>
       </section>
       

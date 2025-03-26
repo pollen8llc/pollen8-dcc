@@ -1,32 +1,54 @@
+
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import CommunityCard from "./CommunityCard";
-import { Community } from "@/data/types";
+import { Community } from "@/models/types";
+import * as communityService from "@/services/communityService";
 
 interface CommunityListProps {
-  communities: Community[];
   searchQuery: string;
 }
 
-const CommunityList = ({ communities, searchQuery }: CommunityListProps) => {
-  const [filteredCommunities, setFilteredCommunities] = useState<Community[]>(communities);
+const CommunityList = ({ searchQuery }: CommunityListProps) => {
+  const { data: communities = [], isLoading, error } = useQuery({
+    queryKey: ['communities'],
+    queryFn: communityService.getAllCommunities
+  });
+
+  const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredCommunities(communities);
-      return;
-    }
+    const fetchFilteredCommunities = async () => {
+      if (!searchQuery.trim()) {
+        setFilteredCommunities(communities);
+        return;
+      }
 
-    const query = searchQuery.toLowerCase();
-    const filtered = communities.filter(
-      (community) =>
-        community.name.toLowerCase().includes(query) ||
-        community.description.toLowerCase().includes(query) ||
-        community.location.toLowerCase().includes(query) ||
-        community.tags.some((tag) => tag.toLowerCase().includes(query))
-    );
+      const filtered = await communityService.searchCommunities(searchQuery);
+      setFilteredCommunities(filtered);
+    };
 
-    setFilteredCommunities(filtered);
+    fetchFilteredCommunities();
   }, [communities, searchQuery]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full py-12 text-center">
+        <h3 className="text-lg font-medium">Loading communities...</h3>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full py-12 text-center">
+        <h3 className="text-lg font-medium text-red-500">Error loading communities</h3>
+        <p className="mt-2 text-muted-foreground">
+          Please try again later.
+        </p>
+      </div>
+    );
+  }
 
   if (filteredCommunities.length === 0) {
     return (
