@@ -34,7 +34,7 @@ const Navbar = () => {
             to="/"
             className="text-xl font-semibold flex items-center space-x-2"
           >
-            <Logo className="text-foreground" />
+            <Logo width={52} height={20} showText={true} className="text-foreground" />
           </Link>
         </div>
 
