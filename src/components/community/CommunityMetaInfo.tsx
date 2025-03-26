@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Users, Target, Activity, Code, Award, MessageSquare } from "lucide-react";
 import { useParams } from "react-router-dom";
@@ -84,7 +85,9 @@ const CommunityMetaInfo = () => {
               </div>
               <div>
                 <p className="font-medium text-sm">{meta.title}</p>
-                <p className="text-base text-muted-foreground line-clamp-3">{meta.value}</p>
+                <p className={`text-base text-muted-foreground ${meta.title === "Mission and Purpose" ? "line-clamp-2" : "line-clamp-3"}`}>
+                  {meta.value}
+                </p>
               </div>
             </CardContent>
           </Card>
