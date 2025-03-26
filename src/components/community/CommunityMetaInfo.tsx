@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Users, Target, Activity, Code, Award, MessageSquare } from "lucide-react";
 import { useParams } from "react-router-dom";
@@ -78,14 +77,14 @@ const CommunityMetaInfo = () => {
     <div className="container mx-auto px-4 mb-12">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 appear-animate" style={{animationDelay: "0.3s"}}>
         {communityMeta.map((meta, index) => (
-          <Card key={index} className="overflow-hidden transition-all duration-300 hover:shadow-md">
+          <Card key={index} className="glass dark:glass-dark rounded-xl overflow-hidden border border-border/40 transition-all duration-300 hover:shadow-md">
             <CardContent className="p-4 flex items-start gap-3">
-              <div className="bg-muted rounded-full p-2 text-foreground mt-1">
+              <div className="bg-muted/50 rounded-full p-2 text-foreground mt-1 flex-shrink-0">
                 {meta.icon}
               </div>
               <div>
-                <p className="text-sm font-bold text-white">{meta.title}</p>
-                <p className="text-base">{meta.value}</p>
+                <p className="font-medium text-sm">{meta.title}</p>
+                <p className="text-base text-muted-foreground line-clamp-3">{meta.value}</p>
               </div>
             </CardContent>
           </Card>
