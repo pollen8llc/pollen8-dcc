@@ -1,6 +1,5 @@
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Badge } from "@/components/ui/badge";
 
 const Navbar = () => {
   const isMobile = useIsMobile();
@@ -20,12 +19,9 @@ const Navbar = () => {
               height={15} 
               className="text-foreground" 
             />
-            <Badge 
-              variant="outline" 
-              className="bg-muted text-muted-foreground text-xs font-normal py-1"
-            >
-              POLLEN8 LABS PRESENTS
-            </Badge>
+            <span className="text-sm text-gray-400 font-normal">
+              The Dot Connector Collective
+            </span>
           </a>
         </div>
       </div>
