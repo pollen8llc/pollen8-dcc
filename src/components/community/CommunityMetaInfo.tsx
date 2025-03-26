@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Users, Activity, Code, Award, MessageSquare } from "lucide-react";
+import { Calendar, Users, Activity, Code, Award, MessageSquare, Link } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { getCommunityById } from "@/data/dataUtils";
 
@@ -20,11 +20,6 @@ const CommunityMetaInfo = () => {
   if (id === "7") { // Humanize HQ
     communityMeta = [
       { 
-        icon: <MessageSquare className="h-5 w-5" />, 
-        title: "Mission and Purpose", 
-        value: "Support • Networking • Resources" 
-      },
-      { 
         icon: <Users className="h-5 w-5" />, 
         title: "Community Size", 
         value: "67 members" 
@@ -36,7 +31,7 @@ const CommunityMetaInfo = () => {
       },
       { 
         icon: <Calendar className="h-5 w-5" />, 
-        title: "Events Organized", 
+        title: "Total Events", 
         value: "Curated conversations and panels" 
       },
       { 
@@ -48,17 +43,22 @@ const CommunityMetaInfo = () => {
         icon: <Code className="h-5 w-5" />, 
         title: "Tech Stack", 
         value: "Luma, Notion, LinkedIn" 
+      },
+      { 
+        icon: <Link className="h-5 w-5" />, 
+        title: "Communication Channels", 
+        value: "Email, Slack, WhatsApp" 
       }
     ];
   } else {
     // Default meta information for other communities
     communityMeta = [
-      { icon: <MessageSquare className="h-5 w-5" />, title: "Mission and Purpose", value: "Support • Growth • Community" },
       { icon: <Users className="h-5 w-5" />, title: "Community Size", value: community?.memberCount + "+ members" },
       { icon: <Activity className="h-5 w-5" />, title: "Event Turnout", value: "30-50 attendees" },
-      { icon: <Calendar className="h-5 w-5" />, title: "Events Organized", value: "12 this year" },
+      { icon: <Calendar className="h-5 w-5" />, title: "Total Events", value: "12 this year" },
       { icon: <MessageSquare className="h-5 w-5" />, title: "Event Formats", value: "Workshops, Fireside Chats" },
-      { icon: <Code className="h-5 w-5" />, title: "Tech Stack", value: "Discord, Notion, Luma" }
+      { icon: <Code className="h-5 w-5" />, title: "Tech Stack", value: "Discord, Notion, Luma" },
+      { icon: <Link className="h-5 w-5" />, title: "Communication Channels", value: "Discord, Email, Telegram" }
     ];
   }
 
@@ -73,7 +73,7 @@ const CommunityMetaInfo = () => {
               </div>
               <div>
                 <p className="font-medium text-sm">{meta.title}</p>
-                <p className={`text-base text-muted-foreground ${meta.title === "Mission and Purpose" ? "line-clamp-2" : "line-clamp-3"}`}>
+                <p className="text-base text-muted-foreground line-clamp-3">
                   {meta.value}
                 </p>
               </div>
