@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -9,6 +9,13 @@ interface SearchBarProps {
 
 const SearchBar = ({ onSearch }: SearchBarProps) => {
   const [query, setQuery] = useState("");
+
+  // Handle input changes and immediately update search results
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    onSearch(newQuery); // Immediately trigger search as user types
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +39,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Search communities..."
           className="flex-grow px-4 py-3 bg-transparent border-none outline-none focus:ring-0 transition-all duration-300"
           aria-label="Search communities"

@@ -9,6 +9,9 @@ interface CommunityCardProps {
 }
 
 const CommunityCard = ({ community }: CommunityCardProps) => {
+  // Only show first two tags
+  const displayTags = community.tags.slice(0, 2);
+  
   return (
     <Link
       to={`/community/${community.id}`}
@@ -33,7 +36,7 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
           </div>
           
           <div className="flex flex-wrap gap-1 mt-2">
-            {community.tags.map((tag) => (
+            {displayTags.map((tag) => (
               <Badge
                 key={tag}
                 className="bg-aquamarine/80 text-primary-foreground text-xs font-medium"
