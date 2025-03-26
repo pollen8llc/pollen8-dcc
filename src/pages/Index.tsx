@@ -18,7 +18,7 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative pt-32 px-4 transition-all duration-300">
+      <section className="relative pt-10 px-4 transition-all duration-300">
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto w-full">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">

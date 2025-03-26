@@ -15,8 +15,8 @@ const Navbar = () => {
             <img 
               src="https://www.pollen8.app/wp-content/uploads/2025/03/DCCLOGO.png" 
               alt="DCC Logo" 
-              width={150} 
-              height={30} 
+              width={75} 
+              height={15} 
               className="text-foreground" 
             />
           </a>
