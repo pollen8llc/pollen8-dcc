@@ -20,7 +20,7 @@ const Index = () => {
       {/* Hero Section - Now using CallToActionBanner component */}
       <CallToActionBanner 
         title="Dot Connector Collective"
-        subtitle="Resources and insights powered by community"
+        subtitle="DCC a directory of Resources and insights powered by community"
         onSearch={handleSearch}
       />
       
