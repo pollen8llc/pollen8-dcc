@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Users, MapPin } from "lucide-react";
 import { Community } from "@/data/types";
@@ -11,6 +10,28 @@ interface CommunityCardProps {
 const CommunityCard = ({ community }: CommunityCardProps) => {
   // Only show first two tags
   const displayTags = community.tags.slice(0, 2);
+  
+  // Simplify the location display to just state code or "Remote"/"Global"
+  const simplifiedLocation = () => {
+    const location = community.location.trim();
+    if (location.toLowerCase() === "remote" || location.toLowerCase() === "global") {
+      return location;
+    }
+    
+    // Check if there's a comma indicating city, state format
+    if (location.includes(",")) {
+      const parts = location.split(",");
+      return parts[parts.length - 1].trim(); // Return just the state part
+    }
+    
+    // If it's short (likely already a state code), return as is
+    if (location.length <= 3) {
+      return location;
+    }
+    
+    // Otherwise return first 3 chars as abbreviation
+    return location.substring(0, 3);
+  };
   
   return (
     <Link
@@ -27,11 +48,11 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1 text-muted-foreground">
               <Users className="h-4 w-4" />
-              <span className="text-sm">{community.memberCount} members</span>
+              <span className="text-sm">{community.memberCount}</span>
             </div>
             <div className="flex items-center space-x-1 text-muted-foreground">
               <MapPin className="h-4 w-4" />
-              <span className="text-sm">{community.location}</span>
+              <span className="text-sm">{simplifiedLocation()}</span>
             </div>
           </div>
           
