@@ -1,5 +1,5 @@
 
-import { User } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 import { Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,9 +28,11 @@ const MemberCard = ({ member, onClick }: MemberCardProps) => {
           <h3 className="font-medium">{member.name}</h3>
           <Badge 
             className={`mt-1 ${
-              member.role === "ORGANIZER" 
+              member.role === UserRole.ORGANIZER 
                 ? "bg-aquamarine text-primary-foreground" 
-                : "bg-muted text-muted-foreground"
+                : member.role === UserRole.ADMIN
+                  ? "bg-purple-500 text-white"
+                  : "bg-muted text-muted-foreground"
             }`}
           >
             {member.role}
