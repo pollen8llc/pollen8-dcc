@@ -41,10 +41,10 @@ const Navbar = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="p-0 h-auto w-auto"
+          className="p-0 h-auto w-auto hover:bg-transparent"
           aria-label="Menu"
         >
-          <span className="material-icons" style={{ fontSize: '20px', width: '20px' }}>linear_scale</span>
+          <span className="material-icons" style={{ fontSize: '60px', width: '60px' }}>linear_scale</span>
         </Button>
       </div>
     </header>
