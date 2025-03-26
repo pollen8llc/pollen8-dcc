@@ -1,7 +1,8 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import ThemeToggle from "./ThemeToggle";
+import { Grid } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 
 const Navbar = () => {
@@ -34,11 +35,18 @@ const Navbar = () => {
             to="/"
             className="text-xl font-semibold flex items-center space-x-2"
           >
-            <Logo width={52} height={20} showText={true} className="text-foreground" />
+            <Logo width={26} height={10} showText={false} className="text-foreground" />
           </Link>
         </div>
 
-        <ThemeToggle />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="transition-all duration-300 rounded-full w-10 h-10"
+          aria-label="Menu"
+        >
+          <Grid className="h-5 w-5" />
+        </Button>
       </div>
     </header>
   );
