@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
+import Logo from "./Logo";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -33,9 +34,7 @@ const Navbar = () => {
             to="/"
             className="text-xl font-semibold flex items-center space-x-2"
           >
-            <span className="bg-aquamarine rounded-lg w-8 h-8 flex items-center justify-center shadow-sm">
-              <span className="text-primary-foreground font-bold">DCC</span>
-            </span>
+            <Logo className="text-foreground" />
           </Link>
         </div>
 

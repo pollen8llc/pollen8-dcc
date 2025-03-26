@@ -6,6 +6,7 @@ import SearchBar from "@/components/SearchBar";
 import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
 import { FilterArea, FilterValues } from "@/components/FilterArea";
+import Logo from "@/components/Logo";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,9 +63,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <div className="text-xl font-semibold flex items-center">
-                <span className="bg-aquamarine rounded-lg w-8 h-8 flex items-center justify-center mr-2 shadow-sm">
-                  <span className="text-primary-foreground font-bold">DCC</span>
-                </span>
+                <Logo className="mr-2" width={52} height={20} />
                 Digital Community Center
               </div>
             </div>
