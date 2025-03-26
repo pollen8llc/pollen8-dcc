@@ -40,7 +40,7 @@ const CommunityTabs = ({ communityId, organizers, members, memberCount }: Commun
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {organizers.map((organizer) => (
-              <div key={organizer.id} className="slide-up-animate" style={{animationDelay: `${parseInt(organizer.id) * 0.1}s`}}>
+              <div key={organizer.id}>
                 <MemberCard 
                   member={organizer}
                   onClick={handleMemberClick}
