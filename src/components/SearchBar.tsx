@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +30,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
   return (
     <form
       onSubmit={handleSearch}
-      className="relative w-full md:max-w-2xl mx-auto mb-0 glass dark:glass-dark rounded-full shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
+      className="relative w-full mx-auto mb-0 glass dark:glass-dark rounded-full shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md"
     >
       <div className="flex items-center">
         <div className="flex items-center justify-center pl-4">

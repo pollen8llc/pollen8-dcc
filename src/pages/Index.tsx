@@ -5,12 +5,10 @@ import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
 import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
-import { FilterArea, FilterValues } from "@/components/FilterArea";
 import Logo from "@/components/Logo";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState<FilterValues>({});
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -33,7 +31,6 @@ const Index = () => {
             
             <div className="appear-animate w-full" style={{animationDelay: "0.2s"}}>
               <SearchBar onSearch={handleSearch} />
-              <FilterArea onFilterChange={setFilters} />
             </div>
           </div>
         </div>
