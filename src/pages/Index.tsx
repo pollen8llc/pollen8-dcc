@@ -25,10 +25,10 @@ const Index = () => {
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto w-full">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
-              Find Your <span className="text-aquamarine">Community</span>
+              <span className="text-aquamarine">Dot Connector Collective</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto appear-animate" style={{animationDelay: "0.1s"}}>
-              Discover, connect, and engage with teams and departments in your organization
+              Resources and insights powered by a network of community organizers
             </p>
             
             <div className="appear-animate w-full" style={{animationDelay: "0.2s"}}>
