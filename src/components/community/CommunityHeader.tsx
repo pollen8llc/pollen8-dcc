@@ -41,7 +41,7 @@ const CommunityHeader = ({ community }: CommunityHeaderProps) => {
               
               <div className="mt-4 md:mt-0 flex flex-wrap gap-2">
                 <Button className="bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 shadow-sm">
-                  Join Community
+                  Connect
                 </Button>
                 <Button variant="outline">
                   <ExternalLink className="h-4 w-4 mr-2" />
