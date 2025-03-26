@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Grid } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 
@@ -35,17 +35,17 @@ const Navbar = () => {
             to="/"
             className="text-xl font-semibold flex items-center space-x-2"
           >
-            <Logo width={26} height={10} showText={false} className="text-foreground" />
+            <Logo width={47} height={18} showText={false} className="text-foreground" />
           </Link>
         </div>
 
         <Button
           variant="ghost"
           size="icon"
-          className="transition-all duration-300 rounded-full w-10 h-10"
+          className="transition-all duration-300 rounded-full w-10 h-10 flex items-center justify-center"
           aria-label="Menu"
         >
-          <Grid className="h-5 w-5" />
+          <LayoutGrid className="h-[18px] w-[18px]" />
         </Button>
       </div>
     </header>

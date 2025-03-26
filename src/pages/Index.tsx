@@ -63,7 +63,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <div className="text-xl font-semibold flex items-center">
-                <Logo width={26} height={10} showText={false} className="mr-2" />
+                <Logo width={47} height={18} showText={false} className="mr-2" />
               </div>
             </div>
             
