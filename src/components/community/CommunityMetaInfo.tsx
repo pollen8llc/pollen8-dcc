@@ -32,7 +32,7 @@ const CommunityMetaInfo = () => {
       { 
         icon: <Calendar className="h-5 w-5" />, 
         title: "Total Events", 
-        value: "Curated conversations and panels" 
+        value: "1" 
       },
       { 
         icon: <MessageSquare className="h-5 w-5" />, 
