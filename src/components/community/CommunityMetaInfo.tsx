@@ -37,7 +37,7 @@ const CommunityMetaInfo = () => {
       { 
         icon: <MessageSquare className="h-5 w-5" />, 
         title: "Event Formats", 
-        value: "Invitation-based, purposefully curated" 
+        value: "Invitation-based, Curated conversations and panels" 
       },
       { 
         icon: <Code className="h-5 w-5" />, 
