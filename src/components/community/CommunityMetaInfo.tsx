@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Users } from "lucide-react";
 import { useParams } from "react-router-dom";
-import { getCommunityById } from "@/data/mockData";
+import { getCommunityById } from "@/data/dataUtils";
 
 interface MetaItem {
   icon: React.ReactNode;

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { communities } from "@/data/mockData";
+import { communities } from "@/data/communities";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
 import CommunityList from "@/components/CommunityList";

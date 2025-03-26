@@ -5,7 +5,7 @@ import CommunityHeader from "@/components/community/CommunityHeader";
 import CommunityMetaInfo from "@/components/community/CommunityMetaInfo";
 import CommunityTabs from "@/components/community/CommunityTabs";
 import NotFoundState from "@/components/community/NotFoundState";
-import { getCommunityById, getCommunityOrganizers, getCommunityRegularMembers } from "@/data/mockData";
+import { getCommunityById, getCommunityOrganizers, getCommunityRegularMembers } from "@/data/dataUtils";
 
 const CommunityProfile = () => {
   const { id } = useParams<{ id: string }>();
