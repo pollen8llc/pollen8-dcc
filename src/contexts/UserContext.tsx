@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, UserRole } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +19,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
+  // Create the mock user function here first, so it can be used throughout the component
+  const setMockUser = () => {
+    setCurrentUser({
+      id: "25",
+      name: "Jane Smith",
+      role: UserRole.ORGANIZER,
+      imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3",
+      email: "jane@example.com",
+      bio: "Community organizer and advocate for sustainable practices.",
+      communities: ["7"],
+      managedCommunities: ["7"]
+    });
+  };
+
   // Check for existing session on mount
   useEffect(() => {
     const fetchInitialSession = async () => {
@@ -35,20 +48,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } finally {
         setIsLoading(false);
       }
-    };
-
-    // TEMPORARY: Set a mock user for development
-    const setMockUser = () => {
-      setCurrentUser({
-        id: "25",
-        name: "Jane Smith",
-        role: UserRole.ORGANIZER,
-        imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3",
-        email: "jane@example.com",
-        bio: "Community organizer and advocate for sustainable practices.",
-        communities: ["7"],
-        managedCommunities: ["7"]
-      });
     };
 
     // Subscribe to auth changes
@@ -126,7 +125,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Refresh user data
   const refreshUser = async (): Promise<void> => {
     // This would fetch the latest user data from the database
-    // For now, we'll just use the mock implementation
     setIsLoading(true);
     try {
       // Mock implementation
