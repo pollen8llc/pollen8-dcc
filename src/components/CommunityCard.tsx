@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { User, Users } from "lucide-react";
+import { Users, MapPin } from "lucide-react";
 import { Community } from "@/data/types";
 import { Badge } from "@/components/ui/badge";
 
@@ -22,18 +22,13 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
         
         <div className="mt-4 flex flex-col space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-1 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                <span className="text-sm">{community.memberCount}</span>
-              </div>
-              <div className="flex items-center space-x-1 text-muted-foreground">
-                <User className="h-4 w-4" />
-                <span className="text-sm">{community.organizerIds.length}</span>
-              </div>
+            <div className="flex items-center space-x-1 text-muted-foreground">
+              <Users className="h-4 w-4" />
+              <span className="text-sm">{community.memberCount} members</span>
             </div>
-            <div className="text-sm text-muted-foreground">
-              {community.location}
+            <div className="flex items-center space-x-1 text-muted-foreground">
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm">{community.location}</span>
             </div>
           </div>
           

@@ -62,9 +62,9 @@ const Index = () => {
             <div className="mb-4 md:mb-0">
               <div className="text-xl font-semibold flex items-center">
                 <span className="bg-aquamarine rounded-lg w-8 h-8 flex items-center justify-center mr-2 shadow-sm">
-                  <span className="text-primary-foreground font-bold">CD</span>
+                  <span className="text-primary-foreground font-bold">DCC</span>
                 </span>
-                Community Directory
+                Digital Community Center
               </div>
             </div>
             
@@ -82,7 +82,7 @@ const Index = () => {
               </div>
               
               <div className="text-sm text-muted-foreground">
-                © 2023 Community Directory. All rights reserved.
+                © 2023 Digital Community Center. All rights reserved.
               </div>
             </div>
           </div>
