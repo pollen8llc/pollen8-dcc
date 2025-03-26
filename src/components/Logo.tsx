@@ -35,10 +35,7 @@ const Logo: React.FC<LogoProps> = ({
       </svg>
       
       {showText && (
-        <div className="flex flex-col ml-2">
-          <span className="text-foreground font-medium text-lg">Dot Connector Collective</span>
-          <span className="text-gray-500 text-sm">small</span>
-        </div>
+        <span className="text-foreground font-medium text-lg ml-2">Dot Connector Collective</span>
       )}
     </div>
   );
