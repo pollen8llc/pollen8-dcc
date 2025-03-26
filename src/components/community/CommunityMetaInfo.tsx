@@ -22,7 +22,7 @@ const CommunityMetaInfo = () => {
       { 
         icon: <MessageSquare className="h-5 w-5" />, 
         title: "Mission and Purpose", 
-        value: "Providing support, networking, and resources to early-stage founders, putting people first in entrepreneurship" 
+        value: "Support • Networking • Resources • People-First" 
       },
       { 
         icon: <Users className="h-5 w-5" />, 
@@ -53,7 +53,7 @@ const CommunityMetaInfo = () => {
   } else {
     // Default meta information for other communities
     communityMeta = [
-      { icon: <MessageSquare className="h-5 w-5" />, title: "Mission and Purpose", value: "Supporting founders" },
+      { icon: <MessageSquare className="h-5 w-5" />, title: "Mission and Purpose", value: "Support • Growth • Community • Innovation" },
       { icon: <Users className="h-5 w-5" />, title: "Community Size", value: community?.memberCount + "+ members" },
       { icon: <Activity className="h-5 w-5" />, title: "Event Turnout", value: "30-50 attendees" },
       { icon: <Calendar className="h-5 w-5" />, title: "Events Organized", value: "12 this year" },
