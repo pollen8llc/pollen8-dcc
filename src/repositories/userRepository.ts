@@ -1,7 +1,18 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 import { users as mockUsers } from "@/data/users";
+import { communities as mockCommunities } from "@/data/communities";
+
+/**
+ * Converts a user from data/types format to models/types format
+ */
+const convertUserType = (dataUser: any): User => {
+  return {
+    ...dataUser,
+    role: dataUser.role === "ORGANIZER" ? UserRole.ORGANIZER : UserRole.MEMBER
+  };
+};
 
 /**
  * Retrieves a user by their ID from the data source.
@@ -10,10 +21,10 @@ export const getUserById = async (id: string): Promise<User | null> => {
   // When database is ready, use this:
   // const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
   // if (error) return null;
-  // return data as User;
+  // return convertUserType(data);
   
   const user = mockUsers.find(user => user.id === id);
-  return user || null;
+  return user ? convertUserType(user) : null;
 };
 
 /**
@@ -25,12 +36,14 @@ export const getCommunityOrganizers = async (communityId: string): Promise<User[
   // if (error) return [];
   // const { data, error: usersError } = await supabase.from('users').select('*').in('id', community.organizerIds);
   // if (usersError) return [];
-  // return data as User[];
+  // return data.map(convertUserType);
   
   const community = mockCommunities.find(c => c.id === communityId);
   if (!community) return [];
   
-  return mockUsers.filter(user => community.organizerIds.includes(user.id));
+  return mockUsers
+    .filter(user => community.organizerIds.includes(user.id))
+    .map(convertUserType);
 };
 
 /**
@@ -42,12 +55,12 @@ export const getCommunityMembers = async (communityId: string): Promise<User[]> 
   // if (error) return [];
   // const { data, error: usersError } = await supabase.from('users').select('*').in('id', community.memberIds);
   // if (usersError) return [];
-  // return data as User[];
+  // return data.map(convertUserType);
   
   const community = mockCommunities.find(c => c.id === communityId);
   if (!community) return [];
   
-  return mockUsers.filter(user => community.memberIds.includes(user.id));
+  return mockUsers
+    .filter(user => community.memberIds.includes(user.id))
+    .map(convertUserType);
 };
-
-import { communities as mockCommunities } from "@/data/communities";

@@ -1,5 +1,5 @@
 
-import { User } from "@/data/types";
+import { User } from "@/models/types";
 import { Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

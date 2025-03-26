@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { User } from "@/data/types";
+import { User } from "@/models/types";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MemberCard from "@/components/MemberCard";
