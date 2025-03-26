@@ -33,7 +33,7 @@ const Navbar = () => {
             to="/"
             className="text-xl font-semibold flex items-center space-x-2"
           >
-            <Logo width={47} height={18} showText={false} className="text-foreground" />
+            <Logo width={62} height={24} showText={false} className="text-foreground" />
           </Link>
         </div>
       </div>
