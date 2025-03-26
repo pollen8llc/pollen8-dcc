@@ -25,9 +25,6 @@ const CallToActionBanner = ({
               POLLEN8 LABS PRESENTS
             </Button>
           </div>
-          <h3 className="text-4xl md:text-5xl font-bold mb-6 appear-animate">
-            <span className="text-aquamarine">{title}</span>
-          </h3>
           <p 
             className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto appear-animate" 
             style={{animationDelay: "0.1s"}}
