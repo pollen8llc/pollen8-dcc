@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 
 const Navbar = () => {
@@ -37,15 +36,6 @@ const Navbar = () => {
             <Logo width={47} height={18} showText={false} className="text-foreground" />
           </Link>
         </div>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="p-0 h-auto w-auto hover:bg-transparent"
-          aria-label="Menu"
-        >
-          <span className="material-icons" style={{ fontSize: '60px', width: '60px' }}>linear_scale</span>
-        </Button>
       </div>
     </header>
   );

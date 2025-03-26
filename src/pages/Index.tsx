@@ -67,22 +67,8 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="flex flex-col md:flex-row md:space-x-8 items-center">
-              <div className="flex space-x-4 mb-4 md:mb-0">
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors duration-200">
-                  Terms
-                </a>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors duration-200">
-                  Privacy
-                </a>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors duration-200">
-                  Contact
-                </a>
-              </div>
-              
-              <div className="text-sm text-muted-foreground">
-                © 2023 Digital Community Center. All rights reserved.
-              </div>
+            <div className="text-sm text-muted-foreground">
+              © 2023 Digital Community Center. All rights reserved.
             </div>
           </div>
         </div>
