@@ -20,6 +20,7 @@ export const createAdminAccount = async (
         data: {
           first_name: firstName,
           last_name: lastName,
+          role: UserRole.ADMIN // This won't be used for the profile update, but is stored in auth metadata
         },
       },
     });
@@ -39,16 +40,16 @@ export const createAdminAccount = async (
       };
     }
 
-    // Step 2: Update the user's role in the profiles table
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ 
+    // Step 2: Insert a record in a separate admin_roles table instead of updating profiles
+    const { error: roleError } = await supabase
+      .from('admin_roles')
+      .insert({ 
+        user_id: authData.user.id,
         role: UserRole.ADMIN 
-      })
-      .eq('id', authData.user.id);
+      });
 
-    if (updateError) {
-      console.error("Error updating admin role:", updateError);
+    if (roleError) {
+      console.error("Error setting admin role:", roleError);
       return {
         success: false,
         message: "Account created but failed to set admin permissions"
