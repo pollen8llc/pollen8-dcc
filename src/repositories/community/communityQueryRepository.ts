@@ -17,6 +17,11 @@ export const getAllCommunities = async (): Promise<Community[]> => {
       return mockCommunities;
     }
     
+    if (!data || data.length === 0) {
+      console.log("No communities found in database, using mock data");
+      return mockCommunities;
+    }
+    
     return data.map(mapDbCommunity);
   } catch (err) {
     console.error("Error in getAllCommunities:", err);
@@ -66,6 +71,16 @@ export const searchCommunities = async (query: string): Promise<Community[]> => 
     
     if (error) {
       console.error("Error searching communities:", error);
+      const lowercaseQuery = query.toLowerCase();
+      return mockCommunities.filter(community => 
+        community.name.toLowerCase().includes(lowercaseQuery) ||
+        community.description.toLowerCase().includes(lowercaseQuery) ||
+        community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+      );
+    }
+    
+    if (!data || data.length === 0) {
+      console.log("No matching communities found in database, using filtered mock data");
       const lowercaseQuery = query.toLowerCase();
       return mockCommunities.filter(community => 
         community.name.toLowerCase().includes(lowercaseQuery) ||

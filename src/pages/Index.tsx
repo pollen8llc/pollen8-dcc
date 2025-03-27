@@ -10,10 +10,11 @@ import * as communityService from "@/services/communityService";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Pre-fetch communities for better UX
+  // Pre-fetch communities for better UX with a longer stale time
   useQuery({
     queryKey: ['communities'],
-    queryFn: communityService.getAllCommunities
+    queryFn: communityService.getAllCommunities,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const handleSearch = (query: string) => {

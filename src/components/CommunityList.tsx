@@ -18,6 +18,7 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
 
   useEffect(() => {
+    // Set filtered communities to all communities initially
     if (!searchQuery.trim()) {
       setFilteredCommunities(communities);
       return;
@@ -33,7 +34,7 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
         const lowercaseQuery = searchQuery.toLowerCase();
         const filtered = communities.filter(community => 
           community.name.toLowerCase().includes(lowercaseQuery) ||
-          community.description?.toLowerCase().includes(lowercaseQuery) ||
+          (community.description?.toLowerCase().includes(lowercaseQuery) || false) ||
           community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
         );
         setFilteredCommunities(filtered);
