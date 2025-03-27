@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { UserProvider } from "@/contexts/UserContext";
 import Index from "./pages/Index";
+import Profile from "./pages/Profile";
 import CommunityProfile from "./pages/CommunityProfile";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -28,6 +29,11 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/create-admin" element={<CreateAdminForm />} />
             <Route path="/community/:id" element={<CommunityProfile />} />
+            <Route path="/profile" element={
+              <ProtectedRoute requiredRole="MEMBER">
+                <Profile />
+              </ProtectedRoute>
+            } />
             
             {/* Protected routes */}
             <Route 
