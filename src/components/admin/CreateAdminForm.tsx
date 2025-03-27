@@ -8,9 +8,10 @@ import { createAdminAccount } from "@/services/adminService";
 import { useToast } from "@/hooks/use-toast";
 
 const CreateAdminForm = () => {
+  // Pre-filled for convenience
   const [email, setEmail] = useState("hellopollen8@gmail.com");
   const [firstName, setFirstName] = useState("Pollen8");
-  const [lastName, setLastName] = useState("");
+  const [lastName, setLastName] = useState("Admin");
   const [password, setPassword] = useState("POLLEN8staff");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -27,11 +28,7 @@ const CreateAdminForm = () => {
           title: "Success",
           description: result.message,
         });
-        // Reset form
-        setEmail("");
-        setFirstName("");
-        setLastName("");
-        setPassword("");
+        // Don't reset form - this makes it easier to retry if needed
       } else {
         toast({
           title: "Error",
