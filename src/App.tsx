@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import KnowledgeBase from "./pages/knowledge/KnowledgeBase";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Auth from "./pages/Auth";
+import CreateAdminForm from "./components/admin/CreateAdminForm";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/create-admin" element={<CreateAdminForm />} />
             <Route path="/community/:id" element={<CommunityProfile />} />
             
             {/* Protected routes */}
