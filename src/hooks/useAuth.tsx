@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-import { User } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 
 export const useAuth = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -48,11 +48,12 @@ export const useAuth = () => {
         .filter(m => m.role === 'admin')
         .map(m => m.community_id);
 
-      // Create user object
+      // Create user object - Fix: Convert string role to UserRole enum value
       setCurrentUser({
         id: userId,
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',
-        role: adminRole?.role || (managedCommunities.length > 0 ? 'ORGANIZER' : 'MEMBER'),
+        role: adminRole?.role === "ADMIN" ? UserRole.ADMIN : 
+              (managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER),
         imageUrl: profile.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         email: profile.email,
         bio: "",
@@ -71,7 +72,7 @@ export const useAuth = () => {
     setCurrentUser({
       id: "25",
       name: "Jane Smith",
-      role: "ORGANIZER",
+      role: UserRole.ORGANIZER, // Fix: Use enum value instead of string
       imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3",
       email: "jane@example.com",
       bio: "Community organizer and advocate for sustainable practices.",
