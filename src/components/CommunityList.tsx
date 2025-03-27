@@ -23,13 +23,24 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
       return;
     }
 
-    // Use the search service to filter communities based on the query
-    const fetchFilteredCommunities = async () => {
-      const filtered = await communityService.searchCommunities(searchQuery);
-      setFilteredCommunities(filtered);
+    const filterCommunities = async () => {
+      try {
+        const filtered = await communityService.searchCommunities(searchQuery);
+        setFilteredCommunities(filtered);
+      } catch (err) {
+        console.error("Error searching communities:", err);
+        // Fallback to client-side filtering if API search fails
+        const lowercaseQuery = searchQuery.toLowerCase();
+        const filtered = communities.filter(community => 
+          community.name.toLowerCase().includes(lowercaseQuery) ||
+          community.description?.toLowerCase().includes(lowercaseQuery) ||
+          community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+        );
+        setFilteredCommunities(filtered);
+      }
     };
 
-    fetchFilteredCommunities();
+    filterCommunities();
   }, [communities, searchQuery]);
 
   if (isLoading) {
