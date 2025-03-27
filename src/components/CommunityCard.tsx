@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Users, MapPin } from "lucide-react";
-import { Community } from "@/data/types";
+import { Community } from "@/models/types";
 import { Badge } from "@/components/ui/badge";
 import { useRef, useEffect, useState } from "react";
 

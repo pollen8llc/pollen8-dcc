@@ -18,12 +18,13 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
 
   useEffect(() => {
-    const fetchFilteredCommunities = async () => {
-      if (!searchQuery.trim()) {
-        setFilteredCommunities(communities);
-        return;
-      }
+    if (!searchQuery.trim()) {
+      setFilteredCommunities(communities);
+      return;
+    }
 
+    // Use the search service to filter communities based on the query
+    const fetchFilteredCommunities = async () => {
       const filtered = await communityService.searchCommunities(searchQuery);
       setFilteredCommunities(filtered);
     };

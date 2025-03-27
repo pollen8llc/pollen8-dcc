@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Community } from "@/models/types";
 import { communities as mockCommunities } from "@/data/communities";
@@ -14,13 +13,15 @@ export const getAllCommunities = async (): Promise<Community[]> => {
     
     if (error) {
       console.error("Error fetching communities:", error);
-      return mockCommunities as unknown as Community[];
+      // Fallback to mock data
+      return mockCommunities;
     }
     
-    return data.map(mapDbCommunity) as Community[];
+    return data.map(mapDbCommunity);
   } catch (err) {
     console.error("Error in getAllCommunities:", err);
-    return mockCommunities as unknown as Community[];
+    // Fallback to mock data
+    return mockCommunities;
   }
 };
 
@@ -41,14 +42,14 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
     if (error) {
       console.error("Error fetching community:", error);
       const community = mockCommunities.find(community => community.id === id);
-      return community ? (community as unknown as Community) : null;
+      return community ? community : null;
     }
     
-    return mapDbCommunity(data) as Community;
+    return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in getCommunityById:", err);
     const community = mockCommunities.find(community => community.id === id);
-    return community ? (community as unknown as Community) : null;
+    return community ? community : null;
   }
 };
 
@@ -70,10 +71,10 @@ export const searchCommunities = async (query: string): Promise<Community[]> => 
         community.name.toLowerCase().includes(lowercaseQuery) ||
         community.description.toLowerCase().includes(lowercaseQuery) ||
         community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
-      ) as unknown as Community[];
+      );
     }
     
-    return data.map(mapDbCommunity) as Community[];
+    return data.map(mapDbCommunity);
   } catch (err) {
     console.error("Error in searchCommunities:", err);
     const lowercaseQuery = query.toLowerCase();
@@ -81,7 +82,7 @@ export const searchCommunities = async (query: string): Promise<Community[]> => 
       community.name.toLowerCase().includes(lowercaseQuery) ||
       community.description.toLowerCase().includes(lowercaseQuery) ||
       community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
-    ) as unknown as Community[];
+    );
   }
 };
 
@@ -103,15 +104,15 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
       console.error("Error fetching managed communities:", error);
       return mockCommunities.filter(community => 
         community.organizerIds.includes(userId)
-      ) as unknown as Community[];
+      );
     }
     
-    return data.map(item => mapDbCommunity(item.communities)) as Community[];
+    return data.map(item => mapDbCommunity(item.communities));
   } catch (err) {
     console.error("Error in getManagedCommunities:", err);
     return mockCommunities.filter(community => 
       community.organizerIds.includes(userId)
-    ) as unknown as Community[];
+    );
   }
 };
 
@@ -137,7 +138,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
       return community;
     }
     
-    return mapDbCommunity(data) as Community;
+    return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in updateCommunity:", err);
     return community;
@@ -193,7 +194,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         });
     }
     
-    return mapDbCommunity(data) as Community;
+    return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in createCommunity:", err);
     return {
