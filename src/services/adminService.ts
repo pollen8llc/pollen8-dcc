@@ -40,12 +40,12 @@ export const createAdminAccount = async (
       };
     }
 
-    // Step 2: Insert a record in a separate admin_roles table instead of updating profiles
+    // Step 2: Insert a record in the admin_roles table
     const { error: roleError } = await supabase
       .from('admin_roles')
       .insert({ 
         user_id: authData.user.id,
-        role: UserRole.ADMIN 
+        role: UserRole.ADMIN.toString()
       });
 
     if (roleError) {
