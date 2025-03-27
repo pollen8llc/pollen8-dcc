@@ -74,4 +74,28 @@ export const communities: Community[] = [
     tags: ["R&D", "Innovation", "Emerging Tech"],
     isPublic: false,
   },
+  {
+    id: "8",
+    name: "Tech Innovators Alliance",
+    description: "A community of forward-thinking developers, engineers, and tech enthusiasts collaborating on cutting-edge projects and sharing knowledge about emerging technologies like AI, blockchain, and IoT.",
+    location: "Austin, TX",
+    imageUrl: "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?q=80&w=1469&auto=format&fit=crop&ixlib=rb-4.0.3",
+    memberCount: 42,
+    organizerIds: ["25"],
+    memberIds: ["8", "14", "17"],
+    tags: ["Technology", "Innovation", "Artificial Intelligence", "Blockchain"],
+    isPublic: true,
+  },
+  {
+    id: "9",
+    name: "Sustainable Living Collective",
+    description: "A group dedicated to promoting eco-friendly practices, sustainable living, and environmental conservation. Members share resources, organize workshops, and collaborate on community projects aimed at reducing carbon footprints.",
+    location: "Portland, OR",
+    imageUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1513&auto=format&fit=crop&ixlib=rb-4.0.3",
+    memberCount: 31,
+    organizerIds: ["4"],
+    memberIds: ["5", "12", "19", "23"],
+    tags: ["Sustainability", "Environment", "Green Living", "Community Action"],
+    isPublic: true,
+  }
 ];
