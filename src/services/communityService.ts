@@ -1,6 +1,6 @@
 
 import { Community } from "@/models/types";
-import * as communityRepository from "@/repositories/communityRepository";
+import * as communityRepository from "@/repositories/community";
 
 /**
  * Gets all communities
