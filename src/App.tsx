@@ -15,7 +15,15 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Auth from "./pages/Auth";
 import CreateAdminForm from "./components/admin/CreateAdminForm";
 
-const queryClient = new QueryClient();
+// Create a new query client with increased stale time for better performance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60000, // 1 minute
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

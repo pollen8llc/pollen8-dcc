@@ -11,6 +11,7 @@ import { UserCircle, Mail, Shield, Library, User as UserIcon } from "lucide-reac
 import { UserRole } from "@/models/types";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const Profile = () => {
   const { currentUser, refreshUser } = useUser();
@@ -19,6 +20,7 @@ const Profile = () => {
   const [profileName, setProfileName] = useState(currentUser?.name || "");
   const [profileImage, setProfileImage] = useState(currentUser?.imageUrl || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
@@ -202,6 +204,25 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      
+      {/* Help Dialog */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Profile Information</DialogTitle>
+            <DialogDescription>
+              Your profile displays your personal information and community activity.
+            </DialogDescription>
+          </DialogHeader>
+          <p className="text-sm">
+            You can edit your profile information by clicking the "Edit Profile" button.
+            Your role in the community determines what features you have access to.
+          </p>
+          <DialogFooter>
+            <Button onClick={() => setShowDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

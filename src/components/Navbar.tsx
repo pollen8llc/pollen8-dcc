@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUser } from "@/contexts/UserContext";
-import { Shield, Library, UserCircle, Menu, User } from "lucide-react";
+import { Shield, Library, UserCircle, Menu, User as UserIcon } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -13,15 +13,6 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger
-} from "@/components/ui/navigation-menu";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 const Navbar = () => {
@@ -54,6 +45,12 @@ const Navbar = () => {
             </Link>
             {currentUser && (
               <>
+                <Link
+                  to="/profile"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Profile
+                </Link>
                 <Link
                   to="/knowledge/7"
                   className="text-muted-foreground transition-colors hover:text-foreground"
@@ -103,25 +100,25 @@ const Navbar = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
+                    <Link to="/profile" className="cursor-pointer flex w-full items-center">
+                      <UserIcon className="mr-2 h-4 w-4" />
                       <span>My Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/" className="cursor-pointer">
+                    <Link to="/" className="cursor-pointer flex w-full items-center">
                       Communities
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/knowledge/7" className="cursor-pointer">
+                    <Link to="/knowledge/7" className="cursor-pointer flex w-full items-center">
                       <Library className="mr-2 h-4 w-4" />
                       <span>Knowledge Base</span>
                     </Link>
                   </DropdownMenuItem>
                   {isOrganizer() && (
                     <DropdownMenuItem asChild>
-                      <Link to="/admin" className="cursor-pointer">
+                      <Link to="/admin" className="cursor-pointer flex w-full items-center">
                         <Shield className="mr-2 h-4 w-4" />
                         <span>Admin</span>
                       </Link>

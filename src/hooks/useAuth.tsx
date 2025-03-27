@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { User, UserRole } from "@/models/types";
+import { toast } from "@/hooks/use-toast";
 
 export const useAuth = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -12,6 +13,8 @@ export const useAuth = () => {
   // Fetch user profile from Supabase
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching profile for user ID:", userId);
+      
       // Get profile data
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -49,17 +52,20 @@ export const useAuth = () => {
         .map(m => m.community_id);
 
       // Create user object - Fix: Convert string role to UserRole enum value
-      setCurrentUser({
+      const userData = {
         id: userId,
-        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',
+        name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'User',
         role: adminRole?.role === "ADMIN" ? UserRole.ADMIN : 
               (managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER),
-        imageUrl: profile.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-        email: profile.email,
-        bio: "",
+        imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+        email: profile?.email || "user@example.com",
+        bio: profile?.bio || "",
         communities,
         managedCommunities
-      });
+      };
+
+      console.log("User data fetched:", userData);
+      setCurrentUser(userData);
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
       // Fall back to mock data for development
@@ -69,6 +75,7 @@ export const useAuth = () => {
 
   // Create the mock user function for development purposes
   const setMockUser = () => {
+    console.log("Setting mock user");
     setCurrentUser({
       id: "25",
       name: "Jane Smith",
@@ -84,6 +91,8 @@ export const useAuth = () => {
   // Refresh user data
   const refreshUser = async (): Promise<void> => {
     setIsLoading(true);
+    console.log("Refreshing user data, session:", session);
+    
     try {
       if (session && session.user) {
         await fetchUserProfile(session.user.id);
@@ -93,6 +102,11 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error("Error refreshing user data:", error);
+      toast({
+        title: "Error refreshing profile",
+        description: "There was a problem loading your profile data.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +115,13 @@ export const useAuth = () => {
   // Check for existing session on mount
   useEffect(() => {
     const fetchInitialSession = async () => {
+      setIsLoading(true);
+      console.log("Initializing auth state...");
+      
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        console.log("Initial session:", session ? "Session exists" : "No session");
+        
         if (session) {
           setSession(session);
           await fetchUserProfile(session.user.id);
@@ -121,8 +140,10 @@ export const useAuth = () => {
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        console.log("Auth state changed:", event, session ? "Has session" : "No session");
         setSession(session);
+        
         if (session) {
           // Only try to fetch profile if we have a session
           setTimeout(() => {
