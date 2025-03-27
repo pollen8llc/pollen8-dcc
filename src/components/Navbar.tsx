@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUser } from "@/contexts/UserContext";
-import { Shield, Library, UserCircle, Menu, User as UserIcon } from "lucide-react";
+import { Shield, Library, UserCircle, Menu, User as UserIcon, FileText } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -67,6 +67,12 @@ const Navbar = () => {
                 )}
               </>
             )}
+            <Link
+              to="/documentation"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Documentation
+            </Link>
           </nav>
         </div>
         
@@ -114,6 +120,12 @@ const Navbar = () => {
                     <Link to="/knowledge/7" className="cursor-pointer flex w-full items-center">
                       <Library className="mr-2 h-4 w-4" />
                       <span>Knowledge Base</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/documentation" className="cursor-pointer flex w-full items-center">
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span>Documentation</span>
                     </Link>
                   </DropdownMenuItem>
                   {isOrganizer() && (

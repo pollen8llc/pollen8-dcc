@@ -14,6 +14,7 @@ import KnowledgeBase from "./pages/knowledge/KnowledgeBase";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Auth from "./pages/Auth";
 import CreateAdminForm from "./components/admin/CreateAdminForm";
+import Documentation from "./pages/Documentation";
 
 // Create a new query client with increased stale time for better performance
 const queryClient = new QueryClient({
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/create-admin" element={<CreateAdminForm />} />
             <Route path="/community/:id" element={<CommunityProfile />} />
+            <Route path="/documentation" element={<Documentation />} />
             <Route path="/profile" element={
               <ProtectedRoute requiredRole="MEMBER">
                 <Profile />
