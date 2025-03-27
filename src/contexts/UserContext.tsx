@@ -1,7 +1,9 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, UserRole } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Session } from "@supabase/supabase-js";
 
 interface UserContextType {
   currentUser: User | null;
@@ -17,9 +19,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [session, setSession] = useState<Session | null>(null);
   const { toast } = useToast();
 
-  // Create the mock user function here first, so it can be used throughout the component
+  // Create the mock user function here for development purposes
   const setMockUser = () => {
     setCurrentUser({
       id: "25",
@@ -33,18 +36,72 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  // Fetch user profile from Supabase
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      // Get profile data
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError);
+        return;
+      }
+
+      // Get user's communities and roles
+      const { data: memberData, error: memberError } = await supabase
+        .from('community_members')
+        .select('community_id, role')
+        .eq('user_id', userId);
+
+      if (memberError) {
+        console.error("Error fetching community memberships:", memberError);
+        return;
+      }
+
+      // Extract communities and managed communities
+      const communities = memberData.map(m => m.community_id);
+      const managedCommunities = memberData
+        .filter(m => m.role === 'admin')
+        .map(m => m.community_id);
+
+      // Create user object
+      setCurrentUser({
+        id: userId,
+        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',
+        role: managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER,
+        imageUrl: profile.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+        email: profile.email,
+        bio: "",
+        communities,
+        managedCommunities
+      });
+    } catch (error) {
+      console.error("Error in fetchUserProfile:", error);
+      // Fall back to mock data for development
+      setMockUser();
+    }
+  };
+
   // Check for existing session on mount
   useEffect(() => {
     const fetchInitialSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          // Once we have authentication set up, we'll fetch the full user profile here
-          // For now, we're using a placeholder user for development
+          setSession(session);
+          await fetchUserProfile(session.user.id);
+        } else {
+          // For development, use mock user
           setMockUser();
         }
       } catch (error) {
         console.error("Error fetching session:", error);
+        // Fall back to mock data for development
+        setMockUser();
       } finally {
         setIsLoading(false);
       }
@@ -53,9 +110,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
+        setSession(session);
         if (session) {
-          // When auth is set up, we'll fetch the user profile here
-          setMockUser();
+          // Only try to fetch profile if we have a session
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
         } else {
           setCurrentUser(null);
         }
@@ -97,7 +157,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!currentUser || currentUser.role !== UserRole.ORGANIZER) return false;
     
     // If no communityId provided, check if user is an organizer for any community
-    if (!communityId) return true;
+    if (!communityId) return currentUser.managedCommunities?.length > 0 || false;
     
     // Check if user is an organizer for the specific community
     return currentUser.managedCommunities?.includes(communityId) || false;
@@ -108,6 +168,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await supabase.auth.signOut();
       setCurrentUser(null);
+      setSession(null);
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account",
@@ -124,11 +185,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Refresh user data
   const refreshUser = async (): Promise<void> => {
-    // This would fetch the latest user data from the database
     setIsLoading(true);
     try {
-      // Mock implementation
-      setMockUser();
+      if (session && session.user) {
+        await fetchUserProfile(session.user.id);
+      } else {
+        // Mock implementation for development
+        setMockUser();
+      }
     } catch (error) {
       console.error("Error refreshing user data:", error);
     } finally {

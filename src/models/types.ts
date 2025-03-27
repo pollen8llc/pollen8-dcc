@@ -34,6 +34,7 @@ export interface Community {
   updatedAt?: string;
   statistics?: CommunityStatistics;
   settings?: CommunitySettings;
+  website?: string;
 }
 
 export interface CommunityStatistics {

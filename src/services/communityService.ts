@@ -43,3 +43,31 @@ export const updateCommunity = async (community: Community): Promise<Community> 
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   return communityRepository.createCommunity(community);
 };
+
+/**
+ * Joins a community
+ */
+export const joinCommunity = async (userId: string, communityId: string): Promise<void> => {
+  return communityRepository.joinCommunity(userId, communityId);
+};
+
+/**
+ * Leaves a community
+ */
+export const leaveCommunity = async (userId: string, communityId: string): Promise<void> => {
+  return communityRepository.leaveCommunity(userId, communityId);
+};
+
+/**
+ * Makes a user an admin of a community
+ */
+export const makeAdmin = async (adminId: string, userId: string, communityId: string): Promise<void> => {
+  return communityRepository.makeAdmin(adminId, userId, communityId);
+};
+
+/**
+ * Removes admin role from a user
+ */
+export const removeAdmin = async (adminId: string, userId: string, communityId: string): Promise<void> => {
+  return communityRepository.removeAdmin(adminId, userId, communityId);
+};
