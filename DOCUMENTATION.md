@@ -1,9 +1,9 @@
 
-# Digital Community Connector (DCC) Platform Documentation
+# ECO8 Platform Documentation
 
 ## Overview
 
-The Digital Community Connector (DCC) is a platform designed to help users create, manage, and participate in online communities. It offers features like community profiles, knowledge bases, member management, and administrative capabilities.
+ECO8 is a platform designed to help users create, manage, and participate in online communities. It offers features like community profiles, knowledge bases, member management, and administrative capabilities.
 
 ## Technology Stack
 

@@ -34,7 +34,7 @@ const Navbar = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex gap-6 md:gap-10">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="font-bold text-xl">DCC</span>
+            <span className="font-bold text-xl">ECO8</span>
           </Link>
           <nav className="hidden md:flex gap-6">
             <Link

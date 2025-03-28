@@ -24,7 +24,7 @@ const Documentation = () => {
 
       <div className="prose prose-sm md:prose-base lg:prose-lg dark:prose-invert max-w-none">
         <div className="bg-muted/50 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Digital Community Connector (DCC)</h2>
+          <h2 className="text-2xl font-bold mb-4">ECO8</h2>
           <p className="text-muted-foreground">
             A comprehensive platform for managing digital communities, their members, and knowledge bases.
             This documentation provides an overview of the platform's architecture, technologies, and functionality.

@@ -27,8 +27,8 @@ const Index = () => {
       
       {/* Hero Section */}
       <CallToActionBanner 
-        title="Dot Connector Collective"
-        subtitle="DCC a directory of Resources and insights powered by community"
+        title="ECO8 Collective"
+        subtitle="ECO8 a directory of Resources and insights powered by community"
         onSearch={handleSearch}
       />
       
