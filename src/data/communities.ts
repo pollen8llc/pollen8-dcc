@@ -16,7 +16,7 @@ export const communities: Community[] = [
   },
   {
     id: "2",
-    name: "Sample Community",
+    name: "Digital Marketing Alliance",
     description: "Promoting our brand and driving customer engagement strategies",
     location: "New York, NY",
     imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -28,7 +28,7 @@ export const communities: Community[] = [
   },
   {
     id: "3",
-    name: "Sample Community",
+    name: "Customer Success Network",
     description: "Supporting customers and ensuring satisfaction with our services",
     location: "San Francisco, CA",
     imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -40,7 +40,7 @@ export const communities: Community[] = [
   },
   {
     id: "4",
-    name: "Sample Community",
+    name: "Design Collective",
     description: "Creating beautiful and functional design solutions",
     location: "London, UK",
     imageUrl: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -52,7 +52,7 @@ export const communities: Community[] = [
   },
   {
     id: "5",
-    name: "Sample Community",
+    name: "Revenue Growth Partners",
     description: "Driving revenue and building client relationships",
     location: "Chicago, IL",
     imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -64,7 +64,7 @@ export const communities: Community[] = [
   },
   {
     id: "6",
-    name: "Sample Community",
+    name: "Innovation Lab",
     description: "Exploring new technologies and future product directions",
     location: "Berlin, Germany",
     imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3",
