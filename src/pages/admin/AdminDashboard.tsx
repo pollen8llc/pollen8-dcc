@@ -11,11 +11,12 @@ import * as communityService from "@/services/communityService";
 import AdminMembersTab from "@/components/admin/AdminMembersTab";
 import AdminSettingsTab from "@/components/admin/AdminSettingsTab";
 import AdminStatsTab from "@/components/admin/AdminStatsTab";
+import UserManagementTab from "@/components/admin/UserManagementTab";
 import NotFoundState from "@/components/community/NotFoundState";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
-  const { currentUser, isOrganizer } = useUser();
+  const { currentUser, isOrganizer, hasPermission } = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -40,6 +41,8 @@ const AdminDashboard = () => {
     }
   }, [id, community, isOrganizer, navigate]);
 
+  const isAdmin = currentUser?.role === "ADMIN";
+
   if (loadingCommunities || loadingCommunity) {
     return (
       <div className="min-h-screen">
@@ -63,6 +66,27 @@ const AdminDashboard = () => {
         <Navbar />
         <div className="container mx-auto py-10">
           <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+          
+          {isAdmin && (
+            <div className="mb-10">
+              <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => setActiveTab("users")}>
+                <CardHeader className="pb-2">
+                  <CardTitle>System Administration</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Manage users, roles and system-wide settings
+                  </p>
+                </CardContent>
+              </Card>
+
+              {activeTab === "users" && (
+                <div className="mt-8">
+                  <UserManagementTab />
+                </div>
+              )}
+            </div>
+          )}
           
           {managedCommunities && managedCommunities.length > 0 ? (
             <div>

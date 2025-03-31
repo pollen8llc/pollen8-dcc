@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { UserRole } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 
 /**
  * Creates an admin user account with the provided details
@@ -98,5 +98,138 @@ export const createAdminAccount = async (
       success: false,
       message: error.message || "An unexpected error occurred"
     };
+  }
+};
+
+/**
+ * Update a user's role
+ */
+export const updateUserRole = async (
+  { userId, role }: { userId: string; role: UserRole }
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    // First check if the user already has this role
+    const { data: existingRole, error: queryError } = await supabase
+      .from('admin_roles')
+      .select('id, role')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (queryError) {
+      console.error("Error checking existing role:", queryError);
+      return {
+        success: false,
+        message: queryError.message || "Failed to check existing role"
+      };
+    }
+    
+    // If the user already has the same role, no need to update
+    if (existingRole && existingRole.role === role) {
+      return {
+        success: true,
+        message: "User already has this role"
+      };
+    }
+    
+    // If the user has a different role, update it
+    if (existingRole) {
+      const { error: updateError } = await supabase
+        .from('admin_roles')
+        .update({ role: role.toString() })
+        .eq('id', existingRole.id);
+      
+      if (updateError) {
+        console.error("Error updating role:", updateError);
+        return {
+          success: false,
+          message: updateError.message || "Failed to update role"
+        };
+      }
+    } else {
+      // If the user doesn't have any role yet, insert a new one
+      const { error: insertError } = await supabase
+        .from('admin_roles')
+        .insert({ 
+          user_id: userId,
+          role: role.toString()
+        });
+      
+      if (insertError) {
+        console.error("Error setting role:", insertError);
+        return {
+          success: false,
+          message: insertError.message || "Failed to set role"
+        };
+      }
+    }
+    
+    return {
+      success: true,
+      message: `User role updated to ${role} successfully`
+    };
+  } catch (error: any) {
+    console.error("Unexpected error updating user role:", error);
+    return {
+      success: false,
+      message: error.message || "An unexpected error occurred"
+    };
+  }
+};
+
+/**
+ * Get all users with their roles
+ */
+export const getAllUsers = async (): Promise<User[]> => {
+  try {
+    // Get all profiles
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('*');
+      
+    if (profilesError) {
+      console.error("Error fetching profiles:", profilesError);
+      throw new Error(profilesError.message);
+    }
+    
+    // Get all admin roles
+    const { data: roles, error: rolesError } = await supabase
+      .from('admin_roles')
+      .select('*');
+      
+    if (rolesError) {
+      console.error("Error fetching admin roles:", rolesError);
+      throw new Error(rolesError.message);
+    }
+    
+    // Map profiles to User objects
+    const users: User[] = profiles.map(profile => {
+      // Find role for this user
+      const userRole = roles?.find(r => r.user_id === profile.id);
+      let role = UserRole.MEMBER; // Default role
+      
+      if (userRole) {
+        if (userRole.role === UserRole.ADMIN.toString()) {
+          role = UserRole.ADMIN;
+        } else if (userRole.role === UserRole.ORGANIZER.toString()) {
+          role = UserRole.ORGANIZER;
+        }
+      }
+      
+      return {
+        id: profile.id,
+        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',
+        role: role,
+        imageUrl: profile.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+        email: profile.email || "",
+        bio: "",
+        communities: [],
+        managedCommunities: []
+      };
+    });
+    
+    return users;
+  } catch (error: any) {
+    console.error("Error fetching users:", error);
+    throw error;
   }
 };
