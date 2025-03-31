@@ -20,6 +20,14 @@ interface UserManagementTabProps {
   // No props needed for now
 }
 
+// Define the interface for the admin account creation parameters
+interface CreateAdminParams {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
 const UserManagementTab = ({}: UserManagementTabProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
@@ -49,7 +57,12 @@ const UserManagementTab = ({}: UserManagementTabProps) => {
 
   // Mutation for creating admin user
   const createAdminMutation = useMutation({
-    mutationFn: adminService.createAdminAccount,
+    mutationFn: (params: CreateAdminParams) => adminService.createAdminAccount(
+      params.email,
+      params.password,
+      params.firstName,
+      params.lastName
+    ),
     onSuccess: (result) => {
       toast({
         title: result.success ? "Success" : "Error",
