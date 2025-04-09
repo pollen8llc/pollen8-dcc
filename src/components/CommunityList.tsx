@@ -35,7 +35,8 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
         const filtered = communities.filter(community => 
           community.name.toLowerCase().includes(lowercaseQuery) ||
           (community.description?.toLowerCase().includes(lowercaseQuery) || false) ||
-          community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+          community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
+          community.location.toLowerCase().includes(lowercaseQuery)
         );
         setFilteredCommunities(filtered);
       }
@@ -77,7 +78,7 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 w-full pt-4">
       {filteredCommunities.map((community) => (
-        <div key={community.id} className="appear-animate w-full" style={{animationDelay: `${parseInt(community.id) * 0.1}s`}}>
+        <div key={community.id} className="appear-animate w-full" style={{animationDelay: `${parseInt(community.id) * 0.05}s`}}>
           <CommunityCard community={community} />
         </div>
       ))}

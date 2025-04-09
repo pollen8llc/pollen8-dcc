@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Users, Activity, Code, MessageSquare, Link } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +23,40 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
   // Define different meta information based on community ID
   let communityMeta: MetaItem[] = [];
   
-  if (communityId === "7") { // Humanize HQ
+  if (communityId === "10") { // NIN (Nigerians in New York)
+    communityMeta = [
+      { 
+        icon: <Users className="h-5 w-5" />, 
+        title: "Community Size", 
+        value: "700+ members" 
+      },
+      { 
+        icon: <Activity className="h-5 w-5" />, 
+        title: "Event Turnout", 
+        value: "Various sizes based on event type" 
+      },
+      { 
+        icon: <Calendar className="h-5 w-5" />, 
+        title: "Event Formats", 
+        value: "Professional panels, Demo Days, Day parties, Sports events, Fitness activities" 
+      },
+      { 
+        icon: <MessageSquare className="h-5 w-5" />, 
+        title: "Communication", 
+        value: "Main WhatsApp group and interest-based subgroups" 
+      },
+      { 
+        icon: <Code className="h-5 w-5" />, 
+        title: "Tech Stack", 
+        value: "WhatsApp, Canva Premium, Google Forms, PartiFul" 
+      },
+      { 
+        icon: <Link className="h-5 w-5" />, 
+        title: "Subgroups", 
+        value: "NIN Jobs, NIN Fitness, NIN Investment" 
+      }
+    ];
+  } else if (communityId === "7") { // Humanize HQ
     communityMeta = [
       { 
         icon: <Users className="h-5 w-5" />, 
@@ -58,7 +90,6 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       }
     ];
   } else {
-    // Default meta information for other communities
     communityMeta = [
       { icon: <Users className="h-5 w-5" />, title: "Community Size", value: community?.memberCount + "+ members" },
       { icon: <Activity className="h-5 w-5" />, title: "Event Turnout", value: "30-50 attendees" },
