@@ -220,11 +220,11 @@ export const users: User[] = [
   },
   {
     id: "25",
-    name: "Larissa Carrera",
+    name: "Toluwase O.",
     role: Role.ORGANIZER,
     imageUrl: "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif",
-    email: "larissa.carrera@humanizehq.com",
-    bio: "Operations professional with experience in family office and venture investments. Founder of Humanize HQ, supporting early-stage founders through community and resources.",
-    communities: ["7"],
+    email: "toluwase@ninycommunity.com",
+    bio: "Nigerian American from Brooklyn, NY with marketing background and MBA from Wharton (2023). Currently works as a Growth Manager at Nala, a fintech company facilitating money transfers to Africa and Asia. Has a natural aptitude for community building, having created multiple communities throughout her life. Views community building as a personal calling or 'ministry'.",
+    communities: ["7", "10"],
   },
 ];
