@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 const Navbar = () => {
-  const { currentUser, isOrganizer, logout } = useUser();
+  const { currentUser, isOrganizer, logout, setMockUser, setAdminUser } = useUser();
   const isAdmin = currentUser?.role === "ADMIN";
 
   // Get user initials for avatar fallback
@@ -32,6 +32,9 @@ const Navbar = () => {
     }
     return nameParts[0][0].toUpperCase();
   };
+
+  // Check if the current user is the specific admin user
+  const isSpecificAdmin = currentUser?.id === "38a18dd6-4742-419b-b2c1-70dec5c51729";
 
   return (
     <header className="border-b border-border/40 sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -96,6 +99,9 @@ const Navbar = () => {
               <Badge variant="outline" className="hidden md:flex items-center gap-1 py-1 px-2 border-primary/30">
                 <UserCircle className="h-3.5 w-3.5 text-primary" />
                 <span className="text-xs">{currentUser.name}</span>
+                {isAdmin && (
+                  <Badge className="ml-1 bg-blue-500 text-white text-xs">Admin</Badge>
+                )}
               </Badge>
               
               <DropdownMenu>
@@ -188,12 +194,32 @@ const Navbar = () => {
               </DropdownMenu>
             </div>
           ) : (
-            <Button variant="default" className="flex items-center gap-2" asChild>
-              <Link to="/auth">
-                <UserCircle className="h-4 w-4" />
-                <span>Login</span>
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="default" className="flex items-center gap-2" asChild>
+                <Link to="/auth">
+                  <UserCircle className="h-4 w-4" />
+                  <span>Login</span>
+                </Link>
+              </Button>
+              {/* Development options for testing */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Development</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {setMockUser && (
+                    <DropdownMenuItem onClick={setMockUser}>Set Mock User</DropdownMenuItem>
+                  )}
+                  {setAdminUser && (
+                    <DropdownMenuItem onClick={setAdminUser}>Set Admin User</DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
           
           <Button variant="ghost" size="icon" className="md:hidden">

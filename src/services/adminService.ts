@@ -2,6 +2,82 @@
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
 
+// The specific admin user ID
+const ADMIN_USER_ID = "38a18dd6-4742-419b-b2c1-70dec5c51729";
+
+/**
+ * Ensures that the specific admin user has the ADMIN role in the database
+ */
+export const ensureAdminRole = async (): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Check if the admin role exists for this user
+    const { data: existingRole, error: queryError } = await supabase
+      .from('admin_roles')
+      .select('id, role')
+      .eq('user_id', ADMIN_USER_ID)
+      .maybeSingle();
+    
+    if (queryError) {
+      console.error("Error checking admin role:", queryError);
+      return {
+        success: false,
+        message: queryError.message || "Failed to check admin role"
+      };
+    }
+    
+    // If the user already has the ADMIN role, no need to update
+    if (existingRole && existingRole.role === UserRole.ADMIN.toString()) {
+      return {
+        success: true,
+        message: "User already has admin privileges"
+      };
+    }
+    
+    // If the user has a different role, update it to ADMIN
+    if (existingRole) {
+      const { error: updateError } = await supabase
+        .from('admin_roles')
+        .update({ role: UserRole.ADMIN.toString() })
+        .eq('id', existingRole.id);
+      
+      if (updateError) {
+        console.error("Error updating role:", updateError);
+        return {
+          success: false,
+          message: updateError.message || "Failed to update to admin role"
+        };
+      }
+    } else {
+      // If the user doesn't have any role yet, insert a new ADMIN role
+      const { error: insertError } = await supabase
+        .from('admin_roles')
+        .insert({ 
+          user_id: ADMIN_USER_ID,
+          role: UserRole.ADMIN.toString()
+        });
+      
+      if (insertError) {
+        console.error("Error setting admin role:", insertError);
+        return {
+          success: false,
+          message: insertError.message || "Failed to set admin role"
+        };
+      }
+    }
+    
+    return {
+      success: true,
+      message: "Admin role has been set successfully"
+    };
+  } catch (error: any) {
+    console.error("Unexpected error ensuring admin role:", error);
+    return {
+      success: false,
+      message: error.message || "An unexpected error occurred"
+    };
+  }
+};
+
 /**
  * Creates an admin user account with the provided details
  */

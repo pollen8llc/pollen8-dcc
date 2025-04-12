@@ -4,11 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { User, UserRole } from "@/models/types";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const useAuth = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [session, setSession] = useState<Session | null>(null);
+  const navigate = useNavigate();
+
+  // Admin user ID
+  const ADMIN_USER_ID = "38a18dd6-4742-419b-b2c1-70dec5c51729";
 
   // Fetch user profile from Supabase
   const fetchUserProfile = async (userId: string) => {
@@ -66,6 +71,13 @@ export const useAuth = () => {
 
       console.log("User data fetched:", userData);
       setCurrentUser(userData);
+      
+      // Redirect admin user to dashboard after login
+      if (userId === ADMIN_USER_ID) {
+        setTimeout(() => {
+          navigate('/admin');
+        }, 0);
+      }
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
     }
@@ -84,6 +96,22 @@ export const useAuth = () => {
       communities: ["7"],
       managedCommunities: ["7"]
     });
+  };
+  
+  // Set specific admin user for testing
+  const setAdminUser = () => {
+    console.log("Setting admin user");
+    setCurrentUser({
+      id: ADMIN_USER_ID,
+      name: "Admin User",
+      role: UserRole.ADMIN,
+      imageUrl: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+      email: "admin@example.com",
+      bio: "System administrator",
+      communities: [],
+      managedCommunities: []
+    });
+    navigate('/admin');
   };
 
   // Refresh user data
@@ -174,5 +202,5 @@ export const useAuth = () => {
     }
   };
 
-  return { currentUser, isLoading, session, refreshUser, logout, setMockUser };
+  return { currentUser, isLoading, session, refreshUser, logout, setMockUser, setAdminUser };
 };

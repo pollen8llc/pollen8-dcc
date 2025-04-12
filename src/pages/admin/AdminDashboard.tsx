@@ -8,6 +8,8 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Community } from "@/models/types";
 import * as communityService from "@/services/communityService";
+import * as adminService from "@/services/adminService";
+import { toast } from "@/hooks/use-toast";
 import AdminMembersTab from "@/components/admin/AdminMembersTab";
 import AdminSettingsTab from "@/components/admin/AdminSettingsTab";
 import AdminStatsTab from "@/components/admin/AdminStatsTab";
@@ -21,6 +23,29 @@ const AdminDashboard = () => {
   const { currentUser, isOrganizer, hasPermission } = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Ensure admin role for the specific user
+  useEffect(() => {
+    const ensureAdminInDatabase = async () => {
+      // Only run this once when the dashboard loads
+      if (currentUser?.id === "38a18dd6-4742-419b-b2c1-70dec5c51729") {
+        try {
+          const result = await adminService.ensureAdminRole();
+          if (!result.success) {
+            toast({
+              title: "Admin role setup error",
+              description: result.message,
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error ensuring admin role:", error);
+        }
+      }
+    };
+
+    ensureAdminInDatabase();
+  }, [currentUser?.id]);
 
   // If no community ID is provided, fetch managed communities
   const { data: managedCommunities, isLoading: loadingCommunities } = useQuery({
