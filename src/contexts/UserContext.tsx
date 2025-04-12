@@ -12,12 +12,13 @@ interface UserContextType {
   isOrganizer: (communityId?: string) => boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  setMockUser?: () => void; // Add this function to allow manual mock user setting
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser, isLoading, logout, refreshUser } = useAuth();
+  const { currentUser, isLoading, logout, refreshUser, setMockUser } = useAuth();
   const { hasPermission, isOrganizer } = usePermissions(currentUser);
   const { toast } = useToast();
 
@@ -46,7 +47,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       hasPermission, 
       isOrganizer,
       logout: handleLogout,
-      refreshUser
+      refreshUser,
+      setMockUser // Add this to the provider
     }}>
       {children}
     </UserContext.Provider>

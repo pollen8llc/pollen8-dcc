@@ -68,12 +68,10 @@ export const useAuth = () => {
       setCurrentUser(userData);
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
-      // Fall back to mock data for development
-      setMockUser();
     }
   };
 
-  // Create the mock user function for development purposes
+  // Create the mock user function for development purposes - will only be used if explicitly called
   const setMockUser = () => {
     console.log("Setting mock user");
     setCurrentUser({
@@ -97,8 +95,8 @@ export const useAuth = () => {
       if (session && session.user) {
         await fetchUserProfile(session.user.id);
       } else {
-        // Mock implementation for development
-        setMockUser();
+        // Do not set mock user automatically
+        setCurrentUser(null);
       }
     } catch (error) {
       console.error("Error refreshing user data:", error);
@@ -126,13 +124,13 @@ export const useAuth = () => {
           setSession(session);
           await fetchUserProfile(session.user.id);
         } else {
-          // For development, use mock user
-          setMockUser();
+          // Do not set a mock user, leave as null to show logged out state
+          setCurrentUser(null);
         }
       } catch (error) {
         console.error("Error fetching session:", error);
-        // Fall back to mock data for development
-        setMockUser();
+        // Do not fall back to mock data
+        setCurrentUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -176,5 +174,5 @@ export const useAuth = () => {
     }
   };
 
-  return { currentUser, isLoading, session, refreshUser, logout };
+  return { currentUser, isLoading, session, refreshUser, logout, setMockUser };
 };
