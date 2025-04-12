@@ -25,7 +25,13 @@ export const usePermissions = (currentUser: User | null) => {
 
   // Check if user is an organizer for a specific community
   const isOrganizer = (communityId?: string): boolean => {
-    if (!currentUser || currentUser.role !== UserRole.ORGANIZER) return false;
+    if (!currentUser) return false;
+    
+    // System admins have all permissions
+    if (currentUser.role === UserRole.ADMIN) return true;
+    
+    // If user is not an organizer
+    if (currentUser.role !== UserRole.ORGANIZER) return false;
     
     // If no communityId provided, check if user is an organizer for any community
     if (!communityId) return currentUser.managedCommunities?.length > 0 || false;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -16,7 +15,6 @@ import { Search, UserPlus, UserMinus, Shield, RefreshCw } from "lucide-react";
 import { User, UserRole } from "@/models/types";
 import * as adminService from "@/services/adminService";
 
-// Define the interface for the admin account creation parameters
 interface CreateAdminParams {
   email: string;
   password: string;
@@ -30,28 +28,27 @@ const UserManagementTab = () => {
   const [newUserFirstName, setNewUserFirstName] = useState("");
   const [newUserLastName, setNewUserLastName] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<string>(UserRole.MEMBER);
+  const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.MEMBER);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch all users
   const { data: users = [], isLoading, error, refetch } = useQuery({
     queryKey: ['admin-users'],
     queryFn: adminService.getAllUsers,
   });
 
-  // Filtered users based on search query
   const filteredUsers = users.filter(user => {
     const searchLower = searchQuery.toLowerCase();
     return (
       user.name.toLowerCase().includes(searchLower) ||
       user.email.toLowerCase().includes(searchLower) ||
-      user.role.toLowerCase().includes(searchLower)
+      (typeof user.role === 'string' 
+        ? user.role.toLowerCase().includes(searchLower)
+        : UserRole[user.role].toLowerCase().includes(searchLower))
     );
   });
 
-  // Mutation for creating admin user
   const createAdminMutation = useMutation({
     mutationFn: (params: CreateAdminParams) => adminService.createAdminAccount(
       params.email,
@@ -81,7 +78,6 @@ const UserManagementTab = () => {
     }
   });
 
-  // Mutation for updating user role
   const updateRoleMutation = useMutation({
     mutationFn: adminService.updateUserRole,
     onSuccess: (result) => {
@@ -104,7 +100,6 @@ const UserManagementTab = () => {
     }
   });
 
-  // Reset form fields
   const resetForm = () => {
     setNewUserEmail("");
     setNewUserFirstName("");
@@ -113,7 +108,6 @@ const UserManagementTab = () => {
     setSelectedRole(UserRole.MEMBER);
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -133,12 +127,18 @@ const UserManagementTab = () => {
     }
   };
 
-  // Handle role change
-  const handleRoleChange = (userId: string, newRole: string) => {
+  const handleRoleChange = (userId: string, newRole: UserRole) => {
     updateRoleMutation.mutate({
       userId,
-      role: newRole as UserRole
+      role: newRole
     });
+  };
+
+  const getRoleDisplay = (role: UserRole | string) => {
+    if (typeof role === 'string') {
+      return role;
+    }
+    return UserRole[role];
   };
 
   return (
@@ -231,16 +231,16 @@ const UserManagementTab = () => {
                     <div className="grid gap-2">
                       <label htmlFor="role">Role</label>
                       <Select
-                        value={selectedRole}
-                        onValueChange={setSelectedRole}
+                        value={selectedRole.toString()}
+                        onValueChange={(value) => setSelectedRole(value as unknown as UserRole)}
                       >
                         <SelectTrigger id="role">
                           <SelectValue placeholder="Select role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
-                          <SelectItem value={UserRole.ORGANIZER}>Organizer</SelectItem>
-                          <SelectItem value={UserRole.MEMBER}>Member</SelectItem>
+                          <SelectItem value={UserRole.ADMIN.toString()}>Admin</SelectItem>
+                          <SelectItem value={UserRole.ORGANIZER.toString()}>Organizer</SelectItem>
+                          <SelectItem value={UserRole.MEMBER.toString()}>Member</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -335,14 +335,14 @@ const UserManagementTab = () => {
                               : "bg-muted"
                           }
                         >
-                          {user.role}
+                          {getRoleDisplay(user.role)}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Select 
-                            value={user.role} 
-                            onValueChange={(value) => handleRoleChange(user.id, value)}
+                            value={user.role.toString()} 
+                            onValueChange={(value) => handleRoleChange(user.id, parseInt(value) as UserRole)}
                             disabled={updateRoleMutation.isPending}
                           >
                             <SelectTrigger className="w-[130px]">
@@ -350,9 +350,9 @@ const UserManagementTab = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
-                              <SelectItem value={UserRole.ORGANIZER}>Organizer</SelectItem>
-                              <SelectItem value={UserRole.MEMBER}>Member</SelectItem>
+                              <SelectItem value={UserRole.ADMIN.toString()}>Admin</SelectItem>
+                              <SelectItem value={UserRole.ORGANIZER.toString()}>Organizer</SelectItem>
+                              <SelectItem value={UserRole.MEMBER.toString()}>Member</SelectItem>
                             </SelectContent>
                           </Select>
                           <Button variant="outline" size="icon">

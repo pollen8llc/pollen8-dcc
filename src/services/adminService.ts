@@ -110,7 +110,7 @@ export const createAdminAccount = async (
           data: {
             first_name: firstName,
             last_name: lastName,
-            role: UserRole.ADMIN // This won't be used for the profile update, but is stored in auth metadata
+            role: UserRole.ADMIN
           },
         },
       });
@@ -200,7 +200,7 @@ export const updateUserRole = async (
     }
     
     // If the user already has the same role, no need to update
-    if (existingRole && existingRole.role === role) {
+    if (existingRole && existingRole.role === role.toString()) {
       return {
         success: true,
         message: "User already has this role"
@@ -241,7 +241,7 @@ export const updateUserRole = async (
     
     return {
       success: true,
-      message: `User role updated to ${role} successfully`
+      message: `User role updated to ${UserRole[role]} successfully`
     };
   } catch (error: any) {
     console.error("Unexpected error updating user role:", error);

@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext } from "react";
-import { User } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -13,7 +13,7 @@ interface UserContextType {
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   setMockUser?: () => void;
-  setAdminUser?: () => void; // Add this function to allow setting the admin user
+  setAdminUser?: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -50,7 +50,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       logout: handleLogout,
       refreshUser,
       setMockUser,
-      setAdminUser // Add this to the provider
+      setAdminUser
     }}>
       {children}
     </UserContext.Provider>

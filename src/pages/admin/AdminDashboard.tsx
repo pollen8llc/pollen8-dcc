@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/contexts/UserContext";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Community } from "@/models/types";
+import { Community, UserRole } from "@/models/types";
 import * as communityService from "@/services/communityService";
 import * as adminService from "@/services/adminService";
 import { toast } from "@/hooks/use-toast";
@@ -63,7 +62,7 @@ const AdminDashboard = () => {
 
   // Check if user has permission to view this community
   useEffect(() => {
-    if (id && community && !isOrganizer(id) && currentUser?.role !== "ADMIN") {
+    if (id && community && !isOrganizer(id) && currentUser?.role !== UserRole.ADMIN) {
       navigate("/", { replace: true });
     }
   }, [id, community, isOrganizer, navigate, currentUser]);
@@ -77,7 +76,7 @@ const AdminDashboard = () => {
     }
   }, [activeTab, navigate, searchParams, id]);
 
-  const isAdmin = currentUser?.role === "ADMIN";
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   if (loadingCommunities || loadingCommunity) {
     return (

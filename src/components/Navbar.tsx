@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUser } from "@/contexts/UserContext";
 import { Shield, Library, UserCircle, Menu, User as UserIcon, FileText, Users, Settings } from "lucide-react";
+import { UserRole } from "@/models/types";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -20,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 
 const Navbar = () => {
   const { currentUser, isOrganizer, logout, setMockUser, setAdminUser } = useUser();
-  const isAdmin = currentUser?.role === "ADMIN";
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {

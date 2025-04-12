@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { User, UserRole } from "@/models/types";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 export const useAuth = () => {
@@ -51,17 +51,19 @@ export const useAuth = () => {
         .maybeSingle();
 
       // Extract communities and managed communities
-      const communities = memberData.map(m => m.community_id);
+      const communities = memberData?.map(m => m.community_id) || [];
       const managedCommunities = memberData
-        .filter(m => m.role === 'admin')
-        .map(m => m.community_id);
+        ?.filter(m => m.role === 'admin')
+        .map(m => m.community_id) || [];
 
-      // Create user object - Fix: Convert string role to UserRole enum value
-      const userData = {
+      // Create user object
+      const role = adminRole?.role === "ADMIN" ? UserRole.ADMIN : 
+                  (managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER);
+      
+      const userData: User = {
         id: userId,
         name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'User',
-        role: adminRole?.role === "ADMIN" ? UserRole.ADMIN : 
-              (managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER),
+        role: role,
         imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         email: profile?.email || "user@example.com",
         bio: "", // Using an empty string as default since bio doesn't exist in the profiles table
@@ -83,13 +85,13 @@ export const useAuth = () => {
     }
   };
 
-  // Create the mock user function for development purposes - will only be used if explicitly called
+  // Create the mock user function for development purposes
   const setMockUser = () => {
     console.log("Setting mock user");
     setCurrentUser({
       id: "25",
       name: "Jane Smith",
-      role: UserRole.ORGANIZER, // Fix: Use enum value instead of string
+      role: UserRole.ORGANIZER,
       imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3",
       email: "jane@example.com",
       bio: "Community organizer and advocate for sustainable practices.",
