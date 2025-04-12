@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/contexts/UserContext";
@@ -16,9 +16,11 @@ import NotFoundState from "@/components/community/NotFoundState";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || "overview";
   const { currentUser, isOrganizer, hasPermission } = useUser();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   // If no community ID is provided, fetch managed communities
   const { data: managedCommunities, isLoading: loadingCommunities } = useQuery({
@@ -36,10 +38,19 @@ const AdminDashboard = () => {
 
   // Check if user has permission to view this community
   useEffect(() => {
-    if (id && community && !isOrganizer(id)) {
+    if (id && community && !isOrganizer(id) && currentUser?.role !== "ADMIN") {
       navigate("/", { replace: true });
     }
-  }, [id, community, isOrganizer, navigate]);
+  }, [id, community, isOrganizer, navigate, currentUser]);
+
+  // Update URL when tab changes
+  useEffect(() => {
+    if (activeTab !== "overview" && !id) {
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set('tab', activeTab);
+      navigate({ search: newSearchParams.toString() }, { replace: true });
+    }
+  }, [activeTab, navigate, searchParams, id]);
 
   const isAdmin = currentUser?.role === "ADMIN";
 
@@ -59,7 +70,7 @@ const AdminDashboard = () => {
     return <NotFoundState />;
   }
 
-  // Show community selection if no ID is provided
+  // Show admin dashboard or community selection if no ID is provided
   if (!id) {
     return (
       <div className="min-h-screen">
@@ -69,26 +80,71 @@ const AdminDashboard = () => {
           
           {isAdmin && (
             <div className="mb-10">
-              <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => setActiveTab("users")}>
-                <CardHeader className="pb-2">
-                  <CardTitle>System Administration</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Manage users, roles and system-wide settings
-                  </p>
-                </CardContent>
-              </Card>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full mb-8 glass dark:glass-dark">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="users">User Management</TabsTrigger>
+                  <TabsTrigger value="settings">System Settings</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="overview">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>System Administration</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground mb-6">
+                        Welcome to the admin dashboard. Use the tabs above to manage users, roles, and system settings.
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => setActiveTab("users")}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">User Management</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-muted-foreground">
+                              Manage user accounts, assign roles and permissions
+                            </p>
+                          </CardContent>
+                        </Card>
+                        
+                        <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => setActiveTab("settings")}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">System Settings</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-muted-foreground">
+                              Configure global settings and system preferences
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-              {activeTab === "users" && (
-                <div className="mt-8">
+                <TabsContent value="users">
                   <UserManagementTab />
-                </div>
-              )}
+                </TabsContent>
+                
+                <TabsContent value="settings">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>System Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">
+                        System settings will be implemented in a future update.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </div>
           )}
           
-          {managedCommunities && managedCommunities.length > 0 ? (
+          {(isOrganizer() || isAdmin) && managedCommunities && managedCommunities.length > 0 && (
             <div>
               <h2 className="text-xl font-semibold mb-4">Select a community to manage:</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -120,7 +176,18 @@ const AdminDashboard = () => {
                 ))}
               </div>
             </div>
-          ) : (
+          )}
+          
+          {!isAdmin && !isOrganizer() && (
+            <div className="text-center py-12">
+              <h2 className="text-xl font-semibold mb-2">You don't have admin privileges</h2>
+              <p className="text-muted-foreground">
+                Contact an administrator if you believe you should have access to this page.
+              </p>
+            </div>
+          )}
+          
+          {(isOrganizer() || isAdmin) && (!managedCommunities || managedCommunities.length === 0) && (
             <div className="text-center py-12">
               <h2 className="text-xl font-semibold mb-2">You don't manage any communities yet</h2>
               <p className="text-muted-foreground">
@@ -133,6 +200,7 @@ const AdminDashboard = () => {
     );
   }
 
+  // If a community ID is provided, show community management dashboard
   return (
     <div className="min-h-screen">
       <Navbar />

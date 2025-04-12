@@ -3,20 +3,24 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUser } from "@/contexts/UserContext";
-import { Shield, Library, UserCircle, Menu, User as UserIcon, FileText } from "lucide-react";
+import { Shield, Library, UserCircle, Menu, User as UserIcon, FileText, Users, Settings } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuLabel, 
   DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 const Navbar = () => {
   const { currentUser, isOrganizer, logout } = useUser();
+  const isAdmin = currentUser?.role === "ADMIN";
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
@@ -65,6 +69,14 @@ const Navbar = () => {
                     Admin
                   </Link>
                 )}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
               </>
             )}
             <Link
@@ -102,6 +114,9 @@ const Navbar = () => {
                       <p className="text-xs leading-none text-muted-foreground">
                         {currentUser.email}
                       </p>
+                      {isAdmin && (
+                        <Badge className="mt-1 bg-blue-500 text-white w-fit">Admin</Badge>
+                      )}
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -128,7 +143,36 @@ const Navbar = () => {
                       <span>Documentation</span>
                     </Link>
                   </DropdownMenuItem>
-                  {isOrganizer() && (
+                  
+                  {/* Admin Menu */}
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
+                        Admin
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="cursor-pointer flex w-full items-center">
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Admin Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin?tab=users" className="cursor-pointer flex w-full items-center">
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>User Management</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin?tab=settings" className="cursor-pointer flex w-full items-center">
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>System Settings</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  {isOrganizer() && !isAdmin && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="cursor-pointer flex w-full items-center">
                         <Shield className="mr-2 h-4 w-4" />
