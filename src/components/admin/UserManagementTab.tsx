@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Table, TableBody, TableCaption, TableCell, 
@@ -45,7 +45,7 @@ const UserManagementTab = () => {
       user.email.toLowerCase().includes(searchLower) ||
       (typeof user.role === 'string' 
         ? user.role.toLowerCase().includes(searchLower)
-        : UserRole[user.role].toLowerCase().includes(searchLower))
+        : UserRole[user.role]?.toLowerCase().includes(searchLower) || '')
     );
   });
 
@@ -127,7 +127,9 @@ const UserManagementTab = () => {
     }
   };
 
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
+  const handleRoleChange = (userId: string, newRoleValue: string) => {
+    const newRole = Number(newRoleValue) as UserRole;
+    
     updateRoleMutation.mutate({
       userId,
       role: newRole
@@ -138,7 +140,7 @@ const UserManagementTab = () => {
     if (typeof role === 'string') {
       return role;
     }
-    return UserRole[role];
+    return UserRole[role] || 'Unknown';
   };
 
   return (
@@ -232,7 +234,7 @@ const UserManagementTab = () => {
                       <label htmlFor="role">Role</label>
                       <Select
                         value={selectedRole.toString()}
-                        onValueChange={(value) => setSelectedRole(value as unknown as UserRole)}
+                        onValueChange={(value) => setSelectedRole(Number(value) as UserRole)}
                       >
                         <SelectTrigger id="role">
                           <SelectValue placeholder="Select role" />
@@ -341,8 +343,8 @@ const UserManagementTab = () => {
                       <TableCell>
                         <div className="flex space-x-2">
                           <Select 
-                            value={user.role.toString()} 
-                            onValueChange={(value) => handleRoleChange(user.id, parseInt(value) as UserRole)}
+                            value={typeof user.role === 'number' ? user.role.toString() : '2'} 
+                            onValueChange={(value) => handleRoleChange(user.id, value)}
                             disabled={updateRoleMutation.isPending}
                           >
                             <SelectTrigger className="w-[130px]">

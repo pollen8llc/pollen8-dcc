@@ -4,13 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { User, UserRole } from "@/models/types";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 export const useAuth = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [session, setSession] = useState<Session | null>(null);
-  const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Admin user ID
   const ADMIN_USER_ID = "38a18dd6-4742-419b-b2c1-70dec5c51729";
@@ -74,11 +73,9 @@ export const useAuth = () => {
       console.log("User data fetched:", userData);
       setCurrentUser(userData);
       
-      // Redirect admin user to dashboard after login
+      // Store a flag if this is the admin user
       if (userId === ADMIN_USER_ID) {
-        setTimeout(() => {
-          navigate('/admin');
-        }, 0);
+        localStorage.setItem('shouldRedirectToAdmin', 'true');
       }
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
@@ -113,7 +110,7 @@ export const useAuth = () => {
       communities: [],
       managedCommunities: []
     });
-    navigate('/admin');
+    localStorage.setItem('shouldRedirectToAdmin', 'true');
   };
 
   // Refresh user data
@@ -198,6 +195,7 @@ export const useAuth = () => {
       await supabase.auth.signOut();
       setCurrentUser(null);
       setSession(null);
+      localStorage.removeItem('shouldRedirectToAdmin');
     } catch (error) {
       console.error("Error logging out:", error);
       throw error;
