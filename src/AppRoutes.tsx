@@ -2,6 +2,7 @@
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
+import { UserRole } from "@/models/types";
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import CommunityProfile from "./pages/CommunityProfile";
@@ -21,7 +22,7 @@ const AppRoutes = () => {
   useEffect(() => {
     const shouldRedirectToAdmin = localStorage.getItem('shouldRedirectToAdmin');
     
-    if (shouldRedirectToAdmin === 'true' && currentUser?.role === 0) {
+    if (shouldRedirectToAdmin === 'true' && currentUser?.role === UserRole.ADMIN) {
       navigate('/admin');
       localStorage.removeItem('shouldRedirectToAdmin');
     }
