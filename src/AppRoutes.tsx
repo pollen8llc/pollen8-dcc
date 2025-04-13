@@ -13,6 +13,9 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Auth from "./pages/Auth";
 import CreateAdminForm from "./components/admin/CreateAdminForm";
 import Documentation from "./pages/Documentation";
+import Onboarding from "./pages/Onboarding";
+import CreateCommunity from "./pages/CreateCommunity";
+import JoinCommunities from "./pages/JoinCommunities";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -32,6 +35,17 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/create-community" element={
+        <ProtectedRoute requiredRole="MEMBER">
+          <CreateCommunity />
+        </ProtectedRoute>
+      } />
+      <Route path="/communities/join" element={
+        <ProtectedRoute requiredRole="MEMBER">
+          <JoinCommunities />
+        </ProtectedRoute>
+      } />
       <Route path="/create-admin" element={<CreateAdminForm />} />
       <Route path="/community/:id" element={<CommunityProfile />} />
       <Route path="/documentation" element={<Documentation />} />

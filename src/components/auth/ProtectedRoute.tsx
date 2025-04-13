@@ -36,12 +36,32 @@ const ProtectedRoute = ({
 
   // Check if user has required role
   const roleEnum = UserRole[requiredRole as keyof typeof UserRole];
-  const hasRequiredRole = 
-    currentUser.role === UserRole.ADMIN || // Admins can access everything
-    currentUser.role === roleEnum ||
-    (roleEnum === UserRole.ORGANIZER && 
-     communityId && 
-     currentUser.managedCommunities?.includes(communityId));
+  
+  // Role validation based on hierarchy: ADMIN > ORGANIZER > MEMBER > GUEST
+  let hasRequiredRole = false;
+  
+  switch (roleEnum) {
+    case UserRole.ADMIN:
+      hasRequiredRole = currentUser.role === UserRole.ADMIN;
+      break;
+    
+    case UserRole.ORGANIZER:
+      hasRequiredRole = 
+        currentUser.role === UserRole.ADMIN || 
+        currentUser.role === UserRole.ORGANIZER ||
+        (communityId !== undefined && currentUser.managedCommunities?.includes(communityId));
+      break;
+    
+    case UserRole.MEMBER:
+      hasRequiredRole = 
+        currentUser.role === UserRole.ADMIN || 
+        currentUser.role === UserRole.ORGANIZER || 
+        currentUser.role === UserRole.MEMBER;
+      break;
+    
+    default:
+      hasRequiredRole = true; // GUEST role - everyone has access
+  }
 
   if (!hasRequiredRole) {
     // User does not have required permissions
