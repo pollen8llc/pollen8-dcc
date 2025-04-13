@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
 import { Separator } from "@/components/ui/separator";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -18,18 +20,24 @@ const Auth = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { currentUser } = useUser();
 
   // Redirect if already logged in
   if (currentUser) {
-    navigate("/");
+    const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
+    sessionStorage.removeItem('redirectAfterLogin');
+    navigate(redirectPath);
     return null;
   }
 
+  const clearError = () => setErrorMessage(null);
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError();
     setIsLoading(true);
 
     try {
@@ -39,24 +47,18 @@ const Auth = () => {
       });
 
       if (error) {
-        toast({
-          title: "Error signing in",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Successfully signed in",
-          description: "Welcome back!",
-        });
-        navigate("/");
+        setErrorMessage(error.message);
+        return;
       }
-    } catch (error: any) {
+
       toast({
-        title: "Error signing in",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
+        title: "Successfully signed in",
+        description: "Welcome back!",
       });
+      
+      // Navigate will happen automatically due to auth state change
+    } catch (error: any) {
+      setErrorMessage(error.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -64,6 +66,7 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError();
     setIsLoading(true);
 
     try {
@@ -79,24 +82,19 @@ const Auth = () => {
       });
 
       if (error) {
-        toast({
-          title: "Error signing up",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Successfully signed up",
-          description: "Please check your email to confirm your account.",
-        });
-        navigate("/");
+        setErrorMessage(error.message);
+        return;
       }
-    } catch (error: any) {
+
       toast({
-        title: "Error signing up",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
+        title: "Successfully signed up",
+        description: "Please check your email to confirm your account.",
       });
+      
+      // Navigate to home page, or wait for confirmation depending on settings
+      navigate("/");
+    } catch (error: any) {
+      setErrorMessage(error.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -106,11 +104,18 @@ const Auth = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Dot Connector Collective</h1>
+          <h1 className="text-2xl font-bold">ECO8</h1>
           <ThemeToggle />
         </div>
 
-        <Tabs defaultValue="signin" className="w-full">
+        {errorMessage && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <Tabs defaultValue="signin" className="w-full" onValueChange={clearError}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>

@@ -1,17 +1,24 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { User } from "@/models/types";
 import { useSession } from "./useSession";
 import { useProfile } from "./useProfile";
 import { useMockUsers } from "./useMockUsers";
 
 export const useAuth = () => {
+  // Core authentication with session management
   const { session, isLoading: sessionLoading, logout } = useSession();
-  const { currentUser, isLoading: profileLoading, refreshUser } = useProfile(session);
-  const { setMockUser, setAdminUser } = useMockUsers(user => setOverrideUser(user));
   
-  // This state allows us to override the current user (for mock users)
+  // Profile management with role determination
+  const { 
+    currentUser, 
+    isLoading: profileLoading, 
+    refreshUser 
+  } = useProfile(session);
+  
+  // Mock user functionality for development/testing
   const [overrideUser, setOverrideUser] = useState<User | null>(null);
+  const { setMockUser, setAdminUser } = useMockUsers(user => setOverrideUser(user));
   
   // The actual user is either the override user (if set) or the user from the profile
   const actualUser = overrideUser || currentUser;
@@ -19,12 +26,18 @@ export const useAuth = () => {
   // Combined loading state
   const isLoading = sessionLoading || profileLoading;
 
+  // Clear override user when logging out
+  const handleLogout = useCallback(async () => {
+    setOverrideUser(null);
+    await logout();
+  }, [logout]);
+
   return { 
     currentUser: actualUser, 
     isLoading, 
     session, 
     refreshUser, 
-    logout, 
+    logout: handleLogout, 
     setMockUser, 
     setAdminUser 
   };

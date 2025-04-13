@@ -2,27 +2,36 @@
 import { Navigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { UserRole } from "@/models/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: keyof typeof UserRole;
   communityId?: string;
+  fallback?: React.ReactNode;
 }
 
 const ProtectedRoute = ({ 
   children, 
   requiredRole = "MEMBER", 
-  communityId 
+  communityId,
+  fallback 
 }: ProtectedRouteProps) => {
-  const { currentUser, isLoading } = useUser();
+  const { currentUser, isLoading, hasPermission, isOrganizer } = useUser();
 
+  // Show custom loading state or default loading indicator
   if (isLoading) {
-    // Show loading state
+    if (fallback) return <>{fallback}</>;
+    
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-aquamarine mx-auto"></div>
-          <p className="mt-4 text-lg">Loading...</p>
+        <div className="w-full max-w-md space-y-4">
+          <Skeleton className="h-12 w-12 rounded-full mx-auto" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-3/4 mx-auto" />
+            <Skeleton className="h-4 w-1/2 mx-auto" />
+          </div>
+          <p className="text-center text-sm text-muted-foreground">Verifying permissions...</p>
         </div>
       </div>
     );
@@ -30,20 +39,25 @@ const ProtectedRoute = ({
 
   // Check if user is authenticated
   if (!currentUser) {
-    // Redirect to login page when implemented
-    return <Navigate to="/" replace />;
+    // Store the intended location for post-login redirect
+    // Could be enhanced with React Router's location state
+    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+    
+    // Redirect to login page
+    return <Navigate to="/auth" replace />;
   }
 
   // Check if user has required role
   const roleEnum = UserRole[requiredRole as keyof typeof UserRole];
-  const hasRequiredRole = 
+  
+  const hasRequiredPermission = 
     currentUser.role === UserRole.ADMIN || // Admins can access everything
     currentUser.role === roleEnum ||
     (roleEnum === UserRole.ORGANIZER && 
      communityId && 
-     currentUser.managedCommunities?.includes(communityId));
+     isOrganizer(communityId));
 
-  if (!hasRequiredRole) {
+  if (!hasRequiredPermission) {
     // User does not have required permissions
     return <Navigate to="/" replace />;
   }

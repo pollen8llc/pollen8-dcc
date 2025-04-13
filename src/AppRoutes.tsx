@@ -1,5 +1,5 @@
 
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { UserRole } from "@/models/types";
@@ -13,11 +13,24 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Auth from "./pages/Auth";
 import CreateAdminForm from "./components/admin/CreateAdminForm";
 import Documentation from "./pages/Documentation";
+import Navbar from "./components/Navbar";
 
 const AppRoutes = () => {
-  const { currentUser } = useUser();
+  const { currentUser, isLoading } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // Redirect to stored location after login (if any)
+  useEffect(() => {
+    if (currentUser && !isLoading) {
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        navigate(redirectPath);
+      }
+    }
+  }, [currentUser, isLoading, navigate]);
+  
   // Handle admin redirect after login
   useEffect(() => {
     const shouldRedirectToAdmin = localStorage.getItem('shouldRedirectToAdmin');
@@ -28,16 +41,24 @@ const AppRoutes = () => {
     }
   }, [currentUser, navigate]);
 
+  // Render layout with common components
+  const renderWithNavbar = (element: JSX.Element) => (
+    <>
+      <Navbar />
+      {element}
+    </>
+  );
+
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
+      <Route path="/" element={renderWithNavbar(<Index />)} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/create-admin" element={<CreateAdminForm />} />
-      <Route path="/community/:id" element={<CommunityProfile />} />
-      <Route path="/documentation" element={<Documentation />} />
+      <Route path="/community/:id" element={renderWithNavbar(<CommunityProfile />)} />
+      <Route path="/documentation" element={renderWithNavbar(<Documentation />)} />
       <Route path="/profile" element={
         <ProtectedRoute requiredRole="MEMBER">
-          <Profile />
+          {renderWithNavbar(<Profile />)}
         </ProtectedRoute>
       } />
       
@@ -46,7 +67,7 @@ const AppRoutes = () => {
         path="/admin" 
         element={
           <ProtectedRoute requiredRole="ORGANIZER">
-            <AdminDashboard />
+            {renderWithNavbar(<AdminDashboard />)}
           </ProtectedRoute>
         } 
       />
@@ -54,7 +75,7 @@ const AppRoutes = () => {
         path="/admin/community/:id" 
         element={
           <ProtectedRoute requiredRole="ORGANIZER">
-            <AdminDashboard />
+            {renderWithNavbar(<AdminDashboard />)}
           </ProtectedRoute>
         } 
       />
@@ -62,13 +83,13 @@ const AppRoutes = () => {
         path="/knowledge/:communityId" 
         element={
           <ProtectedRoute requiredRole="MEMBER">
-            <KnowledgeBase />
+            {renderWithNavbar(<KnowledgeBase />)}
           </ProtectedRoute>
         } 
       />
       
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-      <Route path="*" element={<NotFound />} />
+      {/* Catch-all route */}
+      <Route path="*" element={renderWithNavbar(<NotFound />)} />
     </Routes>
   );
 };
