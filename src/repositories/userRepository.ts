@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
-import { users as mockUsers } from "@/data/users";
 
 /**
  * Converts a database user to models/types User format
@@ -13,15 +12,26 @@ const mapDbUser = async (profile: any): Promise<User> => {
     .select('community_id, role')
     .eq('user_id', profile.id);
   
+  // Get admin role if exists
+  const { data: adminRole } = await supabase
+    .from('admin_roles')
+    .select('role')
+    .eq('user_id', profile.id)
+    .maybeSingle();
+  
   const communities = memberData?.map(m => m.community_id) || [];
   const managedCommunities = memberData
     ?.filter(m => m.role === 'admin')
     .map(m => m.community_id) || [];
   
+  // Determine user role
+  const role = adminRole?.role === "ADMIN" ? UserRole.ADMIN : 
+                (managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER);
+  
   return {
     id: profile.id,
     name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',
-    role: managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER,
+    role: role,
     imageUrl: profile.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
     email: profile.email,
     bio: "",
@@ -43,21 +53,13 @@ export const getUserById = async (id: string): Promise<User | null> => {
     
     if (error) {
       console.error("Error fetching user:", error);
-      const user = mockUsers.find(user => user.id === id);
-      return user ? {
-        ...user,
-        role: user.role === "ORGANIZER" ? UserRole.ORGANIZER : UserRole.MEMBER
-      } : null;
+      return null;
     }
     
     return await mapDbUser(profile);
   } catch (err) {
     console.error("Error in getUserById:", err);
-    const user = mockUsers.find(user => user.id === id);
-    return user ? {
-      ...user,
-      role: user.role === "ORGANIZER" ? UserRole.ORGANIZER : UserRole.MEMBER
-    } : null;
+    return null;
   }
 };
 
@@ -77,29 +79,17 @@ export const getCommunityOrganizers = async (communityId: string): Promise<User[
     
     if (error) {
       console.error("Error fetching community organizers:", error);
-      const community = mockCommunities.find(c => c.id === communityId);
-      if (!community) return [];
-      
-      return mockUsers
-        .filter(user => community.organizerIds.includes(user.id))
-        .map(user => ({
-          ...user,
-          role: UserRole.ORGANIZER
-        }));
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      return [];
     }
     
     return await Promise.all(data.map(item => mapDbUser(item.profiles)));
   } catch (err) {
     console.error("Error in getCommunityOrganizers:", err);
-    const community = mockCommunities.find(c => c.id === communityId);
-    if (!community) return [];
-    
-    return mockUsers
-      .filter(user => community.organizerIds.includes(user.id))
-      .map(user => ({
-        ...user,
-        role: UserRole.ORGANIZER
-      }));
+    return [];
   }
 };
 
@@ -119,34 +109,19 @@ export const getCommunityMembers = async (communityId: string): Promise<User[]> 
     
     if (error) {
       console.error("Error fetching community members:", error);
-      const community = mockCommunities.find(c => c.id === communityId);
-      if (!community) return [];
-      
-      return mockUsers
-        .filter(user => community.memberIds.includes(user.id))
-        .map(user => ({
-          ...user,
-          role: UserRole.MEMBER
-        }));
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      return [];
     }
     
     return await Promise.all(data.map(item => mapDbUser(item.profiles)));
   } catch (err) {
     console.error("Error in getCommunityMembers:", err);
-    const community = mockCommunities.find(c => c.id === communityId);
-    if (!community) return [];
-    
-    return mockUsers
-      .filter(user => community.memberIds.includes(user.id))
-      .map(user => ({
-        ...user,
-        role: UserRole.MEMBER
-      }));
+    return [];
   }
 };
-
-// Import at the top of the file
-import { communities as mockCommunities } from "@/data/communities";
 
 /**
  * Update user profile

@@ -5,8 +5,7 @@ import { User, UserRole } from "@/models/types";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 
-// Admin user ID
-const ADMIN_USER_ID = "38a18dd6-4742-419b-b2c1-70dec5c51729";
+// Admin user ID is no longer needed as we'll check from the admin_roles table
 
 export const useProfile = (session: Session | null) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -54,7 +53,7 @@ export const useProfile = (session: Session | null) => {
         ?.filter(m => m.role === 'admin')
         .map(m => m.community_id) || [];
 
-      // Create user object
+      // Create user object - determine role based on database information
       const role = adminRole?.role === "ADMIN" ? UserRole.ADMIN : 
                   (managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER);
       
@@ -71,11 +70,6 @@ export const useProfile = (session: Session | null) => {
 
       console.log("User data fetched:", userData);
       setCurrentUser(userData);
-      
-      // Store a flag if this is the admin user
-      if (userId === ADMIN_USER_ID) {
-        localStorage.setItem('shouldRedirectToAdmin', 'true');
-      }
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
     }
@@ -126,5 +120,5 @@ export const useProfile = (session: Session | null) => {
     }
   };
 
-  return { currentUser, isLoading: isLoading, refreshUser, fetchUserProfile };
+  return { currentUser, isLoading, refreshUser, fetchUserProfile };
 };

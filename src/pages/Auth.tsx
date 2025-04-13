@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,12 +20,25 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { currentUser } = useUser();
+  const { currentUser, isLoading: userLoading } = useUser();
 
-  // Redirect if already logged in
-  if (currentUser) {
-    navigate("/");
-    return null;
+  // Check if user is authenticated and redirect if needed
+  useEffect(() => {
+    if (currentUser && !userLoading) {
+      navigate("/");
+    }
+  }, [currentUser, userLoading, navigate]);
+
+  // If still loading user status, show loading state
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-aquamarine mx-auto"></div>
+          <p className="mt-4 text-lg">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -64,6 +77,16 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password || !firstName || !lastName) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all fields to sign up.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -89,6 +112,7 @@ const Auth = () => {
           title: "Successfully signed up",
           description: "Please check your email to confirm your account.",
         });
+        // We'll still navigate to home, the user will be prompted to confirm their email
         navigate("/");
       }
     } catch (error: any) {

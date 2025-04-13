@@ -11,11 +11,21 @@ export const useSession = () => {
 
   // Check for existing session on mount and subscribe to auth changes
   useEffect(() => {
+    setIsLoading(true);
+    
+    // Set up auth state listener FIRST to prevent missing auth events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state changed:", event, session ? "Has session" : "No session");
+        setSession(session);
+        setIsLoading(false);
+      }
+    );
+    
+    // THEN check for existing session
     const fetchInitialSession = async () => {
-      setIsLoading(true);
-      console.log("Initializing auth state...");
-      
       try {
+        console.log("Initializing auth state...");
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Initial session:", session ? "Session exists" : "No session");
         setSession(session);
@@ -26,15 +36,6 @@ export const useSession = () => {
         setIsLoading(false);
       }
     };
-
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Auth state changed:", event, session ? "Has session" : "No session");
-        setSession(session);
-        setIsLoading(false);
-      }
-    );
 
     fetchInitialSession();
 

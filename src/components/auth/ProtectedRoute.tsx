@@ -30,8 +30,8 @@ const ProtectedRoute = ({
 
   // Check if user is authenticated
   if (!currentUser) {
-    // Redirect to login page when implemented
-    return <Navigate to="/" replace />;
+    // Redirect to login page
+    return <Navigate to="/auth" replace />;
   }
 
   // Check if user has required role
