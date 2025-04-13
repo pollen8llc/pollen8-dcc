@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useCallback } from "react";
+import React, { createContext, useContext } from "react";
 import { User, UserRole } from "@/models/types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,7 +24,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   // Wrap logout to add toast notifications
-  const handleLogout = useCallback(async (): Promise<void> => {
+  const handleLogout = async (): Promise<void> => {
     try {
       await logout();
       toast({
@@ -39,7 +39,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: "destructive",
       });
     }
-  }, [logout, toast]);
+  };
 
   return (
     <UserContext.Provider value={{ 
