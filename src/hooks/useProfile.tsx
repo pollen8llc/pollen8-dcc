@@ -80,7 +80,7 @@ export const useProfile = (session: Session | null) => {
         role: role,
         imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         email: profile?.email || "user@example.com",
-        bio: profile?.bio || "",
+        bio: "", // Provide a default empty string as bio isn't in the profiles table
         communities,
         managedCommunities
       };
