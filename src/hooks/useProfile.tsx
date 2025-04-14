@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
@@ -15,8 +14,8 @@ export const useProfile = (session: Session | null) => {
     try {
       console.log("Fetching profile for user ID:", userId);
       
-      // Get profile data
-      const { data: profile, error: profileError } = await supabase
+      // Use let instead of const to allow reassignment
+      let { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -42,6 +41,7 @@ export const useProfile = (session: Session | null) => {
               throw createError;
             }
             
+            // Reassign profile to newProfile
             profile = newProfile;
           } else {
             throw new Error("Cannot create profile: User data not available");
@@ -53,8 +53,8 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Profile fetched:", profile);
 
-      // Get user's communities and roles
-      const { data: memberData, error: memberError } = await supabase
+      // Use let instead of const to allow reassignment
+      let { data: memberData, error: memberError } = await supabase
         .from('community_members')
         .select('community_id, role')
         .eq('user_id', userId);
