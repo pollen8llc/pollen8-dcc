@@ -55,11 +55,11 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Protected routes */}
+      {/* Admin routes */}
       <Route 
         path="/admin" 
         element={
-          <ProtectedRoute requiredRole="ORGANIZER">
+          <ProtectedRoute requiredRole="ADMIN">
             <AdminDashboard />
           </ProtectedRoute>
         } 

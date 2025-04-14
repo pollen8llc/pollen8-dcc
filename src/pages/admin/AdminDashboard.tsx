@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -8,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Community, UserRole } from "@/models/types";
 import * as communityService from "@/services/communityService";
 import * as adminService from "@/services/adminService";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import AdminMembersTab from "@/components/admin/AdminMembersTab";
 import AdminSettingsTab from "@/components/admin/AdminSettingsTab";
 import AdminStatsTab from "@/components/admin/AdminStatsTab";
@@ -22,6 +23,7 @@ const AdminDashboard = () => {
   const { currentUser, isOrganizer, hasPermission } = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
+  const { toast } = useToast();
 
   // Ensure admin role for the specific user
   useEffect(() => {

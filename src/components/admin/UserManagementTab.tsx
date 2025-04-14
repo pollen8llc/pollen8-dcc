@@ -1,382 +1,248 @@
 
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Card, 
   CardContent, 
+  CardDescription, 
   CardHeader, 
-  CardTitle, 
-  CardDescription 
+  CardTitle 
 } from "@/components/ui/card";
-import { 
-  Table, 
-  TableHeader, 
-  TableRow, 
-  TableHead, 
-  TableBody, 
-  TableCell 
-} from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, UserRole } from "@/models/types";
-import { updateUserRole, getAllUsers } from "@/services/adminService";
-import { useToast } from "@/hooks/use-toast";
-import { UserCircle, Search, Plus, MoreVertical, Edit, Trash, ShieldAlert } from "lucide-react";
+import UserManagementTable from "./UserManagementTable";
+import * as adminService from "@/services/adminService";
 import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { RefreshCw, UserPlus } from "lucide-react";
 
 const UserManagementTab = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const queryClient = useQueryClient();
   const { toast } = useToast();
-  
-  const usersPerPage = 10;
-  
-  // Get role name as a string for display
-  const getRoleName = (role: UserRole): string => {
-    switch(role) {
-      case UserRole.ADMIN:
-        return "Admin";
-      case UserRole.ORGANIZER:
-        return "Organizer";
-      case UserRole.MEMBER:
-        return "Member";
-      default:
-        return "Unknown";
-    }
-  };
-  
-  // Load users
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        setIsLoading(true);
-        const fetchedUsers = await getAllUsers();
-        setUsers(fetchedUsers);
-      } catch (error) {
-        console.error("Failed to load users:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load users. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadUsers();
-  }, [toast]);
-  
-  // Filter and paginate users
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * usersPerPage,
-    currentPage * usersPerPage
-  );
-  
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-  
-  // Handle changing user role
-  const handleRoleUpdate = async () => {
-    if (!selectedUser || !selectedRole) return;
-    
-    try {
-      // Convert selectedRole string to UserRole enum
-      let newRole: UserRole;
-      
-      if (selectedRole === "ADMIN") {
-        newRole = UserRole.ADMIN;
-      } else if (selectedRole === "ORGANIZER") {
-        newRole = UserRole.ORGANIZER;
-      } else {
-        newRole = UserRole.MEMBER;
-      }
-      
-      const result = await updateUserRole({ 
-        userId: selectedUser.id, 
-        role: newRole 
-      });
-      
-      if (result.success) {
-        // Update the user in the local state
-        setUsers(prevUsers => 
-          prevUsers.map(user => 
-            user.id === selectedUser.id ? { ...user, role: newRole } : user
-          )
-        );
-        
+
+  // Fetch all users
+  const { data: users = [], isLoading, refetch } = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: adminService.getAllUsers
+  });
+
+  // Mutation for updating user roles
+  const updateRoleMutation = useMutation({
+    mutationFn: (variables: { userId: string; role: UserRole }) => 
+      adminService.updateUserRole(variables),
+    onSuccess: (data) => {
+      if (data.success) {
+        // Invalidate the users query to refetch updated data
+        queryClient.invalidateQueries({ queryKey: ['admin-users'] });
         toast({
           title: "Success",
-          description: result.message,
+          description: data.message,
         });
       } else {
         toast({
           title: "Error",
-          description: result.message,
+          description: data.message,
           variant: "destructive",
         });
       }
-    } catch (error) {
-      console.error("Error updating user role:", error);
+    },
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to update user role. Please try again.",
+        description: error.message || "Failed to update user role",
         variant: "destructive",
       });
-    } finally {
-      setIsRoleDialogOpen(false);
-      setSelectedUser(null);
-      setSelectedRole("");
     }
+  });
+
+  // Handle role update
+  const handleUpdateRole = async (userId: string, role: UserRole) => {
+    await updateRoleMutation.mutateAsync({ userId, role });
   };
-  
-  // Open role change dialog
-  const openRoleDialog = (user: User) => {
+
+  // Handle viewing user details
+  const handleViewUserDetails = (user: User) => {
     setSelectedUser(user);
-    // Convert the UserRole enum to string for the select component
-    const roleString = user.role === UserRole.ADMIN ? "ADMIN" : 
-                      user.role === UserRole.ORGANIZER ? "ORGANIZER" : "MEMBER";
-    setSelectedRole(roleString);
-    setIsRoleDialogOpen(true);
+    setShowUserDetails(true);
   };
-  
-  // Generate initials from name
-  const getInitials = (name: string) => {
-    const names = name.split(' ');
-    if (names.length >= 2) {
-      return `${names[0][0]}${names[1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-  
-  // Get badge color based on role
-  const getRoleBadgeColor = (role: UserRole) => {
-    switch(role) {
-      case UserRole.ADMIN:
-        return "bg-blue-500";
-      case UserRole.ORGANIZER:
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-  
+
+  // Stats
+  const adminCount = users.filter(user => user.role === UserRole.ADMIN).length;
+  const organizerCount = users.filter(user => user.role === UserRole.ORGANIZER).length;
+  const memberCount = users.filter(user => user.role === UserRole.MEMBER).length;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <div>User Management</div>
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Add User
-          </Button>
-        </CardTitle>
-        <CardDescription>
-          Manage user accounts and roles
-        </CardDescription>
-        <div className="flex justify-between items-center mt-2">
-          <div className="relative w-64">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search users..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold">User Management</h2>
+          <p className="text-muted-foreground">
+            Manage user accounts and permissions
+          </p>
         </div>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center items-center h-40">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : (
-          <>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedUsers.length > 0 ? (
-                    paginatedUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={user.imageUrl} alt={user.name} />
-                              <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">{user.name}</div>
-                              <div className="text-xs text-muted-foreground">ID: {user.id.substring(0, 8)}...</div>
-                            </div>
+        <div className="flex items-center space-x-2 mt-4 sm:mt-0">
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            disabled={isLoading}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+          <Button>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add User
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Total Users</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{users.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">All active accounts</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Administrators</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{adminCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">With full system access</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Organizers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{organizerCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">Community managers</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>User Accounts</CardTitle>
+          <CardDescription>
+            View and manage all user accounts in the system
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UserManagementTable
+            users={users}
+            isLoading={isLoading}
+            onUpdateRole={handleUpdateRole}
+            onViewUserDetails={handleViewUserDetails}
+          />
+        </CardContent>
+      </Card>
+
+      {/* User details dialog */}
+      {selectedUser && (
+        <Dialog open={showUserDetails} onOpenChange={setShowUserDetails}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>User Details</DialogTitle>
+              <DialogDescription>
+                Detailed information about {selectedUser.name}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <Tabs defaultValue="details">
+                <TabsList className="w-full">
+                  <TabsTrigger value="details">User Details</TabsTrigger>
+                  <TabsTrigger value="communities">Communities</TabsTrigger>
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="details" className="space-y-4 pt-4">
+                  <div className="flex items-center space-x-4">
+                    <img 
+                      src={selectedUser.imageUrl} 
+                      alt={selectedUser.name}
+                      className="h-20 w-20 rounded-full" 
+                    />
+                    <div>
+                      <h3 className="text-xl font-bold">{selectedUser.name}</h3>
+                      <p className="text-muted-foreground">{selectedUser.email}</p>
+                      <div className="mt-1">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          selectedUser.role === UserRole.ADMIN 
+                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
+                            : selectedUser.role === UserRole.ORGANIZER
+                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
+                              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
+                        }`}>
+                          {UserRole[selectedUser.role]}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground">User ID</h4>
+                      <p className="text-sm font-mono break-all">{selectedUser.id}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-muted-foreground">Joined</h4>
+                      <p className="text-sm">{selectedUser.createdAt 
+                        ? new Date(selectedUser.createdAt).toLocaleDateString() 
+                        : "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="communities" className="pt-4">
+                  <h3 className="text-lg font-medium mb-2">Community Memberships</h3>
+                  {selectedUser.communities && selectedUser.communities.length > 0 ? (
+                    <ul className="space-y-2">
+                      {selectedUser.communities.map(communityId => (
+                        <li key={communityId} className="p-2 border rounded">
+                          <div className="flex justify-between items-center">
+                            <span>{communityId}</span>
+                            {selectedUser.managedCommunities?.includes(communityId) && (
+                              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded dark:bg-blue-900 dark:text-blue-100">
+                                Organizer
+                              </span>
+                            )}
                           </div>
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge className={`${getRoleBadgeColor(user.role)} text-white`}>
-                            {getRoleName(user.role)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                                <span className="sr-only">Actions</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openRoleDialog(user)} className="cursor-pointer">
-                                <ShieldAlert className="mr-2 h-4 w-4" />
-                                Change Role
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="cursor-pointer">
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="cursor-pointer text-destructive">
-                                <Trash className="mr-2 h-4 w-4" />
-                                Delete User
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                        </li>
+                      ))}
+                    </ul>
                   ) : (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                        No users found matching your search.
-                      </TableCell>
-                    </TableRow>
+                    <p className="text-muted-foreground">User is not a member of any communities.</p>
                   )}
-                </TableBody>
-              </Table>
+                </TabsContent>
+                
+                <TabsContent value="activity" className="pt-4">
+                  <p className="text-muted-foreground">User activity history will be available in a future update.</p>
+                </TabsContent>
+              </Tabs>
             </div>
-            
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} 
-                    />
-                  </PaginationItem>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <PaginationItem key={page}>
-                      <PaginationLink 
-                        onClick={() => setCurrentPage(page)}
-                        isActive={currentPage === page}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </>
-        )}
-      </CardContent>
-      
-      {/* Role Change Dialog */}
-      <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change User Role</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4 py-4">
-            {selectedUser && (
-              <div className="flex items-center gap-3 mb-4">
-                <Avatar>
-                  <AvatarImage src={selectedUser.imageUrl} alt={selectedUser.name} />
-                  <AvatarFallback>{getInitials(selectedUser.name)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-medium">{selectedUser.name}</div>
-                  <div className="text-xs text-muted-foreground">{selectedUser.email}</div>
-                </div>
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <label htmlFor="role" className="text-sm font-medium">
-                Select Role
-              </label>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
-                  <SelectItem value="ORGANIZER">Organizer</SelectItem>
-                  <SelectItem value="MEMBER">Member</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <div className="text-xs text-muted-foreground mt-2">
-                <strong>Admin:</strong> Full system access including user management
-                <br />
-                <strong>Organizer:</strong> Can manage communities they create
-                <br />
-                <strong>Member:</strong> Standard user with basic permissions
-              </div>
-            </div>
-            
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setIsRoleDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleRoleUpdate}>
-                Save Changes
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </Card>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
   );
 };
 
