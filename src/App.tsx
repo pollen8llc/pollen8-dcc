@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { UserProvider } from "@/contexts/UserContext";
 import AppRoutes from "./AppRoutes";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Create a new query client with increased stale time for better performance
 const queryClient = new QueryClient({
@@ -13,6 +14,7 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 60000, // 1 minute
       retry: 1,
+      refetchOnWindowFocus: false
     },
   },
 });
@@ -23,9 +25,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <UserProvider>
-          <AppRoutes />
-        </UserProvider>
+        <ErrorBoundary>
+          <UserProvider>
+            <AppRoutes />
+          </UserProvider>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

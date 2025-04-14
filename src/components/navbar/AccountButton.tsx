@@ -41,7 +41,11 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
   };
 
   const handleLogout = async () => {
-    await logout();
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   return (
@@ -56,9 +60,9 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
               </Avatar>
               <span className="hidden md:inline-block text-sm font-medium">
                 {currentUser.name} 
-                {currentUser.role === UserRole.ADMIN && <span className="ml-1 text-blue-500">(Admin)</span>}
-                {currentUser.role === UserRole.ORGANIZER && <span className="ml-1 text-green-500">(Organizer)</span>}
-                {currentUser.role === UserRole.MEMBER && <span className="ml-1">(Member)</span>}
+                {isAdmin && <span className="ml-1 text-blue-500">(Admin)</span>}
+                {currentUser.role === UserRole.ORGANIZER && !isAdmin && <span className="ml-1 text-green-500">(Organizer)</span>}
+                {currentUser.role === UserRole.MEMBER && !isAdmin && !currentUser.managedCommunities?.length && <span className="ml-1">(Member)</span>}
               </span>
             </>
           ) : (
@@ -128,7 +132,10 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
             )}
             
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+            <DropdownMenuItem 
+              onClick={handleLogout} 
+              className="cursor-pointer text-red-500 hover:text-red-600 font-medium"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

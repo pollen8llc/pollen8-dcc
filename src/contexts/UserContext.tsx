@@ -1,9 +1,11 @@
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { User, UserRole } from "@/models/types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 interface UserContextType {
   currentUser: User | null;
@@ -17,18 +19,31 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser, isLoading, logout, refreshUser } = useAuth();
+  const { currentUser, isLoading, logout: authLogout, refreshUser } = useAuth();
   const { hasPermission, isOrganizer } = usePermissions(currentUser);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("UserContext rendering, current user:", currentUser?.name, "role:", currentUser?.role);
+  }, [currentUser]);
 
   // Wrap logout to add toast notifications
   const handleLogout = async (): Promise<void> => {
     try {
-      await logout();
+      // Clear any React Query caches
+      queryClient.clear();
+      
+      await authLogout();
+      
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account",
       });
+      
+      // Redirect to home page after logout
+      navigate("/auth");
     } catch (error) {
       console.error("Error logging out:", error);
       toast({

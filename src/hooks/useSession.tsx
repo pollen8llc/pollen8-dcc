@@ -15,9 +15,14 @@ export const useSession = () => {
     
     // Set up auth state listener FIRST to prevent missing auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Auth state changed:", event, session ? "Has session" : "No session");
-        setSession(session);
+      (event, newSession) => {
+        console.log("Auth state changed:", event, newSession ? "Has session" : "No session");
+        if (event === 'SIGNED_OUT') {
+          console.log("User signed out, clearing session");
+          setSession(null);
+        } else {
+          setSession(newSession);
+        }
         setIsLoading(false);
       }
     );
@@ -26,9 +31,9 @@ export const useSession = () => {
     const fetchInitialSession = async () => {
       try {
         console.log("Initializing auth state...");
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log("Initial session:", session ? "Session exists" : "No session");
-        setSession(session);
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        console.log("Initial session:", initialSession ? "Session exists" : "No session");
+        setSession(initialSession);
       } catch (error) {
         console.error("Error fetching session:", error);
         setSession(null);
@@ -48,9 +53,22 @@ export const useSession = () => {
   // Logout user
   const logout = async (): Promise<void> => {
     try {
-      await supabase.auth.signOut();
+      console.log("Logging out user...");
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      
+      console.log("User logged out successfully");
       setSession(null);
       localStorage.removeItem('shouldRedirectToAdmin');
+      
+      // Clear any cached data in localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('app-cache-')) {
+          localStorage.removeItem(key);
+        }
+      });
     } catch (error) {
       console.error("Error logging out:", error);
       throw error;

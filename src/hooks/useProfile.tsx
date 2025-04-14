@@ -24,8 +24,34 @@ export const useProfile = (session: Session | null) => {
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
-        throw profileError;
+        // Check if profile doesn't exist
+        if (profileError.code === 'PGRST116') {
+          console.log("Profile not found, creating new profile");
+          // Attempt to create a profile
+          const authUser = await supabase.auth.getUser();
+          if (authUser.data?.user) {
+            const { data: newProfile, error: createError } = await supabase.from('profiles').insert({
+              id: userId,
+              email: authUser.data.user.email,
+              first_name: authUser.data.user.user_metadata?.first_name || '',
+              last_name: authUser.data.user.user_metadata?.last_name || ''
+            }).select('*').single();
+            
+            if (createError) {
+              console.error("Error creating profile:", createError);
+              throw createError;
+            }
+            
+            profile = newProfile;
+          } else {
+            throw new Error("Cannot create profile: User data not available");
+          }
+        } else {
+          throw profileError;
+        }
       }
+
+      console.log("Profile fetched:", profile);
 
       // Get user's communities and roles
       const { data: memberData, error: memberError } = await supabase
@@ -35,7 +61,8 @@ export const useProfile = (session: Session | null) => {
 
       if (memberError) {
         console.error("Error fetching community memberships:", memberError);
-        throw memberError;
+        // Continue with empty memberships rather than failing
+        memberData = [];
       }
 
       // Get admin role if exists
@@ -47,8 +74,10 @@ export const useProfile = (session: Session | null) => {
 
       if (adminError) {
         console.error("Error fetching admin role:", adminError);
-        throw adminError;
+        // Continue with no admin role rather than failing
       }
+
+      console.log("Admin role fetched:", adminRole);
 
       // Extract communities and managed communities
       const communities = memberData?.map(m => m.community_id) || [];
@@ -72,7 +101,6 @@ export const useProfile = (session: Session | null) => {
       else if (communities.length > 0) {
         role = UserRole.MEMBER;
       }
-      // 4. If no communities and not admin, they're still a MEMBER (registered user)
       
       const userData: User = {
         id: userId,
@@ -86,7 +114,7 @@ export const useProfile = (session: Session | null) => {
         createdAt: profile?.created_at || new Date().toISOString()
       };
 
-      console.log("User data fetched:", userData);
+      console.log("User data constructed:", userData);
       setCurrentUser(userData);
       return userData;
     } catch (error) {
@@ -111,7 +139,7 @@ export const useProfile = (session: Session | null) => {
         setCurrentUser(null);
         toast({
           title: "Error loading profile",
-          description: "There was a problem loading your profile data.",
+          description: "There was a problem loading your profile data. Please try logging out and in again.",
           variant: "destructive",
         });
       } finally {
@@ -137,7 +165,7 @@ export const useProfile = (session: Session | null) => {
       console.error("Error refreshing user data:", error);
       toast({
         title: "Error refreshing profile",
-        description: "There was a problem loading your profile data.",
+        description: "There was a problem loading your profile data. Please try logging out and in again.",
         variant: "destructive",
       });
     } finally {
