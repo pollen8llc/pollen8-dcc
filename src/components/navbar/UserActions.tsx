@@ -2,7 +2,7 @@
 import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
 import UserBadge from "./UserBadge";
-import UserMenuDropdown from "./UserMenuDropdown";
+import AccountButton from "./AccountButton";
 
 interface UserActionsProps {
   currentUser: User;
@@ -16,10 +16,9 @@ const UserActions = ({ currentUser, isOrganizer, logout }: UserActionsProps) => 
   return (
     <div className="flex items-center gap-2">
       <UserBadge currentUser={currentUser} isAdmin={isAdmin} />
-      <UserMenuDropdown 
+      <AccountButton 
         currentUser={currentUser} 
         isAdmin={isAdmin} 
-        isOrganizer={isOrganizer} 
         logout={logout} 
       />
     </div>
