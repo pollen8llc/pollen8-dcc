@@ -10,6 +10,19 @@ interface MemberCardProps {
 }
 
 const MemberCard = ({ member, onClick }: MemberCardProps) => {
+  const getBadgeColorClass = (role: UserRole): string => {
+    switch (role) {
+      case UserRole.ADMIN:
+        return "bg-purple-500 text-white";
+      case UserRole.ORGANIZER:
+        return "bg-blue-500 text-white";
+      case UserRole.MEMBER:
+        return "bg-green-500 text-white";
+      default:
+        return "bg-muted text-muted-foreground";
+    }
+  };
+
   return (
     <div 
       className="glass dark:glass-dark rounded-xl overflow-hidden border border-border/40 cursor-pointer transition-all duration-300 hover:shadow-md transform hover:translate-y-[-2px]"
@@ -26,16 +39,8 @@ const MemberCard = ({ member, onClick }: MemberCardProps) => {
         </div>
         <div className="sm:ml-4 text-center sm:text-left flex-grow">
           <h3 className="font-medium">{member.name}</h3>
-          <Badge 
-            className={`mt-1 ${
-              member.role === UserRole.ORGANIZER 
-                ? "bg-aquamarine text-primary-foreground" 
-                : member.role === UserRole.ADMIN
-                  ? "bg-purple-500 text-white"
-                  : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {member.role}
+          <Badge className={`mt-1 ${getBadgeColorClass(member.role)}`}>
+            {UserRole[member.role]}
           </Badge>
           <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
             {member.bio}

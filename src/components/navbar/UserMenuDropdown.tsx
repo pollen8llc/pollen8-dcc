@@ -41,6 +41,36 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
     return nameParts[0][0].toUpperCase();
   };
 
+  const getBadgeColor = () => {
+    if (isAdmin) {
+      return "bg-purple-500";
+    }
+    
+    switch (currentUser.role) {
+      case UserRole.ORGANIZER:
+        return "bg-blue-500";
+      case UserRole.MEMBER:
+        return "bg-green-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getBadgeText = () => {
+    if (isAdmin) {
+      return "Admin";
+    }
+    
+    switch (currentUser.role) {
+      case UserRole.ORGANIZER:
+        return "Organizer";
+      case UserRole.MEMBER:
+        return "Member";
+      default:
+        return "Guest";
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -58,9 +88,9 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
             <p className="text-xs leading-none text-muted-foreground">
               {currentUser.email}
             </p>
-            {isAdmin && (
-              <Badge className="mt-1 bg-blue-500 text-white w-fit">Admin</Badge>
-            )}
+            <Badge className={`mt-1 ${getBadgeColor()} text-white w-fit`}>
+              {getBadgeText()}
+            </Badge>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -120,7 +150,7 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
           <DropdownMenuItem asChild>
             <Link to="/admin" className="cursor-pointer flex w-full items-center">
               <Shield className="mr-2 h-4 w-4" />
-              <span>Admin</span>
+              <span>Community Management</span>
             </Link>
           </DropdownMenuItem>
         )}

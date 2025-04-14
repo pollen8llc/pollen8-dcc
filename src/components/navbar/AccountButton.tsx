@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { User, UserRole } from "@/models/types";
 import { 
@@ -29,7 +28,6 @@ interface AccountButtonProps {
 }
 
 const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => {
-  // Get user initials for avatar fallback
   const getUserInitials = () => {
     if (!currentUser) return "?";
     
@@ -48,6 +46,40 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
     }
   };
 
+  const getBadgeColor = () => {
+    if (isAdmin) {
+      return "bg-purple-500";
+    }
+    
+    if (!currentUser) return "bg-gray-500";
+    
+    switch (currentUser.role) {
+      case UserRole.ORGANIZER:
+        return "bg-blue-500";
+      case UserRole.MEMBER:
+        return "bg-green-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getBadgeText = () => {
+    if (isAdmin) {
+      return "Admin";
+    }
+    
+    if (!currentUser) return "Guest";
+    
+    switch (currentUser.role) {
+      case UserRole.ORGANIZER:
+        return "Organizer";
+      case UserRole.MEMBER:
+        return "Member";
+      default:
+        return "Guest";
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -60,9 +92,9 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
               </Avatar>
               <span className="hidden md:inline-block text-sm font-medium">
                 {currentUser.name} 
-                {isAdmin && <span className="ml-1 text-blue-500">(Admin)</span>}
-                {currentUser.role === UserRole.ORGANIZER && !isAdmin && <span className="ml-1 text-green-500">(Organizer)</span>}
-                {currentUser.role === UserRole.MEMBER && !isAdmin && !currentUser.managedCommunities?.length && <span className="ml-1">(Member)</span>}
+                {isAdmin && <span className="ml-1 text-purple-500">(Admin)</span>}
+                {currentUser.role === UserRole.ORGANIZER && !isAdmin && <span className="ml-1 text-blue-500">(Organizer)</span>}
+                {currentUser.role === UserRole.MEMBER && !isAdmin && !currentUser.managedCommunities?.length && <span className="ml-1 text-green-500">(Member)</span>}
               </span>
             </>
           ) : (
@@ -82,15 +114,9 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
                 <p className="text-xs leading-none text-muted-foreground">
                   {currentUser.email}
                 </p>
-                {isAdmin && (
-                  <Badge className="mt-1 bg-blue-500 text-white w-fit">Admin</Badge>
-                )}
-                {currentUser.role === UserRole.ORGANIZER && !isAdmin && (
-                  <Badge className="mt-1 bg-green-500 text-white w-fit">Organizer</Badge>
-                )}
-                {currentUser.role === UserRole.MEMBER && !isAdmin && !currentUser.managedCommunities?.length && (
-                  <Badge className="mt-1 bg-gray-500 text-white w-fit">Member</Badge>
-                )}
+                <Badge className={`mt-1 ${getBadgeColor()} text-white w-fit`}>
+                  {getBadgeText()}
+                </Badge>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -107,7 +133,6 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
               </Link>
             </DropdownMenuItem>
             
-            {/* Admin and Organizer Menu */}
             {(isAdmin || currentUser.role === UserRole.ORGANIZER) && (
               <>
                 <DropdownMenuSeparator />

@@ -9,19 +9,43 @@ interface UserBadgeProps {
 }
 
 const UserBadge = ({ currentUser, isAdmin }: UserBadgeProps) => {
+  const getBadgeColor = () => {
+    if (isAdmin) {
+      return "bg-purple-500 hover:bg-purple-600";
+    }
+    
+    switch (currentUser.role) {
+      case UserRole.ORGANIZER:
+        return "bg-blue-500 hover:bg-blue-600";
+      case UserRole.MEMBER:
+        return "bg-green-500 hover:bg-green-600";
+      default:
+        return "bg-gray-500 hover:bg-gray-600";
+    }
+  };
+
+  const getBadgeText = () => {
+    if (isAdmin) {
+      return "Admin";
+    }
+    
+    switch (currentUser.role) {
+      case UserRole.ORGANIZER:
+        return "Organizer";
+      case UserRole.MEMBER:
+        return "Member";
+      default:
+        return "Guest";
+    }
+  };
+
   return (
     <Badge variant="outline" className="hidden md:flex items-center gap-1 py-1 px-2 border-primary/30">
       <UserCircle className="h-3.5 w-3.5 text-primary" />
       <span className="text-xs">{currentUser.name}</span>
-      {isAdmin && (
-        <Badge className="ml-1 bg-blue-500 text-white text-xs">Admin</Badge>
-      )}
-      {currentUser.role === UserRole.ORGANIZER && !isAdmin && (
-        <Badge className="ml-1 bg-green-500 text-white text-xs">Organizer</Badge>
-      )}
-      {currentUser.role === UserRole.MEMBER && !isAdmin && !currentUser.managedCommunities?.length && (
-        <Badge className="ml-1 bg-gray-500 text-white text-xs">Member</Badge>
-      )}
+      <Badge className={`ml-1 ${getBadgeColor()} text-white text-xs`}>
+        {getBadgeText()}
+      </Badge>
     </Badge>
   );
 };

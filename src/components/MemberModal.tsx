@@ -1,9 +1,10 @@
 
-import { User } from "@/models/types";
-import { Mail, Users } from "lucide-react";
+import { User, UserRole } from "@/models/types";
+import { Mail, Users, Shield } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 interface MemberModalProps {
   member: User | null;
@@ -13,6 +14,19 @@ interface MemberModalProps {
 
 const MemberModal = ({ member, open, onClose }: MemberModalProps) => {
   if (!member) return null;
+
+  const getBadgeColorClass = (role: UserRole): string => {
+    switch (role) {
+      case UserRole.ADMIN:
+        return "bg-purple-500 text-white";
+      case UserRole.ORGANIZER:
+        return "bg-blue-500 text-white";
+      case UserRole.MEMBER:
+        return "bg-green-500 text-white";
+      default:
+        return "bg-muted text-muted-foreground";
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
@@ -29,14 +43,8 @@ const MemberModal = ({ member, open, onClose }: MemberModalProps) => {
             <DialogTitle className="text-center text-xl font-semibold">
               {member.name}
             </DialogTitle>
-            <Badge 
-              className={`mt-2 ${
-                member.role === "ORGANIZER" 
-                  ? "bg-aquamarine text-primary-foreground" 
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {member.role}
+            <Badge className={`mt-2 ${getBadgeColorClass(member.role)}`}>
+              {UserRole[member.role]}
             </Badge>
           </div>
         </DialogHeader>
@@ -61,7 +69,18 @@ const MemberModal = ({ member, open, onClose }: MemberModalProps) => {
             </div>
           </div>
           
-          <div className="pt-4 flex justify-center">
+          <div className="pt-4 flex flex-col gap-2">
+            {member.role === UserRole.ADMIN && (
+              <Link to="/admin">
+                <Button 
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin Dashboard
+                </Button>
+              </Link>
+            )}
             <Button 
               className="bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 transition-all duration-300 w-full"
               onClick={() => window.location.href = `mailto:${member.email}`}
