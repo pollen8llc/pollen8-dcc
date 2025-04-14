@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
 
@@ -307,5 +306,74 @@ export const getAllUsers = async (): Promise<User[]> => {
   } catch (error: any) {
     console.error("Error fetching users:", error);
     throw error;
+  }
+};
+
+/**
+ * Check if a user has admin privileges
+ */
+export const checkAdminStatus = async (userIdOrEmail: string): Promise<{ 
+  isAdmin: boolean; 
+  userId?: string; 
+  message: string 
+}> => {
+  try {
+    let userId = userIdOrEmail;
+    
+    // If an email was provided, find the user ID
+    if (userIdOrEmail.includes('@')) {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', userIdOrEmail)
+        .maybeSingle();
+      
+      if (profileError || !profile) {
+        console.error("Error finding user by email:", profileError);
+        return {
+          isAdmin: false,
+          message: `User with email ${userIdOrEmail} not found`
+        };
+      }
+      
+      userId = profile.id;
+    }
+    
+    // Check admin_roles table
+    const { data: roleData, error: roleError } = await supabase
+      .from('admin_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', UserRole.ADMIN.toString())
+      .maybeSingle();
+    
+    if (roleError) {
+      console.error("Error checking admin status:", roleError);
+      return {
+        isAdmin: false,
+        userId,
+        message: roleError.message || "Failed to check admin status"
+      };
+    }
+    
+    if (roleData) {
+      return {
+        isAdmin: true,
+        userId,
+        message: "User has admin privileges"
+      };
+    } else {
+      return {
+        isAdmin: false,
+        userId,
+        message: "User does not have admin privileges"
+      };
+    }
+  } catch (error: any) {
+    console.error("Unexpected error checking admin status:", error);
+    return {
+      isAdmin: false,
+      message: error.message || "An unexpected error occurred"
+    };
   }
 };

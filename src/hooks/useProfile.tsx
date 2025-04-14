@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
@@ -66,7 +65,7 @@ export const useProfile = (session: Session | null) => {
         memberData = [];
       }
 
-      // Get admin role if exists
+      // Get admin role if exists - use explicit column selection to avoid ambiguity
       const { data: adminRole, error: adminError } = await supabase
         .from('admin_roles')
         .select('role')
@@ -90,9 +89,10 @@ export const useProfile = (session: Session | null) => {
       let role = UserRole.MEMBER;
       
       // Role determination logic:
-      // 1. Check if user is in admin_roles table
+      // 1. Check if user is in admin_roles table with ADMIN role
       if (adminRole?.role === "ADMIN") {
         role = UserRole.ADMIN;
+        console.log("User has ADMIN role from admin_roles table");
       }
       // 2. If not admin, check if user manages any communities
       else if (managedCommunities.length > 0) {
