@@ -14,7 +14,16 @@ export const usePermissions = (currentUser: User | null) => {
     switch (currentUser.role) {
       case UserRole.ORGANIZER:
         // Organizers can manage their own communities
-        return resource.startsWith('community') || resource === 'knowledgeBase';
+        if (resource.startsWith('community')) {
+          // For community resources, check if user is an organizer for that specific community
+          const communityId = resource.split(':')[1]; // Format: 'community:123'
+          if (communityId && !currentUser.managedCommunities?.includes(communityId)) {
+            return action === 'read'; // Can only read communities they don't manage
+          }
+          // Can perform any action on communities they manage
+          return true;
+        }
+        return resource === 'knowledgeBase'; // Organizers can manage knowledge base
       case UserRole.MEMBER:
         // Members can view content and participate in discussions
         return action === 'read' || resource === 'comment';

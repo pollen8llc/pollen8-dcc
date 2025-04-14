@@ -1,7 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { User } from "@/models/types";
-import { UserRole } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 
 interface NavLinksProps {
   currentUser: User | null;
@@ -33,20 +32,12 @@ const NavLinks = ({ currentUser, isOrganizer }: NavLinksProps) => {
           >
             Knowledge Base
           </Link>
-          {isOrganizer() && (
+          {(isOrganizer() || isAdmin) && (
             <Link
               to="/admin"
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
-              Admin
-            </Link>
-          )}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Admin Dashboard
+              {isAdmin ? "Admin Dashboard" : "Management"}
             </Link>
           )}
         </>

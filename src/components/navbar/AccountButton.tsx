@@ -7,7 +7,8 @@ import {
   LogOut, 
   User as UserIcon, 
   Library,
-  Settings
+  Settings,
+  Shield
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -39,6 +40,10 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
     return nameParts[0][0].toUpperCase();
   };
 
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,7 +54,12 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
                 <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
                 <AvatarFallback>{getUserInitials()}</AvatarFallback>
               </Avatar>
-              <span className="hidden md:inline-block text-sm font-medium">Account</span>
+              <span className="hidden md:inline-block text-sm font-medium">
+                {currentUser.name} 
+                {currentUser.role === UserRole.ADMIN && <span className="ml-1 text-blue-500">(Admin)</span>}
+                {currentUser.role === UserRole.ORGANIZER && <span className="ml-1 text-green-500">(Organizer)</span>}
+                {currentUser.role === UserRole.MEMBER && <span className="ml-1">(Member)</span>}
+              </span>
             </>
           ) : (
             <>
@@ -71,6 +81,12 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
                 {isAdmin && (
                   <Badge className="mt-1 bg-blue-500 text-white w-fit">Admin</Badge>
                 )}
+                {currentUser.role === UserRole.ORGANIZER && !isAdmin && (
+                  <Badge className="mt-1 bg-green-500 text-white w-fit">Organizer</Badge>
+                )}
+                {currentUser.role === UserRole.MEMBER && !isAdmin && !currentUser.managedCommunities?.length && (
+                  <Badge className="mt-1 bg-gray-500 text-white w-fit">Member</Badge>
+                )}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -86,16 +102,33 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
                 <span>Knowledge Base</span>
               </Link>
             </DropdownMenuItem>
-            {isAdmin && (
-              <DropdownMenuItem asChild>
-                <Link to="/admin" className="cursor-pointer flex w-full items-center">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Admin Dashboard</span>
-                </Link>
-              </DropdownMenuItem>
+            
+            {/* Admin and Organizer Menu */}
+            {(isAdmin || currentUser.role === UserRole.ORGANIZER) && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
+                  Management
+                </DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <Link to="/admin" className="cursor-pointer flex w-full items-center">
+                    <Shield className="mr-2 h-4 w-4" />
+                    <span>{isAdmin ? "Admin Dashboard" : "Community Management"}</span>
+                  </Link>
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin?tab=settings" className="cursor-pointer flex w-full items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>System Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+              </>
             )}
+            
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

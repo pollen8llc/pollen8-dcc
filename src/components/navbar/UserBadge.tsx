@@ -1,7 +1,7 @@
 
 import { UserCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { User } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 
 interface UserBadgeProps {
   currentUser: User;
@@ -15,6 +15,12 @@ const UserBadge = ({ currentUser, isAdmin }: UserBadgeProps) => {
       <span className="text-xs">{currentUser.name}</span>
       {isAdmin && (
         <Badge className="ml-1 bg-blue-500 text-white text-xs">Admin</Badge>
+      )}
+      {currentUser.role === UserRole.ORGANIZER && !isAdmin && (
+        <Badge className="ml-1 bg-green-500 text-white text-xs">Organizer</Badge>
+      )}
+      {currentUser.role === UserRole.MEMBER && !isAdmin && !currentUser.managedCommunities?.length && (
+        <Badge className="ml-1 bg-gray-500 text-white text-xs">Member</Badge>
       )}
     </Badge>
   );
