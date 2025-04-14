@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Table,
@@ -29,7 +28,7 @@ import {
   Shield
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface UserManagementTableProps {
   users: User[];
@@ -48,7 +47,6 @@ const UserManagementTable = ({
   const [sortField, setSortField] = useState<keyof User>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  // Filter users based on search term
   const filteredUsers = users.filter(user => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -58,19 +56,16 @@ const UserManagementTable = ({
     );
   });
 
-  // Sort users based on sort field and direction
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     let aValue = a[sortField];
     let bValue = b[sortField];
     
-    // Handle string comparison
     if (typeof aValue === 'string' && typeof bValue === 'string') {
       return sortDirection === "asc" 
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue);
     }
     
-    // Handle date comparison
     if (sortField === "createdAt") {
       const aDate = new Date(a.createdAt || 0);
       const bDate = new Date(b.createdAt || 0);
@@ -79,7 +74,6 @@ const UserManagementTable = ({
         : bDate.getTime() - aDate.getTime();
     }
     
-    // Fallback for other types
     return 0;
   });
 
