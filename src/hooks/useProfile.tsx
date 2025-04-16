@@ -53,7 +53,7 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Profile fetched:", profile);
 
-      // Use let instead of const to allow reassignment
+      // Get user's communities from community_members table
       let { data: memberData, error: memberError } = await supabase
         .from('community_members')
         .select('community_id, role')
@@ -65,19 +65,33 @@ export const useProfile = (session: Session | null) => {
         memberData = [];
       }
 
-      // Get admin role if exists - use explicit column selection to avoid ambiguity
-      const { data: adminRole, error: adminError } = await supabase
-        .from('admin_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // Get user's roles from the new role system
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select(`
+          role_id,
+          roles:role_id (
+            name
+          )
+        `)
+        .eq('user_id', userId);
 
-      if (adminError) {
-        console.error("Error fetching admin role:", adminError);
-        // Continue with no admin role rather than failing
+      if (rolesError) {
+        console.error("Error fetching user roles:", rolesError);
+        // Continue without roles rather than failing
       }
 
-      console.log("Admin role fetched:", adminRole);
+      // Get highest role using our new database function
+      const { data: highestRole, error: highestRoleError } = await supabase
+        .rpc('get_highest_role', { user_id: userId });
+        
+      if (highestRoleError) {
+        console.error("Error fetching highest role:", highestRoleError);
+        // Fall back to old method
+      }
+
+      console.log("User roles fetched:", userRoles);
+      console.log("Highest role:", highestRole);
 
       // Extract communities and managed communities
       const communities = memberData?.map(m => m.community_id) || [];
@@ -89,18 +103,51 @@ export const useProfile = (session: Session | null) => {
       let role = UserRole.MEMBER;
       
       // Role determination logic:
-      // 1. Check if user is in admin_roles table with ADMIN role
-      if (adminRole?.role === "ADMIN") {
-        role = UserRole.ADMIN;
-        console.log("User has ADMIN role from admin_roles table");
+      // 1. Use the new highest_role function if available
+      if (highestRole) {
+        role = UserRole[highestRole as keyof typeof UserRole];
+        console.log("Using highest role from function:", role);
       }
-      // 2. If not admin, check if user manages any communities
-      else if (managedCommunities.length > 0) {
-        role = UserRole.ORGANIZER;
+      // 2. Fallback: determine from user_roles table
+      else if (userRoles && userRoles.length > 0) {
+        // Check for ADMIN role first
+        const adminRole = userRoles.find(r => r.roles.name === 'ADMIN');
+        if (adminRole) {
+          role = UserRole.ADMIN;
+          console.log("User has ADMIN role from user_roles table");
+        }
+        // Then check for ORGANIZER
+        else if (userRoles.find(r => r.roles.name === 'ORGANIZER')) {
+          role = UserRole.ORGANIZER;
+          console.log("User has ORGANIZER role from user_roles table");
+        }
+        // Then check for MEMBER
+        else if (userRoles.find(r => r.roles.name === 'MEMBER')) {
+          role = UserRole.MEMBER;
+          console.log("User has MEMBER role from user_roles table");
+        }
       }
-      // 3. If not admin or organizer, but has communities, they're a member
-      else if (communities.length > 0) {
-        role = UserRole.MEMBER;
+      // 3. Fallback: old method
+      else {
+        // Legacy compatibility for admin_roles table
+        const { data: adminRole } = await supabase
+          .from('admin_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (adminRole?.role === "ADMIN") {
+          role = UserRole.ADMIN;
+          console.log("User has ADMIN role from admin_roles table (legacy)");
+        }
+        // If not admin, check if user manages any communities
+        else if (managedCommunities.length > 0) {
+          role = UserRole.ORGANIZER;
+        }
+        // If not admin or organizer, but has communities, they're a member
+        else if (communities.length > 0) {
+          role = UserRole.MEMBER;
+        }
       }
       
       const userData: User = {

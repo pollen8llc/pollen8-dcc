@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { UserRole } from "@/models/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserRoleSelectorProps {
   userId: string;
@@ -28,11 +29,49 @@ interface UserRoleSelectorProps {
   onUpdateRole: (userId: string, role: UserRole) => Promise<void>;
 }
 
+interface RoleOption {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 const UserRoleSelector = ({ userId, currentRole, onUpdateRole }: UserRoleSelectorProps) => {
   const [selectedRole, setSelectedRole] = useState<UserRole>(currentRole);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [availableRoles, setAvailableRoles] = useState<RoleOption[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const { toast } = useToast();
+
+  // Fetch available roles from the database
+  useEffect(() => {
+    const fetchRoles = async () => {
+      setIsLoadingRoles(true);
+      try {
+        const { data, error } = await supabase
+          .from('roles')
+          .select('id, name, description')
+          .order('name');
+          
+        if (error) {
+          throw error;
+        }
+        
+        setAvailableRoles(data);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+        toast({
+          title: "Could not load roles",
+          description: "There was a problem loading available roles",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingRoles(false);
+      }
+    };
+    
+    fetchRoles();
+  }, [toast]);
 
   const handleRoleChange = (value: string) => {
     const newRole = UserRole[value as keyof typeof UserRole];
@@ -77,15 +116,21 @@ const UserRoleSelector = ({ userId, currentRole, onUpdateRole }: UserRoleSelecto
       <Select
         value={UserRole[selectedRole].toString()}
         onValueChange={handleRoleChange}
-        disabled={isUpdating}
+        disabled={isUpdating || isLoadingRoles}
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select role" />
+          <SelectValue placeholder={isLoadingRoles ? "Loading..." : "Select role"} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ADMIN">Administrator</SelectItem>
-          <SelectItem value="ORGANIZER">Organizer</SelectItem>
-          <SelectItem value="MEMBER">Member</SelectItem>
+          {availableRoles.map(role => (
+            <SelectItem 
+              key={role.id} 
+              value={role.name}
+              title={role.description || undefined}
+            >
+              {role.name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
