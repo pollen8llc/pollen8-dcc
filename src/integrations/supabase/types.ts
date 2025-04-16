@@ -271,6 +271,15 @@ export type Database = {
         Args: { user_id: string; role_name: string }
         Returns: boolean
       }
+      log_audit_action: {
+        Args: {
+          action_name: string
+          performer_id: string
+          target_id?: string
+          action_details?: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
