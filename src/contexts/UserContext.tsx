@@ -11,6 +11,7 @@ interface UserContextType {
   currentUser: User | null;
   isLoading: boolean;
   hasPermission: (resource: string, action: string) => boolean;
+  checkPermissionAsync: (resource: string, action: string) => Promise<boolean>;
   isOrganizer: (communityId?: string) => boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -20,7 +21,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser, isLoading, logout: authLogout, refreshUser } = useAuth();
-  const { hasPermission, isOrganizer } = usePermissions(currentUser);
+  const { hasPermission, checkPermission, isOrganizer } = usePermissions(currentUser);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -57,8 +58,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <UserContext.Provider value={{ 
       currentUser, 
-      isLoading, 
-      hasPermission, 
+      isLoading,
+      hasPermission: checkPermission, // Use the sync version for UI rendering
+      checkPermissionAsync: hasPermission, // Expose the async version for data operations
       isOrganizer,
       logout: handleLogout,
       refreshUser

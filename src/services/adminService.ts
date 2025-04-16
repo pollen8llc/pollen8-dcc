@@ -67,16 +67,15 @@ export const ensureAdminRole = async (): Promise<{ success: boolean; message: st
     }
     
     // For backwards compatibility, also ensure the admin_roles record exists
+    // First insert then handle conflicts separately
     const { error: legacyInsertError } = await supabase
       .from('admin_roles')
       .insert({ 
         user_id: ADMIN_USER_ID,
         role: UserRole.ADMIN.toString()
-      })
-      .onConflict('user_id')
-      .ignore();
+      });
     
-    if (legacyInsertError) {
+    if (legacyInsertError && legacyInsertError.code !== '23505') { // Not a unique violation
       console.error("Error setting legacy admin role:", legacyInsertError);
       // Don't return failure for legacy table
     }
@@ -197,16 +196,15 @@ export const createAdminAccount = async (
     }
 
     // For backwards compatibility, also insert into admin_roles
+    // First insert then handle conflicts separately
     const { error: legacyInsertError } = await supabase
       .from('admin_roles')
       .insert({ 
         user_id: userId,
         role: UserRole.ADMIN.toString()
-      })
-      .onConflict('user_id')
-      .ignore();
+      });
     
-    if (legacyInsertError) {
+    if (legacyInsertError && legacyInsertError.code !== '23505') { // Not a unique violation
       console.error("Error setting legacy admin role:", legacyInsertError);
       // Don't return failure for legacy table
     }
@@ -313,16 +311,15 @@ export const updateUserRole = async (
     // For backwards compatibility, update admin_roles table if necessary
     if (role === UserRole.ADMIN) {
       // If setting to ADMIN, insert/update admin_roles
+      // First try insert, if it fails with duplicate key, try separate approach
       const { error: legacyInsertError } = await supabase
         .from('admin_roles')
         .insert({ 
           user_id: userId,
           role: UserRole.ADMIN.toString()
-        })
-        .onConflict('user_id')
-        .merge();
+        });
       
-      if (legacyInsertError) {
+      if (legacyInsertError && legacyInsertError.code !== '23505') { // Not a unique violation
         console.error("Error setting legacy admin role:", legacyInsertError);
         // Don't return failure for legacy table
       }
@@ -409,10 +406,10 @@ export const getAllUsers = async (): Promise<User[]> => {
       const userRolesForUser = userRoles?.filter(r => r.user_id === profile.id) || [];
       
       // Check if user has admin role in new system
-      const isAdmin = userRolesForUser.some(r => r.roles.name === 'ADMIN');
+      const isAdmin = userRolesForUser.some(r => r.roles && r.roles.name === 'ADMIN');
       
       // Check if user has organizer role in new system
-      const isOrganizer = userRolesForUser.some(r => r.roles.name === 'ORGANIZER');
+      const isOrganizer = userRolesForUser.some(r => r.roles && r.roles.name === 'ORGANIZER');
       
       // For backwards compatibility, also check legacy admin role
       const legacyAdminRole = legacyAdminRoles?.find(r => r.user_id === profile.id);
@@ -611,8 +608,7 @@ export const getUsersWithRole = async (roleName: string): Promise<User[]> => {
     const { data: userRoles, error: userRolesError } = await supabase
       .from('user_roles')
       .select(`
-        user_id,
-        profiles:user_id (*)
+        user_id
       `)
       .eq('role_id', role.id);
       
@@ -621,10 +617,25 @@ export const getUsersWithRole = async (roleName: string): Promise<User[]> => {
       throw userRolesError;
     }
     
-    // Transform to User objects
-    const users: User[] = userRoles.map(ur => {
-      const profile = ur.profiles;
+    // Get profiles for these users
+    const userIds = userRoles.map(ur => ur.user_id);
+    
+    if (userIds.length === 0) {
+      return []; // No users with this role
+    }
+    
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('id', userIds);
       
+    if (profilesError) {
+      console.error(`Error fetching profiles for ${roleName} users:`, profilesError);
+      throw profilesError;
+    }
+    
+    // Transform to User objects
+    const users: User[] = profiles.map(profile => {
       return {
         id: profile.id,
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',

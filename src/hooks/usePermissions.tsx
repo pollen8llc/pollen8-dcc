@@ -27,9 +27,9 @@ export const usePermissions = (currentUser: User | null) => {
           .eq('name', roleName)
           .single();
           
-        if (!detailsError && roleDetails) {
+        if (!detailsError && roleDetails && roleDetails.permissions) {
           // Check if role has appropriate permissions
-          const permissions = roleDetails.permissions;
+          const permissions = roleDetails.permissions as Record<string, any>;
           
           // Check for all permissions
           if (permissions.all === true) return true;
@@ -40,7 +40,7 @@ export const usePermissions = (currentUser: User | null) => {
           // Check for specific resource and action
           if (permissions[resource] && 
              (permissions[resource][action] === true || 
-              permissions[resource].includes(action))) {
+              Array.isArray(permissions[resource]) && permissions[resource].includes(action))) {
             return true;
           }
           
@@ -88,6 +88,36 @@ export const usePermissions = (currentUser: User | null) => {
     }
   };
 
+  // A synchronous version of hasPermission for use in rendering components
+  // This should be used when you need to quickly check basic permissions in UI
+  const checkPermission = (resource: string, action: string): boolean => {
+    if (!currentUser) return false;
+    
+    // System admins have all permissions
+    if (currentUser.role === UserRole.ADMIN) return true;
+    
+    // Basic role-based check for UI rendering
+    switch (currentUser.role) {
+      case UserRole.ORGANIZER:
+        // Organizers can manage their own communities
+        if (resource.startsWith('community')) {
+          // For community resources, check if user is an organizer for that specific community
+          const communityId = resource.split(':')[1]; // Format: 'community:123'
+          if (communityId && !currentUser.managedCommunities?.includes(communityId)) {
+            return action === 'read'; // Can only read communities they don't manage
+          }
+          // Can perform any action on communities they manage
+          return true;
+        }
+        return resource === 'knowledgeBase'; // Organizers can manage knowledge base
+      case UserRole.MEMBER:
+        // Members can view content and participate in discussions
+        return action === 'read' || resource === 'comment';
+      default:
+        return false;
+    }
+  };
+
   // Check if user is an organizer for a specific community - client-side check
   const isOrganizer = (communityId?: string): boolean => {
     if (!currentUser) return false;
@@ -105,5 +135,5 @@ export const usePermissions = (currentUser: User | null) => {
     return currentUser.managedCommunities?.includes(communityId) || false;
   };
 
-  return { hasPermission, isOrganizer };
+  return { hasPermission, checkPermission, isOrganizer };
 };
