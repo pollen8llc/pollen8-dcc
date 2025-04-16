@@ -11,6 +11,7 @@ import AddUserForm from "./AddUserForm";
 import UserCommunitiesDialog from "./UserCommunitiesDialog";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { usePermissions } from "@/hooks/usePermissions";
+import { UserRole } from "@/models/types";
 
 const UserManagementTab = () => {
   const { currentUser } = useUser();
@@ -36,8 +37,8 @@ const UserManagementTab = () => {
     handleViewCommunities,
   } = useUserManagement();
 
-  // Check if user has permission to manage users
-  const canManageUsers = hasPermission("users", "manage");
+  // Use the synchronous checkPermission instead of the asynchronous hasPermission
+  const canManageUsers = currentUser?.role === UserRole.ADMIN;
 
   return (
     <div className="space-y-8">
@@ -219,7 +220,14 @@ const UserManagementTab = () => {
       <AddUserForm
         open={isAddUserOpen}
         onOpenChange={setIsAddUserOpen}
-        onSubmit={handleAddUser}
+        onSubmit={async (values) => {
+          await handleAddUser({
+            email: values.email,
+            firstName: values.firstName,
+            lastName: values.lastName,
+            role: UserRole[values.role as keyof typeof UserRole]
+          });
+        }}
       />
 
       {/* User Communities Dialog */}

@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Fetches all users with their roles and community information
@@ -95,6 +95,7 @@ export const getAllUsers = async (): Promise<User[]> => {
     return users;
   } catch (error: any) {
     console.error("Error fetching users:", error);
+    const { toast } = useToast();
     toast({
       title: "Error loading users",
       description: error.message || "Failed to load user data",
@@ -166,6 +167,7 @@ export const updateUserRole = async (
     return true;
   } catch (error: any) {
     console.error("Error updating user role:", error);
+    const { toast } = useToast();
     toast({
       title: "Error updating role",
       description: error.message || "Failed to update user role",
@@ -193,6 +195,7 @@ export const inviteUser = async (
       .maybeSingle();
     
     if (existingProfile) {
+      const { toast } = useToast();
       toast({
         title: "User already exists",
         description: `A user with email ${email} already exists`,
@@ -256,6 +259,7 @@ export const inviteUser = async (
     return true;
   } catch (error: any) {
     console.error("Error inviting user:", error);
+    const { toast } = useToast();
     toast({
       title: "Error inviting user",
       description: error.message || "Failed to send invitation",
@@ -271,14 +275,14 @@ export const inviteUser = async (
 export const deactivateUser = async (userId: string): Promise<boolean> => {
   try {
     // Check that we're not deactivating the last admin
-    const { data: adminCount } = await supabase
+    const { data: adminRoles } = await supabase
       .from('user_roles')
-      .select('user_id')
+      .select('user_id, roles!inner(name)')
       .eq('roles.name', 'ADMIN')
-      .not('user_id', 'eq', userId)
-      .count();
+      .not('user_id', 'eq', userId);
     
-    if (adminCount && adminCount.count === 0) {
+    if (!adminRoles || adminRoles.length === 0) {
+      const { toast } = useToast();
       toast({
         title: "Cannot deactivate user",
         description: "You cannot deactivate the last administrator account",
@@ -288,9 +292,10 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
     }
     
     // Deactivate the user in auth system
+    // Use the correct attribute for banning a user
     const { error } = await supabase.auth.admin.updateUserById(
       userId,
-      { banned: true }
+      { user_metadata: { banned: true } }
     );
     
     if (error) {
@@ -307,6 +312,7 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
     return true;
   } catch (error: any) {
     console.error("Error deactivating user:", error);
+    const { toast } = useToast();
     toast({
       title: "Error deactivating user",
       description: error.message || "Failed to deactivate user",
@@ -339,6 +345,7 @@ export const resetUserPassword = async (email: string): Promise<boolean> => {
     return true;
   } catch (error: any) {
     console.error("Error resetting password:", error);
+    const { toast } = useToast();
     toast({
       title: "Error resetting password",
       description: error.message || "Failed to initiate password reset",
@@ -366,14 +373,14 @@ const logAuditAction = async (entry: AuditLogEntry): Promise<void> => {
       return;
     }
     
-    const { error } = await supabase
-      .from('audit_logs')
-      .insert({
-        action: entry.action,
-        performed_by: user.id,
-        target_user_id: entry.targetUserId,
-        details: entry.details || {},
-      });
+    // Using a raw SQL query through rpc to insert into audit_logs table
+    // since the table might not be in the TypeScript types yet
+    const { error } = await supabase.rpc('log_audit_action', {
+      action_name: entry.action,
+      performer_id: user.id,
+      target_id: entry.targetUserId || null,
+      action_details: entry.details || {}
+    });
     
     if (error) {
       console.error("Error logging audit action:", error);

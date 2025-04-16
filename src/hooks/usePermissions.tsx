@@ -32,15 +32,30 @@ export const usePermissions = (currentUser: User | null) => {
           const permissions = roleDetails.permissions as Record<string, any>;
           
           // Check for all permissions
-          if (permissions?.all === true) return true;
+          if (permissions && typeof permissions === 'object' && 'all' in permissions && permissions.all === true) {
+            return true;
+          }
           
           // Check for resource-specific "all actions" permission
-          if (permissions?.[resource] === true) return true;
+          if (permissions && typeof permissions === 'object' && 
+              resource in permissions && permissions[resource] === true) {
+            return true;
+          }
           
           // Check for specific resource and action
-          if (permissions?.[resource] && 
-             (permissions[resource][action] === true || 
-              Array.isArray(permissions[resource]) && permissions[resource].includes(action))) {
+          if (permissions && typeof permissions === 'object' && 
+              resource in permissions && 
+              typeof permissions[resource] === 'object' && 
+              action in permissions[resource] && 
+              permissions[resource][action] === true) {
+            return true;
+          }
+          
+          // Check for array of actions
+          if (permissions && typeof permissions === 'object' && 
+              resource in permissions && 
+              Array.isArray(permissions[resource]) && 
+              permissions[resource].includes(action)) {
             return true;
           }
           

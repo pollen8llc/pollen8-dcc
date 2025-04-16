@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, UserPlus } from "lucide-react";
 
-// Define the form schema
+// Define the form schema using string literals to match the enum
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   firstName: z.string().min(1, "First name is required"),
@@ -64,10 +64,7 @@ export default function AddUserForm({ open, onOpenChange, onSubmit }: AddUserFor
   const handleSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      await onSubmit({
-        ...values,
-        role: values.role as UserRole,
-      });
+      await onSubmit(values);
       form.reset();
     } finally {
       setIsSubmitting(false);
