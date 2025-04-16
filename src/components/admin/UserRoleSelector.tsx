@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Select,
@@ -20,7 +19,7 @@ import {
 import { UserRole } from "@/models/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import * as userManagementService from "@/services/userManagementService";
+import { getRoles } from "@/services/roleService";
 
 interface UserRoleSelectorProps {
   userId: string;
@@ -53,7 +52,7 @@ const UserRoleSelector = ({
     const fetchRoles = async () => {
       setIsLoadingRoles(true);
       try {
-        const data = await userManagementService.getRoles();
+        const data = await getRoles();
         setAvailableRoles(data);
       } catch (error) {
         console.error("Error fetching roles:", error);

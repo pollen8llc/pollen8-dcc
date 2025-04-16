@@ -3,7 +3,10 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { User, UserRole } from '@/models/types';
 import { useToast } from '@/hooks/use-toast';
-import * as userManagementService from '@/services/userManagementService';
+import { getAllUsers } from '@/services/userQueryService';
+import { updateUserRole } from '@/services/roleService';
+import { inviteUser, resetUserPassword } from '@/services/userInvitationService';
+import { deactivateUser, getUserCommunities } from '@/services/userAccountService';
 
 export function useUserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -21,7 +24,7 @@ export function useUserManagement() {
     refetch 
   } = useQuery({
     queryKey: ['admin-users'],
-    queryFn: userManagementService.getAllUsers
+    queryFn: getAllUsers
   });
 
   // Calculate user stats
@@ -35,7 +38,7 @@ export function useUserManagement() {
   // Mutation for updating user roles
   const updateRoleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: UserRole }) =>
-      userManagementService.updateUserRole(userId, role),
+      updateUserRole(userId, role),
     onSuccess: (success) => {
       if (success) {
         // Invalidate the users query to refetch updated data
@@ -51,7 +54,7 @@ export function useUserManagement() {
   // Mutation for adding a new user
   const addUserMutation = useMutation({
     mutationFn: (userData: { email: string; firstName: string; lastName: string; role: UserRole }) =>
-      userManagementService.inviteUser(
+      inviteUser(
         userData.email,
         userData.firstName,
         userData.lastName,
@@ -72,7 +75,7 @@ export function useUserManagement() {
 
   // Mutation for deactivating a user
   const deactivateUserMutation = useMutation({
-    mutationFn: (userId: string) => userManagementService.deactivateUser(userId),
+    mutationFn: (userId: string) => deactivateUser(userId),
     onSuccess: (success) => {
       if (success) {
         // Refetch users to update the list
@@ -87,7 +90,7 @@ export function useUserManagement() {
 
   // Mutation for resetting a user's password
   const resetPasswordMutation = useMutation({
-    mutationFn: (email: string) => userManagementService.resetUserPassword(email),
+    mutationFn: (email: string) => resetUserPassword(email),
     onSuccess: (success) => {
       if (success) {
         toast({
@@ -101,7 +104,7 @@ export function useUserManagement() {
   // Fetch communities for a specific user
   const { data: userCommunities = [], isLoading: loadingCommunities } = useQuery({
     queryKey: ['user-communities', selectedUser?.id],
-    queryFn: () => userManagementService.getUserCommunities(selectedUser?.id || ''),
+    queryFn: () => getUserCommunities(selectedUser?.id || ''),
     enabled: !!selectedUser?.id && isCommunityListOpen
   });
 
