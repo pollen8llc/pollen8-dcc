@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
 import { useToast } from "@/hooks/use-toast";
@@ -372,13 +373,15 @@ const logAuditAction = async (entry: AuditLogEntry): Promise<void> => {
       return;
     }
     
-    // Use the log_audit_action function we created in the database
-    const { error } = await supabase.rpc('log_audit_action', {
-      action_name: entry.action,
-      performer_id: user.id,
-      target_id: entry.targetUserId || null,
-      action_details: entry.details || {}
-    });
+    // Direct insert into audit_logs table instead of using RPC
+    const { error } = await supabase
+      .from('audit_logs')
+      .insert({
+        action: entry.action,
+        performed_by: user.id,
+        target_user_id: entry.targetUserId || null,
+        details: entry.details || {}
+      });
     
     if (error) {
       console.error("Error logging audit action:", error);
