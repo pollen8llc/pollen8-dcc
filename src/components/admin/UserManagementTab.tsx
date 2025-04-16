@@ -1,84 +1,43 @@
 
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, UserRole } from "@/models/types";
 import UserManagementTable from "./UserManagementTable";
-import * as adminService from "@/services/adminService";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/contexts/UserContext";
 import { RefreshCw, UserPlus } from "lucide-react";
+import AddUserForm from "./AddUserForm";
+import UserCommunitiesDialog from "./UserCommunitiesDialog";
+import { useUserManagement } from "@/hooks/useUserManagement";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const UserManagementTab = () => {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showUserDetails, setShowUserDetails] = useState(false);
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const { currentUser } = useUser();
+  const { hasPermission } = usePermissions(currentUser);
+  
+  const {
+    users,
+    isLoading,
+    userStats,
+    selectedUser,
+    isUserDetailsOpen,
+    setIsUserDetailsOpen,
+    isAddUserOpen,
+    setIsAddUserOpen,
+    isCommunityListOpen,
+    setIsCommunityListOpen,
+    userCommunities,
+    loadingCommunities,
+    refetch,
+    handleUpdateRole,
+    handleViewUserDetails,
+    handleAddUser,
+    handleViewCommunities,
+  } = useUserManagement();
 
-  // Fetch all users
-  const { data: users = [], isLoading, refetch } = useQuery({
-    queryKey: ['admin-users'],
-    queryFn: adminService.getAllUsers
-  });
-
-  // Mutation for updating user roles
-  const updateRoleMutation = useMutation({
-    mutationFn: (variables: { userId: string; role: UserRole }) => 
-      adminService.updateUserRole(variables),
-    onSuccess: (data) => {
-      if (data.success) {
-        // Invalidate the users query to refetch updated data
-        queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-        toast({
-          title: "Success",
-          description: data.message,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: data.message,
-          variant: "destructive",
-        });
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update user role",
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Handle role update
-  const handleUpdateRole = async (userId: string, role: UserRole) => {
-    await updateRoleMutation.mutateAsync({ userId, role });
-  };
-
-  // Handle viewing user details
-  const handleViewUserDetails = (user: User) => {
-    setSelectedUser(user);
-    setShowUserDetails(true);
-  };
-
-  // Stats
-  const adminCount = users.filter(user => user.role === UserRole.ADMIN).length;
-  const organizerCount = users.filter(user => user.role === UserRole.ORGANIZER).length;
-  const memberCount = users.filter(user => user.role === UserRole.MEMBER).length;
+  // Check if user has permission to manage users
+  const canManageUsers = hasPermission("users", "manage");
 
   return (
     <div className="space-y-8">
@@ -98,7 +57,10 @@ const UserManagementTab = () => {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
-          <Button>
+          <Button 
+            onClick={() => setIsAddUserOpen(true)}
+            disabled={!canManageUsers}
+          >
             <UserPlus className="mr-2 h-4 w-4" />
             Add User
           </Button>
@@ -111,7 +73,7 @@ const UserManagementTab = () => {
             <CardTitle className="text-lg">Total Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{users.length}</div>
+            <div className="text-3xl font-bold">{userStats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">All active accounts</p>
           </CardContent>
         </Card>
@@ -121,7 +83,7 @@ const UserManagementTab = () => {
             <CardTitle className="text-lg">Administrators</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{adminCount}</div>
+            <div className="text-3xl font-bold">{userStats.admins}</div>
             <p className="text-xs text-muted-foreground mt-1">With full system access</p>
           </CardContent>
         </Card>
@@ -131,7 +93,7 @@ const UserManagementTab = () => {
             <CardTitle className="text-lg">Organizers</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{organizerCount}</div>
+            <div className="text-3xl font-bold">{userStats.organizers}</div>
             <p className="text-xs text-muted-foreground mt-1">Community managers</p>
           </CardContent>
         </Card>
@@ -150,13 +112,15 @@ const UserManagementTab = () => {
             isLoading={isLoading}
             onUpdateRole={handleUpdateRole}
             onViewUserDetails={handleViewUserDetails}
+            onViewCommunities={handleViewCommunities}
+            canManageUsers={canManageUsers}
           />
         </CardContent>
       </Card>
 
       {/* User details dialog */}
       {selectedUser && (
-        <Dialog open={showUserDetails} onOpenChange={setShowUserDetails}>
+        <Dialog open={isUserDetailsOpen} onOpenChange={setIsUserDetailsOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>User Details</DialogTitle>
@@ -213,6 +177,14 @@ const UserManagementTab = () => {
                 </TabsContent>
                 
                 <TabsContent value="communities" className="pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsCommunityListOpen(true)}
+                    className="mb-4"
+                  >
+                    View All Communities
+                  </Button>
+                  
                   <h3 className="text-lg font-medium mb-2">Community Memberships</h3>
                   {selectedUser.communities && selectedUser.communities.length > 0 ? (
                     <ul className="space-y-2">
@@ -242,6 +214,22 @@ const UserManagementTab = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Add User Dialog */}
+      <AddUserForm
+        open={isAddUserOpen}
+        onOpenChange={setIsAddUserOpen}
+        onSubmit={handleAddUser}
+      />
+
+      {/* User Communities Dialog */}
+      <UserCommunitiesDialog
+        user={selectedUser}
+        communities={userCommunities}
+        isLoading={loadingCommunities}
+        open={isCommunityListOpen}
+        onOpenChange={setIsCommunityListOpen}
+      />
     </div>
   );
 };

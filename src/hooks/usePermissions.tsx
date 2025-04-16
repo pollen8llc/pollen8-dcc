@@ -32,13 +32,13 @@ export const usePermissions = (currentUser: User | null) => {
           const permissions = roleDetails.permissions as Record<string, any>;
           
           // Check for all permissions
-          if (permissions.all === true) return true;
+          if (permissions?.all === true) return true;
           
           // Check for resource-specific "all actions" permission
-          if (permissions[resource] === true) return true;
+          if (permissions?.[resource] === true) return true;
           
           // Check for specific resource and action
-          if (permissions[resource] && 
+          if (permissions?.[resource] && 
              (permissions[resource][action] === true || 
               Array.isArray(permissions[resource]) && permissions[resource].includes(action))) {
             return true;
@@ -79,6 +79,9 @@ export const usePermissions = (currentUser: User | null) => {
           // Can perform any action on communities they manage
           return true;
         }
+        if (resource === 'users') {
+          return action === 'read'; // Organizers can view users but not manage them
+        }
         return resource === 'knowledgeBase'; // Organizers can manage knowledge base
       case UserRole.MEMBER:
         // Members can view content and participate in discussions
@@ -108,6 +111,9 @@ export const usePermissions = (currentUser: User | null) => {
           }
           // Can perform any action on communities they manage
           return true;
+        }
+        if (resource === 'users') {
+          return action === 'read'; // Organizers can view users but not manage them
         }
         return resource === 'knowledgeBase'; // Organizers can manage knowledge base
       case UserRole.MEMBER:

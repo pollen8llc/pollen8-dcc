@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Table,
@@ -25,34 +26,57 @@ import {
   Eye, 
   UserCog,
   Mail,
-  Shield
+  Shield,
+  Key,
+  UserX,
+  Users
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface UserManagementTableProps {
   users: User[];
   isLoading: boolean;
   onUpdateRole: (userId: string, role: UserRole) => Promise<void>;
   onViewUserDetails: (user: User) => void;
+  onViewCommunities: (user: User) => void;
+  canManageUsers: boolean;
 }
 
 const UserManagementTable = ({ 
   users, 
   isLoading, 
   onUpdateRole,
-  onViewUserDetails
+  onViewUserDetails,
+  onViewCommunities,
+  canManageUsers
 }: UserManagementTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<keyof User>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null);
+  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(null);
+  const { toast } = useToast();
 
   const filteredUsers = users.filter(user => {
     const searchLower = searchTerm.toLowerCase();
     return (
       user.name.toLowerCase().includes(searchLower) ||
       user.email.toLowerCase().includes(searchLower) ||
-      user.id.toLowerCase().includes(searchLower)
+      user.id.toLowerCase().includes(searchLower) ||
+      UserRole[user.role].toLowerCase().includes(searchLower)
     );
   });
 
@@ -96,6 +120,28 @@ const UserManagementTable = ({
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100";
+    }
+  };
+
+  const handleDeactivateConfirm = () => {
+    // Not fully implementing deactivation for this version
+    if (userToDeactivate) {
+      toast({
+        title: "Feature not implemented",
+        description: "User deactivation will be available in a future update",
+      });
+      setUserToDeactivate(null);
+    }
+  };
+
+  const handleResetPasswordConfirm = () => {
+    // Not fully implementing password reset for this version
+    if (userToResetPassword) {
+      toast({
+        title: "Feature not implemented",
+        description: "Password reset will be available in a future update",
+      });
+      setUserToResetPassword(null);
     }
   };
 
@@ -161,7 +207,14 @@ const UserManagementTable = ({
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead>Communities</TableHead>
+              <TableHead>
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center"
+                >
+                  Communities
+                </Button>
+              </TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -204,15 +257,34 @@ const UserManagementTable = ({
                     </div>
                   </TableCell>
                   <TableCell>
-                    {user.createdAt ? format(new Date(user.createdAt), "MMM d, yyyy") : "N/A"}
+                    {user.createdAt 
+                      ? format(new Date(user.createdAt), "MMM d, yyyy") 
+                      : "N/A"}
                   </TableCell>
                   <TableCell>
-                    {user.communities?.length || 0}
-                    {user.managedCommunities && user.managedCommunities.length > 0 && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        ({user.managedCommunities.length} managed)
-                      </span>
-                    )}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => onViewCommunities(user)}
+                          >
+                            <span className="mr-2">
+                              {user.communities?.length || 0}
+                            </span>
+                            {user.managedCommunities && user.managedCommunities.length > 0 && (
+                              <span className="text-xs text-muted-foreground">
+                                ({user.managedCommunities.length} managed)
+                              </span>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Click to view communities</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
@@ -227,6 +299,7 @@ const UserManagementTable = ({
                         userId={user.id}
                         currentRole={user.role}
                         onUpdateRole={onUpdateRole}
+                        disabled={!canManageUsers}
                       />
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -250,10 +323,27 @@ const UserManagementTable = ({
                             Contact User
                           </DropdownMenuItem>
                           <DropdownMenuItem
+                            onClick={() => onViewCommunities(user)}
                             className="cursor-pointer"
                           >
-                            <UserCog className="mr-2 h-4 w-4" />
-                            Manage Communities
+                            <Users className="mr-2 h-4 w-4" />
+                            View Communities
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setUserToResetPassword(user)}
+                            className="cursor-pointer"
+                            disabled={!canManageUsers}
+                          >
+                            <Key className="mr-2 h-4 w-4" />
+                            Reset Password
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setUserToDeactivate(user)}
+                            className="cursor-pointer text-destructive focus:text-destructive"
+                            disabled={!canManageUsers || user.role === UserRole.ADMIN}
+                          >
+                            <UserX className="mr-2 h-4 w-4" />
+                            Deactivate Account
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -265,6 +355,51 @@ const UserManagementTable = ({
           </TableBody>
         </Table>
       </div>
+
+      {/* Deactivate User Alert Dialog */}
+      <AlertDialog
+        open={!!userToDeactivate}
+        onOpenChange={(open) => !open && setUserToDeactivate(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deactivate User Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to deactivate {userToDeactivate?.name}'s account? They will no longer be able to log in.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeactivateConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Deactivate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reset Password Alert Dialog */}
+      <AlertDialog
+        open={!!userToResetPassword}
+        onOpenChange={(open) => !open && setUserToResetPassword(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset User Password</AlertDialogTitle>
+            <AlertDialogDescription>
+              Send a password reset email to {userToResetPassword?.email}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetPasswordConfirm}>
+              Send Reset Email
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

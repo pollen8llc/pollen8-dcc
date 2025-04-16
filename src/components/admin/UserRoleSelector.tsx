@@ -17,16 +17,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { UserRole } from "@/models/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import * as userManagementService from "@/services/userManagementService";
 
 interface UserRoleSelectorProps {
   userId: string;
   currentRole: UserRole;
   onUpdateRole: (userId: string, role: UserRole) => Promise<void>;
+  disabled?: boolean;
 }
 
 interface RoleOption {
@@ -35,7 +35,12 @@ interface RoleOption {
   description: string | null;
 }
 
-const UserRoleSelector = ({ userId, currentRole, onUpdateRole }: UserRoleSelectorProps) => {
+const UserRoleSelector = ({ 
+  userId, 
+  currentRole, 
+  onUpdateRole,
+  disabled = false
+}: UserRoleSelectorProps) => {
   const [selectedRole, setSelectedRole] = useState<UserRole>(currentRole);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -48,15 +53,7 @@ const UserRoleSelector = ({ userId, currentRole, onUpdateRole }: UserRoleSelecto
     const fetchRoles = async () => {
       setIsLoadingRoles(true);
       try {
-        const { data, error } = await supabase
-          .from('roles')
-          .select('id, name, description')
-          .order('name');
-          
-        if (error) {
-          throw error;
-        }
-        
+        const data = await userManagementService.getRoles();
         setAvailableRoles(data);
       } catch (error) {
         console.error("Error fetching roles:", error);
@@ -111,12 +108,17 @@ const UserRoleSelector = ({ userId, currentRole, onUpdateRole }: UserRoleSelecto
     setShowConfirmation(false);
   };
 
+  // Update when currentRole prop changes
+  useEffect(() => {
+    setSelectedRole(currentRole);
+  }, [currentRole]);
+
   return (
     <>
       <Select
         value={UserRole[selectedRole].toString()}
         onValueChange={handleRoleChange}
-        disabled={isUpdating || isLoadingRoles}
+        disabled={isUpdating || isLoadingRoles || disabled}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder={isLoadingRoles ? "Loading..." : "Select role"} />
