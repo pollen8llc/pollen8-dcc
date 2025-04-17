@@ -12,14 +12,17 @@ ECO8 is a platform designed to help users create, manage, and participate in onl
 - **Build Tool**: Vite
 - **UI Library**: shadcn/ui components (built on Radix UI primitives)
 - **Styling**: Tailwind CSS
-- **State Management**: React Context API
-- **Data Fetching**: TanStack React Query (formerly React Query)
+- **State Management**: React Context API, TanStack React Query
+- **Data Fetching**: TanStack React Query
 - **Routing**: React Router DOM
+- **Visualization**: D3.js, Recharts
 
 ### Backend
 - **Database**: PostgreSQL (via Supabase)
 - **Authentication**: Supabase Auth
 - **API**: Supabase Client SDK
+- **Storage**: Supabase Storage
+- **Security**: Row-Level Security (RLS)
 
 ## Framework Architecture
 
@@ -31,7 +34,6 @@ The application follows a component-based architecture with:
 - Contexts (state management)
 - Hooks (custom logic)
 - Services (API interaction)
-- Repositories (data access)
 - Models (type definitions)
 
 ### Directory Structure
@@ -52,9 +54,8 @@ src/
 ├── pages/              # Page components for each route
 │   ├── admin/          # Admin pages
 │   └── knowledge/      # Knowledge base pages
-├── repositories/       # Data access layer
-│   └── community/      # Community-specific data access
-└── services/           # Business logic and API services
+├── services/           # Business logic and API services
+└── utils/              # Helper functions
 ```
 
 ## Database Structure
@@ -63,7 +64,7 @@ The platform uses Supabase (PostgreSQL) with the following table structure:
 
 ### SQL Schema and Relationships
 
-#### Table Structure Diagrams
+#### Table Structure
 
 ```mermaid
 erDiagram
@@ -71,8 +72,8 @@ erDiagram
     profiles ||--o{ community_members : "participates in"
     communities ||--o{ community_members : "has"
     communities ||--o{ knowledge_base : "has"
-    profiles ||--o{ admin_roles : "has"
-    admin_roles }o--|| role_types : "defines"
+    profiles ||--o{ user_roles : "has"
+    user_roles }o--|| roles : "defines"
     communities ||--o{ community_data : "has"
 ```
 
@@ -161,15 +162,28 @@ BEFORE UPDATE ON public.knowledge_base
 FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 ```
 
-##### `admin_roles`
-Manages platform-level admin roles:
+##### `roles`
+Defines system roles:
 ```sql
-CREATE TABLE public.admin_roles (
+CREATE TABLE public.roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  permissions JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+##### `user_roles`
+Manages the relationship between users and roles:
+```sql
+CREATE TABLE public.user_roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(user_id, role)
+  role_id UUID NOT NULL REFERENCES public.roles(id),
+  assigned_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  assigned_by UUID,
+  UNIQUE(user_id, role_id)
 );
 ```
 
@@ -187,11 +201,9 @@ CREATE TABLE public.community_data (
 );
 ```
 
-### Triggers and Functions
+### Database Functions
 
-The platform uses PostgreSQL triggers and functions to automate certain operations:
-
-#### `handle_updated_at()` Function
+#### `handle_updated_at()`
 Updates the timestamp automatically when records are modified:
 
 ```sql
@@ -204,7 +216,7 @@ END;
 $$ LANGUAGE plpgsql;
 ```
 
-#### `handle_new_user()` Function
+#### `handle_new_user()`
 Creates a profile automatically when a new user signs up:
 
 ```sql
@@ -228,6 +240,77 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 ```
 
+#### `has_role()`
+Checks if a user has a specific role:
+
+```sql
+CREATE OR REPLACE FUNCTION public.has_role(user_id uuid, role_name text)
+RETURNS boolean
+LANGUAGE sql
+STABLE SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.user_roles ur
+    JOIN public.roles r ON ur.role_id = r.id
+    WHERE ur.user_id = user_id
+    AND r.name = role_name
+  );
+$$;
+```
+
+#### `get_user_roles()`
+Returns all roles assigned to a user:
+
+```sql
+CREATE OR REPLACE FUNCTION public.get_user_roles(user_id uuid)
+RETURNS SETOF text
+LANGUAGE sql
+STABLE SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+  SELECT r.name
+  FROM public.user_roles ur
+  JOIN public.roles r ON ur.role_id = r.id
+  WHERE ur.user_id = user_id;
+$$;
+```
+
+#### `get_highest_role()`
+Returns the highest role assigned to a user:
+
+```sql
+CREATE OR REPLACE FUNCTION public.get_highest_role(user_id uuid)
+RETURNS text
+LANGUAGE plpgsql
+STABLE SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+DECLARE
+  highest_role TEXT;
+BEGIN
+  -- Check for admin role first
+  IF public.has_role(user_id, 'ADMIN') THEN
+    RETURN 'ADMIN';
+  END IF;
+  
+  -- Check for organizer role next
+  IF public.has_role(user_id, 'ORGANIZER') THEN
+    RETURN 'ORGANIZER';
+  END IF;
+  
+  -- Check for member role next
+  IF public.has_role(user_id, 'MEMBER') THEN
+    RETURN 'MEMBER';
+  END IF;
+  
+  -- Default to GUEST
+  RETURN 'GUEST';
+END;
+$$;
+```
+
 ### Relationships
 
 The database uses the following key relationships:
@@ -248,9 +331,13 @@ The database uses the following key relationships:
    - A community can have multiple knowledge base articles
    - `knowledge_base.community_id` references `communities.id`
 
-5. **User - Admin Roles**: One-to-many relationship
-   - A user can have multiple admin roles
-   - `admin_roles.user_id` references `auth.users.id`
+5. **User - User Roles**: One-to-many relationship
+   - A user can have multiple roles
+   - `user_roles.user_id` references `auth.users.id`
+
+6. **Roles - User Roles**: One-to-many relationship
+   - A role can be assigned to multiple users
+   - `user_roles.role_id` references `roles.id`
 
 ## User Role System
 
@@ -269,7 +356,7 @@ export enum UserRole {
 }
 ```
 
-These roles are stored in the `admin_roles` table and managed through the `adminService`:
+These roles are managed through the `user_roles` and `roles` tables:
 
 - **ADMIN**: Has full access to all features and communities
 - **ORGANIZER**: Can manage specific communities they're assigned to
@@ -287,36 +374,10 @@ Within each community, users can have specific roles stored in the `community_me
 
 The application determines a user's effective role using the following logic:
 
-1. If the user has an entry in `admin_roles` with `role = 'ADMIN'`, they're a system admin
+1. If the user has an entry in `user_roles` linked to the 'ADMIN' role, they're a system admin
 2. If the user is an admin for any community (`community_members` with `role = 'admin'`), they're an ORGANIZER
 3. If the user has any community membership, they're a MEMBER
 4. Otherwise, they're a GUEST
-
-This is implemented in the `useProfile` hook:
-
-```typescript
-// Role determination logic (simplified)
-const role = adminRole?.role === "ADMIN" ? UserRole.ADMIN : 
-            (managedCommunities.length > 0 ? UserRole.ORGANIZER : UserRole.MEMBER);
-```
-
-### Permission System
-
-The platform uses the `usePermissions` hook to handle permission checks:
-
-- `hasPermission(resource, action)`: Checks if a user can perform an action on a resource
-- `isOrganizer(communityId)`: Checks if a user is an organizer for a specific community
-
-The `ProtectedRoute` component ensures users have the required role to access certain areas:
-
-```typescript
-const hasRequiredRole = 
-  currentUser.role === UserRole.ADMIN || // Admins can access everything
-  currentUser.role === roleEnum ||
-  (roleEnum === UserRole.ORGANIZER && 
-   communityId && 
-   currentUser.managedCommunities?.includes(communityId));
-```
 
 ## Authentication System
 
@@ -342,6 +403,7 @@ The application uses the Supabase JavaScript client for API access:
 ### User Management
 - **Authentication**: Login, logout, session management
 - **Profile**: Get user data, update profile
+- **Roles**: Assign and manage user roles 
 
 ### Community Management
 - **Communities**: Create, read, update communities
@@ -366,135 +428,15 @@ The application implements route protection based on user roles:
 - `/admin/community/:id`: Protected for community administrators (ORGANIZER+)
 - `/knowledge/:communityId`: Protected for community members (MEMBER+)
 
-## Client-side Services
-
-### User Service
-- `getUserById`: Fetch user details
-- `getCommunityOrganizers`: Get community admins
-- `getCommunityMembers`: Get community members
-
-### Community Service
-- `getAllCommunities`: List all communities
-- `getCommunityById`: Get community details
-- `searchCommunities`: Search communities
-- `getManagedCommunities`: Get communities managed by a user
-- `updateCommunity`: Update community details
-- `createCommunity`: Create a new community
-- `joinCommunity`: Join a community
-- `leaveCommunity`: Leave a community
-- `makeAdmin`: Promote a user to community admin
-- `removeAdmin`: Remove admin privileges
-
-### Admin Service
-- `createAdminAccount`: Create a new admin user account
-
-## Data Flow
-
-1. **Authentication Flow**:
-   - User logs in through the Auth page
-   - Supabase validates credentials and returns a session
-   - UserContext stores the current user state
-   - Protected routes check permissions via ProtectedRoute component
-
-2. **Community Access Flow**:
-   - Communities are fetched from the database
-   - User permissions are checked against community membership
-   - UI adapts based on user role and permissions
-
-3. **Data Mutation Flow**:
-   - User actions trigger service functions
-   - Services call repository methods
-   - Repositories interact with Supabase
-   - UI updates based on React Query cache updates
-
-## Development Guidelines
-
-### Adding New Features
-1. Define the feature requirements and user stories
-2. Update TypeScript models if needed
-3. Create or update database tables if required
-4. Implement repository methods for data access
-5. Create service methods for business logic
-6. Build UI components and pages
-7. Connect components to services
-8. Test the feature end-to-end
-
-### Authentication Best Practices
-- Always use the ProtectedRoute component for restricted routes
-- Check user roles and permissions before displaying sensitive UI
-- Use the useUser hook to access the current user state
-- Implement proper error handling for authentication failures
-
-### Database Access Patterns
-- Always use the repository layer to access the database
-- Keep database queries in the repository files
-- Use service layer to combine multiple repository calls
-- Implement proper error handling for database operations
-
-### UI Component Guidelines
-- Follow the Tailwind CSS and shadcn/ui design system
-- Create small, reusable components
-- Use TypeScript for type safety
-- Implement responsive design for all components
-
-## Deployment
-
-The application can be deployed using:
-- Netlify for the frontend
-- Supabase for backend services and database
-
-## Appendix
-
-### TypeScript Models
-
-Key type definitions include:
-
-```typescript
-export enum UserRole {
-  ADMIN = "ADMIN",        // System administrators
-  ORGANIZER = "ORGANIZER", // Community organizers
-  MEMBER = "MEMBER",      // Regular community members
-  GUEST = "GUEST"         // Unauthenticated/public users
-}
-
-export interface User {
-  id: string;
-  name: string;
-  role: UserRole;
-  imageUrl: string;
-  email: string;
-  bio: string;
-  communities: string[];
-  managedCommunities?: string[];
-}
-
-export interface Community {
-  id: string;
-  name: string;
-  description: string;
-  location: string;
-  imageUrl: string;
-  memberCount: number;
-  organizerIds: string[];
-  memberIds: string[];
-  tags: string[];
-  isPublic: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  statistics?: CommunityStatistics;
-  settings?: CommunitySettings;
-  website?: string;
-}
-```
+## Security
 
 ### Row-Level Security (RLS)
 
-For security, the platform implements Row-Level Security policies to control access to database tables:
+For security, the platform implements Row-Level Security policies to control access to database tables.
+
+Example RLS policy for community membership:
 
 ```sql
--- Example RLS policy for community membership
-ALTER TABLE public.community_members ENABLE ROW LEVEL SECURITY;
-
 -- Allow users to see only their own memberships
 CREATE POLICY "Users can view their own memberships"
   ON public.community_members
@@ -513,3 +455,26 @@ CREATE POLICY "Community admins can view all memberships"
     )
   );
 ```
+
+## Development Guidelines
+
+### Adding New Features
+1. Define the feature requirements and user stories
+2. Update TypeScript models if needed
+3. Create or update database tables if required
+4. Implement service methods for business logic
+5. Build UI components and pages
+6. Connect components to services through custom hooks
+7. Test the feature end-to-end
+
+### Authentication Best Practices
+- Always use the ProtectedRoute component for restricted routes
+- Check user roles and permissions before displaying sensitive UI
+- Use the useUser hook to access the current user state
+- Implement proper error handling for authentication failures
+
+### Database Access Patterns
+- Always use the service layer to access the database
+- Keep database queries in the appropriate service files
+- Implement proper error handling for database operations
+- Use Row-Level Security for data protection
