@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
  */
 export const getAllUsers = async (): Promise<User[]> => {
   try {
+    console.log('Fetching all users from database...');
+    
     // Get all profiles
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
@@ -122,4 +124,3 @@ export const getUserCounts = async () => {
     members: users.filter(user => user.role === UserRole.MEMBER).length,
   };
 };
-

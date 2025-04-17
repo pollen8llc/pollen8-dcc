@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { User, UserRole } from '@/models/types';
@@ -26,13 +27,12 @@ export function useUserManagement() {
     queryFn: getAllUsers
   });
 
-  // Calculate user stats
-  const userStats = {
-    total: users.length,
-    admins: users.filter(user => user.role === UserRole.ADMIN).length,
-    organizers: users.filter(user => user.role === UserRole.ORGANIZER).length,
-    members: users.filter(user => user.role === UserRole.MEMBER).length,
-  };
+  // Fetch user stats
+  const { data: userStats = { total: 0, admins: 0, organizers: 0, members: 0 } } = useQuery({
+    queryKey: ['admin-user-stats'],
+    queryFn: getUserCounts,
+    enabled: users.length > 0
+  });
 
   // Mutation for updating user roles
   const updateRoleMutation = useMutation({
