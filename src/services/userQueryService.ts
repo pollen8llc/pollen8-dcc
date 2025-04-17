@@ -44,6 +44,10 @@ export const getAllUsers = async (): Promise<User[]> => {
       throw new Error(membershipError.message);
     }
     
+    console.log('Raw profiles data:', profiles);
+    console.log('Raw user roles data:', userRoles);
+    console.log('Raw memberships data:', memberships);
+    
     // Map profiles to User objects
     const users: User[] = profiles.map(profile => {
       // Find roles for this user
@@ -92,6 +96,7 @@ export const getAllUsers = async (): Promise<User[]> => {
       };
     });
     
+    console.log('Transformed user data:', users);
     return users;
   } catch (error: any) {
     console.error("Error fetching users:", error);
@@ -104,3 +109,17 @@ export const getAllUsers = async (): Promise<User[]> => {
     throw error;
   }
 };
+
+/**
+ * Gets user role counts for dashboard metrics
+ */
+export const getUserCounts = async () => {
+  const users = await getAllUsers();
+  return {
+    total: users.length,
+    admins: users.filter(user => user.role === UserRole.ADMIN).length,
+    organizers: users.filter(user => user.role === UserRole.ORGANIZER).length,
+    members: users.filter(user => user.role === UserRole.MEMBER).length,
+  };
+};
+

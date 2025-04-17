@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { User, UserRole } from '@/models/types';
 import { useToast } from '@/hooks/use-toast';
-import { getAllUsers } from '@/services/userQueryService';
+import { getAllUsers, getUserCounts } from '@/services/userQueryService';
 import { updateUserRole } from '@/services/roleService';
 import { inviteUser, resetUserPassword } from '@/services/userInvitationService';
 import { deactivateUser, getUserCommunities } from '@/services/userAccountService';
