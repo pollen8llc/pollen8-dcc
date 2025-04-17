@@ -10,7 +10,7 @@ export const getAllUsers = async (): Promise<User[]> => {
   try {
     console.log('Fetching all users from database...');
     
-    // Get all profiles
+    // Get all profiles - now works with our fixed RLS policies
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('*');
@@ -36,7 +36,8 @@ export const getAllUsers = async (): Promise<User[]> => {
       throw new Error(rolesError.message);
     }
     
-    // Get community memberships for finding managed communities
+    // Get community memberships safely without causing recursion
+    // This uses the new policy we created
     const { data: memberships, error: membershipError } = await supabase
       .from('community_members')
       .select('user_id, community_id, role');
@@ -46,9 +47,9 @@ export const getAllUsers = async (): Promise<User[]> => {
       throw new Error(membershipError.message);
     }
     
-    console.log('Raw profiles data:', profiles);
-    console.log('Raw user roles data:', userRoles);
-    console.log('Raw memberships data:', memberships);
+    console.log('Raw profiles data:', profiles?.length || 0, 'profiles found');
+    console.log('Raw user roles data:', userRoles?.length || 0, 'role records found');
+    console.log('Raw memberships data:', memberships?.length || 0, 'membership records found');
     
     // Map profiles to User objects
     const users: User[] = profiles.map(profile => {
@@ -98,16 +99,10 @@ export const getAllUsers = async (): Promise<User[]> => {
       };
     });
     
-    console.log('Transformed user data:', users);
+    console.log('Transformed user data:', users.length, 'users processed');
     return users;
   } catch (error: any) {
     console.error("Error fetching users:", error);
-    const { toast } = useToast();
-    toast({
-      title: "Error loading users",
-      description: error.message || "Failed to load user data",
-      variant: "destructive",
-    });
     throw error;
   }
 };

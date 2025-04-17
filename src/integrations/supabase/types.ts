@@ -271,6 +271,10 @@ export type Database = {
         Args: { user_id: string; role_name: string }
         Returns: boolean
       }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       log_audit_action: {
         Args: {
           action_name: string

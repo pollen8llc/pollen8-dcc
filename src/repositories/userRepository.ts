@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
 
@@ -105,7 +104,7 @@ const mapUserWithoutAdminRole = (profile: any, memberData: any[]): User => {
 };
 
 /**
- * Retrieves a user by their ID from the data source.
+ * Retrieves a user by their ID
  */
 export const getUserById = async (id: string): Promise<User | null> => {
   try {
@@ -128,7 +127,7 @@ export const getUserById = async (id: string): Promise<User | null> => {
 };
 
 /**
- * Retrieves all users who are organizers of a specific community.
+ * Retrieves all community organizers
  */
 export const getCommunityOrganizers = async (communityId: string): Promise<User[]> => {
   try {
@@ -158,7 +157,7 @@ export const getCommunityOrganizers = async (communityId: string): Promise<User[
 };
 
 /**
- * Retrieves all users who are regular members (not organizers) of a specific community.
+ * Retrieves all community members (excluding organizers)
  */
 export const getCommunityMembers = async (communityId: string): Promise<User[]> => {
   try {
@@ -184,6 +183,30 @@ export const getCommunityMembers = async (communityId: string): Promise<User[]> 
   } catch (err) {
     console.error("Error in getCommunityMembers:", err);
     return [];
+  }
+};
+
+/**
+ * Retrieves all users in the system
+ * This now works with our fixed RLS policies
+ */
+export const getAllUsers = async (): Promise<User[]> => {
+  try {
+    const { data: profiles, error } = await supabase
+      .from('profiles')
+      .select('*');
+      
+    if (error) {
+      console.error("Error fetching all users:", error);
+      throw error;
+    }
+    
+    // Transform each profile into a User model
+    const users: Promise<User>[] = profiles.map(profile => mapDbUser(profile));
+    return await Promise.all(users);
+  } catch (error: any) {
+    console.error("Error in getAllUsers repository function:", error);
+    throw error;
   }
 };
 

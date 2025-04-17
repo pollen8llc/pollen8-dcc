@@ -22,3 +22,11 @@ export const getCommunityOrganizers = async (communityId: string): Promise<User[
 export const getCommunityMembers = async (communityId: string): Promise<User[]> => {
   return await userRepository.getCommunityMembers(communityId);
 };
+
+/**
+ * Retrieves all users in the system.
+ * Useful for admin-level operations.
+ */
+export const getAllUsers = async (): Promise<User[]> => {
+  return await userRepository.getAllUsers();
+};

@@ -61,6 +61,7 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
  */
 export const getUserCommunities = async (userId: string) => {
   try {
+    // This query now works because of our fixed RLS policy
     const { data, error } = await supabase
       .from('community_members')
       .select(`
