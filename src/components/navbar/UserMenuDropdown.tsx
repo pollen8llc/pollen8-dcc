@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
 import { 
@@ -29,6 +29,8 @@ interface UserMenuDropdownProps {
 }
 
 const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMenuDropdownProps) => {
+  const navigate = useNavigate();
+
   const getUserInitials = () => {
     if (!currentUser) return "?";
     
@@ -67,6 +69,10 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
       default:
         return "Guest";
     }
+  };
+
+  const handleCommunityManagement = () => {
+    navigate('/organizer');
   };
 
   return (
@@ -116,7 +122,6 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
           </Link>
         </DropdownMenuItem>
         
-        {/* Admin Menu */}
         {isAdmin && (
           <>
             <DropdownMenuSeparator />
@@ -145,11 +150,9 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
         )}
         
         {isOrganizer() && !isAdmin && (
-          <DropdownMenuItem asChild>
-            <Link to="/organizer" className="cursor-pointer flex w-full items-center">
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Community Management</span>
-            </Link>
+          <DropdownMenuItem onClick={handleCommunityManagement} className="cursor-pointer flex w-full items-center">
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Community Management</span>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
