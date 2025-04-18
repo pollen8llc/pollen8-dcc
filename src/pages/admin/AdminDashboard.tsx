@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -15,6 +14,7 @@ import AdminSettingsTab from "@/components/admin/AdminSettingsTab";
 import AdminStatsTab from "@/components/admin/AdminStatsTab";
 import UserManagementTab from "@/components/admin/UserManagementTab";
 import NotFoundState from "@/components/community/NotFoundState";
+import { Bug } from "lucide-react";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
                         Welcome to the admin dashboard. Use the tabs above to manage users, roles, and system settings.
                       </p>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => setActiveTab("users")}>
                           <CardHeader className="pb-2">
                             <CardTitle className="text-lg">User Management</CardTitle>
@@ -143,6 +143,22 @@ const AdminDashboard = () => {
                             <p className="text-sm text-muted-foreground">
                               Configure global settings and system preferences
                             </p>
+                          </CardContent>
+                        </Card>
+                        <Card 
+                          className="hover:shadow-md cursor-pointer transition-all" 
+                          onClick={() => navigate("/admin/debug")}
+                        >
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">Component Debugger</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-2">
+                              <Bug className="h-4 w-4" />
+                              <p className="text-sm text-muted-foreground">
+                                Debug and test components
+                              </p>
+                            </div>
                           </CardContent>
                         </Card>
                       </div>

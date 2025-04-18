@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -17,6 +16,8 @@ import Onboarding from "./pages/Onboarding";
 import CreateCommunity from "./pages/CreateCommunity";
 import JoinCommunities from "./pages/JoinCommunities";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
+import React from 'react';
+import DebuggerDashboard from './pages/admin/DebuggerDashboard';
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -93,6 +94,16 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredRole="ORGANIZER">
             <OrganizerDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Add new debugger route */}
+      <Route 
+        path="/admin/debug" 
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <DebuggerDashboard />
           </ProtectedRoute>
         } 
       />

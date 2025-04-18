@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Check } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 
 interface ArticleCardProps {
@@ -10,8 +9,6 @@ interface ArticleCardProps {
     id: string;
     title: string;
     content: string;
-    vote_count?: number;
-    is_answered?: boolean;
     created_at: string;
     tags?: { tag: { name: string } }[];
   };
@@ -29,12 +26,6 @@ const ArticleCard = ({ article, onArticleClick }: ArticleCardProps) => {
           <CardTitle className="text-xl">{article.title}</CardTitle>
           <CardDescription className="mt-2 line-clamp-2">{article.content}</CardDescription>
         </div>
-        
-        {article.is_answered && (
-          <div className="text-green-500">
-            <Check className="h-6 w-6" />
-          </div>
-        )}
       </CardHeader>
       
       <CardContent>

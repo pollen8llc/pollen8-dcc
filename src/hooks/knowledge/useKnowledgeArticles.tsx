@@ -2,7 +2,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { KnowledgeArticle } from '@/models/types';
 import { useSession } from '@/hooks/useSession';
 
 export const useKnowledgeArticles = (communityId: string) => {
@@ -15,18 +14,18 @@ export const useKnowledgeArticles = (communityId: string) => {
     queryFn: async () => {
       console.log('Fetching articles for community:', communityId);
       
-      // Simplified query that avoids expensive joins
       const { data, error } = await supabase
         .from('knowledge_articles')
         .select(`
           id,
           title,
-          content, 
+          content,
           created_at,
-          user_id,
-          is_answered,
-          vote_count,
-          views
+          tags (
+            tag (
+              name
+            )
+          )
         `)
         .eq('community_id', communityId)
         .order('created_at', { ascending: false });
@@ -36,11 +35,10 @@ export const useKnowledgeArticles = (communityId: string) => {
         throw error;
       }
 
-      return data || [];
+      return data;
     },
     enabled: !!communityId,
-    retry: 1,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes to reduce database calls
+    retry: 1
   });
 
   const createArticle = useMutation({
