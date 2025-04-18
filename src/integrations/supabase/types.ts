@@ -130,6 +130,86 @@ export type Database = {
           },
         ]
       }
+      knowledge_article_tags: {
+        Row: {
+          article_id: string
+          tag_id: string
+        }
+        Insert: {
+          article_id: string
+          tag_id: string
+        }
+        Update: {
+          article_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_article_tags_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_article_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_articles: {
+        Row: {
+          community_id: string
+          content: string
+          created_at: string
+          id: string
+          is_answered: boolean | null
+          search_vector: unknown | null
+          title: string
+          updated_at: string
+          user_id: string
+          views: number | null
+          vote_count: number | null
+        }
+        Insert: {
+          community_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_answered?: boolean | null
+          search_vector?: unknown | null
+          title: string
+          updated_at?: string
+          user_id: string
+          views?: number | null
+          vote_count?: number | null
+        }
+        Update: {
+          community_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_answered?: boolean | null
+          search_vector?: unknown | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views?: number | null
+          vote_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_articles_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_base: {
         Row: {
           community_id: string
@@ -164,6 +244,213 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_comments: {
+        Row: {
+          article_id: string
+          content: string
+          created_at: string
+          id: string
+          is_accepted: boolean | null
+          updated_at: string
+          user_id: string
+          vote_count: number | null
+        }
+        Insert: {
+          article_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_accepted?: boolean | null
+          updated_at?: string
+          user_id: string
+          vote_count?: number | null
+        }
+        Update: {
+          article_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_accepted?: boolean | null
+          updated_at?: string
+          user_id?: string
+          vote_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_comments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_poll_options: {
+        Row: {
+          id: string
+          option_text: string
+          poll_id: string
+          votes: number | null
+        }
+        Insert: {
+          id?: string
+          option_text: string
+          poll_id: string
+          votes?: number | null
+        }
+        Update: {
+          id?: string
+          option_text?: string
+          poll_id?: string
+          votes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_polls: {
+        Row: {
+          article_id: string
+          created_at: string
+          ends_at: string | null
+          id: string
+          is_closed: boolean | null
+          question: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_closed?: boolean | null
+          question: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_closed?: boolean | null
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_polls_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_tags: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      knowledge_votes: {
+        Row: {
+          article_id: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          user_id: string
+          vote_type: number
+        }
+        Insert: {
+          article_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          user_id: string
+          vote_type: number
+        }
+        Update: {
+          article_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string
+          vote_type?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_votes_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_votes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_comments"
             referencedColumns: ["id"]
           },
         ]
