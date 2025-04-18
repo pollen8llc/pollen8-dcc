@@ -35,23 +35,12 @@ export const getAllUsers = async (): Promise<User[]> => {
       console.error("Error fetching user roles:", rolesError);
       throw new Error(rolesError.message);
     }
-    
-    // Get community memberships safely without causing recursion
-    // This uses the new policy we created
-    const { data: memberships, error: membershipError } = await supabase
-      .from('community_members')
-      .select('user_id, community_id, role');
-      
-    if (membershipError) {
-      console.error("Error fetching community memberships:", membershipError);
-      throw new Error(membershipError.message);
-    }
-    
+
     console.log('Raw profiles data:', profiles?.length || 0, 'profiles found');
     console.log('Raw user roles data:', userRoles?.length || 0, 'role records found');
-    console.log('Raw memberships data:', memberships?.length || 0, 'membership records found');
     
-    // Map profiles to User objects
+    // Map profiles to User objects without immediately loading community data
+    // This avoids the infinite recursion in the RLS policy
     const users: User[] = profiles.map(profile => {
       // Find roles for this user
       const userRolesForUser = userRoles?.filter(r => r.user_id === profile.id) || [];
@@ -62,30 +51,16 @@ export const getAllUsers = async (): Promise<User[]> => {
       // Check if user has organizer role
       const isOrganizer = userRolesForUser.some(r => r.roles && r.roles.name === 'ORGANIZER');
       
-      // Find user's community memberships
-      const userMemberships = memberships?.filter(m => m.user_id === profile.id) || [];
-      
-      // Get communities user is a member of
-      const communities = userMemberships.map(m => m.community_id);
-      
-      // Get communities user manages
-      const managedCommunities = userMemberships
-        .filter(m => m.role === 'admin')
-        .map(m => m.community_id);
-      
-      // Determine user's role based on the new role system
+      // Determine user's role based on the roles system
       let role = UserRole.MEMBER;
       
       if (isAdmin) {
         role = UserRole.ADMIN;
-      } else if (isOrganizer || managedCommunities.length > 0) {
+      } else if (isOrganizer) {
         role = UserRole.ORGANIZER;
-      } else if (communities.length > 0) {
-        role = UserRole.MEMBER;
-      } else {
-        role = UserRole.GUEST;
       }
       
+      // Create user object without community data initially
       const user = {
         id: profile.id,
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',
@@ -93,19 +68,42 @@ export const getAllUsers = async (): Promise<User[]> => {
         imageUrl: profile.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         email: profile.email || "",
         bio: "",
-        communities,
-        managedCommunities,
+        communities: [],
+        managedCommunities: [],
         createdAt: profile.created_at
       };
-      
-      console.log(`Transformed user ${profile.id}:`, user.name, user.role, 
-        `Communities: ${communities.length}`, 
-        `Managed: ${managedCommunities.length}`);
       
       return user;
     });
     
     console.log('Transformed user data:', users.length, 'users processed');
+
+    // Now fetch community memberships separately for each user
+    // This approach avoids the recursive RLS policy issue
+    for (const user of users) {
+      try {
+        const { data: memberships, error: membershipError } = await supabase
+          .rpc('get_user_memberships', { user_id: user.id });
+          
+        if (!membershipError && memberships) {
+          user.communities = memberships.map(m => m.community_id);
+          user.managedCommunities = memberships
+            .filter(m => m.role === 'admin')
+            .map(m => m.community_id);
+            
+          // Adjust role based on community memberships if needed
+          if (user.role !== UserRole.ADMIN && user.managedCommunities.length > 0) {
+            user.role = UserRole.ORGANIZER;
+          } else if (user.role === UserRole.GUEST && user.communities.length > 0) {
+            user.role = UserRole.MEMBER;
+          }
+        }
+      } catch (err) {
+        console.warn(`Error fetching memberships for user ${user.id}:`, err);
+        // Continue with empty memberships rather than failing the whole operation
+      }
+    }
+    
     return users;
   } catch (error: any) {
     console.error("Error fetching users:", error);
