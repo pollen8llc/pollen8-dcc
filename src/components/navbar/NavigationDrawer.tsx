@@ -1,4 +1,4 @@
-
+import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { User, UserRole } from "@/models/types";
 import { 
@@ -6,11 +6,7 @@ import {
   SheetContent, 
   SheetHeader,
   SheetTitle,
-  SheetFooter
 } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { 
   Shield, 
@@ -24,6 +20,9 @@ import {
   BookOpen
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 interface NavigationDrawerProps {
   open: boolean;
