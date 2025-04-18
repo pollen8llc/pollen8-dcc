@@ -36,22 +36,34 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (event.key === 'should_refresh_user_role') {
         console.log("User role change detected, refreshing...");
         refreshUser();
+        
+        // Show toast notification about role change
+        toast({
+          title: "Role updated",
+          description: "Your user role has been updated. Some functionality may be different.",
+        });
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [refreshUser]);
+  }, [refreshUser, toast]);
 
-  // Check for initial refresh flag
+  // Check for initial refresh flag - this handles the case when the user's own role was changed
   useEffect(() => {
     const shouldRefresh = localStorage.getItem('should_refresh_user_role');
     if (shouldRefresh === 'true' && currentUser) {
       console.log("Initial role refresh needed...");
       localStorage.removeItem('should_refresh_user_role');
       refreshUser();
+      
+      // Show toast notification about role change
+      toast({
+        title: "Role updated",
+        description: "Your user role has been updated. Some functionality may be different.",
+      });
     }
-  }, [currentUser, refreshUser]);
+  }, [currentUser, refreshUser, toast]);
 
   // Wrap logout to add toast notifications
   const handleLogout = async (): Promise<void> => {

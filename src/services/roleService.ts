@@ -27,10 +27,12 @@ export const updateUserRole = async (
     
     console.log(`Role update completed successfully for user ${userId} to ${role}`);
     
-    // After updating the role in the database, invalidate any cached user data
-    // This will force a refresh when the user logs in next time
+    // After updating the role, set a flag to trigger a refresh when the user logs in next
+    // This works across tabs/windows via the storage event listener in UserContext
     try {
-      // Optionally, we could use a dedicated function to clear cache if needed
+      localStorage.setItem('should_refresh_user_role', 'true');
+      
+      // Log the action for audit purposes
       await logAuditAction({
         action: 'update_role',
         targetUserId: userId,

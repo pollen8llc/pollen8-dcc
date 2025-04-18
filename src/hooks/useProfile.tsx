@@ -54,7 +54,7 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Profile fetched:", profile);
 
-      // Get user's highest role using our database function - ensure we're getting up-to-date role information
+      // Force-fetch the user's highest role from the database to ensure it's up-to-date
       const { data: highestRole, error: roleError } = await supabase
         .rpc('get_highest_role', { user_id: userId });
       
@@ -65,16 +65,30 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Highest role from database:", highestRole);
 
-      // Create user object with role from database
+      // Create user object with role from database - explicitly convert to enum
+      const role = UserRole[highestRole as keyof typeof UserRole] || UserRole.MEMBER;
+      console.log("Mapped role:", role);
+
+      // Get user's community memberships for proper role-based access
+      const { data: memberships, error: membershipError } = await supabase
+        .rpc('get_user_memberships', { user_id: userId });
+        
+      if (membershipError) {
+        console.error("Error fetching memberships:", membershipError);
+      }
+      
+      const communities = memberships?.map(m => m.community_id) || [];
+      const managedCommunities = memberships?.filter(m => m.role === 'admin').map(m => m.community_id) || [];
+
       const userData: User = {
         id: userId,
         name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'User',
-        role: UserRole[highestRole as keyof typeof UserRole] || UserRole.MEMBER,
+        role: role,
         imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         email: profile?.email || "",
         bio: "", // Default empty string as bio is not in the profiles table
-        communities: [],
-        managedCommunities: [],
+        communities,
+        managedCommunities,
         createdAt: profile?.created_at || new Date().toISOString()
       };
 
@@ -122,6 +136,8 @@ export const useProfile = (session: Session | null) => {
     try {
       if (session && session.user) {
         await fetchUserProfile(session.user.id);
+        // Clear the role refresh flag after successful refresh
+        localStorage.removeItem('should_refresh_user_role');
       } else {
         setCurrentUser(null);
       }

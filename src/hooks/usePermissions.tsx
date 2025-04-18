@@ -20,6 +20,11 @@ export const usePermissions = (currentUser: User | null) => {
         console.error("Error getting highest role:", roleError);
         // Fall back to client-side checks
       } else if (roleName) {
+        // Check if we got ADMIN back from database (security definer function)
+        if (roleName === 'ADMIN') {
+          return true;
+        }
+        
         // Get the role details
         const { data: roleDetails, error: detailsError } = await supabase
           .from('roles')
@@ -58,22 +63,6 @@ export const usePermissions = (currentUser: User | null) => {
               permissions[resource].includes(action)) {
             return true;
           }
-          
-          // Special cases for resources with IDs (e.g. "community:123")
-          if (resource.includes(':')) {
-            const [resourceType, resourceId] = resource.split(':');
-            
-            // Community-specific permissions
-            if (resourceType === 'community') {
-              // For community resources, check if user is an organizer for that specific community
-              // using the cached data in the user object for performance
-              if (currentUser.managedCommunities?.includes(resourceId)) {
-                return true;
-              }
-              // Regular members can only read community data
-              return action === 'read';
-            }
-          }
         }
       }
     } catch (error) {
@@ -81,7 +70,8 @@ export const usePermissions = (currentUser: User | null) => {
       // Fall back to client-side checks
     }
     
-    // Fall back to the old role-based check system
+    // Fall back to the old role-based check system using the currentUser role
+    // This ensures we don't have circular dependencies or infinite recursion
     switch (currentUser.role) {
       case UserRole.ORGANIZER:
         // Organizers can manage their own communities
