@@ -40,7 +40,6 @@ export const getAllUsers = async (): Promise<User[]> => {
     console.log('Raw user roles data:', userRoles?.length || 0, 'role records found');
     
     // Map profiles to User objects without immediately loading community data
-    // This avoids the infinite recursion in the RLS policy
     const users: User[] = profiles.map(profile => {
       // Find roles for this user
       const userRolesForUser = userRoles?.filter(r => r.user_id === profile.id) || [];
@@ -78,14 +77,20 @@ export const getAllUsers = async (): Promise<User[]> => {
     
     console.log('Transformed user data:', users.length, 'users processed');
 
-    // Now fetch community memberships separately for each user
-    // This approach avoids the recursive RLS policy issue
+    // Now fetch community memberships separately for each user using the new function
     for (const user of users) {
       try {
+        // Use the new get_user_memberships function
         const { data: memberships, error: membershipError } = await supabase
           .rpc('get_user_memberships', { user_id: user.id });
           
-        if (!membershipError && memberships) {
+        if (membershipError) {
+          console.error(`Error fetching memberships for user ${user.id}:`, membershipError);
+          continue;
+        }
+
+        if (memberships) {
+          // Update the user's communities and managed communities
           user.communities = memberships.map(m => m.community_id);
           user.managedCommunities = memberships
             .filter(m => m.role === 'admin')
@@ -94,8 +99,6 @@ export const getAllUsers = async (): Promise<User[]> => {
           // Adjust role based on community memberships if needed
           if (user.role !== UserRole.ADMIN && user.managedCommunities.length > 0) {
             user.role = UserRole.ORGANIZER;
-          } else if (user.role === UserRole.GUEST && user.communities.length > 0) {
-            user.role = UserRole.MEMBER;
           }
         }
       } catch (err) {
@@ -133,3 +136,4 @@ export const getUserCounts = async () => {
     throw error;
   }
 };
+

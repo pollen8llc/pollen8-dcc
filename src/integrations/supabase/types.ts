@@ -263,6 +263,13 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      get_user_memberships: {
+        Args: { user_id: string }
+        Returns: {
+          community_id: string
+          role: string
+        }[]
+      }
       get_user_roles: {
         Args: { user_id: string }
         Returns: string[]
