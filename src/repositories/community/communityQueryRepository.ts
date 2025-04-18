@@ -1,6 +1,6 @@
 
 import { Community } from "@/models/types";
-import { supabase, mockCommunities, mapDbCommunity } from "../base/baseRepository";
+import { supabase, mockCommunities, mapDbCommunity, mapLegacyCommunity } from "../base/baseRepository";
 
 /**
  * Gets all communities
@@ -13,20 +13,20 @@ export const getAllCommunities = async (): Promise<Community[]> => {
     
     if (error) {
       console.error("Error fetching communities:", error);
-      // Fallback to mock data
-      return mockCommunities;
+      // Fallback to mock data, ensuring proper type mapping
+      return mockCommunities.map(mapLegacyCommunity);
     }
     
     if (!data || data.length === 0) {
       console.log("No communities found in database, using mock data");
-      return mockCommunities;
+      return mockCommunities.map(mapLegacyCommunity);
     }
     
     return data.map(mapDbCommunity);
   } catch (err) {
     console.error("Error in getAllCommunities:", err);
-    // Fallback to mock data
-    return mockCommunities;
+    // Fallback to mock data, ensuring proper type mapping
+    return mockCommunities.map(mapLegacyCommunity);
   }
 };
 
@@ -47,14 +47,14 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
     if (error) {
       console.error("Error fetching community:", error);
       const mockCommunity = mockCommunities.find(community => community.id === id);
-      return mockCommunity ? mapDbCommunity(mockCommunity) : null;
+      return mockCommunity ? mapLegacyCommunity(mockCommunity) : null;
     }
     
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in getCommunityById:", err);
     const mockCommunity = mockCommunities.find(community => community.id === id);
-    return mockCommunity ? mapDbCommunity(mockCommunity) : null;
+    return mockCommunity ? mapLegacyCommunity(mockCommunity) : null;
   }
 };
 
@@ -77,7 +77,7 @@ export const searchCommunities = async (query: string): Promise<Community[]> => 
         community.description.toLowerCase().includes(lowercaseQuery) ||
         community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
       );
-      return filteredCommunities.map(mapDbCommunity);
+      return filteredCommunities.map(mapLegacyCommunity);
     }
     
     if (!data || data.length === 0) {
@@ -88,7 +88,7 @@ export const searchCommunities = async (query: string): Promise<Community[]> => 
         community.description.toLowerCase().includes(lowercaseQuery) ||
         community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
       );
-      return filteredCommunities.map(mapDbCommunity);
+      return filteredCommunities.map(mapLegacyCommunity);
     }
     
     return data.map(mapDbCommunity);
@@ -100,7 +100,7 @@ export const searchCommunities = async (query: string): Promise<Community[]> => 
       community.description.toLowerCase().includes(lowercaseQuery) ||
       community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
     );
-    return filteredCommunities.map(mapDbCommunity);
+    return filteredCommunities.map(mapLegacyCommunity);
   }
 };
 
@@ -123,7 +123,7 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
       const filteredCommunities = mockCommunities.filter(community => 
         community.organizerIds.includes(userId)
       );
-      return filteredCommunities.map(mapDbCommunity);
+      return filteredCommunities.map(mapLegacyCommunity);
     }
     
     return data.map(item => mapDbCommunity(item.communities));
@@ -132,6 +132,6 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
     const filteredCommunities = mockCommunities.filter(community => 
       community.organizerIds.includes(userId)
     );
-    return filteredCommunities.map(mapDbCommunity);
+    return filteredCommunities.map(mapLegacyCommunity);
   }
 };

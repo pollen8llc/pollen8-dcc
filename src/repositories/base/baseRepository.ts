@@ -31,9 +31,19 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
  */
 export const mapLegacyCommunity = (community: any): Community => {
   return {
-    ...community,
+    id: community.id,
+    name: community.name,
+    description: community.description || "",
+    location: community.location || "Remote",
+    imageUrl: community.imageUrl,
+    memberCount: community.memberCount || 0,
+    organizerIds: community.organizerIds || [],
+    memberIds: community.memberIds || [],
+    tags: community.tags || [],
+    isPublic: community.isPublic !== undefined ? community.isPublic : true,
     createdAt: community.createdAt || new Date().toISOString(),
-    updatedAt: community.updatedAt || new Date().toISOString()
+    updatedAt: community.updatedAt || new Date().toISOString(),
+    website: community.website || ""
   };
 };
 
