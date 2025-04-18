@@ -30,31 +30,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log("UserContext rendering, current user:", currentUser?.name, "role:", currentUser?.role);
   }, [currentUser]);
 
-  // Force refresh user data when role might have changed
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'should_refresh_user_role') {
-        console.log("User role change detected, refreshing...");
-        
-        // Force invalidate relevant queries
-        queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-        queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
-        
-        // Refresh the user data
-        refreshUser();
-        
-        // Show toast notification about role change
-        toast({
-          title: "Role updated",
-          description: "Your user role has been updated. Some functionality may be different.",
-        });
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [refreshUser, toast, queryClient]);
-
   // Check for initial refresh flag - this handles the case when the user's own role was changed
   useEffect(() => {
     const shouldRefresh = localStorage.getItem('should_refresh_user_role');
@@ -67,15 +42,44 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Clear the flag and refresh user data
       localStorage.removeItem('should_refresh_user_role');
-      refreshUser();
-      
-      // Show toast notification about role change
-      toast({
-        title: "Role updated",
-        description: "Your user role has been updated. Some functionality may be different.",
+      refreshUser().then(() => {
+        // Show toast notification about role change
+        toast({
+          title: "Role updated",
+          description: "Your user role has been updated. Some functionality may be different.",
+        });
+      }).catch(error => {
+        console.error("Error refreshing user after role change:", error);
       });
     }
   }, [currentUser, refreshUser, toast, queryClient]);
+
+  // Force refresh user data when role might have changed
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'should_refresh_user_role') {
+        console.log("User role change detected, refreshing...");
+        
+        // Force invalidate relevant queries
+        queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
+        
+        // Refresh the user data
+        refreshUser().then(() => {
+          // Show toast notification about role change
+          toast({
+            title: "Role updated",
+            description: "Your user role has been updated. Some functionality may be different.",
+          });
+        }).catch(error => {
+          console.error("Error refreshing user after role change:", error);
+        });
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [refreshUser, toast, queryClient]);
 
   // Wrap logout to add toast notifications
   const handleLogout = async (): Promise<void> => {

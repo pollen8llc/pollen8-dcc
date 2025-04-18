@@ -10,11 +10,10 @@ interface UserBadgeProps {
 
 const UserBadge = ({ currentUser, isAdmin }: UserBadgeProps) => {
   const getBadgeColor = () => {
-    if (isAdmin || currentUser.role === UserRole.ADMIN) {
-      return "bg-purple-500 hover:bg-purple-600";
-    }
-    
+    // Use only the currentUser.role for determining badge color, ignore isAdmin param
     switch (currentUser.role) {
+      case UserRole.ADMIN:
+        return "bg-purple-500 hover:bg-purple-600";
       case UserRole.ORGANIZER:
         return "bg-blue-500 hover:bg-blue-600";
       case UserRole.MEMBER:
@@ -25,11 +24,10 @@ const UserBadge = ({ currentUser, isAdmin }: UserBadgeProps) => {
   };
 
   const getBadgeText = () => {
-    if (isAdmin || currentUser.role === UserRole.ADMIN) {
-      return "Admin";
-    }
-    
+    // Use only the currentUser.role for determining badge text, ignore isAdmin param
     switch (currentUser.role) {
+      case UserRole.ADMIN:
+        return "Admin";
       case UserRole.ORGANIZER:
         return "Organizer";
       case UserRole.MEMBER:

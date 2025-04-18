@@ -70,24 +70,35 @@ export const useProfile = (session: Session | null) => {
         throw userRolesError;
       }
 
-      console.log("User roles fetched:", userRoles);
+      console.log("User roles fetched:", JSON.stringify(userRoles, null, 2));
       
       // Determine the highest role
       let role = UserRole.MEMBER; // Default role
       
       if (userRoles && userRoles.length > 0) {
         // Check for admin role
-        const isAdmin = userRoles.some(r => r.roles && r.roles.name === 'ADMIN');
+        const hasAdminRole = userRoles.some(r => {
+          return r.roles && r.roles.name === 'ADMIN';
+        });
         
-        if (isAdmin) {
+        if (hasAdminRole) {
           role = UserRole.ADMIN;
+          console.log("User has ADMIN role");
         } else {
           // Check for organizer role
-          const isOrganizer = userRoles.some(r => r.roles && r.roles.name === 'ORGANIZER');
-          if (isOrganizer) {
+          const hasOrganizerRole = userRoles.some(r => {
+            return r.roles && r.roles.name === 'ORGANIZER';
+          });
+          
+          if (hasOrganizerRole) {
             role = UserRole.ORGANIZER;
+            console.log("User has ORGANIZER role");
+          } else {
+            console.log("User is a regular MEMBER");
           }
         }
+      } else {
+        console.log("No roles found, defaulting to MEMBER");
       }
       
       console.log("Determined role:", role);

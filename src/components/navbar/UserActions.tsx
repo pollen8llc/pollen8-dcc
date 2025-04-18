@@ -11,7 +11,8 @@ interface UserActionsProps {
 }
 
 const UserActions = ({ currentUser, isOrganizer, logout }: UserActionsProps) => {
-  const isAdmin = currentUser?.role === UserRole.ADMIN;
+  // Use the actual role from currentUser, not a derived value
+  const isAdmin = currentUser.role === UserRole.ADMIN;
 
   return (
     <div className="flex items-center gap-2">

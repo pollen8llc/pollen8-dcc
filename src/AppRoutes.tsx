@@ -31,6 +31,8 @@ const AppRoutes = () => {
     }
   }, [currentUser, navigate]);
 
+  console.log("Current user role in AppRoutes:", currentUser?.role);
+
   return (
     <Routes>
       <Route path="/" element={<Index />} />

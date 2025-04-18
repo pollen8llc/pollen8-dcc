@@ -39,7 +39,7 @@ const ProtectedRoute = ({
   
   // For admin routes specifically, only allow ADMIN role
   if (roleEnum === UserRole.ADMIN && currentUser.role !== UserRole.ADMIN) {
-    console.log("Access denied: User is not admin");
+    console.log("Access denied: User is not admin", currentUser.role);
     return <Navigate to="/" replace />;
   }
   
