@@ -12,8 +12,8 @@ interface ArticleCardProps {
     id: string;
     title: string;
     content: string;
-    vote_count: number;
-    is_answered: boolean;
+    vote_count?: number;
+    is_answered?: boolean;
     created_at: string;
     tags?: { tag: { name: string } }[];
   };
@@ -40,7 +40,7 @@ const ArticleCard = ({ article, onArticleClick }: ArticleCardProps) => {
           >
             <ArrowUpIcon className="h-5 w-5" />
           </Button>
-          <span className="font-bold">{article.vote_count}</span>
+          <span className="font-bold">{article.vote_count || 0}</span>
           <Button 
             variant="ghost" 
             size="sm"

@@ -10,7 +10,7 @@ export const useKnowledgeArticles = (communityId: string) => {
   const queryClient = useQueryClient();
   const { session } = useSession();
 
-  const { data: articles, isLoading } = useQuery({
+  const { data: articles, isLoading, error } = useQuery({
     queryKey: ['knowledge-articles', communityId],
     queryFn: async () => {
       console.log('Fetching articles for community:', communityId);
@@ -38,9 +38,10 @@ export const useKnowledgeArticles = (communityId: string) => {
         throw error;
       }
 
-      return data;
+      return data || [];
     },
     enabled: !!communityId,
+    retry: 1,
   });
 
   const createArticle = useMutation({
@@ -83,6 +84,7 @@ export const useKnowledgeArticles = (communityId: string) => {
   return {
     articles,
     isLoading,
+    error,
     createArticle,
   };
 };

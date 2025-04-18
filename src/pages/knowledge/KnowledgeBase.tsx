@@ -5,11 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, AlertTriangle } from "lucide-react";
 import * as communityService from "@/services/communityService";
 import { useKnowledgeArticles } from "@/hooks/knowledge/useKnowledgeArticles";
 import ArticleCard from "@/components/knowledge/ArticleCard";
 import CreateArticleDialog from "@/components/knowledge/CreateArticleDialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const KnowledgeBase = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -18,10 +19,11 @@ const KnowledgeBase = () => {
   const { data: community, isLoading: communityLoading } = useQuery({
     queryKey: ['community', communityId],
     queryFn: () => communityService.getCommunityById(communityId || ""),
-    enabled: !!communityId
+    enabled: !!communityId,
+    retry: 1,
   });
   
-  const { articles, isLoading: articlesLoading } = useKnowledgeArticles(communityId || "");
+  const { articles, isLoading: articlesLoading, error: articlesError } = useKnowledgeArticles(communityId || "");
   
   // Filter articles based on search query
   const filteredArticles = articles?.filter(article => 
@@ -37,6 +39,25 @@ const KnowledgeBase = () => {
         <Navbar />
         <div className="container mx-auto py-20 text-center">
           <h1 className="text-2xl font-bold">Loading knowledge base...</h1>
+          <p className="mt-4 text-muted-foreground">Please wait while we retrieve the knowledge base content.</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (articlesError) {
+    console.error("Error loading articles:", articlesError);
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto py-20">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              There was an error loading the knowledge base. Please try again later.
+            </AlertDescription>
+          </Alert>
         </div>
       </div>
     );

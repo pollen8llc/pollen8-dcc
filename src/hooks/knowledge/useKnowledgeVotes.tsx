@@ -1,5 +1,5 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/useSession';
@@ -31,6 +31,7 @@ export const useKnowledgeVotes = (articleId?: string, commentId?: string) => {
     onSuccess: () => {
       if (articleId) {
         queryClient.invalidateQueries({ queryKey: ['knowledge-article', articleId] });
+        queryClient.invalidateQueries({ queryKey: ['knowledge-articles'] });
       }
       if (commentId) {
         queryClient.invalidateQueries({ queryKey: ['knowledge-comments', commentId] });

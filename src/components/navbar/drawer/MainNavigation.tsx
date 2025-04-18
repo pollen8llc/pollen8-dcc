@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Home, UserIcon, Library, BookOpen } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
 
 interface MainNavigationProps {
   currentUser: boolean;
@@ -9,6 +10,11 @@ interface MainNavigationProps {
 }
 
 const MainNavigation = ({ currentUser, onNavigate }: MainNavigationProps) => {
+  const { currentUser: user } = useUser();
+  
+  // Get the first community ID for the knowledge base link
+  const firstCommunityId = user?.communities?.[0] || "7";
+  
   return (
     <>
       <h3 className="text-sm font-medium text-muted-foreground mb-1">Main Navigation</h3>
@@ -35,7 +41,7 @@ const MainNavigation = ({ currentUser, onNavigate }: MainNavigationProps) => {
           <Button 
             variant="ghost" 
             className="w-full justify-start" 
-            onClick={() => onNavigate("/knowledge/7")}
+            onClick={() => onNavigate(`/knowledge/${firstCommunityId}`)}
           >
             <Library className="mr-2 h-4 w-4" />
             Knowledge Base
