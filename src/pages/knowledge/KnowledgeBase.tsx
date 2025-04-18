@@ -12,10 +12,12 @@ import ArticleCard from "@/components/knowledge/ArticleCard";
 import CreateArticleDialog from "@/components/knowledge/CreateArticleDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const KnowledgeBase = () => {
   const { communityId } = useParams<{ communityId?: string }>();
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const navigate = useNavigate();
   
   // Fetch community details only if communityId is provided
@@ -27,12 +29,10 @@ const KnowledgeBase = () => {
     staleTime: 60 * 1000,
   });
   
-  const { articles, isLoading: articlesLoading, error: articlesError } = useKnowledgeArticles(communityId);
-  
-  // Simple client-side filtering for search
-  const filteredArticles = articles?.filter(article => 
-    article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.content.toLowerCase().includes(searchQuery.toLowerCase())
+  // Using server-side search with the debounced query
+  const { articles, isLoading: articlesLoading, error: articlesError } = useKnowledgeArticles(
+    communityId, 
+    debouncedSearchQuery
   );
   
   if (articlesLoading) {
@@ -109,13 +109,13 @@ const KnowledgeBase = () => {
       <div className="container mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold mb-4">Questions</h2>
         
-        {filteredArticles && filteredArticles.length > 0 ? (
+        {articles && articles.length > 0 ? (
           <div className="space-y-4">
-            {filteredArticles.map((article) => (
+            {articles.map((article) => (
               <ArticleCard 
                 key={article.id}
                 article={article}
-                onArticleClick={(id) => console.log("Navigate to article:", id)}
+                onArticleClick={(id) => navigate(`/knowledge/article/${id}`)}
               />
             ))}
           </div>
@@ -124,9 +124,9 @@ const KnowledgeBase = () => {
             <CardContent>
               <h3 className="text-lg font-medium">No questions found</h3>
               <p className="mt-2 text-muted-foreground">
-                {articles?.length === 0 
-                  ? "Be the first to ask a question!"
-                  : "Try adjusting your search query."}
+                {debouncedSearchQuery 
+                  ? "Try adjusting your search query."
+                  : "Be the first to ask a question!"}
               </p>
             </CardContent>
           </Card>

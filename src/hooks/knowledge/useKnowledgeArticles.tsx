@@ -4,15 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/useSession';
 
-export const useKnowledgeArticles = (communityId?: string) => {
+export const useKnowledgeArticles = (communityId?: string, searchQuery?: string) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { session } = useSession();
 
   const { data: articles, isLoading, error } = useQuery({
-    queryKey: ['knowledge-articles', communityId],
+    queryKey: ['knowledge-articles', communityId, searchQuery],
     queryFn: async () => {
-      console.log('Fetching articles', communityId ? `for community: ${communityId}` : 'for all communities');
+      console.log('Fetching articles', communityId ? `for community: ${communityId}` : 'for all communities', searchQuery ? `with search: ${searchQuery}` : '');
       
       let query = supabase
         .from('knowledge_articles')
@@ -29,6 +29,38 @@ export const useKnowledgeArticles = (communityId?: string) => {
         query = query.eq('community_id', communityId);
       }
 
+      // If search query is provided, use the search_vector column
+      if (searchQuery && searchQuery.trim() !== '') {
+        // First try to use the search_vector if it exists
+        try {
+          const { data: searchData, error: searchError } = await supabase
+            .from('knowledge_articles')
+            .select(`
+              id,
+              title,
+              content,
+              created_at
+            `)
+            .textSearch('search_vector', searchQuery, {
+              type: 'websearch',
+              config: 'english'
+            });
+
+          if (!searchError && searchData) {
+            return searchData.map(article => ({
+              ...article,
+              tags: []
+            }));
+          }
+        } catch (e) {
+          console.warn('Full-text search failed, falling back to basic filtering:', e);
+          // If search_vector doesn't exist or another error occurs, we fall back to basic filtering
+        }
+        
+        // Fallback to simple ILIKE search if full-text search fails
+        query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+      }
+
       const { data, error } = await query;
 
       if (error) {
@@ -41,7 +73,7 @@ export const useKnowledgeArticles = (communityId?: string) => {
         tags: []
       }));
     },
-    enabled: true, // Always enabled since we don't require communityId anymore
+    enabled: true,
     retry: 1
   });
 
@@ -56,7 +88,7 @@ export const useKnowledgeArticles = (communityId?: string) => {
         .insert({
           title: article.title,
           content: article.content,
-          community_id: article.community_id, // Now optional
+          community_id: article.community_id,
           user_id: session.user.id
         })
         .select()

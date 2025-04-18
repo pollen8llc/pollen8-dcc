@@ -7,14 +7,18 @@ import ArticleCard from '../knowledge/ArticleCard';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { useUser } from '@/contexts/UserContext';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const KnowledgeBaseDebugger = () => {
   const [communityId, setCommunityId] = useState<string | undefined>(undefined);
-  const { articles, isLoading, error } = useKnowledgeArticles(communityId);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const { articles, isLoading, error } = useKnowledgeArticles(communityId, debouncedSearchQuery);
   const { currentUser } = useUser();
   
   const handleClear = () => {
     setCommunityId(undefined);
+    setSearchQuery('');
   };
 
   return (
@@ -43,6 +47,15 @@ const KnowledgeBaseDebugger = () => {
             </div>
             
             <div>
+              <label className="block text-sm font-medium mb-2">Search Query</label>
+              <Input 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for articles"
+              />
+            </div>
+            
+            <div>
               <h3 className="text-sm font-medium mb-2">Current State:</h3>
               <pre className="bg-muted p-4 rounded-md text-sm overflow-auto">
                 {JSON.stringify({
@@ -50,6 +63,7 @@ const KnowledgeBaseDebugger = () => {
                   hasError: !!error,
                   articlesCount: articles?.length || 0,
                   communityFilter: communityId || 'none',
+                  searchQuery: debouncedSearchQuery || 'none',
                   error: error?.message
                 }, null, 2)}
               </pre>
