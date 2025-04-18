@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
@@ -30,7 +29,6 @@ interface UserMenuDropdownProps {
 }
 
 const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMenuDropdownProps) => {
-  // Get user initials for avatar fallback
   const getUserInitials = () => {
     if (!currentUser) return "?";
     
@@ -148,7 +146,7 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
         
         {isOrganizer() && !isAdmin && (
           <DropdownMenuItem asChild>
-            <Link to="/admin" className="cursor-pointer flex w-full items-center">
+            <Link to="/organizer" className="cursor-pointer flex w-full items-center">
               <Shield className="mr-2 h-4 w-4" />
               <span>Community Management</span>
             </Link>
