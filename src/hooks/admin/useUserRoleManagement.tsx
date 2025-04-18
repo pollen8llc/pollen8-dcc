@@ -13,11 +13,17 @@ export function useUserRoleManagement() {
       updateUserRole(userId, role),
     onSuccess: (success) => {
       if (success) {
+        // Invalidate all user-related queries to ensure all UI shows updated roles
         queryClient.invalidateQueries({ queryKey: ['admin-users'] });
         queryClient.invalidateQueries({ queryKey: ['admin-user-stats'] });
+        
+        // Invalidate any user-specific queries that may be cached
+        queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
+        
         toast({
           title: "Role updated",
-          description: "User role has been updated successfully",
+          description: "User role has been updated successfully. User must log out and back in to see changes.",
         });
       } else {
         toast({

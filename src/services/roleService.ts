@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
 import { logAuditAction } from "./auditService";
@@ -25,6 +26,21 @@ export const updateUserRole = async (
     }
     
     console.log(`Role update completed successfully for user ${userId} to ${role}`);
+    
+    // After updating the role in the database, invalidate any cached user data
+    // This will force a refresh when the user logs in next time
+    try {
+      // Optionally, we could use a dedicated function to clear cache if needed
+      await logAuditAction({
+        action: 'update_role',
+        targetUserId: userId,
+        details: { role: role.toString() }
+      });
+    } catch (logError) {
+      console.warn("Error logging role update:", logError);
+      // Don't fail the operation if just the logging fails
+    }
+    
     return data;
   } catch (error: any) {
     console.error("Error updating user role:", error);

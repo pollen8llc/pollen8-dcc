@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
@@ -53,7 +54,7 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Profile fetched:", profile);
 
-      // Get user's highest role using our database function
+      // Get user's highest role using our database function - ensure we're getting up-to-date role information
       const { data: highestRole, error: roleError } = await supabase
         .rpc('get_highest_role', { user_id: userId });
       
@@ -61,6 +62,8 @@ export const useProfile = (session: Session | null) => {
         console.error("Error fetching highest role:", roleError);
         throw roleError;
       }
+
+      console.log("Highest role from database:", highestRole);
 
       // Create user object with role from database
       const userData: User = {

@@ -30,6 +30,29 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log("UserContext rendering, current user:", currentUser?.name, "role:", currentUser?.role);
   }, [currentUser]);
 
+  // Force refresh user data when role might have changed
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'should_refresh_user_role') {
+        console.log("User role change detected, refreshing...");
+        refreshUser();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [refreshUser]);
+
+  // Check for initial refresh flag
+  useEffect(() => {
+    const shouldRefresh = localStorage.getItem('should_refresh_user_role');
+    if (shouldRefresh === 'true' && currentUser) {
+      console.log("Initial role refresh needed...");
+      localStorage.removeItem('should_refresh_user_role');
+      refreshUser();
+    }
+  }, [currentUser, refreshUser]);
+
   // Wrap logout to add toast notifications
   const handleLogout = async (): Promise<void> => {
     try {
