@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -16,12 +15,12 @@ import Documentation from "./pages/Documentation";
 import Onboarding from "./pages/Onboarding";
 import CreateCommunity from "./pages/CreateCommunity";
 import JoinCommunities from "./pages/JoinCommunities";
+import OrganizerDashboard from "./pages/admin/OrganizerDashboard";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
 
-  // Handle admin redirect after login
   useEffect(() => {
     const shouldRedirectToAdmin = localStorage.getItem('shouldRedirectToAdmin');
     
@@ -57,7 +56,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Admin routes - restricted to ADMIN role only */}
       <Route 
         path="/admin" 
         element={
@@ -83,7 +81,15 @@ const AppRoutes = () => {
         } 
       />
       
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route 
+        path="/organizer" 
+        element={
+          <ProtectedRoute requiredRole="ORGANIZER">
+            <OrganizerDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
