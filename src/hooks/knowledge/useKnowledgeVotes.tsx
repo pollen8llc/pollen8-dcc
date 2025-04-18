@@ -2,19 +2,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSession } from '@/hooks/useSession';
 
 export const useKnowledgeVotes = (articleId?: string, commentId?: string) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { session } = useSession();
   
   const voteOnContent = useMutation({
     mutationFn: async ({ voteType }: { voteType: 1 | -1 }) => {
+      if (!session?.user?.id) {
+        throw new Error("You must be logged in to vote");
+      }
+
       const { data, error } = await supabase
         .from('knowledge_votes')
         .upsert({
           article_id: articleId,
           comment_id: commentId,
           vote_type: voteType,
+          user_id: session.user.id
         })
         .select();
 

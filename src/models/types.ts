@@ -1,3 +1,4 @@
+
 export enum UserRole {
   ADMIN = "ADMIN",        // System administrators
   ORGANIZER = "ORGANIZER", // Community organizers
@@ -94,14 +95,43 @@ export interface KnowledgeSection {
 
 export interface KnowledgeArticle {
   id: string;
-  sectionId: string;
   title: string;
   content: string;
-  createdAt: string;
-  updatedAt: string;
-  authorId: string;
-  tags: string[];
-  views: number;
+  user_id: string;
+  community_id: string;
+  created_at: string;
+  updated_at: string;
+  views?: number;
+  is_answered?: boolean;
+  vote_count?: number;
+  tags?: KnowledgeTag[];
+  comments?: KnowledgeComment[];
+}
+
+export interface KnowledgeTag {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface KnowledgeComment {
+  id: string;
+  article_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  is_accepted?: boolean;
+  vote_count?: number;
+}
+
+export interface KnowledgeVote {
+  id: string;
+  user_id: string;
+  article_id?: string;
+  comment_id?: string;
+  vote_type: number; // 1 for upvote, -1 for downvote
+  created_at: string;
 }
 
 export interface AdminPermission {

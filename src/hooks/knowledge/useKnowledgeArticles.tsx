@@ -3,10 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { KnowledgeArticle } from '@/models/types';
+import { useSession } from '@/hooks/useSession';
 
 export const useKnowledgeArticles = (communityId: string) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { session } = useSession();
 
   const { data: articles, isLoading } = useQuery({
     queryKey: ['knowledge-articles', communityId],
@@ -42,10 +44,19 @@ export const useKnowledgeArticles = (communityId: string) => {
   });
 
   const createArticle = useMutation({
-    mutationFn: async (article: Partial<KnowledgeArticle>) => {
+    mutationFn: async (article: { title: string; content: string; community_id: string }) => {
+      if (!session?.user?.id) {
+        throw new Error("You must be logged in to create an article");
+      }
+
       const { data, error } = await supabase
         .from('knowledge_articles')
-        .insert([article])
+        .insert({
+          title: article.title,
+          content: article.content,
+          community_id: article.community_id,
+          user_id: session.user.id
+        })
         .select()
         .single();
 

@@ -33,7 +33,8 @@ const CreateArticleDialog = ({ communityId }: CreateArticleDialogProps) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     await createArticle.mutateAsync({
-      ...values,
+      title: values.title,
+      content: values.content,
       community_id: communityId,
     });
     setOpen(false);
