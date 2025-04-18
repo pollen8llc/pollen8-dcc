@@ -22,6 +22,13 @@ const AppRoutes = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
 
+  // Add debugging to track routing and user state
+  console.log("AppRoutes - Current user state:", { 
+    id: currentUser?.id,
+    role: currentUser?.role,
+    isOrganizer: currentUser?.role === UserRole.ORGANIZER || (currentUser?.managedCommunities?.length || 0) > 0
+  });
+
   useEffect(() => {
     const shouldRedirectToAdmin = localStorage.getItem('shouldRedirectToAdmin');
     
@@ -30,8 +37,6 @@ const AppRoutes = () => {
       localStorage.removeItem('shouldRedirectToAdmin');
     }
   }, [currentUser, navigate]);
-
-  console.log("Current user role in AppRoutes:", currentUser?.role);
 
   return (
     <Routes>
@@ -82,6 +87,7 @@ const AppRoutes = () => {
         } 
       />
       
+      {/* Update the organizer route to explicitly check for ORGANIZER or ADMIN roles */}
       <Route 
         path="/organizer" 
         element={

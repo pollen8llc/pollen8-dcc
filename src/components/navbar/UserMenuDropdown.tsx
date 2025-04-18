@@ -77,6 +77,13 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
     navigate('/organizer');
   };
 
+  // Log organizer status for debugging
+  console.log("UserMenuDropdown - Organizer status:", { 
+    isOrganizer: isOrganizer(),
+    role: currentUser.role,
+    managedCommunities: currentUser.managedCommunities
+  });
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -151,8 +158,12 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
           </>
         )}
         
-        {isOrganizer() && !isAdmin && (
-          <DropdownMenuItem onClick={handleCommunityManagement} className="cursor-pointer flex w-full items-center">
+        {/* Modify the organizer dashboard access logic for clarity */}
+        {(isOrganizer() || currentUser.managedCommunities?.length > 0) && !isAdmin && (
+          <DropdownMenuItem
+            onClick={handleCommunityManagement}
+            className="cursor-pointer flex w-full items-center"
+          >
             <Shield className="mr-2 h-4 w-4" />
             <span>Community Management</span>
           </DropdownMenuItem>

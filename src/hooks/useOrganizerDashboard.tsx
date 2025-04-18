@@ -4,22 +4,39 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import * as communityService from '@/services/communityService';
 import { Community } from '@/models/types';
+import { useUser } from '@/contexts/UserContext';
 
 export const useOrganizerDashboard = () => {
   const [communityToDelete, setCommunityToDelete] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  const { data: managedCommunities, isLoading } = useQuery({
-    queryKey: ['managed-communities'],
-    queryFn: () => communityService.getManagedCommunities(""),
+  const { currentUser } = useUser();
+  
+  // Add debugging to track user data
+  console.log("OrganizerDashboard - Current user:", currentUser?.id, "role:", currentUser?.role);
+  
+  const { data: managedCommunities, isLoading, error: communitiesError } = useQuery({
+    queryKey: ['managed-communities', currentUser?.id],
+    queryFn: () => {
+      if (!currentUser?.id) {
+        console.error("Cannot fetch managed communities - user ID is missing");
+        return Promise.resolve([]);
+      }
+      return communityService.getManagedCommunities(currentUser.id);
+    },
+    enabled: !!currentUser?.id, // Only run query if we have a user ID
   });
+
+  // Log any errors for debugging
+  if (communitiesError) {
+    console.error("Error fetching managed communities:", communitiesError);
+  }
 
   const updateCommunityMutation = useMutation({
     mutationFn: (community: Community) => communityService.updateCommunity(community),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['managed-communities'] });
+      queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
       toast({
         title: "Community updated",
         description: "The community visibility has been updated successfully.",
@@ -38,7 +55,7 @@ export const useOrganizerDashboard = () => {
   const deleteCommunityMutation = useMutation({
     mutationFn: (communityId: string) => communityService.deleteCommunity(communityId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['managed-communities'] });
+      queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
       toast({
         title: "Community deleted",
         description: "The community has been deleted successfully.",
@@ -79,6 +96,7 @@ export const useOrganizerDashboard = () => {
     setActiveTab,
     managedCommunities,
     isLoading,
+    communitiesError,
     communityToDelete,
     setCommunityToDelete,
     toggleCommunityVisibility,

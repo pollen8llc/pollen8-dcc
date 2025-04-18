@@ -9,6 +9,14 @@ interface NavLinksProps {
 
 const NavLinks = ({ currentUser, isOrganizer }: NavLinksProps) => {
   const isAdmin = currentUser?.role === UserRole.ADMIN;
+  
+  // Log organizer status for debugging
+  console.log("NavLinks - Navigation status:", { 
+    isAdmin,
+    isOrganizer: isOrganizer(),
+    role: currentUser?.role,
+    managedCommunities: currentUser?.managedCommunities
+  });
 
   return (
     <nav className="hidden md:flex gap-6">
@@ -40,7 +48,8 @@ const NavLinks = ({ currentUser, isOrganizer }: NavLinksProps) => {
               Admin Dashboard
             </Link>
           )}
-          {!isAdmin && isOrganizer() && (
+          {/* Update the condition to check for both role and managed communities */}
+          {!isAdmin && (currentUser.role === UserRole.ORGANIZER || (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) && (
             <Link
               to="/organizer"
               className="text-muted-foreground transition-colors hover:text-foreground font-medium text-blue-500 hover:text-blue-600"

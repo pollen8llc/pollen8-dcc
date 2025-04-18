@@ -16,6 +16,16 @@ const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { currentUser, isLoading } = useUser();
 
+  // Add debugging to track protection flow
+  console.log("ProtectedRoute - Path protection:", {
+    requiredRole,
+    currentUserRole: currentUser?.role,
+    communityId,
+    isLoading,
+    hasUser: !!currentUser,
+    managedCommunities: currentUser?.managedCommunities || []
+  });
+
   if (isLoading) {
     // Show loading state
     return (
@@ -30,6 +40,7 @@ const ProtectedRoute = ({
 
   // Check if user is authenticated
   if (!currentUser) {
+    console.log("ProtectedRoute - No user, redirecting to auth");
     // Redirect to login page
     return <Navigate to="/auth" replace />;
   }
@@ -39,7 +50,7 @@ const ProtectedRoute = ({
   
   // For admin routes specifically, only allow ADMIN role
   if (roleEnum === UserRole.ADMIN && currentUser.role !== UserRole.ADMIN) {
-    console.log("Access denied: User is not admin", currentUser.role);
+    console.log("ProtectedRoute - Access denied: User is not admin", currentUser.role);
     return <Navigate to="/" replace />;
   }
   
@@ -51,7 +62,11 @@ const ProtectedRoute = ({
       (communityId !== undefined && currentUser.managedCommunities?.includes(communityId));
       
     if (!hasAccess) {
-      console.log("Access denied: User is not organizer for this community");
+      console.log("ProtectedRoute - Access denied: User is not organizer", {
+        userRole: currentUser.role,
+        communityId,
+        managedCommunities: currentUser.managedCommunities
+      });
       return <Navigate to="/" replace />;
     }
   }
@@ -64,11 +79,12 @@ const ProtectedRoute = ({
       currentUser.role === UserRole.MEMBER;
       
     if (!hasAccess) {
-      console.log("Access denied: User is not a member");
+      console.log("ProtectedRoute - Access denied: User is not a member");
       return <Navigate to="/" replace />;
     }
   }
 
+  console.log("ProtectedRoute - Access granted");
   // User is authenticated and has required role
   return <>{children}</>;
 };
