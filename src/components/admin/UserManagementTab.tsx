@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import UserManagementTable from "./UserManagementTable";
@@ -12,13 +11,12 @@ import UserCommunitiesDialog from "./UserCommunitiesDialog";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { usePermissions } from "@/hooks/usePermissions";
 import { UserRole } from "@/models/types";
-import UserDebugger from "./UserDebugger"; // Import the debugger component
+import UserDebugger from "./UserDebugger";
 
 const UserManagementTab = () => {
   const { currentUser } = useUser();
   const { hasPermission } = usePermissions(currentUser);
   
-  // Log current user for debugging
   console.log("UserManagementTab rendering with currentUser:", currentUser);
   
   const {
@@ -42,16 +40,13 @@ const UserManagementTab = () => {
     handleViewCommunities,
   } = useUserManagement();
 
-  // Log users data for debugging
   console.log("Users from useUserManagement:", users?.length || 0, "users found");
   console.log("isLoading:", isLoading, "error:", error);
 
-  // Use the synchronous checkPermission instead of the asynchronous hasPermission
   const canManageUsers = currentUser?.role === UserRole.ADMIN;
 
   return (
     <div className="space-y-8">
-      {/* Add the UserDebugger component at the top for testing */}
       <UserDebugger />
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between">
@@ -131,7 +126,6 @@ const UserManagementTab = () => {
         </CardContent>
       </Card>
 
-      {/* User details dialog */}
       {selectedUser && (
         <Dialog open={isUserDetailsOpen} onOpenChange={setIsUserDetailsOpen}>
           <DialogContent className="sm:max-w-[600px]">
@@ -228,7 +222,6 @@ const UserManagementTab = () => {
         </Dialog>
       )}
 
-      {/* Add User Dialog */}
       <AddUserForm
         open={isAddUserOpen}
         onOpenChange={setIsAddUserOpen}
@@ -242,7 +235,6 @@ const UserManagementTab = () => {
         }}
       />
 
-      {/* User Communities Dialog */}
       <UserCommunitiesDialog
         user={selectedUser}
         communities={userCommunities}
