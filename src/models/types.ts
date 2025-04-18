@@ -29,10 +29,8 @@ export interface Community {
   memberIds: string[];
   tags: string[];
   isPublic: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  statistics?: CommunityStatistics;
-  settings?: CommunitySettings;
+  createdAt: string;
+  updatedAt: string;
   website?: string;
 }
 

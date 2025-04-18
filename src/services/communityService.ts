@@ -45,6 +45,13 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
 };
 
 /**
+ * Deletes a community
+ */
+export const deleteCommunity = async (communityId: string): Promise<void> => {
+  return communityRepository.deleteCommunity(communityId);
+};
+
+/**
  * Joins a community
  */
 export const joinCommunity = async (userId: string, communityId: string): Promise<void> => {

@@ -1,26 +1,26 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Community } from "@/models/types";
 import { communities as mockCommunities } from "@/data/communities";
 
 /**
- * Maps database community object to model Community type
+ * Maps a database community record to a Community model
  */
 export const mapDbCommunity = (dbCommunity: any): Community => {
+  // Map the database record to our Community model
   return {
-    id: dbCommunity.id,
-    name: dbCommunity.name,
+    id: dbCommunity.id || String(Date.now()),
+    name: dbCommunity.name || "Unnamed Community",
     description: dbCommunity.description || "",
     location: dbCommunity.location || "Remote",
-    imageUrl: dbCommunity.logo_url,
+    imageUrl: dbCommunity.logo_url || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
     memberCount: dbCommunity.member_count || 0,
-    organizerIds: [], // Will be populated by community_members queries
-    memberIds: [], // Will be populated by community_members queries
-    tags: [], // Will be populated later
-    isPublic: true,
-    createdAt: dbCommunity.created_at,
-    updatedAt: dbCommunity.updated_at,
-    website: dbCommunity.website
+    organizerIds: dbCommunity.organizer_ids || [],
+    memberIds: dbCommunity.member_ids || [],
+    tags: dbCommunity.tags || [],
+    isPublic: dbCommunity.is_public !== undefined ? dbCommunity.is_public : true,
+    createdAt: dbCommunity.created_at || new Date().toISOString(),
+    updatedAt: dbCommunity.updated_at || new Date().toISOString(),
+    website: dbCommunity.website || ""
   };
 };
 
