@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
@@ -77,7 +76,6 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
     navigate('/organizer');
   };
 
-  // Log organizer status for debugging
   console.log("UserMenuDropdown - Organizer status:", { 
     isOrganizer: isOrganizer(),
     role: currentUser.role,
@@ -158,7 +156,6 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
           </>
         )}
         
-        {/* Modify the organizer dashboard access logic for clarity */}
         {(isOrganizer() || currentUser.managedCommunities?.length > 0) && !isAdmin && (
           <DropdownMenuItem
             onClick={handleCommunityManagement}
