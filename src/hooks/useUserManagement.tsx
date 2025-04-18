@@ -31,13 +31,7 @@ export function useUserManagement() {
       return getAllUsers();
     },
     staleTime: 60000, // Cache for 1 minute
-    refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      console.log("admin-users query succeeded with", data.length, "users");
-    },
-    onError: (err) => {
-      console.error("admin-users query failed:", err);
-    }
+    refetchOnWindowFocus: false
   });
 
   // Fetch user stats with proper caching
@@ -48,13 +42,7 @@ export function useUserManagement() {
       return getUserCounts();
     },
     enabled: users.length > 0,
-    staleTime: 60000,
-    onSuccess: (data) => {
-      console.log("admin-user-stats query succeeded:", data);
-    },
-    onError: (err) => {
-      console.error("admin-user-stats query failed:", err);
-    }
+    staleTime: 60000
   });
 
   // Log whenever users data changes
@@ -137,13 +125,7 @@ export function useUserManagement() {
       return getUserCommunities(selectedUser?.id || '');
     },
     enabled: !!selectedUser?.id && isCommunityListOpen,
-    staleTime: 60000,
-    onSuccess: (data) => {
-      console.log("user-communities query succeeded:", data);
-    },
-    onError: (err) => {
-      console.error("user-communities query failed:", err);
-    }
+    staleTime: 60000
   });
 
   // Handler functions
