@@ -291,6 +291,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_user_role: {
+        Args: { p_user_id: string; p_role_name: string; p_assigner_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

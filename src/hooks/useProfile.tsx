@@ -53,112 +53,25 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Profile fetched:", profile);
 
-      // Get user's communities from community_members table
-      let { data: memberData, error: memberError } = await supabase
-        .from('community_members')
-        .select('community_id, role')
-        .eq('user_id', userId);
-
-      if (memberError) {
-        console.error("Error fetching community memberships:", memberError);
-        // Continue with empty memberships rather than failing
-        memberData = [];
-      }
-
-      // Get user's roles from the new role system
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select(`
-          role_id,
-          roles:role_id (
-            name
-          )
-        `)
-        .eq('user_id', userId);
-
-      if (rolesError) {
-        console.error("Error fetching user roles:", rolesError);
-        // Continue without roles rather than failing
-      }
-
-      // Get highest role using our new database function
-      const { data: highestRole, error: highestRoleError } = await supabase
+      // Get user's highest role using our database function
+      const { data: highestRole, error: roleError } = await supabase
         .rpc('get_highest_role', { user_id: userId });
-        
-      if (highestRoleError) {
-        console.error("Error fetching highest role:", highestRoleError);
-        // Fall back to old method
-      }
-
-      console.log("User roles fetched:", userRoles);
-      console.log("Highest role:", highestRole);
-
-      // Extract communities and managed communities
-      const communities = memberData?.map(m => m.community_id) || [];
-      const managedCommunities = memberData
-        ?.filter(m => m.role === 'admin')
-        .map(m => m.community_id) || [];
-
-      // Create user object - determine role based on database information
-      let role = UserRole.MEMBER;
       
-      // Role determination logic:
-      // 1. Use the new highest_role function if available
-      if (highestRole) {
-        role = UserRole[highestRole as keyof typeof UserRole];
-        console.log("Using highest role from function:", role);
+      if (roleError) {
+        console.error("Error fetching highest role:", roleError);
+        throw roleError;
       }
-      // 2. Fallback: determine from user_roles table
-      else if (userRoles && userRoles.length > 0) {
-        // Check for ADMIN role first
-        const adminRole = userRoles.find(r => r.roles.name === 'ADMIN');
-        if (adminRole) {
-          role = UserRole.ADMIN;
-          console.log("User has ADMIN role from user_roles table");
-        }
-        // Then check for ORGANIZER
-        else if (userRoles.find(r => r.roles.name === 'ORGANIZER')) {
-          role = UserRole.ORGANIZER;
-          console.log("User has ORGANIZER role from user_roles table");
-        }
-        // Then check for MEMBER
-        else if (userRoles.find(r => r.roles.name === 'MEMBER')) {
-          role = UserRole.MEMBER;
-          console.log("User has MEMBER role from user_roles table");
-        }
-      }
-      // 3. Fallback: old method
-      else {
-        // Legacy compatibility for admin_roles table
-        const { data: adminRole } = await supabase
-          .from('admin_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .maybeSingle();
 
-        if (adminRole?.role === "ADMIN") {
-          role = UserRole.ADMIN;
-          console.log("User has ADMIN role from admin_roles table (legacy)");
-        }
-        // If not admin, check if user manages any communities
-        else if (managedCommunities.length > 0) {
-          role = UserRole.ORGANIZER;
-        }
-        // If not admin or organizer, but has communities, they're a member
-        else if (communities.length > 0) {
-          role = UserRole.MEMBER;
-        }
-      }
-      
+      // Create user object with role from database
       const userData: User = {
         id: userId,
         name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'User',
-        role: role,
+        role: UserRole[highestRole as keyof typeof UserRole] || UserRole.MEMBER,
         imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         email: profile?.email || "",
         bio: "", // Default empty string as bio is not in the profiles table
-        communities,
-        managedCommunities,
+        communities: [],
+        managedCommunities: [],
         createdAt: profile?.created_at || new Date().toISOString()
       };
 

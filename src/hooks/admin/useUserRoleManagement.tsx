@@ -22,7 +22,7 @@ export function useUserRoleManagement() {
       } else {
         toast({
           title: "Error updating role",
-          description: "There was a problem updating the role",
+          description: "Failed to update user role. Please try again.",
           variant: "destructive",
         });
       }
@@ -31,7 +31,7 @@ export function useUserRoleManagement() {
       console.error("Role update mutation error:", error);
       toast({
         title: "Error updating role",
-        description: "There was a problem updating the role",
+        description: "There was a problem updating the role. Please try again.",
         variant: "destructive",
       });
     }
