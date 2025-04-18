@@ -7,61 +7,75 @@ export const usePermissions = (currentUser: User | null) => {
   const hasPermission = async (resource: string, action: string): Promise<boolean> => {
     if (!currentUser) return false;
     
+    console.log("Checking permission for user:", currentUser.id, "role:", currentUser.role);
+    
     // System admins have all permissions
-    if (currentUser.role === UserRole.ADMIN) return true;
+    if (currentUser.role === UserRole.ADMIN) {
+      console.log("User is ADMIN, granting permission");
+      return true;
+    }
     
     // First, try to use the database function for checking permissions
     try {
-      // Get the role ID for the current user using the highest role
-      const { data: roleName, error: roleError } = await supabase
-        .rpc('get_highest_role', { user_id: currentUser.id });
+      // Get the user's roles from the user_roles table
+      const { data: userRoles, error: userRolesError } = await supabase
+        .from('user_roles')
+        .select(`
+          role_id,
+          roles:role_id (
+            name,
+            permissions
+          )
+        `)
+        .eq('user_id', currentUser.id);
         
-      if (roleError) {
-        console.error("Error getting highest role:", roleError);
+      if (userRolesError) {
+        console.error("Error getting user roles:", userRolesError);
         // Fall back to client-side checks
-      } else if (roleName) {
-        // Check if we got ADMIN back from database (security definer function)
-        if (roleName === 'ADMIN') {
+      } else if (userRoles && userRoles.length > 0) {
+        // Check if user has ADMIN role
+        const adminRole = userRoles.find(r => r.roles && r.roles.name === 'ADMIN');
+        if (adminRole) {
+          console.log("User has ADMIN role from database, granting permission");
           return true;
         }
         
-        // Get the role details
-        const { data: roleDetails, error: detailsError } = await supabase
-          .from('roles')
-          .select('permissions')
-          .eq('name', roleName)
-          .single();
-          
-        if (!detailsError && roleDetails && roleDetails.permissions) {
-          // Check if role has appropriate permissions
-          const permissions = roleDetails.permissions as Record<string, any>;
-          
-          // Check for all permissions
-          if (permissions && typeof permissions === 'object' && 'all' in permissions && permissions.all === true) {
-            return true;
-          }
-          
-          // Check for resource-specific "all actions" permission
-          if (permissions && typeof permissions === 'object' && 
-              resource in permissions && permissions[resource] === true) {
-            return true;
-          }
-          
-          // Check for specific resource and action
-          if (permissions && typeof permissions === 'object' && 
-              resource in permissions && 
-              typeof permissions[resource] === 'object' && 
-              action in permissions[resource] && 
-              permissions[resource][action] === true) {
-            return true;
-          }
-          
-          // Check for array of actions
-          if (permissions && typeof permissions === 'object' && 
-              resource in permissions && 
-              Array.isArray(permissions[resource]) && 
-              permissions[resource].includes(action)) {
-            return true;
+        // Check each role's permissions
+        for (const userRole of userRoles) {
+          if (userRole.roles && userRole.roles.permissions) {
+            const permissions = userRole.roles.permissions as Record<string, any>;
+            
+            // Check for all permissions
+            if (permissions && typeof permissions === 'object' && 'all' in permissions && permissions.all === true) {
+              console.log("User role has 'all' permissions");
+              return true;
+            }
+            
+            // Check for resource-specific "all actions" permission
+            if (permissions && typeof permissions === 'object' && 
+                resource in permissions && permissions[resource] === true) {
+              console.log(`User role has all permissions for resource: ${resource}`);
+              return true;
+            }
+            
+            // Check for specific resource and action
+            if (permissions && typeof permissions === 'object' && 
+                resource in permissions && 
+                typeof permissions[resource] === 'object' && 
+                action in permissions[resource] && 
+                permissions[resource][action] === true) {
+              console.log(`User role has specific permission for ${resource}.${action}`);
+              return true;
+            }
+            
+            // Check for array of actions
+            if (permissions && typeof permissions === 'object' && 
+                resource in permissions && 
+                Array.isArray(permissions[resource]) && 
+                permissions[resource].includes(action)) {
+              console.log(`User role has ${action} in actions array for ${resource}`);
+              return true;
+            }
           }
         }
       }
@@ -70,8 +84,8 @@ export const usePermissions = (currentUser: User | null) => {
       // Fall back to client-side checks
     }
     
-    // Fall back to the old role-based check system using the currentUser role
-    // This ensures we don't have circular dependencies or infinite recursion
+    // Fall back to the role-based check system
+    console.log("Falling back to client-side role checks");
     switch (currentUser.role) {
       case UserRole.ORGANIZER:
         // Organizers can manage their own communities
@@ -97,12 +111,15 @@ export const usePermissions = (currentUser: User | null) => {
   };
 
   // A synchronous version of hasPermission for use in rendering components
-  // This should be used when you need to quickly check basic permissions in UI
   const checkPermission = (resource: string, action: string): boolean => {
     if (!currentUser) return false;
     
+    console.log("Sync checking permission for user:", currentUser.id, "role:", currentUser.role);
+    
     // System admins have all permissions
-    if (currentUser.role === UserRole.ADMIN) return true;
+    if (currentUser.role === UserRole.ADMIN) {
+      return true;
+    }
     
     // Basic role-based check for UI rendering
     switch (currentUser.role) {

@@ -54,20 +54,43 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Profile fetched:", profile);
 
-      // Force-fetch the user's highest role from the database to ensure it's up-to-date
-      const { data: highestRole, error: roleError } = await supabase
-        .rpc('get_highest_role', { user_id: userId });
-      
-      if (roleError) {
-        console.error("Error fetching highest role:", roleError);
-        throw roleError;
+      // Get user's role from the 'user_roles' table
+      const { data: userRoles, error: userRolesError } = await supabase
+        .from('user_roles')
+        .select(`
+          role_id,
+          roles:role_id (
+            name
+          )
+        `)
+        .eq('user_id', userId);
+
+      if (userRolesError) {
+        console.error("Error fetching user roles:", userRolesError);
+        throw userRolesError;
       }
 
-      console.log("Highest role from database:", highestRole);
-
-      // Create user object with role from database - explicitly convert to enum
-      const role = UserRole[highestRole as keyof typeof UserRole] || UserRole.MEMBER;
-      console.log("Mapped role:", role);
+      console.log("User roles fetched:", userRoles);
+      
+      // Determine the highest role
+      let role = UserRole.MEMBER; // Default role
+      
+      if (userRoles && userRoles.length > 0) {
+        // Check for admin role
+        const isAdmin = userRoles.some(r => r.roles && r.roles.name === 'ADMIN');
+        
+        if (isAdmin) {
+          role = UserRole.ADMIN;
+        } else {
+          // Check for organizer role
+          const isOrganizer = userRoles.some(r => r.roles && r.roles.name === 'ORGANIZER');
+          if (isOrganizer) {
+            role = UserRole.ORGANIZER;
+          }
+        }
+      }
+      
+      console.log("Determined role:", role);
 
       // Get user's community memberships for proper role-based access
       const { data: memberships, error: membershipError } = await supabase
@@ -75,11 +98,15 @@ export const useProfile = (session: Session | null) => {
         
       if (membershipError) {
         console.error("Error fetching memberships:", membershipError);
+        throw membershipError;
       }
       
+      console.log("User memberships:", memberships);
+
       const communities = memberships?.map(m => m.community_id) || [];
       const managedCommunities = memberships?.filter(m => m.role === 'admin').map(m => m.community_id) || [];
 
+      // Create user object
       const userData: User = {
         id: userId,
         name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'User',

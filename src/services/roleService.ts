@@ -43,7 +43,7 @@ export const updateUserRole = async (
       // Don't fail the operation if just the logging fails
     }
     
-    return data;
+    return true; // Return true on success
   } catch (error: any) {
     console.error("Error updating user role:", error);
     return false;

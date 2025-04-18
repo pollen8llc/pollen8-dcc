@@ -10,7 +10,7 @@ interface UserBadgeProps {
 
 const UserBadge = ({ currentUser, isAdmin }: UserBadgeProps) => {
   const getBadgeColor = () => {
-    if (isAdmin) {
+    if (isAdmin || currentUser.role === UserRole.ADMIN) {
       return "bg-purple-500 hover:bg-purple-600";
     }
     
@@ -25,7 +25,7 @@ const UserBadge = ({ currentUser, isAdmin }: UserBadgeProps) => {
   };
 
   const getBadgeText = () => {
-    if (isAdmin) {
+    if (isAdmin || currentUser.role === UserRole.ADMIN) {
       return "Admin";
     }
     
