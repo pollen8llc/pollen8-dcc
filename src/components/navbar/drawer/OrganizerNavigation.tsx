@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Shield } from "lucide-react";
+import { LayoutDashboard, Shield } from "lucide-react";
 
 interface OrganizerNavigationProps {
   onNavigate: (path: string) => void;
@@ -18,6 +18,14 @@ const OrganizerNavigation = ({ onNavigate }: OrganizerNavigationProps) => {
       >
         <Shield className="mr-2 h-4 w-4" />
         Community Management
+      </Button>
+      <Button 
+        variant="ghost" 
+        className="w-full justify-start" 
+        onClick={() => onNavigate("/organizer?tab=overview")}
+      >
+        <LayoutDashboard className="mr-2 h-4 w-4" />
+        Organizer Dashboard
       </Button>
     </>
   );

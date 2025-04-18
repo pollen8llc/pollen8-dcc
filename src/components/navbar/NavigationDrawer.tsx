@@ -28,6 +28,13 @@ const NavigationDrawer = ({
 }: NavigationDrawerProps) => {
   const navigate = useNavigate();
   const isAdmin = currentUser?.role === UserRole.ADMIN;
+  
+  // Check if user is an organizer or has managed communities
+  const showOrganizerNav = currentUser && (
+    currentUser.role === UserRole.ORGANIZER || 
+    (currentUser.managedCommunities && currentUser.managedCommunities.length > 0) ||
+    isOrganizer()
+  );
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -73,7 +80,7 @@ const NavigationDrawer = ({
             )}
 
             {/* Organizer section */}
-            {!isAdmin && (isOrganizer() || currentUser?.managedCommunities?.length > 0) && (
+            {showOrganizerNav && !isAdmin && (
               <>
                 <Separator className="my-4" />
                 <OrganizerNavigation onNavigate={handleNavigation} />
