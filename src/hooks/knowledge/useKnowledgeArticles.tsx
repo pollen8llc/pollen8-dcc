@@ -14,21 +14,19 @@ export const useKnowledgeArticles = (communityId: string) => {
     queryKey: ['knowledge-articles', communityId],
     queryFn: async () => {
       console.log('Fetching articles for community:', communityId);
+      
+      // Simplified query that avoids expensive joins
       const { data, error } = await supabase
         .from('knowledge_articles')
         .select(`
-          *,
-          votes: knowledge_votes (
-            vote_type
-          ),
-          comments: knowledge_comments (
-            count
-          ),
-          tags: knowledge_article_tags (
-            tag: knowledge_tags (
-              name
-            )
-          )
+          id,
+          title,
+          content, 
+          created_at,
+          user_id,
+          is_answered,
+          vote_count,
+          views
         `)
         .eq('community_id', communityId)
         .order('created_at', { ascending: false });
@@ -42,6 +40,7 @@ export const useKnowledgeArticles = (communityId: string) => {
     },
     enabled: !!communityId,
     retry: 1,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes to reduce database calls
   });
 
   const createArticle = useMutation({

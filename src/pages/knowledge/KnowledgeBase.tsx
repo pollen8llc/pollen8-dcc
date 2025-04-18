@@ -1,9 +1,9 @@
 
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search, AlertTriangle } from "lucide-react";
 import * as communityService from "@/services/communityService";
@@ -11,21 +11,29 @@ import { useKnowledgeArticles } from "@/hooks/knowledge/useKnowledgeArticles";
 import ArticleCard from "@/components/knowledge/ArticleCard";
 import CreateArticleDialog from "@/components/knowledge/CreateArticleDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { useUser } from "@/contexts/UserContext";
 
 const KnowledgeBase = () => {
   const { communityId } = useParams<{ communityId: string }>();
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+  const { currentUser } = useUser();
+  
+  // Get first community if none specified
+  const effectiveCommunityId = communityId || currentUser?.communities?.[0] || "7";
   
   const { data: community, isLoading: communityLoading } = useQuery({
-    queryKey: ['community', communityId],
-    queryFn: () => communityService.getCommunityById(communityId || ""),
-    enabled: !!communityId,
+    queryKey: ['community', effectiveCommunityId],
+    queryFn: () => communityService.getCommunityById(effectiveCommunityId),
+    enabled: !!effectiveCommunityId,
     retry: 1,
+    staleTime: 60 * 1000, // Cache for 1 minute
   });
   
-  const { articles, isLoading: articlesLoading, error: articlesError } = useKnowledgeArticles(communityId || "");
+  const { articles, isLoading: articlesLoading, error: articlesError } = useKnowledgeArticles(effectiveCommunityId);
   
-  // Filter articles based on search query
+  // Simple client-side filtering for search
   const filteredArticles = articles?.filter(article => 
     article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     article.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -37,9 +45,11 @@ const KnowledgeBase = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="container mx-auto py-20 text-center">
-          <h1 className="text-2xl font-bold">Loading knowledge base...</h1>
-          <p className="mt-4 text-muted-foreground">Please wait while we retrieve the knowledge base content.</p>
+        <div className="container mx-auto py-10 text-center">
+          <div className="animate-pulse">
+            <h1 className="text-2xl font-bold">Loading knowledge base...</h1>
+            <p className="mt-4 text-muted-foreground">Please wait while we retrieve the content.</p>
+          </div>
         </div>
       </div>
     );
@@ -50,7 +60,7 @@ const KnowledgeBase = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="container mx-auto py-20">
+        <div className="container mx-auto py-10">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
@@ -58,6 +68,14 @@ const KnowledgeBase = () => {
               There was an error loading the knowledge base. Please try again later.
             </AlertDescription>
           </Alert>
+          <div className="mt-4 flex justify-center">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.reload()}
+            >
+              Refresh Page
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -67,23 +85,30 @@ const KnowledgeBase = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="container mx-auto py-20 text-center">
+        <div className="container mx-auto py-10 text-center">
           <h1 className="text-2xl font-bold">Community not found</h1>
           <p className="mt-4">The community you're looking for doesn't exist or you don't have access to it.</p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => navigate("/")}
+          >
+            Go to Communities
+          </Button>
         </div>
       </div>
     );
   }
   
   const handleArticleClick = (articleId: string) => {
-    // TODO: Implement article detail view navigation
+    // Placeholder for article detail navigation
     console.log("Navigate to article:", articleId);
   };
   
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="bg-muted/30 py-12">
+      <div className="bg-muted/30 py-8">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
@@ -92,10 +117,10 @@ const KnowledgeBase = () => {
                 Find answers, ask questions, and share your knowledge with the community.
               </p>
             </div>
-            <CreateArticleDialog communityId={communityId || ""} />
+            <CreateArticleDialog communityId={effectiveCommunityId} />
           </div>
           
-          <div className="mt-8 max-w-lg relative">
+          <div className="mt-6 max-w-lg relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               type="search"
@@ -108,45 +133,31 @@ const KnowledgeBase = () => {
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2">
-            <h2 className="text-2xl font-bold mb-6">Questions</h2>
-            {filteredArticles && filteredArticles.length > 0 ? (
-              <div className="space-y-4">
-                {filteredArticles.map((article) => (
-                  <ArticleCard 
-                    key={article.id}
-                    article={article}
-                    onArticleClick={handleArticleClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-muted/30 rounded-lg">
-                <h3 className="text-lg font-medium">No questions found</h3>
-                <p className="mt-2 text-muted-foreground">
-                  {articles?.length === 0 
-                    ? "Be the first to ask a question!"
-                    : "Try adjusting your search query."}
-                </p>
-              </div>
-            )}
+      <div className="container mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold mb-4">Questions</h2>
+        
+        {filteredArticles && filteredArticles.length > 0 ? (
+          <div className="space-y-4">
+            {filteredArticles.map((article) => (
+              <ArticleCard 
+                key={article.id}
+                article={article}
+                onArticleClick={handleArticleClick}
+              />
+            ))}
           </div>
-          
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Popular Tags</h2>
-            <div className="space-y-4">
-              {/* TODO: Implement tag filtering */}
-              <Card className="cursor-pointer hover:bg-muted/20 transition-all">
-                <CardHeader className="py-4">
-                  <CardTitle className="text-base">Getting Started</CardTitle>
-                  <CardDescription>2 questions</CardDescription>
-                </CardHeader>
-              </Card>
-            </div>
-          </div>
-        </div>
+        ) : (
+          <Card className="text-center py-10 bg-muted/30">
+            <CardContent>
+              <h3 className="text-lg font-medium">No questions found</h3>
+              <p className="mt-2 text-muted-foreground">
+                {articles?.length === 0 
+                  ? "Be the first to ask a question!"
+                  : "Try adjusting your search query."}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

@@ -1,11 +1,9 @@
 
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpIcon, ArrowDownIcon, MessageSquare, Check } from "lucide-react";
+import { MessageSquare, Check } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
-import { useKnowledgeVotes } from '@/hooks/knowledge/useKnowledgeVotes';
 
 interface ArticleCardProps {
   article: {
@@ -21,38 +19,12 @@ interface ArticleCardProps {
 }
 
 const ArticleCard = ({ article, onArticleClick }: ArticleCardProps) => {
-  const { voteOnContent } = useKnowledgeVotes(article.id);
-
   return (
     <Card 
       className="hover:bg-accent/5 cursor-pointer transition-colors"
       onClick={() => onArticleClick(article.id)}
     >
       <CardHeader className="flex flex-row items-start space-x-4 pb-2">
-        <div className="flex flex-col items-center space-y-1 min-w-[60px]">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              voteOnContent.mutate({ voteType: 1 });
-            }}
-          >
-            <ArrowUpIcon className="h-5 w-5" />
-          </Button>
-          <span className="font-bold">{article.vote_count || 0}</span>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              voteOnContent.mutate({ voteType: -1 });
-            }}
-          >
-            <ArrowDownIcon className="h-5 w-5" />
-          </Button>
-        </div>
-        
         <div className="flex-1">
           <CardTitle className="text-xl">{article.title}</CardTitle>
           <CardDescription className="mt-2 line-clamp-2">{article.content}</CardDescription>
