@@ -37,35 +37,36 @@ const ProtectedRoute = ({
   // Check if user has required role
   const roleEnum = UserRole[requiredRole as keyof typeof UserRole];
   
-  // Role validation based on hierarchy: ADMIN > ORGANIZER > MEMBER > GUEST
-  let hasRequiredRole = false;
-  
-  switch (roleEnum) {
-    case UserRole.ADMIN:
-      hasRequiredRole = currentUser.role === UserRole.ADMIN;
-      break;
-    
-    case UserRole.ORGANIZER:
-      hasRequiredRole = 
-        currentUser.role === UserRole.ADMIN || 
-        currentUser.role === UserRole.ORGANIZER ||
-        (communityId !== undefined && currentUser.managedCommunities?.includes(communityId));
-      break;
-    
-    case UserRole.MEMBER:
-      hasRequiredRole = 
-        currentUser.role === UserRole.ADMIN || 
-        currentUser.role === UserRole.ORGANIZER || 
-        currentUser.role === UserRole.MEMBER;
-      break;
-    
-    default:
-      hasRequiredRole = true; // GUEST role - everyone has access
-  }
-
-  if (!hasRequiredRole) {
-    // User does not have required permissions
+  // For admin routes specifically, only allow ADMIN role
+  if (roleEnum === UserRole.ADMIN && currentUser.role !== UserRole.ADMIN) {
+    console.log("Access denied: User is not admin");
     return <Navigate to="/" replace />;
+  }
+  
+  // For organizer routes, allow ADMIN or ORGANIZER with management permissions
+  if (roleEnum === UserRole.ORGANIZER) {
+    const hasAccess = 
+      currentUser.role === UserRole.ADMIN || 
+      currentUser.role === UserRole.ORGANIZER ||
+      (communityId !== undefined && currentUser.managedCommunities?.includes(communityId));
+      
+    if (!hasAccess) {
+      console.log("Access denied: User is not organizer for this community");
+      return <Navigate to="/" replace />;
+    }
+  }
+  
+  // For member routes, allow ADMIN, ORGANIZER, or MEMBER
+  if (roleEnum === UserRole.MEMBER) {
+    const hasAccess = 
+      currentUser.role === UserRole.ADMIN || 
+      currentUser.role === UserRole.ORGANIZER || 
+      currentUser.role === UserRole.MEMBER;
+      
+    if (!hasAccess) {
+      console.log("Access denied: User is not a member");
+      return <Navigate to="/" replace />;
+    }
   }
 
   // User is authenticated and has required role

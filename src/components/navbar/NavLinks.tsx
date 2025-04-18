@@ -32,12 +32,20 @@ const NavLinks = ({ currentUser, isOrganizer }: NavLinksProps) => {
           >
             Knowledge Base
           </Link>
-          {(isOrganizer() || isAdmin) && (
+          {isAdmin && (
             <Link
               to="/admin"
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
-              {isAdmin ? "Admin Dashboard" : "Management"}
+              Admin Dashboard
+            </Link>
+          )}
+          {!isAdmin && isOrganizer() && (
+            <Link
+              to="/admin"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Management
             </Link>
           )}
         </>
