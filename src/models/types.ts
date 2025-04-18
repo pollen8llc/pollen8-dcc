@@ -1,4 +1,3 @@
-
 export enum UserRole {
   ADMIN = "ADMIN",        // System administrators
   ORGANIZER = "ORGANIZER", // Community organizers
@@ -142,4 +141,23 @@ export interface AdminPermission {
 export interface UserPermissions {
   userId: string;
   permissions: AdminPermission[];
+}
+
+export interface CommunityOrganizerProfile {
+  id: string;
+  community_id: string;
+  founder_name: string;
+  personal_background?: string;
+  size_demographics?: string;
+  community_structure?: string;
+  team_structure?: string;
+  tech_stack?: string;
+  event_formats?: string;
+  business_model?: string;
+  community_values?: string;
+  challenges?: string;
+  vision?: string;
+  special_notes?: string;
+  created_at?: string;
+  updated_at?: string;
 }

@@ -1,5 +1,6 @@
 import { Community } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
+import { supabase } from "@/utils/supabase";
 
 /**
  * Gets all communities
@@ -83,4 +84,22 @@ export const makeAdmin = async (adminId: string, userId: string, communityId: st
  */
 export const removeAdmin = async (adminId: string, userId: string, communityId: string): Promise<void> => {
   return communityRepository.removeAdmin(adminId, userId, communityId);
+};
+
+/**
+ * Creates a new organizer profile
+ */
+export const createOrganizerProfile = async (profile: Omit<CommunityOrganizerProfile, 'id' | 'created_at' | 'updated_at'>) => {
+  const { data, error } = await supabase
+    .from('community_organizer_profiles')
+    .insert(profile)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating organizer profile:', error);
+    throw error;
+  }
+
+  return data;
 };

@@ -130,6 +130,71 @@ export type Database = {
           },
         ]
       }
+      community_organizer_profiles: {
+        Row: {
+          business_model: string | null
+          challenges: string | null
+          community_id: string | null
+          community_structure: string | null
+          community_values: string | null
+          created_at: string | null
+          event_formats: string | null
+          founder_name: string
+          id: string
+          personal_background: string | null
+          size_demographics: string | null
+          special_notes: string | null
+          team_structure: string | null
+          tech_stack: string | null
+          updated_at: string | null
+          vision: string | null
+        }
+        Insert: {
+          business_model?: string | null
+          challenges?: string | null
+          community_id?: string | null
+          community_structure?: string | null
+          community_values?: string | null
+          created_at?: string | null
+          event_formats?: string | null
+          founder_name: string
+          id?: string
+          personal_background?: string | null
+          size_demographics?: string | null
+          special_notes?: string | null
+          team_structure?: string | null
+          tech_stack?: string | null
+          updated_at?: string | null
+          vision?: string | null
+        }
+        Update: {
+          business_model?: string | null
+          challenges?: string | null
+          community_id?: string | null
+          community_structure?: string | null
+          community_values?: string | null
+          created_at?: string | null
+          event_formats?: string | null
+          founder_name?: string
+          id?: string
+          personal_background?: string | null
+          size_demographics?: string | null
+          special_notes?: string | null
+          team_structure?: string | null
+          tech_stack?: string | null
+          updated_at?: string | null
+          vision?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_organizer_profiles_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_article_tags: {
         Row: {
           article_id: string
