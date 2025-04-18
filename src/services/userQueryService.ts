@@ -86,7 +86,7 @@ export const getAllUsers = async (): Promise<User[]> => {
         role = UserRole.GUEST;
       }
       
-      return {
+      const user = {
         id: profile.id,
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',
         role: role,
@@ -97,6 +97,12 @@ export const getAllUsers = async (): Promise<User[]> => {
         managedCommunities,
         createdAt: profile.created_at
       };
+      
+      console.log(`Transformed user ${profile.id}:`, user.name, user.role, 
+        `Communities: ${communities.length}`, 
+        `Managed: ${managedCommunities.length}`);
+      
+      return user;
     });
     
     console.log('Transformed user data:', users.length, 'users processed');
@@ -111,11 +117,21 @@ export const getAllUsers = async (): Promise<User[]> => {
  * Gets user role counts for dashboard metrics
  */
 export const getUserCounts = async () => {
-  const users = await getAllUsers();
-  return {
-    total: users.length,
-    admins: users.filter(user => user.role === UserRole.ADMIN).length,
-    organizers: users.filter(user => user.role === UserRole.ORGANIZER).length,
-    members: users.filter(user => user.role === UserRole.MEMBER).length,
-  };
+  try {
+    console.log("Getting user counts");
+    const users = await getAllUsers();
+    
+    const counts = {
+      total: users.length,
+      admins: users.filter(user => user.role === UserRole.ADMIN).length,
+      organizers: users.filter(user => user.role === UserRole.ORGANIZER).length,
+      members: users.filter(user => user.role === UserRole.MEMBER).length,
+    };
+    
+    console.log("User counts:", counts);
+    return counts;
+  } catch (error) {
+    console.error("Error getting user counts:", error);
+    throw error;
+  }
 };
