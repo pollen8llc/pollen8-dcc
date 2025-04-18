@@ -15,6 +15,8 @@ const setupCommunity = async () => {
       console.error('Error finding user:', userError);
       return;
     }
+    
+    console.log('Found user:', user);
 
     // Create the community
     const newCommunity = await communityService.createUserCommunity({
@@ -47,6 +49,20 @@ const setupCommunity = async () => {
     }
 
     console.log('User added as admin successfully');
+    
+    // Update the user's roles to ensure they're an organizer if not already
+    const { error: roleError } = await supabase
+      .rpc('update_user_role', { 
+        p_user_id: user.id, 
+        p_role_name: 'ORGANIZER',
+        p_assigner_id: user.id
+      });
+      
+    if (roleError) {
+      console.error('Error updating user role:', roleError);
+    } else {
+      console.log('User role updated to ORGANIZER successfully');
+    }
     
   } catch (error) {
     console.error('Error in setupCommunity:', error);

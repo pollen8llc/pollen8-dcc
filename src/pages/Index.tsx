@@ -10,15 +10,19 @@ import * as communityService from "@/services/communityService";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Pre-fetch communities for better UX with a longer stale time
-  useQuery({
+  // Pre-fetch communities for better UX with a shorter stale time to see updates sooner
+  const { refetch } = useQuery({
     queryKey: ['communities'],
     queryFn: communityService.getAllCommunities,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 60 * 1000, // 1 minute
   });
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+  };
+
+  const handleRefresh = () => {
+    refetch();
   };
 
   return (
@@ -35,16 +39,24 @@ const Index = () => {
       {/* Communities Section */}
       <section className="px-4 pb-20 transition-all duration-300">
         <div className="container mx-auto">
-          <div>
-            {searchQuery && (
+          <div className="flex justify-between items-center">
+            {searchQuery ? (
               <h2 className="text-2xl font-semibold animate-fade-in">
                 Search Results for "{searchQuery}"
               </h2>
+            ) : (
+              <h2 className="text-2xl font-semibold">All Communities</h2>
             )}
-            {!searchQuery && (
-              <Separator className="bg-gray-300 dark:bg-gray-700 transition-all duration-300" />
-            )}
+            
+            <button 
+              onClick={handleRefresh}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Refresh
+            </button>
           </div>
+          
+          <Separator className="my-4 bg-gray-300 dark:bg-gray-700 transition-all duration-300" />
           
           <CommunityList searchQuery={searchQuery} />
         </div>
