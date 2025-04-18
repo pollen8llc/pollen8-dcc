@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
 
@@ -42,6 +41,13 @@ export const updateCommunity = async (community: Community): Promise<Community> 
  */
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   return communityRepository.createCommunity(community);
+};
+
+/**
+ * Creates a new community for a specific user
+ */
+export const createUserCommunity = async (communityData: Partial<Community>): Promise<Community> => {
+  return communityRepository.createCommunity(communityData);
 };
 
 /**
