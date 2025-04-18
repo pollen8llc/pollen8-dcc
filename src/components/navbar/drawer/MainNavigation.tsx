@@ -12,8 +12,8 @@ interface MainNavigationProps {
 const MainNavigation = ({ currentUser, onNavigate }: MainNavigationProps) => {
   const { currentUser: user } = useUser();
   
-  // Get the first community ID for the knowledge base link
-  const firstCommunityId = user?.communities?.[0] || "7";
+  // Get the first community ID without hardcoding
+  const firstCommunityId = user?.communities?.[0];
   
   return (
     <>
@@ -38,14 +38,16 @@ const MainNavigation = ({ currentUser, onNavigate }: MainNavigationProps) => {
             Profile
           </Button>
           
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start" 
-            onClick={() => onNavigate(`/knowledge/${firstCommunityId}`)}
-          >
-            <Library className="mr-2 h-4 w-4" />
-            Knowledge Base
-          </Button>
+          {firstCommunityId && (
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start" 
+              onClick={() => onNavigate(`/knowledge/${firstCommunityId}`)}
+            >
+              <Library className="mr-2 h-4 w-4" />
+              Knowledge Base
+            </Button>
+          )}
         </>
       )}
 
