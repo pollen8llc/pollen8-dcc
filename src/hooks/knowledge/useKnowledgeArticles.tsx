@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/useSession';
 
-export const useKnowledgeArticles = (communityId: string) => {
+export const useKnowledgeArticles = (communityId?: string) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { session } = useSession();
@@ -12,10 +12,9 @@ export const useKnowledgeArticles = (communityId: string) => {
   const { data: articles, isLoading, error } = useQuery({
     queryKey: ['knowledge-articles', communityId],
     queryFn: async () => {
-      console.log('Fetching articles for community:', communityId);
+      console.log('Fetching articles', communityId ? `for community: ${communityId}` : 'for all communities');
       
-      // Simplified query to avoid the tags relation issue
-      const { data, error } = await supabase
+      let query = supabase
         .from('knowledge_articles')
         .select(`
           id,
@@ -23,26 +22,31 @@ export const useKnowledgeArticles = (communityId: string) => {
           content,
           created_at
         `)
-        .eq('community_id', communityId)
         .order('created_at', { ascending: false });
+
+      // Only filter by community if communityId is provided
+      if (communityId) {
+        query = query.eq('community_id', communityId);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching articles:', error);
         throw error;
       }
 
-      // Add empty tags array to each article to satisfy the type
       return data.map(article => ({
         ...article,
         tags: []
       }));
     },
-    enabled: !!communityId,
+    enabled: true, // Always enabled since we don't require communityId anymore
     retry: 1
   });
 
   const createArticle = useMutation({
-    mutationFn: async (article: { title: string; content: string; community_id: string }) => {
+    mutationFn: async (article: { title: string; content: string; community_id?: string }) => {
       if (!session?.user?.id) {
         throw new Error("You must be logged in to create an article");
       }
@@ -52,7 +56,7 @@ export const useKnowledgeArticles = (communityId: string) => {
         .insert({
           title: article.title,
           content: article.content,
-          community_id: article.community_id,
+          community_id: article.community_id, // Now optional
           user_id: session.user.id
         })
         .select()

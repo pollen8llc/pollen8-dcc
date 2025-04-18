@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,26 +12,21 @@ import ArticleCard from "@/components/knowledge/ArticleCard";
 import CreateArticleDialog from "@/components/knowledge/CreateArticleDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@/contexts/UserContext";
 
 const KnowledgeBase = () => {
-  const { communityId } = useParams<{ communityId: string }>();
+  const { communityId } = useParams<{ communityId?: string }>();
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
-  const { currentUser } = useUser();
   
-  // Get first community if none specified
-  const effectiveCommunityId = communityId || currentUser?.communities?.[0] || "7";
-  
-  const { data: community, isLoading: communityLoading } = useQuery({
-    queryKey: ['community', effectiveCommunityId],
-    queryFn: () => communityService.getCommunityById(effectiveCommunityId),
-    enabled: !!effectiveCommunityId,
+  // Fetch community details only if communityId is provided
+  const { data: community } = useQuery({
+    queryKey: ['community', communityId],
+    queryFn: () => communityService.getCommunityById(communityId!),
+    enabled: !!communityId,
     retry: 1,
-    staleTime: 60 * 1000, // Cache for 1 minute
+    staleTime: 60 * 1000,
   });
   
-  const { articles, isLoading: articlesLoading, error: articlesError } = useKnowledgeArticles(effectiveCommunityId);
+  const { articles, isLoading: articlesLoading, error: articlesError } = useKnowledgeArticles(communityId);
   
   // Simple client-side filtering for search
   const filteredArticles = articles?.filter(article => 
@@ -39,9 +34,7 @@ const KnowledgeBase = () => {
     article.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  const isLoading = communityLoading || articlesLoading;
-  
-  if (isLoading) {
+  if (articlesLoading) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -81,30 +74,6 @@ const KnowledgeBase = () => {
     );
   }
   
-  if (!community) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="container mx-auto py-10 text-center">
-          <h1 className="text-2xl font-bold">Community not found</h1>
-          <p className="mt-4">The community you're looking for doesn't exist or you don't have access to it.</p>
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => navigate("/")}
-          >
-            Go to Communities
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  const handleArticleClick = (articleId: string) => {
-    // Placeholder for article detail navigation
-    console.log("Navigate to article:", articleId);
-  };
-  
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -112,12 +81,15 @@ const KnowledgeBase = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">{community.name} Knowledge Base</h1>
+              <h1 className="text-3xl font-bold">
+                {community ? `${community.name} Knowledge Base` : 'Knowledge Base'}
+              </h1>
               <p className="mt-2 text-muted-foreground max-w-2xl">
-                Find answers, ask questions, and share your knowledge with the community.
+                Find answers, ask questions, and share your knowledge
+                {community ? ` with the ${community.name} community` : ''}.
               </p>
             </div>
-            <CreateArticleDialog communityId={effectiveCommunityId} />
+            <CreateArticleDialog communityId={communityId} />
           </div>
           
           <div className="mt-6 max-w-lg relative">
@@ -142,7 +114,7 @@ const KnowledgeBase = () => {
               <ArticleCard 
                 key={article.id}
                 article={article}
-                onArticleClick={handleArticleClick}
+                onArticleClick={(id) => console.log("Navigate to article:", id)}
               />
             ))}
           </div>

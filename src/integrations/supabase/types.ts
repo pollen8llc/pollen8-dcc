@@ -162,7 +162,7 @@ export type Database = {
       }
       knowledge_articles: {
         Row: {
-          community_id: string
+          community_id: string | null
           content: string
           created_at: string
           id: string
@@ -175,7 +175,7 @@ export type Database = {
           vote_count: number | null
         }
         Insert: {
-          community_id: string
+          community_id?: string | null
           content: string
           created_at?: string
           id?: string
@@ -188,7 +188,7 @@ export type Database = {
           vote_count?: number | null
         }
         Update: {
-          community_id?: string
+          community_id?: string | null
           content?: string
           created_at?: string
           id?: string
