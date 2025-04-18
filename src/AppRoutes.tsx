@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -79,13 +80,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
+      
+      {/* General knowledge base route accessible to all */}
+      <Route path="/knowledge" element={<KnowledgeBase />} />
+      
+      {/* Community-specific knowledge base route */}
       <Route 
         path="/knowledge/:communityId" 
-        element={
-          <ProtectedRoute requiredRole="MEMBER">
-            <KnowledgeBase />
-          </ProtectedRoute>
-        } 
+        element={<KnowledgeBase />} 
       />
       
       {/* Update the organizer route to explicitly check for ORGANIZER or ADMIN roles */}

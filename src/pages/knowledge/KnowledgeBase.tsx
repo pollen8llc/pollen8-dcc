@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 const KnowledgeBase = () => {
   const { communityId } = useParams<{ communityId?: string }>();
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
   
   // Fetch community details only if communityId is provided
   const { data: community } = useQuery({
