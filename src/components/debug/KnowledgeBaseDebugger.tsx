@@ -6,11 +6,17 @@ import { useKnowledgeArticles } from '@/hooks/knowledge/useKnowledgeArticles';
 import ArticleCard from '../knowledge/ArticleCard';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { useUser } from '@/contexts/UserContext';
 
 const KnowledgeBaseDebugger = () => {
-  const [communityId, setCommunityId] = useState("7");
+  const [communityId, setCommunityId] = useState<string | undefined>(undefined);
   const { articles, isLoading, error } = useKnowledgeArticles(communityId);
+  const { currentUser } = useUser();
   
+  const handleClear = () => {
+    setCommunityId(undefined);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -20,15 +26,20 @@ const KnowledgeBaseDebugger = () => {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Community ID</label>
+              <label className="block text-sm font-medium mb-2">Community ID (Optional)</label>
               <div className="flex gap-2">
                 <Input 
-                  value={communityId}
-                  onChange={(e) => setCommunityId(e.target.value)}
-                  placeholder="Enter community ID"
+                  value={communityId || ''}
+                  onChange={(e) => setCommunityId(e.target.value || undefined)}
+                  placeholder="Enter community ID (leave empty for all articles)"
                 />
-                <Button onClick={() => setCommunityId("7")}>Reset</Button>
+                <Button onClick={handleClear}>Clear</Button>
               </div>
+              {currentUser && (
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground">Your communities: {currentUser.communities?.join(', ') || 'None'}</p>
+                </div>
+              )}
             </div>
             
             <div>
@@ -38,6 +49,7 @@ const KnowledgeBaseDebugger = () => {
                   isLoading,
                   hasError: !!error,
                   articlesCount: articles?.length || 0,
+                  communityFilter: communityId || 'none',
                   error: error?.message
                 }, null, 2)}
               </pre>
