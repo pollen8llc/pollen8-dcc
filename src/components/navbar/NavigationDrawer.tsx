@@ -1,28 +1,15 @@
+
 import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { User, UserRole } from "@/models/types";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { 
-  Shield, 
-  Library, 
-  UserIcon, 
-  FileText, 
-  Users, 
-  Settings,
-  LogOut,
-  Home,
-  BookOpen
-} from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import UserHeader from './drawer/UserHeader';
+import MainNavigation from './drawer/MainNavigation';
+import AdminNavigation from './drawer/AdminNavigation';
+import OrganizerNavigation from './drawer/OrganizerNavigation';
+import AuthActions from './drawer/AuthActions';
 
 interface NavigationDrawerProps {
   open: boolean;
@@ -41,50 +28,6 @@ const NavigationDrawer = ({
 }: NavigationDrawerProps) => {
   const navigate = useNavigate();
   const isAdmin = currentUser?.role === UserRole.ADMIN;
-
-  const getUserInitials = () => {
-    if (!currentUser) return "?";
-    
-    const nameParts = currentUser.name.split(" ");
-    if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
-    }
-    return nameParts[0][0].toUpperCase();
-  };
-
-  const getBadgeColor = () => {
-    if (isAdmin) {
-      return "bg-purple-500";
-    }
-    
-    if (!currentUser) return "bg-gray-500";
-    
-    switch (currentUser?.role) {
-      case UserRole.ORGANIZER:
-        return "bg-blue-500";
-      case UserRole.MEMBER:
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-
-  const getBadgeText = () => {
-    if (isAdmin) {
-      return "Admin";
-    }
-    
-    if (!currentUser) return "Guest";
-    
-    switch (currentUser.role) {
-      case UserRole.ORGANIZER:
-        return "Organizer";
-      case UserRole.MEMBER:
-        return "Member";
-      default:
-        return "Guest";
-    }
-  };
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -106,21 +49,7 @@ const NavigationDrawer = ({
         <ScrollArea className="h-full px-4">
           {currentUser ? (
             <>
-              <SheetHeader className="text-left mb-2">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 ring-1 ring-primary/20">
-                    <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
-                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-1">
-                    <SheetTitle className="text-lg">{currentUser.name}</SheetTitle>
-                    <p className="text-xs text-muted-foreground">{currentUser.email}</p>
-                    <Badge className={`${getBadgeColor()} text-white`}>
-                      {getBadgeText()}
-                    </Badge>
-                  </div>
-                </div>
-              </SheetHeader>
+              <UserHeader currentUser={currentUser} />
               <Separator className="my-4" />
             </>
           ) : (
@@ -130,79 +59,16 @@ const NavigationDrawer = ({
           )}
 
           <div className="grid gap-2 py-2">
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">Main Navigation</h3>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start" 
-              onClick={() => handleNavigation("/")}
-            >
-              <Home className="mr-2 h-4 w-4" />
-              Communities
-            </Button>
-
-            {currentUser && (
-              <>
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start" 
-                  onClick={() => handleNavigation("/profile")}
-                >
-                  <UserIcon className="mr-2 h-4 w-4" />
-                  Profile
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start" 
-                  onClick={() => handleNavigation("/knowledge/7")}
-                >
-                  <Library className="mr-2 h-4 w-4" />
-                  Knowledge Base
-                </Button>
-              </>
-            )}
-
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start" 
-              onClick={() => handleNavigation("/documentation")}
-            >
-              <BookOpen className="mr-2 h-4 w-4" />
-              Documentation
-            </Button>
+            <MainNavigation 
+              currentUser={!!currentUser} 
+              onNavigate={handleNavigation} 
+            />
 
             {/* Admin section */}
             {isAdmin && (
               <>
                 <Separator className="my-4" />
-                <h3 className="text-sm font-medium text-purple-500 mb-1">Admin</h3>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start" 
-                  onClick={() => handleNavigation("/admin")}
-                >
-                  <Shield className="mr-2 h-4 w-4" />
-                  Admin Dashboard
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start" 
-                  onClick={() => handleNavigation("/admin?tab=users")}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  User Management
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start" 
-                  onClick={() => handleNavigation("/admin?tab=settings")}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  System Settings
-                </Button>
+                <AdminNavigation onNavigate={handleNavigation} />
               </>
             )}
 
@@ -210,40 +76,17 @@ const NavigationDrawer = ({
             {!isAdmin && (isOrganizer() || currentUser?.managedCommunities?.length > 0) && (
               <>
                 <Separator className="my-4" />
-                <h3 className="text-sm font-medium text-blue-500 mb-1">Management</h3>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start" 
-                  onClick={() => handleNavigation("/organizer")}
-                >
-                  <Shield className="mr-2 h-4 w-4" />
-                  Community Management
-                </Button>
+                <OrganizerNavigation onNavigate={handleNavigation} />
               </>
             )}
 
             {/* Auth actions */}
             <Separator className="my-4" />
-            {currentUser ? (
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20" 
-                onClick={handleLogout}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </Button>
-            ) : (
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start" 
-                onClick={() => handleNavigation("/auth")}
-              >
-                <UserIcon className="mr-2 h-4 w-4" />
-                Login / Sign up
-              </Button>
-            )}
+            <AuthActions 
+              currentUser={!!currentUser}
+              onNavigate={handleNavigation}
+              onLogout={handleLogout}
+            />
           </div>
         </ScrollArea>
       </SheetContent>
