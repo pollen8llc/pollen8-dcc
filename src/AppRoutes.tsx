@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -15,7 +16,7 @@ import Documentation from "./pages/Documentation";
 import Onboarding from "./pages/Onboarding";
 import CreateCommunity from "./pages/CreateCommunity";
 import JoinCommunities from "./pages/JoinCommunities";
-import OrganizerDashboard from "./pages/admin/OrganizerDashboard";
+import OrganizerDashboard from "./pages/OrganizerDashboard";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();

@@ -1,3 +1,4 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
@@ -72,6 +73,7 @@ const UserMenuDropdown = ({ currentUser, isAdmin, isOrganizer, logout }: UserMen
   };
 
   const handleCommunityManagement = () => {
+    console.log("Navigating to organizer dashboard");
     navigate('/organizer');
   };
 

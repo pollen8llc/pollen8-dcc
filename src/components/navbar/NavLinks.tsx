@@ -43,7 +43,7 @@ const NavLinks = ({ currentUser, isOrganizer }: NavLinksProps) => {
           {!isAdmin && isOrganizer() && (
             <Link
               to="/organizer"
-              className="text-muted-foreground transition-colors hover:text-foreground"
+              className="text-muted-foreground transition-colors hover:text-foreground font-medium text-blue-500 hover:text-blue-600"
             >
               Organizer Dashboard
             </Link>
