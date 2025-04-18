@@ -14,18 +14,14 @@ export const useKnowledgeArticles = (communityId: string) => {
     queryFn: async () => {
       console.log('Fetching articles for community:', communityId);
       
+      // Simplified query to avoid the tags relation issue
       const { data, error } = await supabase
         .from('knowledge_articles')
         .select(`
           id,
           title,
           content,
-          created_at,
-          tags (
-            tag (
-              name
-            )
-          )
+          created_at
         `)
         .eq('community_id', communityId)
         .order('created_at', { ascending: false });
@@ -35,7 +31,11 @@ export const useKnowledgeArticles = (communityId: string) => {
         throw error;
       }
 
-      return data;
+      // Add empty tags array to each article to satisfy the type
+      return data.map(article => ({
+        ...article,
+        tags: []
+      }));
     },
     enabled: !!communityId,
     retry: 1

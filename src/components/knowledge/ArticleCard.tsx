@@ -10,12 +10,15 @@ interface ArticleCardProps {
     title: string;
     content: string;
     created_at: string;
-    tags?: { tag: { name: string } }[];
+    tags?: { tag: { name: string } }[] | any; // Updated to handle different types
   };
   onArticleClick: (id: string) => void;
 }
 
 const ArticleCard = ({ article, onArticleClick }: ArticleCardProps) => {
+  // Check if tags is a valid array we can map over
+  const hasTags = Array.isArray(article.tags) && article.tags.length > 0;
+  
   return (
     <Card 
       className="hover:bg-accent/5 cursor-pointer transition-colors"
@@ -31,10 +34,12 @@ const ArticleCard = ({ article, onArticleClick }: ArticleCardProps) => {
       <CardContent>
         <div className="flex items-center justify-between">
           <div className="flex gap-2">
-            {article.tags?.map(({ tag }) => (
-              <Badge key={tag.name} variant="secondary">
-                {tag.name}
-              </Badge>
+            {hasTags && article.tags.map(({ tag }) => (
+              tag && tag.name ? (
+                <Badge key={tag.name} variant="secondary">
+                  {tag.name}
+                </Badge>
+              ) : null
             ))}
           </div>
           <div className="text-sm text-muted-foreground">
