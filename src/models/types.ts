@@ -1,3 +1,4 @@
+
 export enum UserRole {
   ADMIN = "ADMIN",        // System administrators
   ORGANIZER = "ORGANIZER", // Community organizers

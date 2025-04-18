@@ -1,5 +1,5 @@
 
-import { zodResolver } from "@hookform/resolver/zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
@@ -48,7 +48,7 @@ export default function CommunityCreateForm() {
       size_demographics: "",
       community_structure: "",
       team_structure: "",
-      tech_structure: "",
+      tech_stack: "",
       event_formats: "",
       business_model: "",
       community_values: "",

@@ -1,6 +1,7 @@
-import { Community } from "@/models/types";
+
+import { Community, CommunityOrganizerProfile } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
-import { supabase } from "@/utils/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Gets all communities
