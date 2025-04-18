@@ -10,23 +10,45 @@ import { useUser } from "@/contexts/UserContext"
 import * as communityService from "@/services/communityService"
 import { BasicCommunityForm } from "./BasicCommunityForm"
 import { OrganizerProfileForm } from "./OrganizerProfileForm"
+import { CommunitySnapshotForm } from "./CommunitySnapshotForm"
+import { OnlinePresenceForm } from "./OnlinePresenceForm"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const formSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters long"),
   description: z.string().min(10, "Description must be at least 10 characters long"),
   location: z.string().min(2, "Location is required"),
+  communityType: z.string().optional(),
+  format: z.string().optional(),
+  targetAudience: z.string().optional(),
+  tone: z.string().optional(),
+  
+  launchDate: z.string().optional(),
+  memberCount: z.number().default(1),
+  memberCapacity: z.number().optional(),
+  eventFrequency: z.string().optional(),
+  
   website: z.string().url().optional().or(z.literal("")),
+  primaryPlatforms: z.array(z.string()).default([]),
+  newsletterUrl: z.string().url().optional().or(z.literal("")),
+  socialMedia: z.array(z.object({
+    platform: z.string().optional(),
+    url: z.string().optional()
+  })).optional().default([{}, {}, {}]),
+  
   founder_name: z.string().min(2, "Founder name is required"),
+  role_title: z.string().optional(),
   personal_background: z.string().optional(),
-  size_demographics: z.string().optional(),
   community_structure: z.string().optional(),
+  vision: z.string().optional(),
+  community_values: z.string().optional(),
+
+  size_demographics: z.string().optional(),
   team_structure: z.string().optional(),
   tech_stack: z.string().optional(),
   event_formats: z.string().optional(),
   business_model: z.string().optional(),
-  community_values: z.string().optional(),
   challenges: z.string().optional(),
-  vision: z.string().optional(),
   special_notes: z.string().optional(),
 });
 
@@ -34,6 +56,7 @@ export default function CommunityCreateForm() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const { currentUser } = useUser()
+  const [activeTab, setActiveTab] = React.useState("overview")
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -41,18 +64,34 @@ export default function CommunityCreateForm() {
       name: "",
       description: "",
       location: "",
+      communityType: "",
+      format: "",
+      targetAudience: "",
+      tone: "",
+      
+      launchDate: "",
+      memberCount: 1,
+      memberCapacity: 0,
+      eventFrequency: "",
+      
       website: "",
+      primaryPlatforms: [],
+      newsletterUrl: "",
+      socialMedia: [{}, {}, {}],
+      
       founder_name: currentUser?.name || "",
+      role_title: "",
       personal_background: "",
-      size_demographics: "",
       community_structure: "",
+      vision: "",
+      community_values: "",
+      
+      size_demographics: "",
       team_structure: "",
       tech_stack: "",
       event_formats: "",
       business_model: "",
-      community_values: "",
       challenges: "",
-      vision: "",
       special_notes: "",
     }
   })
@@ -65,10 +104,19 @@ export default function CommunityCreateForm() {
         location: values.location,
         website: values.website,
         isPublic: true,
-        memberCount: 1,
+        memberCount: values.memberCount || 1,
         organizerIds: [currentUser?.id || ''],
         memberIds: [],
-        tags: [],
+        tags: values.targetAudience ? values.targetAudience.split(',').map(tag => tag.trim()) : [],
+        communityType: values.communityType,
+        format: values.format,
+        tone: values.tone,
+        launchDate: values.launchDate,
+        memberCapacity: values.memberCapacity,
+        eventFrequency: values.eventFrequency,
+        newsletterUrl: values.newsletterUrl,
+        socialMedia: values.socialMedia?.filter(sm => sm.platform || sm.url),
+        primaryPlatforms: values.primaryPlatforms,
       };
 
       const community = await communityService.createCommunity(communityData);
@@ -76,6 +124,7 @@ export default function CommunityCreateForm() {
       const organizerProfile = {
         community_id: community.id,
         founder_name: values.founder_name,
+        role_title: values.role_title,
         personal_background: values.personal_background,
         size_demographics: values.size_demographics,
         community_structure: values.community_structure,
@@ -109,28 +158,77 @@ export default function CommunityCreateForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Community Details</CardTitle>
-            <CardDescription>Basic information about your community</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <BasicCommunityForm form={form} />
-          </CardContent>
-        </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full grid grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="snapshot">Snapshot</TabsTrigger>
+            <TabsTrigger value="online">Online Presence</TabsTrigger>
+            <TabsTrigger value="organizer">Organizer</TabsTrigger>
+          </TabsList>
+          
+          <div className="mt-6">
+            <TabsContent value="overview">
+              <Card>
+                <CardContent className="pt-6">
+                  <BasicCommunityForm form={form} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="snapshot">
+              <Card>
+                <CardContent className="pt-6">
+                  <CommunitySnapshotForm form={form} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="online">
+              <Card>
+                <CardContent className="pt-6">
+                  <OnlinePresenceForm form={form} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="organizer">
+              <Card>
+                <CardContent className="pt-6">
+                  <OrganizerProfileForm form={form} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Organizer Profile</CardTitle>
-            <CardDescription>Tell us about yourself and your vision for the community</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <OrganizerProfileForm form={form} />
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-end">
-          <Button type="submit" size="lg">Create Community</Button>
+        <div className="flex justify-between">
+          <Button 
+            type="button" 
+            variant="outline"
+            onClick={() => {
+              const currentTabIndex = ["overview", "snapshot", "online", "organizer"].indexOf(activeTab);
+              const prevTab = ["overview", "snapshot", "online", "organizer"][Math.max(0, currentTabIndex - 1)];
+              setActiveTab(prevTab);
+            }}
+            disabled={activeTab === "overview"}
+          >
+            Previous
+          </Button>
+          
+          {activeTab !== "organizer" ? (
+            <Button 
+              type="button"
+              onClick={() => {
+                const currentTabIndex = ["overview", "snapshot", "online", "organizer"].indexOf(activeTab);
+                const nextTab = ["overview", "snapshot", "online", "organizer"][Math.min(3, currentTabIndex + 1)];
+                setActiveTab(nextTab);
+              }}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button type="submit" size="lg">Create Community</Button>
+          )}
         </div>
       </form>
     </Form>

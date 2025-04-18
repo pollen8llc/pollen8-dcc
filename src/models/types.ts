@@ -1,4 +1,3 @@
-
 export enum UserRole {
   ADMIN = "ADMIN",        // System administrators
   ORGANIZER = "ORGANIZER", // Community organizers
@@ -33,6 +32,19 @@ export interface Community {
   createdAt: string;
   updatedAt: string;
   website?: string;
+  communityType?: string;
+  format?: string;
+  targetAudience?: string[];
+  tone?: string;
+  launchDate?: string;
+  memberCapacity?: number;
+  eventFrequency?: string;
+  newsletterUrl?: string;
+  socialMedia?: {
+    platform?: string;
+    url?: string;
+  }[];
+  primaryPlatforms?: string[];
 }
 
 export interface CommunityStatistics {
@@ -148,6 +160,7 @@ export interface CommunityOrganizerProfile {
   id: string;
   community_id: string;
   founder_name: string;
+  role_title?: string;
   personal_background?: string;
   size_demographics?: string;
   community_structure?: string;
