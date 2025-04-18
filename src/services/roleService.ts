@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
-import { useToast } from "@/hooks/use-toast";
 import { logAuditAction } from "./auditService";
 
 /**
@@ -66,12 +65,6 @@ export const updateUserRole = async (
     return true;
   } catch (error: any) {
     console.error("Error updating user role:", error);
-    const { toast } = useToast();
-    toast({
-      title: "Error updating role",
-      description: error.message || "Failed to update user role",
-      variant: "destructive",
-    });
     return false;
   }
 };

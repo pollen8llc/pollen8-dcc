@@ -19,13 +19,31 @@ export function useUserRoleManagement() {
           title: "Role updated",
           description: "User role has been updated successfully",
         });
+      } else {
+        toast({
+          title: "Error updating role",
+          description: "There was a problem updating the role",
+          variant: "destructive",
+        });
       }
+    },
+    onError: (error) => {
+      console.error("Role update mutation error:", error);
+      toast({
+        title: "Error updating role",
+        description: "There was a problem updating the role",
+        variant: "destructive",
+      });
     }
   });
 
   const handleUpdateRole = async (userId: string, role: UserRole) => {
     console.log("Updating role for user", userId, "to", role);
-    await updateRoleMutation.mutateAsync({ userId, role });
+    try {
+      await updateRoleMutation.mutateAsync({ userId, role });
+    } catch (error) {
+      console.error("Error in handleUpdateRole:", error);
+    }
   };
 
   return { handleUpdateRole };
