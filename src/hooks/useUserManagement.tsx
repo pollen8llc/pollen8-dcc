@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { User, UserRole } from '@/models/types';
@@ -16,7 +15,7 @@ export function useUserManagement() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch all users
+  // Fetch all users with proper caching
   const { 
     data: users = [], 
     isLoading, 
@@ -24,14 +23,17 @@ export function useUserManagement() {
     refetch 
   } = useQuery({
     queryKey: ['admin-users'],
-    queryFn: getAllUsers
+    queryFn: getAllUsers,
+    staleTime: 60000, // Cache for 1 minute
+    refetchOnWindowFocus: false
   });
 
-  // Fetch user stats
+  // Fetch user stats with proper caching
   const { data: userStats = { total: 0, admins: 0, organizers: 0, members: 0 } } = useQuery({
     queryKey: ['admin-user-stats'],
     queryFn: getUserCounts,
-    enabled: users.length > 0
+    enabled: users.length > 0,
+    staleTime: 60000
   });
 
   // Mutation for updating user roles
@@ -40,8 +42,9 @@ export function useUserManagement() {
       updateUserRole(userId, role),
     onSuccess: (success) => {
       if (success) {
-        // Invalidate the users query to refetch updated data
+        // Invalidate both users and stats queries to refresh data
         queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-user-stats'] });
         toast({
           title: "Role updated",
           description: "User role has been updated successfully",
@@ -100,11 +103,12 @@ export function useUserManagement() {
     }
   });
 
-  // Fetch communities for a specific user
+  // Fetch communities for a specific user with proper caching
   const { data: userCommunities = [], isLoading: loadingCommunities } = useQuery({
     queryKey: ['user-communities', selectedUser?.id],
     queryFn: () => getUserCommunities(selectedUser?.id || ''),
-    enabled: !!selectedUser?.id && isCommunityListOpen
+    enabled: !!selectedUser?.id && isCommunityListOpen,
+    staleTime: 60000
   });
 
   // Handler functions
