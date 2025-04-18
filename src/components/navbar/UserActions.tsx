@@ -2,7 +2,6 @@
 import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
 import UserBadge from "./UserBadge";
-import AccountButton from "./AccountButton";
 
 interface UserActionsProps {
   currentUser: User;
@@ -10,18 +9,13 @@ interface UserActionsProps {
   logout: () => Promise<void>;
 }
 
-const UserActions = ({ currentUser, isOrganizer, logout }: UserActionsProps) => {
-  // Use the actual role from currentUser, not a derived value
+const UserActions = ({ currentUser }: UserActionsProps) => {
+  // Use the actual role from currentUser
   const isAdmin = currentUser.role === UserRole.ADMIN;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center">
       <UserBadge currentUser={currentUser} isAdmin={isAdmin} />
-      <AccountButton 
-        currentUser={currentUser} 
-        isAdmin={isAdmin} 
-        logout={logout} 
-      />
     </div>
   );
 };
