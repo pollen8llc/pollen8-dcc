@@ -46,15 +46,15 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
     
     if (error) {
       console.error("Error fetching community:", error);
-      const community = mockCommunities.find(community => community.id === id);
-      return community ? community : null;
+      const mockCommunity = mockCommunities.find(community => community.id === id);
+      return mockCommunity ? mapDbCommunity(mockCommunity) : null;
     }
     
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in getCommunityById:", err);
-    const community = mockCommunities.find(community => community.id === id);
-    return community ? community : null;
+    const mockCommunity = mockCommunities.find(community => community.id === id);
+    return mockCommunity ? mapDbCommunity(mockCommunity) : null;
   }
 };
 
@@ -72,32 +72,35 @@ export const searchCommunities = async (query: string): Promise<Community[]> => 
     if (error) {
       console.error("Error searching communities:", error);
       const lowercaseQuery = query.toLowerCase();
-      return mockCommunities.filter(community => 
+      const filteredCommunities = mockCommunities.filter(community => 
         community.name.toLowerCase().includes(lowercaseQuery) ||
         community.description.toLowerCase().includes(lowercaseQuery) ||
         community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
       );
+      return filteredCommunities.map(mapDbCommunity);
     }
     
     if (!data || data.length === 0) {
       console.log("No matching communities found in database, using filtered mock data");
       const lowercaseQuery = query.toLowerCase();
-      return mockCommunities.filter(community => 
+      const filteredCommunities = mockCommunities.filter(community => 
         community.name.toLowerCase().includes(lowercaseQuery) ||
         community.description.toLowerCase().includes(lowercaseQuery) ||
         community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
       );
+      return filteredCommunities.map(mapDbCommunity);
     }
     
     return data.map(mapDbCommunity);
   } catch (err) {
     console.error("Error in searchCommunities:", err);
     const lowercaseQuery = query.toLowerCase();
-    return mockCommunities.filter(community => 
+    const filteredCommunities = mockCommunities.filter(community => 
       community.name.toLowerCase().includes(lowercaseQuery) ||
       community.description.toLowerCase().includes(lowercaseQuery) ||
       community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
     );
+    return filteredCommunities.map(mapDbCommunity);
   }
 };
 
@@ -117,16 +120,18 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
     
     if (error) {
       console.error("Error fetching managed communities:", error);
-      return mockCommunities.filter(community => 
+      const filteredCommunities = mockCommunities.filter(community => 
         community.organizerIds.includes(userId)
       );
+      return filteredCommunities.map(mapDbCommunity);
     }
     
     return data.map(item => mapDbCommunity(item.communities));
   } catch (err) {
     console.error("Error in getManagedCommunities:", err);
-    return mockCommunities.filter(community => 
+    const filteredCommunities = mockCommunities.filter(community => 
       community.organizerIds.includes(userId)
     );
+    return filteredCommunities.map(mapDbCommunity);
   }
 };

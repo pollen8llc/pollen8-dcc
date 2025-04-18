@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Community } from "@/models/types";
 import { communities as mockCommunities } from "@/data/communities";
@@ -21,6 +22,18 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
     createdAt: dbCommunity.created_at || new Date().toISOString(),
     updatedAt: dbCommunity.updated_at || new Date().toISOString(),
     website: dbCommunity.website || ""
+  };
+};
+
+/**
+ * Maps a Community from data/types to a Community from models/types
+ * This ensures backward compatibility with older code that might use the data/types version
+ */
+export const mapLegacyCommunity = (community: any): Community => {
+  return {
+    ...community,
+    createdAt: community.createdAt || new Date().toISOString(),
+    updatedAt: community.updatedAt || new Date().toISOString()
   };
 };
 

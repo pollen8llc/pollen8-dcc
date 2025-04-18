@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as communityService from "@/services/communityService";
-import { PlusCircle, Globe, GlobeSlash, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, Globe, EyeOff, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
@@ -301,7 +301,7 @@ const OrganizerDashboard = () => {
                             {community.isPublic ? (
                               <Globe className="h-4 w-4 text-green-500" />
                             ) : (
-                              <GlobeSlash className="h-4 w-4 text-red-500" />
+                              <EyeOff className="h-4 w-4 text-red-500" />
                             )}
                             <Switch 
                               checked={community.isPublic} 
