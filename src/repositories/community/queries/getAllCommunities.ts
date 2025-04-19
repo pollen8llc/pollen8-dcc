@@ -3,7 +3,7 @@ import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
 // Mock data and mapping functions for fallback
-const mockCommunities = [
+export const mockCommunities = [
   {
     id: '1',
     name: 'Tech Enthusiasts',
@@ -21,7 +21,7 @@ const mockCommunities = [
 ];
 
 // Map a database community to our Community type
-const mapDbCommunity = (dbCommunity: any): Community => {
+export const mapDbCommunity = (dbCommunity: any): Community => {
   return {
     id: dbCommunity.id,
     name: dbCommunity.name,
@@ -48,7 +48,7 @@ const mapDbCommunity = (dbCommunity: any): Community => {
 };
 
 // Map legacy mock data to our Community type
-const mapLegacyCommunity = (community: any): Community => {
+export const mapLegacyCommunity = (community: any): Community => {
   return {
     ...community,
     communitySize: community.communitySize || 0
