@@ -56,7 +56,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Calendar className="h-5 w-5" />,
       title: "Start Date",
-      value: formatDate(community.start_date)
+      value: formatDate(community.launchDate || null)
     },
     {
       icon: <Users className="h-5 w-5" />,
