@@ -44,7 +44,13 @@ const CommunityManagementDebugger = () => {
     // API call monitoring
     const originalFetch = window.fetch;
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === 'string' ? input : input.url;
+      // Fix: Properly handle different input types
+      const url = typeof input === 'string' 
+        ? input 
+        : input instanceof URL 
+          ? input.href 
+          : input.url;
+          
       const method = init?.method || 'GET';
       const timestamp = new Date().toISOString();
 
