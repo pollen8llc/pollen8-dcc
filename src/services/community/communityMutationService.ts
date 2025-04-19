@@ -89,12 +89,39 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
 };
 
 /**
- * Deletes a community
+ * Deletes a community using the safe_delete_community database function
  */
 export const deleteCommunity = async (communityId: string): Promise<void> => {
   try {
     console.log(`[communityService] Deleting community with ID: ${communityId}`);
-    await communityRepository.deleteCommunity(communityId);
+    
+    // Get current user session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData?.session?.user?.id) {
+      console.error('Error getting session:', sessionError);
+      throw new Error('Authentication required to delete a community');
+    }
+    
+    const userId = sessionData.session.user.id;
+    
+    // Call the safe_delete_community function
+    const { data, error } = await supabase.rpc(
+      'safe_delete_community',
+      {
+        community_id: communityId,
+        user_id: userId
+      }
+    );
+    
+    if (error) {
+      console.error(`Error deleting community:`, error);
+      throw new Error(error.message || 'Failed to delete community');
+    }
+    
+    if (data === false) {
+      throw new Error('Failed to delete community');
+    }
+    
     console.log(`[communityService] Successfully deleted community with ID: ${communityId}`);
   } catch (error) {
     console.error(`Error in deleteCommunity service for communityId ${communityId}:`, error);
