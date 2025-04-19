@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -58,27 +59,29 @@ export const joinCommunity = async (userId: string, communityId: string, role: s
     
     console.log(`Repository: Created new membership with role ${role}`);
     
-    // Update the community's member count using a direct update query
-    const { error: updateError } = await supabase
+    // Get the current member count first
+    const { data: communityData, error: getError } = await supabase
       .from('communities')
-      .update({ 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', communityId);
+      .select('member_count')
+      .eq('id', communityId)
+      .single();
     
-    if (updateError) {
-      console.warn('Error updating community:', updateError);
-    }
-    
-    // Use a separate query with raw SQL to increment the member count
-    const { error: incrementError } = await supabase
-      .rpc('increment_member_count', {
-        p_community_id: communityId
-      });
-    
-    if (incrementError) {
-      console.warn('Error incrementing member count:', incrementError);
-      // Don't throw here, just log the warning
+    if (getError) {
+      console.warn('Error getting community member count:', getError);
+    } else {
+      // Update the community's member count and timestamp
+      const currentCount = communityData.member_count || 0;
+      const { error: updateError } = await supabase
+        .from('communities')
+        .update({ 
+          updated_at: new Date().toISOString(),
+          member_count: currentCount + 1
+        })
+        .eq('id', communityId);
+      
+      if (updateError) {
+        console.warn('Error updating community member count:', updateError);
+      }
     }
   } catch (error) {
     console.error(`Error in joinCommunity for userId ${userId}, communityId ${communityId}:`, error);
@@ -102,27 +105,31 @@ export const leaveCommunity = async (userId: string, communityId: string): Promi
       throw error;
     }
     
-    // Update the community's timestamp
-    const { error: updateError } = await supabase
+    // Get the current member count first
+    const { data: communityData, error: getError } = await supabase
       .from('communities')
-      .update({ 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', communityId);
+      .select('member_count')
+      .eq('id', communityId)
+      .single();
     
-    if (updateError) {
-      console.warn('Error updating community:', updateError);
-    }
-    
-    // Use a separate query with raw SQL to decrement the member count
-    const { error: decrementError } = await supabase
-      .rpc('decrement_member_count', {
-        p_community_id: communityId
-      });
-    
-    if (decrementError) {
-      console.warn('Error decrementing member count:', decrementError);
-      // Don't throw here, just log the warning
+    if (getError) {
+      console.warn('Error getting community member count:', getError);
+    } else {
+      // Update the community's member count and timestamp, ensuring it never goes below 0
+      const currentCount = communityData.member_count || 0;
+      const newCount = Math.max(currentCount - 1, 0);
+      
+      const { error: updateError } = await supabase
+        .from('communities')
+        .update({ 
+          updated_at: new Date().toISOString(),
+          member_count: newCount
+        })
+        .eq('id', communityId);
+      
+      if (updateError) {
+        console.warn('Error updating community member count:', updateError);
+      }
     }
   } catch (error) {
     console.error(`Error in leaveCommunity for userId ${userId}, communityId ${communityId}:`, error);
@@ -174,27 +181,29 @@ export const makeAdmin = async (adminId: string, userId: string, communityId: st
         throw insertError;
       }
       
-      // Update the community timestamp
-      const { error: updateError } = await supabase
+      // Get the current member count first
+      const { data: communityData, error: getError } = await supabase
         .from('communities')
-        .update({ 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('id', communityId);
+        .select('member_count')
+        .eq('id', communityId)
+        .single();
       
-      if (updateError) {
-        console.warn('Error updating community:', updateError);
-      }
-      
-      // Use a separate query to increment the member count
-      const { error: incrementError } = await supabase
-        .rpc('increment_member_count', {
-          p_community_id: communityId
-        });
-      
-      if (incrementError) {
-        console.warn('Error incrementing member count:', incrementError);
-        // Don't throw here, just log the warning
+      if (getError) {
+        console.warn('Error getting community member count:', getError);
+      } else {
+        // Update the community's member count and timestamp
+        const currentCount = communityData.member_count || 0;
+        const { error: updateError } = await supabase
+          .from('communities')
+          .update({ 
+            updated_at: new Date().toISOString(),
+            member_count: currentCount + 1
+          })
+          .eq('id', communityId);
+        
+        if (updateError) {
+          console.warn('Error updating community member count:', updateError);
+        }
       }
     }
   } catch (error) {
