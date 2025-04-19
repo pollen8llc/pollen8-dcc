@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Users, Globe, Target, Layout, Clock, Link as LinkIcon, MessageSquare, Share2, Video, Mail, Bell } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -103,24 +104,48 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       : [],
 
     eventPlatforms: community.event_platforms 
-      ? Object.entries(community.event_platforms).map(([name, details]) => ({
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          ...(typeof details === 'string' ? { url: details } : details)
-        })) 
+      ? Object.entries(community.event_platforms).map(([name, details]) => {
+          if (typeof details === 'string') {
+            return { name: name.charAt(0).toUpperCase() + name.slice(1), url: details };
+          } else if (details && typeof details === 'object') {
+            return {
+              name: name.charAt(0).toUpperCase() + name.slice(1),
+              url: details.url,
+              details: details.details
+            };
+          }
+          return { name: name.charAt(0).toUpperCase() + name.slice(1) };
+        }) 
       : [],
 
     communicationPlatforms: community.communication_platforms 
-      ? Object.entries(community.communication_platforms).map(([name, details]) => ({
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          ...(typeof details === 'string' ? { url: details } : details)
-        }))
+      ? Object.entries(community.communication_platforms).map(([name, details]) => {
+          if (typeof details === 'string') {
+            return { name: name.charAt(0).toUpperCase() + name.slice(1), url: details };
+          } else if (details && typeof details === 'object') {
+            return {
+              name: name.charAt(0).toUpperCase() + name.slice(1),
+              url: details.url,
+              details: details.details
+            };
+          }
+          return { name: name.charAt(0).toUpperCase() + name.slice(1) };
+        })
       : [],
 
     notificationPlatforms: community.notification_platforms 
-      ? Object.entries(community.notification_platforms).map(([name, details]) => ({
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          ...(typeof details === 'string' ? { url: details } : details)
-        }))
+      ? Object.entries(community.notification_platforms).map(([name, details]) => {
+          if (typeof details === 'string') {
+            return { name: name.charAt(0).toUpperCase() + name.slice(1), url: details };
+          } else if (details && typeof details === 'object') {
+            return {
+              name: name.charAt(0).toUpperCase() + name.slice(1),
+              url: details.url,
+              details: details.details
+            };
+          }
+          return { name: name.charAt(0).toUpperCase() + name.slice(1) };
+        })
       : []
   };
 
