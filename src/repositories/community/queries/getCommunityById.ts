@@ -1,3 +1,4 @@
+
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,17 +38,13 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       ? data.social_media
       : {};
 
-    // Extract community size from the size demographics range
-    const sizeMatch = data.size_demographics ? data.size_demographics.match(/(\d+)-(\d+)/) : null;
-    const communitySize = sizeMatch ? parseInt(sizeMatch[2]) : 0;
-
     return {
       id: data.id,
       name: data.name,
       description: data.description || '',
       location: data.location || 'Remote',
       imageUrl: data.logo_url || '/placeholder.svg',
-      communitySize: communitySize,
+      communitySize: data.member_count || 0,
       organizerIds: organizerIds,
       memberIds: memberIds,
       tags: data.target_audience || [],
