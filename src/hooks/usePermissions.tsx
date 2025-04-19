@@ -21,12 +21,22 @@ export const usePermissions = (currentUser: User | null) => {
         const communityId = resource.split(':')[1];
         if (!communityId) return false;
         
+        // Check if user is the owner (creator) of the community - this is the key distinction
         const { data: isOwner } = await supabase.rpc('is_community_owner', {
           user_id: currentUser.id,
           community_id: communityId
         });
         
-        return isOwner || action === 'read';
+        // If they're the owner, they have full permissions
+        if (isOwner) return true;
+        
+        // If they're not the owner but an organizer, they have limited permissions
+        if (currentUser.managedCommunities?.includes(communityId)) {
+          return action === 'read' || action === 'update' || action === 'manage_members';
+        }
+        
+        // For regular users allow read access
+        return action === 'read';
       }
       
       // Handle other resource types based on role
@@ -71,19 +81,39 @@ export const usePermissions = (currentUser: User | null) => {
     }
   };
 
-  // Check if user is an owner of a specific community
+  // Check if user is an owner of a specific community - this is distinct from being an organizer
+  const isOwner = async (communityId: string): Promise<boolean> => {
+    if (!currentUser) return false;
+    
+    // System admins have all permissions
+    if (currentUser.role === UserRole.ADMIN) return true;
+    
+    // Call the Supabase function to check ownership
+    try {
+      const { data: isOwner } = await supabase.rpc('is_community_owner', {
+        user_id: currentUser.id,
+        community_id: communityId
+      });
+      return !!isOwner;
+    } catch (error) {
+      console.error("Error checking community ownership:", error);
+      return false;
+    }
+  };
+
+  // Check if user is an organizer (but might not be the owner)
   const isOrganizer = (communityId?: string): boolean => {
     if (!currentUser) return false;
     
     // System admins have all permissions
     if (currentUser.role === UserRole.ADMIN) return true;
     
-    // If no communityId provided, check if user owns any communities
+    // If no communityId provided, check if user manages any communities
     if (!communityId) return currentUser.managedCommunities?.length > 0 || false;
     
-    // Check if user owns the specific community
+    // Check if user manages the specific community
     return currentUser.managedCommunities?.includes(communityId) || false;
   };
 
-  return { hasPermission, checkPermission, isOrganizer };
+  return { hasPermission, checkPermission, isOrganizer, isOwner };
 };

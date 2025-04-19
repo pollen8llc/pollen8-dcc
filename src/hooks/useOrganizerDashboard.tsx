@@ -6,6 +6,7 @@ import * as communityService from '@/services/communityService';
 import { Community } from '@/models/types';
 import { useUser } from '@/contexts/UserContext';
 import * as auditService from '@/services/auditService';
+import { usePermissions } from '@/hooks/usePermissions';
 
 export const useOrganizerDashboard = () => {
   const [communityToDelete, setCommunityToDelete] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export const useOrganizerDashboard = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { currentUser } = useUser();
+  const { isOwner } = usePermissions(currentUser);
   
   // Add debugging to track user data
   console.log("OrganizerDashboard - Current user:", currentUser?.id, "role:", currentUser?.role);
@@ -70,8 +72,15 @@ export const useOrganizerDashboard = () => {
   });
 
   const deleteCommunityMutation = useMutation({
-    mutationFn: (communityId: string) => {
+    mutationFn: async (communityId: string) => {
       console.log("Starting deletion process for community:", communityId);
+      
+      // First check ownership
+      const ownershipCheck = await isOwner(communityId);
+      if (!ownershipCheck) {
+        throw new Error("You are not the owner of this community. Only community owners can delete their communities.");
+      }
+      
       return communityService.deleteCommunity(communityId);
     },
     onMutate: (communityId) => {
@@ -122,8 +131,8 @@ export const useOrganizerDashboard = () => {
       
       if (error.message.includes("not the owner") || error.message.includes("verify ownership")) {
         errorMessage = "Only community owners can delete their communities.";
-      } else if (error.message.includes("existing references")) {
-        errorMessage = "Cannot delete community as it still has active members or content. Please remove all members and content first.";
+      } else if (error.message.includes("existing references") || error.message.includes("dependencies")) {
+        errorMessage = "Cannot delete community as it still has active content. Please remove all knowledge base articles, community data, and other linked content first.";
       } else if (error.message.includes("authentication required")) {
         errorMessage = "You need to be logged in to delete a community.";
       }

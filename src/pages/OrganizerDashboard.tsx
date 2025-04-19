@@ -1,7 +1,7 @@
 
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -34,6 +34,10 @@ const OrganizerDashboard = () => {
     confirmDeleteCommunity,
     activeDeletingId,
   } = useOrganizerDashboard();
+
+  const communityName = communityToDelete 
+    ? managedCommunities?.find(c => c.id === communityToDelete)?.name || "this community"
+    : "this community";
 
   return (
     <div className="min-h-screen">
@@ -91,10 +95,23 @@ const OrganizerDashboard = () => {
       <AlertDialog open={!!communityToDelete} onOpenChange={() => setCommunityToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              community and all associated data.
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Permanently delete {communityName}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                This action cannot be undone. This will permanently delete the
+                community and all directly associated data.
+              </p>
+              <p className="font-medium">
+                Note: If you have knowledge base articles or other content linked to this community,
+                you should remove them first to avoid deletion errors.
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Only community owners (the original creator) can delete communities.
+                Organizers who are not owners cannot delete communities.
+              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

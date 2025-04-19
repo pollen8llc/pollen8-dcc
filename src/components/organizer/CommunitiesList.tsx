@@ -1,8 +1,13 @@
+
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Loader2, Shield } from "lucide-react";
 import { Community } from "@/models/types";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@/contexts/UserContext";
 
 interface CommunitiesListProps {
   isLoading: boolean;
@@ -18,6 +23,48 @@ const CommunitiesList = ({
   isDeletingId 
 }: CommunitiesListProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { currentUser } = useUser();
+  const [communityOwnership, setCommunityOwnership] = useState<Record<string, boolean>>({});
+
+  // Check ownership status for each community when the component loads
+  useEffect(() => {
+    const checkOwnership = async () => {
+      if (!managedCommunities || !currentUser?.id) return;
+      
+      const ownershipStatus: Record<string, boolean> = {};
+      
+      for (const community of managedCommunities) {
+        try {
+          const { data: isOwner } = await supabase.rpc('is_community_owner', {
+            user_id: currentUser.id,
+            community_id: community.id
+          });
+          ownershipStatus[community.id] = !!isOwner;
+        } catch (error) {
+          console.error(`Error checking ownership for community ${community.id}:`, error);
+          ownershipStatus[community.id] = false;
+        }
+      }
+      
+      setCommunityOwnership(ownershipStatus);
+    };
+    
+    checkOwnership();
+  }, [managedCommunities, currentUser?.id]);
+
+  const handleDeleteAttempt = (communityId: string) => {
+    if (!communityOwnership[communityId]) {
+      toast({
+        title: "Permission denied",
+        description: "Only community owners can delete communities. You are an organizer but not the owner of this community.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    onDeleteCommunity(communityId);
+  };
 
   if (isLoading) {
     return (
@@ -59,7 +106,15 @@ const CommunitiesList = ({
           className="hover:shadow-md transition-all"
         >
           <CardHeader>
-            <CardTitle>{community.name}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>{community.name}</CardTitle>
+              {communityOwnership[community.id] && (
+                <div className="flex items-center text-xs text-emerald-600 font-medium">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Owner
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="aspect-video relative mb-4 overflow-hidden rounded-md">
@@ -94,8 +149,9 @@ const CommunitiesList = ({
               <Button 
                 size="sm" 
                 variant="destructive"
-                onClick={() => onDeleteCommunity(community.id)}
-                disabled={isDeletingId === community.id}
+                onClick={() => handleDeleteAttempt(community.id)}
+                disabled={isDeletingId === community.id || !communityOwnership[community.id]}
+                title={!communityOwnership[community.id] ? "Only community owners can delete communities" : "Delete this community"}
               >
                 {isDeletingId === community.id ? (
                   <Loader2 className="h-4 w-4 mr-1 animate-spin" />
