@@ -4,15 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Wifi, WifiOff } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { usePermissions } from "@/hooks/usePermissions";
+
+interface ApiCall {
+  url: string;
+  method: string;
+  status?: number;
+  timestamp: string;
+  error?: string;
+}
 
 const CommunityManagementDebugger = () => {
   const { currentUser } = useUser();
   const { isOwner, isOrganizer } = usePermissions(currentUser);
   const [flowErrors, setFlowErrors] = useState<string[]>([]);
   const [dependencies, setDependencies] = useState<{[key: string]: boolean}>({});
+  const [apiCalls, setApiCalls] = useState<ApiCall[]>([]);
 
   useEffect(() => {
     // Track component mount and initialization
@@ -21,6 +30,7 @@ const CommunityManagementDebugger = () => {
       role: currentUser?.role
     });
 
+    // Error listeners setup
     const unhandledErrorListener = (event: ErrorEvent) => {
       setFlowErrors(prev => [...prev, `${event.message} (${event.filename}:${event.lineno})`]);
       console.error("Unhandled error in community management:", event);
@@ -29,6 +39,43 @@ const CommunityManagementDebugger = () => {
     const rejectionListener = (event: PromiseRejectionEvent) => {
       setFlowErrors(prev => [...prev, `Promise rejected: ${event.reason}`]);
       console.error("Unhandled promise rejection:", event);
+    };
+
+    // API call monitoring
+    const originalFetch = window.fetch;
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input.url;
+      const method = init?.method || 'GET';
+      const timestamp = new Date().toISOString();
+
+      try {
+        const response = await originalFetch(input, init);
+        const apiCall: ApiCall = {
+          url,
+          method,
+          status: response.status,
+          timestamp,
+        };
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          apiCall.error = `Failed with status ${response.status}: ${errorText}`;
+          setFlowErrors(prev => [...prev, apiCall.error!]);
+        }
+        
+        setApiCalls(prev => [apiCall, ...prev].slice(0, 10)); // Keep last 10 calls
+        return response;
+      } catch (error: any) {
+        const apiCall: ApiCall = {
+          url,
+          method,
+          timestamp,
+          error: error.message,
+        };
+        setApiCalls(prev => [apiCall, ...prev].slice(0, 10));
+        setFlowErrors(prev => [...prev, `API Error: ${error.message}`]);
+        throw error;
+      }
     };
 
     // Add error listeners
@@ -42,6 +89,7 @@ const CommunityManagementDebugger = () => {
           "User Context": !!currentUser,
           "Permissions Hook": !!(isOwner && isOrganizer),
           "Query Client": !!(window as any)._reactQueryClient,
+          "Fetch API": !!window.fetch,
         });
       } catch (error) {
         console.error("Error checking dependencies:", error);
@@ -51,6 +99,7 @@ const CommunityManagementDebugger = () => {
     checkDependencies();
 
     return () => {
+      window.fetch = originalFetch;
       window.removeEventListener('error', unhandledErrorListener);
       window.removeEventListener('unhandledrejection', rejectionListener);
     };
@@ -89,6 +138,33 @@ const CommunityManagementDebugger = () => {
                 </Badge>
               ))}
             </div>
+          </div>
+
+          {/* API Calls */}
+          <div>
+            <h4 className="text-sm font-medium mb-2">Recent API Calls</h4>
+            <ScrollArea className="h-[100px] rounded-md border">
+              {apiCalls.map((call, index) => (
+                <div key={index} className="p-2 border-b last:border-0">
+                  <div className="flex items-center gap-2">
+                    {call.error ? (
+                      <WifiOff className="h-4 w-4 text-destructive" />
+                    ) : (
+                      <Wifi className="h-4 w-4 text-green-500" />
+                    )}
+                    <span className="text-xs">
+                      {call.method} {new URL(call.url).pathname}
+                    </span>
+                    <Badge variant={call.error ? "destructive" : "default"}>
+                      {call.status || 'Failed'}
+                    </Badge>
+                  </div>
+                  {call.error && (
+                    <p className="text-xs text-destructive mt-1">{call.error}</p>
+                  )}
+                </div>
+              ))}
+            </ScrollArea>
           </div>
 
           {/* Flow Errors */}
