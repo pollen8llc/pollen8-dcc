@@ -76,7 +76,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Users className="h-5 w-5" />,
       title: "Community Size",
-      value: `${community.communitySize || 0} members`
+      value: community.size_demographics || "Not specified"
     },
     {
       icon: <LinkIcon className="h-5 w-5" />,

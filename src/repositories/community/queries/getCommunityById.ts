@@ -44,7 +44,7 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       description: data.description || '',
       location: data.location || 'Remote',
       imageUrl: data.logo_url || '/placeholder.svg',
-      communitySize: data.member_count || 0,
+      communitySize: parseInt(data.size_demographics) || 0,
       organizerIds: organizerIds,
       memberIds: memberIds,
       tags: data.target_audience || [],
@@ -58,7 +58,6 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       community_structure: data.community_structure || '',
       vision: data.vision || '',
       community_values: data.community_values || '',
-      // Add proper mapping for the platform-related fields with type checking
       newsletterUrl: data.newsletter_url || '',
       communication_platforms: communicationPlatforms as Record<string, string | { url?: string; details?: string }>,
       socialMedia: socialMedia as Record<string, string | { url?: string }>,
@@ -66,7 +65,8 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       format: data.format || '',
       eventFrequency: data.event_frequency || '',
       launchDate: data.start_date || null,
-      targetAudience: data.target_audience || []
+      targetAudience: data.target_audience || [],
+      size_demographics: data.size_demographics || '0'
     };
   } catch (err) {
     console.error("Error in getCommunityById:", err);

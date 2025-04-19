@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,7 +27,7 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
     description: dbCommunity.description || '',
     location: dbCommunity.location || 'Remote',
     imageUrl: dbCommunity.logo_url || '/placeholder.svg',
-    communitySize: dbCommunity.member_count || 0,
+    communitySize: parseInt(dbCommunity.size_demographics) || 0,
     organizerIds: dbCommunity.owner_id ? [dbCommunity.owner_id] : [],
     memberIds: [],
     tags: dbCommunity.tags || [],
@@ -43,7 +42,8 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
     launchDate: dbCommunity.start_date || null,
     newsletterUrl: dbCommunity.newsletter_url || '',
     socialMedia: dbCommunity.social_media || {},
-    communication_platforms: dbCommunity.communication_platforms || {}
+    communication_platforms: dbCommunity.communication_platforms || {},
+    size_demographics: dbCommunity.size_demographics || '0'
   };
 };
 
