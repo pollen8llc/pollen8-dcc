@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -103,9 +102,6 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
         throw new Error("You must be logged in to create a community");
       }
 
-      console.log("Current user attempting to create community:", currentUser);
-      
-      // Filter out empty social media entries
       const filteredSocialMedia = values.socialMedia
         ?.filter(sm => sm.platform || sm.url)
         .map(sm => ({
@@ -113,7 +109,6 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
           url: sm.url || ""
         }));
       
-      // Convert tags from comma-separated string to array
       const tags = values.targetAudience 
         ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
         : [];
@@ -125,8 +120,6 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
         website: values.website || "",
         isPublic: true,
         memberCount: values.memberCount || 1,
-        organizerIds: [currentUser.id],
-        memberIds: [currentUser.id],
         tags: tags,
         communityType: values.communityType,
         format: values.format,
@@ -137,93 +130,48 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
         newsletterUrl: values.newsletterUrl || "",
         socialMedia: filteredSocialMedia,
         primaryPlatforms: values.primaryPlatforms.filter(p => p),
-        imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3"
+        imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+        founder_name: values.founder_name,
+        role_title: values.role_title,
+        personal_background: values.personal_background,
+        community_structure: values.community_structure,
+        vision: values.vision,
+        community_values: values.community_values,
+        size_demographics: values.size_demographics,
+        team_structure: values.team_structure,
+        tech_stack: values.tech_stack,
+        event_formats: values.event_formats,
+        business_model: values.business_model,
+        challenges: values.challenges,
+        special_notes: values.special_notes,
       };
 
       console.log("Creating community with data:", communityData);
       
-      // Create the community first
-      let community;
-      try {
-        community = await communityService.createCommunity(communityData);
-        console.log("Community created successfully:", community);
-        
-        if (!community || !community.id) {
-          throw new Error("Failed to create community - no community ID returned");
-        }
-        
-        // Store the community ID in case we need it for retry logic
-        setCreatedCommunityId(community.id);
-        
-        // Next, create the organizer profile
-        try {
-          const organizerProfile = {
-            community_id: community.id,
-            founder_name: values.founder_name,
-            role_title: values.role_title || "",
-            personal_background: values.personal_background || "",
-            size_demographics: values.size_demographics || "",
-            community_structure: values.community_structure || "",
-            team_structure: values.team_structure || "",
-            tech_stack: values.tech_stack || "",
-            event_formats: values.event_formats || "",
-            business_model: values.business_model || "",
-            community_values: values.community_values || "",
-            challenges: values.challenges || "",
-            vision: values.vision || "",
-            special_notes: values.special_notes || "",
-          };
-  
-          console.log("Creating organizer profile with data:", organizerProfile);
-          const profileResult = await communityService.createOrganizerProfile(organizerProfile);
-          console.log("Organizer profile created successfully:", profileResult);
-          
-          toast({
-            title: "Success!",
-            description: "Community and organizer profile created successfully!",
-            variant: "default",
-          });
-  
-          // Allow some time for database operations to complete
-          setTimeout(() => {
-            if (onSuccess && community?.id) {
-              console.log(`Calling onSuccess handler with community ID: ${community.id}`);
-              onSuccess(community.id);
-            } else if (community?.id) {
-              console.log(`Navigating to community page: /community/${community.id}`);
-              navigate(`/community/${community.id}`, { replace: true });
-            }
-          }, 800);
-          
-        } catch (profileError) {
-          console.error('Error creating organizer profile:', profileError);
-          
-          // Continue even if organizer profile creation fails - the community was already created
-          toast({
-            title: "Partial Success",
-            description: "Community created but organizer profile failed. Some details may be missing.",
-            variant: "default",
-          });
-          
-          if (onSuccess && community.id) {
-            onSuccess(community.id);
-          } else {
-            navigate(`/community/${community.id}`, { replace: true });
-          }
-        }
-      } catch (communityError: any) {
-        console.error('Error in community creation:', communityError);
-        
-        // Show a specific error message if available, otherwise show a generic one
-        const errorMessage = communityError?.message || "Unknown error occurred";
-        setSubmissionError(errorMessage);
-        
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: `Failed to create community: ${errorMessage}`,
-        });
+      const community = await communityService.createCommunity(communityData);
+      console.log("Community created successfully:", community);
+      
+      if (!community || !community.id) {
+        throw new Error("Failed to create community - no community ID returned");
       }
+      
+      setCreatedCommunityId(community.id);
+      
+      toast({
+        title: "Success!",
+        description: "Community created successfully!",
+        variant: "default",
+      });
+
+      setTimeout(() => {
+        if (onSuccess && community?.id) {
+          console.log(`Calling onSuccess handler with community ID: ${community.id}`);
+          onSuccess(community.id);
+        } else if (community?.id) {
+          console.log(`Navigating to community page: /community/${community.id}`);
+          navigate(`/community/${community.id}`, { replace: true });
+        }
+      }, 800);
       
     } catch (error: any) {
       console.error('Error in overall submission process:', error);

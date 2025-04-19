@@ -45,6 +45,19 @@ export interface Community {
     url?: string;
   }[];
   primaryPlatforms?: string[];
+  founder_name?: string;
+  role_title?: string;
+  personal_background?: string;
+  community_structure?: string;
+  vision?: string;
+  community_values?: string;
+  size_demographics?: string;
+  team_structure?: string;
+  tech_stack?: string;
+  event_formats?: string;
+  business_model?: string;
+  challenges?: string;
+  special_notes?: string;
 }
 
 export interface CommunityStatistics {

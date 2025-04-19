@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Community } from "@/models/types";
 import { communities as mockCommunities } from "@/data/communities";
@@ -7,7 +6,6 @@ import { communities as mockCommunities } from "@/data/communities";
  * Maps a database community record to a Community model
  */
 export const mapDbCommunity = (dbCommunity: any): Community => {
-  // Map the database record to our Community model
   return {
     id: dbCommunity.id || String(Date.now()),
     name: dbCommunity.name || "Unnamed Community",
@@ -21,7 +19,20 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
     isPublic: dbCommunity.is_public !== undefined ? dbCommunity.is_public : true,
     createdAt: dbCommunity.created_at || new Date().toISOString(),
     updatedAt: dbCommunity.updated_at || new Date().toISOString(),
-    website: dbCommunity.website || ""
+    website: dbCommunity.website || "",
+    founder_name: dbCommunity.founder_name || "",
+    role_title: dbCommunity.role_title || "",
+    personal_background: dbCommunity.personal_background || "",
+    community_structure: dbCommunity.community_structure || "",
+    vision: dbCommunity.vision || "",
+    community_values: dbCommunity.community_values || "",
+    size_demographics: dbCommunity.size_demographics || "",
+    team_structure: dbCommunity.team_structure || "",
+    tech_stack: dbCommunity.tech_stack || "",
+    event_formats: dbCommunity.event_formats || "",
+    business_model: dbCommunity.business_model || "",
+    challenges: dbCommunity.challenges || "",
+    special_notes: dbCommunity.special_notes || ""
   };
 };
 

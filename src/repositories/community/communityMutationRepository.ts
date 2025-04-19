@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase, mapDbCommunity } from "../base/baseRepository";
 
@@ -40,7 +39,6 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
   try {
     console.log("Repository: Creating community with data:", community);
     
-    // Get current authenticated user for debugging
     const { data: sessionData } = await supabase.auth.getSession();
     const currentUserId = sessionData?.session?.user?.id;
     console.log("Current authenticated user ID:", currentUserId);
@@ -50,7 +48,6 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       throw new Error("Authentication required to create a community");
     }
     
-    // Create the community entry
     const { data, error } = await supabase
       .from('communities')
       .insert({
@@ -59,7 +56,20 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         logo_url: community.imageUrl || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
-        location: community.location || "Remote"
+        location: community.location || "Remote",
+        founder_name: community.founder_name || "",
+        role_title: community.role_title || "",
+        personal_background: community.personal_background || "",
+        community_structure: community.community_structure || "",
+        vision: community.vision || "",
+        community_values: community.community_values || "",
+        size_demographics: community.size_demographics || "",
+        team_structure: community.team_structure || "",
+        tech_stack: community.tech_stack || "",
+        event_formats: community.event_formats || "",
+        business_model: community.business_model || "",
+        challenges: community.challenges || "",
+        special_notes: community.special_notes || ""
       })
       .select()
       .single();
@@ -76,38 +86,10 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     }
     
     console.log("Repository: Community created successfully:", data);
-    
-    // Add current user as admin
-    try {
-      const userId = currentUserId;
-      
-      if (userId) {
-        const { error: memberError } = await supabase
-          .from('community_members')
-          .insert({
-            community_id: data.id,
-            user_id: userId,
-            role: 'admin'
-          });
-          
-        if (memberError) {
-          console.error("Error adding user as community admin:", memberError);
-          // Continue anyway since the community was created
-        } else {
-          console.log(`User ${userId} successfully added as admin to community ${data.id}`);
-        }
-      } else {
-        console.log("No authenticated user found to set as community admin");
-      }
-    } catch (memberErr) {
-      console.error("Error during membership creation:", memberErr);
-      // Continue anyway since the community was created
-    }
-    
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in createCommunity:", err);
-    throw err; // Re-throw to allow proper error handling upstream
+    throw err;
   }
 };
 

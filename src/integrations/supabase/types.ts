@@ -32,39 +32,78 @@ export type Database = {
       }
       communities: {
         Row: {
+          business_model: string | null
+          challenges: string | null
+          community_structure: string | null
+          community_values: string | null
           created_at: string
           description: string | null
+          event_formats: string | null
+          founder_name: string | null
           id: string
           is_public: boolean
           location: string | null
           logo_url: string | null
           member_count: number | null
           name: string
+          personal_background: string | null
+          role_title: string | null
+          size_demographics: string | null
+          special_notes: string | null
+          team_structure: string | null
+          tech_stack: string | null
           updated_at: string
+          vision: string | null
           website: string | null
         }
         Insert: {
+          business_model?: string | null
+          challenges?: string | null
+          community_structure?: string | null
+          community_values?: string | null
           created_at?: string
           description?: string | null
+          event_formats?: string | null
+          founder_name?: string | null
           id?: string
           is_public?: boolean
           location?: string | null
           logo_url?: string | null
           member_count?: number | null
           name: string
+          personal_background?: string | null
+          role_title?: string | null
+          size_demographics?: string | null
+          special_notes?: string | null
+          team_structure?: string | null
+          tech_stack?: string | null
           updated_at?: string
+          vision?: string | null
           website?: string | null
         }
         Update: {
+          business_model?: string | null
+          challenges?: string | null
+          community_structure?: string | null
+          community_values?: string | null
           created_at?: string
           description?: string | null
+          event_formats?: string | null
+          founder_name?: string | null
           id?: string
           is_public?: boolean
           location?: string | null
           logo_url?: string | null
           member_count?: number | null
           name?: string
+          personal_background?: string | null
+          role_title?: string | null
+          size_demographics?: string | null
+          special_notes?: string | null
+          team_structure?: string | null
+          tech_stack?: string | null
           updated_at?: string
+          vision?: string | null
           website?: string | null
         }
         Relationships: []
