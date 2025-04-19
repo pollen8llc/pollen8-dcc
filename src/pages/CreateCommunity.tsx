@@ -1,18 +1,14 @@
 
-import React, { useEffect } from 'react';
-import { useUser } from '@/contexts/UserContext';
-import { Navigate, useNavigate } from 'react-router-dom';
-import CommunityCreateForm from '@/components/community/CommunityCreateForm';
-import { Card } from '@/components/ui/card';
-import Navbar from '@/components/Navbar';
-import { useToast } from '@/hooks/use-toast';
+import { useUser } from "@/contexts/UserContext";
+import { Navigate } from "react-router-dom";
+import { CreateCommunityForm } from "@/components/community/CreateCommunityForm";
+import { useToast } from "@/hooks/use-toast";
+import Navbar from "@/components/Navbar";
 
-const CreateCommunityPage: React.FC = () => {
+export default function CreateCommunityPage() {
   const { currentUser, isLoading } = useUser();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Show loading state while checking auth
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -24,7 +20,6 @@ const CreateCommunityPage: React.FC = () => {
     );
   }
 
-  // Redirect if user is not authenticated
   if (!currentUser) {
     toast({
       title: "Authentication required",
@@ -34,36 +29,15 @@ const CreateCommunityPage: React.FC = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  console.log("Creating community as user:", currentUser);
-
-  const handleSuccess = (communityId: string) => {
-    console.log(`Community created successfully with ID: ${communityId}`);
-    toast({
-      title: "Success!",
-      description: "Your community has been created",
-      variant: "default",
-    });
-    
-    // Handle navigation with appropriate delay
-    setTimeout(() => {
-      console.log("Navigating to:", `/community/${communityId}`);
-      navigate(`/community/${communityId}`, { replace: true });
-    }, 500);
-  };
-
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Create a Community</h1>
-          <Card className="p-6">
-            <CommunityCreateForm onSuccess={handleSuccess} />
-          </Card>
+          <CreateCommunityForm />
         </div>
       </div>
     </div>
   );
-};
-
-export default CreateCommunityPage;
+}
