@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Globe2 } from "lucide-react";
+import { MapPin, Calendar, Globe2, FileText } from "lucide-react";
 import { Community } from "@/models/types";
 import { Badge } from "@/components/ui/badge";
 import { useRef, useEffect, useState } from "react";
@@ -41,19 +41,17 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
       className="group relative h-full w-full"
     >
       <div className="relative h-full overflow-hidden rounded-xl bg-card border border-border/40 transition-all duration-300 group-hover:shadow-md transform group-hover:-translate-y-1">
-        {/* Header */}
-        <div className="p-4 border-b border-border/40">
-          <h3 className="text-lg font-semibold text-foreground line-clamp-1">
+        {/* Row 1: Name and Tags */}
+        <div className="p-3 border-b border-border/40">
+          <h3 className="text-base font-semibold text-foreground line-clamp-1">
             {community.name}
           </h3>
-          
-          {/* Tags */}
-          <div ref={tagContainerRef} className="flex flex-wrap gap-1.5 mt-2">
+          <div ref={tagContainerRef} className="flex flex-wrap gap-1 mt-1.5">
             {displayTags.map((tag) => (
               <Badge
                 key={tag}
                 variant="outline"
-                className="bg-primary/5 text-primary text-xs font-medium"
+                className="bg-primary/5 text-primary text-xs font-medium px-2 py-0"
               >
                 {tag}
               </Badge>
@@ -66,28 +64,37 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
           </div>
         </div>
         
-        {/* Content */}
-        <div className="p-4 space-y-3">
-          <div className="grid gap-2 text-sm">
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <MapPin className="h-4 w-4 shrink-0" />
-              <span className="truncate" title={community.location}>
-                {community.location}
-              </span>
-            </div>
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <Globe2 className="h-4 w-4 shrink-0" />
-              <span>{community.format || 'Mixed'}</span>
-            </div>
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <Calendar className="h-4 w-4 shrink-0" />
-              <span>{community.eventFrequency || 'Flexible'}</span>
-            </div>
+        {/* Row 2: Description */}
+        <div className="p-3 border-b border-border/40">
+          <div className="flex items-start space-x-1.5 text-muted-foreground">
+            <FileText className="h-4 w-4 shrink-0 mt-0.5" />
+            <p className="text-sm line-clamp-2">{community.description}</p>
           </div>
-          
+        </div>
+        
+        {/* Row 3: Location and Format */}
+        <div className="p-3 border-b border-border/40 grid grid-cols-2 gap-3">
+          <div className="flex items-center space-x-1.5 text-muted-foreground">
+            <MapPin className="h-4 w-4 shrink-0" />
+            <span className="text-sm truncate" title={community.location}>
+              {community.location}
+            </span>
+          </div>
+          <div className="flex items-center space-x-1.5 text-muted-foreground">
+            <Globe2 className="h-4 w-4 shrink-0" />
+            <span className="text-sm">{community.format || 'Mixed'}</span>
+          </div>
+        </div>
+        
+        {/* Row 4: Event Frequency and Last Active */}
+        <div className="p-3 grid grid-cols-2 gap-3">
+          <div className="flex items-center space-x-1.5 text-muted-foreground">
+            <Calendar className="h-4 w-4 shrink-0" />
+            <span className="text-sm">{community.eventFrequency || 'Flexible'}</span>
+          </div>
           {community.updatedAt && (
-            <div className="text-xs text-muted-foreground pt-2 border-t border-border/40">
-              Last active: {new Date(community.updatedAt).toLocaleDateString()}
+            <div className="text-sm text-muted-foreground text-right">
+              Active: {new Date(community.updatedAt).toLocaleDateString()}
             </div>
           )}
         </div>
