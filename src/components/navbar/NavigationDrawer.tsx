@@ -67,7 +67,6 @@ const NavigationDrawer = ({
 
           <div className="grid gap-2 py-2">
             <MainNavigation 
-              currentUser={!!currentUser} 
               onNavigate={handleNavigation} 
             />
 
