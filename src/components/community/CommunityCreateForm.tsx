@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -6,7 +7,7 @@ import { useToast } from "@/hooks/use-toast"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { useUser } from "@/contexts/UserContext"
 import * as communityService from "@/services/communityService"
 import { BasicCommunityForm } from "./BasicCommunityForm"
@@ -53,7 +54,11 @@ const formSchema = z.object({
   special_notes: z.string().optional(),
 });
 
-export default function CommunityCreateForm() {
+interface CommunityCreateFormProps {
+  onSuccess?: (communityId: string) => void;
+}
+
+export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormProps) {
   const { toast } = useToast()
   const navigate = useNavigate()
   const { currentUser } = useUser()
@@ -169,11 +174,15 @@ export default function CommunityCreateForm() {
         variant: "default",
       });
 
-      // Ensure there's a small delay before navigation to allow the toast to show
-      setTimeout(() => {
-        console.log(`Navigating to community page: /community/${community.id}`);
-        navigate(`/community/${community.id}`);
-      }, 1000);
+      if (onSuccess && community.id) {
+        onSuccess(community.id);
+      } else {
+        // Ensure there's a small delay before navigation to allow the toast to show
+        setTimeout(() => {
+          console.log(`Navigating to community page: /community/${community.id}`);
+          navigate(`/community/${community.id}`);
+        }, 1000);
+      }
     } catch (error) {
       console.error('Error creating community:', error)
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
