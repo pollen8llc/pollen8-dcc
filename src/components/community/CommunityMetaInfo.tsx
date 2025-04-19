@@ -1,7 +1,10 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   User, Layers, MapPin, Calendar, Users, 
-  LayoutList, Clock
+  LayoutList, Clock, Link as LinkIcon, Mail,
+  MessageSquare, Info, Twitter, Instagram, 
+  Facebook, Linkedin
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import * as communityService from "@/services/communityService";
