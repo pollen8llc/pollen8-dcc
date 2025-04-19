@@ -37,6 +37,12 @@ export const useCreateCommunity = () => {
       // Ensure the start date is a valid ISO string
       const startDateISO = new Date(data.startDate).toISOString();
 
+      // Prepare communication platforms as a JSON object
+      const communicationPlatformsObject = data.platforms?.reduce((acc, platform) => {
+        acc[platform] = { enabled: true };
+        return acc;
+      }, {} as Record<string, any>);
+
       // Debug information
       console.log("Creating community with data:", {
         name: data.name,
@@ -49,7 +55,7 @@ export const useCreateCommunity = () => {
         format: data.format,
         member_count: data.size,
         event_frequency: data.eventFrequency,
-        communication_platforms: data.platforms, 
+        communication_platforms: communicationPlatformsObject,
         website: data.website,
         newsletter_url: data.newsletterUrl,
         social_media: socialMediaObject
@@ -69,10 +75,21 @@ export const useCreateCommunity = () => {
           target_audience: targetAudienceArray,
           member_count: data.size || 0,
           event_frequency: data.eventFrequency || "monthly",
-          communication_platforms: data.platforms,
+          communication_platforms: communicationPlatformsObject,
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",
-          social_media: socialMediaObject
+          social_media: socialMediaObject,
+          // Add additional metadata and organizer profile fields
+          vision: data.vision || null,
+          community_structure: data.community_structure || null,
+          team_structure: data.role_title || null,
+          business_model: null,
+          challenges: null,
+          community_values: null,
+          special_notes: null,
+          event_formats: null,
+          tech_stack: null,
+          size_demographics: String(data.size) || "0"
         })
         .select()
         .single();
@@ -85,6 +102,32 @@ export const useCreateCommunity = () => {
       if (!community) {
         console.error("No community data returned after creation");
         throw new Error("Failed to create community: No data returned");
+      }
+
+      // Create organizer profile
+      if (community.id) {
+        const { error: organizerError } = await supabase
+          .from('community_organizer_profiles')
+          .insert({
+            community_id: community.id,
+            founder_name: session.session.user.id,
+            personal_background: null,
+            size_demographics: String(data.size) || "0",
+            community_structure: data.community_structure || null,
+            team_structure: data.role_title || null,
+            tech_stack: null,
+            event_formats: null,
+            business_model: null,
+            community_values: null,
+            challenges: null,
+            vision: data.vision || null,
+            special_notes: null
+          });
+
+        if (organizerError) {
+          console.error("Error creating organizer profile:", organizerError);
+          // Continue even if organizer profile creation fails
+        }
       }
 
       console.log("Community created successfully:", community);
