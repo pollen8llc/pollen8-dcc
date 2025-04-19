@@ -50,6 +50,31 @@ const setupCommunity = async () => {
 
     console.log('User added as admin successfully');
     
+    // Create an organizer profile for the new community
+    try {
+      const organizerProfile = {
+        community_id: newCommunity.id,
+        founder_name: "Neech Organizer",
+        role_title: "Founder",
+        personal_background: "Background in community building",
+        size_demographics: "New growing community",
+        community_structure: "Open and collaborative",
+        team_structure: "Flat hierarchy",
+        tech_stack: "Modern web technologies",
+        event_formats: "Virtual and in-person meetups",
+        business_model: "Community-driven",
+        community_values: "Connection, Collaboration, Growth",
+        challenges: "Building engagement",
+        vision: "Creating a thriving global community",
+        special_notes: ""
+      };
+      
+      await communityService.createOrganizerProfile(organizerProfile);
+      console.log('Organizer profile created successfully');
+    } catch (profileError) {
+      console.error('Error creating organizer profile:', profileError);
+    }
+    
     // Update the user's roles to ensure they're an organizer if not already
     const { error: roleError } = await supabase
       .rpc('update_user_role', { 

@@ -219,6 +219,7 @@ export const createOrganizerProfile = async (profile: Omit<CommunityOrganizerPro
         throw error;
       }
 
+      console.log('Created new organizer profile:', data);
       return data;
     }
   } catch (error) {

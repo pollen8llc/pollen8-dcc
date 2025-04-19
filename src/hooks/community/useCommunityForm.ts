@@ -175,12 +175,12 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
           };
   
           console.log("Creating organizer profile with data:", organizerProfile);
-          await communityService.createOrganizerProfile(organizerProfile);
-          console.log("Organizer profile created successfully");
+          const profileResult = await communityService.createOrganizerProfile(organizerProfile);
+          console.log("Organizer profile created successfully:", profileResult);
           
           toast({
             title: "Success!",
-            description: "Community created successfully!",
+            description: "Community and organizer profile created successfully!",
             variant: "default",
           });
   
