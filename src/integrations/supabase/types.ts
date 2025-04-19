@@ -34,6 +34,7 @@ export type Database = {
         Row: {
           business_model: string | null
           challenges: string | null
+          communication_platforms: Json | null
           community_structure: string | null
           community_type: string | null
           community_values: string | null
@@ -41,6 +42,7 @@ export type Database = {
           description: string | null
           event_formats: string | null
           event_frequency: string | null
+          event_platforms: Json | null
           format: string | null
           founder_name: string | null
           id: string
@@ -50,9 +52,9 @@ export type Database = {
           member_count: number | null
           name: string
           newsletter_url: string | null
+          notification_platforms: Json | null
           owner_id: string | null
           personal_background: string | null
-          primary_platforms: string[] | null
           role_title: string | null
           size_demographics: string | null
           social_media: Json | null
@@ -67,6 +69,7 @@ export type Database = {
         Insert: {
           business_model?: string | null
           challenges?: string | null
+          communication_platforms?: Json | null
           community_structure?: string | null
           community_type?: string | null
           community_values?: string | null
@@ -74,6 +77,7 @@ export type Database = {
           description?: string | null
           event_formats?: string | null
           event_frequency?: string | null
+          event_platforms?: Json | null
           format?: string | null
           founder_name?: string | null
           id?: string
@@ -83,9 +87,9 @@ export type Database = {
           member_count?: number | null
           name: string
           newsletter_url?: string | null
+          notification_platforms?: Json | null
           owner_id?: string | null
           personal_background?: string | null
-          primary_platforms?: string[] | null
           role_title?: string | null
           size_demographics?: string | null
           social_media?: Json | null
@@ -100,6 +104,7 @@ export type Database = {
         Update: {
           business_model?: string | null
           challenges?: string | null
+          communication_platforms?: Json | null
           community_structure?: string | null
           community_type?: string | null
           community_values?: string | null
@@ -107,6 +112,7 @@ export type Database = {
           description?: string | null
           event_formats?: string | null
           event_frequency?: string | null
+          event_platforms?: Json | null
           format?: string | null
           founder_name?: string | null
           id?: string
@@ -116,9 +122,9 @@ export type Database = {
           member_count?: number | null
           name?: string
           newsletter_url?: string | null
+          notification_platforms?: Json | null
           owner_id?: string | null
           personal_background?: string | null
-          primary_platforms?: string[] | null
           role_title?: string | null
           size_demographics?: string | null
           social_media?: Json | null

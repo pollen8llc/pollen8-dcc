@@ -1,6 +1,5 @@
-
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Users, Globe, Target, Layout, Clock, Link as LinkIcon, MessageSquare, Share2 } from "lucide-react";
+import { Calendar, Users, Globe, Target, Layout, Clock, Link as LinkIcon, MessageSquare, Share2, Video, Mail, Bell } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import * as communityService from "@/services/communityService";
 import { format } from "date-fns";
@@ -19,6 +18,12 @@ interface CommunityMetaInfoProps {
 interface SocialMediaLink {
   title: string;
   value: string;
+}
+
+interface PlatformLink {
+  name: string;
+  url?: string;
+  details?: string;
 }
 
 const formatDate = (dateString: string) => {
@@ -73,28 +78,21 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     }
   ];
 
-  // Properly format the online presence data
+  // Format the online presence data
   const onlinePresence = {
     websites: [
       { title: "Website", value: community.website },
       { title: "Newsletter", value: community.newsletterUrl }
     ].filter(item => item.value),
     
-    platforms: Array.isArray(community.primaryPlatforms) ? community.primaryPlatforms.map(platform => ({
-      title: platform.charAt(0).toUpperCase() + platform.slice(1),
-      value: platform
-    })) : [],
-    
     socialMedia: community.socialMedia && typeof community.socialMedia === 'object' 
       ? Object.entries(community.socialMedia).map(([platform, url]) => {
-          // Make sure we're handling the socialMedia object correctly
           if (typeof url === 'string') {
             return {
               title: platform.charAt(0).toUpperCase() + platform.slice(1),
               value: url
             };
           } else if (url && typeof url === 'object' && 'url' in url) {
-            // Handle the case where url is an object with a url property
             return {
               title: platform.charAt(0).toUpperCase() + platform.slice(1),
               value: url.url || ''
@@ -102,8 +100,47 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
           }
           return null;
         }).filter(item => item !== null) as SocialMediaLink[]
+      : [],
+
+    eventPlatforms: community.event_platforms 
+      ? Object.entries(community.event_platforms).map(([name, details]) => ({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          ...(typeof details === 'string' ? { url: details } : details)
+        })) 
+      : [],
+
+    communicationPlatforms: community.communication_platforms 
+      ? Object.entries(community.communication_platforms).map(([name, details]) => ({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          ...(typeof details === 'string' ? { url: details } : details)
+        }))
+      : [],
+
+    notificationPlatforms: community.notification_platforms 
+      ? Object.entries(community.notification_platforms).map(([name, details]) => ({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          ...(typeof details === 'string' ? { url: details } : details)
+        }))
       : []
   };
+
+  const platformCategories = [
+    {
+      title: "Event Platforms",
+      icon: <Video className="h-4 w-4" />,
+      platforms: onlinePresence.eventPlatforms
+    },
+    {
+      title: "Communication Platforms",
+      icon: <MessageSquare className="h-4 w-4" />,
+      platforms: onlinePresence.communicationPlatforms
+    },
+    {
+      title: "Notification Channels",
+      icon: <Bell className="h-4 w-4" />,
+      platforms: onlinePresence.notificationPlatforms
+    }
+  ];
 
   return (
     <div className="container mx-auto px-4 mb-12 space-y-8">
@@ -127,12 +164,13 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
 
       {/* Online Presence Section */}
       {(onlinePresence.websites.length > 0 || 
-        onlinePresence.platforms.length > 0 || 
-        onlinePresence.socialMedia.length > 0) && (
+        onlinePresence.socialMedia.length > 0 || 
+        platformCategories.some(cat => cat.platforms.length > 0)) && (
         <Card className="glass dark:glass-dark rounded-xl overflow-hidden border-b-2 border-aquamarine">
           <CardContent className="p-6 space-y-6">
             <h3 className="text-lg font-semibold mb-4">Online Presence</h3>
             
+            {/* Websites Section */}
             {onlinePresence.websites.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-muted-foreground">Websites</h4>
@@ -154,21 +192,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
               </div>
             )}
             
-            {onlinePresence.platforms.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-muted-foreground">Community Platforms</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {onlinePresence.platforms.map((platform, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm">
-                      <MessageSquare className="h-4 w-4" />
-                      {platform.title}
-                    </div>
-                  ))}
-                </div>
-                <Separator className="my-4" />
-              </div>
-            )}
-            
+            {/* Social Media Section */}
             {onlinePresence.socialMedia.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-muted-foreground">Social Media</h4>
@@ -186,8 +210,49 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
                     </a>
                   ))}
                 </div>
+                <Separator className="my-4" />
               </div>
             )}
+
+            {/* Platform Categories */}
+            {platformCategories.map((category, idx) => (
+              category.platforms.length > 0 && (
+                <div key={idx} className="space-y-2">
+                  <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    {category.icon}
+                    {category.title}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {category.platforms.map((platform, pIdx) => (
+                      <div key={pIdx} className="flex items-center gap-2 text-sm">
+                        {platform.url ? (
+                          <a
+                            href={platform.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 hover:text-primary transition-colors"
+                          >
+                            <LinkIcon className="h-4 w-4" />
+                            {platform.name}
+                          </a>
+                        ) : (
+                          <>
+                            <MessageSquare className="h-4 w-4" />
+                            {platform.name}
+                          </>
+                        )}
+                        {platform.details && (
+                          <span className="text-muted-foreground">({platform.details})</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {idx < platformCategories.length - 1 && category.platforms.length > 0 && (
+                    <Separator className="my-4" />
+                  )}
+                </div>
+              )
+            ))}
           </CardContent>
         </Card>
       )}
