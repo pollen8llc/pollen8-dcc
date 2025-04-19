@@ -61,28 +61,24 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
  */
 export const getUserCommunities = async (userId: string) => {
   try {
-    // This query now works because of our fixed RLS policy
+    // With our new model, we get communities that the user owns
     const { data, error } = await supabase
-      .from('community_members')
+      .from('communities')
       .select(`
-        community_id,
-        role,
-        communities:community_id (
-          id,
-          name,
-          logo_url
-        )
+        id,
+        name,
+        logo_url
       `)
-      .eq('user_id', userId);
+      .eq('owner_id', userId);
       
     if (error) {
       console.error("Error fetching user communities:", error);
       throw error;
     }
     
-    return data.map(membership => ({
-      ...membership.communities,
-      role: membership.role
+    return data.map(community => ({
+      ...community,
+      role: 'admin' // In the new model, all user communities are owned/admin
     }));
   } catch (error: any) {
     console.error("Error in getUserCommunities:", error);

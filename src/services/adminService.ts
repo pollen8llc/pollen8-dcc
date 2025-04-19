@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
 
@@ -390,14 +389,14 @@ export const getAllUsers = async (): Promise<User[]> => {
       // Continue without legacy roles rather than failing
     }
     
-    // Get community memberships for finding managed communities
-    const { data: memberships, error: membershipError } = await supabase
-      .from('community_members')
-      .select('user_id, community_id, role');
+    // Get communities that users own (new model)
+    const { data: ownedCommunities, error: ownedError } = await supabase
+      .from('communities')
+      .select('id, owner_id');
       
-    if (membershipError) {
-      console.error("Error fetching community memberships:", membershipError);
-      // Continue without memberships rather than failing
+    if (ownedError) {
+      console.error("Error fetching owned communities:", ownedError);
+      // Continue without communities rather than failing
     }
     
     // Map profiles to User objects
@@ -414,16 +413,14 @@ export const getAllUsers = async (): Promise<User[]> => {
       // For backwards compatibility, also check legacy admin role
       const legacyAdminRole = legacyAdminRoles?.find(r => r.user_id === profile.id);
       
-      // Find user's community memberships
-      const userMemberships = memberships?.filter(m => m.user_id === profile.id) || [];
+      // Find communities user owns
+      const userOwnedCommunities = ownedCommunities?.filter(c => c.owner_id === profile.id) || [];
       
-      // Get communities user is a member of
-      const communities = userMemberships.map(m => m.community_id);
+      // Get community IDs
+      const communities = userOwnedCommunities.map(c => c.id);
       
-      // Get communities user manages
-      const managedCommunities = userMemberships
-        .filter(m => m.role === 'admin')
-        .map(m => m.community_id);
+      // In the new model, all communities a user is associated with are ones they manage
+      const managedCommunities = communities;
       
       // Determine user's role
       let role = UserRole.MEMBER;

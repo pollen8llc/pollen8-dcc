@@ -39,7 +39,7 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       memberCount: data.member_count || 0,
       organizerIds: organizers,
       memberIds: members,
-      tags: [],
+      tags: [], // No tags in the current model
       isPublic: data.is_public,
       createdAt: data.created_at || new Date().toISOString(),
       updatedAt: data.updated_at || new Date().toISOString(),

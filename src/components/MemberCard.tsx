@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 
 interface MemberCardProps {
   member: User;
-  onClick: (member: User) => void;
+  role?: string; // Added this property to support role designation
+  communityId?: string; // Added optional communityId
+  onClick?: (member: User) => void;
 }
 
-const MemberCard = ({ member, onClick }: MemberCardProps) => {
+const MemberCard = ({ member, role, communityId, onClick }: MemberCardProps) => {
   const getBadgeColorClass = (role: UserRole): string => {
     switch (role) {
       case UserRole.ADMIN:
@@ -23,10 +25,14 @@ const MemberCard = ({ member, onClick }: MemberCardProps) => {
     }
   };
 
+  const handleCardClick = () => {
+    if (onClick) onClick(member);
+  };
+
   return (
     <div 
       className="glass dark:glass-dark rounded-xl overflow-hidden border border-border/40 cursor-pointer transition-all duration-300 hover:shadow-md transform hover:translate-y-[-2px]"
-      onClick={() => onClick(member)}
+      onClick={handleCardClick}
     >
       <div className="flex flex-col sm:flex-row items-center p-4">
         <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-aquamarine/30 flex-shrink-0 mb-3 sm:mb-0">
@@ -40,7 +46,7 @@ const MemberCard = ({ member, onClick }: MemberCardProps) => {
         <div className="sm:ml-4 text-center sm:text-left flex-grow">
           <h3 className="font-medium">{member.name}</h3>
           <Badge className={`mt-1 ${getBadgeColorClass(member.role)}`}>
-            {UserRole[member.role]}
+            {role || UserRole[member.role]}
           </Badge>
           <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
             {member.bio}
