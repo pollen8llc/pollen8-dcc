@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -56,7 +55,7 @@ const DirectoryTab = ({ isLoading, managedCommunities, onToggleVisibility }: Dir
                     <div>
                       <h3 className="font-medium">{community.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {community.memberCount} members
+                        {community.communitySize} members
                       </p>
                     </div>
                   </div>

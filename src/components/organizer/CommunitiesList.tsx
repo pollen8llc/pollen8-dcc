@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,6 @@ const CommunitiesList = ({
   const { currentUser } = useUser();
   const [communityOwnership, setCommunityOwnership] = useState<Record<string, boolean>>({});
 
-  // Check ownership status for each community when the component loads
   useEffect(() => {
     const checkOwnership = async () => {
       if (!managedCommunities || !currentUser?.id) return;
@@ -100,7 +98,7 @@ const CommunitiesList = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {managedCommunities.map((community) => (
+      {managedCommunities?.map((community) => (
         <Card 
           key={community.id}
           className="hover:shadow-md transition-all"
@@ -128,7 +126,7 @@ const CommunitiesList = ({
               {community.description}
             </p>
             <div className="mt-4 text-sm">
-              <span className="font-medium">{community.memberCount}</span> members
+              <span className="font-medium">{community.communitySize}</span> members
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button 

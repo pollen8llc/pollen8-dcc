@@ -36,7 +36,7 @@ const ManagedCommunitiesGrid = ({ communities }: ManagedCommunitiesGridProps) =>
                 {community.description}
               </p>
               <div className="mt-4 text-sm">
-                <span className="font-medium">{community.memberCount}</span> members
+                <span className="font-medium">{community.communitySize}</span> members
               </div>
             </CardContent>
           </Card>

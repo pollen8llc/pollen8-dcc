@@ -1,6 +1,7 @@
 
 import { Community } from "@/models/types";
-import { supabase, mapDbCommunity } from "../base/baseRepository";
+import { supabase } from "@/integrations/supabase/client";
+import { mapDbCommunity } from "../base/baseRepository";
 
 export const updateCommunity = async (community: Community): Promise<Community> => {
   try {

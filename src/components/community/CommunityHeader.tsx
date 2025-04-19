@@ -34,7 +34,7 @@ const CommunityHeader = ({ community }: CommunityHeaderProps) => {
                   </div>
                   <div className="flex items-center text-muted-foreground">
                     <Users className="h-4 w-4 mr-1" />
-                    <span>{community.memberCount} members</span>
+                    <span>{community.communitySize} members</span>
                   </div>
                 </div>
               </div>

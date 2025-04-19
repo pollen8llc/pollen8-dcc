@@ -57,7 +57,7 @@ const CommunityManagementDashboard = ({
                 <p>Created: {community.createdAt || 'Not available'}</p>
                 <p>Last updated: {community.updatedAt || 'Not available'}</p>
                 <p>Visibility: {community.isPublic ? 'Public' : 'Private'}</p>
-                <p>Total members: {community.memberCount}</p>
+                <p>Total members: {community.communitySize}</p>
               </div>
             </CardContent>
           </Card>

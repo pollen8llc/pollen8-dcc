@@ -1,6 +1,7 @@
 
 import { Community } from "@/models/types";
-import { supabase, mockCommunities, mapDbCommunity, mapLegacyCommunity } from "../../base/baseRepository";
+import { supabase } from "@/integrations/supabase/client";
+import { mockCommunities, mapDbCommunity, mapLegacyCommunity } from "../../base/baseRepository";
 
 export const getAllCommunities = async (): Promise<Community[]> => {
   try {

@@ -54,7 +54,7 @@ const CommunityProfile = () => {
         communityId={community.id}
         organizers={organizers}
         members={members}
-        memberCount={community.memberCount}
+        memberCount={community.communitySize}
       />
     </div>
   );
