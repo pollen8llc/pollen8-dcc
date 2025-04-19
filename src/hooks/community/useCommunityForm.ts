@@ -43,6 +43,13 @@ const formSchema = z.object({
   business_model: z.string().optional(),
   challenges: z.string().optional(),
   special_notes: z.string().optional(),
+}).refine((data) => {
+  if (data.name.trim().length < 3) {
+    throw new Error("Community name must be at least 3 characters long")
+  }
+  return true
+}, {
+  message: "Invalid form data"
 });
 
 export type CommunityFormSchema = z.infer<typeof formSchema>;
@@ -58,6 +65,7 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
 
   const form = useForm<CommunityFormSchema>({
     resolver: zodResolver(formSchema),
+    mode: 'onSubmit',
     defaultValues: {
       name: "",
       description: "",
@@ -96,7 +104,6 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
     try {
       setIsSubmitting(true);
       setSubmissionError(null);
-      console.log("Submitting form with values:", values);
       
       if (!currentUser || !currentUser.id) {
         throw new Error("You must be logged in to create a community");
@@ -149,7 +156,6 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
       console.log("Creating community with data:", communityData);
       
       const community = await communityService.createCommunity(communityData);
-      console.log("Community created successfully:", community);
       
       if (!community || !community.id) {
         throw new Error("Failed to create community - no community ID returned");
@@ -165,16 +171,14 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
 
       setTimeout(() => {
         if (onSuccess && community?.id) {
-          console.log(`Calling onSuccess handler with community ID: ${community.id}`);
           onSuccess(community.id);
         } else if (community?.id) {
-          console.log(`Navigating to community page: /community/${community.id}`);
           navigate(`/community/${community.id}`, { replace: true });
         }
       }, 800);
       
     } catch (error: any) {
-      console.error('Error in overall submission process:', error);
+      console.error('Error in community creation:', error);
       const errorMessage = error?.message || "Unknown error occurred";
       setSubmissionError(errorMessage);
       
