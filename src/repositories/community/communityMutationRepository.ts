@@ -39,6 +39,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
   try {
     console.log("Repository: Creating community with data:", community);
     
+    // Create the community entry
     const { data, error } = await supabase
       .from('communities')
       .insert({
@@ -46,13 +47,17 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         description: community.description || "",
         logo_url: community.imageUrl || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
         website: community.website || "",
-        is_public: community.isPublic !== undefined ? community.isPublic : true
+        is_public: community.isPublic !== undefined ? community.isPublic : true,
+        // Adding location as a column in the database if it exists
+        location: community.location || "Remote"
       })
       .select()
       .single();
     
     if (error) {
       console.error("Error creating community:", error);
+      console.error("Error details:", error.details, error.hint, error.message);
+      
       // Create a fallback community object with timestamp-based ID for debugging
       return {
         id: String(Date.now()),
@@ -90,6 +95,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         if (memberError) {
           console.error("Error adding user as community admin:", memberError);
         }
+      } else {
+        console.log("No authenticated user found to set as community admin");
       }
     } catch (memberErr) {
       console.error("Error during membership creation:", memberErr);

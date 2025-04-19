@@ -4,6 +4,7 @@ import { useUser } from '@/contexts/UserContext';
 import { Navigate } from 'react-router-dom';
 import { UserRole } from '@/models/types';
 import CommunityCreateForm from '@/components/community/CommunityCreateForm';
+import { Card } from '@/components/ui/card';
 
 const CreateCommunityPage: React.FC = () => {
   const { currentUser, isLoading } = useUser();
@@ -29,7 +30,9 @@ const CreateCommunityPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Create a Community</h1>
-        <CommunityCreateForm />
+        <Card className="p-6">
+          <CommunityCreateForm />
+        </Card>
       </div>
     </div>
   );

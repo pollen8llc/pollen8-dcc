@@ -100,6 +100,8 @@ export default function CommunityCreateForm() {
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (isSubmitting) return; // Prevent double submission
+    
     try {
       setIsSubmitting(true)
       console.log("Submitting form with values:", values);
@@ -123,11 +125,16 @@ export default function CommunityCreateForm() {
         newsletterUrl: values.newsletterUrl,
         socialMedia: values.socialMedia?.filter(sm => sm.platform || sm.url),
         primaryPlatforms: values.primaryPlatforms,
+        imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3"
       };
 
       console.log("Creating community with data:", communityData);
       const community = await communityService.createCommunity(communityData);
       console.log("Community created:", community);
+
+      if (!community || !community.id) {
+        throw new Error("Failed to create community");
+      }
 
       const organizerProfile = {
         community_id: community.id,
@@ -151,13 +158,14 @@ export default function CommunityCreateForm() {
       console.log("Organizer profile created successfully");
 
       toast({
+        title: "Success!",
         description: "Community created successfully!",
       });
 
       // Ensure there's a small delay before navigation to allow the toast to show
       setTimeout(() => {
         navigate(`/community/${community.id}`);
-      }, 500);
+      }, 1000);
     } catch (error) {
       console.error('Error creating community:', error)
       toast({
@@ -246,6 +254,7 @@ export default function CommunityCreateForm() {
               type="submit" 
               size="lg" 
               disabled={isSubmitting}
+              className="bg-primary hover:bg-primary/90"
             >
               {isSubmitting ? "Creating..." : "Create Community"}
             </Button>
