@@ -3,12 +3,6 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescripti
 import { Input } from "@/components/ui/input"
 import { UseFormReturn } from "react-hook-form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
 
 interface CommunitySnapshotFormProps {
   form: UseFormReturn<any>
@@ -19,112 +13,96 @@ export function CommunitySnapshotForm({ form }: CommunitySnapshotFormProps) {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium">📊 Community Snapshot</h3>
-        <p className="text-sm text-muted-foreground">Details about your community's status and operations</p>
+        <p className="text-sm text-muted-foreground">Information about your community's current state</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <FormField
+          control={form.control}
+          name="founder_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Founder Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Your name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="role_title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Your Role</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. Community Lead" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
       <FormField
         control={form.control}
-        name="launchDate"
+        name="size"
         render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Launch Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full pl-3 text-left font-normal",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? (
-                      format(new Date(field.value), "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date ? date.toISOString() : "")}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
+          <FormItem>
+            <FormLabel>Community Size</FormLabel>
+            <FormControl>
+              <Input 
+                type="number" 
+                placeholder="Current member count"
+                {...field} 
+                onChange={(e) => field.onChange(e.target.value)}
+              />
+            </FormControl>
+            <FormDescription>Approximate number of active members</FormDescription>
             <FormMessage />
           </FormItem>
         )}
       />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <FormField
-          control={form.control}
-          name="memberCount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Current Member Count</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  min="0" 
-                  placeholder="0"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="memberCapacity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Member Capacity</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  min="0" 
-                  placeholder="0 (unlimited)" 
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <FormField
+        control={form.control}
+        name="personal_background"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Personal Background</FormLabel>
+            <FormControl>
+              <Input placeholder="Your background" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <FormField
         control={form.control}
-        name="eventFrequency"
+        name="community_structure"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Event Frequency</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select frequency" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="daily">Daily</SelectItem>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="biweekly">Bi-weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="quarterly">Quarterly</SelectItem>
-                <SelectItem value="adhoc">Ad-hoc</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormLabel>Community Structure</FormLabel>
+            <FormControl>
+              <Input placeholder="How is your community organized?" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="vision"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Vision & Mission</FormLabel>
+            <FormControl>
+              <Input placeholder="The vision for your community" {...field} />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}
