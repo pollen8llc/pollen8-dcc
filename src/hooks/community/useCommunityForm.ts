@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -43,13 +44,6 @@ const formSchema = z.object({
   business_model: z.string().optional(),
   challenges: z.string().optional(),
   special_notes: z.string().optional(),
-}).refine((data) => {
-  if (data.name.trim().length < 3) {
-    throw new Error("Community name must be at least 3 characters long")
-  }
-  return true
-}, {
-  message: "Invalid form data"
 });
 
 export type CommunityFormSchema = z.infer<typeof formSchema>;
@@ -65,7 +59,7 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
 
   const form = useForm<CommunityFormSchema>({
     resolver: zodResolver(formSchema),
-    mode: 'onSubmit',
+    mode: 'onSubmit', // This ensures validation only happens on form submission
     defaultValues: {
       name: "",
       description: "",
@@ -101,9 +95,11 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // If already submitting, prevent multiple submissions
+    if (isSubmitting) return;
+    
+    // Use the form's handleSubmit to validate the form
     form.handleSubmit(async (values: CommunityFormSchema) => {
-      if (isSubmitting) return;
-      
       try {
         setIsSubmitting(true);
         setSubmissionError(null);
@@ -172,13 +168,14 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
           variant: "default",
         });
 
+        // Delay navigation to show success message
         setTimeout(() => {
           if (onSuccess && community?.id) {
             onSuccess(community.id);
           } else if (community?.id) {
             navigate(`/community/${community.id}`, { replace: true });
           }
-        }, 800);
+        }, 1500); // Slightly longer delay for better user experience
         
       } catch (error: any) {
         console.error('Error in community creation:', error);
