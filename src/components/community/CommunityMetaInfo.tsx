@@ -16,6 +16,11 @@ interface CommunityMetaInfoProps {
   communityId: string;
 }
 
+interface SocialMediaLink {
+  title: string;
+  value: string;
+}
+
 const formatDate = (dateString: string) => {
   try {
     return format(new Date(dateString), "MMMM yyyy");
@@ -68,6 +73,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     }
   ];
 
+  // Properly format the online presence data
   const onlinePresence = {
     websites: [
       { title: "Website", value: community.website },
@@ -79,10 +85,24 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       value: platform
     })) : [],
     
-    socialMedia: community.socialMedia ? Object.entries(community.socialMedia).map(([platform, url]) => ({
-      title: platform.charAt(0).toUpperCase() + platform.slice(1),
-      value: url
-    })) : []
+    socialMedia: community.socialMedia && typeof community.socialMedia === 'object' 
+      ? Object.entries(community.socialMedia).map(([platform, url]) => {
+          // Make sure we're handling the socialMedia object correctly
+          if (typeof url === 'string') {
+            return {
+              title: platform.charAt(0).toUpperCase() + platform.slice(1),
+              value: url
+            };
+          } else if (url && typeof url === 'object' && 'url' in url) {
+            // Handle the case where url is an object with a url property
+            return {
+              title: platform.charAt(0).toUpperCase() + platform.slice(1),
+              value: url.url || ''
+            };
+          }
+          return null;
+        }).filter(item => item !== null) as SocialMediaLink[]
+      : []
   };
 
   return (
