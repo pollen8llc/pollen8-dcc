@@ -45,7 +45,16 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       personal_background: data.personal_background || '',
       community_structure: data.community_structure || '',
       vision: data.vision || '',
-      community_values: data.community_values || ''
+      community_values: data.community_values || '',
+      // Add proper mapping for the platform-related fields
+      newsletterUrl: data.newsletter_url || '',
+      communication_platforms: data.communication_platforms || {},
+      socialMedia: data.social_media || {},
+      communityType: data.community_type || '',
+      format: data.format || '',
+      eventFrequency: data.event_frequency || '',
+      launchDate: data.start_date || null,
+      targetAudience: data.target_audience || []
     };
   } catch (err) {
     console.error("Error in getCommunityById:", err);
