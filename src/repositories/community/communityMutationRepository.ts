@@ -32,6 +32,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
 
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   try {
+    // Extract the creator ID (first organizer) to use as owner_id in the database
     const { data, error } = await supabase
       .from('communities')
       .insert({
@@ -41,7 +42,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
         location: community.location || "Remote",
-        owner_id: community.owner_id
+        // Use the first organizer ID as the owner_id, or null if no organizers
+        owner_id: community.organizerIds && community.organizerIds.length > 0 ? community.organizerIds[0] : null
       })
       .select()
       .single();

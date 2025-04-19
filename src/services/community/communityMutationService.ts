@@ -20,10 +20,13 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       throw new Error('Authentication required to create a community');
     }
     
-    return await communityRepository.createCommunity({
+    // Create a new community with the current user as the first organizer
+    const communityWithOrganizer: Partial<Community> = {
       ...community,
-      owner_id: sessionData.session.user.id
-    });
+      organizerIds: [sessionData.session.user.id]
+    };
+    
+    return await communityRepository.createCommunity(communityWithOrganizer);
   } catch (error) {
     console.error("Error in createCommunity service:", error);
     throw error;
