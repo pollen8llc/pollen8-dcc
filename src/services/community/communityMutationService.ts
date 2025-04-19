@@ -3,9 +3,6 @@ import { Community } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
 import { supabase } from "@/integrations/supabase/client";
 
-/**
- * Updates a community
- */
 export const updateCommunity = async (community: Community): Promise<Community> => {
   try {
     return await communityRepository.updateCommunity(community);
@@ -15,9 +12,6 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   }
 };
 
-/**
- * Creates a new community
- */
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   try {
     console.log("Service: Creating community with data:", community);
@@ -88,9 +82,6 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
   }
 };
 
-/**
- * Deletes a community using the safe_delete_community database function
- */
 export const deleteCommunity = async (communityId: string): Promise<void> => {
   try {
     console.log(`[communityService] Deleting community with ID: ${communityId}`);

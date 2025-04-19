@@ -1,9 +1,7 @@
+
 import { Community } from "@/models/types";
 import { supabase, mapDbCommunity } from "../base/baseRepository";
 
-/**
- * Updates a community
- */
 export const updateCommunity = async (community: Community): Promise<Community> => {
   try {
     const { data, error } = await supabase
@@ -32,9 +30,6 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   }
 };
 
-/**
- * Creates a new community
- */
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   try {
     console.log("Repository: Creating community with data:", community);
@@ -63,7 +58,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         community_structure: community.community_structure || "",
         vision: community.vision || "",
         community_values: community.community_values || "",
-        owner_id: currentUserId // Set the owner_id to the current user
+        owner_id: currentUserId
       })
       .select()
       .single();
@@ -87,9 +82,6 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
   }
 };
 
-/**
- * Deletes a community and all associated data
- */
 export const deleteCommunity = async (communityId: string): Promise<void> => {
   try {
     console.log("Repository: Attempting to delete community:", communityId);
