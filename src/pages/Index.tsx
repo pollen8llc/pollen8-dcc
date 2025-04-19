@@ -5,10 +5,12 @@ import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
 import CallToActionBanner from "@/components/CallToActionBanner";
 import * as communityService from "@/services/communityService";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showDebugger, setShowDebugger] = useState(true); // Set to true to show debugger by default
+  const [showDebugger, setShowDebugger] = useState(true);
   
   // Pre-fetch communities for better UX with a shorter stale time to see updates sooner
   const { refetch } = useQuery({
@@ -55,27 +57,21 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="flex justify-between items-center">
             {searchQuery ? (
-              <h2 className="text-2xl font-semibold animate-fade-in">
+              <h2 className="text-xl font-medium animate-fade-in">
                 Search Results for "{searchQuery}"
               </h2>
             ) : (
-              <h2 className="text-2xl font-semibold">All Communities</h2>
+              <h2 className="text-xl font-medium">All Communities</h2>
             )}
             
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setShowDebugger(prev => !prev)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showDebugger ? "Hide" : "Show"} Debugger
-              </button>
-              <button 
-                onClick={handleRefresh}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Refresh
-              </button>
-            </div>
+            <Button 
+              onClick={handleRefresh}
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
           </div>
           
           <Separator className="my-4 bg-gray-300 dark:bg-gray-700 transition-all duration-300" />
