@@ -51,7 +51,9 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Target className="h-5 w-5" />,
       title: "Target Audience",
-      value: community.targetAudience || "Not specified"
+      value: Array.isArray(community.targetAudience) 
+        ? community.targetAudience.join(", ") 
+        : (community.targetAudience || "Not specified")
     },
     {
       icon: <Layout className="h-5 w-5" />,
@@ -71,7 +73,9 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <MessageSquare className="h-5 w-5" />,
       title: "Main Platform",
-      value: community.primaryPlatforms ? community.primaryPlatforms[0]?.charAt(0).toUpperCase() + community.primaryPlatforms[0]?.slice(1) : "Not specified"
+      value: community.primaryPlatforms && community.primaryPlatforms.length > 0
+        ? community.primaryPlatforms[0].charAt(0).toUpperCase() + community.primaryPlatforms[0].slice(1)
+        : "Not specified"
     },
     {
       icon: <Share2 className="h-5 w-5" />,
