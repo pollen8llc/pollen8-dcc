@@ -14,8 +14,15 @@ export const useCreateCommunity = () => {
     try {
       setIsSubmitting(true);
       
-      const { data: session } = await supabase.auth.getSession();
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw new Error("Failed to get user session");
+      }
+      
       if (!session?.session?.user) {
+        console.error("No authenticated user found");
         throw new Error("You must be logged in to create a community");
       }
 
@@ -44,6 +51,7 @@ export const useCreateCommunity = () => {
         social_media: socialMediaObject
       });
 
+      // Try inserting with just essential fields first to isolate any issues
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
@@ -51,13 +59,13 @@ export const useCreateCommunity = () => {
           description: data.description,
           community_type: data.communityType,
           location: data.location,
-          owner_id: session.session.user.id, // Explicitly set the owner_id to the current user
+          owner_id: session.session.user.id,
+          format: data.format || "hybrid",
           start_date: data.startDate,
           target_audience: targetAudienceArray,
-          format: data.format,
-          member_count: data.size,
-          event_frequency: data.eventFrequency,
-          primary_platforms: data.platforms, // Use platforms array
+          member_count: data.size || 0,
+          event_frequency: data.eventFrequency || "monthly",
+          primary_platforms: data.platforms, 
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",
           social_media: socialMediaObject
@@ -67,8 +75,15 @@ export const useCreateCommunity = () => {
 
       if (error) {
         console.error("Supabase error:", error);
-        throw error;
+        throw new Error(`Failed to create community: ${error.message}`);
       }
+
+      if (!community) {
+        console.error("No community data returned after creation");
+        throw new Error("Failed to create community: No data returned");
+      }
+
+      console.log("Community created successfully:", community);
 
       toast({
         title: "Success!",

@@ -28,9 +28,14 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCreateCommunity } from "@/hooks/useCreateCommunity";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useUser } from "@/contexts/UserContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export function CreateCommunityForm() {
   const { createCommunity, isSubmitting } = useCreateCommunity();
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const { currentUser } = useUser();
   
   const form = useForm<CommunityFormData>({
     resolver: zodResolver(communityFormSchema),
@@ -69,13 +74,36 @@ export function CreateCommunityForm() {
     { id: "skool", label: "Skool" },
   ] as const;
 
-  const onSubmit = (data: CommunityFormData) => {
-    createCommunity(data);
+  const onSubmit = async (data: CommunityFormData) => {
+    console.log("Form submitted with data:", data);
+    setSubmissionError(null);
+    
+    if (!currentUser) {
+      setSubmissionError("You must be logged in to create a community.");
+      return;
+    }
+    
+    try {
+      await createCommunity(data);
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      setSubmissionError(
+        error instanceof Error ? error.message : "Failed to create community"
+      );
+    }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {submissionError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{submissionError}</AlertDescription>
+          </Alert>
+        )}
+        
         <Card className="p-6">
           <div className="space-y-6">
             <FormField
@@ -181,9 +209,6 @@ export function CreateCommunityForm() {
                         mode="single"
                         selected={field.value ? new Date(field.value) : undefined}
                         onSelect={(date) => field.onChange(date?.toISOString() ?? "")}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
                         initialFocus
                       />
                     </PopoverContent>
@@ -200,7 +225,7 @@ export function CreateCommunityForm() {
                 <FormItem>
                   <FormLabel>Target Audience</FormLabel>
                   <FormControl>
-                    <Input placeholder="Who is this community for?" {...field} />
+                    <Input placeholder="Who is this community for? (comma-separated)" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -280,20 +305,6 @@ export function CreateCommunityForm() {
 
             <FormField
               control={form.control}
-              name="website"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website / Landing Page</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="platforms"
               render={() => (
                 <FormItem>
@@ -333,6 +344,20 @@ export function CreateCommunityForm() {
                       />
                     ))}
                   </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="website"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Website / Landing Page</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

@@ -1,3 +1,4 @@
+
 import * as z from "zod";
 
 export const communityFormSchema = z.object({
@@ -34,8 +35,8 @@ export const communityFormSchema = z.object({
     "hivebrite",
     "skool"
   ])).default([]),
-  website: z.string().url().optional().or(z.literal("")),
-  newsletterUrl: z.string().url().optional().or(z.literal("")),
+  website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  newsletterUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   socialMediaHandles: z.object({
     twitter: z.string().optional(),
     instagram: z.string().optional(),
