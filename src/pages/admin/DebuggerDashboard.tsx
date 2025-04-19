@@ -1,8 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import KnowledgeBaseDebugger from '@/components/debug/KnowledgeBaseDebugger';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -20,15 +17,11 @@ const DebuggerDashboard = () => {
         <h1 className="text-3xl font-bold">Component Debugger</h1>
       </div>
       
-      <Tabs defaultValue="knowledge" className="w-full">
-        <TabsList>
-          <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="knowledge">
-          <KnowledgeBaseDebugger />
-        </TabsContent>
-      </Tabs>
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">
+          The debugger dashboard has been removed.
+        </p>
+      </div>
     </div>
   );
 };

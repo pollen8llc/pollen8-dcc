@@ -1,11 +1,9 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
 import CallToActionBanner from "@/components/CallToActionBanner";
-import CommunitiesDebugger from "@/components/debug/CommunitiesDebugger";
 import * as communityService from "@/services/communityService";
 
 const Index = () => {
@@ -55,9 +53,6 @@ const Index = () => {
       {/* Communities Section */}
       <section className="px-4 pb-20 transition-all duration-300">
         <div className="container mx-auto">
-          {/* Debug panel */}
-          {showDebugger && <CommunitiesDebugger />}
-
           <div className="flex justify-between items-center">
             {searchQuery ? (
               <h2 className="text-2xl font-semibold animate-fade-in">
