@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   User, FileText, Layers, MapPin, Calendar, Users, 
@@ -96,17 +97,20 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
   };
 
   const extractSocialMedia = () => {
-    if (!community.socialMedia) return [];
-    
-    // Try the socialMedia property first
+    // First try the socialMedia property (from the type definition)
     let socialLinks = community.socialMedia;
     
-    // If not found, try social_media from database
-    if (!socialLinks && community.social_media) {
-      socialLinks = community.social_media;
+    // If not found or empty, try checking if there's a social_media property 
+    // from database (this will be undefined if property doesn't exist)
+    if (!socialLinks || Object.keys(socialLinks || {}).length === 0) {
+      // @ts-ignore - We're checking if this property exists at runtime
+      const dbSocialMedia = community.social_media;
+      if (dbSocialMedia) {
+        socialLinks = dbSocialMedia;
+      }
     }
     
-    if (!socialLinks) return [];
+    if (!socialLinks || Object.keys(socialLinks).length === 0) return [];
 
     return Object.entries(socialLinks)
       .filter(([_, value]) => {
