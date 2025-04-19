@@ -1,4 +1,3 @@
-
 import * as z from "zod";
 
 export const communityFormSchema = z.object({
@@ -13,7 +12,15 @@ export const communityFormSchema = z.object({
   format: z.enum(["irl", "url", "hybrid"], {
     required_error: "Please select a format",
   }),
-  size: z.number().min(0, "Size must be a positive number"),
+  size: z.enum([
+    "1-100",
+    "100-500", 
+    "500-1000",
+    "1000-5000",
+    "5000-10000"
+  ], {
+    required_error: "Please select community size range",
+  }),
   eventFrequency: z.enum([
     "daily",
     "weekly",
@@ -43,7 +50,6 @@ export const communityFormSchema = z.object({
     linkedin: z.string().optional(),
     facebook: z.string().optional(),
   }).optional(),
-  // Add missing properties
   vision: z.string().optional().nullable(),
   community_structure: z.string().optional().nullable(),
   role_title: z.string().optional().nullable(),

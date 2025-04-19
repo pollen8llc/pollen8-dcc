@@ -27,7 +27,7 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
     description: dbCommunity.description || '',
     location: dbCommunity.location || 'Remote',
     imageUrl: dbCommunity.logo_url || '/placeholder.svg',
-    communitySize: parseInt(dbCommunity.size_demographics) || 0,
+    communitySize: parseInt(dbCommunity.size_demographics?.split('-')[1] || '0'),
     organizerIds: dbCommunity.owner_id ? [dbCommunity.owner_id] : [],
     memberIds: [],
     tags: dbCommunity.tags || [],

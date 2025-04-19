@@ -289,15 +289,20 @@ export function CreateCommunityForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Community Size</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      min="0"
-                      placeholder="Current number of members"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select size range" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="1-100">1-100 members</SelectItem>
+                      <SelectItem value="100-500">100-500 members</SelectItem>
+                      <SelectItem value="500-1000">500-1,000 members</SelectItem>
+                      <SelectItem value="1000-5000">1,000-5,000 members</SelectItem>
+                      <SelectItem value="5000-10000">5,000-10,000 members</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
