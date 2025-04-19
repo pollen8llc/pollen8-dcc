@@ -96,17 +96,14 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
   };
 
   const extractSocialMedia = () => {
+    // First try the socialMedia property (from the type definition)
     let socialLinks = community.socialMedia;
-    
+  
+    // If not found or empty, return an empty array
     if (!socialLinks || Object.keys(socialLinks || {}).length === 0) {
-      const dbSocialMedia = community.social_media;
-      if (dbSocialMedia) {
-        socialLinks = dbSocialMedia;
-      }
+      return [];
     }
-    
-    if (!socialLinks || Object.keys(socialLinks).length === 0) return [];
-
+  
     return Object.entries(socialLinks)
       .filter(([_, value]) => {
         if (typeof value === 'string') return value;
