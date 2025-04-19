@@ -56,7 +56,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Calendar className="h-5 w-5" />,
       title: "Start Date",
-      value: formatDate(community.startDate)
+      value: formatDate(community.start_date)
     },
     {
       icon: <Users className="h-5 w-5" />,
@@ -83,8 +83,8 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     }
   ];
 
-  const platforms = community.communicationPlatforms && typeof community.communicationPlatforms === 'object'
-    ? Object.keys(community.communicationPlatforms)
+  const platforms = community.communication_platforms && typeof community.communication_platforms === 'object'
+    ? Object.keys(community.communication_platforms)
     : [];
 
   const socialMedia = community.socialMedia && typeof community.socialMedia === 'object'
