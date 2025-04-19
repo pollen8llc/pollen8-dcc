@@ -40,7 +40,7 @@ export const useCreateCommunity = () => {
           member_count: data.size,
           event_frequency: data.eventFrequency,
           website: data.website || "",
-          primary_platforms: [data.mainPlatform], // Convert to array
+          primary_platforms: data.platforms, // Use platforms array instead of mainPlatform
           newsletter_url: data.newsletterUrl || "",
           social_media: socialMediaObject
         })
