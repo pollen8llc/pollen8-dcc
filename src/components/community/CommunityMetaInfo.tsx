@@ -4,6 +4,7 @@ import { Calendar, Users, Globe, Target, Layout, Clock, Link as LinkIcon, Messag
 import { useQuery } from "@tanstack/react-query";
 import * as communityService from "@/services/communityService";
 import { format } from "date-fns";
+import { Separator } from "@/components/ui/separator";
 
 interface MetaItem {
   icon: React.ReactNode;
@@ -32,7 +33,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
 
   if (!community) return null;
 
-  const communityMeta: MetaItem[] = [
+  const basicInfo: MetaItem[] = [
     {
       icon: <Users className="h-5 w-5" />,
       title: "Community Size",
@@ -64,30 +65,30 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       icon: <Clock className="h-5 w-5" />,
       title: "Event Frequency",
       value: community.eventFrequency?.replace("_", " ") || "Not specified"
-    },
-    {
-      icon: <LinkIcon className="h-5 w-5" />,
-      title: "Website",
-      value: community.website || "Not specified"
-    },
-    {
-      icon: <MessageSquare className="h-5 w-5" />,
-      title: "Main Platform",
-      value: community.primaryPlatforms && community.primaryPlatforms.length > 0
-        ? community.primaryPlatforms[0].charAt(0).toUpperCase() + community.primaryPlatforms[0].slice(1)
-        : "Not specified"
-    },
-    {
-      icon: <Share2 className="h-5 w-5" />,
-      title: "Social Media",
-      value: community.socialMedia ? Object.keys(community.socialMedia).length + " platforms" : "Not specified"
     }
   ];
 
+  const onlinePresence = {
+    websites: [
+      { title: "Website", value: community.website },
+      { title: "Newsletter", value: community.newsletterUrl }
+    ].filter(item => item.value),
+    
+    platforms: Array.isArray(community.primaryPlatforms) ? community.primaryPlatforms.map(platform => ({
+      title: platform.charAt(0).toUpperCase() + platform.slice(1),
+      value: platform
+    })) : [],
+    
+    socialMedia: community.socialMedia ? Object.entries(community.socialMedia).map(([platform, url]) => ({
+      title: platform.charAt(0).toUpperCase() + platform.slice(1),
+      value: url
+    })) : []
+  };
+
   return (
-    <div className="container mx-auto px-4 mb-12">
+    <div className="container mx-auto px-4 mb-12 space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 appear-animate">
-        {communityMeta.map((meta, index) => (
+        {basicInfo.map((meta, index) => (
           <Card key={index} className="glass dark:glass-dark rounded-xl overflow-hidden border-b-2 border-aquamarine transition-all duration-300 hover:shadow-md">
             <CardContent className="p-4 flex items-start gap-3">
               <div className="bg-muted/50 rounded-full p-2 text-foreground mt-1 flex-shrink-0">
@@ -103,6 +104,73 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
           </Card>
         ))}
       </div>
+
+      {/* Online Presence Section */}
+      {(onlinePresence.websites.length > 0 || 
+        onlinePresence.platforms.length > 0 || 
+        onlinePresence.socialMedia.length > 0) && (
+        <Card className="glass dark:glass-dark rounded-xl overflow-hidden border-b-2 border-aquamarine">
+          <CardContent className="p-6 space-y-6">
+            <h3 className="text-lg font-semibold mb-4">Online Presence</h3>
+            
+            {onlinePresence.websites.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Websites</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {onlinePresence.websites.map((site, index) => (
+                    <a
+                      key={index}
+                      href={site.value}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                    >
+                      <LinkIcon className="h-4 w-4" />
+                      {site.title}
+                    </a>
+                  ))}
+                </div>
+                <Separator className="my-4" />
+              </div>
+            )}
+            
+            {onlinePresence.platforms.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Community Platforms</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {onlinePresence.platforms.map((platform, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm">
+                      <MessageSquare className="h-4 w-4" />
+                      {platform.title}
+                    </div>
+                  ))}
+                </div>
+                <Separator className="my-4" />
+              </div>
+            )}
+            
+            {onlinePresence.socialMedia.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">Social Media</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {onlinePresence.socialMedia.map((social, index) => (
+                    <a
+                      key={index}
+                      href={social.value}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                    >
+                      <Share2 className="h-4 w-4" />
+                      {social.title}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
