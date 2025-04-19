@@ -13,7 +13,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         website: community.website,
         is_public: community.isPublic,
         location: community.location,
-        member_count: community.memberCount
+        member_count: community.communitySize // Changed from memberCount to communitySize
       })
       .eq('id', community.id)
       .select()
@@ -43,7 +43,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
         location: community.location || "Remote",
-        member_count: community.memberCount || 0,
+        member_count: community.communitySize || 0, // Changed from memberCount to communitySize
         // Use the first organizer ID as the owner_id, or null if no organizers
         owner_id: community.organizerIds && community.organizerIds.length > 0 ? community.organizerIds[0] : null
       })

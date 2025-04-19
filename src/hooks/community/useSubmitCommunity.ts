@@ -40,7 +40,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         format: values.format,
         tone: values.tone,
         imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-        memberCount: values.size ? parseInt(values.size.toString()) : 0,
+        communitySize: values.size ? parseInt(values.size.toString()) : 0, // Changed from memberCount to communitySize
         organizerIds: [],
         memberIds: [],
         visionStatement: values.vision || "",

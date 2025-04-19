@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Users, MapPin } from "lucide-react";
 import { Community } from "@/models/types";
@@ -79,7 +78,7 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1 text-muted-foreground">
               <Users className="h-4 w-4" />
-              <span className="text-sm">{community.memberCount}</span>
+              <span className="text-sm">{community.communitySize}</span>
             </div>
             <div className="flex items-center space-x-1 text-muted-foreground">
               <MapPin className="h-4 w-4" />

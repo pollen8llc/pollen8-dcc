@@ -41,7 +41,7 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       description: data.description || '',
       location: data.location || 'Remote',
       imageUrl: data.logo_url || '/placeholder.svg',
-      memberCount: data.member_count || 0,
+      communitySize: data.member_count || 0, // Changed from memberCount to communitySize
       organizerIds: organizerIds,
       memberIds: memberIds,
       tags: [], // No tags in the current model
