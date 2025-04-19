@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Community } from "@/models/types";
 import AdminMembersTab from "./AdminMembersTab";
 import AdminSettingsTab from "./AdminSettingsTab";
