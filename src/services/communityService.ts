@@ -1,3 +1,4 @@
+
 import { Community, CommunityOrganizerProfile } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
 import { supabase } from "@/integrations/supabase/client";
@@ -150,7 +151,9 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
  */
 export const deleteCommunity = async (communityId: string): Promise<void> => {
   try {
-    return await communityRepository.deleteCommunity(communityId);
+    console.log(`[communityService] Deleting community with ID: ${communityId}`);
+    await communityRepository.deleteCommunity(communityId);
+    console.log(`[communityService] Successfully deleted community with ID: ${communityId}`);
   } catch (error) {
     console.error(`Error in deleteCommunity service for communityId ${communityId}:`, error);
     throw error;

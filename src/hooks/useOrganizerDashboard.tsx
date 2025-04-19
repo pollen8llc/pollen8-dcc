@@ -71,6 +71,7 @@ export const useOrganizerDashboard = () => {
   const deleteCommunityMutation = useMutation({
     mutationFn: (communityId: string) => communityService.deleteCommunity(communityId),
     onMutate: (communityId) => {
+      console.log("Starting community deletion process for:", communityId);
       // Set the active deleting ID
       setActiveDeletingId(communityId);
       
@@ -83,6 +84,7 @@ export const useOrganizerDashboard = () => {
       return { communityId };
     },
     onSuccess: (_, communityId) => {
+      console.log("Successfully deleted community:", communityId);
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
@@ -97,6 +99,7 @@ export const useOrganizerDashboard = () => {
     },
     onError: (error: Error, communityId) => {
       console.error("Error deleting community:", error);
+      console.error("Failed to delete community with ID:", communityId);
       
       // Show specific error messages based on the error
       let errorMessage = "Failed to delete the community. Please try again.";
@@ -104,6 +107,10 @@ export const useOrganizerDashboard = () => {
         errorMessage = "Only community owners can delete their communities.";
       } else if (error.message.includes("existing references")) {
         errorMessage = "Cannot delete community due to existing references. Please remove all associated content first.";
+      } else if (error.message.includes("authentication required")) {
+        errorMessage = "You need to be logged in to delete a community.";
+      } else if (error.message.includes("verify ownership")) {
+        errorMessage = "Failed to verify your ownership of this community.";
       }
       
       toast({
@@ -116,6 +123,7 @@ export const useOrganizerDashboard = () => {
       setActiveDeletingId(null);
     },
     onSettled: () => {
+      console.log("Community deletion process completed");
       // Always cleanup the active deleting ID
       setActiveDeletingId(null);
     }
@@ -130,6 +138,7 @@ export const useOrganizerDashboard = () => {
   }, [updateCommunityMutation]);
 
   const handleDeleteCommunity = useCallback((communityId: string) => {
+    console.log("User requested to delete community:", communityId);
     setCommunityToDelete(communityId);
   }, []);
 

@@ -1,3 +1,4 @@
+
 import { Community } from "@/models/types";
 import { supabase, mapDbCommunity } from "../base/baseRepository";
 
@@ -104,28 +105,39 @@ export const deleteCommunity = async (communityId: string): Promise<void> => {
     }
     
     // Check if user is the owner of this community
-    const { data: isOwner } = await supabase.rpc('is_community_owner', {
+    const { data: isOwner, error: ownerCheckError } = await supabase.rpc('is_community_owner', {
       user_id: userId,
       community_id: communityId
     });
+    
+    if (ownerCheckError) {
+      console.error("Error checking community ownership:", ownerCheckError);
+      throw new Error(`Failed to verify ownership: ${ownerCheckError.message}`);
+    }
     
     if (!isOwner) {
       console.error("User is not the owner of this community");
       throw new Error("Only community owners can delete their communities");
     }
+
+    // Check if there are any related tables that might cause constraint errors
+    console.log("Checking if community has dependent records before deletion");
     
     // Delete the community - cascade will handle related records
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from('communities')
       .delete()
       .eq('id', communityId);
     
-    if (error) {
-      console.error("Error deleting community:", error);
-      if (error.code === '23503') {
-        throw new Error("Cannot delete community due to existing references");
+    if (deleteError) {
+      console.error("Error deleting community:", deleteError);
+      console.error("Error details:", deleteError.code, deleteError.details, deleteError.hint, deleteError.message);
+      
+      if (deleteError.code === '23503') {
+        throw new Error("Cannot delete community due to existing references. Please remove all associated content first.");
       }
-      throw error;
+      
+      throw new Error(`Failed to delete community: ${deleteError.message}`);
     }
 
     console.log("Community deleted successfully:", communityId);
