@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import * as communityService from '@/services/communityService';
 import { Community } from '@/models/types';
 import { useUser } from '@/contexts/UserContext';
+import * as auditService from '@/services/auditService';
 
 export const useOrganizerDashboard = () => {
   const [communityToDelete, setCommunityToDelete] = useState<string | null>(null);
@@ -69,13 +70,14 @@ export const useOrganizerDashboard = () => {
   });
 
   const deleteCommunityMutation = useMutation({
-    mutationFn: (communityId: string) => communityService.deleteCommunity(communityId),
+    mutationFn: (communityId: string) => {
+      console.log("Starting deletion process for community:", communityId);
+      return communityService.deleteCommunity(communityId);
+    },
     onMutate: (communityId) => {
-      console.log("Starting community deletion process for:", communityId);
-      // Set the active deleting ID
+      console.log("Preparing to delete community:", communityId);
       setActiveDeletingId(communityId);
       
-      // Show loading toast
       toast({
         title: "Deleting community...",
         description: "Please wait while we process your request.",
@@ -83,9 +85,23 @@ export const useOrganizerDashboard = () => {
       
       return { communityId };
     },
-    onSuccess: (_, communityId) => {
+    onSuccess: async (_, communityId) => {
       console.log("Successfully deleted community:", communityId);
-      // Invalidate and refetch
+      
+      // Log the audit action
+      try {
+        await auditService.logAuditAction({
+          action: "community_deleted",
+          details: {
+            community_id: communityId,
+            timestamp: new Date().toISOString()
+          }
+        });
+      } catch (error) {
+        console.error("Failed to log audit action:", error);
+      }
+      
+      // Invalidate and refetch queries
       queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
       
@@ -101,16 +117,15 @@ export const useOrganizerDashboard = () => {
       console.error("Error deleting community:", error);
       console.error("Failed to delete community with ID:", communityId);
       
-      // Show specific error messages based on the error
+      // Show specific error messages based on the error type
       let errorMessage = "Failed to delete the community. Please try again.";
-      if (error.message.includes("not the owner")) {
+      
+      if (error.message.includes("not the owner") || error.message.includes("verify ownership")) {
         errorMessage = "Only community owners can delete their communities.";
       } else if (error.message.includes("existing references")) {
-        errorMessage = "Cannot delete community due to existing references. Please remove all associated content first.";
+        errorMessage = "Cannot delete community as it still has active members or content. Please remove all members and content first.";
       } else if (error.message.includes("authentication required")) {
         errorMessage = "You need to be logged in to delete a community.";
-      } else if (error.message.includes("verify ownership")) {
-        errorMessage = "Failed to verify your ownership of this community.";
       }
       
       toast({
@@ -124,7 +139,6 @@ export const useOrganizerDashboard = () => {
     },
     onSettled: () => {
       console.log("Community deletion process completed");
-      // Always cleanup the active deleting ID
       setActiveDeletingId(null);
     }
   });
@@ -139,8 +153,16 @@ export const useOrganizerDashboard = () => {
 
   const handleDeleteCommunity = useCallback((communityId: string) => {
     console.log("User requested to delete community:", communityId);
+    if (!currentUser?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to delete a community",
+        variant: "destructive",
+      });
+      return;
+    }
     setCommunityToDelete(communityId);
-  }, []);
+  }, [currentUser?.id, toast]);
 
   const confirmDeleteCommunity = useCallback(() => {
     if (communityToDelete) {

@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase, mapDbCommunity } from "../base/baseRepository";
 
@@ -93,7 +92,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
  */
 export const deleteCommunity = async (communityId: string): Promise<void> => {
   try {
-    console.log("Attempting to delete community:", communityId);
+    console.log("Repository: Attempting to delete community:", communityId);
     
     // First, get the session to verify user has permission
     const session = await supabase.auth.getSession();
@@ -120,7 +119,7 @@ export const deleteCommunity = async (communityId: string): Promise<void> => {
       throw new Error("Only community owners can delete their communities");
     }
 
-    // Check if there are any related tables that might cause constraint errors
+    // Check if community has dependent records before deletion
     console.log("Checking if community has dependent records before deletion");
     
     // Delete the community - cascade will handle related records

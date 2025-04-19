@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,12 @@ interface CommunitiesListProps {
   isDeletingId?: string | null;
 }
 
-const CommunitiesList = ({ isLoading, managedCommunities, onDeleteCommunity, isDeletingId }: CommunitiesListProps) => {
+const CommunitiesList = ({ 
+  isLoading, 
+  managedCommunities, 
+  onDeleteCommunity, 
+  isDeletingId 
+}: CommunitiesListProps) => {
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -98,7 +102,7 @@ const CommunitiesList = ({ isLoading, managedCommunities, onDeleteCommunity, isD
                 ) : (
                   <Trash2 className="h-4 w-4 mr-1" />
                 )}
-                Delete
+                {isDeletingId === community.id ? 'Deleting...' : 'Delete'}
               </Button>
             </div>
           </CardContent>
