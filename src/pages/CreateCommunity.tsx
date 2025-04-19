@@ -22,6 +22,11 @@ export default function CreateCommunityPage() {
           setIsAuthenticated(false);
         } else {
           setIsAuthenticated(!!data.session);
+          if (data.session) {
+            console.log("User is authenticated:", data.session.user);
+          } else {
+            console.log("No active session found");
+          }
         }
       } catch (err) {
         console.error("Exception checking auth:", err);

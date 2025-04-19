@@ -34,6 +34,7 @@ export const useCreateCommunity = () => {
       // Prepare social media handles as a JSON object
       const socialMediaObject = data.socialMediaHandles || {};
 
+      // Debug information
       console.log("Creating community with data:", {
         name: data.name,
         description: data.description,
@@ -45,13 +46,13 @@ export const useCreateCommunity = () => {
         format: data.format,
         member_count: data.size,
         event_frequency: data.eventFrequency,
-        platforms: data.platforms,
+        communication_platforms: data.platforms, // Using existing communication_platforms column
         website: data.website,
         newsletter_url: data.newsletterUrl,
         social_media: socialMediaObject
       });
 
-      // Try inserting with just essential fields first to isolate any issues
+      // Insert into communities table with correct column names
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
@@ -61,11 +62,11 @@ export const useCreateCommunity = () => {
           location: data.location,
           owner_id: session.session.user.id,
           format: data.format || "hybrid",
-          start_date: data.startDate,
+          start_date: new Date(data.startDate).toISOString(), // Make sure date is in ISO format
           target_audience: targetAudienceArray,
           member_count: data.size || 0,
           event_frequency: data.eventFrequency || "monthly",
-          primary_platforms: data.platforms, 
+          communication_platforms: data.platforms, // Using existing communication_platforms column
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",
           social_media: socialMediaObject

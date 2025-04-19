@@ -4,7 +4,7 @@ import * as z from "zod";
 export const communityFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  communityType: z.enum(["tech", "creative", "wellness", "professional", "social-impact"], {
+  communityType: z.enum(["tech", "creative", "wellness", "professional", "social-impact", "education", "social", "other"], {
     required_error: "Please select a community type",
   }),
   location: z.string().min(2, "Location is required"),
