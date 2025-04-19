@@ -8,7 +8,6 @@ import Profile from "./pages/Profile";
 import CommunityProfile from "./pages/CommunityProfile";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import KnowledgeBase from "./pages/knowledge/KnowledgeBase";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Auth from "./pages/Auth";
 import CreateAdminForm from "./components/admin/CreateAdminForm";
@@ -81,16 +80,6 @@ const AppRoutes = () => {
         } 
       />
       
-      {/* General knowledge base route accessible to all */}
-      <Route path="/knowledge" element={<KnowledgeBase />} />
-      
-      {/* Community-specific knowledge base route */}
-      <Route 
-        path="/knowledge/:communityId" 
-        element={<KnowledgeBase />} 
-      />
-      
-      {/* Update the organizer route to explicitly check for ORGANIZER or ADMIN roles */}
       <Route 
         path="/organizer" 
         element={
@@ -100,7 +89,6 @@ const AppRoutes = () => {
         } 
       />
       
-      {/* Add new debugger route */}
       <Route 
         path="/admin/debug" 
         element={
