@@ -41,12 +41,12 @@ export const useCreateCommunity = () => {
         community_type: data.communityType,
         location: data.location,
         owner_id: session.session.user.id,
-        start_date: data.startDate,
+        start_date: new Date(data.startDate).toISOString(),
         target_audience: targetAudienceArray,
         format: data.format,
         member_count: data.size,
         event_frequency: data.eventFrequency,
-        communication_platforms: data.platforms, // Using existing communication_platforms column
+        communication_platforms: data.platforms, 
         website: data.website,
         newsletter_url: data.newsletterUrl,
         social_media: socialMediaObject
@@ -62,11 +62,11 @@ export const useCreateCommunity = () => {
           location: data.location,
           owner_id: session.session.user.id,
           format: data.format || "hybrid",
-          start_date: new Date(data.startDate).toISOString(), // Make sure date is in ISO format
+          start_date: new Date(data.startDate).toISOString(),
           target_audience: targetAudienceArray,
           member_count: data.size || 0,
           event_frequency: data.eventFrequency || "monthly",
-          communication_platforms: data.platforms, // Using existing communication_platforms column
+          communication_platforms: data.platforms,
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",
           social_media: socialMediaObject
