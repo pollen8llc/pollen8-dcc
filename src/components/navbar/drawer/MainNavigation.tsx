@@ -5,9 +5,10 @@ import { Home, Users } from "lucide-react";
 
 interface MainNavigationProps {
   onNavigate: (path: string) => void;
+  currentUser?: boolean;
 }
 
-const MainNavigation = ({ onNavigate }: MainNavigationProps) => {
+const MainNavigation = ({ onNavigate, currentUser }: MainNavigationProps) => {
   return (
     <>
       <h3 className="text-sm font-medium mb-1">Navigation</h3>
