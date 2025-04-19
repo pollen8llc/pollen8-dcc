@@ -43,6 +43,11 @@ export const communityFormSchema = z.object({
     linkedin: z.string().optional(),
     facebook: z.string().optional(),
   }).optional(),
+  // Add missing properties
+  vision: z.string().optional().nullable(),
+  community_structure: z.string().optional().nullable(),
+  role_title: z.string().optional().nullable(),
+  tone: z.enum(["casual", "professional", "experimental", "reflective", "playful", "serious"]).optional(),
 });
 
 export type CommunityFormData = z.infer<typeof communityFormSchema>;
