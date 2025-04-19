@@ -1,6 +1,9 @@
+
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
-import { mockCommunities, mapLegacyCommunity } from "../../base/baseRepository";
+
+// Import the mock data and mapLegacyCommunity from getAllCommunities
+import { mockCommunities, mapLegacyCommunity } from "./getAllCommunities";
 
 export const getCommunityById = async (id: string): Promise<Community | null> => {
   try {
@@ -41,10 +44,10 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       description: data.description || '',
       location: data.location || 'Remote',
       imageUrl: data.logo_url || '/placeholder.svg',
-      communitySize: data.member_count || 0, // Changed from memberCount to communitySize
+      communitySize: data.member_count || 0,
       organizerIds: organizerIds,
       memberIds: memberIds,
-      tags: [], // No tags in the current model
+      tags: data.target_audience || [],
       isPublic: data.is_public,
       createdAt: data.created_at || new Date().toISOString(),
       updatedAt: data.updated_at || new Date().toISOString(),
