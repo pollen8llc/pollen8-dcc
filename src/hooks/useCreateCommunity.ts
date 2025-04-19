@@ -53,7 +53,7 @@ export const useCreateCommunity = () => {
         start_date: startDateISO,
         target_audience: targetAudienceArray,
         format: data.format,
-        member_count: data.size,
+        size_demographics: data.size, // Store the size range string directly
         event_frequency: data.eventFrequency,
         communication_platforms: communicationPlatformsObject,
         website: data.website,
@@ -73,7 +73,7 @@ export const useCreateCommunity = () => {
           format: data.format || "hybrid",
           start_date: startDateISO,
           target_audience: targetAudienceArray,
-          member_count: data.size || 0,
+          size_demographics: data.size, // Store the size range directly as a string
           event_frequency: data.eventFrequency || "monthly",
           communication_platforms: communicationPlatformsObject,
           website: data.website || "",
@@ -88,8 +88,7 @@ export const useCreateCommunity = () => {
           community_values: null,
           special_notes: null,
           event_formats: null,
-          tech_stack: null,
-          size_demographics: String(data.size) || "0"
+          tech_stack: null
         })
         .select()
         .single();
@@ -112,7 +111,7 @@ export const useCreateCommunity = () => {
             community_id: community.id,
             founder_name: session.session.user.id,
             personal_background: null,
-            size_demographics: String(data.size) || "0",
+            size_demographics: data.size, // Store the size range directly as a string
             community_structure: data.community_structure || null,
             team_structure: data.role_title || null,
             tech_stack: null,

@@ -1,3 +1,4 @@
+
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 

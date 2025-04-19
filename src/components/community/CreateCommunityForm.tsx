@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,7 +48,7 @@ export function CreateCommunityForm() {
       startDate: new Date().toISOString(),
       targetAudience: "",
       format: "hybrid",
-      size: 0,
+      size: "1-100", // Changed from number to string enum
       eventFrequency: "monthly",
       website: "",
       newsletterUrl: "",
