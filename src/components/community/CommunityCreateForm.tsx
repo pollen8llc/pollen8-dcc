@@ -58,7 +58,8 @@ export default function CommunityCreateForm() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const { currentUser } = useUser()
-  const [activeTab, setActiveTab] = React.useState("overview")
+  const [activeTab, setActiveTab] = useState("overview")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -100,6 +101,9 @@ export default function CommunityCreateForm() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setIsSubmitting(true)
+      console.log("Submitting form with values:", values);
+      
       const communityData = {
         name: values.name,
         description: values.description,
@@ -121,7 +125,9 @@ export default function CommunityCreateForm() {
         primaryPlatforms: values.primaryPlatforms,
       };
 
+      console.log("Creating community with data:", communityData);
       const community = await communityService.createCommunity(communityData);
+      console.log("Community created:", community);
 
       const organizerProfile = {
         community_id: community.id,
@@ -140,13 +146,18 @@ export default function CommunityCreateForm() {
         special_notes: values.special_notes,
       };
 
+      console.log("Creating organizer profile with data:", organizerProfile);
       await communityService.createOrganizerProfile(organizerProfile);
+      console.log("Organizer profile created successfully");
 
       toast({
         description: "Community created successfully!",
       });
 
-      navigate(`/community/${community.id}`);
+      // Ensure there's a small delay before navigation to allow the toast to show
+      setTimeout(() => {
+        navigate(`/community/${community.id}`);
+      }, 500);
     } catch (error) {
       console.error('Error creating community:', error)
       toast({
@@ -154,6 +165,8 @@ export default function CommunityCreateForm() {
         title: "Error",
         description: "Failed to create community. Please try again.",
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -229,7 +242,13 @@ export default function CommunityCreateForm() {
               Next
             </Button>
           ) : (
-            <Button type="submit" size="lg">Create Community</Button>
+            <Button 
+              type="submit" 
+              size="lg" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Community"}
+            </Button>
           )}
         </div>
       </form>

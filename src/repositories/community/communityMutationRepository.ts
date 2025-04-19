@@ -37,6 +37,8 @@ export const updateCommunity = async (community: Community): Promise<Community> 
  */
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   try {
+    console.log("Repository: Creating community with data:", community);
+    
     const { data, error } = await supabase
       .from('communities')
       .insert({
@@ -51,6 +53,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     
     if (error) {
       console.error("Error creating community:", error);
+      // Create a fallback community object with timestamp-based ID for debugging
       return {
         id: String(Date.now()),
         name: community.name || "New Community",
@@ -68,23 +71,34 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       };
     }
     
-    // Add current user as admin
-    const session = await supabase.auth.getSession();
-    const userId = session.data.session?.user.id;
+    console.log("Repository: Community created successfully:", data);
     
-    if (userId) {
-      await supabase
-        .from('community_members')
-        .insert({
-          community_id: data.id,
-          user_id: userId,
-          role: 'admin'
-        });
+    // Add current user as admin
+    try {
+      const session = await supabase.auth.getSession();
+      const userId = session.data.session?.user.id;
+      
+      if (userId) {
+        const { error: memberError } = await supabase
+          .from('community_members')
+          .insert({
+            community_id: data.id,
+            user_id: userId,
+            role: 'admin'
+          });
+          
+        if (memberError) {
+          console.error("Error adding user as community admin:", memberError);
+        }
+      }
+    } catch (memberErr) {
+      console.error("Error during membership creation:", memberErr);
     }
     
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in createCommunity:", err);
+    // Create a fallback community object with timestamp-based ID
     return {
       id: String(Date.now()),
       name: community.name || "New Community",
