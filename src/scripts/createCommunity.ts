@@ -1,10 +1,9 @@
+
 import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
 
-dotenv.config();
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+// Remove dotenv import and use process.env directly
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('Supabase URL and key are required in the environment variables.');
@@ -36,8 +35,6 @@ async function createCommunity(communityName: string, userId: string) {
   }
 
   console.log("Created community:", community);
-
-  // The owner is automatically set, no need to create a membership record
 
   // Optionally, log the community creation event
   console.log(`Community "${communityName}" created successfully by user ${userId}.`);
