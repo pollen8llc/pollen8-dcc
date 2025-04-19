@@ -18,7 +18,7 @@ const setupCommunity = async () => {
     
     console.log('Found user:', user);
 
-    // Create the community
+    // Create the community with the user as owner
     const newCommunity = await communityService.createCommunity({
       name: "Neech Community",
       description: "A community for Neech members to connect and share ideas",
@@ -33,22 +33,6 @@ const setupCommunity = async () => {
     });
 
     console.log('Community created successfully:', newCommunity);
-
-    // Add the user as an admin of the community
-    const { error: memberError } = await supabase
-      .from('community_members')
-      .insert({
-        community_id: newCommunity.id,
-        user_id: user.id,
-        role: 'admin'
-      });
-
-    if (memberError) {
-      console.error('Error adding user as admin:', memberError);
-      return;
-    }
-
-    console.log('User added as admin successfully');
     
     // Create an organizer profile for the new community
     try {

@@ -5,14 +5,14 @@ import { User, UserRole } from "@/models/types";
  * Converts a database user to models/types User format
  */
 const mapDbUser = async (profile: any): Promise<User> => {
-  // Get user's community memberships
-  const { data: memberData, error: memberError } = await supabase
-    .from('community_members')
-    .select('community_id, role')
-    .eq('user_id', profile.id);
+  // Get communities where user is the owner (new structure)
+  const { data: ownedCommunities, error: ownedError } = await supabase
+    .from('communities')
+    .select('id')
+    .eq('owner_id', profile.id);
   
-  if (memberError) {
-    console.error("Error fetching community memberships:", memberError);
+  if (ownedError) {
+    console.error("Error fetching owned communities:", ownedError);
     return mapUserWithoutMemberships(profile);
   }
   
@@ -25,13 +25,12 @@ const mapDbUser = async (profile: any): Promise<User> => {
   
   if (adminError) {
     console.error("Error fetching admin role:", adminError);
-    return mapUserWithoutAdminRole(profile, memberData || []);
+    return mapUserWithoutAdminRole(profile, ownedCommunities || []);
   }
   
-  const communities = memberData?.map(m => m.community_id) || [];
-  const managedCommunities = memberData
-    ?.filter(m => m.role === 'admin')
-    .map(m => m.community_id) || [];
+  const managedCommunities = ownedCommunities?.map(c => c.id) || [];
+  // In our new model, a user is only a member of communities they own
+  const communities = managedCommunities;
   
   // Determine user role
   let role = UserRole.MEMBER;
@@ -77,13 +76,12 @@ const mapUserWithoutMemberships = (profile: any): User => {
 /**
  * Helper function to map user without admin role
  */
-const mapUserWithoutAdminRole = (profile: any, memberData: any[]): User => {
-  const communities = memberData?.map(m => m.community_id) || [];
-  const managedCommunities = memberData
-    ?.filter(m => m.role === 'admin')
-    .map(m => m.community_id) || [];
+const mapUserWithoutAdminRole = (profile: any, ownedCommunities: any[]): User => {
+  const managedCommunities = ownedCommunities?.map(c => c.id) || [];
+  // In our new model, a user is only a member of communities they own
+  const communities = managedCommunities;
   
-  // Determine user role based on memberships
+  // Determine user role based on ownerships
   let role = UserRole.MEMBER;
   
   if (managedCommunities.length > 0) {
@@ -131,25 +129,33 @@ export const getUserById = async (id: string): Promise<User | null> => {
  */
 export const getCommunityOrganizers = async (communityId: string): Promise<User[]> => {
   try {
-    const { data, error } = await supabase
-      .from('community_members')
-      .select(`
-        user_id,
-        profiles:user_id(*)
-      `)
-      .eq('community_id', communityId)
-      .eq('role', 'admin');
+    // In the new model, there's only one owner per community
+    const { data: community, error: communityError } = await supabase
+      .from('communities')
+      .select('owner_id')
+      .eq('id', communityId)
+      .single();
     
-    if (error) {
-      console.error("Error fetching community organizers:", error);
+    if (communityError || !community || !community.owner_id) {
+      console.error("Error fetching community owner:", communityError);
       return [];
     }
     
-    if (!data || data.length === 0) {
+    // Get the owner's profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', community.owner_id)
+      .single();
+      
+    if (profileError || !profile) {
+      console.error("Error fetching owner profile:", profileError);
       return [];
     }
     
-    return await Promise.all(data.map(item => mapDbUser(item.profiles)));
+    // Map and return the owner as the only organizer
+    const organizer = await mapDbUser(profile);
+    return [organizer];
   } catch (err) {
     console.error("Error in getCommunityOrganizers:", err);
     return [];
@@ -158,32 +164,11 @@ export const getCommunityOrganizers = async (communityId: string): Promise<User[
 
 /**
  * Retrieves all community members (excluding organizers)
+ * In the new model, we don't have regular members, only owners
+ * This is a placeholder that returns an empty array
  */
 export const getCommunityMembers = async (communityId: string): Promise<User[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('community_members')
-      .select(`
-        user_id,
-        profiles:user_id(*)
-      `)
-      .eq('community_id', communityId)
-      .eq('role', 'member');
-    
-    if (error) {
-      console.error("Error fetching community members:", error);
-      return [];
-    }
-    
-    if (!data || data.length === 0) {
-      return [];
-    }
-    
-    return await Promise.all(data.map(item => mapDbUser(item.profiles)));
-  } catch (err) {
-    console.error("Error in getCommunityMembers:", err);
-    return [];
-  }
+  return [];
 };
 
 /**

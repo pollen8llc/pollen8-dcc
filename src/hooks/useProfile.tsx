@@ -103,19 +103,20 @@ export const useProfile = (session: Session | null) => {
       
       console.log("Determined role:", role);
 
-      // Get user's community memberships for proper role-based access
-      const { data: memberships, error: membershipError } = await supabase
-        .rpc('get_user_memberships', { user_id: userId });
+      // Get user's owned communities
+      const { data: ownedCommunities, error: ownedError } = await supabase
+        .rpc('get_user_owned_communities', { user_id: userId });
         
-      if (membershipError) {
-        console.error("Error fetching memberships:", membershipError);
-        throw membershipError;
+      if (ownedError) {
+        console.error("Error fetching owned communities:", ownedError);
+        throw ownedError;
       }
       
-      console.log("User memberships:", memberships);
+      console.log("User owned communities:", ownedCommunities);
 
-      const communities = memberships?.map(m => m.community_id) || [];
-      const managedCommunities = memberships?.filter(m => m.role === 'admin').map(m => m.community_id) || [];
+      const managedCommunities = ownedCommunities?.map(m => m.community_id) || [];
+      // In the new model, users are only members of communities they own
+      const communities = managedCommunities;
 
       // Create user object
       const userData: User = {

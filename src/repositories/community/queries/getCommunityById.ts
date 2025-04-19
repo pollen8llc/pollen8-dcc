@@ -6,13 +6,7 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
   try {
     const { data, error } = await supabase
       .from('communities')
-      .select(`
-        *,
-        community_members (
-          user_id,
-          role
-        )
-      `)
+      .select('*')
       .eq('id', id)
       .single();
     
@@ -27,8 +21,14 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       return null;
     }
 
-    const organizers = data.community_members?.filter(member => member.role === 'admin')?.map(member => member.user_id) || [];
-    const members = data.community_members?.filter(member => member.role === 'member')?.map(member => member.user_id) || [];
+    // Check if the current user is the owner of this community
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentUserId = sessionData?.session?.user?.id;
+    
+    // Set organizer to the owner
+    const organizers = data.owner_id ? [data.owner_id] : [];
+    // For now, set members to empty array since we don't have a members table anymore
+    const members = [];
 
     return {
       id: data.id,
@@ -42,7 +42,14 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       tags: [],
       isPublic: data.is_public,
       createdAt: data.created_at || new Date().toISOString(),
-      updatedAt: data.updated_at || new Date().toISOString()
+      updatedAt: data.updated_at || new Date().toISOString(),
+      website: data.website || '',
+      founder_name: data.founder_name || '',
+      role_title: data.role_title || '',
+      personal_background: data.personal_background || '',
+      community_structure: data.community_structure || '',
+      vision: data.vision || '',
+      community_values: data.community_values || ''
     };
   } catch (err) {
     console.error("Error in getCommunityById:", err);
