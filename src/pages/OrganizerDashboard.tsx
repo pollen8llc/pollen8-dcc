@@ -1,4 +1,4 @@
-
+import React from "react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, AlertTriangle } from "lucide-react";
@@ -14,11 +14,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
 import OverviewTab from "@/components/organizer/OverviewTab";
 import CommunitiesList from "@/components/organizer/CommunitiesList";
 import DirectoryTab from "@/components/organizer/DirectoryTab";
 import { useOrganizerDashboard } from "@/hooks/useOrganizerDashboard";
+import CommunityManagementDebugger from "@/components/debug/CommunityManagementDebugger";
 
 const OrganizerDashboard = () => {
   const navigate = useNavigate();
@@ -43,6 +43,7 @@ const OrganizerDashboard = () => {
     <div className="min-h-screen">
       <Navbar />
       <div className="container mx-auto py-10">
+        <CommunityManagementDebugger />
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-bold">Community Management</h1>
