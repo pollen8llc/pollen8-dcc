@@ -62,14 +62,9 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         personal_background: community.personal_background || "",
         community_structure: community.community_structure || "",
         vision: community.vision || "",
-        community_values: community.community_values || "",
-        size_demographics: community.size_demographics || "",
-        team_structure: community.team_structure || "",
-        tech_stack: community.tech_stack || "",
-        event_formats: community.event_formats || "",
-        business_model: community.business_model || "",
-        challenges: community.challenges || "",
-        special_notes: community.special_notes || ""
+        community_values: community.community_values || ""
+        // Remove any fields that don't exist in the database schema
+        // These fields are now handled by the trigger: size_demographics, team_structure, tech_stack, event_formats, business_model, challenges, special_notes
       })
       .select()
       .single();

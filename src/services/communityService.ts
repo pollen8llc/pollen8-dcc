@@ -96,7 +96,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         is_public: true,
         member_count: 1, // Starting with 1 for the creator
         logo_url: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-        // Store custom fields in appropriate columns that exist in the database
+        // Store community fields in the appropriate database columns
         founder_name: community.founder_name || "",
         role_title: community.role_title || "",
         personal_background: community.personal_background || "",

@@ -659,6 +659,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_community_admin_status: {
+        Args: { user_id: string; community_id: string }
+        Returns: boolean
+      }
       get_highest_role: {
         Args: { user_id: string }
         Returns: string
