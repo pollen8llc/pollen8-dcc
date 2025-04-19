@@ -1,7 +1,6 @@
-
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateCommunity } from "@/hooks/useCreateCommunity";
 import { communityFormSchema, type CommunityFormData } from "@/schemas/communitySchema";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +26,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCreateCommunity } from "@/hooks/useCreateCommunity";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function CreateCommunityForm() {
   const { createCommunity, isSubmitting } = useCreateCommunity();
@@ -44,7 +45,6 @@ export function CreateCommunityForm() {
       size: 0,
       eventFrequency: "monthly",
       website: "",
-      mainPlatform: "discord",
       newsletterUrl: "",
       socialMediaHandles: {
         twitter: "",
@@ -52,8 +52,22 @@ export function CreateCommunityForm() {
         linkedin: "",
         facebook: "",
       },
+      platforms: [],
     },
   });
+
+  // Define platforms options
+  const platformOptions = [
+    { id: "discord", label: "Discord" },
+    { id: "slack", label: "Slack" },
+    { id: "whatsapp", label: "WhatsApp" },
+    { id: "luma", label: "Luma" },
+    { id: "eventbrite", label: "Eventbrite" },
+    { id: "meetup", label: "Meetup" },
+    { id: "circle", label: "Circle" },
+    { id: "hivebrite", label: "Hivebrite" },
+    { id: "skool", label: "Skool" },
+  ] as const;
 
   const onSubmit = (data: CommunityFormData) => {
     createCommunity(data);
@@ -280,25 +294,45 @@ export function CreateCommunityForm() {
 
             <FormField
               control={form.control}
-              name="mainPlatform"
-              render={({ field }) => (
+              name="platforms"
+              render={() => (
                 <FormItem>
-                  <FormLabel>Main Platform</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select platform" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                      <SelectItem value="discord">Discord</SelectItem>
-                      <SelectItem value="slack">Slack</SelectItem>
-                      <SelectItem value="facebook">Facebook</SelectItem>
-                      <SelectItem value="telegram">Telegram</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Platforms</FormLabel>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                    {platformOptions.map((platform) => (
+                      <FormField
+                        key={platform.id}
+                        control={form.control}
+                        name="platforms"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={platform.id}
+                              className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(platform.id)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([...field.value, platform.id])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== platform.id
+                                          )
+                                        )
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {platform.label}
+                              </FormLabel>
+                            </FormItem>
+                          )
+                        }}
+                      />
+                    ))}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

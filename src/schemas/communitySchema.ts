@@ -1,4 +1,3 @@
-
 import * as z from "zod";
 
 export const communityFormSchema = z.object({
@@ -24,17 +23,18 @@ export const communityFormSchema = z.object({
   ], {
     required_error: "Please select event frequency",
   }),
-  website: z.string().url().optional().or(z.literal("")),
-  mainPlatform: z.enum([
-    "whatsapp",
+  platforms: z.array(z.enum([
     "discord",
     "slack",
-    "facebook",
-    "telegram",
-    "other"
-  ], {
-    required_error: "Please select main platform",
-  }),
+    "whatsapp",
+    "luma",
+    "eventbrite",
+    "meetup",
+    "circle",
+    "hivebrite",
+    "skool"
+  ])).default([]),
+  website: z.string().url().optional().or(z.literal("")),
   newsletterUrl: z.string().url().optional().or(z.literal("")),
   socialMediaHandles: z.object({
     twitter: z.string().optional(),
