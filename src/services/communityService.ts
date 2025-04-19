@@ -1,4 +1,3 @@
-
 import { Community, CommunityOrganizerProfile } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,7 +72,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
   try {
     console.log("Service: Creating community with data:", community);
     
-    // Create the community without handling memberships
+    // Create the community with fields that match the actual database schema
     const { data: newCommunity, error } = await supabase
       .from('communities')
       .insert({
@@ -81,13 +80,16 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         description: community.description,
         location: community.location,
         website: community.website || "",
-        isPublic: true,
-        memberCount: 1, // Starting with 1 for the creator
-        tags: community.tags || [],
-        communityType: community.communityType,
-        format: community.format,
-        tone: community.tone,
-        imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+        is_public: true,
+        member_count: 1, // Starting with 1 for the creator
+        logo_url: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+        // Store custom fields in appropriate columns that exist in the database
+        founder_name: community.founder_name || "",
+        role_title: community.role_title || "",
+        personal_background: community.personal_background || "",
+        community_structure: community.community_structure || "",
+        vision: community.vision || "",
+        community_values: community.community_values || ""
       })
       .select()
       .single();
@@ -105,24 +107,24 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       name: newCommunity.name,
       description: newCommunity.description || "",
       location: newCommunity.location || "Remote",
-      imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-      memberCount: 1,
+      imageUrl: newCommunity.logo_url || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+      memberCount: newCommunity.member_count || 1,
       organizerIds: [],
       memberIds: [],
       tags: community.tags || [],
-      isPublic: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      website: community.website || "",
+      isPublic: newCommunity.is_public,
+      createdAt: newCommunity.created_at,
+      updatedAt: newCommunity.updated_at,
+      website: newCommunity.website || "",
       communityType: community.communityType,
       format: community.format,
       tone: community.tone,
-      founder_name: community.founder_name || "",
-      role_title: community.role_title || "",
-      personal_background: community.personal_background || "",
-      community_structure: community.community_structure || "",
-      vision: community.vision || "",
-      community_values: community.community_values || ""
+      founder_name: newCommunity.founder_name || "",
+      role_title: newCommunity.role_title || "",
+      personal_background: newCommunity.personal_background || "",
+      community_structure: newCommunity.community_structure || "",
+      vision: newCommunity.vision || "",
+      community_values: newCommunity.community_values || ""
     };
     
     return transformedCommunity;
