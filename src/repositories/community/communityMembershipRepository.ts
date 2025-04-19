@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -58,11 +59,11 @@ export const joinCommunity = async (userId: string, communityId: string, role: s
     
     console.log(`Repository: Created new membership with role ${role}`);
     
-    // Update the community's member count
+    // Update the community's member count using direct SQL
     const { error: updateError } = await supabase
-      .rpc('increment_member_count', { 
-        p_community_id: communityId
-      });
+      .from('communities')
+      .update({ member_count: supabase.sql`member_count + 1` })
+      .eq('id', communityId);
     
     if (updateError) {
       console.warn('Error incrementing member count:', updateError);
@@ -90,11 +91,11 @@ export const leaveCommunity = async (userId: string, communityId: string): Promi
       throw error;
     }
     
-    // Update the community's member count
+    // Update the community's member count using direct SQL
     const { error: updateError } = await supabase
-      .rpc('decrement_member_count', { 
-        p_community_id: communityId
-      });
+      .from('communities')
+      .update({ member_count: supabase.sql`GREATEST(member_count - 1, 0)` })
+      .eq('id', communityId);
     
     if (updateError) {
       console.warn('Error decrementing member count:', updateError);
@@ -150,11 +151,11 @@ export const makeAdmin = async (adminId: string, userId: string, communityId: st
         throw insertError;
       }
       
-      // Update the community's member count
+      // Update the community's member count using direct SQL
       const { error: updateError } = await supabase
-        .rpc('increment_member_count', { 
-          p_community_id: communityId
-        });
+        .from('communities')
+        .update({ member_count: supabase.sql`member_count + 1` })
+        .eq('id', communityId);
       
       if (updateError) {
         console.warn('Error incrementing member count:', updateError);
