@@ -9,6 +9,8 @@ import { CommunitySnapshotForm } from "./CommunitySnapshotForm";
 import { OnlinePresenceForm } from "./OnlinePresenceForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCommunityForm } from "@/hooks/community/useCommunityForm";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface CommunityCreateFormProps {
   onSuccess?: (communityId: string) => void;
@@ -22,16 +24,26 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
     isSubmitting,
     submissionError,
     handleSubmit,
+    createdCommunityId,
   } = useCommunityForm(onSuccess);
 
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit} className="space-y-8">
         {submissionError && (
-          <div className="bg-destructive/15 text-destructive p-4 rounded-md mb-4">
-            <p className="font-medium">Error creating community:</p>
-            <p>{submissionError}</p>
-          </div>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error creating community</AlertTitle>
+            <AlertDescription>{submissionError}</AlertDescription>
+          </Alert>
+        )}
+        
+        {createdCommunityId && (
+          <Alert variant="default" className="bg-green-50 border-green-200 text-green-800">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertTitle>Community Created</AlertTitle>
+            <AlertDescription>Your community has been created successfully. Redirecting you in a moment...</AlertDescription>
+          </Alert>
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -86,7 +98,7 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
               const prevTab = ["overview", "snapshot", "online", "organizer"][Math.max(0, currentTabIndex - 1)];
               setActiveTab(prevTab);
             }}
-            disabled={activeTab === "overview"}
+            disabled={activeTab === "overview" || isSubmitting}
           >
             Previous
           </Button>
@@ -99,6 +111,7 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
                 const nextTab = ["overview", "snapshot", "online", "organizer"][Math.min(3, currentTabIndex + 1)];
                 setActiveTab(nextTab);
               }}
+              disabled={isSubmitting}
             >
               Next
             </Button>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 import CommunityCreateForm from '@/components/community/CommunityCreateForm';
@@ -44,11 +44,11 @@ const CreateCommunityPage: React.FC = () => {
       variant: "default",
     });
     
-    // Ensure navigation works properly
+    // Handle navigation with appropriate delay
     setTimeout(() => {
       console.log("Navigating to:", `/community/${communityId}`);
-      navigate(`/community/${communityId}`);
-    }, 300);
+      navigate(`/community/${communityId}`, { replace: true });
+    }, 500);
   };
 
   return (

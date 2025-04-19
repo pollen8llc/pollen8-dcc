@@ -55,6 +55,7 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [createdCommunityId, setCreatedCommunityId] = useState<string | null>(null);
 
   const form = useForm<CommunityFormSchema>({
     resolver: zodResolver(formSchema),
@@ -104,54 +105,73 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
 
       console.log("Current user attempting to create community:", currentUser);
       
+      // Filter out empty social media entries
+      const filteredSocialMedia = values.socialMedia
+        ?.filter(sm => sm.platform || sm.url)
+        .map(sm => ({
+          platform: sm.platform || "",
+          url: sm.url || ""
+        }));
+      
+      // Convert tags from comma-separated string to array
+      const tags = values.targetAudience 
+        ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+        : [];
+      
       const communityData = {
         name: values.name,
         description: values.description,
         location: values.location,
-        website: values.website,
+        website: values.website || "",
         isPublic: true,
         memberCount: values.memberCount || 1,
         organizerIds: [currentUser.id],
-        memberIds: [],
-        tags: values.targetAudience ? values.targetAudience.split(',').map(tag => tag.trim()) : [],
+        memberIds: [currentUser.id],
+        tags: tags,
         communityType: values.communityType,
         format: values.format,
         tone: values.tone,
         launchDate: values.launchDate,
         memberCapacity: values.memberCapacity,
         eventFrequency: values.eventFrequency,
-        newsletterUrl: values.newsletterUrl,
-        socialMedia: values.socialMedia?.filter(sm => sm.platform || sm.url),
-        primaryPlatforms: values.primaryPlatforms,
+        newsletterUrl: values.newsletterUrl || "",
+        socialMedia: filteredSocialMedia,
+        primaryPlatforms: values.primaryPlatforms.filter(p => p),
         imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3"
       };
 
       console.log("Creating community with data:", communityData);
       
+      // Create the community first
+      let community;
       try {
-        const community = await communityService.createCommunity(communityData);
+        community = await communityService.createCommunity(communityData);
         console.log("Community created successfully:", community);
         
         if (!community || !community.id) {
           throw new Error("Failed to create community - no community ID returned");
         }
         
+        // Store the community ID in case we need it for retry logic
+        setCreatedCommunityId(community.id);
+        
+        // Next, create the organizer profile
         try {
           const organizerProfile = {
             community_id: community.id,
             founder_name: values.founder_name,
-            role_title: values.role_title,
-            personal_background: values.personal_background,
-            size_demographics: values.size_demographics,
-            community_structure: values.community_structure,
-            team_structure: values.team_structure,
-            tech_stack: values.tech_stack,
-            event_formats: values.event_formats,
-            business_model: values.business_model,
-            community_values: values.community_values,
-            challenges: values.challenges,
-            vision: values.vision,
-            special_notes: values.special_notes,
+            role_title: values.role_title || "",
+            personal_background: values.personal_background || "",
+            size_demographics: values.size_demographics || "",
+            community_structure: values.community_structure || "",
+            team_structure: values.team_structure || "",
+            tech_stack: values.tech_stack || "",
+            event_formats: values.event_formats || "",
+            business_model: values.business_model || "",
+            community_values: values.community_values || "",
+            challenges: values.challenges || "",
+            vision: values.vision || "",
+            special_notes: values.special_notes || "",
           };
   
           console.log("Creating organizer profile with data:", organizerProfile);
@@ -164,22 +184,21 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
             variant: "default",
           });
   
-          // Wait a bit to ensure database operations are fully complete
+          // Allow some time for database operations to complete
           setTimeout(() => {
-            if (onSuccess && community.id) {
+            if (onSuccess && community?.id) {
               console.log(`Calling onSuccess handler with community ID: ${community.id}`);
               onSuccess(community.id);
-            } else {
+            } else if (community?.id) {
               console.log(`Navigating to community page: /community/${community.id}`);
-              navigate(`/community/${community.id}`);
+              navigate(`/community/${community.id}`, { replace: true });
             }
-          }, 500);
+          }, 800);
           
         } catch (profileError) {
           console.error('Error creating organizer profile:', profileError);
-          // Continue even if organizer profile creation fails
-          // The community was already created
           
+          // Continue even if organizer profile creation fails - the community was already created
           toast({
             title: "Partial Success",
             description: "Community created but organizer profile failed. Some details may be missing.",
@@ -189,17 +208,26 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
           if (onSuccess && community.id) {
             onSuccess(community.id);
           } else {
-            navigate(`/community/${community.id}`);
+            navigate(`/community/${community.id}`, { replace: true });
           }
         }
-      } catch (communityError) {
+      } catch (communityError: any) {
         console.error('Error in community creation:', communityError);
-        throw communityError;
+        
+        // Show a specific error message if available, otherwise show a generic one
+        const errorMessage = communityError?.message || "Unknown error occurred";
+        setSubmissionError(errorMessage);
+        
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: `Failed to create community: ${errorMessage}`,
+        });
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in overall submission process:', error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      const errorMessage = error?.message || "Unknown error occurred";
       setSubmissionError(errorMessage);
       
       toast({
@@ -219,5 +247,6 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
     isSubmitting,
     submissionError,
     handleSubmit: form.handleSubmit(handleSubmit),
+    createdCommunityId,
   };
 };

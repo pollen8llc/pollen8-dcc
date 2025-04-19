@@ -23,13 +23,13 @@ export const updateCommunity = async (community: Community): Promise<Community> 
     
     if (error) {
       console.error("Error updating community:", error);
-      return community;
+      throw error;
     }
     
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in updateCommunity:", err);
-    return community;
+    throw err;
   }
 };
 
@@ -47,6 +47,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     
     if (!currentUserId) {
       console.warn("No authenticated user found when creating community");
+      throw new Error("Authentication required to create a community");
     }
     
     // Create the community entry
@@ -91,6 +92,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
           
         if (memberError) {
           console.error("Error adding user as community admin:", memberError);
+          // Continue anyway since the community was created
         } else {
           console.log(`User ${userId} successfully added as admin to community ${data.id}`);
         }
@@ -99,6 +101,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       }
     } catch (memberErr) {
       console.error("Error during membership creation:", memberErr);
+      // Continue anyway since the community was created
     }
     
     return mapDbCommunity(data);
