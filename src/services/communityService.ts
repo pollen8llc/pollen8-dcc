@@ -102,7 +102,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         personal_background: community.personal_background || "",
         community_structure: community.community_structure || "",
         vision: community.vision || "",
-        community_values: community.community_values || ""
+        community_values: community.community_values || "",
+        owner_id: sessionData.session.user.id // Set the owner directly
       })
       .select()
       .single();
