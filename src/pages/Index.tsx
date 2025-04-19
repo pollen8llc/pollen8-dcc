@@ -5,10 +5,12 @@ import Navbar from "@/components/Navbar";
 import CommunityList from "@/components/CommunityList";
 import { Separator } from "@/components/ui/separator";
 import CallToActionBanner from "@/components/CallToActionBanner";
+import CommunitiesDebugger from "@/components/debug/CommunitiesDebugger";
 import * as communityService from "@/services/communityService";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDebugger, setShowDebugger] = useState(true); // Set to true to show debugger by default
   
   // Pre-fetch communities for better UX with a shorter stale time to see updates sooner
   const { refetch } = useQuery({
@@ -25,6 +27,20 @@ const Index = () => {
     refetch();
   };
 
+  // Toggle debugger with Ctrl+Shift+D
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      setShowDebugger(prev => !prev);
+      e.preventDefault();
+    }
+  };
+
+  // Add keyboard listener
+  useState(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  });
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -39,6 +55,9 @@ const Index = () => {
       {/* Communities Section */}
       <section className="px-4 pb-20 transition-all duration-300">
         <div className="container mx-auto">
+          {/* Debug panel */}
+          {showDebugger && <CommunitiesDebugger />}
+
           <div className="flex justify-between items-center">
             {searchQuery ? (
               <h2 className="text-2xl font-semibold animate-fade-in">
@@ -48,12 +67,20 @@ const Index = () => {
               <h2 className="text-2xl font-semibold">All Communities</h2>
             )}
             
-            <button 
-              onClick={handleRefresh}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Refresh
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setShowDebugger(prev => !prev)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showDebugger ? "Hide" : "Show"} Debugger
+              </button>
+              <button 
+                onClick={handleRefresh}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
           
           <Separator className="my-4 bg-gray-300 dark:bg-gray-700 transition-all duration-300" />

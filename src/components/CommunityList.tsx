@@ -17,32 +17,32 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
 
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
 
+  // Fix the infinite loop by properly handling dependencies
   useEffect(() => {
-    const filterCommunities = async () => {
+    const filterCommunities = () => {
       try {
         if (!searchQuery.trim()) {
           setFilteredCommunities(communities);
           return;
         }
         
-        const filtered = await communityService.searchCommunities(searchQuery);
-        setFilteredCommunities(filtered);
-      } catch (err) {
-        console.error("Error searching communities:", err);
-        // Fallback to client-side filtering if API search fails
+        // Client-side filtering
         const lowercaseQuery = searchQuery.toLowerCase();
         const filtered = communities.filter(community => 
           community.name.toLowerCase().includes(lowercaseQuery) ||
           (community.description?.toLowerCase().includes(lowercaseQuery) || false) ||
-          community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
-          community.location.toLowerCase().includes(lowercaseQuery)
+          (community.tags && community.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))) ||
+          (community.location && community.location.toLowerCase().includes(lowercaseQuery))
         );
         setFilteredCommunities(filtered);
+      } catch (err) {
+        console.error("Error filtering communities:", err);
+        setFilteredCommunities(communities);
       }
     };
 
     filterCommunities();
-  }, [communities, searchQuery]);
+  }, [communities, searchQuery]); // Only re-run when communities or searchQuery changes
 
   if (isLoading) {
     return (
