@@ -651,3 +651,31 @@ export const getUsersWithRole = async (roleName: string): Promise<User[]> => {
     throw error;
   }
 };
+
+/**
+ * Gets user communities - Updated to use the new ownership model
+ * @param userId User ID
+ */
+export const getUserCommunities = async (userId: string) => {
+  try {
+    // Get all communities where the user is the owner
+    const { data, error } = await supabase
+      .from('communities')
+      .select('id, name, logo_url')
+      .eq('owner_id', userId);
+    
+    if (error) {
+      console.error('Error fetching user communities:', error);
+      throw error;
+    }
+    
+    // Transform data to the expected format
+    return data.map(community => ({
+      ...community,
+      role: 'admin' // All owned communities have admin role
+    }));
+  } catch (error) {
+    console.error("Error in getUserCommunities:", error);
+    return [];
+  }
+}

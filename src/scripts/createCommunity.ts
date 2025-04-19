@@ -1,81 +1,56 @@
+import { createClient } from '@supabase/supabase-js';
+import * as dotenv from 'dotenv';
 
-import { supabase } from "@/integrations/supabase/client";
-import * as communityService from "@/services/communityService";
+dotenv.config();
 
-const setupCommunity = async () => {
-  try {
-    // First, get the user ID for the email
-    const { data: user, error: userError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', 'neechbrands@gmail.com')
-      .single();
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 
-    if (userError) {
-      console.error('Error finding user:', userError);
-      return;
-    }
-    
-    console.log('Found user:', user);
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Supabase URL and key are required in the environment variables.');
+  process.exit(1);
+}
 
-    // Create the community with the user as owner
-    const newCommunity = await communityService.createCommunity({
-      name: "Neech Community",
-      description: "A community for Neech members to connect and share ideas",
-      imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-      location: "Global",
-      isPublic: true,
-      memberCount: 1,
-      organizerIds: [user.id],
-      memberIds: [],
-      tags: ["Community", "Connection", "Ideas"],
-      website: ""
-    });
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log('Community created successfully:', newCommunity);
-    
-    // Create an organizer profile for the new community
-    try {
-      const organizerProfile = {
-        community_id: newCommunity.id,
-        founder_name: "Neech Organizer",
-        role_title: "Founder",
-        personal_background: "Background in community building",
-        size_demographics: "New growing community",
-        community_structure: "Open and collaborative",
-        team_structure: "Flat hierarchy",
-        tech_stack: "Modern web technologies",
-        event_formats: "Virtual and in-person meetups",
-        business_model: "Community-driven",
-        community_values: "Connection, Collaboration, Growth",
-        challenges: "Building engagement",
-        vision: "Creating a thriving global community",
-        special_notes: ""
-      };
-      
-      await communityService.createOrganizerProfile(organizerProfile);
-      console.log('Organizer profile created successfully');
-    } catch (profileError) {
-      console.error('Error creating organizer profile:', profileError);
-    }
-    
-    // Update the user's roles to ensure they're an organizer if not already
-    const { error: roleError } = await supabase
-      .rpc('update_user_role', { 
-        p_user_id: user.id, 
-        p_role_name: 'ORGANIZER',
-        p_assigner_id: user.id
-      });
-      
-    if (roleError) {
-      console.error('Error updating user role:', roleError);
-    } else {
-      console.log('User role updated to ORGANIZER successfully');
-    }
-    
-  } catch (error) {
-    console.error('Error in setupCommunity:', error);
+async function createCommunity(communityName: string, userId: string) {
+  // When creating a new community, set the owner_id directly
+  const newCommunity = {
+    name: communityName,
+    description: "A community for testing purposes.",
+    location: "Virtual",
+    is_public: true,
+    owner_id: userId // Set the owner directly instead of using community_members
+  };
+
+  // Insert the community
+  const { data: community, error: communityError } = await supabase
+    .from('communities')
+    .insert(newCommunity)
+    .select()
+    .single();
+
+  if (communityError) {
+    console.error("Error creating community:", communityError);
+    return;
   }
-};
 
-setupCommunity();
+  console.log("Created community:", community);
+
+  // The owner is automatically set, no need to create a membership record
+
+  // Optionally, log the community creation event
+  console.log(`Community "${communityName}" created successfully by user ${userId}.`);
+}
+
+async function main() {
+  // Replace with the actual user ID and community name
+  const userId = 'YOUR_USER_ID'; // Replace with a valid user ID
+  const communityName = 'Test Community'; // Replace with the desired community name
+
+  await createCommunity(communityName, userId);
+}
+
+main().catch(error => {
+  console.error("An error occurred:", error);
+});

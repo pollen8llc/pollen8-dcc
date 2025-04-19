@@ -21,14 +21,10 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       return null;
     }
 
-    // Check if the current user is the owner of this community
-    const { data: sessionData } = await supabase.auth.getSession();
-    const currentUserId = sessionData?.session?.user?.id;
-    
     // Set organizer to the owner
-    const organizers = data.owner_id ? [data.owner_id] : [];
+    const organizerIds = data.owner_id ? [data.owner_id] : [];
     // For now, set members to empty array since we don't have a members table anymore
-    const members = [];
+    const memberIds = [];
 
     return {
       id: data.id,
@@ -37,8 +33,8 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       location: data.location || 'Remote',
       imageUrl: data.logo_url || '/placeholder.svg',
       memberCount: data.member_count || 0,
-      organizerIds: organizers,
-      memberIds: members,
+      organizerIds: organizerIds,
+      memberIds: memberIds,
       tags: [], // No tags in the current model
       isPublic: data.is_public,
       createdAt: data.created_at || new Date().toISOString(),

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 interface MemberCardProps {
   member: User;
-  role?: string; // Added this property to support role designation
+  role?: string; // Added to support role designation
   communityId?: string; // Added optional communityId
   onClick?: (member: User) => void;
 }
