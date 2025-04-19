@@ -27,6 +27,23 @@ export const useCreateCommunity = () => {
       // Prepare social media handles as a JSON object
       const socialMediaObject = data.socialMediaHandles || {};
 
+      console.log("Creating community with data:", {
+        name: data.name,
+        description: data.description,
+        community_type: data.communityType,
+        location: data.location,
+        owner_id: session.session.user.id,
+        start_date: data.startDate,
+        target_audience: targetAudienceArray,
+        format: data.format,
+        member_count: data.size,
+        event_frequency: data.eventFrequency,
+        platforms: data.platforms,
+        website: data.website,
+        newsletter_url: data.newsletterUrl,
+        social_media: socialMediaObject
+      });
+
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
@@ -34,20 +51,24 @@ export const useCreateCommunity = () => {
           description: data.description,
           community_type: data.communityType,
           location: data.location,
+          owner_id: session.session.user.id, // Explicitly set the owner_id to the current user
           start_date: data.startDate,
           target_audience: targetAudienceArray,
           format: data.format,
           member_count: data.size,
           event_frequency: data.eventFrequency,
+          primary_platforms: data.platforms, // Use platforms array
           website: data.website || "",
-          primary_platforms: data.platforms, // Use platforms array instead of mainPlatform
           newsletter_url: data.newsletterUrl || "",
           social_media: socialMediaObject
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
 
       toast({
         title: "Success!",
