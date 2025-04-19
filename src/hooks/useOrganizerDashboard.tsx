@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -71,11 +70,6 @@ export const useOrganizerDashboard = () => {
     mutationFn: async (communityId: string) => {
       console.log("Starting deletion process for community:", communityId);
       
-      const ownershipCheck = await isOwner(communityId);
-      if (!ownershipCheck) {
-        throw new Error("You are not the owner of this community. Only community owners can delete their communities.");
-      }
-      
       return communityService.deleteCommunity(communityId);
     },
     onMutate: (communityId) => {
@@ -91,18 +85,6 @@ export const useOrganizerDashboard = () => {
     },
     onSuccess: async (_, communityId) => {
       console.log("Successfully deleted community:", communityId);
-      
-      try {
-        await auditService.logAuditAction({
-          action: "community_deleted",
-          details: {
-            community_id: communityId,
-            timestamp: new Date().toISOString()
-          }
-        });
-      } catch (error) {
-        console.error("Failed to log audit action:", error);
-      }
       
       queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
@@ -122,8 +104,6 @@ export const useOrganizerDashboard = () => {
       
       if (error.message.includes("not the owner")) {
         errorMessage = "Only community owners can delete their communities.";
-      } else if (error.message.includes("existing references")) {
-        errorMessage = "Cannot delete community as it still has active content. Please remove all linked content first.";
       } else if (error.message.includes("authentication required")) {
         errorMessage = "You need to be logged in to delete a community.";
       }
@@ -164,13 +144,6 @@ export const useOrganizerDashboard = () => {
     setCommunityToDelete(communityId);
   }, [currentUser?.id, toast]);
 
-  const confirmDeleteCommunity = useCallback(() => {
-    if (communityToDelete) {
-      console.log("Confirming community deletion:", communityToDelete);
-      deleteCommunityMutation.mutate(communityToDelete);
-    }
-  }, [communityToDelete, deleteCommunityMutation]);
-
   return {
     activeTab,
     setActiveTab,
@@ -181,7 +154,11 @@ export const useOrganizerDashboard = () => {
     setCommunityToDelete,
     toggleCommunityVisibility,
     handleDeleteCommunity,
-    confirmDeleteCommunity,
+    confirmDeleteCommunity: () => {
+      if (communityToDelete) {
+        deleteCommunityMutation.mutate(communityToDelete);
+      }
+    },
     activeDeletingId,
   };
 };

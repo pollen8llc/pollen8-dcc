@@ -359,10 +359,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      community_has_dependencies: {
-        Args: { community_id: string }
-        Returns: boolean
-      }
       get_community_admin_status: {
         Args: { user_id: string; community_id: string }
         Returns: boolean
