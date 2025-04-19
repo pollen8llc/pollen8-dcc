@@ -58,29 +58,19 @@ export const joinCommunity = async (userId: string, communityId: string, role: s
     
     console.log(`Repository: Created new membership with role ${role}`);
     
-    // Get the current member count first
-    const { data: communityData, error: getError } = await supabase
-      .from('communities')
-      .select('member_count')
-      .eq('id', communityId)
-      .single();
-    
-    if (getError) {
-      console.warn('Error getting community member count:', getError);
-    } else {
-      // Update the community's member count and timestamp
-      const currentCount = communityData.member_count || 0;
-      const { error: updateError } = await supabase
-        .from('communities')
-        .update({ 
-          updated_at: new Date().toISOString(),
-          member_count: currentCount + 1
-        })
-        .eq('id', communityId);
+    // Call the edge function to increment the member count
+    try {
+      const { data: incrementResponse, error: incrementError } = await supabase.functions.invoke('increment-community-count', {
+        body: { communityId }
+      });
       
-      if (updateError) {
-        console.warn('Error updating community member count:', updateError);
+      if (incrementError) {
+        console.warn('Error incrementing community member count:', incrementError);
+      } else {
+        console.log('Member count updated:', incrementResponse);
       }
+    } catch (edgeFuncError) {
+      console.warn('Failed to call increment-community-count function:', edgeFuncError);
     }
   } catch (error) {
     console.error(`Error in joinCommunity for userId ${userId}, communityId ${communityId}:`, error);
@@ -104,31 +94,19 @@ export const leaveCommunity = async (userId: string, communityId: string): Promi
       throw error;
     }
     
-    // Get the current member count first
-    const { data: communityData, error: getError } = await supabase
-      .from('communities')
-      .select('member_count')
-      .eq('id', communityId)
-      .single();
-    
-    if (getError) {
-      console.warn('Error getting community member count:', getError);
-    } else {
-      // Update the community's member count and timestamp, ensuring it never goes below 0
-      const currentCount = communityData.member_count || 0;
-      const newCount = Math.max(currentCount - 1, 0);
+    // Call the edge function to decrement the member count
+    try {
+      const { data: decrementResponse, error: decrementError } = await supabase.functions.invoke('decrement-community-count', {
+        body: { communityId }
+      });
       
-      const { error: updateError } = await supabase
-        .from('communities')
-        .update({ 
-          updated_at: new Date().toISOString(),
-          member_count: newCount
-        })
-        .eq('id', communityId);
-      
-      if (updateError) {
-        console.warn('Error updating community member count:', updateError);
+      if (decrementError) {
+        console.warn('Error decrementing community member count:', decrementError);
+      } else {
+        console.log('Member count updated:', decrementResponse);
       }
+    } catch (edgeFuncError) {
+      console.warn('Failed to call decrement-community-count function:', edgeFuncError);
     }
   } catch (error) {
     console.error(`Error in leaveCommunity for userId ${userId}, communityId ${communityId}:`, error);
@@ -180,29 +158,19 @@ export const makeAdmin = async (adminId: string, userId: string, communityId: st
         throw insertError;
       }
       
-      // Get the current member count first
-      const { data: communityData, error: getError } = await supabase
-        .from('communities')
-        .select('member_count')
-        .eq('id', communityId)
-        .single();
-      
-      if (getError) {
-        console.warn('Error getting community member count:', getError);
-      } else {
-        // Update the community's member count and timestamp
-        const currentCount = communityData.member_count || 0;
-        const { error: updateError } = await supabase
-          .from('communities')
-          .update({ 
-            updated_at: new Date().toISOString(),
-            member_count: currentCount + 1
-          })
-          .eq('id', communityId);
+      // Call the edge function to increment the member count
+      try {
+        const { data: incrementResponse, error: incrementError } = await supabase.functions.invoke('increment-community-count', {
+          body: { communityId }
+        });
         
-        if (updateError) {
-          console.warn('Error updating community member count:', updateError);
+        if (incrementError) {
+          console.warn('Error incrementing community member count:', incrementError);
+        } else {
+          console.log('Member count updated:', incrementResponse);
         }
+      } catch (edgeFuncError) {
+        console.warn('Failed to call increment-community-count function:', edgeFuncError);
       }
     }
   } catch (error) {
