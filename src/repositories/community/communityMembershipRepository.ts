@@ -1,64 +1,43 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Makes a user join a community
+ * Makes a user own a community (replaces join community functionality)
  */
-export const joinCommunity = async (userId: string, communityId: string, role: string = 'member'): Promise<void> => {
-  console.log(`Repository: User ${userId} joining community ${communityId} with role ${role}`);
+export const joinCommunity = async (userId: string, communityId: string, role: string = 'admin'): Promise<void> => {
+  console.log(`Repository: Setting user ${userId} as owner of community ${communityId}`);
   
   try {
-    // Check if the membership already exists
-    const { data: existingMembership, error: checkError } = await supabase
-      .from('community_members')
-      .select('id, role')
-      .eq('user_id', userId)
-      .eq('community_id', communityId)
-      .maybeSingle();
+    // Check if the user is already the owner of this community
+    const { data: existingOwnership, error: checkError } = await supabase.rpc('is_community_owner', {
+      user_id: userId,
+      community_id: communityId
+    });
     
     if (checkError) {
-      console.error('Error checking existing membership:', checkError);
+      console.error('Error checking existing ownership:', checkError);
       throw checkError;
     }
     
-    // If membership exists, update the role if needed
-    if (existingMembership) {
-      console.log(`Repository: Membership already exists with role ${existingMembership.role}`);
-      
-      // If existing role isn't admin but requested role is admin, upgrade to admin
-      if (existingMembership.role !== 'admin' && role === 'admin') {
-        const { error: updateError } = await supabase
-          .from('community_members')
-          .update({ role: 'admin' })
-          .eq('id', existingMembership.id);
-        
-        if (updateError) {
-          console.error('Error updating membership role:', updateError);
-          throw updateError;
-        }
-        
-        console.log(`Repository: Updated membership role to admin`);
-      }
-      
+    // If user is already the owner, no need to do anything
+    if (existingOwnership) {
+      console.log(`Repository: User ${userId} is already the owner of community ${communityId}`);
       return;
     }
     
-    // Otherwise create new membership
-    const { error: insertError } = await supabase
-      .from('community_members')
-      .insert({
-        user_id: userId,
-        community_id: communityId,
-        role: role
-      });
+    // Otherwise update the community's owner_id
+    const { error: updateError } = await supabase
+      .from('communities')
+      .update({ owner_id: userId })
+      .eq('id', communityId);
     
-    if (insertError) {
-      console.error('Error creating community membership:', insertError);
-      throw insertError;
+    if (updateError) {
+      console.error('Error updating community ownership:', updateError);
+      throw updateError;
     }
     
-    console.log(`Repository: Created new membership with role ${role}`);
+    console.log(`Repository: Updated ownership of community ${communityId} to user ${userId}`);
     
-    // Call the edge function to increment the member count
+    // Call the edge function to increment the member count if needed
     try {
       const { data: incrementResponse, error: incrementError } = await supabase.functions.invoke('increment-community-count', {
         body: { communityId }
@@ -79,22 +58,39 @@ export const joinCommunity = async (userId: string, communityId: string, role: s
 };
 
 /**
- * Makes a user leave a community
+ * Makes a user leave a community (now removes ownership)
  */
 export const leaveCommunity = async (userId: string, communityId: string): Promise<void> => {
   try {
-    const { error } = await supabase
-      .from('community_members')
-      .delete()
-      .eq('user_id', userId)
-      .eq('community_id', communityId);
+    // Check if user is the owner of this community
+    const { data: isOwner, error: checkError } = await supabase.rpc('is_community_owner', {
+      user_id: userId,
+      community_id: communityId
+    });
     
-    if (error) {
-      console.error('Error removing community membership:', error);
-      throw error;
+    if (checkError) {
+      console.error('Error checking ownership:', checkError);
+      throw checkError;
     }
     
-    // Call the edge function to decrement the member count
+    // If user is the owner, set the owner_id to null
+    if (isOwner) {
+      const { error: updateError } = await supabase
+        .from('communities')
+        .update({ owner_id: null })
+        .eq('id', communityId);
+      
+      if (updateError) {
+        console.error('Error removing community ownership:', updateError);
+        throw updateError;
+      }
+      
+      console.log(`Repository: Removed ownership of community ${communityId} from user ${userId}`);
+    } else {
+      console.log(`Repository: User ${userId} is not the owner of community ${communityId}, nothing to do`);
+    }
+    
+    // Call the edge function to decrement the member count if needed
     try {
       const { data: decrementResponse, error: decrementError } = await supabase.functions.invoke('decrement-community-count', {
         body: { communityId }
@@ -115,64 +111,22 @@ export const leaveCommunity = async (userId: string, communityId: string): Promi
 };
 
 /**
- * Makes a user an admin of a community
+ * Makes a user an admin of a community (now transfers ownership)
  */
 export const makeAdmin = async (adminId: string, userId: string, communityId: string): Promise<void> => {
   try {
-    // Check if the user is already a member of the community
-    const { data: existingMembership, error: checkError } = await supabase
-      .from('community_members')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('community_id', communityId)
-      .maybeSingle();
+    // In our new model, "admin" means "owner", so transfer ownership
+    const { error: updateError } = await supabase
+      .from('communities')
+      .update({ owner_id: userId })
+      .eq('id', communityId);
     
-    if (checkError) {
-      console.error('Error checking existing membership:', checkError);
-      throw checkError;
+    if (updateError) {
+      console.error('Error transferring community ownership:', updateError);
+      throw updateError;
     }
     
-    if (existingMembership) {
-      // Update the role to admin
-      const { error: updateError } = await supabase
-        .from('community_members')
-        .update({ role: 'admin' })
-        .eq('id', existingMembership.id);
-      
-      if (updateError) {
-        console.error('Error updating to admin role:', updateError);
-        throw updateError;
-      }
-    } else {
-      // Create a new membership with admin role
-      const { error: insertError } = await supabase
-        .from('community_members')
-        .insert({
-          user_id: userId,
-          community_id: communityId,
-          role: 'admin'
-        });
-      
-      if (insertError) {
-        console.error('Error creating admin membership:', insertError);
-        throw insertError;
-      }
-      
-      // Call the edge function to increment the member count
-      try {
-        const { data: incrementResponse, error: incrementError } = await supabase.functions.invoke('increment-community-count', {
-          body: { communityId }
-        });
-        
-        if (incrementError) {
-          console.warn('Error incrementing community member count:', incrementError);
-        } else {
-          console.log('Member count updated:', incrementResponse);
-        }
-      } catch (edgeFuncError) {
-        console.warn('Failed to call increment-community-count function:', edgeFuncError);
-      }
-    }
+    console.log(`Repository: Transferred ownership of community ${communityId} from user ${adminId} to user ${userId}`);
   } catch (error) {
     console.error(`Error in makeAdmin:`, error);
     throw error;
@@ -180,23 +134,10 @@ export const makeAdmin = async (adminId: string, userId: string, communityId: st
 };
 
 /**
- * Removes admin role from a user
+ * No-op function as we don't have multiple admin roles any more
+ * Kept for API compatibility
  */
 export const removeAdmin = async (adminId: string, userId: string, communityId: string): Promise<void> => {
-  try {
-    const { error } = await supabase
-      .from('community_members')
-      .update({ role: 'member' })
-      .eq('user_id', userId)
-      .eq('community_id', communityId)
-      .eq('role', 'admin');
-    
-    if (error) {
-      console.error('Error removing admin role:', error);
-      throw error;
-    }
-  } catch (error) {
-    console.error(`Error in removeAdmin:`, error);
-    throw error;
-  }
+  console.log("This operation is no longer supported in the new ownership model.");
+  // No-op function since we only support a single owner now
 };

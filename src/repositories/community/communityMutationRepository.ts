@@ -112,7 +112,7 @@ export const deleteCommunity = async (communityId: string): Promise<void> => {
       throw new Error("Permission denied");
     }
     
-    // Delete the community (the owner_id foreign key will handle cleanup)
+    // Delete the community
     const { error } = await supabase
       .from('communities')
       .delete()
