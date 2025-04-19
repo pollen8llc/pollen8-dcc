@@ -1,3 +1,4 @@
+
 import { Community, CommunityOrganizerProfile } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,7 +98,34 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     }
 
     console.log('Created new community:', newCommunity);
-    return newCommunity;
+    
+    // Transform the Supabase response to match the Community type
+    const transformedCommunity: Community = {
+      id: newCommunity.id,
+      name: newCommunity.name,
+      description: newCommunity.description || "",
+      location: newCommunity.location || "Remote",
+      imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+      memberCount: 1,
+      organizerIds: [],
+      memberIds: [],
+      tags: community.tags || [],
+      isPublic: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      website: community.website || "",
+      communityType: community.communityType,
+      format: community.format,
+      tone: community.tone,
+      founder_name: community.founder_name || "",
+      role_title: community.role_title || "",
+      personal_background: community.personal_background || "",
+      community_structure: community.community_structure || "",
+      vision: community.vision || "",
+      community_values: community.community_values || ""
+    };
+    
+    return transformedCommunity;
   } catch (error) {
     console.error("Error in createCommunity service:", error);
     throw error;
