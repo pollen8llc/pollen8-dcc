@@ -179,7 +179,7 @@ export const createOrganizerProfile = async (profile: Omit<CommunityOrganizerPro
           challenges: profile.challenges,
           vision: profile.vision,
           special_notes: profile.special_notes,
-          updated_at: new Date()
+          updated_at: new Date().toISOString() // Convert Date to string
         })
         .eq('id', existingProfile.id)
         .select()

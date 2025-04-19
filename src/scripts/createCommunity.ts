@@ -19,7 +19,7 @@ const setupCommunity = async () => {
     console.log('Found user:', user);
 
     // Create the community
-    const newCommunity = await communityService.createUserCommunity({
+    const newCommunity = await communityService.createCommunity({
       name: "Neech Community",
       description: "A community for Neech members to connect and share ideas",
       imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
