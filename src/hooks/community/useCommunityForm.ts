@@ -16,34 +16,15 @@ const formSchema = z.object({
   format: z.string().optional(),
   targetAudience: z.string().optional(),
   tone: z.string().optional(),
-  
-  launchDate: z.string().optional(),
-  memberCount: z.number().default(1),
-  memberCapacity: z.number().optional(),
-  eventFrequency: z.string().optional(),
-  
   website: z.string().url().optional().or(z.literal("")),
   primaryPlatforms: z.array(z.string()).default([]),
   newsletterUrl: z.string().url().optional().or(z.literal("")),
-  socialMedia: z.array(z.object({
-    platform: z.string().optional(),
-    url: z.string().optional()
-  })).optional().default([{}, {}, {}]),
-  
   founder_name: z.string().min(2, "Founder name is required"),
   role_title: z.string().optional(),
   personal_background: z.string().optional(),
   community_structure: z.string().optional(),
   vision: z.string().optional(),
   community_values: z.string().optional(),
-
-  size_demographics: z.string().optional(),
-  team_structure: z.string().optional(),
-  tech_stack: z.string().optional(),
-  event_formats: z.string().optional(),
-  business_model: z.string().optional(),
-  challenges: z.string().optional(),
-  special_notes: z.string().optional(),
 });
 
 export type CommunityFormSchema = z.infer<typeof formSchema>;
@@ -59,7 +40,7 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
 
   const form = useForm<CommunityFormSchema>({
     resolver: zodResolver(formSchema),
-    mode: 'onSubmit', // This ensures validation only happens on form submission
+    mode: 'onSubmit',
     defaultValues: {
       name: "",
       description: "",
@@ -68,37 +49,23 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
       format: "",
       targetAudience: "",
       tone: "",
-      launchDate: "",
-      memberCount: 1,
-      memberCapacity: 0,
-      eventFrequency: "",
       website: "",
       primaryPlatforms: [],
       newsletterUrl: "",
-      socialMedia: [{}, {}, {}],
       founder_name: currentUser?.name || "",
       role_title: "",
       personal_background: "",
       community_structure: "",
       vision: "",
       community_values: "",
-      size_demographics: "",
-      team_structure: "",
-      tech_stack: "",
-      event_formats: "",
-      business_model: "",
-      challenges: "",
-      special_notes: "",
     }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // If already submitting, prevent multiple submissions
     if (isSubmitting) return;
     
-    // Use the form's handleSubmit to validate the form
     form.handleSubmit(async (values: CommunityFormSchema) => {
       try {
         setIsSubmitting(true);
@@ -108,13 +75,6 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
           throw new Error("You must be logged in to create a community");
         }
 
-        const filteredSocialMedia = values.socialMedia
-          ?.filter(sm => sm.platform || sm.url)
-          .map(sm => ({
-            platform: sm.platform || "",
-            url: sm.url || ""
-          }));
-        
         const tags = values.targetAudience 
           ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
           : [];
@@ -125,31 +85,11 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
           location: values.location,
           website: values.website || "",
           isPublic: true,
-          memberCount: values.memberCount || 1,
           tags: tags,
           communityType: values.communityType,
           format: values.format,
           tone: values.tone,
-          launchDate: values.launchDate,
-          memberCapacity: values.memberCapacity,
-          eventFrequency: values.eventFrequency,
-          newsletterUrl: values.newsletterUrl || "",
-          socialMedia: filteredSocialMedia,
-          primaryPlatforms: values.primaryPlatforms.filter(p => p),
           imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-          founder_name: values.founder_name,
-          role_title: values.role_title,
-          personal_background: values.personal_background,
-          community_structure: values.community_structure,
-          vision: values.vision,
-          community_values: values.community_values,
-          size_demographics: values.size_demographics,
-          team_structure: values.team_structure,
-          tech_stack: values.tech_stack,
-          event_formats: values.event_formats,
-          business_model: values.business_model,
-          challenges: values.challenges,
-          special_notes: values.special_notes,
         };
 
         console.log("Creating community with data:", communityData);
@@ -168,14 +108,13 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
           variant: "default",
         });
 
-        // Delay navigation to show success message
         setTimeout(() => {
           if (onSuccess && community?.id) {
             onSuccess(community.id);
           } else if (community?.id) {
             navigate(`/community/${community.id}`, { replace: true });
           }
-        }, 1500); // Slightly longer delay for better user experience
+        }, 1500);
         
       } catch (error: any) {
         console.error('Error in community creation:', error);

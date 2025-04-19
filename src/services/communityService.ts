@@ -71,11 +71,32 @@ export const updateCommunity = async (community: Community): Promise<Community> 
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   try {
     console.log("Service: Creating community with data:", community);
-    const newCommunity = await communityRepository.createCommunity(community);
-    console.log("Service: Community created successfully:", newCommunity);
     
-    // We'll handle membership separately later via invite links
-    // Just return the new community for now
+    // Create the community without handling memberships
+    const { data: newCommunity, error } = await supabase
+      .from('communities')
+      .insert({
+        name: community.name,
+        description: community.description,
+        location: community.location,
+        website: community.website || "",
+        isPublic: true,
+        memberCount: 1, // Starting with 1 for the creator
+        tags: community.tags || [],
+        communityType: community.communityType,
+        format: community.format,
+        tone: community.tone,
+        imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating community:', error);
+      throw error;
+    }
+
+    console.log('Created new community:', newCommunity);
     return newCommunity;
   } catch (error) {
     console.error("Error in createCommunity service:", error);
