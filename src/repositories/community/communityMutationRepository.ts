@@ -14,7 +14,8 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         description: community.description,
         logo_url: community.imageUrl,
         website: community.website,
-        is_public: community.isPublic
+        is_public: community.isPublic,
+        location: community.location
       })
       .eq('id', community.id)
       .select()
@@ -39,6 +40,15 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
   try {
     console.log("Repository: Creating community with data:", community);
     
+    // Get current authenticated user for debugging
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentUserId = sessionData?.session?.user?.id;
+    console.log("Current authenticated user ID:", currentUserId);
+    
+    if (!currentUserId) {
+      console.warn("No authenticated user found when creating community");
+    }
+    
     // Create the community entry
     const { data, error } = await supabase
       .from('communities')
@@ -48,7 +58,6 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         logo_url: community.imageUrl || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
-        // Adding location as a column in the database if it exists
         location: community.location || "Remote"
       })
       .select()
@@ -57,31 +66,19 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     if (error) {
       console.error("Error creating community:", error);
       console.error("Error details:", error.details, error.hint, error.message);
-      
-      // Create a fallback community object with timestamp-based ID for debugging
-      return {
-        id: String(Date.now()),
-        name: community.name || "New Community",
-        description: community.description || "",
-        location: community.location || "Remote",
-        imageUrl: community.imageUrl || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-        memberCount: 1,
-        organizerIds: community.organizerIds || ["25"],
-        memberIds: community.memberIds || [],
-        tags: community.tags || [],
-        isPublic: community.isPublic !== undefined ? community.isPublic : true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        website: community.website || ""
-      };
+      throw new Error(`Failed to create community: ${error.message}`);
+    }
+    
+    if (!data) {
+      console.error("No data returned from community creation");
+      throw new Error("No data returned from community creation");
     }
     
     console.log("Repository: Community created successfully:", data);
     
     // Add current user as admin
     try {
-      const session = await supabase.auth.getSession();
-      const userId = session.data.session?.user.id;
+      const userId = currentUserId;
       
       if (userId) {
         const { error: memberError } = await supabase
@@ -94,6 +91,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
           
         if (memberError) {
           console.error("Error adding user as community admin:", memberError);
+        } else {
+          console.log(`User ${userId} successfully added as admin to community ${data.id}`);
         }
       } else {
         console.log("No authenticated user found to set as community admin");
@@ -105,22 +104,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in createCommunity:", err);
-    // Create a fallback community object with timestamp-based ID
-    return {
-      id: String(Date.now()),
-      name: community.name || "New Community",
-      description: community.description || "",
-      location: community.location || "Remote",
-      imageUrl: community.imageUrl || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-      memberCount: 1,
-      organizerIds: community.organizerIds || ["25"],
-      memberIds: community.memberIds || [],
-      tags: community.tags || [],
-      isPublic: community.isPublic !== undefined ? community.isPublic : true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      website: community.website || ""
-    };
+    throw err; // Re-throw to allow proper error handling upstream
   }
 };
 

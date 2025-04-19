@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -60,6 +59,7 @@ export default function CommunityCreateForm() {
   const { currentUser } = useUser()
   const [activeTab, setActiveTab] = useState("overview")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submissionError, setSubmissionError] = useState<string | null>(null)
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -104,7 +104,13 @@ export default function CommunityCreateForm() {
     
     try {
       setIsSubmitting(true)
+      setSubmissionError(null)
       console.log("Submitting form with values:", values);
+      
+      // Get current user to ensure authentication
+      if (!currentUser || !currentUser.id) {
+        throw new Error("You must be logged in to create a community");
+      }
       
       const communityData = {
         name: values.name,
@@ -113,7 +119,7 @@ export default function CommunityCreateForm() {
         website: values.website,
         isPublic: true,
         memberCount: values.memberCount || 1,
-        organizerIds: [currentUser?.id || ''],
+        organizerIds: [currentUser.id],
         memberIds: [],
         tags: values.targetAudience ? values.targetAudience.split(',').map(tag => tag.trim()) : [],
         communityType: values.communityType,
@@ -160,18 +166,23 @@ export default function CommunityCreateForm() {
       toast({
         title: "Success!",
         description: "Community created successfully!",
+        variant: "default",
       });
 
       // Ensure there's a small delay before navigation to allow the toast to show
       setTimeout(() => {
+        console.log(`Navigating to community page: /community/${community.id}`);
         navigate(`/community/${community.id}`);
       }, 1000);
     } catch (error) {
       console.error('Error creating community:', error)
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      setSubmissionError(errorMessage);
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create community. Please try again.",
+        description: errorMessage || "Failed to create community. Please try again.",
       })
     } finally {
       setIsSubmitting(false)
@@ -181,6 +192,13 @@ export default function CommunityCreateForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {submissionError && (
+          <div className="bg-destructive/15 text-destructive p-4 rounded-md mb-4">
+            <p className="font-medium">Error creating community:</p>
+            <p>{submissionError}</p>
+          </div>
+        )}
+        
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
