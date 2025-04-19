@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   User, Layers, MapPin, Calendar, Users, 
@@ -78,13 +77,17 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       icon: <Users className="h-5 w-5" />,
       title: "Community Size",
       value: `${community.memberCount || 0} members`
+    },
+    {
+      icon: <LinkIcon className="h-5 w-5" />,
+      title: "Website",
+      value: community.website || "Not specified"
     }
   ];
 
   const extractPlatforms = () => {
     if (!community.communication_platforms) return [];
     
-    // Handle both object and array formats
     if (Array.isArray(community.communication_platforms)) {
       return community.communication_platforms;
     }
@@ -93,13 +96,9 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
   };
 
   const extractSocialMedia = () => {
-    // First try the socialMedia property (from the type definition)
     let socialLinks = community.socialMedia;
     
-    // If not found or empty, try checking if there's a social_media property 
-    // from database (this will be undefined if property doesn't exist)
     if (!socialLinks || Object.keys(socialLinks || {}).length === 0) {
-      // @ts-ignore - We're checking if this property exists at runtime
       const dbSocialMedia = community.social_media;
       if (dbSocialMedia) {
         socialLinks = dbSocialMedia;
@@ -133,7 +132,20 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
               </div>
               <div>
                 <p className="font-medium text-sm">{info.title}</p>
-                <p className="text-base text-muted-foreground break-words">{info.value}</p>
+                <p className="text-base text-muted-foreground break-words">
+                  {info.title === "Website" && info.value !== "Not specified" ? (
+                    <a 
+                      href={info.value}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors"
+                    >
+                      {info.value}
+                    </a>
+                  ) : (
+                    info.value
+                  )}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -168,25 +180,6 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
 
           <div className="space-y-3">
             <div>
-              {community.website ? (
-                <a 
-                  href={community.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
-                >
-                  <LinkIcon className="h-4 w-4" />
-                  Website / Landing Page
-                </a>
-              ) : (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <LinkIcon className="h-4 w-4" />
-                  <span>No website specified</span>
-                </div>
-              )}
-            </div>
-            
-            <div>
               {community.newsletterUrl ? (
                 <a 
                   href={community.newsletterUrl}
@@ -206,8 +199,6 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
             </div>
           </div>
 
-          <Separator className="my-4" />
-          
           <div>
             <h3 className="text-lg font-semibold mb-3">Social Media</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
