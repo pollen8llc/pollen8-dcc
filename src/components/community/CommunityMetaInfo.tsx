@@ -46,7 +46,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Layers className="h-5 w-5" />,
       title: "Community Type",
-      value: community.community_type?.charAt(0).toUpperCase() + community.community_type?.slice(1) || "Not specified"
+      value: community.communityType?.charAt(0).toUpperCase() + community.communityType?.slice(1) || "Not specified"
     },
     {
       icon: <MapPin className="h-5 w-5" />,
@@ -56,13 +56,13 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Calendar className="h-5 w-5" />,
       title: "Start Date",
-      value: formatDate(community.start_date)
+      value: formatDate(community.startDate)
     },
     {
       icon: <Users className="h-5 w-5" />,
       title: "Target Audience",
-      value: Array.isArray(community.target_audience) 
-        ? community.target_audience.join(", ") 
+      value: Array.isArray(community.targetAudience) 
+        ? community.targetAudience.join(", ") 
         : "Not specified"
     },
     {
@@ -73,22 +73,22 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Clock className="h-5 w-5" />,
       title: "Event Frequency",
-      value: community.event_frequency?.replace("_", " ").charAt(0).toUpperCase() + 
-        community.event_frequency?.slice(1) || "Not specified"
+      value: community.eventFrequency?.replace("_", " ").charAt(0).toUpperCase() + 
+        community.eventFrequency?.slice(1) || "Not specified"
     },
     {
       icon: <Users className="h-5 w-5" />,
       title: "Community Size",
-      value: `${community.member_count || 0} members`
+      value: `${community.memberCount || 0} members`
     }
   ];
 
-  const platforms = community.communication_platforms && typeof community.communication_platforms === 'object'
-    ? Object.keys(community.communication_platforms)
+  const platforms = community.communicationPlatforms && typeof community.communicationPlatforms === 'object'
+    ? Object.keys(community.communicationPlatforms)
     : [];
 
-  const socialMedia = community.social_media && typeof community.social_media === 'object'
-    ? Object.entries(community.social_media).filter(([_, url]) => url)
+  const socialMedia = community.socialMedia && typeof community.socialMedia === 'object'
+    ? Object.entries(community.socialMedia).filter(([_, url]) => url)
     : [];
 
   return (
@@ -145,9 +145,9 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
               </a>
             )}
             
-            {community.newsletter_url && (
+            {community.newsletterUrl && (
               <a 
-                href={community.newsletter_url}
+                href={community.newsletterUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
