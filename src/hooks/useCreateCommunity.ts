@@ -19,6 +19,14 @@ export const useCreateCommunity = () => {
         throw new Error("You must be logged in to create a community");
       }
 
+      // Convert targetAudience string to array if it's not already
+      const targetAudienceArray = typeof data.targetAudience === 'string' 
+        ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
+        : data.targetAudience;
+
+      // Prepare social media handles as a JSON object
+      const socialMediaObject = data.socialMediaHandles || {};
+
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
@@ -27,16 +35,14 @@ export const useCreateCommunity = () => {
           community_type: data.communityType,
           location: data.location,
           start_date: data.startDate,
-          target_audience: data.targetAudience,
+          target_audience: targetAudienceArray,
           format: data.format,
           member_count: data.size,
           event_frequency: data.eventFrequency,
           website: data.website || "",
-          main_platform: data.mainPlatform,
+          primary_platforms: [data.mainPlatform], // Convert to array
           newsletter_url: data.newsletterUrl || "",
-          social_media: data.socialMediaHandles,
-          is_public: true,
-          logo_url: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3"
+          social_media: socialMediaObject
         })
         .select()
         .single();
