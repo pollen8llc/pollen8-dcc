@@ -26,6 +26,15 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
     // For now, set members to empty array since we don't have a members table anymore
     const memberIds = [];
 
+    // Type-safe handling of potentially non-object JSON fields
+    const communicationPlatforms = typeof data.communication_platforms === 'object' && data.communication_platforms !== null
+      ? data.communication_platforms
+      : {};
+      
+    const socialMedia = typeof data.social_media === 'object' && data.social_media !== null
+      ? data.social_media
+      : {};
+
     return {
       id: data.id,
       name: data.name,
@@ -46,10 +55,10 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       community_structure: data.community_structure || '',
       vision: data.vision || '',
       community_values: data.community_values || '',
-      // Add proper mapping for the platform-related fields
+      // Add proper mapping for the platform-related fields with type checking
       newsletterUrl: data.newsletter_url || '',
-      communication_platforms: data.communication_platforms || {},
-      socialMedia: data.social_media || {},
+      communication_platforms: communicationPlatforms as Record<string, string | { url?: string; details?: string }>,
+      socialMedia: socialMedia as Record<string, string | { url?: string }>,
       communityType: data.community_type || '',
       format: data.format || '',
       eventFrequency: data.event_frequency || '',
