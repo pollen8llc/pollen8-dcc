@@ -30,6 +30,33 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          performed_by: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          performed_by: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          performed_by?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       communities: {
         Row: {
           business_model: string | null
@@ -657,6 +684,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      community_has_dependencies: {
+        Args: { community_id: string }
+        Returns: boolean
+      }
       get_community_admin_status: {
         Args: { user_id: string; community_id: string }
         Returns: boolean
@@ -703,6 +734,10 @@ export type Database = {
           action_details?: Json
         }
         Returns: undefined
+      }
+      safe_delete_community: {
+        Args: { community_id: string; user_id: string }
+        Returns: boolean
       }
       update_user_role: {
         Args: { p_user_id: string; p_role_name: string; p_assigner_id: string }
