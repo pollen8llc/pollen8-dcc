@@ -57,10 +57,13 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     },
     {
       icon: <Users className="h-5 w-5" />,
-      title: "Target Audience",
-      value: Array.isArray(community.targetAudience) 
-        ? community.targetAudience.join(", ") 
-        : "Not specified"
+      title: "Members",
+      value: `${community.communitySize || 0} members`
+    },
+    {
+      icon: <Users className="h-5 w-5" />,
+      title: "Target Size",
+      value: community.size_demographics || "Not specified"
     },
     {
       icon: <LayoutList className="h-5 w-5" />,
@@ -72,11 +75,6 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       title: "Event Frequency",
       value: community.eventFrequency?.replace("_", " ").charAt(0).toUpperCase() + 
         community.eventFrequency?.slice(1) || "Not specified"
-    },
-    {
-      icon: <Users className="h-5 w-5" />,
-      title: "Community Size",
-      value: community.size_demographics || "Not specified"
     },
     {
       icon: <LinkIcon className="h-5 w-5" />,

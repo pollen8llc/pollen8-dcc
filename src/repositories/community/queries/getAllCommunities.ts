@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,10 +27,10 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
     description: dbCommunity.description || '',
     location: dbCommunity.location || 'Remote',
     imageUrl: dbCommunity.logo_url || '/placeholder.svg',
-    communitySize: parseInt(dbCommunity.size_demographics?.split('-')[1] || '0'),
+    communitySize: dbCommunity.member_count || 0,
     organizerIds: dbCommunity.owner_id ? [dbCommunity.owner_id] : [],
     memberIds: [],
-    tags: dbCommunity.tags || [],
+    tags: dbCommunity.target_audience || [],
     isPublic: dbCommunity.is_public,
     createdAt: dbCommunity.created_at || new Date().toISOString(),
     updatedAt: dbCommunity.updated_at || new Date().toISOString(),
