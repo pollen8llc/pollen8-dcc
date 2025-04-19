@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -5,22 +6,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/contexts/UserContext";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Community, UserRole } from "@/models/types";
+import { UserRole } from "@/models/types";
 import * as communityService from "@/services/communityService";
 import * as adminService from "@/services/adminService";
 import { useToast } from "@/hooks/use-toast";
-import AdminMembersTab from "@/components/admin/AdminMembersTab";
-import AdminSettingsTab from "@/components/admin/AdminSettingsTab";
-import AdminStatsTab from "@/components/admin/AdminStatsTab";
 import UserManagementTab from "@/components/admin/UserManagementTab";
+import AdminOverviewCards from "@/components/admin/AdminOverviewCards";
+import ManagedCommunitiesGrid from "@/components/admin/ManagedCommunitiesGrid";
+import CommunityManagementDashboard from "@/components/admin/CommunityManagementDashboard";
 import NotFoundState from "@/components/community/NotFoundState";
-import { Bug } from "lucide-react";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || "overview";
-  const { currentUser, isOrganizer, hasPermission } = useUser();
+  const { currentUser, isOrganizer } = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
   const { toast } = useToast();
@@ -28,7 +28,6 @@ const AdminDashboard = () => {
   // Ensure admin role for the specific user
   useEffect(() => {
     const ensureAdminInDatabase = async () => {
-      // Only run this once when the dashboard loads
       if (currentUser?.id === "38a18dd6-4742-419b-b2c1-70dec5c51729") {
         try {
           const result = await adminService.ensureAdminRole();
@@ -122,46 +121,7 @@ const AdminDashboard = () => {
                       <p className="text-muted-foreground mb-6">
                         Welcome to the admin dashboard. Use the tabs above to manage users, roles, and system settings.
                       </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => setActiveTab("users")}>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-lg">User Management</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">
-                              Manage user accounts, assign roles and permissions
-                            </p>
-                          </CardContent>
-                        </Card>
-                        
-                        <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => setActiveTab("settings")}>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-lg">System Settings</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">
-                              Configure global settings and system preferences
-                            </p>
-                          </CardContent>
-                        </Card>
-                        <Card 
-                          className="hover:shadow-md cursor-pointer transition-all" 
-                          onClick={() => navigate("/admin/debug")}
-                        >
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-lg">Component Debugger</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center gap-2">
-                              <Bug className="h-4 w-4" />
-                              <p className="text-sm text-muted-foreground">
-                                Debug and test components
-                              </p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
+                      <AdminOverviewCards onTabChange={setActiveTab} />
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -187,37 +147,7 @@ const AdminDashboard = () => {
           )}
           
           {(isOrganizer() || isAdmin) && managedCommunities && managedCommunities.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Select a community to manage:</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {managedCommunities.map((community: Community) => (
-                  <Card 
-                    key={community.id}
-                    className="hover:shadow-md cursor-pointer transition-all"
-                    onClick={() => navigate(`/admin/community/${community.id}`)}
-                  >
-                    <CardHeader className="pb-2">
-                      <CardTitle>{community.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="aspect-video relative mb-4 overflow-hidden rounded-md">
-                        <img 
-                          src={community.imageUrl} 
-                          alt={community.name} 
-                          className="object-cover w-full h-full" 
-                        />
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {community.description}
-                      </p>
-                      <div className="mt-4 text-sm">
-                        <span className="font-medium">{community.memberCount}</span> members
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <ManagedCommunitiesGrid communities={managedCommunities} />
           )}
           
           {!isAdmin && !isOrganizer() && (
@@ -246,63 +176,11 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container mx-auto py-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Managing: {community.name}</h1>
-            <p className="text-muted-foreground mt-1">
-              Make changes to your community settings and manage members
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <a 
-              href={`/community/${community.id}`} 
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              target="_blank" 
-              rel="noopener noreferrer"
-            >
-              View public page →
-            </a>
-          </div>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full mb-8 glass dark:glass-dark">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="statistics">Statistics</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Community Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p>Created: {community.createdAt || 'Not available'}</p>
-                  <p>Last updated: {community.updatedAt || 'Not available'}</p>
-                  <p>Visibility: {community.isPublic ? 'Public' : 'Private'}</p>
-                  <p>Total members: {community.memberCount}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="members">
-            <AdminMembersTab communityId={community.id} />
-          </TabsContent>
-          
-          <TabsContent value="statistics">
-            <AdminStatsTab communityId={community.id} />
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <AdminSettingsTab community={community} />
-          </TabsContent>
-        </Tabs>
-      </div>
+      <CommunityManagementDashboard 
+        community={community}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
     </div>
   );
 };
