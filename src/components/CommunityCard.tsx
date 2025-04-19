@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { MapPin, Globe2, FileText } from "lucide-react";
+import { MapPin, Globe2, FileText, Circle } from "lucide-react";
 import { Community } from "@/models/types";
 import { Badge } from "@/components/ui/badge";
 import { useRef, useEffect, useState } from "react";
@@ -35,12 +35,25 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
   
   const displayTags = community.tags.slice(0, displayTagCount);
   
+  // Determine activity status (you might want to modify this logic based on your specific requirements)
+  const isActive = community.updatedAt 
+    ? (new Date().getTime() - new Date(community.updatedAt).getTime()) < (30 * 24 * 60 * 60 * 1000) 
+    : false;
+
   return (
     <Link
       to={`/community/${community.id}`}
       className="group relative h-full w-full"
     >
       <div className="relative h-full overflow-hidden rounded-xl bg-card border border-border/40 transition-all duration-300 group-hover:shadow-md transform group-hover:-translate-y-1">
+        {/* Activity Indicator */}
+        <div className="absolute top-2 right-2 z-10">
+          <Circle 
+            className={`h-3 w-3 ${isActive ? 'text-green-500' : 'text-muted-foreground'}`} 
+            fill={isActive ? '#10B981' : 'transparent'}
+          />
+        </div>
+
         {/* Row 1: Name and Tags */}
         <div className="p-3 border-b border-border/40">
           <h3 className="text-base font-semibold text-foreground line-clamp-1">
