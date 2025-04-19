@@ -1,9 +1,7 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { 
-  User, FileText, Layers, MapPin, Calendar, Users, 
-  LayoutList, Clock, Link as LinkIcon, Mail,
-  Instagram, Twitter, Facebook, Linkedin, MessageSquare, Info
+  User, Layers, MapPin, Calendar, Users, 
+  LayoutList, Clock
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import * as communityService from "@/services/communityService";
@@ -39,11 +37,6 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       icon: <User className="h-5 w-5" />,
       title: "Community Name",
       value: community.name
-    },
-    {
-      icon: <FileText className="h-5 w-5" />,
-      title: "Description",
-      value: community.description
     },
     {
       icon: <Layers className="h-5 w-5" />,
