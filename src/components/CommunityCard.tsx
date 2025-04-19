@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Users, MapPin, Calendar, Globe2 } from "lucide-react";
+import { MapPin, Calendar, Globe2 } from "lucide-react";
 import { Community } from "@/models/types";
 import { Badge } from "@/components/ui/badge";
 import { useRef, useEffect, useState } from "react";
@@ -46,37 +46,9 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
           <h3 className="text-lg font-semibold text-foreground line-clamp-1">
             {community.name}
           </h3>
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-            {community.description}
-          </p>
-        </div>
-        
-        {/* Content */}
-        <div className="p-4 space-y-4">
-          {/* Key Info */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span>{community.communitySize} members</span>
-            </div>
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <Globe2 className="h-4 w-4" />
-              <span>{community.format || 'Mixed'}</span>
-            </div>
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>{community.eventFrequency || 'Flexible'}</span>
-            </div>
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span className="truncate" title={community.location}>
-                {community.location}
-              </span>
-            </div>
-          </div>
           
           {/* Tags */}
-          <div ref={tagContainerRef} className="flex flex-wrap gap-1.5">
+          <div ref={tagContainerRef} className="flex flex-wrap gap-1.5 mt-2">
             {displayTags.map((tag) => (
               <Badge
                 key={tag}
@@ -93,10 +65,35 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
             )}
           </div>
         </div>
+        
+        {/* Content */}
+        <div className="p-4 space-y-3">
+          <div className="grid gap-2 text-sm">
+            <div className="flex items-center space-x-1.5 text-muted-foreground">
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span className="truncate" title={community.location}>
+                {community.location}
+              </span>
+            </div>
+            <div className="flex items-center space-x-1.5 text-muted-foreground">
+              <Globe2 className="h-4 w-4 shrink-0" />
+              <span>{community.format || 'Mixed'}</span>
+            </div>
+            <div className="flex items-center space-x-1.5 text-muted-foreground">
+              <Calendar className="h-4 w-4 shrink-0" />
+              <span>{community.eventFrequency || 'Flexible'}</span>
+            </div>
+          </div>
+          
+          {community.updatedAt && (
+            <div className="text-xs text-muted-foreground pt-2 border-t border-border/40">
+              Last active: {new Date(community.updatedAt).toLocaleDateString()}
+            </div>
+          )}
+        </div>
       </div>
     </Link>
   );
 };
 
 export default CommunityCard;
-
