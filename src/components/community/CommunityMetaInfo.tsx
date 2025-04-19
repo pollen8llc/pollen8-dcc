@@ -20,6 +20,8 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     enabled: !!communityId
   });
 
+  console.log("Community data:", community); // Debug log
+
   if (!community) return null;
 
   const formatDate = (dateString: string | null) => {
@@ -82,13 +84,43 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     }
   ];
 
-  const platforms = community.communication_platforms && typeof community.communication_platforms === 'object'
-    ? Object.keys(community.communication_platforms)
-    : [];
+  const extractPlatforms = () => {
+    if (!community.communication_platforms) return [];
+    
+    // Handle both object and array formats
+    if (Array.isArray(community.communication_platforms)) {
+      return community.communication_platforms;
+    }
+    
+    return Object.keys(community.communication_platforms);
+  };
 
-  const socialMedia = community.socialMedia && typeof community.socialMedia === 'object'
-    ? Object.entries(community.socialMedia).filter(([_, url]) => !!url)
-    : [];
+  const extractSocialMedia = () => {
+    if (!community.socialMedia) return [];
+    
+    // Try the socialMedia property first
+    let socialLinks = community.socialMedia;
+    
+    // If not found, try social_media from database
+    if (!socialLinks && community.social_media) {
+      socialLinks = community.social_media;
+    }
+    
+    if (!socialLinks) return [];
+
+    return Object.entries(socialLinks)
+      .filter(([_, value]) => {
+        if (typeof value === 'string') return value;
+        return value?.url;
+      })
+      .map(([platform, value]) => ({
+        platform,
+        url: typeof value === 'string' ? value : value?.url
+      }));
+  };
+
+  const platforms = extractPlatforms();
+  const socialMedia = extractSocialMedia();
 
   return (
     <div className="container mx-auto px-4 mb-12">
@@ -115,65 +147,72 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
               <MessageSquare className="h-5 w-5" />
               Platforms
             </h3>
-            {platforms.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {platforms.map((platform) => (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {platforms.length > 0 ? (
+                platforms.map((platform) => (
                   <span key={platform} className="text-muted-foreground">
-                    {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    {typeof platform === 'string' 
+                      ? platform.charAt(0).toUpperCase() + platform.slice(1)
+                      : 'Unknown Platform'}
                   </span>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Info className="h-4 w-4" />
-                <span>No platforms specified</span>
-              </div>
-            )}
+                ))
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground col-span-full">
+                  <Info className="h-4 w-4" />
+                  <span>No platforms specified</span>
+                </div>
+              )}
+            </div>
             <Separator className="my-4" />
           </div>
 
           <div className="space-y-3">
-            {community.website ? (
-              <a 
-                href={community.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
-              >
-                <LinkIcon className="h-4 w-4" />
-                Website / Landing Page
-              </a>
-            ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <LinkIcon className="h-4 w-4" />
-                <span>No website specified</span>
-              </div>
-            )}
+            <div>
+              {community.website ? (
+                <a 
+                  href={community.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                >
+                  <LinkIcon className="h-4 w-4" />
+                  Website / Landing Page
+                </a>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <LinkIcon className="h-4 w-4" />
+                  <span>No website specified</span>
+                </div>
+              )}
+            </div>
             
-            {community.newsletterUrl ? (
-              <a 
-                href={community.newsletterUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
-              >
-                <Mail className="h-4 w-4" />
-                Newsletter
-              </a>
-            ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span>No newsletter available</span>
-              </div>
-            )}
+            <div>
+              {community.newsletterUrl ? (
+                <a 
+                  href={community.newsletterUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                >
+                  <Mail className="h-4 w-4" />
+                  Newsletter
+                </a>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  <span>No newsletter available</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <Separator className="my-4" />
+          
           <div>
             <h3 className="text-lg font-semibold mb-3">Social Media</h3>
-            {socialMedia.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {socialMedia.map(([platform, url]) => {
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {socialMedia.length > 0 ? (
+                socialMedia.map(({ platform, url }) => {
                   let Icon;
                   switch(platform.toLowerCase()) {
                     case 'twitter':
@@ -195,7 +234,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
                   return (
                     <a
                       key={platform}
-                      href={typeof url === 'string' ? url : (url as any)?.url || '#'}
+                      href={url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
@@ -204,14 +243,14 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
                       {platform.charAt(0).toUpperCase() + platform.slice(1)}
                     </a>
                   );
-                })}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Info className="h-4 w-4" />
-                <span>No social media links available</span>
-              </div>
-            )}
+                })
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground col-span-full">
+                  <Info className="h-4 w-4" />
+                  <span>No social media links available</span>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
