@@ -86,6 +86,7 @@ export type Database = {
           size_demographics: string | null
           social_media: Json | null
           special_notes: string | null
+          start_date: string | null
           target_audience: string[] | null
           team_structure: string | null
           tech_stack: string | null
@@ -121,6 +122,7 @@ export type Database = {
           size_demographics?: string | null
           social_media?: Json | null
           special_notes?: string | null
+          start_date?: string | null
           target_audience?: string[] | null
           team_structure?: string | null
           tech_stack?: string | null
@@ -156,6 +158,7 @@ export type Database = {
           size_demographics?: string | null
           social_media?: Json | null
           special_notes?: string | null
+          start_date?: string | null
           target_audience?: string[] | null
           team_structure?: string | null
           tech_stack?: string | null
