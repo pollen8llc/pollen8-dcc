@@ -1,3 +1,4 @@
+
 import { Community } from "@/models/types";
 import { supabase, mockCommunities, mapDbCommunity, mapLegacyCommunity } from "../base/baseRepository";
 
@@ -71,7 +72,9 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       organizerIds: organizers,
       memberIds: members,
       tags: [],  // You might want to add a tags relationship later
-      isPublic: data.is_public
+      isPublic: data.is_public,
+      createdAt: data.created_at || new Date().toISOString(),
+      updatedAt: data.updated_at || new Date().toISOString()
     };
   } catch (err) {
     console.error("Error in getCommunityById:", err);
