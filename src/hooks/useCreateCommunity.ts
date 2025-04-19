@@ -24,14 +24,17 @@ export const useCreateCommunity = () => {
         .insert({
           name: data.name,
           description: data.description,
+          community_type: data.communityType,
           location: data.location,
+          start_date: data.startDate,
+          target_audience: data.targetAudience,
+          format: data.format,
+          member_count: data.size,
+          event_frequency: data.eventFrequency,
           website: data.website || "",
-          founder_name: data.founder_name,
-          role_title: data.role_title || "",
-          community_structure: data.community_structure || "",
-          personal_background: data.personal_background || "",
-          vision: data.vision || "",
-          community_values: data.community_values || "",
+          main_platform: data.mainPlatform,
+          newsletter_url: data.newsletterUrl || "",
+          social_media: data.socialMediaHandles,
           is_public: true,
           logo_url: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3"
         })

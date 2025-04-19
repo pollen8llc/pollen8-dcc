@@ -15,6 +15,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function CreateCommunityForm() {
   const { createCommunity, isSubmitting } = useCreateCommunity();
@@ -24,14 +36,22 @@ export function CreateCommunityForm() {
     defaultValues: {
       name: "",
       description: "",
+      communityType: "tech",
       location: "",
+      startDate: new Date().toISOString(),
+      targetAudience: "",
+      format: "hybrid",
+      size: 0,
+      eventFrequency: "monthly",
       website: "",
-      founder_name: "",
-      role_title: "",
-      community_structure: "",
-      personal_background: "",
-      vision: "",
-      community_values: "",
+      mainPlatform: "discord",
+      newsletterUrl: "",
+      socialMediaHandles: {
+        twitter: "",
+        instagram: "",
+        linkedin: "",
+        facebook: "",
+      },
     },
   });
 
@@ -79,13 +99,24 @@ export function CreateCommunityForm() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name="location"
+                name="communityType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Remote, New York, Global" {...field} />
-                    </FormControl>
+                    <FormLabel>Community Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="tech">Tech</SelectItem>
+                        <SelectItem value="creative">Creative</SelectItem>
+                        <SelectItem value="wellness">Wellness</SelectItem>
+                        <SelectItem value="professional">Professional</SelectItem>
+                        <SelectItem value="social-impact">Social Impact</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -93,12 +124,12 @@ export function CreateCommunityForm() {
 
               <FormField
                 control={form.control}
-                name="website"
+                name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Website (Optional)</FormLabel>
+                    <FormLabel>Location</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://..." {...field} />
+                      <Input placeholder="City, Region, or Global" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -108,13 +139,41 @@ export function CreateCommunityForm() {
 
             <FormField
               control={form.control}
-              name="founder_name"
+              name="startDate"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Founder Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Your name" {...field} />
-                  </FormControl>
+                <FormItem className="flex flex-col">
+                  <FormLabel>Start Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(new Date(field.value), "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value ? new Date(field.value) : undefined}
+                        onSelect={(date) => field.onChange(date?.toISOString() ?? "")}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
@@ -122,29 +181,82 @@ export function CreateCommunityForm() {
 
             <FormField
               control={form.control}
-              name="role_title"
+              name="targetAudience"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role Title (Optional)</FormLabel>
+                  <FormLabel>Target Audience</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Community Manager" {...field} />
+                    <Input placeholder="Who is this community for?" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="format"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Format</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select format" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="irl">In-person (IRL)</SelectItem>
+                        <SelectItem value="url">Online (URL)</SelectItem>
+                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="eventFrequency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Event Frequency</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                        <SelectItem value="adhoc">Ad-hoc</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
-              name="vision"
+              name="size"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Community Vision (Optional)</FormLabel>
+                  <FormLabel>Community Size</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="What's your vision for this community?"
-                      className="min-h-[100px]"
-                      {...field} 
+                    <Input 
+                      type="number" 
+                      min="0"
+                      placeholder="Current number of members"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -154,21 +266,111 @@ export function CreateCommunityForm() {
 
             <FormField
               control={form.control}
-              name="community_values"
+              name="website"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Community Values (Optional)</FormLabel>
+                  <FormLabel>Website / Landing Page</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="What values guide your community?"
-                      className="min-h-[100px]"
-                      {...field} 
-                    />
+                    <Input placeholder="https://" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="mainPlatform"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Main Platform</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select platform" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                      <SelectItem value="discord">Discord</SelectItem>
+                      <SelectItem value="slack">Slack</SelectItem>
+                      <SelectItem value="facebook">Facebook</SelectItem>
+                      <SelectItem value="telegram">Telegram</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="newsletterUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Newsletter URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Newsletter subscription link" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="space-y-4">
+              <FormLabel>Social Media Handles</FormLabel>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="socialMediaHandles.twitter"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Twitter handle" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="socialMediaHandles.instagram"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Instagram handle" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="socialMediaHandles.linkedin"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="LinkedIn URL" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="socialMediaHandles.facebook"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Facebook URL" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
           </div>
 
           <Button
