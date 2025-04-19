@@ -1,3 +1,4 @@
+
 import { Community } from "@/models/types";
 import { supabase, mapDbCommunity } from "../base/baseRepository";
 
@@ -62,9 +63,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         personal_background: community.personal_background || "",
         community_structure: community.community_structure || "",
         vision: community.vision || "",
-        community_values: community.community_values || ""
-        // Remove any fields that don't exist in the database schema
-        // These fields are now handled by the trigger: size_demographics, team_structure, tech_stack, event_formats, business_model, challenges, special_notes
+        community_values: community.community_values || "",
+        owner_id: currentUserId // Set the owner_id to the current user
       })
       .select()
       .single();
@@ -101,27 +101,18 @@ export const deleteCommunity = async (communityId: string): Promise<void> => {
       throw new Error("User not authenticated");
     }
     
-    // Check if user is an admin of this community
-    const { data: memberData, error: memberError } = await supabase
-      .from('community_members')
-      .select('*')
-      .eq('community_id', communityId)
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .single();
+    // Check if user is the owner of this community
+    const { data: isOwner } = await supabase.rpc('is_community_owner', {
+      user_id: userId,
+      community_id: communityId
+    });
     
-    if (memberError || !memberData) {
-      console.error("User is not an admin of this community or community doesn't exist");
+    if (!isOwner) {
+      console.error("User is not the owner of this community");
       throw new Error("Permission denied");
     }
     
-    // Delete community members first (cascade not enabled by default)
-    await supabase
-      .from('community_members')
-      .delete()
-      .eq('community_id', communityId);
-    
-    // Now delete the community
+    // Delete the community (the owner_id foreign key will handle cleanup)
     const { error } = await supabase
       .from('communities')
       .delete()

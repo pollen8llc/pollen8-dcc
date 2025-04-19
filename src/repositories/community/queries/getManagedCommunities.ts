@@ -12,14 +12,9 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
   
   try {
     const { data, error } = await supabase
-      .from('community_members')
-      .select(`
-        community_id,
-        role,
-        communities:community_id(*)
-      `)
-      .eq('user_id', userId)
-      .eq('role', 'admin');
+      .from('communities')
+      .select('*')
+      .eq('owner_id', userId);
     
     if (error) {
       console.error("Error fetching managed communities:", error);
@@ -32,9 +27,7 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
     }
     
     console.log(`Repository: Found ${data.length} real communities managed by user ${userId}`);
-    return data
-      .filter(item => item.communities)
-      .map(item => mapDbCommunity(item.communities));
+    return data.map(mapDbCommunity);
   } catch (err) {
     console.error("Error in getManagedCommunities:", err);
     return getMockManagedCommunities(userId);

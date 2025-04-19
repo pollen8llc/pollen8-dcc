@@ -46,6 +46,7 @@ export type Database = {
           logo_url: string | null
           member_count: number | null
           name: string
+          owner_id: string | null
           personal_background: string | null
           role_title: string | null
           size_demographics: string | null
@@ -71,6 +72,7 @@ export type Database = {
           logo_url?: string | null
           member_count?: number | null
           name: string
+          owner_id?: string | null
           personal_background?: string | null
           role_title?: string | null
           size_demographics?: string | null
@@ -96,6 +98,7 @@ export type Database = {
           logo_url?: string | null
           member_count?: number | null
           name?: string
+          owner_id?: string | null
           personal_background?: string | null
           role_title?: string | null
           size_demographics?: string | null
@@ -139,38 +142,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "community_data_community_id_fkey"
-            columns: ["community_id"]
-            isOneToOne: false
-            referencedRelation: "communities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      community_members: {
-        Row: {
-          community_id: string
-          id: string
-          joined_at: string
-          role: string
-          user_id: string
-        }
-        Insert: {
-          community_id: string
-          id?: string
-          joined_at?: string
-          role?: string
-          user_id: string
-        }
-        Update: {
-          community_id?: string
-          id?: string
-          joined_at?: string
-          role?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "community_members_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
@@ -674,6 +645,13 @@ export type Database = {
           role: string
         }[]
       }
+      get_user_owned_communities: {
+        Args: { user_id: string }
+        Returns: {
+          community_id: string
+          role: string
+        }[]
+      }
       get_user_roles: {
         Args: { user_id: string }
         Returns: string[]
@@ -684,6 +662,10 @@ export type Database = {
       }
       is_admin: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      is_community_owner: {
+        Args: { user_id: string; community_id: string }
         Returns: boolean
       }
       log_audit_action: {
