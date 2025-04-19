@@ -83,12 +83,14 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     }
   ];
 
+  // Extract platforms from communication_platforms
   const platforms = community.communication_platforms && typeof community.communication_platforms === 'object'
     ? Object.keys(community.communication_platforms)
     : [];
 
+  // Extract social media links
   const socialMedia = community.socialMedia && typeof community.socialMedia === 'object'
-    ? Object.entries(community.socialMedia).filter(([_, url]) => url)
+    ? Object.entries(community.socialMedia).filter(([_, url]) => !!url)
     : [];
 
   return (
@@ -114,7 +116,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       <Card className="glass dark:glass-dark">
         <CardContent className="p-6 space-y-6">
           {/* Platforms */}
-          {platforms.length > 0 && (
+          {platforms && platforms.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
@@ -159,24 +161,35 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
           </div>
 
           {/* Social Media */}
-          {socialMedia.length > 0 && (
+          {socialMedia && socialMedia.length > 0 && (
             <>
-              <Separator />
+              <Separator className="my-4" />
               <div>
                 <h3 className="text-lg font-semibold mb-3">Social Media</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {socialMedia.map(([platform, url]) => {
-                    const Icon = {
-                      twitter: Twitter,
-                      instagram: Instagram,
-                      facebook: Facebook,
-                      linkedin: Linkedin
-                    }[platform.toLowerCase()] || LinkIcon;
+                    let Icon;
+                    switch(platform.toLowerCase()) {
+                      case 'twitter':
+                        Icon = Twitter;
+                        break;
+                      case 'instagram':
+                        Icon = Instagram;
+                        break;
+                      case 'facebook':
+                        Icon = Facebook;
+                        break;
+                      case 'linkedin':
+                        Icon = Linkedin;
+                        break;
+                      default:
+                        Icon = LinkIcon;
+                    }
 
                     return (
                       <a
                         key={platform}
-                        href={url as string}
+                        href={typeof url === 'string' ? url : (url as any)?.url || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
