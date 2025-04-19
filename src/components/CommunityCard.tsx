@@ -1,15 +1,16 @@
 
 import { Link } from "react-router-dom";
-import { MapPin, Globe2, FileText, Circle } from "lucide-react";
+import { MapPin, FileText, Circle } from "lucide-react";
 import { Community } from "@/models/types";
 import { Badge } from "@/components/ui/badge";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, memo } from "react";
 
 interface CommunityCardProps {
   community: Community;
 }
 
-const CommunityCard = ({ community }: CommunityCardProps) => {
+// Using memo to prevent unnecessary re-renders
+const CommunityCard = memo(({ community }: CommunityCardProps) => {
   const [displayTagCount, setDisplayTagCount] = useState(2);
   const tagContainerRef = useRef<HTMLDivElement>(null);
   
@@ -29,13 +30,19 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
     };
     
     checkTagOverflow();
-    window.addEventListener('resize', checkTagOverflow);
-    return () => window.removeEventListener('resize', checkTagOverflow);
+    
+    // Use a more efficient resize observer instead of window event
+    const resizeObserver = new ResizeObserver(checkTagOverflow);
+    if (tagContainerRef.current) {
+      resizeObserver.observe(tagContainerRef.current);
+    }
+    
+    return () => resizeObserver.disconnect();
   }, [community.tags]);
   
   const displayTags = community.tags.slice(0, displayTagCount);
   
-  // Determine activity status (you might want to modify this logic based on your specific requirements)
+  // Determine activity status (less than 30 days old)
   const isActive = community.updatedAt 
     ? (new Date().getTime() - new Date(community.updatedAt).getTime()) < (30 * 24 * 60 * 60 * 1000) 
     : false;
@@ -97,6 +104,9 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
       </div>
     </Link>
   );
-};
+});
+
+// Set display name for debugging
+CommunityCard.displayName = "CommunityCard";
 
 export default CommunityCard;

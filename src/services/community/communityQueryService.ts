@@ -3,11 +3,12 @@ import { Community } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
 
 /**
- * Gets all communities
+ * Gets all communities with pagination
  */
-export const getAllCommunities = async (): Promise<Community[]> => {
+export const getAllCommunities = async (page = 1, pageSize = 12): Promise<Community[]> => {
   try {
-    return await communityRepository.getAllCommunities();
+    console.log(`[communityService] Getting all communities: page ${page}, pageSize ${pageSize}`);
+    return await communityRepository.getAllCommunities(page, pageSize);
   } catch (error) {
     console.error("Error in getAllCommunities service:", error);
     return [];
@@ -27,13 +28,27 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
 };
 
 /**
- * Searches communities by a query string
+ * Searches communities by a query string (client-side)
+ * @deprecated Use searchCommunitiesServer for better performance
  */
 export const searchCommunities = async (query: string): Promise<Community[]> => {
   try {
     return await communityRepository.searchCommunities(query);
   } catch (error) {
     console.error(`Error in searchCommunities service for query ${query}:`, error);
+    return [];
+  }
+};
+
+/**
+ * Searches communities by a query string (server-side)
+ */
+export const searchCommunitiesServer = async (query: string, page = 1, pageSize = 12): Promise<Community[]> => {
+  try {
+    console.log(`[communityService] Searching communities with query "${query}": page ${page}, pageSize ${pageSize}`);
+    return await communityRepository.searchCommunitiesServer(query, page, pageSize);
+  } catch (error) {
+    console.error(`Error in searchCommunitiesServer service for query ${query}:`, error);
     return [];
   }
 };
