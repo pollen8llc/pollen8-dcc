@@ -1,6 +1,5 @@
-
 import { Link } from "react-router-dom";
-import { MapPin, Calendar, Globe2, FileText } from "lucide-react";
+import { MapPin, Globe2, FileText } from "lucide-react";
 import { Community } from "@/models/types";
 import { Badge } from "@/components/ui/badge";
 import { useRef, useEffect, useState } from "react";
@@ -32,7 +31,7 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
     window.addEventListener('resize', checkTagOverflow);
     return () => window.removeEventListener('resize', checkTagOverflow);
   }, [community.tags]);
-  
+
   const displayTags = community.tags.slice(0, displayTagCount);
   
   return (
@@ -73,7 +72,7 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
         </div>
         
         {/* Row 3: Location and Format */}
-        <div className="p-3 border-b border-border/40 grid grid-cols-2 gap-3">
+        <div className="p-3 grid grid-cols-2 gap-3">
           <div className="flex items-center space-x-1.5 text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
             <span className="text-sm truncate" title={community.location}>
@@ -84,19 +83,6 @@ const CommunityCard = ({ community }: CommunityCardProps) => {
             <Globe2 className="h-4 w-4 shrink-0" />
             <span className="text-sm">{community.format || 'Mixed'}</span>
           </div>
-        </div>
-        
-        {/* Row 4: Event Frequency and Last Active */}
-        <div className="p-3 grid grid-cols-2 gap-3">
-          <div className="flex items-center space-x-1.5 text-muted-foreground">
-            <Calendar className="h-4 w-4 shrink-0" />
-            <span className="text-sm">{community.eventFrequency || 'Flexible'}</span>
-          </div>
-          {community.updatedAt && (
-            <div className="text-sm text-muted-foreground text-right">
-              Active: {new Date(community.updatedAt).toLocaleDateString()}
-            </div>
-          )}
         </div>
       </div>
     </Link>
