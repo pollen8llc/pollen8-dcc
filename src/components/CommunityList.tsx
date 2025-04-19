@@ -35,7 +35,7 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
       console.log(`Fetching page ${page} with query "${searchQuery}"`);
       
       if (searchQuery) {
-        return communityService.searchCommunitiesServer(searchQuery, page, pageSize);
+        return communityService.searchCommunities(searchQuery);
       } else {
         return communityService.getAllCommunities(page, pageSize);
       }

@@ -19,7 +19,9 @@ const CommunityPicker: React.FC = () => {
 
   const { data: communities = [], isLoading } = useQuery({
     queryKey: ['communities'],
-    queryFn: getAllCommunities,
+    queryFn: async () => {
+      return getAllCommunities(1, 12);
+    },
   });
 
   const joinCommunityMutation = useMutation({

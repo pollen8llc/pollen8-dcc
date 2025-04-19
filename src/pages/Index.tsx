@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
@@ -15,7 +16,9 @@ const Index = () => {
   // Pre-fetch communities for better UX with a shorter stale time to see updates sooner
   const { refetch } = useQuery({
     queryKey: ['communities'],
-    queryFn: communityService.getAllCommunities,
+    queryFn: async () => {
+      return communityService.getAllCommunities(1, 12);
+    },
     staleTime: 60 * 1000, // 1 minute
   });
 
