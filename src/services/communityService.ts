@@ -44,7 +44,10 @@ export const searchCommunities = async (query: string): Promise<Community[]> => 
  */
 export const getManagedCommunities = async (userId: string): Promise<Community[]> => {
   try {
-    return await communityRepository.getManagedCommunities(userId);
+    console.log(`[communityService] Getting managed communities for user: ${userId}`);
+    const communities = await communityRepository.getManagedCommunities(userId);
+    console.log(`[communityService] Found ${communities.length} managed communities`);
+    return communities;
   } catch (error) {
     console.error(`Error in getManagedCommunities service for userId ${userId}:`, error);
     return [];
@@ -71,6 +74,23 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     console.log("Service: Creating community with data:", community);
     const newCommunity = await communityRepository.createCommunity(community);
     console.log("Service: Community created successfully:", newCommunity);
+    
+    // Ensure the creator is added as an admin to the community
+    const currentUser = supabase.auth.getUser();
+    const userId = (await currentUser).data.user?.id;
+    
+    if (userId) {
+      console.log(`Service: Adding creator (${userId}) as admin for community (${newCommunity.id})`);
+      try {
+        await communityRepository.joinCommunity(userId, newCommunity.id, 'admin');
+        console.log("Service: Creator added as admin successfully");
+      } catch (joinError) {
+        console.error("Error adding creator as admin:", joinError);
+      }
+    } else {
+      console.warn("Service: Cannot add creator as admin - user ID not available");
+    }
+    
     return newCommunity;
   } catch (error) {
     console.error("Error in createCommunity service:", error);

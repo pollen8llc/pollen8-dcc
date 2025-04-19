@@ -113,14 +113,15 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
     return [];
   }
 
-  console.log("Fetching managed communities for user:", userId);
+  console.log("Repository: Fetching managed communities for user:", userId);
   
   try {
-    // First try to get real communities from database
+    // First try to get real communities from database through community_members table
     const { data, error } = await supabase
       .from('community_members')
       .select(`
         community_id,
+        role,
         communities:community_id(*)
       `)
       .eq('user_id', userId)
@@ -137,7 +138,7 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
     }
     
     if (!data || data.length === 0) {
-      console.log("No managed communities found in database, checking mock data");
+      console.log("No managed communities found in database for user", userId);
       // If no real communities, use mock data
       const filteredCommunities = mockCommunities.filter(community => 
         community.organizerIds.includes(userId)
@@ -147,16 +148,17 @@ export const getManagedCommunities = async (userId: string): Promise<Community[]
         console.log(`Found ${filteredCommunities.length} mock communities managed by user ${userId}`);
         return filteredCommunities.map(mapLegacyCommunity);
       } else {
-        console.log("No managed communities found for user");
-        // For testing purposes, return at least one community if no communities are found
-        return [mapLegacyCommunity(mockCommunities[0])];
+        console.log("No managed communities found for user in mock data either");
+        return [];
       }
     }
     
-    console.log(`Found ${data.length} real communities managed by user ${userId}`);
-    return data
+    console.log(`Repository: Found ${data.length} real communities managed by user ${userId}`);
+    const communities = data
       .filter(item => item.communities) // Filter out null communities
       .map(item => mapDbCommunity(item.communities));
+    
+    return communities;
   } catch (err) {
     console.error("Error in getManagedCommunities:", err);
     // If error, fall back to mock data

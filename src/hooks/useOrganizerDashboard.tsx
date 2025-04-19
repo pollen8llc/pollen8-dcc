@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import * as communityService from '@/services/communityService';
@@ -23,16 +23,29 @@ export const useOrganizerDashboard = () => {
         console.error("Cannot fetch managed communities - user ID is missing");
         return Promise.resolve([]);
       }
-      console.log("Fetching managed communities for user:", currentUser.id);
+      console.log("Hook: Fetching managed communities for user:", currentUser.id);
       return communityService.getManagedCommunities(currentUser.id);
     },
     enabled: !!currentUser?.id, // Only run query if we have a user ID
   });
 
+  // When the component mounts, always try to refetch the communities
+  useEffect(() => {
+    if (currentUser?.id) {
+      console.log("Refreshing managed communities list on mount");
+      refetch();
+    }
+  }, [currentUser?.id, refetch]);
+
   // Log any errors for debugging
   if (communitiesError) {
     console.error("Error fetching managed communities:", communitiesError);
   }
+
+  // Log the managed communities when they change
+  useEffect(() => {
+    console.log("Managed communities in hook:", managedCommunities);
+  }, [managedCommunities]);
 
   const updateCommunityMutation = useMutation({
     mutationFn: (community: Community) => communityService.updateCommunity(community),
@@ -95,6 +108,7 @@ export const useOrganizerDashboard = () => {
   }, [communityToDelete, deleteCommunityMutation]);
 
   const refreshCommunities = useCallback(() => {
+    console.log("Manually refreshing communities");
     refetch();
   }, [refetch]);
 

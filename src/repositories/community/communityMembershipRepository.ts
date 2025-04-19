@@ -1,43 +1,108 @@
-
-import { supabase } from "../base/baseRepository";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Joins a community
+ * Makes a user join a community
  */
-export const joinCommunity = async (userId: string, communityId: string): Promise<void> => {
+export const joinCommunity = async (userId: string, communityId: string, role: string = 'member'): Promise<void> => {
+  console.log(`Repository: User ${userId} joining community ${communityId} with role ${role}`);
+  
   try {
-    const { error } = await supabase
+    // Check if the membership already exists
+    const { data: existingMembership, error: checkError } = await supabase
+      .from('community_members')
+      .select('id, role')
+      .eq('user_id', userId)
+      .eq('community_id', communityId)
+      .maybeSingle();
+    
+    if (checkError) {
+      console.error('Error checking existing membership:', checkError);
+      throw checkError;
+    }
+    
+    // If membership exists, update the role if needed
+    if (existingMembership) {
+      console.log(`Repository: Membership already exists with role ${existingMembership.role}`);
+      
+      // If existing role isn't admin but requested role is admin, upgrade to admin
+      if (existingMembership.role !== 'admin' && role === 'admin') {
+        const { error: updateError } = await supabase
+          .from('community_members')
+          .update({ role: 'admin' })
+          .eq('id', existingMembership.id);
+        
+        if (updateError) {
+          console.error('Error updating membership role:', updateError);
+          throw updateError;
+        }
+        
+        console.log(`Repository: Updated membership role to admin`);
+      }
+      
+      return;
+    }
+    
+    // Otherwise create new membership
+    const { error: insertError } = await supabase
       .from('community_members')
       .insert({
-        community_id: communityId,
         user_id: userId,
-        role: 'member'
+        community_id: communityId,
+        role: role
       });
     
-    if (error) {
-      console.error("Error joining community:", error);
+    if (insertError) {
+      console.error('Error creating community membership:', insertError);
+      throw insertError;
     }
-  } catch (err) {
-    console.error("Error in joinCommunity:", err);
+    
+    console.log(`Repository: Created new membership with role ${role}`);
+    
+    // Update the community's member count
+    const { error: updateError } = await supabase
+      .rpc('increment_member_count', { 
+        p_community_id: communityId
+      });
+    
+    if (updateError) {
+      console.warn('Error incrementing member count:', updateError);
+      // Don't throw here, just log the warning
+    }
+  } catch (error) {
+    console.error(`Error in joinCommunity for userId ${userId}, communityId ${communityId}:`, error);
+    throw error;
   }
 };
 
 /**
- * Leaves a community
+ * Makes a user leave a community
  */
 export const leaveCommunity = async (userId: string, communityId: string): Promise<void> => {
   try {
     const { error } = await supabase
       .from('community_members')
       .delete()
-      .eq('community_id', communityId)
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .eq('community_id', communityId);
     
     if (error) {
-      console.error("Error leaving community:", error);
+      console.error('Error removing community membership:', error);
+      throw error;
     }
-  } catch (err) {
-    console.error("Error in leaveCommunity:", err);
+    
+    // Update the community's member count
+    const { error: updateError } = await supabase
+      .rpc('decrement_member_count', { 
+        p_community_id: communityId
+      });
+    
+    if (updateError) {
+      console.warn('Error decrementing member count:', updateError);
+      // Don't throw here, just log the warning
+    }
+  } catch (error) {
+    console.error(`Error in leaveCommunity for userId ${userId}, communityId ${communityId}:`, error);
+    throw error;
   }
 };
 
@@ -46,30 +111,59 @@ export const leaveCommunity = async (userId: string, communityId: string): Promi
  */
 export const makeAdmin = async (adminId: string, userId: string, communityId: string): Promise<void> => {
   try {
-    // Check if the requester is an admin
-    const { data: adminCheck } = await supabase
+    // Check if the user is already a member of the community
+    const { data: existingMembership, error: checkError } = await supabase
       .from('community_members')
-      .select('role')
+      .select('id')
+      .eq('user_id', userId)
       .eq('community_id', communityId)
-      .eq('user_id', adminId)
-      .eq('role', 'admin')
-      .single();
+      .maybeSingle();
     
-    if (!adminCheck) {
-      throw new Error("Only admins can assign admin roles");
+    if (checkError) {
+      console.error('Error checking existing membership:', checkError);
+      throw checkError;
     }
-
-    const { error } = await supabase
-      .from('community_members')
-      .update({ role: 'admin' })
-      .eq('community_id', communityId)
-      .eq('user_id', userId);
     
-    if (error) {
-      console.error("Error making admin:", error);
+    if (existingMembership) {
+      // Update the role to admin
+      const { error: updateError } = await supabase
+        .from('community_members')
+        .update({ role: 'admin' })
+        .eq('id', existingMembership.id);
+      
+      if (updateError) {
+        console.error('Error updating to admin role:', updateError);
+        throw updateError;
+      }
+    } else {
+      // Create a new membership with admin role
+      const { error: insertError } = await supabase
+        .from('community_members')
+        .insert({
+          user_id: userId,
+          community_id: communityId,
+          role: 'admin'
+        });
+      
+      if (insertError) {
+        console.error('Error creating admin membership:', insertError);
+        throw insertError;
+      }
+      
+      // Update the community's member count
+      const { error: updateError } = await supabase
+        .rpc('increment_member_count', { 
+          p_community_id: communityId
+        });
+      
+      if (updateError) {
+        console.warn('Error incrementing member count:', updateError);
+        // Don't throw here, just log the warning
+      }
     }
-  } catch (err) {
-    console.error("Error in makeAdmin:", err);
+  } catch (error) {
+    console.error(`Error in makeAdmin:`, error);
+    throw error;
   }
 };
 
@@ -78,29 +172,19 @@ export const makeAdmin = async (adminId: string, userId: string, communityId: st
  */
 export const removeAdmin = async (adminId: string, userId: string, communityId: string): Promise<void> => {
   try {
-    // Check if the requester is an admin
-    const { data: adminCheck } = await supabase
-      .from('community_members')
-      .select('role')
-      .eq('community_id', communityId)
-      .eq('user_id', adminId)
-      .eq('role', 'admin')
-      .single();
-    
-    if (!adminCheck) {
-      throw new Error("Only admins can remove admin roles");
-    }
-
     const { error } = await supabase
       .from('community_members')
       .update({ role: 'member' })
+      .eq('user_id', userId)
       .eq('community_id', communityId)
-      .eq('user_id', userId);
+      .eq('role', 'admin');
     
     if (error) {
-      console.error("Error removing admin:", error);
+      console.error('Error removing admin role:', error);
+      throw error;
     }
-  } catch (err) {
-    console.error("Error in removeAdmin:", err);
+  } catch (error) {
+    console.error(`Error in removeAdmin:`, error);
+    throw error;
   }
 };
