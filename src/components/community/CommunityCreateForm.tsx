@@ -4,7 +4,6 @@ import { Form } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BasicCommunityForm } from "./BasicCommunityForm";
-import { OrganizerProfileForm } from "./OrganizerProfileForm";
 import { CommunitySnapshotForm } from "./CommunitySnapshotForm";
 import { OnlinePresenceForm } from "./OnlinePresenceForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,11 +46,10 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-4">
+          <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="snapshot">Snapshot</TabsTrigger>
             <TabsTrigger value="online">Online Presence</TabsTrigger>
-            <TabsTrigger value="organizer">Organizer</TabsTrigger>
           </TabsList>
           
           <div className="mt-6">
@@ -78,14 +76,6 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
                 </CardContent>
               </Card>
             </TabsContent>
-            
-            <TabsContent value="organizer">
-              <Card>
-                <CardContent className="pt-6">
-                  <OrganizerProfileForm form={form} />
-                </CardContent>
-              </Card>
-            </TabsContent>
           </div>
         </Tabs>
 
@@ -94,8 +84,8 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
             type="button" 
             variant="outline"
             onClick={() => {
-              const currentTabIndex = ["overview", "snapshot", "online", "organizer"].indexOf(activeTab);
-              const prevTab = ["overview", "snapshot", "online", "organizer"][Math.max(0, currentTabIndex - 1)];
+              const currentTabIndex = ["overview", "snapshot", "online"].indexOf(activeTab);
+              const prevTab = ["overview", "snapshot", "online"][Math.max(0, currentTabIndex - 1)];
               setActiveTab(prevTab);
             }}
             disabled={activeTab === "overview" || isSubmitting}
@@ -103,12 +93,12 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
             Previous
           </Button>
           
-          {activeTab !== "organizer" ? (
+          {activeTab !== "online" ? (
             <Button 
               type="button"
               onClick={() => {
-                const currentTabIndex = ["overview", "snapshot", "online", "organizer"].indexOf(activeTab);
-                const nextTab = ["overview", "snapshot", "online", "organizer"][Math.min(3, currentTabIndex + 1)];
+                const currentTabIndex = ["overview", "snapshot", "online"].indexOf(activeTab);
+                const nextTab = ["overview", "snapshot", "online"][Math.min(2, currentTabIndex + 1)];
                 setActiveTab(nextTab);
               }}
               disabled={isSubmitting}
