@@ -101,6 +101,8 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
       if (!currentUser || !currentUser.id) {
         throw new Error("You must be logged in to create a community");
       }
+
+      console.log("Current user attempting to create community:", currentUser);
       
       const communityData = {
         name: values.name,
@@ -125,50 +127,78 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
       };
 
       console.log("Creating community with data:", communityData);
-      const community = await communityService.createCommunity(communityData);
-      console.log("Community created:", community);
-
-      if (!community || !community.id) {
-        throw new Error("Failed to create community");
+      
+      try {
+        const community = await communityService.createCommunity(communityData);
+        console.log("Community created successfully:", community);
+        
+        if (!community || !community.id) {
+          throw new Error("Failed to create community - no community ID returned");
+        }
+        
+        try {
+          const organizerProfile = {
+            community_id: community.id,
+            founder_name: values.founder_name,
+            role_title: values.role_title,
+            personal_background: values.personal_background,
+            size_demographics: values.size_demographics,
+            community_structure: values.community_structure,
+            team_structure: values.team_structure,
+            tech_stack: values.tech_stack,
+            event_formats: values.event_formats,
+            business_model: values.business_model,
+            community_values: values.community_values,
+            challenges: values.challenges,
+            vision: values.vision,
+            special_notes: values.special_notes,
+          };
+  
+          console.log("Creating organizer profile with data:", organizerProfile);
+          await communityService.createOrganizerProfile(organizerProfile);
+          console.log("Organizer profile created successfully");
+          
+          toast({
+            title: "Success!",
+            description: "Community created successfully!",
+            variant: "default",
+          });
+  
+          // Wait a bit to ensure database operations are fully complete
+          setTimeout(() => {
+            if (onSuccess && community.id) {
+              console.log(`Calling onSuccess handler with community ID: ${community.id}`);
+              onSuccess(community.id);
+            } else {
+              console.log(`Navigating to community page: /community/${community.id}`);
+              navigate(`/community/${community.id}`);
+            }
+          }, 500);
+          
+        } catch (profileError) {
+          console.error('Error creating organizer profile:', profileError);
+          // Continue even if organizer profile creation fails
+          // The community was already created
+          
+          toast({
+            title: "Partial Success",
+            description: "Community created but organizer profile failed. Some details may be missing.",
+            variant: "default",
+          });
+          
+          if (onSuccess && community.id) {
+            onSuccess(community.id);
+          } else {
+            navigate(`/community/${community.id}`);
+          }
+        }
+      } catch (communityError) {
+        console.error('Error in community creation:', communityError);
+        throw communityError;
       }
-
-      const organizerProfile = {
-        community_id: community.id,
-        founder_name: values.founder_name,
-        role_title: values.role_title,
-        personal_background: values.personal_background,
-        size_demographics: values.size_demographics,
-        community_structure: values.community_structure,
-        team_structure: values.team_structure,
-        tech_stack: values.tech_stack,
-        event_formats: values.event_formats,
-        business_model: values.business_model,
-        community_values: values.community_values,
-        challenges: values.challenges,
-        vision: values.vision,
-        special_notes: values.special_notes,
-      };
-
-      console.log("Creating organizer profile with data:", organizerProfile);
-      await communityService.createOrganizerProfile(organizerProfile);
-      console.log("Organizer profile created successfully");
-
-      toast({
-        title: "Success!",
-        description: "Community created successfully!",
-        variant: "default",
-      });
-
-      if (onSuccess && community.id) {
-        onSuccess(community.id);
-      } else {
-        setTimeout(() => {
-          console.log(`Navigating to community page: /community/${community.id}`);
-          navigate(`/community/${community.id}`);
-        }, 1000);
-      }
+      
     } catch (error) {
-      console.error('Error creating community:', error);
+      console.error('Error in overall submission process:', error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       setSubmissionError(errorMessage);
       

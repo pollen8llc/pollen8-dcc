@@ -2,7 +2,6 @@
 import React from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { UserRole } from '@/models/types';
 import CommunityCreateForm from '@/components/community/CommunityCreateForm';
 import { Card } from '@/components/ui/card';
 import Navbar from '@/components/Navbar';
@@ -44,7 +43,12 @@ const CreateCommunityPage: React.FC = () => {
       description: "Your community has been created",
       variant: "default",
     });
-    navigate(`/community/${communityId}`);
+    
+    // Ensure navigation works properly
+    setTimeout(() => {
+      console.log("Navigating to:", `/community/${communityId}`);
+      navigate(`/community/${communityId}`);
+    }, 300);
   };
 
   return (
