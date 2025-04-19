@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -59,14 +58,26 @@ export const joinCommunity = async (userId: string, communityId: string, role: s
     
     console.log(`Repository: Created new membership with role ${role}`);
     
-    // Update the community's member count using direct SQL
+    // Update the community's member count using a direct update query
     const { error: updateError } = await supabase
       .from('communities')
-      .update({ member_count: supabase.sql`member_count + 1` })
+      .update({ 
+        updated_at: new Date().toISOString() 
+      })
       .eq('id', communityId);
     
     if (updateError) {
-      console.warn('Error incrementing member count:', updateError);
+      console.warn('Error updating community:', updateError);
+    }
+    
+    // Use a separate query with raw SQL to increment the member count
+    const { error: incrementError } = await supabase
+      .rpc('increment_member_count', {
+        p_community_id: communityId
+      });
+    
+    if (incrementError) {
+      console.warn('Error incrementing member count:', incrementError);
       // Don't throw here, just log the warning
     }
   } catch (error) {
@@ -91,14 +102,26 @@ export const leaveCommunity = async (userId: string, communityId: string): Promi
       throw error;
     }
     
-    // Update the community's member count using direct SQL
+    // Update the community's timestamp
     const { error: updateError } = await supabase
       .from('communities')
-      .update({ member_count: supabase.sql`GREATEST(member_count - 1, 0)` })
+      .update({ 
+        updated_at: new Date().toISOString() 
+      })
       .eq('id', communityId);
     
     if (updateError) {
-      console.warn('Error decrementing member count:', updateError);
+      console.warn('Error updating community:', updateError);
+    }
+    
+    // Use a separate query with raw SQL to decrement the member count
+    const { error: decrementError } = await supabase
+      .rpc('decrement_member_count', {
+        p_community_id: communityId
+      });
+    
+    if (decrementError) {
+      console.warn('Error decrementing member count:', decrementError);
       // Don't throw here, just log the warning
     }
   } catch (error) {
@@ -151,14 +174,26 @@ export const makeAdmin = async (adminId: string, userId: string, communityId: st
         throw insertError;
       }
       
-      // Update the community's member count using direct SQL
+      // Update the community timestamp
       const { error: updateError } = await supabase
         .from('communities')
-        .update({ member_count: supabase.sql`member_count + 1` })
+        .update({ 
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', communityId);
       
       if (updateError) {
-        console.warn('Error incrementing member count:', updateError);
+        console.warn('Error updating community:', updateError);
+      }
+      
+      // Use a separate query to increment the member count
+      const { error: incrementError } = await supabase
+        .rpc('increment_member_count', {
+          p_community_id: communityId
+        });
+      
+      if (incrementError) {
+        console.warn('Error incrementing member count:', incrementError);
         // Don't throw here, just log the warning
       }
     }
