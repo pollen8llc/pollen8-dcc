@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -70,7 +69,7 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       eventFrequency: data.event_frequency || '',
       launchDate: data.start_date || null,
       targetAudience: data.target_audience || [],
-      size_demographics: data.size_demographics || '0'
+      size_demographics: data.size_demographics || '1-100'
     };
   } catch (err) {
     console.error("Error in getCommunityById:", err);
