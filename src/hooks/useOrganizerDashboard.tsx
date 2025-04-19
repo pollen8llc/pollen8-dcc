@@ -69,20 +69,38 @@ export const useOrganizerDashboard = () => {
 
   const deleteCommunityMutation = useMutation({
     mutationFn: (communityId: string) => communityService.deleteCommunity(communityId),
+    onMutate: (communityId) => {
+      // Show loading toast
+      toast({
+        title: "Deleting community...",
+        description: "Please wait while we process your request.",
+      });
+    },
     onSuccess: () => {
+      // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
-      queryClient.invalidateQueries({ queryKey: ['communities'] }); // Invalidate main communities list too
+      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      
       toast({
         title: "Community deleted",
         description: "The community has been deleted successfully.",
       });
       setCommunityToDelete(null);
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error("Error deleting community:", error);
+      
+      // Show specific error messages based on the error
+      let errorMessage = "Failed to delete the community. Please try again.";
+      if (error.message.includes("not the owner")) {
+        errorMessage = "Only community owners can delete their communities.";
+      } else if (error.message.includes("existing references")) {
+        errorMessage = "Cannot delete community due to existing references. Please remove all associated content first.";
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to delete the community. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
       setCommunityToDelete(null);
@@ -103,6 +121,7 @@ export const useOrganizerDashboard = () => {
 
   const confirmDeleteCommunity = useCallback(() => {
     if (communityToDelete) {
+      console.log("Confirming community deletion:", communityToDelete);
       deleteCommunityMutation.mutate(communityToDelete);
     }
   }, [communityToDelete, deleteCommunityMutation]);

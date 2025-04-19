@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { Community } from "@/models/types";
 
 interface CommunitiesListProps {
@@ -90,8 +90,13 @@ const CommunitiesList = ({ isLoading, managedCommunities, onDeleteCommunity }: C
                 size="sm" 
                 variant="destructive"
                 onClick={() => onDeleteCommunity(community.id)}
+                disabled={isLoading}
               >
-                <Trash2 className="h-4 w-4 mr-1" />
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4 mr-1" />
+                )}
                 Delete
               </Button>
             </div>

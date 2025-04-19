@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase, mapDbCommunity } from "../base/baseRepository";
 
@@ -89,16 +88,19 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
 };
 
 /**
- * Deletes a community
+ * Deletes a community and all associated data
  */
 export const deleteCommunity = async (communityId: string): Promise<void> => {
   try {
+    console.log("Attempting to delete community:", communityId);
+    
     // First, get the session to verify user has permission
     const session = await supabase.auth.getSession();
     const userId = session.data.session?.user.id;
     
     if (!userId) {
-      throw new Error("User not authenticated");
+      console.error("No authenticated user found when deleting community");
+      throw new Error("Authentication required to delete a community");
     }
     
     // Check if user is the owner of this community
@@ -109,10 +111,10 @@ export const deleteCommunity = async (communityId: string): Promise<void> => {
     
     if (!isOwner) {
       console.error("User is not the owner of this community");
-      throw new Error("Permission denied");
+      throw new Error("Only community owners can delete their communities");
     }
     
-    // Delete the community
+    // Delete the community - cascade will handle related records
     const { error } = await supabase
       .from('communities')
       .delete()
@@ -120,8 +122,13 @@ export const deleteCommunity = async (communityId: string): Promise<void> => {
     
     if (error) {
       console.error("Error deleting community:", error);
+      if (error.code === '23503') {
+        throw new Error("Cannot delete community due to existing references");
+      }
       throw error;
     }
+
+    console.log("Community deleted successfully:", communityId);
   } catch (err) {
     console.error("Error in deleteCommunity:", err);
     throw err;
