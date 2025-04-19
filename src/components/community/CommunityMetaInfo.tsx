@@ -36,7 +36,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Users className="h-5 w-5" />,
       title: "Community Size",
-      value: `${community.member_count || 0} members`
+      value: `${community.memberCount || 0} members`
     },
     {
       icon: <Globe className="h-5 w-5" />,
@@ -46,12 +46,12 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Calendar className="h-5 w-5" />,
       title: "Started",
-      value: formatDate(community.start_date)
+      value: formatDate(community.createdAt || "")
     },
     {
       icon: <Target className="h-5 w-5" />,
       title: "Target Audience",
-      value: community.target_audience
+      value: community.targetAudience || "Not specified"
     },
     {
       icon: <Layout className="h-5 w-5" />,
@@ -61,7 +61,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Clock className="h-5 w-5" />,
       title: "Event Frequency",
-      value: community.event_frequency?.replace("_", " ") || "Not specified"
+      value: community.eventFrequency?.replace("_", " ") || "Not specified"
     },
     {
       icon: <LinkIcon className="h-5 w-5" />,
@@ -71,12 +71,12 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <MessageSquare className="h-5 w-5" />,
       title: "Main Platform",
-      value: community.main_platform?.charAt(0).toUpperCase() + community.main_platform?.slice(1) || "Not specified"
+      value: community.primaryPlatforms ? community.primaryPlatforms[0]?.charAt(0).toUpperCase() + community.primaryPlatforms[0]?.slice(1) : "Not specified"
     },
     {
       icon: <Share2 className="h-5 w-5" />,
       title: "Social Media",
-      value: community.social_media ? Object.keys(community.social_media).length + " platforms" : "Not specified"
+      value: community.socialMedia ? Object.keys(community.socialMedia).length + " platforms" : "Not specified"
     }
   ];
 
