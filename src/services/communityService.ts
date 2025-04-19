@@ -1,4 +1,3 @@
-
 import { Community, CommunityOrganizerProfile } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,18 +84,16 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       throw new Error('Authentication required to create a community');
     }
     
-    // Create the community with fields that match the actual database schema
+    // Create the community with owner_id set
     const { data: newCommunity, error } = await supabase
       .from('communities')
       .insert({
         name: community.name,
         description: community.description,
-        location: community.location,
+        location: community.location || "Remote",
         website: community.website || "",
         is_public: true,
-        member_count: 1, // Starting with 1 for the creator
         logo_url: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-        // Store community fields in the appropriate database columns
         founder_name: community.founder_name || "",
         role_title: community.role_title || "",
         personal_background: community.personal_background || "",
@@ -114,9 +111,6 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     }
 
     console.log('Created new community:', newCommunity);
-    
-    // Note: We don't need to manually create a membership record anymore
-    // Our database trigger community_creator_trigger will handle this automatically
     
     // Transform the Supabase response to match the Community type
     const transformedCommunity: Community = {
