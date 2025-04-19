@@ -8,6 +8,7 @@ import { useUser } from '@/contexts/UserContext';
 
 export const useOrganizerDashboard = () => {
   const [communityToDelete, setCommunityToDelete] = useState<string | null>(null);
+  const [activeDeletingId, setActiveDeletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -70,13 +71,18 @@ export const useOrganizerDashboard = () => {
   const deleteCommunityMutation = useMutation({
     mutationFn: (communityId: string) => communityService.deleteCommunity(communityId),
     onMutate: (communityId) => {
+      // Set the active deleting ID
+      setActiveDeletingId(communityId);
+      
       // Show loading toast
       toast({
         title: "Deleting community...",
         description: "Please wait while we process your request.",
       });
+      
+      return { communityId };
     },
-    onSuccess: () => {
+    onSuccess: (_, communityId) => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
       queryClient.invalidateQueries({ queryKey: ['communities'] });
@@ -85,9 +91,11 @@ export const useOrganizerDashboard = () => {
         title: "Community deleted",
         description: "The community has been deleted successfully.",
       });
+      
       setCommunityToDelete(null);
+      setActiveDeletingId(null);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, communityId) => {
       console.error("Error deleting community:", error);
       
       // Show specific error messages based on the error
@@ -103,8 +111,14 @@ export const useOrganizerDashboard = () => {
         description: errorMessage,
         variant: "destructive",
       });
+      
       setCommunityToDelete(null);
+      setActiveDeletingId(null);
     },
+    onSettled: () => {
+      // Always cleanup the active deleting ID
+      setActiveDeletingId(null);
+    }
   });
 
   const toggleCommunityVisibility = useCallback((community: Community) => {
@@ -143,5 +157,6 @@ export const useOrganizerDashboard = () => {
     handleDeleteCommunity,
     confirmDeleteCommunity,
     refreshCommunities,
+    activeDeletingId,
   };
 };

@@ -32,6 +32,7 @@ const OrganizerDashboard = () => {
     toggleCommunityVisibility,
     handleDeleteCommunity,
     confirmDeleteCommunity,
+    activeDeletingId,
   } = useOrganizerDashboard();
 
   return (
@@ -73,6 +74,7 @@ const OrganizerDashboard = () => {
               isLoading={isLoading}
               managedCommunities={managedCommunities}
               onDeleteCommunity={handleDeleteCommunity}
+              isDeletingId={activeDeletingId}
             />
           </TabsContent>
 

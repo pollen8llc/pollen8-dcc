@@ -9,9 +9,10 @@ interface CommunitiesListProps {
   isLoading: boolean;
   managedCommunities: Community[] | undefined;
   onDeleteCommunity: (id: string) => void;
+  isDeletingId?: string | null;
 }
 
-const CommunitiesList = ({ isLoading, managedCommunities, onDeleteCommunity }: CommunitiesListProps) => {
+const CommunitiesList = ({ isLoading, managedCommunities, onDeleteCommunity, isDeletingId }: CommunitiesListProps) => {
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -90,9 +91,9 @@ const CommunitiesList = ({ isLoading, managedCommunities, onDeleteCommunity }: C
                 size="sm" 
                 variant="destructive"
                 onClick={() => onDeleteCommunity(community.id)}
-                disabled={isLoading}
+                disabled={isDeletingId === community.id}
               >
-                {isLoading ? (
+                {isDeletingId === community.id ? (
                   <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                 ) : (
                   <Trash2 className="h-4 w-4 mr-1" />
