@@ -26,9 +26,17 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
     createdCommunityId,
   } = useCommunityForm(onSuccess);
 
+  const onSubmit = (e: React.FormEvent) => {
+    // Prevent the default form submission
+    e.preventDefault();
+    
+    // Call our custom submit handler
+    handleSubmit(e);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={onSubmit} className="space-y-8">
         {submissionError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />

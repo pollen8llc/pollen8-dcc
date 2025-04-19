@@ -1,4 +1,3 @@
-
 import { Community, CommunityOrganizerProfile } from "@/models/types";
 import * as communityRepository from "@/repositories/community";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,22 +74,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     const newCommunity = await communityRepository.createCommunity(community);
     console.log("Service: Community created successfully:", newCommunity);
     
-    // Ensure the creator is added as an admin to the community
-    const currentUser = supabase.auth.getUser();
-    const userId = (await currentUser).data.user?.id;
-    
-    if (userId) {
-      console.log(`Service: Adding creator (${userId}) as admin for community (${newCommunity.id})`);
-      try {
-        await communityRepository.joinCommunity(userId, newCommunity.id, 'admin');
-        console.log("Service: Creator added as admin successfully");
-      } catch (joinError) {
-        console.error("Error adding creator as admin:", joinError);
-      }
-    } else {
-      console.warn("Service: Cannot add creator as admin - user ID not available");
-    }
-    
+    // We'll handle membership separately later via invite links
+    // Just return the new community for now
     return newCommunity;
   } catch (error) {
     console.error("Error in createCommunity service:", error);

@@ -98,98 +98,102 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
     }
   });
 
-  const handleSubmit = async (values: CommunityFormSchema) => {
-    if (isSubmitting) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    try {
-      setIsSubmitting(true);
-      setSubmissionError(null);
+    form.handleSubmit(async (values: CommunityFormSchema) => {
+      if (isSubmitting) return;
       
-      if (!currentUser || !currentUser.id) {
-        throw new Error("You must be logged in to create a community");
-      }
-
-      const filteredSocialMedia = values.socialMedia
-        ?.filter(sm => sm.platform || sm.url)
-        .map(sm => ({
-          platform: sm.platform || "",
-          url: sm.url || ""
-        }));
-      
-      const tags = values.targetAudience 
-        ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
-        : [];
-      
-      const communityData = {
-        name: values.name,
-        description: values.description,
-        location: values.location,
-        website: values.website || "",
-        isPublic: true,
-        memberCount: values.memberCount || 1,
-        tags: tags,
-        communityType: values.communityType,
-        format: values.format,
-        tone: values.tone,
-        launchDate: values.launchDate,
-        memberCapacity: values.memberCapacity,
-        eventFrequency: values.eventFrequency,
-        newsletterUrl: values.newsletterUrl || "",
-        socialMedia: filteredSocialMedia,
-        primaryPlatforms: values.primaryPlatforms.filter(p => p),
-        imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-        founder_name: values.founder_name,
-        role_title: values.role_title,
-        personal_background: values.personal_background,
-        community_structure: values.community_structure,
-        vision: values.vision,
-        community_values: values.community_values,
-        size_demographics: values.size_demographics,
-        team_structure: values.team_structure,
-        tech_stack: values.tech_stack,
-        event_formats: values.event_formats,
-        business_model: values.business_model,
-        challenges: values.challenges,
-        special_notes: values.special_notes,
-      };
-
-      console.log("Creating community with data:", communityData);
-      
-      const community = await communityService.createCommunity(communityData);
-      
-      if (!community || !community.id) {
-        throw new Error("Failed to create community - no community ID returned");
-      }
-      
-      setCreatedCommunityId(community.id);
-      
-      toast({
-        title: "Success!",
-        description: "Community created successfully!",
-        variant: "default",
-      });
-
-      setTimeout(() => {
-        if (onSuccess && community?.id) {
-          onSuccess(community.id);
-        } else if (community?.id) {
-          navigate(`/community/${community.id}`, { replace: true });
+      try {
+        setIsSubmitting(true);
+        setSubmissionError(null);
+        
+        if (!currentUser || !currentUser.id) {
+          throw new Error("You must be logged in to create a community");
         }
-      }, 800);
-      
-    } catch (error: any) {
-      console.error('Error in community creation:', error);
-      const errorMessage = error?.message || "Unknown error occurred";
-      setSubmissionError(errorMessage);
-      
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: errorMessage || "Failed to create community. Please try again.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+
+        const filteredSocialMedia = values.socialMedia
+          ?.filter(sm => sm.platform || sm.url)
+          .map(sm => ({
+            platform: sm.platform || "",
+            url: sm.url || ""
+          }));
+        
+        const tags = values.targetAudience 
+          ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+          : [];
+        
+        const communityData = {
+          name: values.name,
+          description: values.description,
+          location: values.location,
+          website: values.website || "",
+          isPublic: true,
+          memberCount: values.memberCount || 1,
+          tags: tags,
+          communityType: values.communityType,
+          format: values.format,
+          tone: values.tone,
+          launchDate: values.launchDate,
+          memberCapacity: values.memberCapacity,
+          eventFrequency: values.eventFrequency,
+          newsletterUrl: values.newsletterUrl || "",
+          socialMedia: filteredSocialMedia,
+          primaryPlatforms: values.primaryPlatforms.filter(p => p),
+          imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+          founder_name: values.founder_name,
+          role_title: values.role_title,
+          personal_background: values.personal_background,
+          community_structure: values.community_structure,
+          vision: values.vision,
+          community_values: values.community_values,
+          size_demographics: values.size_demographics,
+          team_structure: values.team_structure,
+          tech_stack: values.tech_stack,
+          event_formats: values.event_formats,
+          business_model: values.business_model,
+          challenges: values.challenges,
+          special_notes: values.special_notes,
+        };
+
+        console.log("Creating community with data:", communityData);
+        
+        const community = await communityService.createCommunity(communityData);
+        
+        if (!community || !community.id) {
+          throw new Error("Failed to create community - no community ID returned");
+        }
+        
+        setCreatedCommunityId(community.id);
+        
+        toast({
+          title: "Success!",
+          description: "Community created successfully!",
+          variant: "default",
+        });
+
+        setTimeout(() => {
+          if (onSuccess && community?.id) {
+            onSuccess(community.id);
+          } else if (community?.id) {
+            navigate(`/community/${community.id}`, { replace: true });
+          }
+        }, 800);
+        
+      } catch (error: any) {
+        console.error('Error in community creation:', error);
+        const errorMessage = error?.message || "Unknown error occurred";
+        setSubmissionError(errorMessage);
+        
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: errorMessage || "Failed to create community. Please try again.",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    })(e);
   };
 
   return {
@@ -198,7 +202,7 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
     setActiveTab,
     isSubmitting,
     submissionError,
-    handleSubmit: form.handleSubmit(handleSubmit),
+    handleSubmit,
     createdCommunityId,
   };
 };
