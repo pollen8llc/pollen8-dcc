@@ -26,25 +26,24 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
     createdCommunityId,
   } = useCommunityForm(onSuccess);
 
-  // Custom onSubmit handler that uses the form's handleSubmit
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent default form submission
+  const onFormAction = (e: React.FormEvent) => {
+    e.preventDefault();
     
+    // If not on the last tab and Next is clicked, just navigate
     if (activeTab !== "online") {
-      // If not on the last tab, don't submit
       const currentTabIndex = ["overview", "snapshot", "online"].indexOf(activeTab);
       const nextTab = ["overview", "snapshot", "online"][Math.min(2, currentTabIndex + 1)];
       setActiveTab(nextTab);
       return;
     }
     
-    // Only proceed with submission if on the last tab
+    // Only submit if we're on the last tab and Create Community is clicked
     handleSubmit(e);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} className="space-y-8">
+      <form onSubmit={onFormAction} className="space-y-8">
         {submissionError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -111,12 +110,7 @@ export default function CommunityCreateForm({ onSuccess }: CommunityCreateFormPr
           
           {activeTab !== "online" ? (
             <Button 
-              type="button"
-              onClick={() => {
-                const currentTabIndex = ["overview", "snapshot", "online"].indexOf(activeTab);
-                const nextTab = ["overview", "snapshot", "online"][Math.min(2, currentTabIndex + 1)];
-                setActiveTab(nextTab);
-              }}
+              type="submit"
               disabled={isSubmitting}
             >
               Next
