@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { formatDistanceToNow } from "date-fns";
 
-// Define type for the profiles join
+// Define type for the profiles data
 interface UserProfile {
   email: string;
   first_name: string | null;
@@ -25,7 +25,6 @@ interface RawAuditLog {
   details: any; // Using any here as it will be cast appropriately
   performed_by: string;
   created_at: string;
-  profiles: UserProfile | null;
 }
 
 // Define the expected shape of community audit details
@@ -40,35 +39,64 @@ interface CommunityAudit {
   };
   performed_by: string;
   created_at: string;
-  profiles?: UserProfile | null;
+  userProfile?: UserProfile | null;
 }
 
 const CommunityAuditTable = () => {
   const { data: auditLogs, isLoading } = useQuery({
     queryKey: ['community-audit-logs'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get the audit logs
+      const { data: auditData, error: auditError } = await supabase
         .from('audit_logs')
         .select(`
           action,
           details,
           performed_by,
-          created_at,
-          profiles(email, first_name, last_name)
+          created_at
         `)
         .eq('action', 'community_created')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (auditError) throw auditError;
       
-      // Transform the raw data to match our expected type
-      return (data as RawAuditLog[]).map(log => ({
+      // Transform the raw audit logs
+      const transformedLogs: CommunityAudit[] = (auditData as RawAuditLog[]).map(log => ({
         action: log.action,
         details: log.details as CommunityAudit['details'],
         performed_by: log.performed_by,
         created_at: log.created_at,
-        profiles: log.profiles
-      })) as CommunityAudit[];
+        userProfile: null // Will be populated later
+      }));
+      
+      // If there are no logs, return empty array
+      if (transformedLogs.length === 0) return transformedLogs;
+      
+      // Get all the user IDs we need to look up
+      const userIds = transformedLogs.map(log => log.performed_by);
+      
+      // Now fetch user profiles in a separate query
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, first_name, last_name')
+        .in('id', userIds);
+        
+      if (profilesError) {
+        console.error("Error fetching profiles:", profilesError);
+        return transformedLogs; // Return logs without profiles if there's an error
+      }
+      
+      // Create a map of user IDs to profiles for easy lookup
+      const profilesMap = (profilesData || []).reduce((acc, profile) => {
+        acc[profile.id] = profile;
+        return acc;
+      }, {} as Record<string, any>);
+      
+      // Add user profile data to each log
+      return transformedLogs.map(log => ({
+        ...log,
+        userProfile: profilesMap[log.performed_by] || null
+      }));
     }
   });
 
@@ -95,7 +123,7 @@ const CommunityAuditTable = () => {
                 {log.details.community_name}
               </TableCell>
               <TableCell>
-                {log.profiles?.email || 'Unknown'}
+                {log.userProfile?.email || 'Unknown'}
               </TableCell>
               <TableCell>{log.details.ip_address || 'Not available'}</TableCell>
               <TableCell>
