@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +15,7 @@ import ManagedCommunitiesGrid from "@/components/admin/ManagedCommunitiesGrid";
 import CommunityManagementDashboard from "@/components/admin/CommunityManagementDashboard";
 import NotFoundState from "@/components/community/NotFoundState";
 import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
-import AdminCreateCommunityForm from "@/components/admin/AdminCreateCommunityForm";
+import { AdminCreateCommunityForm } from "@/components/admin/AdminCreateCommunityForm";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
