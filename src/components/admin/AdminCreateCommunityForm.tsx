@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
+// Change to named export
 export function AdminCreateCommunityForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
