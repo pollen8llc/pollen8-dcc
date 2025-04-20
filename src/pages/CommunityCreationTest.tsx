@@ -5,10 +5,60 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCommunityForm } from "@/hooks/community/useCommunityForm";
+import { useCreateCommunityForm } from "@/hooks/community/useCreateCommunityForm";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 export default function CommunityCreationTest() {
   const navigate = useNavigate();
   const { currentUser } = useUser();
+  
+  // Test both hooks
+  const {
+    isSubmitting: isSubmittingDirect,
+    submissionError: directError,
+    handleSubmit: handleDirectSubmit
+  } = useCreateCommunityForm();
+  
+  const {
+    isSubmitting: isSubmittingService,
+    submissionError: serviceError,
+    handleSubmit: handleServiceSubmit
+  } = useCommunityForm();
+
+  // Test submission handlers
+  const testDirectSubmission = async () => {
+    try {
+      const testData = {
+        name: "Test Community Direct",
+        description: "Testing direct form submission",
+        type: "tech",
+        format: "hybrid",
+        location: "Test Location",
+      };
+      await handleDirectSubmit(testData);
+      console.log("Direct submission completed");
+    } catch (error) {
+      console.error("Direct submission error:", error);
+    }
+  };
+
+  const testServiceSubmission = async () => {
+    try {
+      const testData = {
+        name: "Test Community Service",
+        description: "Testing service layer submission",
+        type: "tech",
+        format: "hybrid",
+        location: "Test Location",
+      };
+      await handleServiceSubmit(testData);
+      console.log("Service submission completed");
+    } catch (error) {
+      console.error("Service submission error:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,6 +87,64 @@ export default function CommunityCreationTest() {
                   </p>
                 </>
               )}
+            </div>
+          </Card>
+
+          {/* Hook Testing */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Hook Testing</h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-medium mb-2">1. Direct Form Hook</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Test useCreateCommunityForm hook
+                </p>
+                <Button 
+                  onClick={testDirectSubmission}
+                  disabled={isSubmittingDirect}
+                >
+                  {isSubmittingDirect ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    "Test Direct Submission"
+                  )}
+                </Button>
+                {directError && (
+                  <Alert variant="destructive" className="mt-2">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{directError}</AlertDescription>
+                  </Alert>
+                )}
+              </div>
+              
+              <div>
+                <h3 className="font-medium mb-2">2. Service Layer Hook</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Test useCommunityForm with service layer
+                </p>
+                <Button 
+                  onClick={testServiceSubmission}
+                  disabled={isSubmittingService}
+                >
+                  {isSubmittingService ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    "Test Service Submission"
+                  )}
+                </Button>
+                {serviceError && (
+                  <Alert variant="destructive" className="mt-2">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{serviceError}</AlertDescription>
+                  </Alert>
+                )}
+              </div>
             </div>
           </Card>
 
@@ -73,7 +181,8 @@ export default function CommunityCreationTest() {
               <div className="space-y-2 font-mono text-sm">
                 <p>• Auth state loaded</p>
                 <p>• Form validation ready</p>
-                <p>• Supabase connection active</p>
+                <p>• Test submission buttons ready</p>
+                <p>• Both hooks initialized</p>
               </div>
             </ScrollArea>
           </Card>
