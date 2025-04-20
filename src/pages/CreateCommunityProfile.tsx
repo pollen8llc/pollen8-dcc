@@ -118,6 +118,8 @@ export default function CreateCommunityProfile() {
           owner_id: session.session.user.id,
           is_public: true,
           member_count: 1,
+          community_size: values.communitySize || null, // use string value, not number!
+          event_frequency: values.eventFrequency || null
         })
         .select()
         .single();

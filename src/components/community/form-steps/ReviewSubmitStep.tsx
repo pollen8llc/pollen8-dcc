@@ -72,9 +72,9 @@ export function ReviewSubmitStep({
         social_media: values.socialMediaHandles || {},
         owner_id: sessionData.session.user.id,
         is_public: true,
-        member_count: 1,
+        member_count: 1, // start with owner
         start_date: startDateString,
-        community_size: values.communitySize || null,
+        community_size: values.communitySize || null, // use string range - not mapped to member_count!
         event_frequency: values.eventFrequency || null
       };
 

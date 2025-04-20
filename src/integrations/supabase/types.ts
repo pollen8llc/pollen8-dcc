@@ -60,6 +60,7 @@ export type Database = {
       communities: {
         Row: {
           communication_platforms: Json | null
+          community_size: string | null
           community_structure: string | null
           community_type: string | null
           community_values: string | null
@@ -89,6 +90,7 @@ export type Database = {
         }
         Insert: {
           communication_platforms?: Json | null
+          community_size?: string | null
           community_structure?: string | null
           community_type?: string | null
           community_values?: string | null
@@ -118,6 +120,7 @@ export type Database = {
         }
         Update: {
           communication_platforms?: Json | null
+          community_size?: string | null
           community_structure?: string | null
           community_type?: string | null
           community_values?: string | null
