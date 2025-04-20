@@ -15,7 +15,6 @@ import ManagedCommunitiesGrid from "@/components/admin/ManagedCommunitiesGrid";
 import CommunityManagementDashboard from "@/components/admin/CommunityManagementDashboard";
 import NotFoundState from "@/components/community/NotFoundState";
 import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
-import { AdminCreateCommunityForm } from "@/components/admin/AdminCreateCommunityForm";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
@@ -117,11 +116,6 @@ const AdminDashboard = () => {
                         Welcome to the admin dashboard. Use the tabs above to manage users, roles, and system settings.
                       </p>
                       <AdminOverviewCards onTabChange={setActiveTab} />
-                      
-                      <div className="mt-8">
-                        <h2 className="text-xl font-semibold mb-4">Create New Community</h2>
-                        <AdminCreateCommunityForm />
-                      </div>
                       
                       <div className="mt-8">
                         <h2 className="text-xl font-semibold mb-4">Community Creation Audit Log</h2>
