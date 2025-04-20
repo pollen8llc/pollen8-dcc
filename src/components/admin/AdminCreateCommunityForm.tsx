@@ -39,7 +39,20 @@ export function AdminCreateCommunityForm() {
       location: "Remote",
       communityType: "tech",
       format: "hybrid",
-      owner_id: ""
+      owner_id: "",
+      startDate: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+      targetAudience: "Tech professionals",
+      size: "100-500",
+      eventFrequency: "monthly",
+      platforms: [],
+      website: "",
+      newsletterUrl: "",
+      socialMediaHandles: {
+        twitter: "",
+        instagram: "",
+        linkedin: "",
+        facebook: ""
+      }
     }
   });
 
@@ -56,7 +69,14 @@ export function AdminCreateCommunityForm() {
           community_type: values.communityType,
           format: values.format,
           owner_id: values.owner_id,
-          is_public: true
+          is_public: true,
+          start_date: new Date(values.startDate).toISOString(),
+          target_audience: [values.targetAudience],
+          size_demographics: values.size,
+          event_frequency: values.eventFrequency,
+          website: values.website || "",
+          newsletter_url: values.newsletterUrl || "",
+          social_media: values.socialMediaHandles || {}
         })
         .select()
         .single();
@@ -158,6 +178,34 @@ export function AdminCreateCommunityForm() {
 
             <FormField
               control={form.control}
+              name="startDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="targetAudience"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target Audience</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="communityType"
               render={({ field }) => (
                 <FormItem>
@@ -199,6 +247,85 @@ export function AdminCreateCommunityForm() {
                       <SelectItem value="hybrid">Hybrid</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="size"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Community Size</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select size range" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="1-100">1-100 members</SelectItem>
+                      <SelectItem value="100-500">100-500 members</SelectItem>
+                      <SelectItem value="500-1000">500-1000 members</SelectItem>
+                      <SelectItem value="1000-5000">1000-5000 members</SelectItem>
+                      <SelectItem value="5000-10000">5000-10000 members</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="eventFrequency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Frequency</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="adhoc">Ad-hoc</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="website"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Website URL (optional)</FormLabel>
+                  <FormControl>
+                    <Input type="url" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="newsletterUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Newsletter URL (optional)</FormLabel>
+                  <FormControl>
+                    <Input type="url" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
