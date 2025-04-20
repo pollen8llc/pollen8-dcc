@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { communityFormSchema, type CommunityFormData } from "@/schemas/communitySchema";
@@ -20,30 +20,37 @@ import { supabase } from "@/integrations/supabase/client";
 export function CreateCommunityForm() {
   const { createCommunity, isSubmitting } = useCreateCommunity();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
-  const { currentUser, isLoading } = useUser();
+  const { currentUser, isLoading: userLoading } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Check if user is authenticated at the form level
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  // Check auth state explicitly
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [hasSession, setHasSession] = useState(false);
   
-  useState(() => {
-    const checkAuth = async () => {
+  // Check auth state on mount
+  useEffect(() => {
+    const checkAuthState = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
         if (error) {
           console.error("Auth check error:", error);
-          setSubmissionError("Authentication error. Please log in again.");
+          setSubmissionError("Authentication error. Please try logging in again.");
+          setHasSession(false);
+        } else {
+          console.log("Auth check - session:", data.session ? "Present" : "None");
+          setHasSession(!!data.session);
         }
-        setCheckingAuth(false);
       } catch (err) {
         console.error("Error checking auth:", err);
-        setCheckingAuth(false);
+        setHasSession(false);
+      } finally {
+        setIsCheckingAuth(false);
       }
     };
     
-    checkAuth();
-  });
+    checkAuthState();
+  }, []);
   
   const form = useForm<CommunityFormData>({
     resolver: zodResolver(communityFormSchema),
@@ -74,13 +81,17 @@ export function CreateCommunityForm() {
     try {
       setSubmissionError(null);
       
-      if (!currentUser) {
-        setSubmissionError("You must be logged in to create a community.");
+      // Check authentication again before submission
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session) {
+        const errorMsg = "You must be logged in to create a community.";
+        setSubmissionError(errorMsg);
         
         toast({
           variant: "destructive",
           title: "Authentication required",
-          description: "You need to be logged in to create a community",
+          description: errorMsg,
         });
         
         navigate("/auth");
@@ -125,6 +136,7 @@ export function CreateCommunityForm() {
     dirtyFields: form.formState.dirtyFields,
     values: form.getValues(),
     isSubmitting: isSubmitting,
+    hasSession: hasSession,
     currentUser: currentUser
   });
 
@@ -143,16 +155,16 @@ export function CreateCommunityForm() {
     });
   };
 
-  if (isLoading || checkingAuth) {
+  if (isCheckingAuth || userLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading...</span>
+        <span className="ml-2">Checking authentication...</span>
       </div>
     );
   }
 
-  if (!currentUser) {
+  if (!hasSession || !currentUser) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive" className="mb-4">

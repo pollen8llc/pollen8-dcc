@@ -40,10 +40,14 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Log the community data for debugging
     console.log("Creating community in repository with data:", community);
 
+    // Make sure owner_id is provided - this is critical for permissions
+    if (!community.organizerIds || !community.organizerIds[0]) {
+      console.error("Error: Missing owner_id for community creation");
+      throw new Error("Owner ID is required to create a community");
+    }
+
     // Extract the creator ID (first organizer) to use as owner_id in the database
-    const owner_id = community.organizerIds && community.organizerIds.length > 0 
-      ? community.organizerIds[0] 
-      : null;
+    const owner_id = community.organizerIds[0];
 
     // Extract tags for the database
     const target_audience = Array.isArray(community.tags) ? community.tags : [];
@@ -51,7 +55,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Extract social media values if they exist
     const socialMedia = community.socialMedia || {};
     
-    // Build the database record
+    // Build the database record with explicit owner_id
     const { data, error } = await supabase
       .from('communities')
       .insert({
@@ -61,8 +65,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
         location: community.location || "Remote",
-        member_count: community.communitySize || 0,
-        owner_id: owner_id,
+        member_count: community.communitySize || 1, // Initialize with 1 for the owner
+        owner_id: owner_id, // This is critical - explicitly set owner
         target_audience: target_audience,
         community_type: community.communityType || null,
         format: community.format || null,

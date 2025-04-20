@@ -84,7 +84,7 @@ export const useCreateCommunity = () => {
         return acc;
       }, {} as Record<string, any>);
 
-      // Create the community
+      // Create the community with the owner_id explicitly set
       const { data: community, error: insertError } = await supabase
         .from('communities')
         .insert({
@@ -92,7 +92,7 @@ export const useCreateCommunity = () => {
           description: data.description,
           community_type: data.communityType,
           location: data.location,
-          owner_id: session.user.id,
+          owner_id: session.user.id, // Explicitly set the current user as owner
           format: data.format,
           start_date: data.startDate, // Use the string format directly
           target_audience: targetAudienceArray,
@@ -101,7 +101,8 @@ export const useCreateCommunity = () => {
           communication_platforms: communicationPlatformsObject,
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",
-          social_media: socialMediaObject
+          social_media: socialMediaObject,
+          member_count: 1 // Initialize with 1 (the owner)
         })
         .select()
         .single();
@@ -130,10 +131,23 @@ export const useCreateCommunity = () => {
     } catch (error: any) {
       console.error("Error creating community:", error);
       
+      // Improved error handling with more specific messages
+      let errorMessage = "Failed to create community";
+      
+      if (error.message.includes("auth/unauthorized")) {
+        errorMessage = "You must be logged in to create a community";
+      } else if (error.message.includes("violates row level security")) {
+        errorMessage = "Permission denied: You don't have permission to create a community";
+      } else if (error.message.includes("duplicate key")) {
+        errorMessage = "A community with this name already exists";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to create community",
+        description: errorMessage,
       });
       
       throw error;
