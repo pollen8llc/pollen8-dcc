@@ -1,218 +1,147 @@
-import React, { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 
-const defaultPlatforms = [
-  "Discord", "Slack", "WhatsApp", "Luma", "Meetup", "Circle"
-];
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { useCreateCommunityForm } from "@/hooks/forms/useCreateCommunityForm";
+import { FormBasicInfo } from "@/components/community/form-sections/FormBasicInfo";
+import { FormPlatforms } from "@/components/community/form-sections/FormPlatforms";
+import { FormSocialMedia } from "@/components/community/form-sections/FormSocialMedia";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function CreateCommunityProfile() {
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    type: "",
-    location: "",
-    website: "",
-    platforms: [] as string[],
-    twitter: "",
-    instagram: "",
-    linkedin: "",
-    facebook: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const { 
+    form, 
+    isSubmitting, 
+    activeTab, 
+    progress, 
+    updateProgress, 
+    onSubmit 
+  } = useCreateCommunityForm();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const goToNextStep = () => {
+    if (activeTab === "basic-info") {
+      // Validate the current form step before proceeding
+      form.trigger(["name", "description", "type", "format", "location", "targetAudience"]);
+      
+      const basicInfoErrors = [
+        form.formState.errors.name,
+        form.formState.errors.description,
+        form.formState.errors.type,
+        form.formState.errors.format,
+        form.formState.errors.location,
+        form.formState.errors.targetAudience
+      ];
+
+      if (!basicInfoErrors.some(error => error)) {
+        updateProgress("platforms");
+      }
+    } else if (activeTab === "platforms") {
+      updateProgress("social-media");
+    }
   };
 
-  const handleCheckbox = (platform: string) => {
-    setForm(prev => ({
-      ...prev,
-      platforms: prev.platforms.includes(platform)
-        ? prev.platforms.filter(p => p !== platform)
-        : [...prev.platforms, platform]
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    // Add any basic validation here if needed
-
-    try {
-      // Get current user
-      const session = await supabase.auth.getSession();
-      const user = session?.data?.session?.user;
-      if (!user) throw new Error("Not authenticated");
-
-      // Build communication_platforms and social_media fields for db
-      const communication_platforms = {};
-      form.platforms.forEach(p => {
-        communication_platforms[p.toLowerCase()] = { enabled: true }
-      });
-      const social_media = {
-        twitter: form.twitter,
-        instagram: form.instagram,
-        linkedin: form.linkedin,
-        facebook: form.facebook,
-      };
-
-      const { data, error } = await supabase
-        .from("communities")
-        .insert({
-          name: form.name,
-          description: form.description,
-          type: form.type,
-          location: form.location,
-          website: form.website,
-          communication_platforms,
-          social_media,
-          owner_id: user.id,
-          is_public: true,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast({
-        title: "Community Created!",
-        description: "Your community profile has been created.",
-      });
-      setTimeout(() => navigate(`/community/${data.id}`), 1200);
-    } catch (err: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message || "Failed to create community."
-      });
-    } finally {
-      setLoading(false);
+  const goToPrevStep = () => {
+    if (activeTab === "platforms") {
+      updateProgress("basic-info");
+    } else if (activeTab === "social-media") {
+      updateProgress("platforms");
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background py-12 px-4">
-      <div className="w-full max-w-xl rounded-xl shadow-lg p-8 bg-card border border-primary/10 space-y-6">
-        <h2 className="text-3xl font-bold mb-2 text-center">Create Community Profile</h2>
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div>
-            <label className="block font-medium mb-1">Name *</label>
-            <Input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              required
-              placeholder="Your Community Name"
-            />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/90 py-12 px-4">
+      <div className="w-full max-w-2xl">
+        {/* Progress bar */}
+        <div className="mb-8">
+          <div className="flex justify-between text-sm mb-2">
+            <span>Step {activeTab === "basic-info" ? "1" : activeTab === "platforms" ? "2" : "3"} of 3</span>
+            <span>{progress}% complete</span>
           </div>
-          <div>
-            <label className="block font-medium mb-1">Description *</label>
-            <Textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              required
-              minLength={10}
-              placeholder="Describe your community"
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Type *</label>
-            <select
-              name="type"
-              className="w-full border rounded py-2 px-3"
-              value={form.type}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select type...</option>
-              <option value="tech">Tech</option>
-              <option value="wellness">Wellness</option>
-              <option value="creative">Creative</option>
-              <option value="professional">Professional</option>
-              <option value="social-impact">Social Impact</option>
-              <option value="education">Education</option>
-              <option value="social">Social</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Location *</label>
-            <Input
-              name="location"
-              value={form.location}
-              onChange={handleChange}
-              placeholder="City, Region, or Global"
-              required
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Website</label>
-            <Input
-              name="website"
-              type="url"
-              value={form.website}
-              onChange={handleChange}
-              placeholder="https://yourcommunity.com"
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Platforms</label>
-            <div className="flex flex-wrap gap-4 mb-2">
-              {defaultPlatforms.map(platform => (
-                <div key={platform} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id={platform}
-                    checked={form.platforms.includes(platform)}
-                    onChange={() => handleCheckbox(platform)}
-                  />
-                  <label htmlFor={platform}>{platform}</label>
-                </div>
-              ))}
+          <Progress value={progress} className="h-2" />
+        </div>
+
+        {/* Main content area with animation */}
+        <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="p-6 md:p-8">
+              <AnimatePresence mode="wait">
+                {activeTab === "basic-info" && (
+                  <motion.div
+                    key="basic-info"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h2 className="text-2xl font-bold mb-6">Basic Community Information</h2>
+                    <FormBasicInfo form={form} />
+                  </motion.div>
+                )}
+
+                {activeTab === "platforms" && (
+                  <motion.div
+                    key="platforms"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h2 className="text-2xl font-bold mb-6">Communication Platforms</h2>
+                    <FormPlatforms form={form} />
+                  </motion.div>
+                )}
+
+                {activeTab === "social-media" && (
+                  <motion.div
+                    key="social-media"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <h2 className="text-2xl font-bold mb-6">Online Presence</h2>
+                    <FormSocialMedia form={form} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Socials</label>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                name="twitter"
-                value={form.twitter}
-                onChange={handleChange}
-                placeholder="Twitter handle"
-              />
-              <Input
-                name="instagram"
-                value={form.instagram}
-                onChange={handleChange}
-                placeholder="Instagram handle"
-              />
-              <Input
-                name="linkedin"
-                value={form.linkedin}
-                onChange={handleChange}
-                placeholder="LinkedIn URL"
-              />
-              <Input
-                name="facebook"
-                value={form.facebook}
-                onChange={handleChange}
-                placeholder="Facebook URL"
-              />
+
+            {/* Navigation buttons */}
+            <div className="flex justify-between items-center p-6 bg-muted/30 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={goToPrevStep}
+                disabled={activeTab === "basic-info" || isSubmitting}
+                className="gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" /> Previous
+              </Button>
+
+              {activeTab !== "social-media" ? (
+                <Button
+                  type="button"
+                  onClick={goToNextStep}
+                  disabled={isSubmitting}
+                  className="gap-2"
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Creating..." : "Create Community"}
+                </Button>
+              )}
             </div>
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Creating..." : "Create Community"}
-          </Button>
-        </form>
+          </form>
+        </div>
       </div>
+      <Toaster />
     </div>
   );
 }

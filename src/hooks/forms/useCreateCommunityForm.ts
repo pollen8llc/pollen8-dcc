@@ -59,43 +59,82 @@ export const useCreateCommunityForm = () => {
         throw new Error("You must be logged in to create a community");
       }
 
-      const { data: community, error } = await supabase
+      // Prepare the data for insertion
+      const targetAudienceArray = typeof data.targetAudience === 'string' 
+        ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
+        : data.targetAudience;
+
+      const socialMediaObject = data.socialMediaHandles || {};
+
+      const communicationPlatformsObject = data.platforms?.reduce((acc, platform) => {
+        acc[platform] = { enabled: true };
+        return acc;
+      }, {} as Record<string, any>);
+
+      // Create the community with the owner_id explicitly set
+      const { data: community, error: insertError } = await supabase
         .from('communities')
         .insert({
           name: data.name,
           description: data.description,
           type: data.type,
-          format: data.format,
           location: data.location,
-          target_audience: [data.targetAudience],
-          communication_platforms: data.platforms,
-          website: data.website || null,
-          newsletter_url: data.newsletterUrl || null,
-          social_media: data.socialMediaHandles || {},
-          owner_id: session.session.user.id,
+          owner_id: session.session.user.id, // Explicitly set the current user as owner
+          format: data.format,
+          target_audience: targetAudienceArray,
+          communication_platforms: communicationPlatformsObject,
+          website: data.website || "",
+          newsletter_url: data.newsletterUrl || "",
+          social_media: socialMediaObject,
+          member_count: 1 // Initialize with 1 (the owner)
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (insertError) {
+        console.error("Supabase error:", insertError);
+        throw new Error(`Failed to create community: ${insertError.message}`);
+      }
 
+      if (!community) {
+        console.error("No community data returned after creation");
+        throw new Error("Failed to create community: No data returned");
+      }
+
+      console.log("Community created successfully:", community);
+      
       toast({
         title: "Success!",
-        description: "Your community has been created.",
+        description: "Community created successfully!",
       });
 
-      // Delay navigation slightly to show success state
-      setTimeout(() => {
-        navigate(`/community/${community.id}`);
-      }, 1500);
-
+      // Navigate to the newly created community page
+      navigate(`/community/${community.id}`);
+      
+      return community;
     } catch (error: any) {
       console.error("Error creating community:", error);
+      
+      // Improved error handling with more specific messages
+      let errorMessage = "Failed to create community";
+      
+      if (error.message.includes("auth/unauthorized")) {
+        errorMessage = "You must be logged in to create a community";
+      } else if (error.message.includes("violates row level security")) {
+        errorMessage = "Permission denied: You don't have permission to create a community";
+      } else if (error.message.includes("duplicate key")) {
+        errorMessage = "A community with this name already exists";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to create community",
+        description: errorMessage,
       });
+      
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
