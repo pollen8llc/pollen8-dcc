@@ -1,5 +1,4 @@
-
-import { FormField, FormItem, FormControl, FormMessage, FormLabel } from "@/components/ui/form";
+import { FormField, FormItem, FormControl, FormMessage, FormLabel, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -78,39 +77,6 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
 
         <FormField
           control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location *</FormLabel>
-              <FormControl>
-                <Input placeholder="City, Region, or Global" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="startDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Start Date *</FormLabel>
-              <FormControl>
-                <Input 
-                  type="date" 
-                  {...field} 
-                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                  onChange={(e) => field.onChange(e.target.value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="format"
           render={({ field }) => (
             <FormItem>
@@ -131,7 +97,7 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
             </FormItem>
           )}
         />
-
+        
         <FormField
           control={form.control}
           name="size"
@@ -182,24 +148,95 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="targetAudience"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Target Audience *</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="e.g., developers, designers, entrepreneurs" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </div>
+
+      <FormField
+        control={form.control}
+        name="location"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Location *</FormLabel>
+            <FormControl>
+              <Input placeholder="City, Region, or Global" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="targetAudience"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Target Audience *</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="e.g., developers, designers, entrepreneurs" 
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="startDate"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Start Date *</FormLabel>
+            <FormControl>
+              <Input 
+                type="date" 
+                {...field} 
+                value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                onChange={(e) => field.onChange(e.target.value)}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="website"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Website URL</FormLabel>
+            <FormControl>
+              <Input 
+                type="url" 
+                placeholder="https://yourcommunity.com"
+                {...field} 
+              />
+            </FormControl>
+            <FormDescription>Your community's main website (optional)</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="newsletterUrl"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Newsletter URL</FormLabel>
+            <FormControl>
+              <Input 
+                type="url" 
+                placeholder="https://newsletter.yourcommunity.com"
+                {...field} 
+              />
+            </FormControl>
+            <FormDescription>Link to subscribe to your newsletter (optional)</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 }
