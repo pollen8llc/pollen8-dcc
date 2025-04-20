@@ -33,7 +33,7 @@ export function ReviewSubmitStep({
     setError(null);
 
     try {
-      // Format values for database insertion
+      // Check if user is logged in
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !sessionData?.session?.user?.id) {
         setError("You must be logged in to create a community.");
@@ -96,6 +96,17 @@ export function ReviewSubmitStep({
         setIsSubmitting(false);
         return;
       }
+
+      // Log the successful creation through the log_audit_action function
+      await supabase.rpc('log_audit_action', {
+        action_name: 'community_created',
+        performer_id: sessionData.session.user.id,
+        action_details: {
+          community_id: community.id,
+          community_name: community.name,
+          timestamp: new Date().toISOString()
+        }
+      });
 
       toast({
         title: "Success",
@@ -162,4 +173,3 @@ export function ReviewSubmitStep({
     </div>
   );
 }
-
