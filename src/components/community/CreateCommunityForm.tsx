@@ -1,3 +1,4 @@
+
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -35,6 +36,18 @@ export function CreateCommunityForm() {
           addDebugLog('error', `Auth check failed: ${error.message}`);
         } else if (data.session) {
           addDebugLog('success', `Authenticated as: ${data.session.user.email}`);
+          
+          // Check roles
+          const { data: roles, error: rolesError } = await supabase.rpc(
+            'get_user_roles',
+            { user_id: data.session.user.id }
+          );
+          
+          if (rolesError) {
+            addDebugLog('error', `Role check failed: ${rolesError.message}`);
+          } else {
+            addDebugLog('info', `User roles: ${JSON.stringify(roles)}`);
+          }
         } else {
           addDebugLog('error', 'Not authenticated - please log in');
         }

@@ -46,6 +46,7 @@ export const useCreateCommunityForm = () => {
     clearDebugLogs();
     
     try {
+      addDebugLog('info', 'Submitting community creation form...');
       const community = await submitCommunity(data, addDebugLog);
 
       toast({

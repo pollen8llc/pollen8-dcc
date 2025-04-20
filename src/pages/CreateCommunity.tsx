@@ -1,5 +1,4 @@
 
-import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
