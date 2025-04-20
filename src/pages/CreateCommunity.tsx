@@ -1,42 +1,16 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
 import { CreateCommunityForm } from "@/components/community/CreateCommunityForm";
 
 export default function CreateCommunityPage() {
   const { currentUser, isLoading } = useUser();
   const { toast } = useToast();
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error checking auth session:", error);
-          setIsAuthenticated(false);
-        } else {
-          console.log("Auth session check:", data.session ? "Active session" : "No session");
-          setIsAuthenticated(!!data.session);
-        }
-      } catch (err) {
-        console.error("Exception checking auth:", err);
-        setIsAuthenticated(false);
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  if (isLoading || checkingAuth) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -47,7 +21,7 @@ export default function CreateCommunityPage() {
     );
   }
 
-  if (!currentUser && !isAuthenticated) {
+  if (!currentUser) {
     toast({
       title: "Authentication required",
       description: "You need to be logged in to create a community",
