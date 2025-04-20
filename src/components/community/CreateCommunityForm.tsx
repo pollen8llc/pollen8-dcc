@@ -57,7 +57,9 @@ export function CreateCommunityForm() {
       }
 
       console.log("Form submitted with data:", data);
-      await createCommunity(data);
+      const result = await createCommunity(data);
+      
+      console.log("Community created successfully:", result);
       
       toast({
         title: "Success!",

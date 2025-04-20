@@ -64,6 +64,9 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
                   <SelectItem value="wellness">Wellness</SelectItem>
                   <SelectItem value="professional">Professional</SelectItem>
                   <SelectItem value="social-impact">Social Impact</SelectItem>
+                  <SelectItem value="education">Education</SelectItem>
+                  <SelectItem value="social">Social</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -79,6 +82,97 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
               <FormLabel>Location</FormLabel>
               <FormControl>
                 <Input placeholder="City, Region, or Global" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="format"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Format</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="irl">In-person</SelectItem>
+                  <SelectItem value="url">Online</SelectItem>
+                  <SelectItem value="hybrid">Hybrid</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="size"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Community Size</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select size range" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="1-100">1-100 members</SelectItem>
+                  <SelectItem value="100-500">100-500 members</SelectItem>
+                  <SelectItem value="500-1000">500-1,000 members</SelectItem>
+                  <SelectItem value="1000-5000">1,000-5,000 members</SelectItem>
+                  <SelectItem value="5000-10000">5,000-10,000 members</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="eventFrequency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Event Frequency</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                  <SelectItem value="adhoc">Ad hoc</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="targetAudience"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Target Audience</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="e.g., developers, designers, entrepreneurs" 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

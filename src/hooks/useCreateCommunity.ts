@@ -1,14 +1,12 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import type { CommunityFormData } from "@/schemas/communitySchema";
 
 export const useCreateCommunity = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const createCommunity = async (data: CommunityFormData) => {
     try {
@@ -62,7 +60,6 @@ export const useCreateCommunity = () => {
         social_media: socialMediaObject
       });
 
-      // Insert into communities table with correct column names
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
@@ -79,17 +76,7 @@ export const useCreateCommunity = () => {
           communication_platforms: communicationPlatformsObject,
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",
-          social_media: socialMediaObject,
-          // Add additional metadata and organizer profile fields
-          vision: data.vision || null,
-          community_structure: data.community_structure || null,
-          team_structure: data.role_title || null,
-          business_model: null,
-          challenges: null,
-          community_values: null,
-          special_notes: null,
-          event_formats: null,
-          tech_stack: null
+          social_media: socialMediaObject
         })
         .select()
         .single();
@@ -105,50 +92,9 @@ export const useCreateCommunity = () => {
       }
 
       console.log("Community created successfully:", community);
-
-      // Create organizer profile
-      if (community.id) {
-        const { error: organizerError } = await supabase
-          .from('community_organizer_profiles')
-          .insert({
-            community_id: community.id,
-            founder_name: session.session.user.id,
-            personal_background: null,
-            size_demographics: data.size,
-            community_structure: data.community_structure || null,
-            team_structure: data.role_title || null,
-            tech_stack: null,
-            event_formats: null,
-            business_model: null,
-            community_values: null,
-            challenges: null,
-            vision: data.vision || null,
-            special_notes: null
-          });
-
-        if (organizerError) {
-          console.error("Error creating organizer profile:", organizerError);
-          // Continue even if organizer profile creation fails
-        } else {
-          console.log("Organizer profile created successfully");
-        }
-      }
-
-      toast({
-        title: "Success!",
-        description: "Your community has been created.",
-      });
-
-      // Navigate to the community page
-      navigate(`/community/${community.id}`);
       return community;
     } catch (error) {
       console.error("Error creating community:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create community",
-      });
       throw error;
     } finally {
       setIsSubmitting(false);

@@ -1,3 +1,4 @@
+
 import * as z from "zod";
 
 export const communityFormSchema = z.object({
@@ -31,17 +32,7 @@ export const communityFormSchema = z.object({
   ], {
     required_error: "Please select event frequency",
   }),
-  platforms: z.array(z.enum([
-    "discord",
-    "slack",
-    "whatsapp",
-    "luma",
-    "eventbrite",
-    "meetup",
-    "circle",
-    "hivebrite",
-    "skool"
-  ])).default([]),
+  platforms: z.array(z.string()).default([]),
   website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   newsletterUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   socialMediaHandles: z.object({
@@ -50,10 +41,6 @@ export const communityFormSchema = z.object({
     linkedin: z.string().optional(),
     facebook: z.string().optional(),
   }).optional(),
-  vision: z.string().optional().nullable(),
-  community_structure: z.string().optional().nullable(),
-  role_title: z.string().optional().nullable(),
-  tone: z.enum(["casual", "professional", "experimental", "reflective", "playful", "serious"]).optional(),
 });
 
 export type CommunityFormData = z.infer<typeof communityFormSchema>;
