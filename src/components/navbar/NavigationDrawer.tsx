@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { User, UserRole } from "@/models/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -10,6 +10,7 @@ import UserHeader from './drawer/UserHeader';
 import MainNavigation from './drawer/MainNavigation';
 import AdminNavigation from './drawer/AdminNavigation';
 import AuthActions from './drawer/AuthActions';
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavigationDrawerProps {
   open: boolean;
@@ -19,24 +20,68 @@ interface NavigationDrawerProps {
   logout: () => Promise<void>;
 }
 
-// Define a type for the community structure that could be in managedCommunities
-type CommunityReference = string | { id: string; name: string };
+// A utility type for managed community info
+type DrawerCommunity = { id: string; name: string | null };
 
-const NavigationDrawer = ({ 
-  open, 
+const NavigationDrawer = ({
+  open,
   onOpenChange,
-  currentUser, 
-  isOrganizer, 
-  logout 
+  currentUser,
+  isOrganizer,
+  logout,
 }: NavigationDrawerProps) => {
   const navigate = useNavigate();
   const isAdmin = currentUser?.role === UserRole.ADMIN;
-  
-  const showOrganizerNav = currentUser && (
-    currentUser.role === UserRole.ORGANIZER || 
-    (currentUser.managedCommunities && currentUser.managedCommunities.length > 0) ||
-    isOrganizer()
-  );
+
+  // Show for ORGANIZERs or any user with managed communities (even by id only)
+  const showOrganizerNav =
+    !!currentUser &&
+    (currentUser.role === UserRole.ORGANIZER ||
+      (currentUser.managedCommunities && currentUser.managedCommunities.length > 0) ||
+      isOrganizer());
+
+  // For actual community info display in the drawer
+  const [drawerCommunities, setDrawerCommunities] = useState<DrawerCommunity[]>([]);
+
+  // Fetch names when drawer opens and user has managed communities (string[])
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      if (
+        open &&
+        currentUser &&
+        currentUser.managedCommunities &&
+        currentUser.managedCommunities.length > 0
+      ) {
+        // Remove dupes and nulls; support both string and object for future-compat
+        const ids = currentUser.managedCommunities
+          .map((c) => typeof c === "string" ? c : c.id)
+          .filter(Boolean);
+
+        // Fetch their details (names)
+        const { data, error } = await supabase
+          .from('communities')
+          .select('id, name')
+          .in('id', ids);
+
+        if (!error && Array.isArray(data)) {
+          setDrawerCommunities(
+            ids.map((id) => {
+              const match = data.find((c) => c.id === id);
+              return { id, name: match?.name || null };
+            })
+          );
+        } else {
+          // fallback: list the IDs
+          setDrawerCommunities(ids.map((id) => ({ id, name: null })));
+        }
+      } else {
+        setDrawerCommunities([]);
+      }
+    };
+
+    fetchCommunities();
+    // Only when open, relevant user, or managedCommunities changes
+  }, [open, currentUser]);
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -68,10 +113,10 @@ const NavigationDrawer = ({
           )}
 
           <div className="grid gap-2 py-2">
-            <MainNavigation 
+            <MainNavigation
               onNavigate={handleNavigation}
               currentUser={!!currentUser}
-              isAdmin={isAdmin} 
+              isAdmin={isAdmin}
             />
 
             {/* Admin section */}
@@ -83,36 +128,30 @@ const NavigationDrawer = ({
             )}
 
             {/* Organizer section */}
-            {showOrganizerNav && currentUser && currentUser.managedCommunities && currentUser.managedCommunities.length > 0 && (
+            {showOrganizerNav && drawerCommunities.length > 0 && (
               <>
                 <Separator className="my-4" />
                 <div className="px-2 mb-2 text-sm font-semibold text-muted-foreground">
                   Manage Communities
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
-                  {currentUser.managedCommunities.map((community: CommunityReference) => {
-                    // Check if it's a string or an object with id and name properties
-                    const communityId = typeof community === 'string' ? community : community.id;
-                    const communityName = typeof community === 'string' ? community : community.name;
-                    
-                    return (
-                      <Button 
-                        key={communityId}
-                        variant="ghost"
-                        className="justify-start"
-                        onClick={() => handleNavigation(`/organizer/community/${communityId}`)}
-                      >
-                        <span>{communityName}</span>
-                      </Button>
-                    );
-                  })}
+                  {drawerCommunities.map((community) => (
+                    <Button
+                      key={community.id}
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation(`/organizer/community/${community.id}`)}
+                    >
+                      <span>{community.name || `Community ${community.id}`}</span>
+                    </Button>
+                  ))}
                 </div>
               </>
             )}
 
             {/* Auth actions */}
             <Separator className="my-4" />
-            <AuthActions 
+            <AuthActions
               currentUser={!!currentUser}
               onNavigate={handleNavigation}
               onLogout={handleLogout}
