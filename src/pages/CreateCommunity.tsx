@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Navigate } from "react-router-dom";
-import { CreateCommunityForm } from "@/components/community/CreateCommunityForm";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
+import CommunityCreateForm from "@/components/community/CommunityCreateForm";
 
 export default function CreateCommunityPage() {
   const { currentUser, isLoading } = useUser();
@@ -65,7 +65,7 @@ export default function CreateCommunityPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Create a Community</h1>
-          <CreateCommunityForm />
+          <CommunityCreateForm />
         </div>
       </div>
     </div>

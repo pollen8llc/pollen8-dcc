@@ -29,6 +29,20 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
         : [];
       
+      // Prepare social media handles as a JSON object
+      const socialMediaObject = {
+        twitter: values.socialMediaHandles?.twitter || "",
+        instagram: values.socialMediaHandles?.instagram || "",
+        linkedin: values.socialMediaHandles?.linkedin || "",
+        facebook: values.socialMediaHandles?.facebook || "",
+      };
+
+      // Prepare communication platforms as a JSON object
+      const communicationPlatformsObject = values.platforms?.reduce((acc, platform) => {
+        acc[platform] = { enabled: true };
+        return acc;
+      }, {} as Record<string, any>) || {};
+      
       const communityData = {
         name: values.name,
         description: values.description,
@@ -40,10 +54,15 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         format: values.format,
         tone: values.tone,
         imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-        communitySize: values.size ? parseInt(values.size.toString()) : 0, // Changed from memberCount to communitySize
+        communitySize: values.size ? parseInt(values.size.toString()) : 0,
         organizerIds: [],
         memberIds: [],
+        role_title: values.role_title || "",
+        community_structure: values.community_structure || "",
         visionStatement: values.vision || "",
+        social_media: socialMediaObject,
+        communication_platforms: communicationPlatformsObject,
+        newsletter_url: values.newsletterUrl || "",
       };
 
       console.log("Creating community with data:", communityData);

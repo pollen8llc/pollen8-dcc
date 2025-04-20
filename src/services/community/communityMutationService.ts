@@ -15,6 +15,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
 
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   try {
+    console.log("Creating community in service:", community);
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData?.session?.user?.id) {
       throw new Error('Authentication required to create a community');
@@ -26,7 +27,23 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       organizerIds: [sessionData.session.user.id]
     };
     
-    return await communityRepository.createCommunity(communityWithOrganizer);
+    // Log for debugging
+    console.log("Creating community with data:", communityWithOrganizer);
+
+    // Create the community in the database
+    const createdCommunity = await communityRepository.createCommunity(communityWithOrganizer);
+    
+    // Log audit action for successful creation
+    await auditService.logAuditAction({
+      action: 'community_created',
+      details: {
+        community_id: createdCommunity.id,
+        community_name: createdCommunity.name,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+    return createdCommunity;
   } catch (error) {
     console.error("Error in createCommunity service:", error);
     throw error;

@@ -1,6 +1,6 @@
 
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { UseFormReturn } from "react-hook-form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -12,38 +12,8 @@ export function CommunitySnapshotForm({ form }: CommunitySnapshotFormProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">📊 Community Snapshot</h3>
-        <p className="text-sm text-muted-foreground">Information about your community's current state</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <FormField
-          control={form.control}
-          name="founder_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Founder Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Your name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="role_title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Your Role</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g. Community Lead" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <h3 className="text-lg font-medium">📸 Community Snapshot</h3>
+        <p className="text-sm text-muted-foreground">Tell us more about your community's structure and goals</p>
       </div>
 
       <FormField
@@ -52,29 +22,20 @@ export function CommunitySnapshotForm({ form }: CommunitySnapshotFormProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Community Size</FormLabel>
-            <FormControl>
-              <Input 
-                type="number" 
-                placeholder="Current member count"
-                {...field} 
-                onChange={(e) => field.onChange(e.target.value)}
-              />
-            </FormControl>
-            <FormDescription>Approximate number of active members</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="personal_background"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Personal Background</FormLabel>
-            <FormControl>
-              <Input placeholder="Your background" {...field} />
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select size range" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="1-100">1-100 members</SelectItem>
+                <SelectItem value="100-500">100-500 members</SelectItem>
+                <SelectItem value="500-1000">500-1,000 members</SelectItem>
+                <SelectItem value="1000-5000">1,000-5,000 members</SelectItem>
+                <SelectItem value="5000-10000">5,000+ members</SelectItem>
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
@@ -87,7 +48,28 @@ export function CommunitySnapshotForm({ form }: CommunitySnapshotFormProps) {
           <FormItem>
             <FormLabel>Community Structure</FormLabel>
             <FormControl>
-              <Input placeholder="How is your community organized?" {...field} />
+              <Textarea 
+                placeholder="How is your community organized? (e.g., committees, teams, tiers)" 
+                className="min-h-[100px]"
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="role_title"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Your Role</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="What is your role in the community? How are you involved?" 
+                {...field} 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -99,9 +81,13 @@ export function CommunitySnapshotForm({ form }: CommunitySnapshotFormProps) {
         name="vision"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Vision & Mission</FormLabel>
+            <FormLabel>Vision Statement</FormLabel>
             <FormControl>
-              <Input placeholder="The vision for your community" {...field} />
+              <Textarea 
+                placeholder="What is your vision for this community? What do you hope to achieve?" 
+                className="min-h-[120px]"
+                {...field} 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
