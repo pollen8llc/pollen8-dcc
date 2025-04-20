@@ -17,7 +17,7 @@ export const useProfile = (session: Session | null) => {
       
       // Use let instead of const to allow reassignment
       let { data: profile, error: profileError } = await supabase
-        .from('profiles')
+        .from('profiles') // Using the correct profiles table
         .select('*')
         .eq('id', userId)
         .single();
