@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Home, Users } from "lucide-react";
+import { Home, Users, Plus } from "lucide-react";
 
 interface MainNavigationProps {
   onNavigate: (path: string) => void;
@@ -28,6 +28,16 @@ const MainNavigation = ({ onNavigate, currentUser }: MainNavigationProps) => {
         <Users className="mr-2 h-4 w-4" />
         Join Communities
       </Button>
+      {currentUser && (
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start" 
+          onClick={() => onNavigate("/community-creation-test")}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Test Community Creation
+        </Button>
+      )}
     </>
   );
 };
