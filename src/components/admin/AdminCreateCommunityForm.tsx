@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,13 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
 
-// Change to named export
 export function AdminCreateCommunityForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  // Fetch available users for the dropdown
   const { data: users } = useQuery({
     queryKey: ['users-for-community'],
     queryFn: async () => {
@@ -40,7 +38,7 @@ export function AdminCreateCommunityForm() {
       communityType: "tech",
       format: "hybrid",
       owner_id: "",
-      startDate: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+      startDate: new Date().toISOString().split('T')[0],
       targetAudience: "Tech professionals",
       size: "100-500",
       eventFrequency: "monthly",
@@ -182,9 +180,10 @@ export function AdminCreateCommunityForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Start Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
+                  <DatePicker 
+                    value={field.value ? new Date(field.value) : undefined}
+                    onChange={(date) => field.onChange(date?.toISOString())}
+                  />
                   <FormMessage />
                 </FormItem>
               )}

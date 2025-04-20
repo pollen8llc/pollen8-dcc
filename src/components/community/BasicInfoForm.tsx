@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { CommunityFormData } from "@/schemas/communitySchema";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface BasicInfoFormProps {
   form: UseFormReturn<CommunityFormData>;
@@ -187,14 +188,10 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Start Date *</FormLabel>
-            <FormControl>
-              <Input 
-                type="date" 
-                {...field} 
-                value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                onChange={(e) => field.onChange(e.target.value)}
-              />
-            </FormControl>
+            <DatePicker 
+              value={field.value ? new Date(field.value) : undefined}
+              onChange={(date) => field.onChange(date?.toISOString())}
+            />
             <FormMessage />
           </FormItem>
         )}
