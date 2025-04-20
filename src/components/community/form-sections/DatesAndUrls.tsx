@@ -18,7 +18,7 @@ export function DatesAndUrls({ form }: DatesAndUrlsProps) {
         name="website"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Website URL</FormLabel>
+            <FormLabel>Website URL *</FormLabel>
             <FormControl>
               <Input 
                 type="url" 
@@ -27,7 +27,7 @@ export function DatesAndUrls({ form }: DatesAndUrlsProps) {
                 className="bg-black/10 backdrop-blur-sm border-white/20"
               />
             </FormControl>
-            <FormDescription>Your community's main website (optional)</FormDescription>
+            <FormDescription>Your community's main website</FormDescription>
             <FormMessage />
           </FormItem>
         )}
