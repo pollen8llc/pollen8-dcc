@@ -11,9 +11,11 @@ interface ManagedCommunitiesGridProps {
 const ManagedCommunitiesGrid = ({ communities }: ManagedCommunitiesGridProps) => {
   const navigate = useNavigate();
 
+  // If no communities, return null to not render anything
+  if (!communities || communities.length === 0) return null;
+
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Select a community to manage:</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {communities.map((community: Community) => (
           <Card 
