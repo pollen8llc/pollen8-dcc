@@ -78,7 +78,7 @@ export const FormDebugger = ({ logs }: FormDebuggerProps) => {
       
       {isExpanded && (
         <CardContent className="pt-0">
-          <ScrollArea className="h-[200px] w-full rounded-md border p-2">
+          <ScrollArea className="h-[300px] w-full rounded-md border p-2">
             {logs.length === 0 ? (
               <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
                 No logs yet

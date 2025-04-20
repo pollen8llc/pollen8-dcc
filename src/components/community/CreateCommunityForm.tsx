@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { PlatformsForm } from "./PlatformsForm";
 import { SocialMediaForm } from "./SocialMediaForm";

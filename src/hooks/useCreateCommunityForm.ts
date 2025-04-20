@@ -94,32 +94,28 @@ export const useCreateCommunityForm = () => {
 
       addDebugLog('info', `Authenticated as user: ${session.session.user.id}`);
       
-      // Check user roles
+      // Check user roles using RLS-compatible approach
       addDebugLog('info', 'Checking user roles...');
       
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select(`
-          role_id,
-          roles:role_id(name)
-        `)
-        .eq('user_id', session.session.user.id);
+      const { data: roles, error: rolesError } = await supabase.rpc(
+        'get_user_roles',
+        { user_id: session.session.user.id }
+      );
       
       if (rolesError) {
         addDebugLog('error', `Error checking roles: ${rolesError.message}`);
         throw new Error(`Unable to verify your permissions: ${rolesError.message}`);
       }
 
-      if (!userRoles || userRoles.length === 0) {
+      if (!roles || roles.length === 0) {
         addDebugLog('error', 'User has no roles assigned');
         throw new Error("You don't have permission to create a community. Required role: ADMIN or ORGANIZER");
       }
       
-      const roleNames = userRoles.map(r => r.roles?.name || 'unknown');
-      addDebugLog('info', `User has roles: ${roleNames.join(', ')}`);
+      addDebugLog('info', `Found roles: ${JSON.stringify(roles)}`);
       
-      const hasPermission = userRoles?.some(role => 
-        role.roles?.name === 'ADMIN' || role.roles?.name === 'ORGANIZER'
+      const hasPermission = roles.some(role => 
+        role === 'ADMIN' || role === 'ORGANIZER'
       );
       
       if (!hasPermission) {
