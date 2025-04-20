@@ -12,17 +12,35 @@ import {
 } from "@/components/ui/table";
 import { formatDistanceToNow } from "date-fns";
 
+// Define type for the profiles join
+interface UserProfile {
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
+// Define type for the raw data returned from Supabase
+interface RawAuditLog {
+  action: string;
+  details: any; // Using any here as it will be cast appropriately
+  performed_by: string;
+  created_at: string;
+  profiles: UserProfile | null;
+}
+
+// Define the expected shape of community audit details
 interface CommunityAudit {
   action: string;
   details: {
     community_id: string;
     community_name: string;
-    ip_address: string;
-    timestamp: string;
-    user_agent: string;
+    ip_address?: string;
+    timestamp?: string;
+    user_agent?: string;
   };
   performed_by: string;
   created_at: string;
+  profiles?: UserProfile | null;
 }
 
 const CommunityAuditTable = () => {
@@ -36,17 +54,21 @@ const CommunityAuditTable = () => {
           details,
           performed_by,
           created_at,
-          profiles:performed_by (
-            email,
-            first_name,
-            last_name
-          )
+          profiles(email, first_name, last_name)
         `)
         .eq('action', 'community_created')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as CommunityAudit[];
+      
+      // Transform the raw data to match our expected type
+      return (data as RawAuditLog[]).map(log => ({
+        action: log.action,
+        details: log.details as CommunityAudit['details'],
+        performed_by: log.performed_by,
+        created_at: log.created_at,
+        profiles: log.profiles
+      })) as CommunityAudit[];
     }
   });
 
@@ -73,7 +95,7 @@ const CommunityAuditTable = () => {
                 {log.details.community_name}
               </TableCell>
               <TableCell>
-                {(log as any).profiles?.email || 'Unknown'}
+                {log.profiles?.email || 'Unknown'}
               </TableCell>
               <TableCell>{log.details.ip_address || 'Not available'}</TableCell>
               <TableCell>
