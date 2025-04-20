@@ -25,7 +25,7 @@ export default function CommunityCreationTest() {
   const {
     isSubmitting: isSubmittingService,
     submissionError: serviceError,
-    handleSubmit
+    submitCommunity
   } = useCommunityForm();
 
   // Test submission handlers
@@ -34,8 +34,9 @@ export default function CommunityCreationTest() {
       const testData = {
         name: "Test Community Direct",
         description: "Testing direct form submission",
-        type: "tech",
-        format: "hybrid",
+        // Use the specific enum value from the allowed values
+        type: "tech" as const, 
+        format: "hybrid" as const,
         location: "Test Location",
         targetAudience: "developers, tech enthusiasts",
         platforms: ["discord", "slack"],
@@ -67,8 +68,8 @@ export default function CommunityCreationTest() {
         location: "Test Location",
       };
       
-      // Submit community data through the service
-      await handleSubmit(testData);
+      // Submit community data through the service directly
+      await submitCommunity(testData);
       console.log("Service submission completed");
     } catch (error) {
       console.error("Service submission error:", error);
