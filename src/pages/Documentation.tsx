@@ -1,2022 +1,1376 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  ArrowLeft, 
-  Code, 
-  Database, 
-  FileText, 
-  Layers, 
-  Lock, 
-  Server, 
-  Home,
-  User,
-  Users,
-  Search,
-  Settings,
-  ExternalLink,
-  Key,
-  Shield
-} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { User, UserRole } from '@/models/types';
+import { FormTab } from '@/hooks/useFormProgress';
 
 const Documentation = () => {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSection, setActiveSection] = useState<string>("overview");
+
+  const scrollToSection = (section: string) => {
+    setActiveSection(section);
+    const element = document.getElementById(section);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4">
-      <div className="flex items-center mb-6 gap-4">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">ECO8 Platform Technical Documentation</h1>
-          <p className="text-muted-foreground">Comprehensive technical reference for developers</p>
-        </div>
-      </div>
-
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search documentation..."
-          className="w-full pl-10 pr-4 py-2 rounded-md border border-border/40 bg-black/10 focus:outline-none focus:ring-2 focus:ring-primary/20"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="architecture">Architecture</TabsTrigger>
-          <TabsTrigger value="routes">Routes</TabsTrigger>
-          <TabsTrigger value="components">Components</TabsTrigger>
-          <TabsTrigger value="hooks">Hooks & Utils</TabsTrigger>
-          <TabsTrigger value="api">API Reference</TabsTrigger>
-          <TabsTrigger value="database">Database</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <Card>
+    <div className="container mx-auto py-12 max-w-7xl">
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="w-full md:w-1/4 md:sticky md:top-20 h-fit">
+          <Card className="glass-dark">
             <CardHeader>
-              <CardTitle>ECO8 Platform Technical Overview</CardTitle>
+              <CardTitle className="text-lg font-medium">
+                Technical Documentation
+              </CardTitle>
               <CardDescription>
-                Core technical architecture and implementation details
+                Developer reference for the community management platform
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center">
-                    <Layers className="h-5 w-5 mr-2 text-primary/80" />
-                    Architecture Stack
-                  </h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2">
-                      <Badge variant="outline" className="w-20 justify-center">Frontend</Badge>
-                      <span className="text-sm">React 18.3.1 + TypeScript</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Badge variant="outline" className="w-20 justify-center">Routing</Badge>
-                      <span className="text-sm">React Router Dom 6.26.2</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Badge variant="outline" className="w-20 justify-center">Styling</Badge>
-                      <span className="text-sm">Tailwind CSS</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Badge variant="outline" className="w-20 justify-center">UI Library</Badge>
-                      <span className="text-sm">shadcn/ui (Radix UI)</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Badge variant="outline" className="w-20 justify-center">State</Badge>
-                      <span className="text-sm">React Context + TanStack Query</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Badge variant="outline" className="w-20 justify-center">Backend</Badge>
-                      <span className="text-sm">Supabase (Auth, DB, Storage)</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Badge variant="outline" className="w-20 justify-center">Build</Badge>
-                      <span className="text-sm">Vite</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center">
-                    <FileText className="h-5 w-5 mr-2 text-primary/80" />
-                    Key Features
-                  </h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Role-based access control (RBAC)
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Supabase authentication integration
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      PostgreSQL database with RLS policies
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Community management system
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Admin dashboard and controls
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Multi-step form validation
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Activity and audit logging
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Repository pattern architecture
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center">
-                    <Lock className="h-5 w-5 mr-2 text-primary/80" />
-                    Security Implementation
-                  </h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      JWT-based authentication
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Row-Level Security (RLS) policies
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Protected routes with role checks
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Fine-grained permission system
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      Action audit logging
-                    </li>
-                    <li className="flex items-center">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/80 mr-2"></span>
-                      SQL injection protection via Supabase
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <Separator className="my-6" />
-              
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Key className="h-5 w-5 mr-2 text-primary/80" />
-                  Configuration Details
-                </h3>
-                <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                  <code className="text-xs overflow-x-auto block">
-                    <pre>
-{`// Supabase Configuration
-PROJECT_ID: "oltcuwvgdzszxshpfnre"
-SUPABASE_URL: "https://oltcuwvgdzszxshpfnre.supabase.co"
-AUTH_PROVIDERS: ["Email", "Password"]
-RLS_ENABLED: true
-
-// Environment Variables
-NODE_ENV: "development" | "production"
-PUBLIC_URL: "/"
-
-// Build Configuration
-VITE_CONFIG: {
-  plugins: [...],
-  resolve: { alias: {...} },
-  server: { port: 3000 }
-}`}
-                    </pre>
-                  </code>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="architecture" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Application Architecture</CardTitle>
-              <CardDescription>Detailed architecture and data flow</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Project Structure</h3>
-                <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                  <code className="text-xs overflow-x-auto block">
-                    <pre>
-{`src/
-├── components/         # Reusable UI components
-│   ├── ui/            # shadcn/ui components (Radix UI primitives)
-│   ├── admin/         # Admin dashboard components
-│   ├── auth/          # Authentication components
-│   ├── community/     # Community-related components
-│   ├── debug/         # Debugging utilities
-│   └── navbar/        # Navigation components
-├── contexts/          # React contexts for state management
-│   └── UserContext.tsx # Global user authentication state
-├── data/              # Mock data and constants
-├── hooks/             # Custom React hooks
-│   ├── admin/         # Admin-specific hooks
-│   ├── community/     # Community-related hooks
-│   ├── forms/         # Form-related hooks
-│   └── use-*.ts       # General utility hooks
-├── integrations/      # External service integrations
-│   └── supabase/      # Supabase client and types
-├── lib/               # Utility libraries
-├── models/            # TypeScript type definitions
-├── pages/             # Page components
-│   └── admin/         # Admin-specific pages
-├── repositories/      # Data access layer
-│   ├── base/          # Base repository utilities
-│   ├── community/     # Community data access
-│   └── queries/       # Query functions
-├── schemas/           # Zod validation schemas
-├── services/          # Business logic layer
-│   └── community/     # Community-related services
-└── utils/             # Utility functions`}
-                    </pre>
-                  </code>
-                </div>
-              </div>
-
-              <div className="space-y-4 mt-6">
-                <h3 className="text-lg font-semibold">Architecture Patterns</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-48">Pattern</TableHead>
-                      <TableHead>Implementation</TableHead>
-                      <TableHead className="w-32">Used For</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">Repository Pattern</TableCell>
-                      <TableCell>Implemented in <code className="text-xs">/repositories</code> with base abstractions and specific implementations</TableCell>
-                      <TableCell>Data access</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Service Layer</TableCell>
-                      <TableCell>Business logic encapsulated in <code className="text-xs">/services</code> with domain-specific modules</TableCell>
-                      <TableCell>Business logic</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Context Providers</TableCell>
-                      <TableCell>Application state managed in <code className="text-xs">/contexts</code> with React Context API</TableCell>
-                      <TableCell>State management</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Custom Hooks</TableCell>
-                      <TableCell>Stateful logic and side effects encapsulated in <code className="text-xs">/hooks</code></TableCell>
-                      <TableCell>UI Logic</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">RLS Security</TableCell>
-                      <TableCell>Row-Level Security policies in Supabase ensure data access control</TableCell>
-                      <TableCell>Data security</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-
-              <div className="space-y-4 mt-6">
-                <h3 className="text-lg font-semibold">Authentication Flow</h3>
-                <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                  <code className="text-xs overflow-x-auto block">
-                    <pre>
-{`1. User initiates auth → Auth.tsx renders login/register form
-2. Credentials submitted → Supabase.auth.signInWithPassword() / signUp()
-3. Auth response received → Session stored in Supabase client
-4. UserContext.tsx retrieves session → useSession hook
-5. Profile data fetched → useProfile hook queries profiles table
-6. Role determination → useProfile assigns role based on database records
-7. Protected route access → ProtectedRoute component checks user role and permissions
-8. Route rendered or redirected → Based on permission checks`}
-                    </pre>
-                  </code>
-                </div>
-              </div>
-
-              <div className="space-y-4 mt-6">
-                <h3 className="text-lg font-semibold">Data Flow Diagram</h3>
-                <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                  <code className="text-xs overflow-x-auto block whitespace-pre">
-                    <pre>
-{`┌───────────┐      ┌────────────┐      ┌──────────────┐      ┌─────────────┐
-│ UI Layer   │ ←──→ │ React      │ ←──→ │ Services      │ ←──→ │ Repositories │
-│ Components │      │ Hooks      │      │ Business Logic│      │ Data Access  │
-└───────────┘      └────────────┘      └──────────────┘      └─────────────┘
-                                                                    ↑
-                   ┌────────────┐                                   │
-                   │ Context    │                                   ↓
-                   │ Providers  │                          ┌─────────────────┐
-                   └────────────┘                          │ Supabase Client │
-                         ↑                                 │ (API/Database)  │
-                         │                                 └─────────────────┘
-┌────────────────────────┴────────────────────────────────────────┐
-│                                                                  │
-│                           App.tsx                                │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘`}
-                    </pre>
-                  </code>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="routes" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Application Routes</CardTitle>
-              <CardDescription>Complete route structure and access requirements</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-64">Path</TableHead>
-                    <TableHead>Component</TableHead>
-                    <TableHead className="w-32">Access Level</TableHead>
-                    <TableHead className="w-32">Parameters</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/</code></TableCell>
-                    <TableCell><code className="text-xs">Index.tsx</code></TableCell>
-                    <TableCell>Public</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/auth</code></TableCell>
-                    <TableCell><code className="text-xs">Auth.tsx</code></TableCell>
-                    <TableCell>Public</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/onboarding</code></TableCell>
-                    <TableCell><code className="text-xs">Onboarding.tsx</code></TableCell>
-                    <TableCell>Authenticated</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/create-community</code></TableCell>
-                    <TableCell><code className="text-xs">CreateCommunity.tsx</code></TableCell>
-                    <TableCell>ADMIN, ORGANIZER</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/communities/join</code></TableCell>
-                    <TableCell><code className="text-xs">JoinCommunities.tsx</code></TableCell>
-                    <TableCell>MEMBER+</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/create-admin</code></TableCell>
-                    <TableCell><code className="text-xs">CreateAdminForm.tsx</code></TableCell>
-                    <TableCell>Public</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/community/:id</code></TableCell>
-                    <TableCell><code className="text-xs">CommunityProfile.tsx</code></TableCell>
-                    <TableCell>Public</TableCell>
-                    <TableCell>id: UUID</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/documentation</code></TableCell>
-                    <TableCell><code className="text-xs">Documentation.tsx</code></TableCell>
-                    <TableCell>Public</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/profile</code></TableCell>
-                    <TableCell><code className="text-xs">Profile.tsx</code></TableCell>
-                    <TableCell>MEMBER+</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/admin</code></TableCell>
-                    <TableCell><code className="text-xs">AdminDashboard.tsx</code></TableCell>
-                    <TableCell>ADMIN</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/admin/community/:id</code></TableCell>
-                    <TableCell><code className="text-xs">AdminDashboard.tsx</code></TableCell>
-                    <TableCell>ORGANIZER</TableCell>
-                    <TableCell>id: UUID</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/organizer</code></TableCell>
-                    <TableCell><code className="text-xs">OrganizerDashboard.tsx</code></TableCell>
-                    <TableCell>ORGANIZER</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium"><code className="text-xs">/admin/debug</code></TableCell>
-                    <TableCell><code className="text-xs">DebuggerDashboard.tsx</code></TableCell>
-                    <TableCell>ADMIN</TableCell>
-                    <TableCell>None</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-
-              <div className="space-y-4 mt-6">
-                <h3 className="text-lg font-semibold">Route Implementation Source</h3>
-                <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                  <code className="text-xs overflow-x-auto block">
-                    <pre>
-{`// AppRoutes.tsx
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useUser } from "@/contexts/UserContext";
-import { UserRole } from "@/models/types";
-
-// Route configuration with protection
-<Routes>
-  <Route path="/" element={<Index />} />
-  <Route path="/auth" element={<Auth />} />
-  <Route path="/onboarding" element={<Onboarding />} />
-  <Route path="/create-community" element={<CreateCommunity />} />
-  <Route path="/communities/join" element={
-    <ProtectedRoute requiredRole="MEMBER">
-      <JoinCommunities />
-    </ProtectedRoute>
-  } />
-  <Route path="/create-admin" element={<CreateAdminForm />} />
-  <Route path="/community/:id" element={<CommunityProfile />} />
-  <Route path="/documentation" element={<Documentation />} />
-  <Route path="/profile" element={
-    <ProtectedRoute requiredRole="MEMBER">
-      <Profile />
-    </ProtectedRoute>
-  } />
-  
-  <Route 
-    path="/admin" 
-    element={
-      <ProtectedRoute requiredRole="ADMIN">
-        <AdminDashboard />
-      </ProtectedRoute>
-    } 
-  />
-  // ... remaining routes
-</Routes>`}
-                    </pre>
-                  </code>
-                </div>
-              </div>
-
-              <div className="space-y-4 mt-6">
-                <h3 className="text-lg font-semibold">Route Protection Mechanism</h3>
-                <p className="text-sm text-muted-foreground">Routes are protected using the <code className="text-xs">ProtectedRoute</code> component, which checks the user's role against required access level:</p>
-                <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                  <code className="text-xs overflow-x-auto block">
-                    <pre>
-{`// ProtectedRoute.tsx
-const ProtectedRoute = ({ children, requiredRole, communityId }) => {
-  const { currentUser, isLoading } = useUser();
-  const navigate = useNavigate();
-  
-  // Convert required role string to enum
-  const roleEnum = requiredRole === "ADMIN" 
-    ? UserRole.ADMIN 
-    : requiredRole === "ORGANIZER" 
-      ? UserRole.ORGANIZER 
-      : UserRole.MEMBER;
-
-  useEffect(() => {
-    if (!isLoading && (!currentUser || currentUser.role === UserRole.GUEST)) {
-      navigate("/auth");
-    } else if (!isLoading && currentUser) {
-      const hasRequiredRole = 
-        currentUser.role === UserRole.ADMIN || 
-        currentUser.role === roleEnum ||
-        (roleEnum === UserRole.ORGANIZER && 
-         communityId && 
-         currentUser.managedCommunities?.includes(communityId));
-      
-      if (!hasRequiredRole) {
-        navigate("/");
-      }
-    }
-  }, [currentUser, isLoading, navigate, roleEnum, communityId]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  return children;
-};`}
-                    </pre>
-                  </code>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="components" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Component Reference</CardTitle>
-              <CardDescription>Detailed component documentation</CardDescription>
-            </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[600px] pr-4">
-                <Accordion type="multiple" className="w-full">
-                  <AccordionItem value="ui-components">
-                    <AccordionTrigger className="text-lg font-medium">
-                      UI Components
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Shadcn UI components built on Radix UI primitives. All are located in <code className="text-xs">src/components/ui/</code>
-                      </p>
-                      
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Component</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Import Path</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium">Button</TableCell>
-                            <TableCell>Primary action component with multiple variants</TableCell>
-                            <TableCell><code className="text-xs">@/components/ui/button</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">Form</TableCell>
-                            <TableCell>Form components built on React Hook Form</TableCell>
-                            <TableCell><code className="text-xs">@/components/ui/form</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">Card</TableCell>
-                            <TableCell>Container for content with header and footer options</TableCell>
-                            <TableCell><code className="text-xs">@/components/ui/card</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">Tabs</TableCell>
-                            <TableCell>Tabbed interface for content organization</TableCell>
-                            <TableCell><code className="text-xs">@/components/ui/tabs</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">Toast</TableCell>
-                            <TableCell>Notification system for user feedback</TableCell>
-                            <TableCell><code className="text-xs">@/components/ui/toast</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="community-components">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Community Components
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Community-specific components located in <code className="text-xs">src/components/community/</code>
-                      </p>
-                      
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Component</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Props</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium">CreateCommunityForm</TableCell>
-                            <TableCell>Multi-step form for community creation with progress tracking</TableCell>
-                            <TableCell>None</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">BasicInfoForm</TableCell>
-                            <TableCell>First step of community creation form for basic details</TableCell>
-                            <TableCell><code className="text-xs">form: UseFormReturn</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">PlatformsForm</TableCell>
-                            <TableCell>Form step for community platforms selection</TableCell>
-                            <TableCell><code className="text-xs">form: UseFormReturn</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">SocialMediaForm</TableCell>
-                            <TableCell>Form step for social media handles</TableCell>
-                            <TableCell><code className="text-xs">form: UseFormReturn</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">CommunityHeader</TableCell>
-                            <TableCell>Header component for community profile</TableCell>
-                            <TableCell><code className="text-xs">community: Community</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="admin-components">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Admin Components
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Admin dashboard components located in <code className="text-xs">src/components/admin/</code>
-                      </p>
-                      
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Component</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Props</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium">AdminOverviewCards</TableCell>
-                            <TableCell>Metrics dashboard cards for admin overview</TableCell>
-                            <TableCell>None</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">UserManagementTab</TableCell>
-                            <TableCell>User management interface for admins</TableCell>
-                            <TableCell>None</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">CommunityAuditTable</TableCell>
-                            <TableCell>Table for community audit logs</TableCell>
-                            <TableCell><code className="text-xs">communityId?: string</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">UserRoleSelector</TableCell>
-                            <TableCell>Dropdown for changing user roles</TableCell>
-                            <TableCell><code className="text-xs">userId: string, currentRole: UserRole</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">CreateAdminForm</TableCell>
-                            <TableCell>Form for creating admin accounts</TableCell>
-                            <TableCell>None</TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="auth-components">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Authentication Components
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Authentication components located in <code className="text-xs">src/components/auth/</code>
-                      </p>
-                      
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Component</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Props</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium">AuthLayout</TableCell>
-                            <TableCell>Layout wrapper for auth pages</TableCell>
-                            <TableCell><code className="text-xs">children: ReactNode</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">ProtectedRoute</TableCell>
-                            <TableCell>Component for role-based route protection</TableCell>
-                            <TableCell><code className="text-xs">children: ReactNode, requiredRole: string, communityId?: string</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="navbar-components">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Navigation Components
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Navbar and navigation components located in <code className="text-xs">src/components/navbar/</code>
-                      </p>
-                      
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Component</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Props</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium">Navbar</TableCell>
-                            <TableCell>Main navigation component</TableCell>
-                            <TableCell>None</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">UserActions</TableCell>
-                            <TableCell>Action buttons for authenticated users</TableCell>
-                            <TableCell><code className="text-xs">user: User</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">GuestActions</TableCell>
-                            <TableCell>Action buttons for unauthenticated users</TableCell>
-                            <TableCell>None</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">NavigationDrawer</TableCell>
-                            <TableCell>Mobile navigation drawer component</TableCell>
-                            <TableCell>None</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium">UserMenuDropdown</TableCell>
-                            <TableCell>User profile dropdown menu</TableCell>
-                            <TableCell><code className="text-xs">user: User</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </ScrollArea>
+              <ul className="space-y-2">
+                {[
+                  { id: "overview", name: "Overview" },
+                  { id: "architecture", name: "Architecture" },
+                  { id: "routes", name: "Routes" },
+                  { id: "components", name: "Components" },
+                  { id: "hooks", name: "Hooks" },
+                  { id: "api", name: "API" },
+                  { id: "database", name: "Database" }
+                ].map((section) => (
+                  <li key={section.id}>
+                    <button
+                      onClick={() => scrollToSection(section.id)}
+                      className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                        activeSection === section.id
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-secondary"
+                      }`}
+                    >
+                      {section.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
-        </TabsContent>
+        </div>
 
-        <TabsContent value="hooks" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Hooks and Utilities</CardTitle>
-              <CardDescription>Custom hooks, utility functions and service layer</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[600px] pr-4">
-                <Accordion type="multiple" className="w-full">
-                  <AccordionItem value="auth-hooks">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Authentication Hooks
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Hook</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Returns</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useAuth</code></TableCell>
-                            <TableCell>Manages authentication state and operations</TableCell>
-                            <TableCell><code className="text-xs">{ login, logout, register, isLoading, error }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useSession</code></TableCell>
-                            <TableCell>Manages Supabase session state</TableCell>
-                            <TableCell><code className="text-xs">{ session, isLoading }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useProfile</code></TableCell>
-                            <TableCell>Fetches and manages user profile data</TableCell>
-                            <TableCell><code className="text-xs">{ profile, isLoading, error }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">usePermissions</code></TableCell>
-                            <TableCell>Handles role-based permissions</TableCell>
-                            <TableCell><code className="text-xs">{ hasPermission, isOrganizer }</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="form-hooks">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Form Hooks
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Hook</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Returns</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useCreateCommunityForm</code></TableCell>
-                            <TableCell>Manages the multi-step community creation form</TableCell>
-                            <TableCell><code className="text-xs">{ form, isSubmitting, activeTab, progress, onSubmit }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useFormProgress</code></TableCell>
-                            <TableCell>Tracks multi-step form progress</TableCell>
-                            <TableCell><code className="text-xs">{ activeTab, progress, updateProgress }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useCommunityForm</code></TableCell>
-                            <TableCell>Handles community form validation and submission</TableCell>
-                            <TableCell><code className="text-xs">{ form, submitForm, isSubmitting }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useDebugLogger</code></TableCell>
-                            <TableCell>Development utility for form debugging</TableCell>
-                            <TableCell><code className="text-xs">{ debugLogs, addDebugLog, clearDebugLogs }</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="admin-hooks">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Admin Hooks
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Hook</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Returns</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useAdminUsers</code></TableCell>
-                            <TableCell>Fetches and manages user data for admin dashboard</TableCell>
-                            <TableCell><code className="text-xs">{ users, isLoading, error, refetch }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useUserActions</code></TableCell>
-                            <TableCell>Provides actions for user management (deactivate, reset password)</TableCell>
-                            <TableCell><code className="text-xs">{ deactivateUser, resetPassword, isLoading }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useUserRoleManagement</code></TableCell>
-                            <TableCell>Manages role assignment operations</TableCell>
-                            <TableCell><code className="text-xs">{ updateRole, isUpdating, error }</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">useUserCommunities</code></TableCell>
-                            <TableCell>Fetches communities a user belongs to</TableCell>
-                            <TableCell><code className="text-xs">{ communities, isLoading, error }</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="utility-functions">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Utility Functions
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Function</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Module</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">cn</code></TableCell>
-                            <TableCell>Conditional className utility (uses tailwind-merge)</TableCell>
-                            <TableCell><code className="text-xs">@/lib/utils</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">formatDistanceToNow</code></TableCell>
-                            <TableCell>Date formatting utility using date-fns</TableCell>
-                            <TableCell><code className="text-xs">@/lib/utils</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">communityLogger</code></TableCell>
-                            <TableCell>Logging utility for community operations</TableCell>
-                            <TableCell><code className="text-xs">@/utils/communityLogger</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">debugLogger</code></TableCell>
-                            <TableCell>Development debugging utilities</TableCell>
-                            <TableCell><code className="text-xs">@/utils/debugLogger</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="service-layer">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Service Layer
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Business logic services located in <code className="text-xs">src/services/</code>
-                      </p>
-                      
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-56">Service</TableHead>
-                            <TableHead>Key Functions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">communityQueryService</code></TableCell>
-                            <TableCell>
-                              <ul className="list-disc list-inside text-xs space-y-1">
-                                <li><code>getAllCommunities(page, pageSize)</code></li>
-                                <li><code>getCommunityById(id)</code></li>
-                                <li><code>searchCommunities(query)</code></li>
-                                <li><code>getManagedCommunities(userId)</code></li>
-                              </ul>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">communityMutationService</code></TableCell>
-                            <TableCell>
-                              <ul className="list-disc list-inside text-xs space-y-1">
-                                <li><code>createCommunity(community)</code></li>
-                                <li><code>updateCommunity(community)</code></li>
-                                <li><code>deleteCommunity(communityId)</code></li>
-                              </ul>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">communityMembershipService</code></TableCell>
-                            <TableCell>
-                              <ul className="list-disc list-inside text-xs space-y-1">
-                                <li><code>joinCommunity(communityId, userId)</code></li>
-                                <li><code>leaveCommunity(communityId, userId)</code></li>
-                                <li><code>makeAdmin(communityId, userId)</code></li>
-                                <li><code>removeAdmin(communityId, userId)</code></li>
-                              </ul>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">communitySubmissionService</code></TableCell>
-                            <TableCell>
-                              <ul className="list-disc list-inside text-xs space-y-1">
-                                <li><code>submitCommunity(data, addDebugLog)</code></li>
-                              </ul>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">userQueryService</code></TableCell>
-                            <TableCell>
-                              <ul className="list-disc list-inside text-xs space-y-1">
-                                <li><code>getAllUsers()</code></li>
-                                <li><code>getUserCounts()</code></li>
-                              </ul>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">roleService</code></TableCell>
-                            <TableCell>
-                              <ul className="list-disc list-inside text-xs space-y-1">
-                                <li><code>updateUserRole(userId, role)</code></li>
-                                <li><code>getRoles()</code></li>
-                              </ul>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">auditService</code></TableCell>
-                            <TableCell>
-                              <ul className="list-disc list-inside text-xs space-y-1">
-                                <li><code>logAuditAction(action, details)</code></li>
-                                <li><code>getAuditLogs(filter)</code></li>
-                              </ul>
-                            </TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="api" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>API Reference</CardTitle>
-              <CardDescription>Supabase API endpoints and request formats</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[600px] pr-4">
-                <Accordion type="multiple" className="w-full">
-                  <AccordionItem value="auth-api">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Authentication API
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <div className="space-y-6">
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-green-600">POST</Badge>
-                            <h3 className="text-md font-semibold">Sign In</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase.auth.signInWithPassword({
-  email: 'example@email.com',
-  password: 'password123'
-})
-
-// Response
-{
-  "data": {
-    "session": {
-      "access_token": "jwt-token",
-      "refresh_token": "refresh-token",
-      "expires_in": 3600,
-      "user": {
-        "id": "uuid",
-        "email": "example@email.com"
-      }
-    }
-  },
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-green-600">POST</Badge>
-                            <h3 className="text-md font-semibold">Sign Up</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase.auth.signUp({
-  email: 'example@email.com',
-  password: 'password123',
-  options: {
-    data: {
-      first_name: 'John',
-      last_name: 'Doe'
-    }
-  }
-})
-
-// Response
-{
-  "data": {
-    "user": {
-      "id": "uuid",
-      "email": "example@email.com"
-    },
-    "session": null  // Only returned if email confirmation is disabled
-  },
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-blue-600">GET</Badge>
-                            <h3 className="text-md font-semibold">Get Session</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase.auth.getSession()
-
-// Response
-{
-  "data": {
-    "session": {
-      "access_token": "jwt-token",
-      "refresh_token": "refresh-token",
-      "expires_in": 3600,
-      "user": {
-        "id": "uuid",
-        "email": "example@email.com"
-      }
-    }
-  },
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-red-600">POST</Badge>
-                            <h3 className="text-md font-semibold">Sign Out</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { error } = await supabase.auth.signOut()
-
-// Response
-{
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="communities-api">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Communities API
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <div className="space-y-6">
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-blue-600">GET</Badge>
-                            <h3 className="text-md font-semibold">List Communities</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase
-  .from('communities')
-  .select('*')
-  .limit(10)
-  .range(0, 9)  // Pagination
-
-// Response
-{
-  "data": [
-    {
-      "id": "uuid",
-      "name": "Community Name",
-      "description": "Community description",
-      "logo_url": "https://example.com/logo.png",
-      "website": "https://community.com",
-      "is_public": true,
-      "location": "Remote",
-      "owner_id": "user-uuid",
-      "created_at": "2023-01-01T00:00:00.000Z",
-      "updated_at": "2023-01-01T00:00:00.000Z"
-    },
-    // More communities...
-  ],
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-blue-600">GET</Badge>
-                            <h3 className="text-md font-semibold">Get Community by ID</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase
-  .from('communities')
-  .select('*')
-  .eq('id', 'community-uuid')
-  .single()
-
-// Response
-{
-  "data": {
-    "id": "community-uuid",
-    "name": "Community Name",
-    "description": "Community description",
-    "logo_url": "https://example.com/logo.png",
-    "website": "https://community.com",
-    "is_public": true,
-    "location": "Remote",
-    "owner_id": "user-uuid",
-    "created_at": "2023-01-01T00:00:00.000Z",
-    "updated_at": "2023-01-01T00:00:00.000Z"
-  },
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-green-600">POST</Badge>
-                            <h3 className="text-md font-semibold">Create Community</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase
-  .from('communities')
-  .insert({
-    name: "New Community",
-    description: "Community description",
-    logo_url: "https://example.com/logo.png",
-    website: "https://community.com",
-    is_public: true,
-    location: "Remote",
-    target_audience: ["developers", "designers"]
-  })
-  .select()
-  .single()
-
-// Response
-{
-  "data": {
-    "id": "new-uuid",
-    "name": "New Community",
-    "description": "Community description",
-    "logo_url": "https://example.com/logo.png",
-    "website": "https://community.com",
-    "is_public": true,
-    "location": "Remote",
-    "owner_id": "user-uuid",
-    "target_audience": ["developers", "designers"],
-    "created_at": "2023-01-01T00:00:00.000Z",
-    "updated_at": "2023-01-01T00:00:00.000Z"
-  },
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-yellow-600">PATCH</Badge>
-                            <h3 className="text-md font-semibold">Update Community</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase
-  .from('communities')
-  .update({
-    name: "Updated Community Name",
-    description: "Updated description"
-  })
-  .eq('id', 'community-uuid')
-  .select()
-  .single()
-
-// Response
-{
-  "data": {
-    "id": "community-uuid",
-    "name": "Updated Community Name",
-    "description": "Updated description",
-    "logo_url": "https://example.com/logo.png",
-    "website": "https://community.com",
-    "is_public": true,
-    "location": "Remote",
-    "owner_id": "user-uuid",
-    "created_at": "2023-01-01T00:00:00.000Z",
-    "updated_at": "2023-01-01T00:00:00.000Z"
-  },
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-red-600">DELETE</Badge>
-                            <h3 className="text-md font-semibold">Delete Community</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase.rpc(
-  'safe_delete_community',
-  {
-    community_id: 'community-uuid',
-    user_id: 'user-uuid'
-  }
-)
-
-// Response
-{
-  "data": true,
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="users-api">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Users API
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <div className="space-y-6">
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-blue-600">GET</Badge>
-                            <h3 className="text-md font-semibold">Get User Profile</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase
-  .from('profiles')
-  .select('*')
-  .eq('id', 'user-uuid')
-  .single()
-
-// Response
-{
-  "data": {
-    "id": "user-uuid",
-    "email": "user@example.com",
-    "first_name": "John",
-    "last_name": "Doe",
-    "avatar_url": "https://example.com/avatar.png",
-    "created_at": "2023-01-01T00:00:00.000Z",
-    "updated_at": "2023-01-01T00:00:00.000Z"
-  },
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-yellow-600">PATCH</Badge>
-                            <h3 className="text-md font-semibold">Update User Profile</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase
-  .from('profiles')
-  .update({
-    first_name: "Updated",
-    last_name: "Name",
-    avatar_url: "https://example.com/new-avatar.png"
-  })
-  .eq('id', 'user-uuid')
-  .select()
-
-// Response
-{
-  "data": {
-    "id": "user-uuid",
-    "email": "user@example.com",
-    "first_name": "Updated",
-    "last_name": "Name",
-    "avatar_url": "https://example.com/new-avatar.png",
-    "created_at": "2023-01-01T00:00:00.000Z",
-    "updated_at": "2023-01-01T00:00:00.000Z"
-  },
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-blue-600">GET</Badge>
-                            <h3 className="text-md font-semibold">Get User Roles</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase.rpc(
-  'get_user_roles',
-  { user_id: 'user-uuid' }
-)
-
-// Response
-{
-  "data": ["ADMIN", "ORGANIZER"],
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge className="bg-yellow-600">POST</Badge>
-                            <h3 className="text-md font-semibold">Update User Role</h3>
-                          </div>
-                          <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                            <code className="text-xs overflow-x-auto block">
-                              <pre>
-{`// Request
-const { data, error } = await supabase.rpc(
-  'update_user_role',
-  {
-    p_user_id: 'user-uuid',
-    p_role_name: 'ADMIN',
-    p_assigner_id: 'admin-user-uuid'
-  }
-)
-
-// Response
-{
-  "data": true,
-  "error": null
-}`}
-                              </pre>
-                            </code>
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="database-functions">
-                    <AccordionTrigger className="text-lg font-medium">
-                      Database Functions
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-48">Function</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-32">Parameters</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">get_user_roles</code></TableCell>
-                            <TableCell>Returns all roles assigned to a user</TableCell>
-                            <TableCell><code className="text-xs">user_id: UUID</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">has_role</code></TableCell>
-                            <TableCell>Checks if a user has a specific role</TableCell>
-                            <TableCell><code className="text-xs">user_id: UUID, role_name: TEXT</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">is_admin</code></TableCell>
-                            <TableCell>Checks if a user is an admin</TableCell>
-                            <TableCell><code className="text-xs">user_id: UUID</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">get_community_admin_status</code></TableCell>
-                            <TableCell>Checks if a user is an admin of a specific community</TableCell>
-                            <TableCell><code className="text-xs">user_id: UUID, community_id: UUID</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">get_highest_role</code></TableCell>
-                            <TableCell>Returns the highest role a user has</TableCell>
-                            <TableCell><code className="text-xs">user_id: UUID</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">get_user_memberships</code></TableCell>
-                            <TableCell>Returns all community memberships for a user</TableCell>
-                            <TableCell><code className="text-xs">user_id: UUID</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">safe_delete_community</code></TableCell>
-                            <TableCell>Safely deletes a community with ownership check</TableCell>
-                            <TableCell><code className="text-xs">community_id: UUID, user_id: UUID</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">update_user_role</code></TableCell>
-                            <TableCell>Updates a user's role</TableCell>
-                            <TableCell><code className="text-xs">p_user_id: UUID, p_role_name: TEXT, p_assigner_id: UUID</code></TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell className="font-medium"><code className="text-xs">log_audit_action</code></TableCell>
-                            <TableCell>Logs an audit action</TableCell>
-                            <TableCell><code className="text-xs">action_name: TEXT, performer_id: UUID, target_id: UUID, action_details: JSONB</code></TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="database" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Database Schema</CardTitle>
-              <CardDescription>PostgreSQL schema and entity relationships</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[600px] pr-4">
-                <div className="space-y-8">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center">
-                      <Database className="h-5 w-5 mr-2 text-primary/80" />
-                      Core Tables
-                    </h3>
+        <div className="w-full md:w-3/4">
+          <ScrollArea className="h-[calc(100vh-120px)] pr-4">
+            <div className="space-y-12">
+              {/* Overview section */}
+              <section id="overview" className="scroll-mt-20">
+                <Card className="glass-dark">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p>This is the technical documentation for the Community Management Platform, a comprehensive system for creating and managing communities, user roles, and their interactions.</p>
                     
-                    <Accordion type="multiple" className="w-full">
-                      <AccordionItem value="communities-table">
-                        <AccordionTrigger className="font-medium">
-                          communities
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-4">
-                            <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                              <code className="text-xs overflow-x-auto block">
-                                <pre>
-{`CREATE TABLE public.communities (
-  id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  name TEXT NOT NULL,
-  description TEXT NOT NULL DEFAULT '',
-  logo_url TEXT,
-  website TEXT,
-  is_public BOOLEAN NOT NULL DEFAULT true,
-  location TEXT DEFAULT 'Remote',
-  owner_id UUID NOT NULL,
-  member_count INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
-  social_media JSONB DEFAULT '{}'::jsonb,
-  communication_platforms JSONB DEFAULT '{}'::jsonb,
-  target_audience TEXT[],
-  format TEXT,
-  community_type TEXT,
-  vision TEXT,
-  role_title TEXT,
-  community_structure TEXT,
-  community_values TEXT,
-  type TEXT,
-  tags TEXT[] DEFAULT '{}'::text[],
-  founder_name TEXT,
-  personal_background TEXT,
-  newsletter_url TEXT,
-  event_frequency TEXT,
-  start_date TIMESTAMPTZ
-);`}</pre>
-                              </code>
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <Card className="bg-card/60">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Tech Stack</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="list-disc pl-5 space-y-1">
+                            <li>React 18 with TypeScript</li>
+                            <li>Vite for build tooling</li>
+                            <li>React Router for routing</li>
+                            <li>Tailwind CSS for styling</li>
+                            <li>shadcn/ui for component library</li>
+                            <li>Tanstack Query for data fetching</li>
+                            <li>Supabase for backend services</li>
+                            <li>Zod for schema validation</li>
+                          </ul>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-card/60">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Key Features</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="list-disc pl-5 space-y-1">
+                            <li>Role-based authentication</li>
+                            <li>Community management</li>
+                            <li>User administration</li>
+                            <li>Comprehensive permission system</li>
+                            <li>Form wizard for community creation</li>
+                            <li>Advanced filtering and sorting</li>
+                            <li>Realtime updates</li>
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
 
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead className="w-48">Indexes</TableHead>
-                                  <TableHead>Type</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">communities_pkey</code></TableCell>
-                                  <TableCell>PRIMARY KEY (id)</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">idx_communities_owner</code></TableCell>
-                                  <TableCell>BTREE (owner_id)</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">idx_communities_name</code></TableCell>
-                                  <TableCell>BTREE (name)</TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
+              {/* Architecture section */}
+              <section id="architecture" className="scroll-mt-20">
+                <Card className="glass-dark">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Architecture</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p>The application follows a robust architecture with clear separation of concerns:</p>
+                    
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="folder-structure">
+                        <AccordionTrigger className="text-lg font-medium">Folder Structure</AccordionTrigger>
+                        <AccordionContent>
+                          <pre className="bg-black/20 p-4 rounded-md overflow-x-auto text-sm">
+{`src/
+├── components/       # UI components
+│   ├── admin/        # Admin-specific components
+│   ├── auth/         # Authentication components
+│   ├── community/    # Community-related components
+│   ├── navbar/       # Navigation components
+│   ├── onboarding/   # Onboarding flow components
+│   ├── organizer/    # Organizer dashboard components
+│   └── ui/           # Base UI components (shadcn)
+├── contexts/         # React contexts
+├── hooks/            # Custom React hooks
+├── integrations/     # Third-party integrations
+├── models/           # TypeScript interfaces and types
+├── pages/            # Page components
+├── repositories/     # Data fetching and mutation logic
+├── schemas/          # Zod validation schemas
+├── services/         # Business logic services
+└── utils/            # Utility functions`}
+                          </pre>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      <AccordionItem value="data-flow">
+                        <AccordionTrigger className="text-lg font-medium">Data Flow</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="bg-black/20 p-4 rounded-md">
+                            <ol className="list-decimal pl-5 space-y-2">
+                              <li><strong>User Interaction</strong>: User interacts with UI components</li>
+                              <li><strong>Component Handlers</strong>: Event handlers in components call hooks or context methods</li>
+                              <li><strong>Hooks/Contexts</strong>: Custom hooks or contexts handle business logic and call services</li>
+                              <li><strong>Services</strong>: Service layer orchestrates data operations and calls repositories</li>
+                              <li><strong>Repositories</strong>: Repository layer executes Supabase queries/mutations</li>
+                              <li><strong>Supabase</strong>: Database operations and auth handled by Supabase</li>
+                              <li><strong>UI Updates</strong>: Data flows back up through the chain to update UI</li>
+                            </ol>
                           </div>
                         </AccordionContent>
                       </AccordionItem>
 
-                      <AccordionItem value="profiles-table">
-                        <AccordionTrigger className="font-medium">
-                          profiles
-                        </AccordionTrigger>
+                      <AccordionItem value="authentication">
+                        <AccordionTrigger className="text-lg font-medium">Authentication Architecture</AccordionTrigger>
                         <AccordionContent>
-                          <div className="space-y-4">
-                            <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                              <code className="text-xs overflow-x-auto block">
-                                <pre>
-{`CREATE TABLE public.profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
-  email TEXT NOT NULL,
-  first_name TEXT,
-  last_name TEXT,
-  avatar_url TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now())
-);`}</pre>
-                              </code>
-                            </div>
-
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead className="w-48">Triggers</TableHead>
-                                  <TableHead>Function</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">set_profile_updated_at</code></TableCell>
-                                  <TableCell><code className="text-xs">handle_profile_update()</code></TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="roles-table">
-                        <AccordionTrigger className="font-medium">
-                          roles
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-4">
-                            <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                              <code className="text-xs overflow-x-auto block">
-                                <pre>
-{`CREATE TABLE public.roles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  description TEXT,
-  permissions JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);`}</pre>
-                              </code>
-                            </div>
-
-                            <div className="pt-2">
-                              <h4 className="text-sm font-medium mb-2">Default Records</h4>
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>name</TableHead>
-                                    <TableHead>description</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  <TableRow>
-                                    <TableCell><code className="text-xs">ADMIN</code></TableCell>
-                                    <TableCell>System administrator with full access</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell><code className="text-xs">ORGANIZER</code></TableCell>
-                                    <TableCell>Community organizer with management access</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell><code className="text-xs">MEMBER</code></TableCell>
-                                    <TableCell>Regular platform member</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell><code className="text-xs">GUEST</code></TableCell>
-                                    <TableCell>Unauthenticated user with limited access</TableCell>
-                                  </TableRow>
-                                </TableBody>
-                              </Table>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="user-roles-table">
-                        <AccordionTrigger className="font-medium">
-                          user_roles
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-4">
-                            <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                              <code className="text-xs overflow-x-auto block">
-                                <pre>
-{`CREATE TABLE public.user_roles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,
-  role_id UUID NOT NULL REFERENCES public.roles(id),
-  assigned_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  assigned_by UUID,
-  UNIQUE(user_id, role_id)
-);`}</pre>
-                              </code>
-                            </div>
-
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead className="w-48">Indexes</TableHead>
-                                  <TableHead>Type</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">user_roles_pkey</code></TableCell>
-                                  <TableCell>PRIMARY KEY (id)</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">user_roles_user_id_role_id_key</code></TableCell>
-                                  <TableCell>UNIQUE (user_id, role_id)</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">idx_user_roles_user_id</code></TableCell>
-                                  <TableCell>BTREE (user_id)</TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="admin-roles-table">
-                        <AccordionTrigger className="font-medium">
-                          admin_roles
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-4">
-                            <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                              <code className="text-xs overflow-x-auto block">
-                                <pre>
-{`CREATE TABLE public.admin_roles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,
-  role TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(user_id, role)
-);`}</pre>
-                              </code>
-                            </div>
-
-                            <p className="text-xs text-muted-foreground">
-                              <Shield className="inline-block h-3 w-3 mr-1" />
-                              This table is used for backward compatibility with older admin role assignments.
-                            </p>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      <AccordionItem value="audit-logs-table">
-                        <AccordionTrigger className="font-medium">
-                          audit_logs
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-4">
-                            <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                              <code className="text-xs overflow-x-auto block">
-                                <pre>
-{`CREATE TABLE public.audit_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  action TEXT NOT NULL,
-  performed_by UUID NOT NULL,
-  target_user_id UUID,
-  details JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);`}</pre>
-                              </code>
-                            </div>
-
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead className="w-48">Indexes</TableHead>
-                                  <TableHead>Type</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">audit_logs_pkey</code></TableCell>
-                                  <TableCell>PRIMARY KEY (id)</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">idx_audit_logs_action</code></TableCell>
-                                  <TableCell>BTREE (action)</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">idx_audit_logs_performer</code></TableCell>
-                                  <TableCell>BTREE (performed_by)</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell><code className="text-xs">idx_audit_logs_created_at</code></TableCell>
-                                  <TableCell>BTREE (created_at DESC)</TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
+                          <div className="bg-black/20 p-4 rounded-md">
+                            <p>The authentication system uses Supabase Auth with a multi-layered approach:</p>
+                            
+                            <ol className="list-decimal pl-5 space-y-2 mt-2">
+                              <li><strong>useSession hook</strong>: Manages auth session state and handles login/logout operations</li>
+                              <li><strong>useAuth hook</strong>: Extends session with user profile data</li>
+                              <li><strong>useUser context</strong>: Provides authentication state throughout the app</li>
+                              <li><strong>usePermissions hook</strong>: Handles role-based permissions and access control</li>
+                              <li><strong>ProtectedRoute component</strong>: Guards routes based on authentication state and permissions</li>
+                            </ol>
                           </div>
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>
-                  </div>
+                  </CardContent>
+                </Card>
+              </section>
 
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center">
-                      <Lock className="h-5 w-5 mr-2 text-primary/80" />
-                      Row Level Security (RLS)
-                    </h3>
-                    
-                    <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                      <code className="text-xs overflow-x-auto block">
-                        <pre>
-{`-- Communities table policies
-ALTER TABLE public.communities ENABLE ROW LEVEL SECURITY;
-
--- Any user can view public communities
-CREATE POLICY "Public communities are viewable by everyone" 
-  ON public.communities FOR SELECT
-  USING (is_public = true);
-
--- Owners can view their own communities regardless of public status
-CREATE POLICY "Community owners can view their communities" 
-  ON public.communities FOR SELECT
-  USING (owner_id = auth.uid());
-
--- Only owners can update/delete their communities
-CREATE POLICY "Community owners can update their communities" 
-  ON public.communities FOR UPDATE
-  USING (owner_id = auth.uid());
-
-CREATE POLICY "Community owners can delete their communities" 
-  ON public.communities FOR DELETE
-  USING (owner_id = auth.uid());
-
--- Authenticated users can create communities
-CREATE POLICY "Authenticated users can create communities" 
-  ON public.communities FOR INSERT
-  WITH CHECK (auth.uid() IS NOT NULL);
-
--- Profiles table policies
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
--- Any authenticated user can read profiles
-CREATE POLICY "Profiles are viewable by authenticated users" 
-  ON public.profiles FOR SELECT
-  USING (auth.uid() IS NOT NULL);
-
--- Users can update only their own profiles
-CREATE POLICY "Users can update their own profiles" 
-  ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
-
--- Audit logs policies
-ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
-
--- Only admins can view audit logs
-CREATE POLICY "Only admins can view audit logs" 
-  ON public.audit_logs FOR SELECT
-  USING (public.is_admin(auth.uid()));
-
--- System can insert audit logs
-CREATE POLICY "System can create audit logs" 
-  ON public.audit_logs FOR INSERT
-  WITH CHECK (auth.uid() IS NOT NULL);`}</pre>
-                      </code>
+              {/* Routes section */}
+              <section id="routes" className="scroll-mt-20">
+                <Card className="glass-dark">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Routes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th className="text-left py-2 px-4">Path</th>
+                            <th className="text-left py-2 px-4">Component</th>
+                            <th className="text-left py-2 px-4">Access</th>
+                            <th className="text-left py-2 px-4">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/</td>
+                            <td className="py-2 px-4">Index</td>
+                            <td className="py-2 px-4">Public</td>
+                            <td className="py-2 px-4">Landing page with community listings</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/auth</td>
+                            <td className="py-2 px-4">Auth</td>
+                            <td className="py-2 px-4">Public</td>
+                            <td className="py-2 px-4">Authentication page (login/register)</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/profile</td>
+                            <td className="py-2 px-4">Profile</td>
+                            <td className="py-2 px-4">Authenticated</td>
+                            <td className="py-2 px-4">User profile management</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/onboarding</td>
+                            <td className="py-2 px-4">Onboarding</td>
+                            <td className="py-2 px-4">Authenticated</td>
+                            <td className="py-2 px-4">New user onboarding flow</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/community/create</td>
+                            <td className="py-2 px-4">CreateCommunity</td>
+                            <td className="py-2 px-4">Admin/Organizer</td>
+                            <td className="py-2 px-4">Community creation wizard</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/community/:id</td>
+                            <td className="py-2 px-4">CommunityProfile</td>
+                            <td className="py-2 px-4">Public</td>
+                            <td className="py-2 px-4">Community profile page</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/join</td>
+                            <td className="py-2 px-4">JoinCommunities</td>
+                            <td className="py-2 px-4">Authenticated</td>
+                            <td className="py-2 px-4">Join community page</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/organizer</td>
+                            <td className="py-2 px-4">OrganizerDashboard</td>
+                            <td className="py-2 px-4">Organizer</td>
+                            <td className="py-2 px-4">Dashboard for community organizers</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/admin</td>
+                            <td className="py-2 px-4">AdminDashboard</td>
+                            <td className="py-2 px-4">Admin</td>
+                            <td className="py-2 px-4">Admin control panel</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/admin/debug</td>
+                            <td className="py-2 px-4">DebuggerDashboard</td>
+                            <td className="py-2 px-4">Admin</td>
+                            <td className="py-2 px-4">Debugging tools for admins</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-4 font-mono text-sm">/docs</td>
+                            <td className="py-2 px-4">Documentation</td>
+                            <td className="py-2 px-4">Public</td>
+                            <td className="py-2 px-4">Technical documentation</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              </section>
 
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center">
-                      <Server className="h-5 w-5 mr-2 text-primary/80" />
-                      Entity Relationship Diagram
-                    </h3>
-                    
-                    <div className="bg-background/50 border border-border/20 p-4 rounded-md">
-                      <code className="text-xs overflow-x-auto block whitespace-pre">
-                        <pre>
-{`┌────────────────┐       ┌────────────────┐       ┌────────────────┐
-│   auth.users    │       │    profiles     │       │  communities   │
-├────────────────┤       ├────────────────┤       ├────────────────┤
-│ id (PK)        │──1:1──┤ id (PK, FK)    │       │ id (PK)        │
-│ email          │       │ email          │       │ name           │
-│ password       │       │ first_name     │       │ description    │
-│ ...            │       │ last_name      │       │ logo_url       │
-└────────────────┘       │ avatar_url     │       │ website        │
-                         │ created_at     │       │ is_public      │
-                         │ updated_at     │       │ location       │
-                         └────────────────┘       │ owner_id       │────┐
-                                │                 │ member_count   │    │
-                                │                 │ created_at     │    │
-                                │                 │ updated_at     │    │
-                                │                 │ ...            │    │
-                                │                 └────────────────┘    │
-                                │                                       │
-                                │                                       │
-┌────────────────┐       ┌─────┴──────────┐       ┌─────────────────┐  │
-│     roles      │       │   user_roles   │       │  community_data │  │
-├────────────────┤       ├────────────────┤       ├─────────────────┤  │
-│ id (PK)        │─1:n─┐ │ id (PK)        │       │ id (PK)         │  │
-│ name           │     │ │ user_id (FK)   │───────┤ community_id(FK)│◄─┘
-│ description    │     │ │ role_id (FK)   │◄──────┤ data_type       │
-│ permissions    │     │ │ assigned_at    │       │ data            │
-│ created_at     │     │ │ assigned_by    │       │ metadata        │
-└────────────────┘     │ └────────────────┘       │ imported_at     │
-                       │                          │ imported_by     │
-                       │                          └─────────────────┘
-                       │
-                       │  ┌────────────────┐       ┌────────────────┐
-                       │  │  admin_roles   │       │   audit_logs   │
-                       │  ├────────────────┤       ├────────────────┤
-                       │  │ id (PK)        │       │ id (PK)        │
-                       └──┤ user_id (FK)   │       │ action         │
-                          │ role           │       │ performed_by   │
-                          │ created_at     │       │ target_user_id │
-                          └────────────────┘       │ details        │
-                                                   │ created_at     │
-                                                   └────────────────┘`}</pre>
-                      </code>
+              {/* Components section */}
+              <section id="components" className="scroll-mt-20">
+                <Card className="glass-dark">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Components</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs defaultValue="core">
+                      <TabsList className="grid grid-cols-5 w-full mb-4">
+                        <TabsTrigger value="core">Core</TabsTrigger>
+                        <TabsTrigger value="admin">Admin</TabsTrigger>
+                        <TabsTrigger value="community">Community</TabsTrigger>
+                        <TabsTrigger value="auth">Auth</TabsTrigger>
+                        <TabsTrigger value="ui">UI</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="core">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                Navbar
+                                <Badge variant="outline" className="ml-2">Core</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Main navigation component with responsive design</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/Navbar.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Sub-components:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>UserMenuDropdown</li>
+                                  <li>NavigationDrawer</li>
+                                  <li>AccountButton</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                CommunityCard
+                                <Badge variant="outline" className="ml-2">Core</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Displays community information in a card format</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/CommunityCard.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Props:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>community: Community</li>
+                                  <li>isCompact?: boolean</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                MemberCard
+                                <Badge variant="outline" className="ml-2">Core</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Displays member information in a card format</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/MemberCard.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Props:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>member: User</li>
+                                  <li>role?: string</li>
+                                  <li>showActions?: boolean</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                SearchBar
+                                <Badge variant="outline" className="ml-2">Core</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Search component with debounce functionality</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/SearchBar.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Props:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>onSearch: (query: string) => void</li>
+                                  <li>placeholder?: string</li>
+                                  <li>className?: string</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="admin">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                UserManagementTable
+                                <Badge variant="outline" className="ml-2">Admin</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Interactive user management table for administrators</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/admin/UserManagementTable.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Sub-components:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>UserTableRow</li>
+                                  <li>UserTableActions</li>
+                                  <li>UserDetailsDialog</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                AdminOverviewCards
+                                <Badge variant="outline" className="ml-2">Admin</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Dashboard overview cards with system metrics</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/admin/AdminOverviewCards.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Features:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>User metrics</li>
+                                  <li>Community metrics</li>
+                                  <li>System health</li>
+                                  <li>Activity metrics</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="community">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                CreateCommunityForm
+                                <Badge variant="outline" className="ml-2">Community</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Multi-step form for community creation</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/community/CreateCommunityForm.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Form Sections:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>BasicInfoForm</li>
+                                  <li>PlatformsForm</li>
+                                  <li>SocialMediaForm</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                CommunityHeader
+                                <Badge variant="outline" className="ml-2">Community</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Header component for community profile pages</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/community/CommunityHeader.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Props:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>community: Community</li>
+                                  <li>isOrganizer: boolean</li>
+                                  <li>onJoin?: () => void</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="auth">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                ProtectedRoute
+                                <Badge variant="outline" className="ml-2">Auth</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Route guard for authenticated routes</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/auth/ProtectedRoute.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Props:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>children: React.ReactNode</li>
+                                  <li>requiredRole?: UserRole</li>
+                                  <li>redirect?: string</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">
+                                AuthLayout
+                                <Badge variant="outline" className="ml-2">Auth</Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Layout for authentication pages</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/components/auth/AuthLayout.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Features:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>Responsive design</li>
+                                  <li>Background styling</li>
+                                  <li>Card layout</li>
+                                  <li>Logo display</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="ui">
+                        <p className="text-muted-foreground mb-4">The UI components are based on shadcn/ui and provide a consistent design system throughout the application.</p>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {[
+                            "Button", "Card", "Dialog", "Form", 
+                            "Input", "Select", "Tabs", "Toast",
+                            "Accordion", "Avatar", "Badge", "Checkbox",
+                            "Dropdown", "Label", "Progress", "Table"
+                          ].map((component) => (
+                            <Card key={component} className="bg-card/60">
+                              <CardHeader className="py-2 px-3">
+                                <CardTitle className="text-sm">{component}</CardTitle>
+                              </CardHeader>
+                              <CardContent className="py-2 px-3">
+                                <p className="text-xs font-mono">src/components/ui/{component.toLowerCase()}.tsx</p>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Hooks section */}
+              <section id="hooks" className="scroll-mt-20">
+                <Card className="glass-dark">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Hooks</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Authentication Hooks</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useAuth</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Manages authentication state with user profile</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/useAuth.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>currentUser: User | null</li>
+                                  <li>isLoading: boolean</li>
+                                  <li>session: Session | null</li>
+                                  <li>refreshUser: () => Promise&lt;void&gt;</li>
+                                  <li>logout: () => Promise&lt;void&gt;</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useSession</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Manages Supabase authentication session</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/useSession.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>session: Session | null</li>
+                                  <li>isLoading: boolean</li>
+                                  <li>logout: () => Promise&lt;void&gt;</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useProfile</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Fetches and manages user profile data</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/useProfile.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>currentUser: User | null</li>
+                                  <li>isLoading: boolean</li>
+                                  <li>error: Error | null</li>
+                                  <li>refreshUser: () => Promise&lt;void&gt;</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">usePermissions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Role-based permission management</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/usePermissions.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>hasPermission: (resource, action) => boolean</li>
+                                  <li>isOrganizer: (communityId?) => boolean</li>
+                                  <li>isOwner: (communityId) => Promise&lt;boolean&gt;</li>
+                                  <li>checkPermission: (resource, action) => boolean</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Form and Data Hooks</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useFormProgress</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Manages multi-step form progress</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/useFormProgress.ts</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>activeTab: FormTab</li>
+                                  <li>progress: number</li>
+                                  <li>updateProgress: (tab: FormTab) => void</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useCreateCommunityForm</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Form management for community creation</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/useCreateCommunityForm.ts</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>form: UseFormReturn&lt;CommunityFormData&gt;</li>
+                                  <li>isSubmitting: boolean</li>
+                                  <li>submitForm: () => Promise&lt;void&gt;</li>
+                                  <li>onSubmit: (values) => Promise&lt;void&gt;</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useDebounce</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Debounces a value with configurable delay</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/useDebounce.ts</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Parameters:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>value: T</li>
+                                  <li>delay?: number (default: 500)</li>
+                                </ul>
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>debouncedValue: T</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useMobile</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Detects mobile viewport with resize listener</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/use-mobile.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>isMobile: boolean</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Admin Hooks</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useAdminUsers</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Admin user management functionality</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/admin/useAdminUsers.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>users: User[]</li>
+                                  <li>isLoading: boolean</li>
+                                  <li>error: Error | null</li>
+                                  <li>refetch: () => void</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useUserActions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">User management actions for admins</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/admin/useUserActions.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>deactivateUser: (userId) => Promise&lt;void&gt;</li>
+                                  <li>resetPassword: (email) => Promise&lt;void&gt;</li>
+                                  <li>isLoading: boolean</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useUserRoleManagement</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">User role management functionality</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/admin/useUserRoleManagement.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>updateRole: (userId, role) => Promise&lt;void&gt;</li>
+                                  <li>isUpdating: boolean</li>
+                                  <li>error: Error | null</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useUserCommunities</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Manages user's community associations</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/admin/useUserCommunities.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>communities: Community[]</li>
+                                  <li>isLoading: boolean</li>
+                                  <li>error: Error | null</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                  </CardContent>
+                </Card>
+              </section>
 
-      <div className="w-full flex justify-center mt-12">
-        <Button variant="outline" size="sm" className="flex items-center gap-2 text-muted-foreground" asChild>
-          <a href="https://github.com/eco8-platform/documentation" target="_blank" rel="noopener noreferrer">
-            <Code className="h-4 w-4" />
-            View Source
-            <ExternalLink className="h-3 w-3 ml-1" />
-          </a>
-        </Button>
+              {/* API section */}
+              <section id="api" className="scroll-mt-20">
+                <Card className="glass-dark">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">API</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs defaultValue="auth">
+                      <TabsList className="grid grid-cols-4 w-full mb-4">
+                        <TabsTrigger value="auth">Auth</TabsTrigger>
+                        <TabsTrigger value="communities">Communities</TabsTrigger>
+                        <TabsTrigger value="users">Users</TabsTrigger>
+                        <TabsTrigger value="admin">Admin</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="auth">
+                        <div className="space-y-4">
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Authentication API</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useAuth Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Authentication API
+// Returns: { currentUser, isLoading, session, refreshUser, logout }
+const { 
+  currentUser,  // The current user object or null
+  isLoading,    // Boolean indicating if auth is loading
+  session,      // Supabase session object
+  refreshUser,  // Function to refresh user data
+  logout        // Function to log out the user
+} = useAuth();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Session Management</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useSession Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Session API
+// Returns: { session, isLoading, logout }
+const { 
+  session,    // Supabase session object or null
+  isLoading,  // Boolean indicating if session is loading
+} = useSession();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Profile Management</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useProfile Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Profile API
+// Returns: { currentUser, isLoading, error, refreshUser }
+const { 
+  currentUser,  // The current user profile or null
+  isLoading,    // Boolean indicating if profile is loading
+  error         // Error object if profile fetch failed
+} = useProfile(session);`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Permissions System</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">usePermissions Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Permissions API
+// Returns: { hasPermission, checkPermissionAsync, isOrganizer }
+const { 
+  hasPermission,       // (resource: string, action: string) => boolean
+  isOrganizer          // (communityId?: string) => boolean
+} = usePermissions(currentUser);`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="communities">
+                        <div className="space-y-4">
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Community Form Management</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useCreateCommunityForm Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Community Form API
+// Returns: { form, isSubmitting, activeTab, progress, onSubmit }
+const { 
+  form,          // React Hook Form object
+  isSubmitting,  // Boolean indicating if form is submitting
+  activeTab,     // Current active tab in the form
+  progress,      // Form completion progress (number)
+  onSubmit       // Form submission handler
+} = useCreateCommunityForm();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Form Progress Management</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useFormProgress Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Form Progress API
+// Returns: { activeTab, progress, updateProgress }
+const { 
+  activeTab,       // Current active tab (FormTab)
+  progress,        // Progress percentage (number)
+  updateProgress   // (tab: FormTab) => void - Updates progress
+} = useFormProgress();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Community Submission</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useCreateCommunity Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Community Creation API
+// Returns: { form, submitForm, isSubmitting }
+const { 
+  form,         // React Hook Form object
+  submitForm,   // Form submission function
+  isSubmitting  // Boolean indicating if form is submitting
+} = useCreateCommunity();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Debug Tools</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Debug Utilities</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Debug API
+// Functions for debugging
+const { 
+  debugLogs,      // Array of debug logs
+  addDebugLog,    // (message: string) => void
+  clearDebugLogs  // () => void
+} = useDebugger();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="users">
+                        <div className="space-y-4">
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">User Management</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">User Management API</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// User Management Service Exports
+export {
+  getAllUsers,         // Fetches all users
+  getUserCounts,       // Gets user count statistics
+  updateUserRole,      // Updates a user's role
+  inviteUser,          // Invites a new user
+  deactivateUser,      // Deactivates a user
+  resetUserPassword,   // Sends password reset email
+  getRoles,            // Gets available roles
+  getUserCommunities   // Gets communities for a user
+} from './userManagementService';`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">User Query API</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useAdminUsers Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// User Query API
+// Returns: { users, isLoading, error, refetch }
+const { 
+  users,      // Array of User objects
+  isLoading,  // Boolean indicating if data is loading
+  error,      // Error object if query failed
+  refetch     // Function to refetch users
+} = useAdminUsers();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">User Actions API</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useUserActions Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// User Actions API
+// Returns: { deactivateUser, resetPassword, isLoading }
+const { 
+  deactivateUser,  // (userId: string) => Promise<void>
+  resetPassword,   // (email: string) => Promise<void>
+  isLoading        // Boolean indicating if action is in progress
+} = useUserActions();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Role Management API</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useUserRoleManagement Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Role Management API
+// Returns: { updateRole, isUpdating, error }
+const { 
+  updateRole,   // (userId: string, role: UserRole) => Promise<void>
+  isUpdating,   // Boolean indicating if update is in progress
+  error         // Error object if update failed
+} = useUserRoleManagement();`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">User Community API</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">useUserCommunities Hook</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// User Communities API
+// Returns: { communities, isLoading, error }
+const { 
+  communities,  // Array of Community objects
+  isLoading,    // Boolean indicating if data is loading
+  error         // Error object if query failed
+} = useUserCommunities(userId);`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="admin">
+                        <div className="space-y-4">
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Admin Services</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Admin Service Exports</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Admin Service Exports
+// From adminService.ts
+export {
+  getSystemStats,          // Gets system-wide statistics
+  getUserRoleCounts,       // Gets user count by role
+  getCommunityStats,       // Gets community statistics
+  getRecentActivities,     // Gets recent system activities
+  getAdminSettings,        // Gets admin settings
+  updateAdminSettings,     // Updates admin settings
+  getMaintenanceStatus,    // Gets system maintenance status
+  toggleMaintenanceMode    // Toggles maintenance mode
+};`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-lg font-medium mb-2">Audit Services</h3>
+                            <Card className="bg-card/60">
+                              <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Audit Service Exports</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <pre className="bg-black/20 p-3 rounded-md overflow-x-auto text-xs">
+{`// Audit Service Exports
+// From auditService.ts
+export {
+  getAuditLogs,            // Gets system audit logs
+  getAuditLogsByUser,      // Gets audit logs for a specific user
+  getAuditLogsByResource,  // Gets audit logs for a specific resource
+  getAuditLogsByCommunity, // Gets audit logs for a specific community
+  recordAuditEvent         // Records a new audit event
+};`}
+                                </pre>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* Database section */}
+              <section id="database" className="scroll-mt-20">
+                <Card className="glass-dark">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">Database</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">Supabase Schema Overview</h3>
+                      <Card className="bg-card/60 p-4">
+                        <p className="text-sm mb-4">The application uses Supabase as its backend database and authentication provider. Below is the schema of the main tables.</p>
+                        
+                        <Accordion type="single" collapsible className="w-full">
+                          <AccordionItem value="users-table">
+                            <AccordionTrigger className="text-base font-medium">Users Tables</AccordionTrigger>
+                            <AccordionContent>
+                              <div className="bg-black/20 p-3 rounded-md overflow-x-auto">
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="border-b border-white/10">
+                                      <th className="text-left py-1 px-2">Table Name</th>
+                                      <th className="text-left py-1 px-2">Description</th>
+                                      <th className="text-left py-1 px-2">Key Columns</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="text-xs">
+                                    <tr className="border-b border-white/10">
+                                      <td className="py-1 px-2 font-mono">auth.users</td>
+                                      <td className="py-1 px-2">Supabase auth users</td>
+                                      <td className="py-1 px-2">id, email, role</td>
+                                    </tr>
+                                    <tr className="border-b border-white/10">
+                                      <td className="py-1 px-2 font-mono">public.profiles</td>
+                                      <td className="py-1 px-2">Extended user profiles</td>
+                                      <td className="py-1 px-2">id, user_id, name, bio, avatar_url</td>
+                                    </tr>
+                                    <tr className="border-b border-white/10">
+                                      <td className="py-1 px-2 font-mono">public.user_roles</td>
+                                      <td className="py-1 px-2">User role assignments</td>
+                                      <td className="py-1 px-2">id, user_id, role, assigned_at</td>
+                                    </tr>
+                                    <tr>
+                                      <td className="py-1 px-2 font-mono">public.user_settings</td>
+                                      <td className="py-1 px-2">User preferences</td>
+                                      <td className="py-1 px-2">id, user_id, theme, notifications</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                          
+                          <AccordionItem value="communities-table">
+                            <AccordionTrigger className="text-base font-medium">Communities Tables</AccordionTrigger>
+                            <AccordionContent>
+                              <div className="bg-black/20 p-3 rounded-md overflow-x-auto">
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="border-b border-white/10">
+                                      <th className="text-left py-1 px-2">Table Name</th>
+                                      <th className="text-left py-1 px-2">Description</th>
+                                      <th className="text-left py-1 px-2">Key Columns</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="text-xs">
+                                    <tr className="border-b border-white/10">
+                                      <td className="py-1 px-2 font-mono">public.communities</td>
+                                      <td className="py-1 px-2">Core communities data</td>
+                                      <td className="py-1 px-2">id, name, description, creator_id, created_at</td>
+                                    </tr>
+                                    <tr className="border-b border-white/10">
+                                      <td className="py-1 px-2 font-mono">public.community_members</td>
+                                      <td className="py-1 px-2">Community membership</td>
+                                      <td className="py-1 px-2">id, community_id, user_id, role, joined_at</td>
+                                    </tr>
+                                    <tr className="border-b border-white/10">
+                                      <td className="py-1 px-2 font-mono">public.community_platforms</td>
+                                      <td className="py-1 px-2">Community platform links</td>
+                                      <td className="py-1 px-2">id, community_id, platform_type, url</td>
+                                    </tr>
+                                    <tr>
+                                      <td className="py-1 px-2 font-mono">public.community_social</td>
+                                      <td className="py-1 px-2">Community social media</td>
+                                      <td className="py-1 px-2">id, community_id, platform, handle, url</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                          
+                          <AccordionItem value="audit-table">
+                            <AccordionTrigger className="text-base font-medium">Audit Tables</AccordionTrigger>
+                            <AccordionContent>
+                              <div className="bg-black/20 p-3 rounded-md overflow-x-auto">
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="border-b border-white/10">
+                                      <th className="text-left py-1 px-2">Table Name</th>
+                                      <th className="text-left py-1 px-2">Description</th>
+                                      <th className="text-left py-1 px-2">Key Columns</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="text-xs">
+                                    <tr className="border-b border-white/10">
+                                      <td className="py-1 px-2 font-mono">public.audit_logs</td>
+                                      <td className="py-1 px-2">System audit logs</td>
+                                      <td className="py-1 px-2">id, actor_id, action, resource_type, resource_id, timestamp, ip_address</td>
+                                    </tr>
+                                    <tr>
+                                      <td className="py-1 px-2 font-mono">public.system_events</td>
+                                      <td className="py-1 px-2">System-level events</td>
+                                      <td className="py-1 px-2">id, event_type, data, created_at</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+                      </Card>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">Database Functions</h3>
+                      <Card className="bg-card/60 p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <h4 className="text-base font-medium">Member Count Functions</h4>
+                            <div className="bg-black/20 p-3 rounded-md text-xs">
+                              <p className="font-mono mb-1">increment_community_count</p>
+                              <p className="text-xs text-muted-foreground">Increments a community's member count</p>
+                              <div className="h-2"></div>
+                              
+                              <p className="font-mono mb-1">decrement_community_count</p>
+                              <p className="text-xs text-muted-foreground">Decrements a community's member count</p>
+                              <div className="h-2"></div>
+                              
+                              <p className="font-mono mb-1">ensure_member_count_column</p>
+                              <p className="text-xs text-muted-foreground">Ensures member_count column exists and has correct values</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <h4 className="text-base font-medium">User Functions</h4>
+                            <div className="bg-black/20 p-3 rounded-md text-xs">
+                              <p className="font-mono mb-1">get_user_roles</p>
+                              <p className="text-xs text-muted-foreground">Retrieves roles for a specific user</p>
+                              <div className="h-2"></div>
+                              
+                              <p className="font-mono mb-1">is_community_owner</p>
+                              <p className="text-xs text-muted-foreground">Checks if a user is the owner of a community</p>
+                              <div className="h-2"></div>
+                              
+                              <p className="font-mono mb-1">get_user_memberships</p>
+                              <p className="text-xs text-muted-foreground">Gets all community memberships for a user</p>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">RLS Policies</h3>
+                      <Card className="bg-card/60 p-4">
+                        <p className="text-sm mb-4">Row-Level Security (RLS) policies control access to database rows based on user roles and permissions.</p>
+                        
+                        <div className="bg-black/20 p-3 rounded-md overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-white/10">
+                                <th className="text-left py-1 px-2">Policy Name</th>
+                                <th className="text-left py-1 px-2">Table</th>
+                                <th className="text-left py-1 px-2">Operation</th>
+                                <th className="text-left py-1 px-2">Description</th>
+                              </tr>
+                            </thead>
+                            <tbody className="text-xs">
+                              <tr className="border-b border-white/10">
+                                <td className="py-1 px-2">profiles_read_all</td>
+                                <td className="py-1 px-2 font-mono">profiles</td>
+                                <td className="py-1 px-2">SELECT</td>
+                                <td className="py-1 px-2">All users can read profiles</td>
+                              </tr>
+                              <tr className="border-b border-white/10">
+                                <td className="py-1 px-2">profiles_update_own</td>
+                                <td className="py-1 px-2 font-mono">profiles</td>
+                                <td className="py-1 px-2">UPDATE</td>
+                                <td className="py-1 px-2">Users can update their own profile</td>
+                              </tr>
+                              <tr className="border-b border-white/10">
+                                <td className="py-1 px-2">communities_read_all</td>
+                                <td className="py-1 px-2 font-mono">communities</td>
+                                <td className="py-1 px-2">SELECT</td>
+                                <td className="py-1 px-2">All users can read communities</td>
+                              </tr>
+                              <tr className="border-b border-white/10">
+                                <td className="py-1 px-2">communities_create_org_admin</td>
+                                <td className="py-1 px-2 font-mono">communities</td>
+                                <td className="py-1 px-2">INSERT</td>
+                                <td className="py-1 px-2">Only admins and organizers can create communities</td>
+                              </tr>
+                              <tr className="border-b border-white/10">
+                                <td className="py-1 px-2">communities_update_owner</td>
+                                <td className="py-1 px-2 font-mono">communities</td>
+                                <td className="py-1 px-2">UPDATE</td>
+                                <td className="py-1 px-2">Only community owners and admins can update communities</td>
+                              </tr>
+                              <tr>
+                                <td className="py-1 px-2">audit_logs_admin_only</td>
+                                <td className="py-1 px-2 font-mono">audit_logs</td>
+                                <td className="py-1 px-2">SELECT</td>
+                                <td className="py-1 px-2">Only admins can view audit logs</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+            </div>
+          </ScrollArea>
+        </div>
       </div>
     </div>
   );
