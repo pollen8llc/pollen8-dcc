@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
-import CommunityCreateForm from "@/components/community/CommunityCreateForm";
+import { CreateCommunityForm } from "@/components/community/CreateCommunityForm";
 
 export default function CreateCommunityPage() {
   const { currentUser, isLoading } = useUser();
@@ -17,17 +17,7 @@ export default function CreateCommunityPage() {
     const checkAuth = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Error checking auth:", error);
-          setIsAuthenticated(false);
-        } else {
-          setIsAuthenticated(!!data.session);
-          if (data.session) {
-            console.log("User is authenticated:", data.session.user);
-          } else {
-            console.log("No active session found");
-          }
-        }
+        setIsAuthenticated(!!data.session);
       } catch (err) {
         console.error("Exception checking auth:", err);
         setIsAuthenticated(false);
@@ -62,12 +52,7 @@ export default function CreateCommunityPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Create a Community</h1>
-          <CommunityCreateForm />
-        </div>
-      </div>
+      <CreateCommunityForm />
     </div>
   );
 }
