@@ -51,9 +51,8 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         return acc;
       }, {} as Record<string, any>) || {};
       
-      // Get the properly transformed size value from the schema
-      // The transform function in the schema will handle the conversion
-      const communitySize = typeof values.size !== 'undefined' ? values.size : 0;
+      // Use the size value directly as a string
+      const communitySize = values.size || "1-100";
       
       const communityData = {
         name: values.name,

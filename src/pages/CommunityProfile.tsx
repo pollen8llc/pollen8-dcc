@@ -45,6 +45,11 @@ const CommunityProfile = () => {
     return <NotFoundState />;
   }
   
+  // Convert communitySize to a number for display if needed
+  const memberCount = isNaN(parseInt(community.communitySize)) 
+    ? community.communitySize 
+    : parseInt(community.communitySize);
+  
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -54,7 +59,7 @@ const CommunityProfile = () => {
         communityId={community.id}
         organizers={organizers}
         members={members}
-        memberCount={community.communitySize}
+        memberCount={memberCount}
       />
     </div>
   );

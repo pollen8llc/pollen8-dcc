@@ -16,7 +16,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         website: community.website,
         is_public: community.isPublic,
         location: community.location,
-        member_count: community.communitySize
+        member_count: community.communitySize // This will store the size as a string (e.g., "1-100")
       })
       .eq('id', community.id)
       .select()
@@ -65,7 +65,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
         location: community.location || "Remote",
-        member_count: community.communitySize || 1, // Initialize with 1 for the owner
+        member_count: community.communitySize || "1-100", // Store as string
         owner_id: owner_id, // This is critical - explicitly set owner
         target_audience: target_audience,
         community_type: community.communityType || null,
