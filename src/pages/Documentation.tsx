@@ -571,8 +571,8 @@ const Documentation = () => {
                                   <li>currentUser: User | null</li>
                                   <li>isLoading: boolean</li>
                                   <li>session: Session | null</li>
-                                  <li>refreshUser: () => Promise&lt;void&gt;</li>
-                                  <li>logout: () => Promise&lt;void&gt;</li>
+                                  <li>refreshUser: () =&gt; Promise&lt;void&gt;</li>
+                                  <li>logout: () =&gt; Promise&lt;void&gt;</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -590,7 +590,7 @@ const Documentation = () => {
                                 <ul className="text-xs list-disc pl-5">
                                   <li>session: Session | null</li>
                                   <li>isLoading: boolean</li>
-                                  <li>logout: () => Promise&lt;void&gt;</li>
+                                  <li>logout: () =&gt; Promise&lt;void&gt;</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -609,7 +609,7 @@ const Documentation = () => {
                                   <li>currentUser: User | null</li>
                                   <li>isLoading: boolean</li>
                                   <li>error: Error | null</li>
-                                  <li>refreshUser: () => Promise&lt;void&gt;</li>
+                                  <li>refreshUser: () =&gt; Promise&lt;void&gt;</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -625,10 +625,10 @@ const Documentation = () => {
                               <div className="mt-2">
                                 <p className="text-xs font-semibold mt-1">Returns:</p>
                                 <ul className="text-xs list-disc pl-5">
-                                  <li>hasPermission: (resource, action) => boolean</li>
-                                  <li>isOrganizer: (communityId?) => boolean</li>
-                                  <li>isOwner: (communityId) => Promise&lt;boolean&gt;</li>
-                                  <li>checkPermission: (resource, action) => boolean</li>
+                                  <li>hasPermission: (resource, action) =&gt; boolean</li>
+                                  <li>isOrganizer: (communityId?) =&gt; boolean</li>
+                                  <li>isOwner: (communityId) =&gt; Promise&lt;boolean&gt;</li>
+                                  <li>checkPermission: (resource, action) =&gt; boolean</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -651,7 +651,7 @@ const Documentation = () => {
                                 <ul className="text-xs list-disc pl-5">
                                   <li>activeTab: FormTab</li>
                                   <li>progress: number</li>
-                                  <li>updateProgress: (tab: FormTab) => void</li>
+                                  <li>updateProgress: (tab: FormTab) =&gt; void</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -669,8 +669,8 @@ const Documentation = () => {
                                 <ul className="text-xs list-disc pl-5">
                                   <li>form: UseFormReturn&lt;CommunityFormData&gt;</li>
                                   <li>isSubmitting: boolean</li>
-                                  <li>submitForm: () => Promise&lt;void&gt;</li>
-                                  <li>onSubmit: (values) => Promise&lt;void&gt;</li>
+                                  <li>submitForm: () =&gt; Promise&lt;void&gt;</li>
+                                  <li>onSubmit: (values) =&gt; Promise&lt;void&gt;</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -731,7 +731,7 @@ const Documentation = () => {
                                   <li>users: User[]</li>
                                   <li>isLoading: boolean</li>
                                   <li>error: Error | null</li>
-                                  <li>refetch: () => void</li>
+                                  <li>refetch: () =&gt; void</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -747,8 +747,8 @@ const Documentation = () => {
                               <div className="mt-2">
                                 <p className="text-xs font-semibold mt-1">Returns:</p>
                                 <ul className="text-xs list-disc pl-5">
-                                  <li>deactivateUser: (userId) => Promise&lt;void&gt;</li>
-                                  <li>resetPassword: (email) => Promise&lt;void&gt;</li>
+                                  <li>deactivateUser: (userId) =&gt; Promise&lt;void&gt;</li>
+                                  <li>resetPassword: (email) =&gt; Promise&lt;void&gt;</li>
                                   <li>isLoading: boolean</li>
                                 </ul>
                               </div>
@@ -765,7 +765,7 @@ const Documentation = () => {
                               <div className="mt-2">
                                 <p className="text-xs font-semibold mt-1">Returns:</p>
                                 <ul className="text-xs list-disc pl-5">
-                                  <li>updateRole: (userId, role) => Promise&lt;void&gt;</li>
+                                  <li>updateRole: (userId, role) =&gt; Promise&lt;void&gt;</li>
                                   <li>isUpdating: boolean</li>
                                   <li>error: Error | null</li>
                                 </ul>
@@ -1377,3 +1377,4 @@ export {
 };
 
 export default Documentation;
+
