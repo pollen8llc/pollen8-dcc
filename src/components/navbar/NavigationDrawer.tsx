@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { User, UserRole } from "@/models/types";
@@ -12,6 +11,7 @@ import AdminNavigation from './drawer/AdminNavigation';
 import AuthActions from './drawer/AuthActions';
 import { Folder } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 interface NavigationDrawerProps {
   open: boolean;
@@ -136,28 +136,53 @@ const NavigationDrawer = ({
             )}
 
             {/* ORGANIZER menu, if any managed communities */}
-            {showOrganizerNav && drawerCommunities.length > 0 && (
+            {showOrganizerNav && (
               <>
                 <Separator className="my-4" />
                 <div className="px-2 mb-2 text-sm font-semibold text-muted-foreground">
-                  Manage Communities
+                  Organizer Menu
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
-                  {drawerCommunities.map((community) => (
-                    <Button
-                      key={community.id}
-                      variant="ghost"
-                      className="justify-start flex gap-2 items-center"
-                      onClick={() => handleNavigation(`/organizer/community/${community.id}`)}
-                    >
-                      <Folder className="w-4 h-4 mr-1" />
-                      <span>
-                        {community.name ? community.name : `Community ${community.id}`}
-                      </span>
-                      <span className="ml-auto text-xs text-muted-foreground">Manage</span>
-                    </Button>
-                  ))}
+                  {/* Dot Connector Dashboard menu item */}
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="justify-start flex gap-2 items-center"
+                    onClick={() => {
+                      handleNavigation("/organizer/dot-connector");
+                    }}
+                  >
+                    <Link to="/organizer/dot-connector">
+                      <span className="w-2 h-2 rounded-full bg-primary mr-2 inline-block"></span>
+                      <span>Dot Connector Dashboard</span>
+                    </Link>
+                  </Button>
                 </div>
+
+                {/* Managed Communities, if any */}
+                {drawerCommunities.length > 0 && (
+                  <>
+                    <div className="px-2 mb-2 text-sm font-semibold text-muted-foreground">
+                      Manage Communities
+                    </div>
+                    <div className="flex flex-col gap-1 pb-2">
+                      {drawerCommunities.map((community) => (
+                        <Button
+                          key={community.id}
+                          variant="ghost"
+                          className="justify-start flex gap-2 items-center"
+                          onClick={() => handleNavigation(`/organizer/community/${community.id}`)}
+                        >
+                          <Folder className="w-4 h-4 mr-1" />
+                          <span>
+                            {community.name ? community.name : `Community ${community.id}`}
+                          </span>
+                          <span className="ml-auto text-xs text-muted-foreground">Manage</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </>
             )}
 

@@ -17,6 +17,7 @@ import JoinCommunities from "./pages/JoinCommunities";
 import React from 'react';
 import DebuggerDashboard from './pages/admin/DebuggerDashboard';
 import OrganizerDashboard from "./pages/OrganizerDashboard";
+import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -86,6 +87,12 @@ const AppRoutes = () => {
       <Route path="/organizer/community/:id" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <OrganizerDashboard />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/organizer/dot-connector" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <DotConnectorDashboard />
         </ProtectedRoute>
       } />
       
