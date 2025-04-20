@@ -5,6 +5,8 @@ import { mapDbCommunity } from "../base/baseRepository";
 
 export const updateCommunity = async (community: Community): Promise<Community> => {
   try {
+    console.log("Updating community:", community.id);
+    
     const { data, error } = await supabase
       .from('communities')
       .update({
@@ -25,6 +27,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
       throw error;
     }
     
+    console.log("Community updated successfully:", data.id);
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in updateCommunity:", err);
@@ -46,7 +49,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     const target_audience = Array.isArray(community.tags) ? community.tags : [];
 
     // Extract social media values if they exist
-    const social_media = community.socialMedia || {};
+    const socialMedia = community.socialMedia || {};
     
     // Build the database record
     const { data, error } = await supabase
@@ -66,7 +69,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         role_title: community.role_title || null,
         community_structure: community.community_structure || null,
         vision: community.vision || null,
-        social_media: social_media,
+        social_media: socialMedia,
         communication_platforms: community.communication_platforms || {},
         newsletter_url: community.newsletterUrl || null
       })
@@ -78,6 +81,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       throw error;
     }
     
+    console.log("Community created successfully:", data.id);
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in createCommunity:", err);
@@ -87,15 +91,25 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
 
 export const deleteCommunity = async (communityId: string): Promise<void> => {
   try {
-    const { error } = await supabase
-      .from('communities')
-      .delete()
-      .eq('id', communityId);
+    console.log("Deleting community:", communityId);
+    
+    // Use the safe_delete_community function instead of direct delete
+    // This ensures proper ownership validation and auditing
+    const { data, error } = await supabase.rpc('safe_delete_community', {
+      community_id: communityId,
+      user_id: (await supabase.auth.getUser()).data.user?.id
+    });
     
     if (error) {
       console.error("Error deleting community:", error);
       throw error;
     }
+    
+    if (!data) {
+      throw new Error("Failed to delete community - you may not be the owner");
+    }
+    
+    console.log("Community deleted successfully:", communityId);
   } catch (err) {
     console.error("Error in deleteCommunity:", err);
     throw err;

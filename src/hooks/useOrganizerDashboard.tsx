@@ -1,16 +1,17 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import * as communityService from '@/services/communityService';
 import { Community } from '@/models/types';
 import { useUser } from '@/contexts/UserContext';
-import * as auditService from '@/services/auditService';
 import { usePermissions } from '@/hooks/usePermissions';
 
 export const useOrganizerDashboard = () => {
   const [communityToDelete, setCommunityToDelete] = useState<string | null>(null);
   const [activeDeletingId, setActiveDeletingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isActionInProgress, setIsActionInProgress] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { currentUser } = useUser();
@@ -18,7 +19,12 @@ export const useOrganizerDashboard = () => {
   
   console.log("OrganizerDashboard - Current user:", currentUser?.id, "role:", currentUser?.role);
   
-  const { data: managedCommunities, isLoading, error: communitiesError, refetch } = useQuery({
+  const { 
+    data: managedCommunities, 
+    isLoading, 
+    error: communitiesError, 
+    refetch 
+  } = useQuery({
     queryKey: ['managed-communities', currentUser?.id],
     queryFn: () => {
       if (!currentUser?.id) {
@@ -29,6 +35,8 @@ export const useOrganizerDashboard = () => {
       return communityService.getManagedCommunities(currentUser.id);
     },
     enabled: !!currentUser?.id,
+    retry: 1,
+    staleTime: 30 * 1000, // 30 seconds
   });
 
   useEffect(() => {
@@ -47,10 +55,19 @@ export const useOrganizerDashboard = () => {
   }, [managedCommunities]);
 
   const updateCommunityMutation = useMutation({
-    mutationFn: (community: Community) => communityService.updateCommunity(community),
+    mutationFn: (community: Community) => {
+      setIsActionInProgress(true);
+      return communityService.updateCommunity(community);
+    },
     onSuccess: () => {
+      // Only invalidate the specific queries
       queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      
+      // Schedule community list invalidation for after UI update
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['communities'] });
+      }, 500);
+      
       toast({
         title: "Community updated",
         description: "The community visibility has been updated successfully.",
@@ -64,12 +81,15 @@ export const useOrganizerDashboard = () => {
         variant: "destructive",
       });
     },
+    onSettled: () => {
+      setIsActionInProgress(false);
+    }
   });
 
   const deleteCommunityMutation = useMutation({
     mutationFn: async (communityId: string) => {
       console.log("Starting deletion process for community:", communityId);
-      
+      setIsActionInProgress(true);
       return communityService.deleteCommunity(communityId);
     },
     onMutate: (communityId) => {
@@ -86,8 +106,17 @@ export const useOrganizerDashboard = () => {
     onSuccess: async (_, communityId) => {
       console.log("Successfully deleted community:", communityId);
       
-      queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
-      queryClient.invalidateQueries({ queryKey: ['communities'] });
+      // Optimistically update the UI
+      if (managedCommunities) {
+        const updatedCommunities = managedCommunities.filter(c => c.id !== communityId);
+        queryClient.setQueryData(['managed-communities', currentUser?.id], updatedCommunities);
+      }
+      
+      // Schedule full refetch after UI update
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['managed-communities', currentUser?.id] });
+        queryClient.invalidateQueries({ queryKey: ['communities'] });
+      }, 500);
       
       toast({
         title: "Community deleted",
@@ -120,18 +149,35 @@ export const useOrganizerDashboard = () => {
     onSettled: () => {
       console.log("Community deletion process completed");
       setActiveDeletingId(null);
+      setIsActionInProgress(false);
     }
   });
 
   const toggleCommunityVisibility = useCallback((community: Community) => {
+    if (isActionInProgress) {
+      toast({
+        title: "Action in progress",
+        description: "Please wait for the current operation to complete.",
+      });
+      return;
+    }
+    
     const updatedCommunity = {
       ...community,
       isPublic: !community.isPublic
     };
     updateCommunityMutation.mutate(updatedCommunity);
-  }, [updateCommunityMutation]);
+  }, [updateCommunityMutation, isActionInProgress, toast]);
 
   const handleDeleteCommunity = useCallback((communityId: string) => {
+    if (isActionInProgress) {
+      toast({
+        title: "Action in progress",
+        description: "Please wait for the current operation to complete.",
+      });
+      return;
+    }
+    
     console.log("User requested to delete community:", communityId);
     if (!currentUser?.id) {
       toast({
@@ -142,7 +188,7 @@ export const useOrganizerDashboard = () => {
       return;
     }
     setCommunityToDelete(communityId);
-  }, [currentUser?.id, toast]);
+  }, [currentUser?.id, toast, isActionInProgress]);
 
   return {
     activeTab,
@@ -160,5 +206,6 @@ export const useOrganizerDashboard = () => {
       }
     },
     activeDeletingId,
+    isActionInProgress
   };
 };

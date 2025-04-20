@@ -1,7 +1,8 @@
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Globe, EyeOff } from "lucide-react";
+import { Globe, EyeOff, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Community } from "@/models/types";
 
@@ -9,9 +10,15 @@ interface DirectoryTabProps {
   isLoading: boolean;
   managedCommunities: Community[] | undefined;
   onToggleVisibility: (community: Community) => void;
+  isActionInProgress?: boolean;
 }
 
-const DirectoryTab = ({ isLoading, managedCommunities, onToggleVisibility }: DirectoryTabProps) => {
+const DirectoryTab = ({ 
+  isLoading, 
+  managedCommunities, 
+  onToggleVisibility, 
+  isActionInProgress = false 
+}: DirectoryTabProps) => {
   const navigate = useNavigate();
 
   return (
@@ -60,7 +67,9 @@ const DirectoryTab = ({ isLoading, managedCommunities, onToggleVisibility }: Dir
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {community.isPublic ? (
+                    {isActionInProgress ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : community.isPublic ? (
                       <Globe className="h-4 w-4 text-green-500" />
                     ) : (
                       <EyeOff className="h-4 w-4 text-red-500" />
@@ -69,6 +78,7 @@ const DirectoryTab = ({ isLoading, managedCommunities, onToggleVisibility }: Dir
                       checked={community.isPublic} 
                       onCheckedChange={() => onToggleVisibility(community)}
                       aria-label="Toggle directory visibility"
+                      disabled={isActionInProgress}
                     />
                     <span className="text-sm ml-1">
                       {community.isPublic ? "Public" : "Private"}

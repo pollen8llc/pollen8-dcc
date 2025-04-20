@@ -17,6 +17,7 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
   const [allCommunities, setAllCommunities] = useState<Community[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const pageSize = 12;
+  const prevSearchQuery = useRef(searchQuery);
   
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.5,
@@ -28,13 +29,14 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
     data: communities = [],
     isLoading: isLoadingCommunities,
     isFetching: isFetchingCommunities,
-    error: communitiesError
+    error: communitiesError,
+    refetch
   } = useQuery({
     queryKey: ['communities', page, pageSize, searchQuery],
     queryFn: async () => {
       console.log(`Fetching page ${page} with query "${searchQuery}"`);
       
-      if (searchQuery) {
+      if (searchQuery && searchQuery.trim() !== '') {
         return communityService.searchCommunities(searchQuery);
       } else {
         return communityService.getAllCommunities(page, pageSize);
@@ -42,6 +44,17 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
     },
     staleTime: 60 * 1000, // 1 minute
   });
+  
+  // Reset pagination when search query changes
+  useEffect(() => {
+    if (searchQuery !== prevSearchQuery.current) {
+      console.log("Search query changed:", prevSearchQuery.current, "->", searchQuery);
+      setPage(1);
+      setAllCommunities([]);
+      setHasMore(true);
+      prevSearchQuery.current = searchQuery;
+    }
+  }, [searchQuery]);
   
   // Update the combined list when new data arrives
   useEffect(() => {
@@ -60,14 +73,6 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
     }
   }, [communities, page]);
   
-  // Reset pagination when search query changes
-  useEffect(() => {
-    console.log("Search query changed to:", searchQuery);
-    setPage(1);
-    setAllCommunities([]);
-    setHasMore(true);
-  }, [searchQuery]);
-  
   // Load more when the load more element comes into view
   useEffect(() => {
     if (inView && hasMore && !isFetchingCommunities) {
@@ -82,6 +87,18 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
       setPage(prevPage => prevPage + 1);
     }
   }, [isFetchingCommunities, hasMore]);
+
+  // Force refetch when search is cleared
+  const handleRefreshData = useCallback(() => {
+    refetch();
+  }, [refetch]);
+  
+  // When search is cleared and we have no results, force a refresh
+  useEffect(() => {
+    if (!searchQuery && allCommunities.length === 0 && !isLoadingCommunities) {
+      handleRefreshData();
+    }
+  }, [searchQuery, allCommunities.length, isLoadingCommunities, handleRefreshData]);
   
   if (isLoadingCommunities && page === 1) {
     return (
@@ -101,11 +118,14 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
         <p className="mt-2 text-muted-foreground">
           Please try again later.
         </p>
+        <Button onClick={handleRefreshData} variant="outline" className="mt-4">
+          Try Again
+        </Button>
       </div>
     );
   }
 
-  if (allCommunities.length === 0 && !isLoadingCommunities) {
+  if (allCommunities.length === 0 && !isLoadingCommunities && !isFetchingCommunities) {
     return (
       <div className="w-full py-12 text-center">
         <h3 className="text-lg font-medium">No communities found</h3>
@@ -114,6 +134,11 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
             ? `No results found for "${searchQuery}". Try a different search term.` 
             : 'No communities available at the moment.'}
         </p>
+        {!searchQuery && (
+          <Button onClick={handleRefreshData} variant="outline" className="mt-4">
+            Refresh
+          </Button>
+        )}
       </div>
     );
   }

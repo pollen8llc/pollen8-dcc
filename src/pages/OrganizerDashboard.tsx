@@ -33,6 +33,7 @@ const OrganizerDashboard = () => {
     handleDeleteCommunity,
     confirmDeleteCommunity,
     activeDeletingId,
+    isActionInProgress
   } = useOrganizerDashboard();
 
   const communityName = communityToDelete 
@@ -53,6 +54,7 @@ const OrganizerDashboard = () => {
           <Button 
             onClick={() => navigate("/create-community")} 
             className="flex items-center gap-2"
+            disabled={isActionInProgress}
           >
             <PlusCircle className="h-4 w-4" />
             Create Community
@@ -87,6 +89,7 @@ const OrganizerDashboard = () => {
               isLoading={isLoading}
               managedCommunities={managedCommunities}
               onToggleVisibility={toggleCommunityVisibility}
+              isActionInProgress={isActionInProgress}
             />
           </TabsContent>
         </Tabs>
@@ -116,7 +119,11 @@ const OrganizerDashboard = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteCommunity} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction 
+              onClick={confirmDeleteCommunity} 
+              className="bg-destructive text-destructive-foreground"
+              disabled={isActionInProgress}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

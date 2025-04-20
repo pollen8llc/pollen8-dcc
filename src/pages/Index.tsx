@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import CommunityList from "@/components/CommunityList";
@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showDebugger, setShowDebugger] = useState(true);
+  const [showDebugger, setShowDebugger] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Pre-fetch communities for better UX with a shorter stale time to see updates sooner
   const { refetch } = useQuery({
@@ -23,11 +24,22 @@ const Index = () => {
   });
 
   const handleSearch = (query: string) => {
+    console.log("Search query changed in Index:", query);
     setSearchQuery(query);
   };
 
-  const handleRefresh = () => {
-    refetch();
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } catch (error) {
+      console.error("Error refreshing communities:", error);
+    } finally {
+      // Add a small delay to prevent UI flicker
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
   };
 
   // Toggle debugger with Ctrl+Shift+D
@@ -39,10 +51,10 @@ const Index = () => {
   };
 
   // Add keyboard listener
-  useState(() => {
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  });
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -72,8 +84,9 @@ const Index = () => {
               variant="ghost"
               size="icon"
               className="text-muted-foreground hover:text-foreground"
+              disabled={isRefreshing}
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
           
