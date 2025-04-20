@@ -110,7 +110,7 @@ export const useCreateCommunityForm = () => {
 
       addDebugLog('info', 'Checking user roles...');
       
-      // Check user roles using RPC to avoid permissions issues
+      // Use the RPC function to check roles safely without accessing auth.users directly
       const { data: roles, error: rolesError } = await supabase.rpc(
         'get_user_roles',
         { user_id: session.session.user.id }
@@ -122,6 +122,7 @@ export const useCreateCommunityForm = () => {
 
       addDebugLog('info', `Found roles: ${JSON.stringify(roles)}`);
       
+      // Determine if user has the required roles
       const hasPermission = roles && roles.some(role => 
         role === 'ADMIN' || role === 'ORGANIZER'
       );
@@ -147,7 +148,8 @@ export const useCreateCommunityForm = () => {
 
       addDebugLog('info', 'Inserting community into database...');
 
-      // Insert the community
+      // Insert the community - Important: notice we use user.id directly from the session
+      // and don't try to query the auth.users table
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
