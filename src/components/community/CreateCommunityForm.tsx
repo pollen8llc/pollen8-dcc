@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,11 +24,9 @@ export function CreateCommunityForm() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Check auth state explicitly
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [hasSession, setHasSession] = useState(false);
   
-  // Check auth state on mount
   useEffect(() => {
     const checkAuthState = async () => {
       try {
@@ -82,7 +79,6 @@ export function CreateCommunityForm() {
     try {
       setSubmissionError(null);
       
-      // Check authentication again before submission
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !sessionData.session) {
@@ -101,7 +97,6 @@ export function CreateCommunityForm() {
 
       console.log("Form submitted with data:", data);
       
-      // Validate date format
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(data.startDate)) {
         setSubmissionError("Invalid date format. Please use YYYY-MM-DD format.");
@@ -113,7 +108,6 @@ export function CreateCommunityForm() {
         return;
       }
       
-      // Transform the form data to match the structure expected by submitCommunity
       const communityData: CommunityFormSchema = {
         name: data.name,
         description: data.description,
@@ -129,7 +123,6 @@ export function CreateCommunityForm() {
         instagram: data.socialMediaHandles?.instagram || "",
         linkedin: data.socialMediaHandles?.linkedin || "",
         facebook: data.socialMediaHandles?.facebook || "",
-        // Convert size to number or use the schema's transform function to handle it
         size: data.size,
       };
       
@@ -148,7 +141,6 @@ export function CreateCommunityForm() {
     }
   };
 
-  // Debug logs to help diagnose form issues
   console.log("Form state:", {
     isValid: form.formState.isValid,
     errors: form.formState.errors,
@@ -162,7 +154,6 @@ export function CreateCommunityForm() {
   const handleValidationFailed = (errors: any) => {
     console.error("Form validation errors:", errors);
     
-    // Get the first error message for the toast
     const firstError = Object.entries(errors)[0];
     const fieldName = firstError[0];
     const errorMessage = (firstError[1] as { message?: string })?.message || 'Invalid field';

@@ -25,7 +25,7 @@ export interface Community {
   description: string;
   location: string;
   imageUrl: string;
-  communitySize: number; // Changed from memberCount to communitySize
+  communitySize: string; // Changed from number to string
   organizerIds: string[];
   memberIds: string[];
   tags: string[];

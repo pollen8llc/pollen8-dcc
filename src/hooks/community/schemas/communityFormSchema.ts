@@ -18,27 +18,11 @@ export const communityFormSchema = z.object({
   community_structure: z.string().optional(),
   vision: z.string().optional(),
   community_values: z.string().optional(),
-  // Add social media fields directly to the schema
   twitter: z.string().optional(),
   instagram: z.string().optional(),
   linkedin: z.string().optional(),
   facebook: z.string().optional(),
-  // Define size as either string or number, with proper transformation
-  size: z.union([
-    z.string(),
-    z.number()
-  ]).optional().transform(val => {
-    if (typeof val === 'string') {
-      // If it's a range like "1-100", extract the max number
-      if (val.includes('-')) {
-        const match = val.match(/\d+-(\d+)/);
-        return match ? parseInt(match[1]) : 0;
-      }
-      // If it's just a string, try to convert it to a number
-      return parseInt(val) || 0;
-    }
-    return val || 0;
-  }),
+  size: z.string().optional()
 });
 
 export type CommunityFormSchema = z.infer<typeof communityFormSchema>;
