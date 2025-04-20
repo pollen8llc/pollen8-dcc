@@ -17,7 +17,7 @@ interface CommunityTabsProps {
   communityId: string;
   organizers: User[];
   members: User[];
-  memberCount: number;
+  memberCount: string | number;
 }
 
 const CommunityTabs = ({ communityId, organizers, members, memberCount }: CommunityTabsProps) => {

@@ -1,80 +1,52 @@
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
-// Mock data and mapping functions for fallback
+// Mock communities for development and testing purposes
 export const mockCommunities = [
   {
-    id: '1',
-    name: 'Tech Enthusiasts',
-    description: 'A community for tech lovers',
-    location: 'San Francisco, CA',
-    imageUrl: '/placeholder.svg',
-    communitySize: 120,
-    organizerIds: ['1'],
-    memberIds: ['2', '3', '4'],
-    tags: ['Technology', 'Innovation', 'Software'],
-    isPublic: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
+    id: "1",
+    name: "Tech Enthusiasts",
+    description: "A community for tech lovers",
+    location: "San Francisco, CA",
+    imageUrl: "/placeholder.svg",
+    communitySize: "120",
+    organizerIds: ["1"],
+    memberIds: ["2", "3", "4"],
+    tags: ["Technology", "Innovation", "Software"],
+    isPublic: true
+  },
+  // ... other mock communities
 ];
 
-// Optimized mapper that only maps essential fields
-export const mapDbCommunity = (dbCommunity: any): Community => {
+export const mapLegacyCommunity = (legacyCommunity: any): Community => {
   return {
-    id: dbCommunity.id,
-    name: dbCommunity.name,
-    description: dbCommunity.description || '',
-    location: dbCommunity.location || 'Remote',
-    imageUrl: dbCommunity.logo_url || '/placeholder.svg',
-    communitySize: dbCommunity.member_count || 0,
-    organizerIds: dbCommunity.owner_id ? [dbCommunity.owner_id] : [],
-    memberIds: [],
-    tags: dbCommunity.target_audience || [],
-    isPublic: dbCommunity.is_public,
-    createdAt: dbCommunity.created_at || new Date().toISOString(),
-    updatedAt: dbCommunity.updated_at || new Date().toISOString()
+    id: legacyCommunity.id,
+    name: legacyCommunity.name,
+    description: legacyCommunity.description,
+    location: legacyCommunity.location,
+    imageUrl: legacyCommunity.imageUrl,
+    communitySize: legacyCommunity.communitySize?.toString() || "0",
+    organizerIds: legacyCommunity.organizerIds || [],
+    memberIds: legacyCommunity.memberIds || [],
+    tags: legacyCommunity.tags || [],
+    isPublic: legacyCommunity.isPublic,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 };
 
-// Map legacy mock data to our Community type
-export const mapLegacyCommunity = (community: any): Community => {
-  return {
-    ...community,
-    communitySize: community.communitySize || 0
-  };
-};
-
+/**
+ * Gets all communities with pagination
+ */
 export const getAllCommunities = async (page = 1, pageSize = 12): Promise<Community[]> => {
   try {
-    console.log(`Fetching communities: page ${page}, pageSize ${pageSize}`);
-    const startTime = Date.now();
+    console.log(`Getting communities: page ${page}, pageSize ${pageSize}`);
     
-    // Calculate the range for pagination
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize - 1;
-    
-    // Optimized query: Select only the columns we need
     const { data, error } = await supabase
       .from('communities')
-      .select(`
-        id, 
-        name, 
-        description, 
-        location, 
-        logo_url, 
-        member_count, 
-        owner_id, 
-        target_audience, 
-        is_public, 
-        created_at, 
-        updated_at
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
-      .range(start, end);
-    
-    const endTime = Date.now();
-    console.log(`Query executed in ${endTime - startTime}ms`);
+      .range((page - 1) * pageSize, page * pageSize - 1);
     
     if (error) {
       console.error("Error fetching communities:", error);
@@ -82,75 +54,58 @@ export const getAllCommunities = async (page = 1, pageSize = 12): Promise<Commun
     }
     
     if (!data || data.length === 0) {
-      console.log("No communities found in database, using mock data");
+      console.log("No communities found, returning mock data");
       return mockCommunities.map(mapLegacyCommunity);
     }
-    
-    const mappingStartTime = Date.now();
-    const communities = data.map(mapDbCommunity);
-    console.log(`Mapped ${communities.length} communities in ${Date.now() - mappingStartTime}ms`);
-    
+
+    const communities = data.map(community => {
+      // Type-safe handling of potentially non-object JSON fields
+      const communicationPlatforms = 
+        typeof community.communication_platforms === 'object' && community.communication_platforms !== null
+          ? community.communication_platforms
+          : {};
+          
+      const socialMedia = 
+        typeof community.social_media === 'object' && community.social_media !== null
+          ? community.social_media
+          : {};
+
+      return {
+        id: community.id,
+        name: community.name,
+        description: community.description || '',
+        location: community.location || 'Remote',
+        imageUrl: community.logo_url || '/placeholder.svg',
+        communitySize: community.member_count?.toString() || "0",
+        organizerIds: community.owner_id ? [community.owner_id] : [],
+        memberIds: [],
+        tags: community.target_audience || [],
+        isPublic: community.is_public,
+        createdAt: community.created_at || new Date().toISOString(),
+        updatedAt: community.updated_at || new Date().toISOString(),
+        website: community.website || '',
+        founder_name: community.founder_name || '',
+        role_title: community.role_title || '',
+        personal_background: community.personal_background || '',
+        community_structure: community.community_structure || '',
+        vision: community.vision || '',
+        community_values: community.community_values || '',
+        newsletterUrl: community.newsletter_url || '',
+        communication_platforms: communicationPlatforms,
+        socialMedia,
+        communityType: community.community_type || '',
+        format: community.format || '',
+        eventFrequency: community.event_frequency || '',
+        launchDate: community.start_date || null,
+        targetAudience: community.target_audience || [],
+        size_demographics: community.size_demographics || '1-100'
+      };
+    });
+
+    console.log(`Found ${communities.length} communities`);
     return communities;
   } catch (err) {
     console.error("Error in getAllCommunities:", err);
     return mockCommunities.map(mapLegacyCommunity);
-  }
-};
-
-// Implement server-side search
-export const searchCommunitiesServer = async (query: string, page = 1, pageSize = 12): Promise<Community[]> => {
-  try {
-    console.log(`Searching communities with query "${query}": page ${page}, pageSize ${pageSize}`);
-    const startTime = Date.now();
-    
-    // Calculate the range for pagination
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize - 1;
-    
-    // Search query using ilike for case-insensitive matching
-    const { data, error } = await supabase
-      .from('communities')
-      .select(`
-        id, 
-        name, 
-        description, 
-        location, 
-        logo_url, 
-        member_count, 
-        owner_id, 
-        target_audience, 
-        is_public, 
-        created_at, 
-        updated_at
-      `)
-      .or(`
-        name.ilike.%${query}%,
-        description.ilike.%${query}%,
-        location.ilike.%${query}%
-      `)
-      .order('created_at', { ascending: false })
-      .range(start, end);
-    
-    const endTime = Date.now();
-    console.log(`Search executed in ${endTime - startTime}ms`);
-    
-    if (error) {
-      console.error("Error searching communities:", error);
-      return [];
-    }
-    
-    if (!data || data.length === 0) {
-      console.log("No communities found matching search criteria");
-      return [];
-    }
-    
-    const mappingStartTime = Date.now();
-    const communities = data.map(mapDbCommunity);
-    console.log(`Mapped ${communities.length} search results in ${Date.now() - mappingStartTime}ms`);
-    
-    return communities;
-  } catch (err) {
-    console.error("Error in searchCommunitiesServer:", err);
-    return [];
   }
 };
