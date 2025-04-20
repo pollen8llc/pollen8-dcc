@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import UserHeader from './drawer/UserHeader';
 import MainNavigation from './drawer/MainNavigation';
 import AdminNavigation from './drawer/AdminNavigation';
-import OrganizerNavigation from './drawer/OrganizerNavigation';
+// Removed OrganizerNavigation import because the module is missing and this feature is removed
 import AuthActions from './drawer/AuthActions';
 
 interface NavigationDrawerProps {
@@ -81,12 +81,7 @@ const NavigationDrawer = ({
             )}
 
             {/* Organizer section */}
-            {showOrganizerNav && !isAdmin && (
-              <>
-                <Separator className="my-4" />
-                <OrganizerNavigation onNavigate={handleNavigation} />
-              </>
-            )}
+            {/* Removed OrganizerNavigation usage completely as requested */}
 
             {/* Auth actions */}
             <Separator className="my-4" />
@@ -103,3 +98,4 @@ const NavigationDrawer = ({
 };
 
 export default NavigationDrawer;
+
