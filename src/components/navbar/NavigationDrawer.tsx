@@ -23,6 +23,11 @@ interface NavigationDrawerProps {
 // A utility type for managed community info
 type DrawerCommunity = { id: string; name: string | null };
 
+// Type guard to check if an item is a community object with an id
+function isCommunityObject(item: any): item is { id: string } {
+  return item && typeof item === 'object' && 'id' in item;
+}
+
 const NavigationDrawer = ({
   open,
   onOpenChange,
@@ -43,7 +48,7 @@ const NavigationDrawer = ({
   // For actual community info display in the drawer
   const [drawerCommunities, setDrawerCommunities] = useState<DrawerCommunity[]>([]);
 
-  // Fetch names when drawer opens and user has managed communities (string[])
+  // Fetch names when drawer opens and user has managed communities
   useEffect(() => {
     const fetchCommunities = async () => {
       if (
@@ -52,10 +57,15 @@ const NavigationDrawer = ({
         currentUser.managedCommunities &&
         currentUser.managedCommunities.length > 0
       ) {
-        // Remove dupes and nulls; support both string and object for future-compat
+        // Extract IDs from managedCommunities, which could be either strings or objects
         const ids = currentUser.managedCommunities
-          .map((c) => typeof c === "string" ? c : c.id)
-          .filter(Boolean);
+          .map((c) => {
+            if (typeof c === "string") return c;
+            return isCommunityObject(c) ? c.id : null;
+          })
+          .filter(Boolean) as string[];
+
+        if (ids.length === 0) return;
 
         // Fetch their details (names)
         const { data, error } = await supabase
