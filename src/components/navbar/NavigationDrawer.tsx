@@ -10,6 +10,7 @@ import UserHeader from './drawer/UserHeader';
 import MainNavigation from './drawer/MainNavigation';
 import AdminNavigation from './drawer/AdminNavigation';
 import AuthActions from './drawer/AuthActions';
+import { Folder } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface NavigationDrawerProps {
@@ -23,7 +24,7 @@ interface NavigationDrawerProps {
 // Type for items in managedCommunities (string IDs or objects)
 type ManagedCommunityItem = string | { id: string; [key: string]: any };
 
-// A utility type for managed community info used in the drawer
+// Community info for display
 type DrawerCommunity = { id: string; name: string | null };
 
 const NavigationDrawer = ({
@@ -36,10 +37,7 @@ const NavigationDrawer = ({
   const navigate = useNavigate();
   const isAdmin = currentUser?.role === UserRole.ADMIN;
 
-  // Show organizer navigation if:
-  // - User is ORGANIZER or
-  // - has managedCommunities or
-  // - isOrganizer() returns true
+  // Organizers/owners only
   const showOrganizerNav =
     !!currentUser &&
     (currentUser.role === UserRole.ORGANIZER ||
@@ -48,16 +46,15 @@ const NavigationDrawer = ({
 
   const [drawerCommunities, setDrawerCommunities] = useState<DrawerCommunity[]>([]);
 
-  // Fetch community names when the drawer opens and user has managed communities
+  // Load communities if drawer open & user manages them
   useEffect(() => {
     const fetchCommunities = async () => {
       if (
         open &&
-        currentUser &&
-        currentUser.managedCommunities &&
+        currentUser?.managedCommunities &&
         currentUser.managedCommunities.length > 0
       ) {
-        // Create a string-ID array regardless of managedCommunity entry type
+        // Normalize IDs from managedCommunities
         const ids: string[] = currentUser.managedCommunities.map((community: ManagedCommunityItem) => {
           if (typeof community === "string") return community;
           if (community && typeof community === "object" && "id" in community) return community.id;
@@ -69,7 +66,7 @@ const NavigationDrawer = ({
           return;
         }
 
-        // Fetch names from Supabase for these community IDs
+        // Fetch community names via IDs
         const { data, error } = await supabase
           .from('communities')
           .select('id, name')
@@ -83,7 +80,6 @@ const NavigationDrawer = ({
             })
           );
         } else {
-          // fallback: just display IDs
           setDrawerCommunities(ids.map((id) => ({ id, name: null })));
         }
       } else {
@@ -124,14 +120,14 @@ const NavigationDrawer = ({
           )}
 
           <div className="grid gap-2 py-2">
-            {/* Main navigation - always shown */}
+            {/* Main site navigation */}
             <MainNavigation
               onNavigate={handleNavigation}
               currentUser={!!currentUser}
               isAdmin={isAdmin}
             />
 
-            {/* Admin section (system admin only) */}
+            {/* ADMIN section */}
             {isAdmin && (
               <>
                 <Separator className="my-4" />
@@ -139,7 +135,7 @@ const NavigationDrawer = ({
               </>
             )}
 
-            {/* Organizer section (role or has managed communities) */}
+            {/* ORGANIZER menu, if any managed communities */}
             {showOrganizerNav && drawerCommunities.length > 0 && (
               <>
                 <Separator className="my-4" />
@@ -151,17 +147,21 @@ const NavigationDrawer = ({
                     <Button
                       key={community.id}
                       variant="ghost"
-                      className="justify-start"
+                      className="justify-start flex gap-2 items-center"
                       onClick={() => handleNavigation(`/organizer/community/${community.id}`)}
                     >
-                      <span>{community.name || `Community ${community.id}`}</span>
+                      <Folder className="w-4 h-4 mr-1" />
+                      <span>
+                        {community.name ? community.name : `Community ${community.id}`}
+                      </span>
+                      <span className="ml-auto text-xs text-muted-foreground">Manage</span>
                     </Button>
                   ))}
                 </div>
               </>
             )}
 
-            {/* Auth actions */}
+            {/* Auth (login/logout) actions */}
             <Separator className="my-4" />
             <AuthActions
               currentUser={!!currentUser}
