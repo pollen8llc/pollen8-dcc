@@ -53,25 +53,44 @@ export const useCreateCommunityForm = () => {
   const onSubmit = async (data: CommunityFormData) => {
     try {
       setIsSubmitting(true);
-      console.log("Submitting form with data:", data);
+      console.log("Submitting form with data:", JSON.stringify(data, null, 2));
       
+      // Check for authentication
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
         throw new Error("You must be logged in to create a community");
       }
-
+      
       // Process target audience as an array
       const targetAudienceArray = data.targetAudience
         .split(',')
         .map(item => item.trim())
         .filter(item => item.length > 0);
-
+      
       // Process platforms as an object for the database
       const communicationPlatforms = data.platforms.reduce((acc, platform) => {
         acc[platform] = { enabled: true };
         return acc;
       }, {} as Record<string, any>);
+      
+      // Format social media data
+      const socialMedia = data.socialMediaHandles || {};
+      
+      console.log("Transformed data ready for Supabase:", {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        format: data.format,
+        location: data.location,
+        target_audience: targetAudienceArray,
+        communication_platforms: communicationPlatforms,
+        website: data.website || null,
+        newsletter_url: data.newsletterUrl || null,
+        social_media: socialMedia,
+        owner_id: session.session.user.id
+      });
 
+      // Insert into communities table
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
@@ -84,7 +103,7 @@ export const useCreateCommunityForm = () => {
           communication_platforms: communicationPlatforms,
           website: data.website || null,
           newsletter_url: data.newsletterUrl || null,
-          social_media: data.socialMediaHandles || {},
+          social_media: socialMedia,
           owner_id: session.session.user.id,
           is_public: true,
           member_count: 1 // Start with 1 member (the owner)
@@ -96,13 +115,15 @@ export const useCreateCommunityForm = () => {
         console.error("Error creating community:", error);
         throw error;
       }
+      
+      console.log("Community created successfully:", community);
 
       toast({
         title: "Success!",
         description: "Your community has been created.",
       });
 
-      // Delay navigation slightly to show success state
+      // Navigate to the community page after a short delay
       setTimeout(() => {
         navigate(`/community/${community.id}`);
       }, 1500);
