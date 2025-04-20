@@ -6,6 +6,7 @@ import { CommunityFormData } from "@/schemas/communitySchema";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import CommunityCardPreview from "./CommunityCardPreview";
 
 interface ReviewSubmitStepProps {
   form: UseFormReturn<CommunityFormData>;
@@ -119,11 +120,9 @@ export function ReviewSubmitStep({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-5">Review & Submit</h2>
-      <div className="space-y-2 bg-muted/30 px-4 py-3 rounded">
-        <pre className="overflow-x-auto whitespace-pre-wrap text-xs">
-          {JSON.stringify(values, null, 2)}
-        </pre>
+      <h2 className="text-xl font-semibold mb-5 text-center">Preview & Submit</h2>
+      <div className="flex justify-center mb-4">
+        <CommunityCardPreview formValues={values} />
       </div>
       {error && (
         <div className="mt-4 text-sm text-red-600 bg-red-100 px-3 py-2 rounded">
@@ -163,3 +162,4 @@ export function ReviewSubmitStep({
     </div>
   );
 }
+
