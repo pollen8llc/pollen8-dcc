@@ -21,11 +21,12 @@ export default function CommunityCreationTest() {
     onSubmit: directOnSubmit
   } = useCreateCommunityForm();
   
-  // Test service layer hook - this one uses submitCommunity
+  // Test service layer hook - this one uses handleSubmit
   const {
+    form,
     isSubmitting: isSubmittingService,
     submissionError: serviceError,
-    submitCommunity
+    handleSubmit
   } = useCommunityForm();
 
   // Test submission handlers
@@ -68,9 +69,13 @@ export default function CommunityCreationTest() {
         location: "Test Location",
       };
       
-      // Submit community data through the service directly
-      await submitCommunity(testData);
-      console.log("Service submission completed");
+      // Use the form's handleSubmit method instead of directly calling submitCommunity
+      form.handleSubmit((data) => {
+        console.log("Form data:", data);
+        // The actual submission is handled internally by the hook
+      })(new Event('submit') as any);
+      
+      console.log("Service submission initiated");
     } catch (error) {
       console.error("Service submission error:", error);
     }
