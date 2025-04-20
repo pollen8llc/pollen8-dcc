@@ -2,12 +2,12 @@
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
-// Mock communities for development and testing purposes
+// Expanded mock communities for development and testing purposes
 export const mockCommunities = [
   {
     id: "1",
     name: "Tech Enthusiasts",
-    description: "A community for tech lovers",
+    description: "A community for tech lovers exploring the latest in software, hardware, and innovations.",
     location: "San Francisco, CA",
     imageUrl: "/placeholder.svg",
     communitySize: "120",
@@ -16,7 +16,54 @@ export const mockCommunities = [
     tags: ["Technology", "Innovation", "Software"],
     isPublic: true
   },
-  // ... other mock communities
+  {
+    id: "2",
+    name: "Eco Warriors",
+    description: "Dedicated to environmental activism and sustainability efforts in urban areas.",
+    location: "Portland, OR",
+    imageUrl: "/placeholder.svg",
+    communitySize: "85",
+    organizerIds: ["5"],
+    memberIds: ["6", "7", "8"],
+    tags: ["Environment", "Activism", "Sustainability"],
+    isPublic: true
+  },
+  {
+    id: "3",
+    name: "Art Collective",
+    description: "A vibrant group of artists sharing ideas, projects, and exhibitions.",
+    location: "Brooklyn, NY",
+    imageUrl: "/placeholder.svg",
+    communitySize: "65",
+    organizerIds: ["9"],
+    memberIds: ["10", "11", "12"],
+    tags: ["Art", "Creativity", "Exhibition"],
+    isPublic: true
+  },
+  {
+    id: "4",
+    name: "Fitness Friends",
+    description: "Community focused on fitness, wellness, and active lifestyles.",
+    location: "Austin, TX",
+    imageUrl: "/placeholder.svg",
+    communitySize: "150",
+    organizerIds: ["13"],
+    memberIds: ["14", "15", "16"],
+    tags: ["Fitness", "Wellness", "Health"],
+    isPublic: true
+  },
+  {
+    id: "5",
+    name: "Book Lovers",
+    description: "Readers and writers coming together to discuss literature and writing.",
+    location: "Seattle, WA",
+    imageUrl: "/placeholder.svg",
+    communitySize: "95",
+    organizerIds: ["17"],
+    memberIds: ["18", "19", "20"],
+    tags: ["Books", "Literature", "Writing"],
+    isPublic: true
+  }
 ];
 
 // Export this function for use in other files
