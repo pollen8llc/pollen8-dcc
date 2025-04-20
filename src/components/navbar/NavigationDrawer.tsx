@@ -5,10 +5,10 @@ import { User, UserRole } from "@/models/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import UserHeader from './drawer/UserHeader';
 import MainNavigation from './drawer/MainNavigation';
 import AdminNavigation from './drawer/AdminNavigation';
-// Removed OrganizerNavigation import because the module is missing and this feature is removed
 import AuthActions from './drawer/AuthActions';
 
 interface NavigationDrawerProps {
@@ -80,24 +80,29 @@ const NavigationDrawer = ({
             )}
 
             {/* Organizer section */}
-            {showOrganizerNav && currentUser.managedCommunities && currentUser.managedCommunities.length > 0 && (
+            {showOrganizerNav && currentUser && currentUser.managedCommunities && currentUser.managedCommunities.length > 0 && (
               <>
                 <Separator className="my-4" />
                 <div className="px-2 mb-2 text-sm font-semibold text-muted-foreground">
                   Manage Communities
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
-                  {currentUser.managedCommunities.map((community) => (
-                    <Button 
-                      key={community.id}
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation(`/organizer/community/${community.id}`)}
-                    >
-                      {/* Optionally add an icon here if you like */}
-                      <span>{community.name}</span>
-                    </Button>
-                  ))}
+                  {currentUser.managedCommunities.map((community) => {
+                    // Check if it's a string or an object with id and name properties
+                    const communityId = typeof community === 'string' ? community : community.id;
+                    const communityName = typeof community === 'string' ? community : community.name;
+                    
+                    return (
+                      <Button 
+                        key={communityId}
+                        variant="ghost"
+                        className="justify-start"
+                        onClick={() => handleNavigation(`/organizer/community/${communityId}`)}
+                      >
+                        <span>{communityName}</span>
+                      </Button>
+                    );
+                  })}
                 </div>
               </>
             )}
@@ -117,4 +122,3 @@ const NavigationDrawer = ({
 };
 
 export default NavigationDrawer;
-
