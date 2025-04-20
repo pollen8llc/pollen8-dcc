@@ -55,6 +55,9 @@ export function ReviewSubmitStep({
         return acc;
       }, {} as Record<string, any>);
 
+      // Convert Date to ISO string for Supabase
+      const startDateString = values.startDate ? values.startDate.toISOString() : null;
+
       // Compose insert object
       const insertObj = {
         name: values.name,
@@ -70,7 +73,7 @@ export function ReviewSubmitStep({
         owner_id: sessionData.session.user.id,
         is_public: true,
         member_count: 1,
-        start_date: values.startDate || null,
+        start_date: startDateString,
         community_size: values.communitySize || null,
         event_frequency: values.eventFrequency || null
       };
