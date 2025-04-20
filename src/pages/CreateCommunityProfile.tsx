@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -5,6 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AlertCircle } from "lucide-react";
 
 const defaultPlatforms = [
   "Discord", "Slack", "WhatsApp", "Luma", "Meetup", "Circle"
@@ -23,12 +34,36 @@ export default function CreateCommunityProfile() {
     linkedin: "",
     facebook: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Clear error when field is edited
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleSelectChange = (value: string, name: string) => {
+    setForm({ ...form, [name]: value });
+    
+    // Clear error when field is edited
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleCheckbox = (platform: string) => {
@@ -40,10 +75,48 @@ export default function CreateCommunityProfile() {
     }));
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!form.name.trim()) {
+      newErrors.name = "Name is required";
+    }
+    
+    if (!form.description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (form.description.trim().length < 10) {
+      newErrors.description = "Description must be at least 10 characters";
+    }
+    
+    if (!form.type) {
+      newErrors.type = "Type is required";
+    }
+    
+    if (!form.location.trim()) {
+      newErrors.location = "Location is required";
+    }
+    
+    if (form.website && !/^https?:\/\/.+/.test(form.website)) {
+      newErrors.website = "Please enter a valid URL starting with http:// or https://";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fix the errors in the form",
+      });
+      return;
+    }
+    
     setLoading(true);
-    // Add any basic validation here if needed
 
     try {
       // Get current user
@@ -97,118 +170,181 @@ export default function CreateCommunityProfile() {
     }
   };
 
+  const renderFieldError = (fieldName: string) => {
+    if (!errors[fieldName]) return null;
+    return (
+      <div className="text-red-500 text-xs flex items-center mt-1">
+        <AlertCircle className="w-3 h-3 mr-1" />
+        {errors[fieldName]}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background py-12 px-4">
       <div className="w-full max-w-xl rounded-xl shadow-lg p-8 bg-card border border-primary/10 space-y-6">
         <h2 className="text-3xl font-bold mb-2 text-center">Create Community Profile</h2>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label className="block font-medium mb-1">Name *</label>
+            <Label htmlFor="name" className="font-medium">
+              Name <span className="text-red-500">*</span>
+            </Label>
             <Input
+              id="name"
               name="name"
               value={form.name}
               onChange={handleChange}
-              required
+              className={errors.name ? "border-red-500" : ""}
               placeholder="Your Community Name"
             />
+            {renderFieldError("name")}
           </div>
+          
           <div>
-            <label className="block font-medium mb-1">Description *</label>
+            <Label htmlFor="description" className="font-medium">
+              Description <span className="text-red-500">*</span>
+            </Label>
             <Textarea
+              id="description"
               name="description"
               value={form.description}
               onChange={handleChange}
-              required
+              className={errors.description ? "border-red-500" : ""}
               minLength={10}
-              placeholder="Describe your community"
+              placeholder="Describe your community (min 10 characters)"
             />
+            {renderFieldError("description")}
           </div>
+          
           <div>
-            <label className="block font-medium mb-1">Type *</label>
-            <select
-              name="type"
-              className="w-full border rounded py-2 px-3"
-              value={form.type}
-              onChange={handleChange}
-              required
+            <Label htmlFor="type" className="font-medium">
+              Type <span className="text-red-500">*</span>
+            </Label>
+            <Select 
+              value={form.type} 
+              onValueChange={(value) => handleSelectChange(value, "type")}
             >
-              <option value="">Select type...</option>
-              <option value="tech">Tech</option>
-              <option value="wellness">Wellness</option>
-              <option value="creative">Creative</option>
-              <option value="professional">Professional</option>
-              <option value="social-impact">Social Impact</option>
-              <option value="education">Education</option>
-              <option value="social">Social</option>
-              <option value="other">Other</option>
-            </select>
+              <SelectTrigger id="type" className={errors.type ? "border-red-500" : ""}>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tech">Tech</SelectItem>
+                <SelectItem value="wellness">Wellness</SelectItem>
+                <SelectItem value="creative">Creative</SelectItem>
+                <SelectItem value="professional">Professional</SelectItem>
+                <SelectItem value="social-impact">Social Impact</SelectItem>
+                <SelectItem value="education">Education</SelectItem>
+                <SelectItem value="social">Social</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+            {renderFieldError("type")}
           </div>
+          
           <div>
-            <label className="block font-medium mb-1">Location *</label>
+            <Label htmlFor="location" className="font-medium">
+              Location <span className="text-red-500">*</span>
+            </Label>
             <Input
+              id="location"
               name="location"
               value={form.location}
               onChange={handleChange}
+              className={errors.location ? "border-red-500" : ""}
               placeholder="City, Region, or Global"
-              required
             />
+            {renderFieldError("location")}
           </div>
+          
           <div>
-            <label className="block font-medium mb-1">Website</label>
+            <Label htmlFor="website" className="font-medium">
+              Website
+            </Label>
             <Input
+              id="website"
               name="website"
               type="url"
               value={form.website}
               onChange={handleChange}
+              className={errors.website ? "border-red-500" : ""}
               placeholder="https://yourcommunity.com"
             />
+            {renderFieldError("website")}
           </div>
+          
           <div>
-            <label className="block font-medium mb-1">Platforms</label>
-            <div className="flex flex-wrap gap-4 mb-2">
+            <Label className="font-medium block mb-2">Platforms</Label>
+            <div className="flex flex-wrap gap-4">
               {defaultPlatforms.map(platform => (
                 <div key={platform} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id={platform}
                     checked={form.platforms.includes(platform)}
-                    onChange={() => handleCheckbox(platform)}
+                    onCheckedChange={() => handleCheckbox(platform)}
                   />
-                  <label htmlFor={platform}>{platform}</label>
+                  <Label htmlFor={platform} className="cursor-pointer text-sm font-normal">
+                    {platform}
+                  </Label>
                 </div>
               ))}
             </div>
           </div>
+          
           <div>
-            <label className="block font-medium mb-1">Socials</label>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                name="twitter"
-                value={form.twitter}
-                onChange={handleChange}
-                placeholder="Twitter handle"
-              />
-              <Input
-                name="instagram"
-                value={form.instagram}
-                onChange={handleChange}
-                placeholder="Instagram handle"
-              />
-              <Input
-                name="linkedin"
-                value={form.linkedin}
-                onChange={handleChange}
-                placeholder="LinkedIn URL"
-              />
-              <Input
-                name="facebook"
-                value={form.facebook}
-                onChange={handleChange}
-                placeholder="Facebook URL"
-              />
+            <Label className="font-medium block mb-2">Socials</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="twitter" className="text-sm">Twitter</Label>
+                <Input
+                  id="twitter"
+                  name="twitter"
+                  value={form.twitter}
+                  onChange={handleChange}
+                  placeholder="Twitter handle"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="instagram" className="text-sm">Instagram</Label>
+                <Input
+                  id="instagram"
+                  name="instagram"
+                  value={form.instagram}
+                  onChange={handleChange}
+                  placeholder="Instagram handle"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="linkedin" className="text-sm">LinkedIn</Label>
+                <Input
+                  id="linkedin"
+                  name="linkedin"
+                  value={form.linkedin}
+                  onChange={handleChange}
+                  placeholder="LinkedIn URL"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="facebook" className="text-sm">Facebook</Label>
+                <Input
+                  id="facebook"
+                  name="facebook"
+                  value={form.facebook}
+                  onChange={handleChange}
+                  placeholder="Facebook URL"
+                  className="mt-1"
+                />
+              </div>
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          
+          <Button 
+            type="submit" 
+            className="w-full mt-6" 
+            disabled={loading}
+          >
             {loading ? "Creating..." : "Create Community"}
           </Button>
         </form>
