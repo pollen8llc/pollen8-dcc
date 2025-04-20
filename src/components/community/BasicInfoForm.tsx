@@ -13,12 +13,14 @@ interface BasicInfoFormProps {
 export function BasicInfoForm({ form }: BasicInfoFormProps) {
   return (
     <div className="space-y-6">
+      <h3 className="text-lg font-semibold">Basic Information</h3>
+      
       <FormField
         control={form.control}
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Community Name</FormLabel>
+            <FormLabel>Community Name *</FormLabel>
             <FormControl>
               <Input placeholder="Enter community name" {...field} />
             </FormControl>
@@ -32,7 +34,7 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>Description *</FormLabel>
             <FormControl>
               <Textarea 
                 placeholder="Describe your community"
@@ -51,7 +53,7 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
           name="communityType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Community Type</FormLabel>
+              <FormLabel>Community Type *</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -79,9 +81,28 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location</FormLabel>
+              <FormLabel>Location *</FormLabel>
               <FormControl>
                 <Input placeholder="City, Region, or Global" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="startDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Start Date *</FormLabel>
+              <FormControl>
+                <Input 
+                  type="date" 
+                  {...field} 
+                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -93,7 +114,7 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
           name="format"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Format</FormLabel>
+              <FormLabel>Format *</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -116,7 +137,7 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
           name="size"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Community Size</FormLabel>
+              <FormLabel>Community Size *</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -141,7 +162,7 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
           name="eventFrequency"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Event Frequency</FormLabel>
+              <FormLabel>Event Frequency *</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
@@ -167,7 +188,7 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
           name="targetAudience"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Target Audience</FormLabel>
+              <FormLabel>Target Audience *</FormLabel>
               <FormControl>
                 <Input 
                   placeholder="e.g., developers, designers, entrepreneurs" 

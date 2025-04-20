@@ -8,10 +8,56 @@ export const useCreateCommunity = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const validateFormData = (data: CommunityFormData): boolean => {
+    // Add validation checks for critical fields
+    if (!data.name || data.name.length < 3) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Community name is required and must be at least 3 characters.",
+      });
+      return false;
+    }
+    
+    if (!data.description || data.description.length < 10) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Description is required and must be at least 10 characters.",
+      });
+      return false;
+    }
+    
+    if (!data.startDate) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Start date is required.",
+      });
+      return false;
+    }
+    
+    if (!data.targetAudience) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Target audience is required.",
+      });
+      return false;
+    }
+    
+    return true;
+  };
+
   const createCommunity = async (data: CommunityFormData) => {
     try {
       setIsSubmitting(true);
       console.log("Creating community with data:", data);
+      
+      // Validate data before proceeding
+      if (!validateFormData(data)) {
+        throw new Error("Form validation failed");
+      }
       
       const { data: session, error: sessionError } = await supabase.auth.getSession();
       
@@ -42,8 +88,8 @@ export const useCreateCommunity = () => {
         return acc;
       }, {} as Record<string, any>);
 
-      // Debug information
-      console.log("Creating community with processed data:", {
+      // Debug information - pre-insert validation
+      console.log("Community data ready for insertion:", {
         name: data.name,
         description: data.description,
         community_type: data.communityType,
@@ -68,11 +114,11 @@ export const useCreateCommunity = () => {
           community_type: data.communityType,
           location: data.location,
           owner_id: session.session.user.id,
-          format: data.format || "hybrid",
+          format: data.format,
           start_date: startDateISO,
           target_audience: targetAudienceArray,
           size_demographics: data.size,
-          event_frequency: data.eventFrequency || "monthly",
+          event_frequency: data.eventFrequency,
           communication_platforms: communicationPlatformsObject,
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",

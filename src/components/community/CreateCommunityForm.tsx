@@ -30,7 +30,7 @@ export function CreateCommunityForm() {
       description: "",
       communityType: "tech",
       location: "",
-      startDate: new Date().toISOString(),
+      startDate: new Date().toISOString().split('T')[0],
       targetAudience: "",
       format: "hybrid",
       size: "1-100",
@@ -45,6 +45,7 @@ export function CreateCommunityForm() {
       },
       platforms: [],
     },
+    mode: "onSubmit",
   });
 
   const onSubmit = async (data: CommunityFormData) => {
@@ -81,27 +82,36 @@ export function CreateCommunityForm() {
     }
   };
 
-  // Add debug log to verify form state and submission
+  // Debug logs to help diagnose form issues
   console.log("Form state:", {
     isValid: form.formState.isValid,
     errors: form.formState.errors,
     dirtyFields: form.formState.dirtyFields,
+    values: form.getValues(),
     isSubmitting: isSubmitting
   });
+
+  const handleValidationFailed = (errors: any) => {
+    console.error("Form validation errors:", errors);
+    
+    // Get the first error message for the toast
+    const firstError = Object.entries(errors)[0];
+    const fieldName = firstError[0];
+    const errorMessage = (firstError[1] as { message?: string })?.message || 'Invalid field';
+    
+    toast({
+      variant: "destructive",
+      title: "Validation Error",
+      description: `${fieldName}: ${errorMessage}`,
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Create Your Community</h1>
       
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-          console.error("Form validation errors:", errors);
-          toast({
-            variant: "destructive",
-            title: "Validation error",
-            description: "Please fix the errors in the form before submitting.",
-          });
-        })} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit, handleValidationFailed)} className="space-y-8">
           {submissionError && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
