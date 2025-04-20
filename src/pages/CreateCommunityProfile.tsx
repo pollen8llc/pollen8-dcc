@@ -22,6 +22,9 @@ import {
   TagsStep,
   ReviewSubmitStep,
 } from "@/components/community/form-steps";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const FORM_STEPS = [
   "welcome",
@@ -71,7 +74,82 @@ export default function CreateCommunityProfile() {
   const totalSteps = FORM_STEPS.length;
   const progress = Math.round((stepIdx + 1) / totalSteps * 100);
 
-  // On submit is handled in the Review step
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // SUBMIT: Insert data and redirect to new profile
+  const handleActualSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const values = methods.getValues();
+      // Map data for DB as in your community creation logic
+      const targetAudienceArray = values.targetAudience
+        ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+        : [];
+
+      const communicationPlatforms = (values.platforms || []).reduce((acc, platform) => {
+        acc[platform] = { enabled: true };
+        return acc;
+      }, {} as Record<string, any>);
+
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.session?.user) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "You must be logged in to create a community.",
+        });
+        return;
+      }
+
+      const { data: community, error: insertError } = await supabase
+        .from("communities")
+        .insert({
+          name: values.name,
+          description: values.description,
+          type: values.type,
+          format: values.format,
+          location: values.location || "Remote",
+          target_audience: targetAudienceArray,
+          communication_platforms: communicationPlatforms,
+          website: values.website || null,
+          newsletter_url: values.newsletterUrl || null,
+          social_media: values.socialMediaHandles || {},
+          owner_id: session.session.user.id,
+          is_public: true,
+          member_count: 1,
+        })
+        .select()
+        .single();
+
+      if (insertError || !community) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: insertError?.message || "Failed to create community.",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Community created successfully!",
+      });
+      setTimeout(() => {
+        navigate(`/community/${community.id}`);
+      }, 200);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create community.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNext = async () => {
     if (stepIdx < FORM_STEPS.length - 1) {
       setStepIdx((idx) => idx + 1);
@@ -84,10 +162,8 @@ export default function CreateCommunityProfile() {
     }
   };
 
-  // Map current step to component
   const currentStepKey = FORM_STEPS[stepIdx];
-  
-  // Render the current step component
+
   const renderStepComponent = () => {
     switch (currentStepKey) {
       case "welcome":
@@ -144,11 +220,12 @@ export default function CreateCommunityProfile() {
         );
       case "review":
         return (
-          <ReviewSubmitStep 
-            form={methods} 
-            onPrev={handlePrev} 
-            isSubmitting={isSubmitting} 
-            setIsSubmitting={setIsSubmitting} 
+          <ReviewSubmitStep
+            form={methods}
+            onPrev={handlePrev}
+            isSubmitting={isSubmitting}
+            setIsSubmitting={setIsSubmitting}
+            onActualSubmit={handleActualSubmit}
           />
         );
       default:
