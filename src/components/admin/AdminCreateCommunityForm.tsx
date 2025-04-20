@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +21,7 @@ export function AdminCreateCommunityForm() {
   const { data: users } = useQuery({
     queryKey: ['users-for-community'],
     queryFn: async () => {
+      // Use the profiles table instead of auth.users
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('id, email, first_name, last_name');

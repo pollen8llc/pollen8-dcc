@@ -40,6 +40,8 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           selected={value}
           onSelect={onChange}
           initialFocus
+          fromYear={2000}
+          toYear={2030}
           className={cn("p-3 pointer-events-auto")}
         />
       </PopoverContent>

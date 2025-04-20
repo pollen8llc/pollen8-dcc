@@ -80,7 +80,7 @@ export const useCreateCommunity = () => {
       const socialMediaObject = data.socialMediaHandles || {};
 
       // Ensure the start date is a valid ISO string
-      const startDateISO = new Date(data.startDate).toISOString();
+      const startDateISO = data.startDate ? new Date(data.startDate).toISOString() : new Date().toISOString();
 
       // Prepare communication platforms as a JSON object
       const communicationPlatformsObject = data.platforms?.reduce((acc, platform) => {
@@ -106,6 +106,7 @@ export const useCreateCommunity = () => {
         social_media: socialMediaObject
       });
 
+      // Make sure we only send data to columns that exist in the table
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
