@@ -9,6 +9,7 @@ import { FormSocialMedia } from "@/components/community/form-sections/FormSocial
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
+import { Form } from "@/components/ui/form";
 
 export default function CreateCommunityProfile() {
   const { 
@@ -64,81 +65,83 @@ export default function CreateCommunityProfile() {
 
         {/* Main content area with animation */}
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="p-6 md:p-8">
-              <AnimatePresence mode="wait">
-                {activeTab === "basic-info" && (
-                  <motion.div
-                    key="basic-info"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h2 className="text-2xl font-bold mb-6">Basic Community Information</h2>
-                    <FormBasicInfo form={form} />
-                  </motion.div>
-                )}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="p-6 md:p-8">
+                <AnimatePresence mode="wait">
+                  {activeTab === "basic-info" && (
+                    <motion.div
+                      key="basic-info"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <h2 className="text-2xl font-bold mb-6">Basic Community Information</h2>
+                      <FormBasicInfo form={form} />
+                    </motion.div>
+                  )}
 
-                {activeTab === "platforms" && (
-                  <motion.div
-                    key="platforms"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h2 className="text-2xl font-bold mb-6">Communication Platforms</h2>
-                    <FormPlatforms form={form} />
-                  </motion.div>
-                )}
+                  {activeTab === "platforms" && (
+                    <motion.div
+                      key="platforms"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <h2 className="text-2xl font-bold mb-6">Communication Platforms</h2>
+                      <FormPlatforms form={form} />
+                    </motion.div>
+                  )}
 
-                {activeTab === "social-media" && (
-                  <motion.div
-                    key="social-media"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h2 className="text-2xl font-bold mb-6">Online Presence</h2>
-                    <FormSocialMedia form={form} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                  {activeTab === "social-media" && (
+                    <motion.div
+                      key="social-media"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <h2 className="text-2xl font-bold mb-6">Online Presence</h2>
+                      <FormSocialMedia form={form} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-            {/* Navigation buttons */}
-            <div className="flex justify-between items-center p-6 bg-muted/30 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={goToPrevStep}
-                disabled={activeTab === "basic-info" || isSubmitting}
-                className="gap-2"
-              >
-                <ChevronLeft className="h-4 w-4" /> Previous
-              </Button>
-
-              {activeTab !== "social-media" ? (
+              {/* Navigation buttons */}
+              <div className="flex justify-between items-center p-6 bg-muted/30 border-t">
                 <Button
                   type="button"
-                  onClick={goToNextStep}
-                  disabled={isSubmitting}
+                  variant="outline"
+                  onClick={goToPrevStep}
+                  disabled={activeTab === "basic-info" || isSubmitting}
                   className="gap-2"
                 >
-                  Next <ChevronRight className="h-4 w-4" />
+                  <ChevronLeft className="h-4 w-4" /> Previous
                 </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Creating..." : "Create Community"}
-                </Button>
-              )}
-            </div>
-          </form>
+
+                {activeTab !== "social-media" ? (
+                  <Button
+                    type="button"
+                    onClick={goToNextStep}
+                    disabled={isSubmitting}
+                    className="gap-2"
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Creating..." : "Create Community"}
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
       <Toaster />

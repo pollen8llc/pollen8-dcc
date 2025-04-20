@@ -19,8 +19,6 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Calendar } from "lucide-react";
-import { DatePicker } from "@/components/ui/date-picker";
 
 interface FormBasicInfoProps {
   form: UseFormReturn<CommunityFormData>;
