@@ -15,6 +15,7 @@ import ManagedCommunitiesGrid from "@/components/admin/ManagedCommunitiesGrid";
 import CommunityManagementDashboard from "@/components/admin/CommunityManagementDashboard";
 import NotFoundState from "@/components/community/NotFoundState";
 import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
+import AdminCreateCommunityForm from "@/components/admin/AdminCreateCommunityForm";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +26,6 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const { toast } = useToast();
 
-  // Ensure admin role for the specific user
   useEffect(() => {
     const ensureAdminInDatabase = async () => {
       if (currentUser?.id === "38a18dd6-4742-419b-b2c1-70dec5c51729") {
@@ -47,28 +47,24 @@ const AdminDashboard = () => {
     ensureAdminInDatabase();
   }, [currentUser?.id]);
 
-  // If no community ID is provided, fetch managed communities
   const { data: managedCommunities, isLoading: loadingCommunities } = useQuery({
     queryKey: ['managed-communities', currentUser?.id],
     queryFn: () => communityService.getManagedCommunities(currentUser?.id || ""),
     enabled: !id && !!currentUser?.id
   });
 
-  // If a community ID is provided, fetch that specific community
   const { data: community, isLoading: loadingCommunity, error: communityError } = useQuery({
     queryKey: ['community', id],
     queryFn: () => communityService.getCommunityById(id || ""),
     enabled: !!id
   });
 
-  // Check if user has permission to view this community
   useEffect(() => {
     if (id && community && !isOrganizer(id) && currentUser?.role !== UserRole.ADMIN) {
       navigate("/", { replace: true });
     }
   }, [id, community, isOrganizer, navigate, currentUser]);
 
-  // Update URL when tab changes
   useEffect(() => {
     if (activeTab !== "overview" && !id) {
       const newSearchParams = new URLSearchParams(searchParams);
@@ -95,7 +91,6 @@ const AdminDashboard = () => {
     return <NotFoundState />;
   }
 
-  // Show admin dashboard or community selection if no ID is provided
   if (!id) {
     return (
       <div className="min-h-screen">
@@ -122,6 +117,11 @@ const AdminDashboard = () => {
                         Welcome to the admin dashboard. Use the tabs above to manage users, roles, and system settings.
                       </p>
                       <AdminOverviewCards onTabChange={setActiveTab} />
+                      
+                      <div className="mt-8">
+                        <h2 className="text-xl font-semibold mb-4">Create New Community</h2>
+                        <AdminCreateCommunityForm />
+                      </div>
                       
                       <div className="mt-8">
                         <h2 className="text-xl font-semibold mb-4">Community Creation Audit Log</h2>
@@ -177,7 +177,6 @@ const AdminDashboard = () => {
     );
   }
 
-  // If a community ID is provided, show community management dashboard
   return (
     <div className="min-h-screen">
       <Navbar />
