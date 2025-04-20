@@ -1,4 +1,3 @@
-
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -25,13 +24,10 @@ export function CreateCommunityForm() {
     addDebugLog
   } = useCreateCommunityForm();
 
-  // Add initial debug log on mount, using a proper dependency array to prevent infinite loops
   useEffect(() => {
-    // Only run this effect once on component mount
     addDebugLog('info', 'Community creation form initialized');
     addDebugLog('info', 'Please complete the form to create your community');
     
-    // Check authentication status
     const checkAuth = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
@@ -48,53 +44,52 @@ export function CreateCommunityForm() {
     };
     
     checkAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="space-y-6">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+    <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="space-y-8">
+        <div className="text-center space-y-3">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
             Create Your Community
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            Fill out the form below to establish your community presence
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Build your community presence and connect with like-minded individuals
           </p>
         </div>
         
-        <div className="relative">
+        <div className="relative mt-8">
           <Progress 
             value={progress} 
-            className="h-2 bg-secondary/30"
+            className="h-2.5 bg-secondary/30"
           />
-          <span className="absolute right-0 top-4 text-sm text-muted-foreground">
+          <span className="absolute right-0 -top-6 text-sm font-medium text-muted-foreground">
             {progress}% Complete
           </span>
         </div>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card className="p-6 glass-dark shadow-2xl border-primary/10">
+            <Card className="p-8 glass-dark border-primary/10 shadow-xl backdrop-blur-xl">
               <Tabs value={activeTab} onValueChange={updateProgress} className="w-full">
-                <TabsList className="grid grid-cols-3 mb-8 bg-background/50 backdrop-blur-xl border border-primary/20">
+                <TabsList className="grid grid-cols-3 mb-12 bg-background/50 backdrop-blur-xl border border-primary/20 p-1 rounded-lg">
                   <TabsTrigger 
-                    value="basic-info" 
-                    className="data-[state=active]:bg-primary/80 data-[state=active]:text-primary-foreground backdrop-blur-sm transition-all duration-300"
+                    value="basic-info"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
                   >
                     <Users className="mr-2 h-4 w-4" />
                     Basic Info
                   </TabsTrigger>
                   <TabsTrigger 
-                    value="platforms" 
-                    className="data-[state=active]:bg-primary/80 data-[state=active]:text-primary-foreground backdrop-blur-sm transition-all duration-300"
+                    value="platforms"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
                   >
                     <Link className="mr-2 h-4 w-4" />
                     Platforms
                   </TabsTrigger>
                   <TabsTrigger 
-                    value="social-media" 
-                    className="data-[state=active]:bg-primary/80 data-[state=active]:text-primary-foreground backdrop-blur-sm transition-all duration-300"
+                    value="social-media"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
                   >
                     <Share2 className="mr-2 h-4 w-4" />
                     Social Media
@@ -103,10 +98,10 @@ export function CreateCommunityForm() {
                 
                 <TabsContent value="basic-info" className="mt-0 animate-fade-in">
                   <BasicInfoForm form={form} />
-                  <div className="flex justify-end mt-6">
+                  <div className="flex justify-end mt-8">
                     <Button 
                       type="button"
-                      className="bg-primary/80 backdrop-blur-sm hover:bg-primary/90 text-primary-foreground"
+                      className="bg-primary/90 hover:bg-primary text-primary-foreground shadow-lg"
                       onClick={() => updateProgress("platforms")}
                     >
                       Continue to Platforms
@@ -116,18 +111,18 @@ export function CreateCommunityForm() {
                 
                 <TabsContent value="platforms" className="mt-0 animate-fade-in">
                   <PlatformsForm form={form} />
-                  <div className="flex justify-between mt-6">
+                  <div className="flex justify-between mt-8">
                     <Button 
                       type="button" 
                       variant="outline"
-                      className="backdrop-blur-sm border-white/20"
+                      className="border-white/20 hover:bg-accent/10"
                       onClick={() => updateProgress("basic-info")}
                     >
                       Back
                     </Button>
                     <Button 
                       type="button"
-                      className="bg-primary/80 backdrop-blur-sm hover:bg-primary/90 text-primary-foreground"
+                      className="bg-primary/90 hover:bg-primary text-primary-foreground shadow-lg"
                       onClick={() => updateProgress("social-media")}
                     >
                       Continue to Social Media
@@ -137,24 +132,24 @@ export function CreateCommunityForm() {
                 
                 <TabsContent value="social-media" className="mt-0 animate-fade-in">
                   <SocialMediaForm form={form} />
-                  <div className="flex justify-between mt-6">
+                  <div className="flex justify-between mt-8">
                     <Button 
                       type="button" 
                       variant="outline"
-                      className="backdrop-blur-sm border-white/20"
+                      className="border-white/20 hover:bg-accent/10"
                       onClick={() => updateProgress("platforms")}
                     >
                       Back
                     </Button>
                     <Button
                       type="submit"
-                      className="bg-primary/80 backdrop-blur-sm hover:bg-primary/90 text-primary-foreground"
+                      className="bg-primary/90 hover:bg-primary text-primary-foreground shadow-lg"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating...
+                          Creating Community...
                         </>
                       ) : (
                         "Create Community"
@@ -167,7 +162,6 @@ export function CreateCommunityForm() {
           </form>
         </Form>
 
-        {/* Form debugger */}
         <FormDebugger logs={debugLogs} />
       </div>
     </div>
