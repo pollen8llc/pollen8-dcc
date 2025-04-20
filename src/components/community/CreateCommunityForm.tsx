@@ -1,102 +1,24 @@
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2 } from "lucide-react";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { PlatformsForm } from "./PlatformsForm";
 import { SocialMediaForm } from "./SocialMediaForm";
-import { useCreateCommunityForm } from "@/hooks/community/useCreateCommunityForm";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { useCreateCommunityForm } from "@/hooks/forms/useCreateCommunityForm";
 
 export function CreateCommunityForm() {
   const {
     form,
     isSubmitting,
-    submissionError,
-    isCheckingAuth,
-    hasSession,
-    onSubmit,
-    handleValidationFailed,
-    createdCommunityId
+    activeTab,
+    progress,
+    updateProgress,
+    onSubmit
   } = useCreateCommunityForm();
-  
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("basic-info");
-  const [progress, setProgress] = useState(0);
-  const [isNavigating, setIsNavigating] = useState(false);
-  
-  // Track form progress
-  const updateProgress = (tab: string) => {
-    setActiveTab(tab);
-    switch(tab) {
-      case "basic-info":
-        setProgress(33);
-        break;
-      case "platforms":
-        setProgress(66);
-        break;
-      case "social-media":
-        setProgress(100);
-        break;
-      default:
-        setProgress(33);
-    }
-  };
-
-  const handleSubmitForm = async (e: React.FormEvent) => {
-    e.preventDefault();
-    form.handleSubmit(async (data) => {
-      setIsNavigating(true);
-      await onSubmit(data);
-      
-      // Navigate to the new community page after a short delay
-      if (createdCommunityId) {
-        setTimeout(() => {
-          navigate(`/community/${createdCommunityId}`);
-        }, 1500);
-      }
-    }, handleValidationFailed)(e);
-  };
-
-  if (isCheckingAuth) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Checking authentication...</span>
-      </div>
-    );
-  }
-
-  if (!hasSession) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Authentication Required</AlertTitle>
-          <AlertDescription>
-            You need to be logged in to create a community.
-          </AlertDescription>
-        </Alert>
-        <Button onClick={() => navigate("/auth")}>Go to Login</Button>
-      </div>
-    );
-  }
-  
-  if (isNavigating) {
-    return (
-      <div className="container mx-auto px-4 py-12 flex flex-col items-center justify-center">
-        <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Creating your community</h2>
-        <p className="text-muted-foreground mb-8">Please wait while we set things up...</p>
-        <Progress value={100} className="w-64 h-2" />
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -105,25 +27,26 @@ export function CreateCommunityForm() {
       <Progress value={progress} className="mb-8" />
       
       <Form {...form}>
-        <form onSubmit={handleSubmitForm} className="space-y-8">
-          {submissionError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{submissionError}</AlertDescription>
-            </Alert>
-          )}
-          
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Card className="p-6 bg-black/5 backdrop-blur-sm border border-white/10 shadow-xl">
-            <Tabs defaultValue="basic-info" value={activeTab} onValueChange={updateProgress} className="w-full">
+            <Tabs value={activeTab} onValueChange={updateProgress} className="w-full">
               <TabsList className="grid grid-cols-3 mb-8 bg-black/20 backdrop-blur-lg">
-                <TabsTrigger value="basic-info" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300">
+                <TabsTrigger 
+                  value="basic-info" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+                >
                   Basic Info
                 </TabsTrigger>
-                <TabsTrigger value="platforms" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300">
+                <TabsTrigger 
+                  value="platforms" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+                >
                   Platforms
                 </TabsTrigger>
-                <TabsTrigger value="social-media" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300">
+                <TabsTrigger 
+                  value="social-media" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+                >
                   Social Media
                 </TabsTrigger>
               </TabsList>
@@ -195,4 +118,4 @@ export function CreateCommunityForm() {
       </Form>
     </div>
   );
-}
+};

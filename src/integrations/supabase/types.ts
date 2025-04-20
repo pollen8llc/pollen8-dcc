@@ -59,17 +59,13 @@ export type Database = {
       }
       communities: {
         Row: {
-          business_model: string | null
-          challenges: string | null
           communication_platforms: Json | null
           community_structure: string | null
           community_type: string | null
           community_values: string | null
           created_at: string
-          description: string | null
-          event_formats: string | null
+          description: string
           event_frequency: string | null
-          event_platforms: Json | null
           format: string | null
           founder_name: string | null
           id: string
@@ -79,33 +75,26 @@ export type Database = {
           member_count: number | null
           name: string
           newsletter_url: string | null
-          notification_platforms: Json | null
-          owner_id: string | null
+          owner_id: string
           personal_background: string | null
           role_title: string | null
-          size_demographics: string | null
           social_media: Json | null
-          special_notes: string | null
           start_date: string | null
+          tags: string[] | null
           target_audience: string[] | null
-          team_structure: string | null
-          tech_stack: string | null
+          type: string | null
           updated_at: string
           vision: string | null
           website: string | null
         }
         Insert: {
-          business_model?: string | null
-          challenges?: string | null
           communication_platforms?: Json | null
           community_structure?: string | null
           community_type?: string | null
           community_values?: string | null
           created_at?: string
-          description?: string | null
-          event_formats?: string | null
+          description?: string
           event_frequency?: string | null
-          event_platforms?: Json | null
           format?: string | null
           founder_name?: string | null
           id?: string
@@ -115,33 +104,26 @@ export type Database = {
           member_count?: number | null
           name: string
           newsletter_url?: string | null
-          notification_platforms?: Json | null
-          owner_id?: string | null
+          owner_id: string
           personal_background?: string | null
           role_title?: string | null
-          size_demographics?: string | null
           social_media?: Json | null
-          special_notes?: string | null
           start_date?: string | null
+          tags?: string[] | null
           target_audience?: string[] | null
-          team_structure?: string | null
-          tech_stack?: string | null
+          type?: string | null
           updated_at?: string
           vision?: string | null
           website?: string | null
         }
         Update: {
-          business_model?: string | null
-          challenges?: string | null
           communication_platforms?: Json | null
           community_structure?: string | null
           community_type?: string | null
           community_values?: string | null
           created_at?: string
-          description?: string | null
-          event_formats?: string | null
+          description?: string
           event_frequency?: string | null
-          event_platforms?: Json | null
           format?: string | null
           founder_name?: string | null
           id?: string
@@ -151,17 +133,14 @@ export type Database = {
           member_count?: number | null
           name?: string
           newsletter_url?: string | null
-          notification_platforms?: Json | null
-          owner_id?: string | null
+          owner_id?: string
           personal_background?: string | null
           role_title?: string | null
-          size_demographics?: string | null
           social_media?: Json | null
-          special_notes?: string | null
           start_date?: string | null
+          tags?: string[] | null
           target_audience?: string[] | null
-          team_structure?: string | null
-          tech_stack?: string | null
+          type?: string | null
           updated_at?: string
           vision?: string | null
           website?: string | null
@@ -199,71 +178,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "community_data_community_id_fkey"
-            columns: ["community_id"]
-            isOneToOne: false
-            referencedRelation: "communities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      community_organizer_profiles: {
-        Row: {
-          business_model: string | null
-          challenges: string | null
-          community_id: string | null
-          community_structure: string | null
-          community_values: string | null
-          created_at: string | null
-          event_formats: string | null
-          founder_name: string
-          id: string
-          personal_background: string | null
-          size_demographics: string | null
-          special_notes: string | null
-          team_structure: string | null
-          tech_stack: string | null
-          updated_at: string | null
-          vision: string | null
-        }
-        Insert: {
-          business_model?: string | null
-          challenges?: string | null
-          community_id?: string | null
-          community_structure?: string | null
-          community_values?: string | null
-          created_at?: string | null
-          event_formats?: string | null
-          founder_name: string
-          id?: string
-          personal_background?: string | null
-          size_demographics?: string | null
-          special_notes?: string | null
-          team_structure?: string | null
-          tech_stack?: string | null
-          updated_at?: string | null
-          vision?: string | null
-        }
-        Update: {
-          business_model?: string | null
-          challenges?: string | null
-          community_id?: string | null
-          community_structure?: string | null
-          community_values?: string | null
-          created_at?: string | null
-          event_formats?: string | null
-          founder_name?: string
-          id?: string
-          personal_background?: string | null
-          size_demographics?: string | null
-          special_notes?: string | null
-          team_structure?: string | null
-          tech_stack?: string | null
-          updated_at?: string | null
-          vision?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "community_organizer_profiles_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"

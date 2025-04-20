@@ -4,36 +4,14 @@ import * as z from "zod";
 export const communityFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  communityType: z.enum(["tech", "creative", "wellness", "professional", "social-impact", "education", "social", "other"], {
+  type: z.enum(["tech", "creative", "wellness", "professional", "social-impact", "education", "social", "other"], {
     required_error: "Please select a community type",
   }),
-  location: z.string().min(2, "Location is required"),
-  startDate: z.string()
-    .min(1, "Start date is required")
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
-  targetAudience: z.string().min(2, "Target audience is required"),
-  format: z.enum(["irl", "url", "hybrid"], {
+  format: z.enum(["online", "in-person", "hybrid"], {
     required_error: "Please select a format",
   }),
-  size: z.enum([
-    "1-100",
-    "100-500", 
-    "500-1000",
-    "1000-5000",
-    "5000-10000"
-  ], {
-    required_error: "Please select community size range",
-  }),
-  eventFrequency: z.enum([
-    "daily",
-    "weekly",
-    "biweekly",
-    "monthly",
-    "quarterly",
-    "adhoc"
-  ], {
-    required_error: "Please select event frequency",
-  }),
+  location: z.string().min(2, "Location is required"),
+  targetAudience: z.string().min(2, "Target audience is required"),
   platforms: z.array(z.string()).default([]),
   website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   newsletterUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),

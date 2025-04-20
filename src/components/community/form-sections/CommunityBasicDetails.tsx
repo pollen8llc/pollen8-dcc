@@ -4,6 +4,7 @@ import { CommunityFormData } from "@/schemas/communitySchema";
 import { FormField, FormItem, FormControl, FormMessage, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CommunityBasicDetailsProps {
   form: UseFormReturn<CommunityFormData>;
@@ -45,6 +46,57 @@ export function CommunityBasicDetails({ form }: CommunityBasicDetailsProps) {
                 {...field} 
               />
             </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="type"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-foreground/90">Community Type *</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger className="bg-black/10 backdrop-blur-sm border-white/20">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="tech">Technology</SelectItem>
+                <SelectItem value="creative">Creative</SelectItem>
+                <SelectItem value="wellness">Wellness</SelectItem>
+                <SelectItem value="professional">Professional</SelectItem>
+                <SelectItem value="social-impact">Social Impact</SelectItem>
+                <SelectItem value="education">Education</SelectItem>
+                <SelectItem value="social">Social</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="format"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-foreground/90">Format *</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger className="bg-black/10 backdrop-blur-sm border-white/20">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="online">Online</SelectItem>
+                <SelectItem value="in-person">In Person</SelectItem>
+                <SelectItem value="hybrid">Hybrid</SelectItem>
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
