@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -17,7 +18,6 @@ import JoinCommunities from "./pages/JoinCommunities";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
 import React from 'react';
 import DebuggerDashboard from './pages/admin/DebuggerDashboard';
-import { CreateCommunityForm } from "@/components/community/CreateCommunityForm";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -44,11 +44,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/create-community" element={
-        <ProtectedRoute requiredRole="MEMBER">
-          <CreateCommunityForm />
-        </ProtectedRoute>
-      } />
+      <Route path="/create-community" element={<CreateCommunity />} />
       <Route path="/communities/join" element={
         <ProtectedRoute requiredRole="MEMBER">
           <JoinCommunities />

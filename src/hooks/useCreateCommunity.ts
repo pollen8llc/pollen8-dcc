@@ -13,6 +13,7 @@ export const useCreateCommunity = () => {
   const createCommunity = async (data: CommunityFormData) => {
     try {
       setIsSubmitting(true);
+      console.log("Creating community with data:", data);
       
       const { data: session, error: sessionError } = await supabase.auth.getSession();
       
@@ -44,7 +45,7 @@ export const useCreateCommunity = () => {
       }, {} as Record<string, any>);
 
       // Debug information
-      console.log("Creating community with data:", {
+      console.log("Creating community with processed data:", {
         name: data.name,
         description: data.description,
         community_type: data.communityType,
@@ -53,7 +54,7 @@ export const useCreateCommunity = () => {
         start_date: startDateISO,
         target_audience: targetAudienceArray,
         format: data.format,
-        size_demographics: data.size, // Store the size range string directly
+        size_demographics: data.size, 
         event_frequency: data.eventFrequency,
         communication_platforms: communicationPlatformsObject,
         website: data.website,
@@ -73,7 +74,7 @@ export const useCreateCommunity = () => {
           format: data.format || "hybrid",
           start_date: startDateISO,
           target_audience: targetAudienceArray,
-          size_demographics: data.size, // Store the size range directly as a string
+          size_demographics: data.size,
           event_frequency: data.eventFrequency || "monthly",
           communication_platforms: communicationPlatformsObject,
           website: data.website || "",
@@ -103,6 +104,8 @@ export const useCreateCommunity = () => {
         throw new Error("Failed to create community: No data returned");
       }
 
+      console.log("Community created successfully:", community);
+
       // Create organizer profile
       if (community.id) {
         const { error: organizerError } = await supabase
@@ -111,7 +114,7 @@ export const useCreateCommunity = () => {
             community_id: community.id,
             founder_name: session.session.user.id,
             personal_background: null,
-            size_demographics: data.size, // Store the size range directly as a string
+            size_demographics: data.size,
             community_structure: data.community_structure || null,
             team_structure: data.role_title || null,
             tech_stack: null,
@@ -126,17 +129,19 @@ export const useCreateCommunity = () => {
         if (organizerError) {
           console.error("Error creating organizer profile:", organizerError);
           // Continue even if organizer profile creation fails
+        } else {
+          console.log("Organizer profile created successfully");
         }
       }
-
-      console.log("Community created successfully:", community);
 
       toast({
         title: "Success!",
         description: "Your community has been created.",
       });
 
+      // Navigate to the community page
       navigate(`/community/${community.id}`);
+      return community;
     } catch (error) {
       console.error("Error creating community:", error);
       toast({
@@ -144,6 +149,7 @@ export const useCreateCommunity = () => {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create community",
       });
+      throw error;
     } finally {
       setIsSubmitting(false);
     }

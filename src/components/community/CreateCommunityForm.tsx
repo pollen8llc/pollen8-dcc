@@ -79,12 +79,27 @@ export function CreateCommunityForm() {
     }
   };
 
+  // Add debug log to verify form state and submission
+  console.log("Form state:", {
+    isValid: form.formState.isValid,
+    errors: form.formState.errors,
+    dirtyFields: form.formState.dirtyFields,
+    isSubmitting: isSubmitting
+  });
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Create Your Community</h1>
       
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+          console.error("Form validation errors:", errors);
+          toast({
+            variant: "destructive",
+            title: "Validation error",
+            description: "Please fix the errors in the form before submitting.",
+          });
+        })} className="space-y-8">
           {submissionError && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />

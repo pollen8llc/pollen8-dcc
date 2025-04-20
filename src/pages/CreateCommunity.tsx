@@ -17,7 +17,14 @@ export default function CreateCommunityPage() {
     const checkAuth = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
-        setIsAuthenticated(!!data.session);
+        
+        if (error) {
+          console.error("Error checking auth session:", error);
+          setIsAuthenticated(false);
+        } else {
+          console.log("Auth session check:", data.session ? "Active session" : "No session");
+          setIsAuthenticated(!!data.session);
+        }
       } catch (err) {
         console.error("Exception checking auth:", err);
         setIsAuthenticated(false);
