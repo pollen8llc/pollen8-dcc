@@ -19,6 +19,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
     if (isSubmitting) return;
     
     try {
+      console.log("Starting community submission with values:", values);
       setIsSubmitting(true);
       setSubmissionError(null);
       
@@ -32,12 +33,12 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         throw new Error("You must be logged in to create a community");
       }
 
-      // Process tags from targetAudience if it exists
+      // Process tags from targetAudience
       const tags = values.targetAudience 
         ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
         : [];
       
-      // Handle social media - ensure we access properties that exist in the schema
+      // Handle social media
       const socialMediaObject = {
         twitter: values.twitter || "",
         instagram: values.instagram || "",
@@ -45,29 +46,32 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         facebook: values.facebook || "",
       };
 
-      // Handle platforms - ensure values.primaryPlatforms exists in the schema
+      // Handle communication platforms
       const communicationPlatformsObject = values.primaryPlatforms?.reduce((acc, platform) => {
         acc[platform] = { enabled: true };
         return acc;
       }, {} as Record<string, any>) || {};
-      
-      // Use the size value directly as a string
-      const communitySize = values.size || "1-100";
-      
+
+      console.log("Creating community with processed data:", {
+        name: values.name,
+        description: values.description,
+        communityType: values.communityType,
+        tags,
+        socialMedia: socialMediaObject,
+        platforms: communicationPlatformsObject
+      });
+
       const communityData = {
         name: values.name,
         description: values.description,
-        location: values.location,
-        website: values.website || "",
-        isPublic: true,
-        tags,
+        location: values.location || "Remote",
         communityType: values.communityType,
         format: values.format,
-        tone: values.tone,
-        imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-        communitySize,
-        organizerIds: [session.session.user.id], // Explicitly set current user as organizer
-        memberIds: [],
+        tags,
+        communitySize: values.size || "1-100",
+        organizerIds: [session.session.user.id],
+        isPublic: true,
+        website: values.website || "",
         role_title: values.role_title || "",
         community_structure: values.community_structure || "",
         vision: values.vision || "",
@@ -76,9 +80,9 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         newsletterUrl: values.newsletterUrl || "",
       };
 
-      console.log("Creating community with data:", communityData);
-      
       const community = await communityService.createCommunity(communityData);
+      
+      console.log("Community created successfully:", community);
       
       if (!community || !community.id) {
         throw new Error("Failed to create community - no community ID returned");
@@ -92,6 +96,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         variant: "default",
       });
 
+      // Navigate after a short delay to ensure toast is visible
       setTimeout(() => {
         if (onSuccess && community?.id) {
           onSuccess(community.id);

@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbCommunity } from "../base/baseRepository";
@@ -61,6 +60,14 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Parse communitySize to an integer for database storage
     const memberCount = parseInt(community.communitySize || "0", 10);
     
+    // Log the final data being sent to the database
+    console.log("Inserting into database with data:", {
+      name: community.name,
+      owner_id,
+      target_audience,
+      member_count: memberCount
+    });
+
     // Build the database record with explicit owner_id
     const { data, error } = await supabase
       .from('communities')
@@ -71,8 +78,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
         location: community.location || "Remote",
-        member_count: memberCount, // Use parsed integer
-        owner_id: owner_id, // This is critical - explicitly set owner
+        member_count: memberCount,
+        owner_id: owner_id,
         target_audience: target_audience,
         community_type: community.communityType || null,
         format: community.format || null,
@@ -91,7 +98,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       throw error;
     }
     
-    console.log("Community created successfully:", data.id);
+    console.log("Community created successfully:", data);
     return mapDbCommunity(data);
   } catch (err) {
     console.error("Error in createCommunity:", err);
