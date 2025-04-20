@@ -45,7 +45,7 @@ const CommunityProfile = () => {
     return <NotFoundState />;
   }
   
-  // Convert communitySize to a formatted string for display if needed
+  // Use the communitySize directly as a string
   const memberCount = community.communitySize;
   
   return (

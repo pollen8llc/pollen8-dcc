@@ -7,6 +7,11 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   try {
     console.log("Updating community:", community.id);
     
+    // Convert communitySize to a string if it's not already
+    const communitySize = typeof community.communitySize === 'number' 
+      ? community.communitySize.toString() 
+      : community.communitySize;
+    
     const { data, error } = await supabase
       .from('communities')
       .update({
@@ -16,7 +21,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         website: community.website,
         is_public: community.isPublic,
         location: community.location,
-        member_count: community.communitySize
+        member_count: communitySize // Use the string version
       })
       .eq('id', community.id)
       .select()
@@ -55,6 +60,11 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Extract social media values if they exist
     const socialMedia = community.socialMedia || {};
     
+    // Convert communitySize to string if it's a number
+    const communitySize = typeof community.communitySize === 'number'
+      ? community.communitySize.toString()
+      : community.communitySize || "0";
+    
     // Build the database record with explicit owner_id
     const { data, error } = await supabase
       .from('communities')
@@ -65,7 +75,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
         location: community.location || "Remote",
-        member_count: community.communitySize || "1-100",
+        member_count: communitySize, // Use the string version
         owner_id: owner_id, // This is critical - explicitly set owner
         target_audience: target_audience,
         community_type: community.communityType || null,
