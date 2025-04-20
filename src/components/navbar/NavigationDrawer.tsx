@@ -20,16 +20,11 @@ interface NavigationDrawerProps {
   logout: () => Promise<void>;
 }
 
-// A utility type for managed community info
+// Type for items in managedCommunities (string IDs or objects)
+type ManagedCommunityItem = string | { id: string; [key: string]: any };
+
+// A utility type for managed community info used in the drawer
 type DrawerCommunity = { id: string; name: string | null };
-
-// Type for a community object that has an id property
-type CommunityWithId = { id: string; [key: string]: any };
-
-// Type guard to check if an item is a community object with an id
-function isCommunityObject(item: any): item is CommunityWithId {
-  return item && typeof item === 'object' && 'id' in item;
-}
 
 const NavigationDrawer = ({
   open,
@@ -41,17 +36,19 @@ const NavigationDrawer = ({
   const navigate = useNavigate();
   const isAdmin = currentUser?.role === UserRole.ADMIN;
 
-  // Show for ORGANIZERs or any user with managed communities (even by id only)
+  // Show organizer navigation if:
+  // - User is ORGANIZER or
+  // - has managedCommunities or
+  // - isOrganizer() returns true
   const showOrganizerNav =
     !!currentUser &&
     (currentUser.role === UserRole.ORGANIZER ||
       (currentUser.managedCommunities && currentUser.managedCommunities.length > 0) ||
       isOrganizer());
 
-  // For actual community info display in the drawer
   const [drawerCommunities, setDrawerCommunities] = useState<DrawerCommunity[]>([]);
 
-  // Fetch names when drawer opens and user has managed communities
+  // Fetch community names when the drawer opens and user has managed communities
   useEffect(() => {
     const fetchCommunities = async () => {
       if (
@@ -60,20 +57,19 @@ const NavigationDrawer = ({
         currentUser.managedCommunities &&
         currentUser.managedCommunities.length > 0
       ) {
-        // Extract IDs from managedCommunities, which could be either strings or objects
-        const ids: string[] = [];
-        
-        for (const community of currentUser.managedCommunities) {
-          if (typeof community === "string") {
-            ids.push(community);
-          } else if (isCommunityObject(community)) {
-            ids.push(community.id);
-          }
+        // Create a string-ID array regardless of managedCommunity entry type
+        const ids: string[] = currentUser.managedCommunities.map((community: ManagedCommunityItem) => {
+          if (typeof community === "string") return community;
+          if (community && typeof community === "object" && "id" in community) return community.id;
+          return "";
+        }).filter(Boolean);
+
+        if (ids.length === 0) {
+          setDrawerCommunities([]);
+          return;
         }
 
-        if (ids.length === 0) return;
-
-        // Fetch their details (names)
+        // Fetch names from Supabase for these community IDs
         const { data, error } = await supabase
           .from('communities')
           .select('id, name')
@@ -87,7 +83,7 @@ const NavigationDrawer = ({
             })
           );
         } else {
-          // fallback: list the IDs
+          // fallback: just display IDs
           setDrawerCommunities(ids.map((id) => ({ id, name: null })));
         }
       } else {
@@ -96,7 +92,6 @@ const NavigationDrawer = ({
     };
 
     fetchCommunities();
-    // Only when open, relevant user, or managedCommunities changes
   }, [open, currentUser]);
 
   const handleNavigation = (path: string) => {
@@ -129,13 +124,14 @@ const NavigationDrawer = ({
           )}
 
           <div className="grid gap-2 py-2">
+            {/* Main navigation - always shown */}
             <MainNavigation
               onNavigate={handleNavigation}
               currentUser={!!currentUser}
               isAdmin={isAdmin}
             />
 
-            {/* Admin section */}
+            {/* Admin section (system admin only) */}
             {isAdmin && (
               <>
                 <Separator className="my-4" />
@@ -143,7 +139,7 @@ const NavigationDrawer = ({
               </>
             )}
 
-            {/* Organizer section */}
+            {/* Organizer section (role or has managed communities) */}
             {showOrganizerNav && drawerCommunities.length > 0 && (
               <>
                 <Separator className="my-4" />
