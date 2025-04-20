@@ -10,8 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { CommunityFormSchema } from "@/hooks/community/schemas/communityFormSchema";
 
 export const useCreateCommunityForm = () => {
-  const { submitCommunity, isSubmitting } = useSubmitCommunity();
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const { submitCommunity, isSubmitting, submissionError, createdCommunityId } = useSubmitCommunity();
+  const [localSubmissionError, setLocalSubmissionError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -27,7 +27,7 @@ export const useCreateCommunityForm = () => {
       startDate: new Date().toISOString().split('T')[0],
       targetAudience: "",
       format: "hybrid",
-      size: "1-100",
+      size: "1-100", // Keep default value even though we hide it
       eventFrequency: "monthly",
       website: "",
       newsletterUrl: "",
@@ -48,7 +48,7 @@ export const useCreateCommunityForm = () => {
         const { data, error } = await supabase.auth.getSession();
         if (error) {
           console.error("Auth check error:", error);
-          setSubmissionError("Authentication error. Please try logging in again.");
+          setLocalSubmissionError("Authentication error. Please try logging in again.");
           setHasSession(false);
         } else {
           console.log("Auth check - session:", data.session ? "Present" : "None");
@@ -67,13 +67,13 @@ export const useCreateCommunityForm = () => {
 
   const onSubmit = async (data: CommunityFormData) => {
     try {
-      setSubmissionError(null);
+      setLocalSubmissionError(null);
       
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !sessionData.session) {
         const errorMsg = "You must be logged in to create a community.";
-        setSubmissionError(errorMsg);
+        setLocalSubmissionError(errorMsg);
         
         toast({
           variant: "destructive",
@@ -89,7 +89,7 @@ export const useCreateCommunityForm = () => {
       
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(data.startDate)) {
-        setSubmissionError("Invalid date format. Please use YYYY-MM-DD format.");
+        setLocalSubmissionError("Invalid date format. Please use YYYY-MM-DD format.");
         toast({
           variant: "destructive",
           title: "Validation Error",
@@ -113,21 +113,23 @@ export const useCreateCommunityForm = () => {
         instagram: data.socialMediaHandles?.instagram || "",
         linkedin: data.socialMediaHandles?.linkedin || "",
         facebook: data.socialMediaHandles?.facebook || "",
-        size: data.size,
+        size: data.size, // Keep the size field but we won't show it in the UI
       };
       
-      await submitCommunity(communityData);
+      const communityId = await submitCommunity(communityData);
       
       toast({
         title: "Success!",
         description: "Your community has been created.",
       });
 
+      return communityId;
     } catch (error) {
       console.error("Error in form submission:", error);
-      setSubmissionError(
+      setLocalSubmissionError(
         error instanceof Error ? error.message : "Failed to create community"
       );
+      return null;
     }
   };
 
@@ -148,10 +150,11 @@ export const useCreateCommunityForm = () => {
   return {
     form,
     isSubmitting,
-    submissionError,
+    submissionError: localSubmissionError || submissionError,
     isCheckingAuth,
     hasSession,
     onSubmit,
-    handleValidationFailed
+    handleValidationFailed,
+    createdCommunityId
   };
 };

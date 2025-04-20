@@ -61,6 +61,9 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         platforms: communicationPlatformsObject
       });
 
+      // Set a default size value since we removed the size field from the form
+      const defaultSize = "1-100";
+
       const communityData = {
         name: values.name,
         description: values.description,
@@ -68,7 +71,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         communityType: values.communityType,
         format: values.format,
         tags,
-        communitySize: values.size || "1", // Ensure this is a string that can be parsed to a number
+        communitySize: defaultSize, // Use default size
         organizerIds: [session.session.user.id],
         isPublic: true,
         website: values.website || "",
@@ -96,15 +99,12 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         variant: "default",
       });
 
-      // Navigate after a short delay to ensure toast is visible
-      setTimeout(() => {
-        if (onSuccess && community?.id) {
-          onSuccess(community.id);
-        } else if (community?.id) {
-          navigate(`/community/${community.id}`, { replace: true });
-        }
-      }, 1500);
+      // If onSuccess callback is provided, call it
+      if (onSuccess && community?.id) {
+        onSuccess(community.id);
+      }
       
+      return community.id;
     } catch (error: any) {
       console.error('Error in community creation:', error);
       
@@ -124,6 +124,8 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         title: "Error",
         description: errorMessage || "Failed to create community. Please try again.",
       });
+      
+      return null;
     } finally {
       setIsSubmitting(false);
     }
