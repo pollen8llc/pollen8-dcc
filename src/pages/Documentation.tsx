@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -370,7 +371,7 @@ const Documentation = () => {
                               <div className="mt-2">
                                 <p className="text-xs font-semibold mt-1">Props:</p>
                                 <ul className="text-xs list-disc pl-5">
-                                  <li>onSearch: (query: string) => void</li>
+                                  <li>onSearch: (query: string) {`=>`} void</li>
                                   <li>placeholder?: string</li>
                                   <li>className?: string</li>
                                 </ul>
@@ -465,7 +466,7 @@ const Documentation = () => {
                                 <ul className="text-xs list-disc pl-5">
                                   <li>community: Community</li>
                                   <li>isOrganizer: boolean</li>
-                                  <li>onJoin?: () => void</li>
+                                  <li>onJoin?: () {`=>`} void</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -570,8 +571,8 @@ const Documentation = () => {
                                   <li>currentUser: User | null</li>
                                   <li>isLoading: boolean</li>
                                   <li>session: Session | null</li>
-                                  <li>refreshUser: () =&gt; Promise&lt;void&gt;</li>
-                                  <li>logout: () =&gt; Promise&lt;void&gt;</li>
+                                  <li>refreshUser: () {`=>`} Promise{`<void>`}</li>
+                                  <li>logout: () {`=>`} Promise{`<void>`}</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -589,7 +590,7 @@ const Documentation = () => {
                                 <ul className="text-xs list-disc pl-5">
                                   <li>session: Session | null</li>
                                   <li>isLoading: boolean</li>
-                                  <li>logout: () =&gt; Promise&lt;void&gt;</li>
+                                  <li>logout: () {`=>`} Promise{`<void>`}</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -608,7 +609,7 @@ const Documentation = () => {
                                   <li>currentUser: User | null</li>
                                   <li>isLoading: boolean</li>
                                   <li>error: Error | null</li>
-                                  <li>refreshUser: () =&gt; Promise&lt;void&gt;</li>
+                                  <li>refreshUser: () {`=>`} Promise{`<void>`}</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -624,10 +625,10 @@ const Documentation = () => {
                               <div className="mt-2">
                                 <p className="text-xs font-semibold mt-1">Returns:</p>
                                 <ul className="text-xs list-disc pl-5">
-                                  <li>hasPermission: (resource, action) =&gt; boolean</li>
-                                  <li>isOrganizer: (communityId?) =&gt; boolean</li>
-                                  <li>isOwner: (communityId) =&gt; Promise&lt;boolean&gt;</li>
-                                  <li>checkPermission: (resource, action) =&gt; boolean</li>
+                                  <li>hasPermission: (resource, action) {`=>`} boolean</li>
+                                  <li>isOrganizer: (communityId?) {`=>`} boolean</li>
+                                  <li>isOwner: (communityId) {`=>`} Promise{`<boolean>`}</li>
+                                  <li>checkPermission: (resource, action) {`=>`} boolean</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -650,7 +651,7 @@ const Documentation = () => {
                                 <ul className="text-xs list-disc pl-5">
                                   <li>activeTab: FormTab</li>
                                   <li>progress: number</li>
-                                  <li>updateProgress: (tab: FormTab) =&gt; void</li>
+                                  <li>updateProgress: (tab: FormTab) {`=>`} void</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -666,10 +667,10 @@ const Documentation = () => {
                               <div className="mt-2">
                                 <p className="text-xs font-semibold mt-1">Returns:</p>
                                 <ul className="text-xs list-disc pl-5">
-                                  <li>form: UseFormReturn&lt;CommunityFormData&gt;</li>
+                                  <li>form: UseFormReturn{`<CommunityFormData>`}</li>
                                   <li>isSubmitting: boolean</li>
-                                  <li>submitForm: () =&gt; Promise&lt;void&gt;</li>
-                                  <li>onSubmit: (values) =&gt; Promise&lt;void&gt;</li>
+                                  <li>submitForm: () {`=>`} Promise{`<void>`}</li>
+                                  <li>onSubmit: (values) {`=>`} Promise{`<void>`}</li>
                                 </ul>
                               </div>
                             </CardContent>
@@ -727,4 +728,84 @@ const Documentation = () => {
                               <div className="mt-2">
                                 <p className="text-xs font-semibold mt-1">Returns:</p>
                                 <ul className="text-xs list-disc pl-5">
-                                  <li>users: User
+                                  <li>users: User[]</li>
+                                  <li>isLoading: boolean</li>
+                                  <li>error: Error | null</li>
+                                  <li>refetch: () {`=>`} void</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useUserActions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">User administration actions</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/admin/useUserActions.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>deactivateUser: (id) {`=>`} Promise{`<void>`}</li>
+                                  <li>resetPassword: (email) {`=>`} Promise{`<void>`}</li>
+                                  <li>isLoading: boolean</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useUserRoleManagement</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Role management for users</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/admin/useUserRoleManagement.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>updateRole: (userId, role) {`=>`} Promise{`<void>`}</li>
+                                  <li>isUpdating: boolean</li>
+                                  <li>error: Error | null</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          
+                          <Card className="bg-card/60">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">useUserCommunities</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground mb-2">Fetches communities for a user</p>
+                              <p className="text-xs font-mono bg-black/20 p-2 rounded">src/hooks/admin/useUserCommunities.tsx</p>
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold mt-1">Returns:</p>
+                                <ul className="text-xs list-disc pl-5">
+                                  <li>communities: Community[]</li>
+                                  <li>isLoading: boolean</li>
+                                  <li>error: Error | null</li>
+                                </ul>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              {/* API section would go here */}
+              
+              {/* Database section would go here */}
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Documentation;
