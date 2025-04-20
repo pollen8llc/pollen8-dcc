@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { PlatformsForm } from "./PlatformsForm";
 import { SocialMediaForm } from "./SocialMediaForm";
 import { useCreateCommunityForm } from "@/hooks/useCreateCommunityForm";
 import { FormDebugger } from "@/components/debug/FormDebugger";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function CreateCommunityForm() {
   const {
@@ -19,8 +21,33 @@ export function CreateCommunityForm() {
     progress,
     updateProgress,
     onSubmit,
-    debugLogs
+    debugLogs,
+    addDebugLog
   } = useCreateCommunityForm();
+
+  // Add initial debug log on mount
+  useEffect(() => {
+    addDebugLog('info', 'Community creation form initialized');
+    addDebugLog('info', 'Please complete the form to create your community');
+    
+    // Check authentication status
+    const checkAuth = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          addDebugLog('error', `Auth check failed: ${error.message}`);
+        } else if (data.session) {
+          addDebugLog('success', `Authenticated as: ${data.session.user.email}`);
+        } else {
+          addDebugLog('error', 'Not authenticated - please log in');
+        }
+      } catch (err: any) {
+        addDebugLog('error', `Auth check error: ${err.message}`);
+      }
+    };
+    
+    checkAuth();
+  }, [addDebugLog]);
 
   return (
     <div className="container mx-auto px-4 py-8">

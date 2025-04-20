@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,17 +16,25 @@ interface DebugLog {
 export const useCreateCommunityForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("basic-info");
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const [progress, setProgress] = useState(33);
   const [debugLogs, setDebugLogs] = useState<DebugLog[]>([]);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const addDebugLog = (type: DebugLog['type'], message: string) => {
-    setDebugLogs(prev => [...prev, {
-      type,
-      message,
-      timestamp: new Date().toLocaleTimeString()
-    }]);
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    setDebugLogs(prev => [
+      ...prev, 
+      {
+        type,
+        message,
+        timestamp: new Date().toLocaleTimeString()
+      }
+    ]);
+  };
+
+  const clearDebugLogs = () => {
+    setDebugLogs([]);
   };
 
   const form = useForm<CommunityFormData>({
@@ -65,16 +74,27 @@ export const useCreateCommunityForm = () => {
   };
 
   const onSubmit = async (data: CommunityFormData) => {
+    clearDebugLogs();
     try {
       setIsSubmitting(true);
       addDebugLog('info', 'Starting form submission...');
+      addDebugLog('info', `Submitting data: ${JSON.stringify(data, null, 2)}`);
       
-      const { data: session } = await supabase.auth.getSession();
+      // Check authentication
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        addDebugLog('error', `Authentication error: ${sessionError.message}`);
+        throw new Error(`Authentication error: ${sessionError.message}`);
+      }
+      
       if (!session?.session?.user) {
         addDebugLog('error', 'No authenticated user found');
         throw new Error("You must be logged in to create a community");
       }
 
+      addDebugLog('info', `Authenticated as user: ${session.session.user.id}`);
+      
+      // Check user roles
       addDebugLog('info', 'Checking user roles...');
       
       const { data: userRoles, error: rolesError } = await supabase
@@ -87,10 +107,16 @@ export const useCreateCommunityForm = () => {
       
       if (rolesError) {
         addDebugLog('error', `Error checking roles: ${rolesError.message}`);
-        throw new Error("Unable to verify your permissions");
+        throw new Error(`Unable to verify your permissions: ${rolesError.message}`);
       }
 
-      addDebugLog('info', `Found roles: ${JSON.stringify(userRoles?.map(r => r.roles?.name))}`);
+      if (!userRoles || userRoles.length === 0) {
+        addDebugLog('error', 'User has no roles assigned');
+        throw new Error("You don't have permission to create a community. Required role: ADMIN or ORGANIZER");
+      }
+      
+      const roleNames = userRoles.map(r => r.roles?.name || 'unknown');
+      addDebugLog('info', `User has roles: ${roleNames.join(', ')}`);
       
       const hasPermission = userRoles?.some(role => 
         role.roles?.name === 'ADMIN' || role.roles?.name === 'ORGANIZER'
@@ -101,20 +127,27 @@ export const useCreateCommunityForm = () => {
         throw new Error("You don't have permission to create a community. Required role: ADMIN or ORGANIZER");
       }
 
+      addDebugLog('success', 'User has proper permissions to create a community');
       addDebugLog('info', 'Processing form data...');
 
+      // Process the target audience into an array
       const targetAudienceArray = data.targetAudience
         .split(',')
         .map(item => item.trim())
         .filter(item => item.length > 0);
 
+      addDebugLog('info', `Processed target audience: ${JSON.stringify(targetAudienceArray)}`);
+
+      // Process the platforms into an object
       const communicationPlatforms = data.platforms.reduce((acc, platform) => {
         acc[platform] = { enabled: true };
         return acc;
       }, {} as Record<string, any>);
 
+      addDebugLog('info', `Processed platforms: ${JSON.stringify(communicationPlatforms)}`);
       addDebugLog('info', 'Inserting community into database...');
 
+      // Insert the community
       const { data: community, error } = await supabase
         .from('communities')
         .insert({
@@ -141,7 +174,12 @@ export const useCreateCommunityForm = () => {
         throw error;
       }
 
-      addDebugLog('success', 'Community created successfully!');
+      if (!community) {
+        addDebugLog('error', 'No community data returned after insertion');
+        throw new Error("Failed to create community: No data returned");
+      }
+
+      addDebugLog('success', `Community created successfully with ID: ${community.id}`);
 
       toast({
         title: "Success!",
@@ -154,7 +192,8 @@ export const useCreateCommunityForm = () => {
 
     } catch (error: any) {
       console.error("Error creating community:", error);
-      addDebugLog('error', `Error: ${error.message}`);
+      addDebugLog('error', `Error: ${error.message || "Unknown error"}`);
+      
       toast({
         variant: "destructive",
         title: "Error",
@@ -172,6 +211,8 @@ export const useCreateCommunityForm = () => {
     progress,
     updateProgress,
     onSubmit,
-    debugLogs
+    debugLogs,
+    addDebugLog,
+    clearDebugLogs
   };
 };
