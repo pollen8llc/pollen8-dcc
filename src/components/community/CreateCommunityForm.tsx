@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,13 +15,35 @@ import { PlatformsForm } from "./PlatformsForm";
 import { SocialMediaForm } from "./SocialMediaForm";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function CreateCommunityForm() {
   const { createCommunity, isSubmitting } = useCreateCommunity();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
-  const { currentUser } = useUser();
+  const { currentUser, isLoading } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Check if user is authenticated at the form level
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  
+  useState(() => {
+    const checkAuth = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Auth check error:", error);
+          setSubmissionError("Authentication error. Please log in again.");
+        }
+        setCheckingAuth(false);
+      } catch (err) {
+        console.error("Error checking auth:", err);
+        setCheckingAuth(false);
+      }
+    };
+    
+    checkAuth();
+  });
   
   const form = useForm<CommunityFormData>({
     resolver: zodResolver(communityFormSchema),
@@ -53,10 +76,31 @@ export function CreateCommunityForm() {
       
       if (!currentUser) {
         setSubmissionError("You must be logged in to create a community.");
+        
+        toast({
+          variant: "destructive",
+          title: "Authentication required",
+          description: "You need to be logged in to create a community",
+        });
+        
+        navigate("/auth");
         return;
       }
 
       console.log("Form submitted with data:", data);
+      
+      // Validate date format
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(data.startDate)) {
+        setSubmissionError("Invalid date format. Please use YYYY-MM-DD format.");
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Invalid date format. Please use YYYY-MM-DD format.",
+        });
+        return;
+      }
+      
       const result = await createCommunity(data);
       
       console.log("Community created successfully:", result);
@@ -66,18 +110,11 @@ export function CreateCommunityForm() {
         description: "Your community has been created.",
       });
 
-      navigate("/");
     } catch (error) {
       console.error("Error in form submission:", error);
       setSubmissionError(
         error instanceof Error ? error.message : "Failed to create community"
       );
-      
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create community. Please try again.",
-      });
     }
   };
 
@@ -87,7 +124,8 @@ export function CreateCommunityForm() {
     errors: form.formState.errors,
     dirtyFields: form.formState.dirtyFields,
     values: form.getValues(),
-    isSubmitting: isSubmitting
+    isSubmitting: isSubmitting,
+    currentUser: currentUser
   });
 
   const handleValidationFailed = (errors: any) => {
@@ -104,6 +142,30 @@ export function CreateCommunityForm() {
       description: `${fieldName}: ${errorMessage}`,
     });
   };
+
+  if (isLoading || checkingAuth) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
+            You need to be logged in to create a community.
+          </AlertDescription>
+        </Alert>
+        <Button onClick={() => navigate("/auth")}>Go to Login</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

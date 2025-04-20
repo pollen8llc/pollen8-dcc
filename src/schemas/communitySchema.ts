@@ -8,7 +8,9 @@ export const communityFormSchema = z.object({
     required_error: "Please select a community type",
   }),
   location: z.string().min(2, "Location is required"),
-  startDate: z.string().min(1, "Start date is required"),
+  startDate: z.string()
+    .min(1, "Start date is required")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
   targetAudience: z.string().min(2, "Target audience is required"),
   format: z.enum(["irl", "url", "hybrid"], {
     required_error: "Please select a format",

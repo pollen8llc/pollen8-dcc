@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -58,26 +59,32 @@ export const useCreateCommunity = () => {
         throw new Error("Form validation failed");
       }
       
+      // Check for user session first
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (sessionError || !session?.user) {
+      if (sessionError) {
         console.error("Session error:", sessionError);
+        throw new Error(`Authentication error: ${sessionError.message}`);
+      }
+      
+      if (!session?.user) {
+        console.error("No user session found");
         throw new Error("You must be logged in to create a community");
       }
 
+      // Prepare the data for insertion
       const targetAudienceArray = typeof data.targetAudience === 'string' 
         ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
         : data.targetAudience;
 
       const socialMediaObject = data.socialMediaHandles || {};
 
-      const startDateISO = data.startDate ? new Date(data.startDate).toISOString() : new Date().toISOString();
-
       const communicationPlatformsObject = data.platforms?.reduce((acc, platform) => {
         acc[platform] = { enabled: true };
         return acc;
       }, {} as Record<string, any>);
 
+      // Create the community
       const { data: community, error: insertError } = await supabase
         .from('communities')
         .insert({
@@ -87,7 +94,7 @@ export const useCreateCommunity = () => {
           location: data.location,
           owner_id: session.user.id,
           format: data.format,
-          start_date: startDateISO,
+          start_date: data.startDate, // Use the string format directly
           target_audience: targetAudienceArray,
           size_demographics: data.size,
           event_frequency: data.eventFrequency,
@@ -116,11 +123,19 @@ export const useCreateCommunity = () => {
         description: "Community created successfully!",
       });
 
+      // Navigate to the newly created community page
       navigate(`/community/${community.id}`);
       
       return community;
     } catch (error: any) {
       console.error("Error creating community:", error);
+      
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create community",
+      });
+      
       throw error;
     } finally {
       setIsSubmitting(false);

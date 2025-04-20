@@ -4,12 +4,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { UseFormReturn } from "react-hook-form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
 
 interface BasicCommunityFormProps {
   form: UseFormReturn<any>
@@ -99,6 +93,25 @@ export function BasicCommunityForm({ form }: BasicCommunityFormProps) {
               <Input placeholder="City, Region, Global" {...field} />
             </FormControl>
             <FormDescription>Specify your community's geographical scope</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="startDate"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Start Date (YYYY-MM-DD)</FormLabel>
+            <FormControl>
+              <Input 
+                type="text"
+                placeholder="YYYY-MM-DD"
+                {...field}
+              />
+            </FormControl>
+            <FormDescription>When did your community start?</FormDescription>
             <FormMessage />
           </FormItem>
         )}

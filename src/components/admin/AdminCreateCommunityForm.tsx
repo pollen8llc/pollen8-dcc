@@ -7,27 +7,34 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { DatePicker } from "@/components/ui/date-picker";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function AdminCreateCommunityForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const { data: users } = useQuery({
+  const { data: users, isLoading: isLoadingUsers, error: usersError } = useQuery({
     queryKey: ['users-for-community'],
     queryFn: async () => {
-      // Use the profiles table instead of auth.users
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('id, email, first_name, last_name');
-      
-      if (error) throw error;
-      return profiles;
+      try {
+        // Use the profiles table instead of auth.users
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('id, email, first_name, last_name');
+        
+        if (error) throw error;
+        return profiles || [];
+      } catch (error: any) {
+        console.error("Error fetching users:", error);
+        setError(error.message || "Failed to fetch users");
+        return [];
+      }
     }
   });
 
@@ -59,6 +66,23 @@ export function AdminCreateCommunityForm() {
   const onSubmit = async (values: any) => {
     try {
       setIsSubmitting(true);
+      setError(null);
+      
+      console.log("Submitting community with values:", values);
+      
+      // Check for session
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        throw new Error("Authentication error: " + sessionError.message);
+      }
+      
+      if (!sessionData.session) {
+        throw new Error("You must be logged in to create a community");
+      }
+      
+      // Format the targetAudience as an array
+      const targetAudienceArray = values.targetAudience.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0);
       
       const { data, error } = await supabase
         .from('communities')
@@ -70,8 +94,8 @@ export function AdminCreateCommunityForm() {
           format: values.format,
           owner_id: values.owner_id,
           is_public: true,
-          start_date: new Date(values.startDate).toISOString(),
-          target_audience: [values.targetAudience],
+          start_date: values.startDate, // Using the string format
+          target_audience: targetAudienceArray,
           size_demographics: values.size,
           event_frequency: values.eventFrequency,
           website: values.website || "",
@@ -81,7 +105,10 @@ export function AdminCreateCommunityForm() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating community:", error);
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -91,6 +118,7 @@ export function AdminCreateCommunityForm() {
       form.reset();
     } catch (error: any) {
       console.error('Error creating community:', error);
+      setError(error.message || "Failed to create community");
       toast({
         title: "Error",
         description: error.message || "Failed to create community",
@@ -101,12 +129,30 @@ export function AdminCreateCommunityForm() {
     }
   };
 
+  if (usersError) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Error loading users: {usersError instanceof Error ? usersError.message : "Unknown error"}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Create New Community</CardTitle>
       </CardHeader>
       <CardContent>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -122,11 +168,20 @@ export function AdminCreateCommunityForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {users?.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.email} ({user.first_name} {user.last_name})
-                        </SelectItem>
-                      ))}
+                      {isLoadingUsers ? (
+                        <div className="flex items-center justify-center p-2">
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Loading users...
+                        </div>
+                      ) : users?.length === 0 ? (
+                        <div className="p-2 text-center text-muted-foreground">No users found</div>
+                      ) : (
+                        users?.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.email} ({user.first_name} {user.last_name})
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -181,11 +236,15 @@ export function AdminCreateCommunityForm() {
               name="startDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Start Date</FormLabel>
-                  <DatePicker 
-                    value={field.value ? new Date(field.value) : undefined}
-                    onChange={(date) => field.onChange(date?.toISOString())}
-                  />
+                  <FormLabel>Start Date (YYYY-MM-DD)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="text" 
+                      placeholder="YYYY-MM-DD" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>Enter date in YYYY-MM-DD format</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
