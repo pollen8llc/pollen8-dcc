@@ -25,8 +25,9 @@ export function CreateCommunityForm() {
     addDebugLog
   } = useCreateCommunityForm();
 
-  // Add initial debug log on mount
+  // Add initial debug log on mount, using a proper dependency array to prevent infinite loops
   useEffect(() => {
+    // Only run this effect once on component mount
     addDebugLog('info', 'Community creation form initialized');
     addDebugLog('info', 'Please complete the form to create your community');
     
@@ -47,7 +48,8 @@ export function CreateCommunityForm() {
     };
     
     checkAuth();
-  }, [addDebugLog]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array means this effect runs once on mount
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -146,6 +148,7 @@ export function CreateCommunityForm() {
         </form>
       </Form>
 
+      {/* Render the debugger separately to avoid rendering issues */}
       <FormDebugger logs={debugLogs} />
     </div>
   );

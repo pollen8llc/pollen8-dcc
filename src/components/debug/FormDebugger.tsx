@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -16,18 +16,19 @@ interface FormDebuggerProps {
   logs: DebugData[];
 }
 
-export const FormDebugger = ({ logs }: FormDebuggerProps) => {
+// Using memo to prevent unnecessary re-renders
+export const FormDebugger = memo(({ logs }: FormDebuggerProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
 
-  // Auto-expand when errors appear
+  // Auto-expand when errors appear, with proper dependency array
   useEffect(() => {
     const hasErrors = logs.some(log => log.type === 'error');
     if (hasErrors) {
       setIsExpanded(true);
       setIsVisible(true);
     }
-  }, [logs]);
+  }, [logs]); // Only run when logs change
 
   if (!isVisible) {
     return (
@@ -111,4 +112,6 @@ export const FormDebugger = ({ logs }: FormDebuggerProps) => {
       )}
     </Card>
   );
-};
+});
+
+FormDebugger.displayName = 'FormDebugger';

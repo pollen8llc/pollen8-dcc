@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { communityFormSchema, type CommunityFormData } from "@/schemas/communitySchema";
@@ -21,7 +21,8 @@ export const useCreateCommunityForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const addDebugLog = (type: DebugLog['type'], message: string) => {
+  // Use useCallback to prevent function recreation on every render
+  const addDebugLog = useCallback((type: DebugLog['type'], message: string) => {
     console.log(`[${type.toUpperCase()}] ${message}`);
     setDebugLogs(prev => [
       ...prev, 
@@ -31,11 +32,11 @@ export const useCreateCommunityForm = () => {
         timestamp: new Date().toLocaleTimeString()
       }
     ]);
-  };
+  }, []);
 
-  const clearDebugLogs = () => {
+  const clearDebugLogs = useCallback(() => {
     setDebugLogs([]);
-  };
+  }, []);
 
   const form = useForm<CommunityFormData>({
     resolver: zodResolver(communityFormSchema),
@@ -58,7 +59,7 @@ export const useCreateCommunityForm = () => {
     },
   });
 
-  const updateProgress = (tab: string) => {
+  const updateProgress = useCallback((tab: string) => {
     setActiveTab(tab);
     switch (tab) {
       case "basic-info":
@@ -71,7 +72,7 @@ export const useCreateCommunityForm = () => {
         setProgress(100);
         break;
     }
-  };
+  }, []);
 
   const onSubmit = async (data: CommunityFormData) => {
     clearDebugLogs();
