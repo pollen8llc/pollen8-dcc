@@ -29,7 +29,6 @@ const NavigationDrawer = ({
   const navigate = useNavigate();
   const isAdmin = currentUser?.role === UserRole.ADMIN;
   
-  // Check if user is an organizer or has managed communities
   const showOrganizerNav = currentUser && (
     currentUser.role === UserRole.ORGANIZER || 
     (currentUser.managedCommunities && currentUser.managedCommunities.length > 0) ||
@@ -81,7 +80,27 @@ const NavigationDrawer = ({
             )}
 
             {/* Organizer section */}
-            {/* Removed OrganizerNavigation usage completely as requested */}
+            {showOrganizerNav && currentUser.managedCommunities && currentUser.managedCommunities.length > 0 && (
+              <>
+                <Separator className="my-4" />
+                <div className="px-2 mb-2 text-sm font-semibold text-muted-foreground">
+                  Manage Communities
+                </div>
+                <div className="flex flex-col gap-1 pb-2">
+                  {currentUser.managedCommunities.map((community) => (
+                    <Button 
+                      key={community.id}
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation(`/organizer/community/${community.id}`)}
+                    >
+                      {/* Optionally add an icon here if you like */}
+                      <span>{community.name}</span>
+                    </Button>
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* Auth actions */}
             <Separator className="my-4" />
