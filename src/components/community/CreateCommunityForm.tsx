@@ -9,6 +9,7 @@ import { BasicInfoForm } from "./BasicInfoForm";
 import { PlatformsForm } from "./PlatformsForm";
 import { SocialMediaForm } from "./SocialMediaForm";
 import { useCreateCommunityForm } from "@/hooks/useCreateCommunityForm";
+import { FormDebugger } from "@/components/debug/FormDebugger";
 
 export function CreateCommunityForm() {
   const {
@@ -17,7 +18,8 @@ export function CreateCommunityForm() {
     activeTab,
     progress,
     updateProgress,
-    onSubmit
+    onSubmit,
+    debugLogs
   } = useCreateCommunityForm();
 
   return (
@@ -116,6 +118,8 @@ export function CreateCommunityForm() {
           </Card>
         </form>
       </Form>
+
+      <FormDebugger logs={debugLogs} />
     </div>
   );
 };

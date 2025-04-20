@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,12 +6,27 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
+interface DebugLog {
+  type: 'info' | 'error' | 'success';
+  message: string;
+  timestamp: string;
+}
+
 export const useCreateCommunityForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("basic-info");
   const { toast } = useToast();
   const navigate = useNavigate();
   const [progress, setProgress] = useState(33);
+  const [debugLogs, setDebugLogs] = useState<DebugLog[]>([]);
+
+  const addDebugLog = (type: DebugLog['type'], message: string) => {
+    setDebugLogs(prev => [...prev, {
+      type,
+      message,
+      timestamp: new Date().toLocaleTimeString()
+    }]);
+  };
 
   const form = useForm<CommunityFormData>({
     resolver: zodResolver(communityFormSchema),
@@ -53,14 +67,16 @@ export const useCreateCommunityForm = () => {
   const onSubmit = async (data: CommunityFormData) => {
     try {
       setIsSubmitting(true);
-      console.log("Submitting form with data:", data);
+      addDebugLog('info', 'Starting form submission...');
       
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
+        addDebugLog('error', 'No authenticated user found');
         throw new Error("You must be logged in to create a community");
       }
 
-      // Verify user has appropriate role
+      addDebugLog('info', 'Checking user roles...');
+      
       const { data: userRoles, error: rolesError } = await supabase
         .from('user_roles')
         .select(`
@@ -70,29 +86,34 @@ export const useCreateCommunityForm = () => {
         .eq('user_id', session.session.user.id);
       
       if (rolesError) {
-        console.error("Error verifying user role:", rolesError);
+        addDebugLog('error', `Error checking roles: ${rolesError.message}`);
         throw new Error("Unable to verify your permissions");
       }
+
+      addDebugLog('info', `Found roles: ${JSON.stringify(userRoles?.map(r => r.roles?.name))}`);
       
       const hasPermission = userRoles?.some(role => 
         role.roles?.name === 'ADMIN' || role.roles?.name === 'ORGANIZER'
       );
       
       if (!hasPermission) {
-        throw new Error("You don't have permission to create a community");
+        addDebugLog('error', 'User lacks required permissions (ADMIN or ORGANIZER role)');
+        throw new Error("You don't have permission to create a community. Required role: ADMIN or ORGANIZER");
       }
 
-      // Process target audience as an array
+      addDebugLog('info', 'Processing form data...');
+
       const targetAudienceArray = data.targetAudience
         .split(',')
         .map(item => item.trim())
         .filter(item => item.length > 0);
 
-      // Process platforms as an object for the database
       const communicationPlatforms = data.platforms.reduce((acc, platform) => {
         acc[platform] = { enabled: true };
         return acc;
       }, {} as Record<string, any>);
+
+      addDebugLog('info', 'Inserting community into database...');
 
       const { data: community, error } = await supabase
         .from('communities')
@@ -109,28 +130,31 @@ export const useCreateCommunityForm = () => {
           social_media: data.socialMediaHandles || {},
           owner_id: session.session.user.id,
           is_public: true,
-          member_count: 1 // Start with 1 member (the owner)
+          member_count: 1
         })
         .select()
         .single();
 
       if (error) {
+        addDebugLog('error', `Database error: ${error.message}`);
         console.error("Error creating community:", error);
         throw error;
       }
+
+      addDebugLog('success', 'Community created successfully!');
 
       toast({
         title: "Success!",
         description: "Your community has been created.",
       });
 
-      // Delay navigation slightly to show success state
       setTimeout(() => {
         navigate(`/community/${community.id}`);
       }, 1500);
 
     } catch (error: any) {
       console.error("Error creating community:", error);
+      addDebugLog('error', `Error: ${error.message}`);
       toast({
         variant: "destructive",
         title: "Error",
@@ -148,5 +172,6 @@ export const useCreateCommunityForm = () => {
     progress,
     updateProgress,
     onSubmit,
+    debugLogs
   };
 };
