@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
-import * as communityService from "@/services/communityService"
+import * as communityService from "@/services/community/communityMutationService"
 import { CommunityFormSchema } from "./schemas/communityFormSchema"
 import { useUser } from "@/contexts/UserContext"
 
@@ -25,20 +25,21 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         throw new Error("You must be logged in to create a community");
       }
 
+      // Process tags from targetAudience if it exists
       const tags = values.targetAudience 
         ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
         : [];
       
-      // Prepare social media handles as a JSON object
+      // Handle social media - ensure we access properties that exist in the schema
       const socialMediaObject = {
-        twitter: values.socialMediaHandles?.twitter || "",
-        instagram: values.socialMediaHandles?.instagram || "",
-        linkedin: values.socialMediaHandles?.linkedin || "",
-        facebook: values.socialMediaHandles?.facebook || "",
+        twitter: values.twitter || "",
+        instagram: values.instagram || "",
+        linkedin: values.linkedin || "",
+        facebook: values.facebook || "",
       };
 
-      // Prepare communication platforms as a JSON object
-      const communicationPlatformsObject = values.platforms?.reduce((acc, platform) => {
+      // Handle platforms - ensure values.primaryPlatforms exists in the schema
+      const communicationPlatformsObject = values.primaryPlatforms?.reduce((acc, platform) => {
         acc[platform] = { enabled: true };
         return acc;
       }, {} as Record<string, any>) || {};
@@ -59,10 +60,10 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         memberIds: [],
         role_title: values.role_title || "",
         community_structure: values.community_structure || "",
-        visionStatement: values.vision || "",
-        social_media: socialMediaObject,
+        vision: values.vision || "",
+        socialMedia: socialMediaObject,
         communication_platforms: communicationPlatformsObject,
-        newsletter_url: values.newsletterUrl || "",
+        newsletterUrl: values.newsletterUrl || "",
       };
 
       console.log("Creating community with data:", communityData);

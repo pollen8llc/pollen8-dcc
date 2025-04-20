@@ -21,7 +21,7 @@ interface OnlinePresenceFormProps {
 }
 
 export function OnlinePresenceForm({ form }: OnlinePresenceFormProps) {
-  const platformsValue = form.watch("platforms") || [];
+  const platformsValue = form.watch("primaryPlatforms") || [];
 
   return (
     <div className="space-y-6">
@@ -69,7 +69,7 @@ export function OnlinePresenceForm({ form }: OnlinePresenceFormProps) {
             <FormField
               key={platform.id}
               control={form.control}
-              name="platforms"
+              name="primaryPlatforms"
               render={({ field }) => {
                 return (
                   <FormItem
@@ -100,7 +100,7 @@ export function OnlinePresenceForm({ form }: OnlinePresenceFormProps) {
 
       <FormField
         control={form.control}
-        name="socialMediaHandles.twitter"
+        name="twitter"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Twitter</FormLabel>
@@ -114,7 +114,7 @@ export function OnlinePresenceForm({ form }: OnlinePresenceFormProps) {
 
       <FormField
         control={form.control}
-        name="socialMediaHandles.instagram"
+        name="instagram"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Instagram</FormLabel>
@@ -129,7 +129,7 @@ export function OnlinePresenceForm({ form }: OnlinePresenceFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="socialMediaHandles.linkedin"
+          name="linkedin"
           render={({ field }) => (
             <FormItem>
               <FormLabel>LinkedIn</FormLabel>
@@ -143,7 +143,7 @@ export function OnlinePresenceForm({ form }: OnlinePresenceFormProps) {
 
         <FormField
           control={form.control}
-          name="socialMediaHandles.facebook"
+          name="facebook"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Facebook</FormLabel>

@@ -18,6 +18,11 @@ export const communityFormSchema = z.object({
   community_structure: z.string().optional(),
   vision: z.string().optional(),
   community_values: z.string().optional(),
+  // Add social media fields directly to the schema
+  twitter: z.string().optional(),
+  instagram: z.string().optional(),
+  linkedin: z.string().optional(),
+  facebook: z.string().optional(),
   size: z.string().or(z.number()).optional().transform(val => 
     typeof val === 'string' ? parseInt(val) || 0 : val
   ),

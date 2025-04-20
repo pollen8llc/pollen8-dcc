@@ -46,7 +46,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     const target_audience = Array.isArray(community.tags) ? community.tags : [];
 
     // Extract social media values if they exist
-    const social_media = community.social_media || {};
+    const social_media = community.socialMedia || {};
     
     // Build the database record
     const { data, error } = await supabase
@@ -65,10 +65,10 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         format: community.format || null,
         role_title: community.role_title || null,
         community_structure: community.community_structure || null,
-        vision: community.visionStatement || null,
+        vision: community.vision || null,
         social_media: social_media,
         communication_platforms: community.communication_platforms || {},
-        newsletter_url: community.newsletter_url || null
+        newsletter_url: community.newsletterUrl || null
       })
       .select()
       .single();

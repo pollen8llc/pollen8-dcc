@@ -31,6 +31,10 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
       community_structure: "",
       vision: "",
       community_values: "",
+      twitter: "",
+      instagram: "",
+      linkedin: "",
+      facebook: "",
     }
   });
 
