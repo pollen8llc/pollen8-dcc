@@ -25,7 +25,6 @@ export function DatesAndUrls({ form }: DatesAndUrlsProps) {
                 placeholder="https://yourcommunity.com"
                 {...field} 
                 className="bg-black/10 backdrop-blur-sm border-white/20"
-                required
               />
             </FormControl>
             <FormDescription>Your community's main website</FormDescription>
