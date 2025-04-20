@@ -14,17 +14,18 @@ export default function CommunityCreationTest() {
   const navigate = useNavigate();
   const { currentUser } = useUser();
   
-  // Test both hooks
+  // Test direct form hook - this one uses onSubmit
   const {
     isSubmitting: isSubmittingDirect,
-    submissionError: directError,
-    handleSubmit: handleDirectSubmit
+    form: directForm,
+    onSubmit: directOnSubmit
   } = useCreateCommunityForm();
   
+  // Test service layer hook - this one uses submitCommunity
   const {
     isSubmitting: isSubmittingService,
     submissionError: serviceError,
-    handleSubmit: handleServiceSubmit
+    handleSubmit
   } = useCommunityForm();
 
   // Test submission handlers
@@ -36,9 +37,21 @@ export default function CommunityCreationTest() {
         type: "tech",
         format: "hybrid",
         location: "Test Location",
+        targetAudience: "developers, tech enthusiasts",
+        platforms: ["discord", "slack"],
+        website: "https://example.com",
+        newsletterUrl: "",
+        socialMediaHandles: {
+          twitter: "",
+          instagram: "",
+          linkedin: "",
+          facebook: ""
+        }
       };
-      await handleDirectSubmit(testData);
-      console.log("Direct submission completed");
+      
+      // Call onSubmit directly with the data
+      directOnSubmit(testData);
+      console.log("Direct submission initiated");
     } catch (error) {
       console.error("Direct submission error:", error);
     }
@@ -49,11 +62,13 @@ export default function CommunityCreationTest() {
       const testData = {
         name: "Test Community Service",
         description: "Testing service layer submission",
-        type: "tech",
+        communityType: "tech",
         format: "hybrid",
         location: "Test Location",
       };
-      await handleServiceSubmit(testData);
+      
+      // Submit community data through the service
+      await handleSubmit(testData);
       console.log("Service submission completed");
     } catch (error) {
       console.error("Service submission error:", error);
@@ -112,10 +127,14 @@ export default function CommunityCreationTest() {
                     "Test Direct Submission"
                   )}
                 </Button>
-                {directError && (
+                {directForm.formState.errors && Object.keys(directForm.formState.errors).length > 0 && (
                   <Alert variant="destructive" className="mt-2">
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{directError}</AlertDescription>
+                    <AlertTitle>Form Error</AlertTitle>
+                    <AlertDescription>
+                      {Object.values(directForm.formState.errors).map((error, i) => (
+                        <div key={i}>{error.message}</div>
+                      ))}
+                    </AlertDescription>
                   </Alert>
                 )}
               </div>
