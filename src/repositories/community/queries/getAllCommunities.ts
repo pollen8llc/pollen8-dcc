@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Expanded mock communities for development and testing purposes
 export const mockCommunities = [
   {
-    id: "1",
+    id: "a1b2c3d4-e5f6-4a2b-8c6d-1e3f5a7b9c0d",
     name: "Tech Enthusiasts",
     description: "A community for tech lovers exploring the latest in software, hardware, and innovations.",
     location: "San Francisco, CA",
@@ -17,7 +17,7 @@ export const mockCommunities = [
     isPublic: true
   },
   {
-    id: "2",
+    id: "b2c3d4e5-f6a7-5b3c-9d7e-2f4a6b8c0d2",
     name: "Eco Warriors",
     description: "Dedicated to environmental activism and sustainability efforts in urban areas.",
     location: "Portland, OR",
@@ -29,7 +29,7 @@ export const mockCommunities = [
     isPublic: true
   },
   {
-    id: "3",
+    id: "c3d4e5f6-a7b8-6c4d-0e8f-3a5b7c9d1e3",
     name: "Art Collective",
     description: "A vibrant group of artists sharing ideas, projects, and exhibitions.",
     location: "Brooklyn, NY",
@@ -41,7 +41,7 @@ export const mockCommunities = [
     isPublic: true
   },
   {
-    id: "4",
+    id: "d4e5f6a7-b8c9-7d5e-1f9a-4b6c8d0e2f4",
     name: "Fitness Friends",
     description: "Community focused on fitness, wellness, and active lifestyles.",
     location: "Austin, TX",
@@ -53,7 +53,7 @@ export const mockCommunities = [
     isPublic: true
   },
   {
-    id: "5",
+    id: "e5f6a7b8-c9d0-8e6f-2a0b-5c7d9e1f3a5",
     name: "Book Lovers",
     description: "Readers and writers coming together to discuss literature and writing.",
     location: "Seattle, WA",
