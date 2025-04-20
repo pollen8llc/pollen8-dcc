@@ -1,3 +1,4 @@
+
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbCommunity } from "../base/baseRepository";
@@ -6,8 +7,8 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   try {
     console.log("Updating community:", community.id);
     
-    // Ensure communitySize is treated as a string
-    const communitySize = community.communitySize || "0";
+    // Parse communitySize to an integer for database storage
+    const memberCount = parseInt(community.communitySize || "0", 10);
     
     const { data, error } = await supabase
       .from('communities')
@@ -18,7 +19,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         website: community.website,
         is_public: community.isPublic,
         location: community.location,
-        member_count: communitySize // Use the string version
+        member_count: memberCount // Use parsed integer
       })
       .eq('id', community.id)
       .select()
@@ -57,8 +58,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Extract social media values if they exist
     const socialMedia = community.socialMedia || {};
     
-    // Ensure communitySize is a string
-    const communitySize = community.communitySize || "0";
+    // Parse communitySize to an integer for database storage
+    const memberCount = parseInt(community.communitySize || "0", 10);
     
     // Build the database record with explicit owner_id
     const { data, error } = await supabase
@@ -70,7 +71,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         website: community.website || "",
         is_public: community.isPublic !== undefined ? community.isPublic : true,
         location: community.location || "Remote",
-        member_count: communitySize, // Use the string version
+        member_count: memberCount, // Use parsed integer
         owner_id: owner_id, // This is critical - explicitly set owner
         target_audience: target_audience,
         community_type: community.communityType || null,
