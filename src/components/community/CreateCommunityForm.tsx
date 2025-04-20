@@ -129,7 +129,8 @@ export function CreateCommunityForm() {
         instagram: data.socialMediaHandles?.instagram || "",
         linkedin: data.socialMediaHandles?.linkedin || "",
         facebook: data.socialMediaHandles?.facebook || "",
-        size: data.size, // This will be transformed in the schema
+        // Convert size to number or use the schema's transform function to handle it
+        size: data.size,
       };
       
       await submitCommunity(communityData);
