@@ -23,8 +23,11 @@ interface NavigationDrawerProps {
 // A utility type for managed community info
 type DrawerCommunity = { id: string; name: string | null };
 
+// Type for a community object that has an id property
+type CommunityWithId = { id: string; [key: string]: any };
+
 // Type guard to check if an item is a community object with an id
-function isCommunityObject(item: any): item is { id: string } {
+function isCommunityObject(item: any): item is CommunityWithId {
   return item && typeof item === 'object' && 'id' in item;
 }
 
@@ -58,12 +61,15 @@ const NavigationDrawer = ({
         currentUser.managedCommunities.length > 0
       ) {
         // Extract IDs from managedCommunities, which could be either strings or objects
-        const ids = currentUser.managedCommunities
-          .map((c) => {
-            if (typeof c === "string") return c;
-            return isCommunityObject(c) ? c.id : null;
-          })
-          .filter(Boolean) as string[];
+        const ids: string[] = [];
+        
+        for (const community of currentUser.managedCommunities) {
+          if (typeof community === "string") {
+            ids.push(community);
+          } else if (isCommunityObject(community)) {
+            ids.push(community.id);
+          }
+        }
 
         if (ids.length === 0) return;
 
