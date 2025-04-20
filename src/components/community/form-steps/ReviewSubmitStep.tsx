@@ -58,7 +58,7 @@ export function ReviewSubmitStep({
       // Convert Date to ISO string for Supabase
       const startDateString = values.startDate ? values.startDate.toISOString() : null;
 
-      // Compose insert object using the actual column names from the database
+      // Compose insert object
       const insertObj = {
         name: values.name,
         description: values.description,
@@ -74,11 +74,7 @@ export function ReviewSubmitStep({
         is_public: true,
         member_count: 1,
         start_date: startDateString,
-        // Instead of using community_size which doesn't exist, use member_count
-        // The form field communitySize is used to initialize the member_count
-        member_count: values.communitySize 
-          ? parseInt(values.communitySize.split('-')[0], 10) // Convert from range like '1-10' to a number
-          : 1,
+        community_size: values.communitySize || null,
         event_frequency: values.eventFrequency || null
       };
 
