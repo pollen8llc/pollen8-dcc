@@ -16,6 +16,7 @@ import CreateCommunity from "./pages/CreateCommunity";
 import JoinCommunities from "./pages/JoinCommunities";
 import React from 'react';
 import DebuggerDashboard from './pages/admin/DebuggerDashboard';
+import OrganizerDashboard from "./pages/OrganizerDashboard";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -81,6 +82,12 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
+      
+      <Route path="/organizer/community/:id" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <OrganizerDashboard />
+        </ProtectedRoute>
+      } />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
