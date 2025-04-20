@@ -30,6 +30,11 @@ export const communityFormSchema = z.object({
     linkedin: z.string().optional(),
     facebook: z.string().optional(),
   }).optional(),
+
+  // Additional fields
+  startDate: z.date().optional().nullable(),
+  communitySize: z.string().optional(),
+  eventFrequency: z.string().optional(),
 });
 
 export type CommunityFormData = z.infer<typeof communityFormSchema>;
