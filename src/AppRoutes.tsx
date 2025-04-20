@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -15,7 +14,6 @@ import Documentation from "./pages/Documentation";
 import Onboarding from "./pages/Onboarding";
 import CreateCommunity from "./pages/CreateCommunity";
 import JoinCommunities from "./pages/JoinCommunities";
-import OrganizerDashboard from "./pages/OrganizerDashboard";
 import React from 'react';
 import DebuggerDashboard from './pages/admin/DebuggerDashboard';
 
@@ -23,7 +21,6 @@ const AppRoutes = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
 
-  // Add debugging to track routing and user state
   console.log("AppRoutes - Current user state:", { 
     id: currentUser?.id,
     role: currentUser?.role,
@@ -72,15 +69,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredRole="ORGANIZER">
             <AdminDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/organizer" 
-        element={
-          <ProtectedRoute requiredRole="ORGANIZER">
-            <OrganizerDashboard />
           </ProtectedRoute>
         } 
       />
