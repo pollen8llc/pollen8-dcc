@@ -51,6 +51,41 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       return null;
     }
 
+    // Create safe defaults for JSON fields
+    const communicationPlatforms = 
+      typeof data.communication_platforms === 'object' && data.communication_platforms !== null
+        ? data.communication_platforms
+        : {};
+        
+    const socialMedia = 
+      typeof data.social_media === 'object' && data.social_media !== null
+        ? data.social_media
+        : {};
+
+    // Convert any social media values that are numbers to strings
+    const typeSafeSocialMedia: Record<string, string | { url?: string }> = {};
+    
+    if (typeof socialMedia === 'object' && socialMedia !== null) {
+      Object.keys(socialMedia).forEach(key => {
+        const value = socialMedia[key];
+        if (typeof value === 'number') {
+          typeSafeSocialMedia[key] = value.toString();
+        } else if (typeof value === 'object' && value !== null) {
+          typeSafeSocialMedia[key] = value;
+        } else if (typeof value === 'string') {
+          typeSafeSocialMedia[key] = value;
+        } else {
+          typeSafeSocialMedia[key] = '';
+        }
+      });
+    }
+
+    // Extract platform keys safely
+    const platformKeys = 
+      typeof communicationPlatforms === 'object' && communicationPlatforms !== null
+        ? Object.keys(communicationPlatforms)
+        : [];
+
     // Transform the data to match our Community model
     const community: Community = {
       id: data.id,
@@ -58,7 +93,7 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       description: data.description,
       location: data.location || 'Remote',
       imageUrl: data.logo_url || '',
-      communitySize: '', // We no longer store this
+      communitySize: (data.member_count?.toString() || "0"),
       organizerIds: [data.owner_id],
       memberIds: [],
       tags: data.tags || [],
@@ -68,12 +103,12 @@ export const getCommunityById = async (id: string): Promise<Community | null> =>
       website: data.website,
       communityType: data.type || data.community_type,
       format: data.format,
-      targetAudience: data.target_audience,
+      targetAudience: data.target_audience || [],
       tone: '',
       newsletterUrl: data.newsletter_url,
-      socialMedia: data.social_media,
-      primaryPlatforms: Object.keys(data.communication_platforms || {}),
-      communication_platforms: data.communication_platforms,
+      socialMedia: typeSafeSocialMedia,
+      primaryPlatforms: platformKeys,
+      communication_platforms: communicationPlatforms as Record<string, string | { url?: string; details?: string }>,
       founder_name: data.founder_name,
       role_title: data.role_title,
       personal_background: data.personal_background,
