@@ -51,6 +51,18 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         return acc;
       }, {} as Record<string, any>) || {};
       
+      // Parse size to a number if it exists and is a string
+      let communitySize: number | undefined;
+      if (values.size) {
+        if (typeof values.size === 'string') {
+          // Extract number from format like "1-100" by taking the second number
+          const match = values.size.match(/\d+-(\d+)/);
+          communitySize = match ? parseInt(match[1]) : 0;
+        } else {
+          communitySize = values.size;
+        }
+      }
+      
       const communityData = {
         name: values.name,
         description: values.description,
@@ -62,7 +74,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         format: values.format,
         tone: values.tone,
         imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
-        communitySize: values.size ? parseInt(values.size.toString()) : 0,
+        communitySize: communitySize || 0,
         organizerIds: [session.session.user.id], // Explicitly set current user as organizer
         memberIds: [],
         role_title: values.role_title || "",

@@ -23,9 +23,18 @@ export const communityFormSchema = z.object({
   instagram: z.string().optional(),
   linkedin: z.string().optional(),
   facebook: z.string().optional(),
-  size: z.string().or(z.number()).optional().transform(val => 
-    typeof val === 'string' ? parseInt(val) || 0 : val
-  ),
+  // Change the size field to handle both string and number, transforming string to number
+  size: z.union([
+    z.string(),
+    z.number()
+  ]).optional().transform(val => {
+    if (typeof val === 'string') {
+      // If it's a range like "1-100", extract the max number
+      const match = val.match(/\d+-(\d+)/);
+      return match ? parseInt(match[1]) : 0;
+    }
+    return val || 0;
+  }),
 });
 
 export type CommunityFormSchema = z.infer<typeof communityFormSchema>;
