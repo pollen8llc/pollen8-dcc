@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,7 +61,7 @@ export function CreateCommunityForm() {
       startDate: new Date().toISOString().split('T')[0],
       targetAudience: "",
       format: "hybrid",
-      size: "1-100",
+      size: "1",  // Changed from "1-100" to "1" for proper number parsing
       eventFrequency: "monthly",
       website: "",
       newsletterUrl: "",
@@ -95,7 +96,7 @@ export function CreateCommunityForm() {
         return;
       }
 
-      console.log("Form submitted with data:", data);
+      console.log("Form submitted with data:", JSON.stringify(data, null, 2));
       
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(data.startDate)) {
@@ -123,7 +124,7 @@ export function CreateCommunityForm() {
         instagram: data.socialMediaHandles?.instagram || "",
         linkedin: data.socialMediaHandles?.linkedin || "",
         facebook: data.socialMediaHandles?.facebook || "",
-        size: data.size,
+        size: data.size, // Now properly passing as a string that can be parsed to a number
       };
       
       await submitCommunity(communityData);
@@ -152,7 +153,7 @@ export function CreateCommunityForm() {
   });
 
   const handleValidationFailed = (errors: any) => {
-    console.error("Form validation errors:", errors);
+    console.error("Form validation errors:", JSON.stringify(errors, null, 2));
     
     const firstError = Object.entries(errors)[0];
     const fieldName = firstError[0];

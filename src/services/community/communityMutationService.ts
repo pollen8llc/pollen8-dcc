@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import * as communityRepository from "@/repositories/community";
 import * as auditService from "@/services/auditService";
@@ -20,7 +21,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
 
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   try {
-    console.log("Creating community in service with data:", community);
+    console.log("Creating community in service with data:", JSON.stringify(community, null, 2));
     
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData?.session?.user?.id) {
@@ -34,7 +35,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       organizerIds: [sessionData.session.user.id]
     };
     
-    console.log("Submitting to repository with data:", communityWithOrganizer);
+    console.log("Submitting to repository with data:", JSON.stringify(communityWithOrganizer, null, 2));
 
     // Create the community in the database
     const createdCommunity = await communityRepository.createCommunity(communityWithOrganizer);

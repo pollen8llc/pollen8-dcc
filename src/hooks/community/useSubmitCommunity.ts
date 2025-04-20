@@ -19,7 +19,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
     if (isSubmitting) return;
     
     try {
-      console.log("Starting community submission with values:", values);
+      console.log("Starting community submission with values:", JSON.stringify(values, null, 2));
       setIsSubmitting(true);
       setSubmissionError(null);
       
@@ -68,7 +68,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         communityType: values.communityType,
         format: values.format,
         tags,
-        communitySize: values.size || "1-100",
+        communitySize: values.size || "1", // Ensure this is a string that can be parsed to a number
         organizerIds: [session.session.user.id],
         isPublic: true,
         website: values.website || "",

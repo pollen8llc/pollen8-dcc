@@ -1,3 +1,4 @@
+
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbCommunity } from "../base/baseRepository";
@@ -40,7 +41,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
 export const createCommunity = async (community: Partial<Community>): Promise<Community> => {
   try {
     // Log the community data for debugging
-    console.log("Creating community in repository with data:", community);
+    console.log("Creating community in repository with data:", JSON.stringify(community, null, 2));
 
     // Make sure we have the auth session
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -58,7 +59,9 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     const socialMedia = community.socialMedia || {};
     
     // Parse communitySize to an integer for database storage
-    const memberCount = parseInt(community.communitySize || "0", 10);
+    const memberCount = community.communitySize 
+      ? parseInt(community.communitySize, 10) 
+      : 1; // Default to 1 if not provided
     
     // Log the final data being sent to the database
     console.log("Inserting into database with data:", {
