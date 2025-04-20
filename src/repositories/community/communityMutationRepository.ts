@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbCommunity } from "../base/baseRepository";
@@ -7,10 +6,8 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   try {
     console.log("Updating community:", community.id);
     
-    // Convert communitySize to a string if it's not already
-    const communitySize = typeof community.communitySize === 'number' 
-      ? community.communitySize.toString() 
-      : community.communitySize;
+    // Ensure communitySize is treated as a string
+    const communitySize = community.communitySize || "0";
     
     const { data, error } = await supabase
       .from('communities')
@@ -60,10 +57,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Extract social media values if they exist
     const socialMedia = community.socialMedia || {};
     
-    // Convert communitySize to string if it's a number
-    const communitySize = typeof community.communitySize === 'number'
-      ? community.communitySize.toString()
-      : community.communitySize || "0";
+    // Ensure communitySize is a string
+    const communitySize = community.communitySize || "0";
     
     // Build the database record with explicit owner_id
     const { data, error } = await supabase
