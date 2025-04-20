@@ -23,15 +23,19 @@ export const communityFormSchema = z.object({
   instagram: z.string().optional(),
   linkedin: z.string().optional(),
   facebook: z.string().optional(),
-  // Change the size field to handle both string and number, transforming string to number
+  // Define size as either string or number, with proper transformation
   size: z.union([
     z.string(),
     z.number()
   ]).optional().transform(val => {
     if (typeof val === 'string') {
       // If it's a range like "1-100", extract the max number
-      const match = val.match(/\d+-(\d+)/);
-      return match ? parseInt(match[1]) : 0;
+      if (val.includes('-')) {
+        const match = val.match(/\d+-(\d+)/);
+        return match ? parseInt(match[1]) : 0;
+      }
+      // If it's just a string, try to convert it to a number
+      return parseInt(val) || 0;
     }
     return val || 0;
   }),

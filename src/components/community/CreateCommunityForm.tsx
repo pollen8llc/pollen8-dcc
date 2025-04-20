@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +16,7 @@ import { SocialMediaForm } from "./SocialMediaForm";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { CommunityFormSchema } from "@/hooks/community/schemas/communityFormSchema";
 
 export function CreateCommunityForm() {
   const { submitCommunity, isSubmitting } = useSubmitCommunity();
@@ -111,9 +113,26 @@ export function CreateCommunityForm() {
         return;
       }
       
-      const result = await submitCommunity(data);
+      // Transform the form data to match the structure expected by submitCommunity
+      const communityData: CommunityFormSchema = {
+        name: data.name,
+        description: data.description,
+        communityType: data.communityType,
+        location: data.location,
+        format: data.format,
+        targetAudience: data.targetAudience,
+        tone: "",
+        website: data.website || "",
+        primaryPlatforms: data.platforms,
+        newsletterUrl: data.newsletterUrl || "",
+        twitter: data.socialMediaHandles?.twitter || "",
+        instagram: data.socialMediaHandles?.instagram || "",
+        linkedin: data.socialMediaHandles?.linkedin || "",
+        facebook: data.socialMediaHandles?.facebook || "",
+        size: data.size, // This will be transformed in the schema
+      };
       
-      console.log("Community created successfully:", result);
+      await submitCommunity(communityData);
       
       toast({
         title: "Success!",
