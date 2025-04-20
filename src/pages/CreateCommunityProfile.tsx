@@ -1,147 +1,155 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useCreateCommunityForm } from "@/hooks/forms/useCreateCommunityForm";
-import { FormBasicInfo } from "@/components/community/form-sections/FormBasicInfo";
-import { FormPlatforms } from "@/components/community/form-sections/FormPlatforms";
-import { FormSocialMedia } from "@/components/community/form-sections/FormSocialMedia";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { communityFormSchema, CommunityFormData } from "@/schemas/communitySchema";
 import { Toaster } from "@/components/ui/toaster";
-import { Form } from "@/components/ui/form";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  WelcomeStep,
+  CommunityNameStep,
+  DescriptionStep,
+  TypeStep,
+  LocationStep,
+  StartDateStep,
+  SizeStep,
+  FormatStep,
+  EventFrequencyStep,
+  WebsiteStep,
+  PlatformsStep,
+  SocialMediaStep,
+  TagsStep,
+  ReviewSubmitStep,
+} from "@/components/community/form-steps";
+
+const FORM_STEPS = [
+  "welcome",
+  "name",
+  "description",
+  "type",
+  "location",
+  "startDate",
+  "size",
+  "format",
+  "eventFrequency",
+  "website",
+  "platforms",
+  "socialMedia",
+  "tags",
+  "review",
+];
 
 export default function CreateCommunityProfile() {
-  const { 
-    form, 
-    isSubmitting, 
-    activeTab, 
-    progress, 
-    updateProgress, 
-    onSubmit 
-  } = useCreateCommunityForm();
+  const [stepIdx, setStepIdx] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const goToNextStep = () => {
-    if (activeTab === "basic-info") {
-      // Validate the current form step before proceeding
-      form.trigger(["name", "description", "type", "format", "location", "targetAudience"]);
-      
-      const basicInfoErrors = [
-        form.formState.errors.name,
-        form.formState.errors.description,
-        form.formState.errors.type,
-        form.formState.errors.format,
-        form.formState.errors.location,
-        form.formState.errors.targetAudience
-      ];
+  const methods = useForm<CommunityFormData>({
+    resolver: zodResolver(communityFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      type: "tech",
+      format: "hybrid",
+      location: "",
+      targetAudience: "",
+      platforms: [],
+      website: "",
+      newsletterUrl: "",
+      socialMediaHandles: {
+        twitter: "",
+        instagram: "",
+        linkedin: "",
+        facebook: "",
+      },
+      // For steps that are not in the main schema, handle with generic form context.
+      // startDate, eventFrequency, communitySize, tags may need to be added or mapped
+    },
+    mode: "onTouched",
+  });
 
-      if (!basicInfoErrors.some(error => error)) {
-        updateProgress("platforms");
-      }
-    } else if (activeTab === "platforms") {
-      updateProgress("social-media");
+  const totalSteps = FORM_STEPS.length;
+  const progress = Math.round((stepIdx + 1) / totalSteps * 100);
+
+  // On submit is handled in the Review step
+  const handleNext = async () => {
+    if (stepIdx < FORM_STEPS.length - 1) {
+      setStepIdx((idx) => idx + 1);
     }
   };
 
-  const goToPrevStep = () => {
-    if (activeTab === "platforms") {
-      updateProgress("basic-info");
-    } else if (activeTab === "social-media") {
-      updateProgress("platforms");
+  const handlePrev = () => {
+    if (stepIdx > 0) {
+      setStepIdx((idx) => idx - 1);
     }
   };
+
+  // Map current step to component
+  const currentStepKey = FORM_STEPS[stepIdx];
+  const StepComponent = {
+    welcome: WelcomeStep,
+    name: CommunityNameStep,
+    description: DescriptionStep,
+    type: TypeStep,
+    location: LocationStep,
+    startDate: StartDateStep,
+    size: SizeStep,
+    format: FormatStep,
+    eventFrequency: EventFrequencyStep,
+    website: WebsiteStep,
+    platforms: PlatformsStep,
+    socialMedia: SocialMediaStep,
+    tags: TagsStep,
+    review: ReviewSubmitStep,
+  }[currentStepKey];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/90 py-12 px-4">
-      <div className="w-full max-w-2xl">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/90 py-10 px-2">
+      <div className="w-full max-w-xl">
         {/* Progress bar */}
-        <div className="mb-8">
-          <div className="flex justify-between text-sm mb-2">
-            <span>Step {activeTab === "basic-info" ? "1" : activeTab === "platforms" ? "2" : "3"} of 3</span>
+        <div className="mb-6">
+          <div className="flex justify-between text-xs mb-2">
+            <span>
+              Step {stepIdx + 1} of {totalSteps}
+            </span>
             <span>{progress}% complete</span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
 
-        {/* Main content area with animation */}
+        {/* Form Step Container */}
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="p-6 md:p-8">
+          <FormProvider {...methods}>
+            <form
+              onSubmit={methods.handleSubmit((data) => {
+                // The real submit logic is inside ReviewSubmitStep
+              })}
+            >
+              <div className="p-6 min-h-[300px] flex flex-col">
                 <AnimatePresence mode="wait">
-                  {activeTab === "basic-info" && (
-                    <motion.div
-                      key="basic-info"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h2 className="text-2xl font-bold mb-6">Basic Community Information</h2>
-                      <FormBasicInfo form={form} />
-                    </motion.div>
-                  )}
-
-                  {activeTab === "platforms" && (
-                    <motion.div
-                      key="platforms"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h2 className="text-2xl font-bold mb-6">Communication Platforms</h2>
-                      <FormPlatforms form={form} />
-                    </motion.div>
-                  )}
-
-                  {activeTab === "social-media" && (
-                    <motion.div
-                      key="social-media"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h2 className="text-2xl font-bold mb-6">Online Presence</h2>
-                      <FormSocialMedia form={form} />
-                    </motion.div>
-                  )}
+                  <motion.div
+                    key={currentStepKey}
+                    initial={{ opacity: 0, x: 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -24 }}
+                    transition={{ duration: 0.28 }}
+                  >
+                    <StepComponent
+                      form={methods}
+                      onNext={handleNext}
+                      onPrev={handlePrev}
+                      isFirst={stepIdx === 0}
+                      isLast={stepIdx === FORM_STEPS.length - 1}
+                      isSubmitting={isSubmitting}
+                      setIsSubmitting={setIsSubmitting}
+                    />
+                  </motion.div>
                 </AnimatePresence>
               </div>
-
-              {/* Navigation buttons */}
-              <div className="flex justify-between items-center p-6 bg-muted/30 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={goToPrevStep}
-                  disabled={activeTab === "basic-info" || isSubmitting}
-                  className="gap-2"
-                >
-                  <ChevronLeft className="h-4 w-4" /> Previous
-                </Button>
-
-                {activeTab !== "social-media" ? (
-                  <Button
-                    type="button"
-                    onClick={goToNextStep}
-                    disabled={isSubmitting}
-                    className="gap-2"
-                  >
-                    Next <ChevronRight className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Creating..." : "Create Community"}
-                  </Button>
-                )}
-              </div>
+              {/* Navigation is handled in each step, show nothing here */}
             </form>
-          </Form>
+          </FormProvider>
         </div>
       </div>
       <Toaster />
