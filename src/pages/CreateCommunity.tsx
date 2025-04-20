@@ -29,6 +29,18 @@ export default function CreateCommunityPage() {
     return <Navigate to="/auth" replace />;
   }
 
+  // Check if user has the required role to create communities
+  const hasRequiredRole = currentUser.role === 'ADMIN' || currentUser.role === 'ORGANIZER';
+  
+  if (!hasRequiredRole) {
+    toast({
+      title: "Permission denied",
+      description: "You need to be an Admin or Organizer to create communities",
+      variant: "destructive",
+    });
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />

@@ -178,5 +178,4 @@ export function CreateCommunityForm() {
         <FormDebugger logs={debugLogs} />
       </div>
     </div>
-  );
-}
+  
