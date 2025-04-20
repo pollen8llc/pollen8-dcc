@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { communityFormSchema, type CommunityFormData } from "@/schemas/communitySchema";
@@ -20,19 +20,33 @@ export const useCreateCommunityForm = () => {
   const [debugLogs, setDebugLogs] = useState<DebugLog[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isSubmittingRef = useRef(false);
 
+  // Limit debug logs to prevent UI performance issues
+  const maxLogs = 30;
+  
   // Use useCallback to prevent function recreation on every render
   const addDebugLog = useCallback((type: DebugLog['type'], message: string) => {
+    // Don't log during submission if we already have enough logs
+    if (isSubmittingRef.current && type === 'info' && debugLogs.length > maxLogs) {
+      return;
+    }
+    
     console.log(`[${type.toUpperCase()}] ${message}`);
-    setDebugLogs(prev => [
-      ...prev, 
-      {
-        type,
-        message,
-        timestamp: new Date().toLocaleTimeString()
-      }
-    ]);
-  }, []);
+    setDebugLogs(prev => {
+      const newLogs = [
+        {
+          type,
+          message,
+          timestamp: new Date().toLocaleTimeString()
+        },
+        ...prev
+      ];
+      
+      // Trim logs to prevent memory issues
+      return newLogs.slice(0, maxLogs);
+    });
+  }, [debugLogs.length]);
 
   const clearDebugLogs = useCallback(() => {
     setDebugLogs([]);
@@ -75,56 +89,48 @@ export const useCreateCommunityForm = () => {
   }, []);
 
   const onSubmit = async (data: CommunityFormData) => {
+    if (isSubmittingRef.current) return;
+    
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
     clearDebugLogs();
+    
     try {
-      setIsSubmitting(true);
       addDebugLog('info', 'Starting form submission...');
-      addDebugLog('info', `Submitting data: ${JSON.stringify(data, null, 2)}`);
       
       // Check authentication
       const { data: session, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) {
-        addDebugLog('error', `Authentication error: ${sessionError.message}`);
         throw new Error(`Authentication error: ${sessionError.message}`);
       }
       
       if (!session?.session?.user) {
-        addDebugLog('error', 'No authenticated user found');
         throw new Error("You must be logged in to create a community");
       }
 
-      addDebugLog('info', `Authenticated as user: ${session.session.user.id}`);
-      
-      // Check user roles using RLS-compatible approach
       addDebugLog('info', 'Checking user roles...');
       
+      // Check user roles using RPC to avoid permissions issues
       const { data: roles, error: rolesError } = await supabase.rpc(
         'get_user_roles',
         { user_id: session.session.user.id }
       );
       
       if (rolesError) {
-        addDebugLog('error', `Error checking roles: ${rolesError.message}`);
-        throw new Error(`Unable to verify your permissions: ${rolesError.message}`);
+        throw new Error(`Error checking roles: ${rolesError.message}`);
       }
 
-      if (!roles || roles.length === 0) {
-        addDebugLog('error', 'User has no roles assigned');
-        throw new Error("You don't have permission to create a community. Required role: ADMIN or ORGANIZER");
-      }
-      
       addDebugLog('info', `Found roles: ${JSON.stringify(roles)}`);
       
-      const hasPermission = roles.some(role => 
+      const hasPermission = roles && roles.some(role => 
         role === 'ADMIN' || role === 'ORGANIZER'
       );
       
       if (!hasPermission) {
-        addDebugLog('error', 'User lacks required permissions (ADMIN or ORGANIZER role)');
         throw new Error("You don't have permission to create a community. Required role: ADMIN or ORGANIZER");
       }
 
-      addDebugLog('success', 'User has proper permissions to create a community');
+      addDebugLog('success', 'User has proper permissions');
       addDebugLog('info', 'Processing form data...');
 
       // Process the target audience into an array
@@ -133,15 +139,12 @@ export const useCreateCommunityForm = () => {
         .map(item => item.trim())
         .filter(item => item.length > 0);
 
-      addDebugLog('info', `Processed target audience: ${JSON.stringify(targetAudienceArray)}`);
-
       // Process the platforms into an object
       const communicationPlatforms = data.platforms.reduce((acc, platform) => {
         acc[platform] = { enabled: true };
         return acc;
       }, {} as Record<string, any>);
 
-      addDebugLog('info', `Processed platforms: ${JSON.stringify(communicationPlatforms)}`);
       addDebugLog('info', 'Inserting community into database...');
 
       // Insert the community
@@ -166,13 +169,10 @@ export const useCreateCommunityForm = () => {
         .single();
 
       if (error) {
-        addDebugLog('error', `Database error: ${error.message}`);
-        console.error("Error creating community:", error);
-        throw error;
+        throw new Error(`Database error: ${error.message}`);
       }
 
       if (!community) {
-        addDebugLog('error', 'No community data returned after insertion');
         throw new Error("Failed to create community: No data returned");
       }
 
@@ -183,12 +183,12 @@ export const useCreateCommunityForm = () => {
         description: "Your community has been created.",
       });
 
+      // Navigate after a short delay
       setTimeout(() => {
         navigate(`/community/${community.id}`);
-      }, 1500);
+      }, 1000);
 
     } catch (error: any) {
-      console.error("Error creating community:", error);
       addDebugLog('error', `Error: ${error.message || "Unknown error"}`);
       
       toast({
@@ -198,6 +198,7 @@ export const useCreateCommunityForm = () => {
       });
     } finally {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 

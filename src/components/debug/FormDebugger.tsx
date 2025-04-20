@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash, PlusCircle, Clock, AlertTriangle, Info, CheckCircle } from "lucide-react";
+import { AlertTriangle, Info, CheckCircle, Minimize, Maximize, X } from "lucide-react";
 
 interface DebugData {
   type: 'info' | 'error' | 'success';
@@ -18,14 +18,18 @@ interface FormDebuggerProps {
 
 // Using memo to prevent unnecessary re-renders
 export const FormDebugger = memo(({ logs }: FormDebuggerProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  
+  // Only show errors and important logs in compact mode
+  const filteredLogs = isExpanded 
+    ? logs 
+    : logs.filter(log => log.type === 'error' || log.message.includes('successfully'));
 
-  // Auto-expand when errors appear, with proper dependency array
+  // Auto-expand only for errors, with proper dependency array
   useEffect(() => {
     const hasErrors = logs.some(log => log.type === 'error');
     if (hasErrors) {
-      setIsExpanded(true);
       setIsVisible(true);
     }
   }, [logs]); // Only run when logs change
@@ -34,76 +38,74 @@ export const FormDebugger = memo(({ logs }: FormDebuggerProps) => {
     return (
       <Button 
         variant="outline" 
-        className="fixed bottom-4 right-4 z-50 bg-background" 
+        size="sm"
+        className="fixed bottom-4 right-4 z-50 bg-background shadow-md" 
         onClick={() => setIsVisible(true)}
       >
-        <PlusCircle className="h-4 w-4 mr-2" /> 
-        Show Debug Console
+        Show Debug
       </Button>
     );
   }
 
+  const errorCount = logs.filter(log => log.type === 'error').length;
+
   return (
-    <Card className="mt-6 border-2 border-primary/20 fixed bottom-4 right-4 z-50 w-[95%] md:w-[500px] shadow-xl">
-      <CardHeader className="pb-2">
+    <Card className={`fixed bottom-4 right-4 z-50 ${isExpanded ? 'w-[350px]' : 'w-[200px]'} shadow-xl border-2 ${errorCount > 0 ? 'border-red-400/30' : 'border-primary/20'}`}>
+      <CardHeader className="p-2">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <CardTitle className="text-sm font-medium">Debug Console</CardTitle>
-            <Badge 
-              variant={logs.some(log => log.type === 'error') ? 'destructive' : 'outline'} 
-              className="ml-2"
-            >
-              {logs.length} logs
-            </Badge>
+            <CardTitle className="text-xs font-medium">Debug</CardTitle>
+            {errorCount > 0 && (
+              <Badge variant="destructive" className="ml-2 text-xs">
+                {errorCount} {errorCount === 1 ? 'error' : 'errors'}
+              </Badge>
+            )}
           </div>
           <div className="flex space-x-1">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-7 w-7 p-0" 
+              className="h-6 w-6 p-0" 
               onClick={() => setIsExpanded(!isExpanded)}
             >
-              {isExpanded ? '−' : '+'}
+              {isExpanded ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
             </Button>
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-7 w-7 p-0 text-muted-foreground" 
+              className="h-6 w-6 p-0 text-muted-foreground" 
               onClick={() => setIsVisible(false)}
             >
-              ×
+              <X className="h-3 w-3" />
             </Button>
           </div>
         </div>
       </CardHeader>
       
       {isExpanded && (
-        <CardContent className="pt-0">
-          <ScrollArea className="h-[300px] w-full rounded-md border p-2">
-            {logs.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+        <CardContent className="p-2">
+          <ScrollArea className="h-[150px] w-full rounded-md border p-2">
+            {filteredLogs.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-muted-foreground text-xs">
                 No logs yet
               </div>
             ) : (
-              logs.map((log, index) => (
+              filteredLogs.map((log, index) => (
                 <div
                   key={index}
-                  className={`mb-2 rounded-lg p-2 text-xs ${
+                  className={`mb-2 rounded-lg p-1.5 text-[10px] ${
                     log.type === 'error' ? 'bg-red-500/10 text-red-500 border border-red-200' :
                     log.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-200' :
                     'bg-blue-500/10 text-blue-500 border border-blue-200'
                   }`}
                 >
-                  <div className="flex items-center mb-1">
-                    {log.type === 'error' ? <AlertTriangle className="h-3 w-3 mr-1" /> : 
-                     log.type === 'success' ? <CheckCircle className="h-3 w-3 mr-1" /> : 
-                     <Info className="h-3 w-3 mr-1" />}
-                    <span className="text-[10px] opacity-70 flex items-center">
-                      <Clock className="h-2.5 w-2.5 mr-1" />
-                      {log.timestamp}
-                    </span>
+                  <div className="flex items-center">
+                    {log.type === 'error' ? <AlertTriangle className="h-2.5 w-2.5 mr-1" /> : 
+                     log.type === 'success' ? <CheckCircle className="h-2.5 w-2.5 mr-1" /> : 
+                     <Info className="h-2.5 w-2.5 mr-1" />}
+                    <span className="opacity-70">{log.timestamp}</span>
                   </div>
-                  <p className="whitespace-pre-wrap break-words">{log.message}</p>
+                  <p className="whitespace-pre-wrap break-words mt-1">{log.message}</p>
                 </div>
               ))
             )}
