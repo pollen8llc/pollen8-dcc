@@ -35,7 +35,7 @@ export function CreateCommunityForm() {
         if (error) {
           addDebugLog('error', `Auth check failed: ${error.message}`);
         } else if (data.session) {
-          addDebugLog('success', `Authenticated as: ${data.session.user.email}`);
+          addDebugLog('success', `Authenticated as: ${data.session.user.email}`)
           
           // Check roles
           const { data: roles, error: rolesError } = await supabase.rpc(
@@ -178,4 +178,5 @@ export function CreateCommunityForm() {
         <FormDebugger logs={debugLogs} />
       </div>
     </div>
-  
+  );
+}
