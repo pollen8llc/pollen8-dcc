@@ -63,6 +63,30 @@ export const useCreateCommunity = () => {
         throw new Error("You must be logged in to create a community");
       }
 
+      // Verify user has proper role
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select(`
+          role_id,
+          roles:role_id(name)
+        `)
+        .eq('user_id', session.user.id);
+      
+      if (rolesError) {
+        console.error("Error fetching user roles:", rolesError);
+        throw new Error(`Role verification error: ${rolesError.message}`);
+      }
+      
+      // Check if user is admin or organizer
+      const hasPermission = userRoles?.some(role => 
+        role.roles?.name === 'ADMIN' || role.roles?.name === 'ORGANIZER'
+      );
+      
+      if (!hasPermission) {
+        console.error("User lacks permission to create community");
+        throw new Error("You don't have permission to create a community. Contact an administrator.");
+      }
+
       // Prepare the data for insertion
       const targetAudienceArray = typeof data.targetAudience === 'string' 
         ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 

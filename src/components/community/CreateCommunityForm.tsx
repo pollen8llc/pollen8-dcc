@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { PlatformsForm } from "./PlatformsForm";
 import { SocialMediaForm } from "./SocialMediaForm";
-import { useCreateCommunityForm } from "@/hooks/forms/useCreateCommunityForm";
+import { useCreateCommunityForm } from "@/hooks/useCreateCommunityForm";
 
 export function CreateCommunityForm() {
   const {
