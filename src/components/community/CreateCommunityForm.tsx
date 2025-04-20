@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, Users, Link, Share2 } from "lucide-react";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { PlatformsForm } from "./PlatformsForm";
 import { SocialMediaForm } from "./SocialMediaForm";
@@ -66,18 +66,21 @@ export function CreateCommunityForm() {
                   value="basic-info" 
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
                 >
+                  <Users className="mr-2 h-4 w-4" />
                   Basic Info
                 </TabsTrigger>
                 <TabsTrigger 
                   value="platforms" 
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
                 >
+                  <Link className="mr-2 h-4 w-4" />
                   Platforms
                 </TabsTrigger>
                 <TabsTrigger 
                   value="social-media" 
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
                 >
+                  <Share2 className="mr-2 h-4 w-4" />
                   Social Media
                 </TabsTrigger>
               </TabsList>
@@ -152,4 +155,4 @@ export function CreateCommunityForm() {
       <FormDebugger logs={debugLogs} />
     </div>
   );
-};
+}
