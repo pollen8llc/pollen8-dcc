@@ -81,28 +81,34 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [refreshUser, toast, queryClient]);
 
-  // Wrap logout to add toast notifications
+  // Wrap logout to add toast notifications and handle errors better
   const handleLogout = async (): Promise<void> => {
     try {
       // Clear any React Query caches
       queryClient.clear();
       
+      // Call the auth logout function
       await authLogout();
       
+      // Show success toast even if there's a backend error since local state is cleared
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account",
       });
       
-      // Redirect to home page after logout
+      // Redirect to auth page after logout
       navigate("/auth");
     } catch (error) {
-      console.error("Error logging out:", error);
+      console.error("Error during logout:", error);
+      
+      // Still show logout success since we're cleaning local state anyway
       toast({
-        title: "Error logging out",
-        description: "There was a problem logging you out. Please try again.",
-        variant: "destructive",
+        title: "Logged out",
+        description: "You have been logged out of your account",
       });
+      
+      // Still redirect to auth page
+      navigate("/auth");
     }
   };
 

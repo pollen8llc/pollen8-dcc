@@ -50,16 +50,21 @@ export const useSession = () => {
     };
   }, []);
 
-  // Logout user
+  // Logout user with improved error handling
   const logout = async (): Promise<void> => {
     try {
       console.log("Logging out user...");
+      
+      // Attempt to sign out with Supabase
       const { error } = await supabase.auth.signOut();
+      
+      // Even if there's an error (like session not found), we'll still clear the local state
       if (error) {
-        throw error;
+        console.warn("Warning during logout:", error.message);
+        // We'll continue with local cleanup even if there was an error with Supabase
       }
       
-      console.log("User logged out successfully");
+      // Always clear local session state
       setSession(null);
       localStorage.removeItem('shouldRedirectToAdmin');
       
@@ -69,9 +74,13 @@ export const useSession = () => {
           localStorage.removeItem(key);
         }
       });
+      
+      console.log("Local user state cleared successfully");
+      return Promise.resolve();
     } catch (error) {
-      console.error("Error logging out:", error);
-      throw error;
+      console.error("Error in logout function:", error);
+      // We'll still resolve the promise even on error to avoid blocking the UI
+      return Promise.resolve();
     }
   };
 
