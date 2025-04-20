@@ -2,15 +2,28 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { UseFormReturn } from "react-hook-form";
+import { CommunityFormData } from "@/schemas/communitySchema";
 
-export function ReviewSubmitStep({ form, onPrev, isSubmitting, setIsSubmitting }) {
+interface ReviewSubmitStepProps {
+  form: UseFormReturn<CommunityFormData>;
+  onPrev: () => void;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export function ReviewSubmitStep({ 
+  form, 
+  onPrev, 
+  isSubmitting, 
+  setIsSubmitting 
+}: ReviewSubmitStepProps) {
   const navigate = useNavigate();
   const values = form.getValues();
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Submit as before, you could customize this as needed
       await form.handleSubmit(async (data) => {
         // Pop a toast or do submission here. For demo, redirect home:
         // (Replace with your real submission logic)

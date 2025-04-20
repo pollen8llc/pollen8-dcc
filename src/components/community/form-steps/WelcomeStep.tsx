@@ -3,7 +3,11 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { HelpCircle } from "lucide-react";
 
-export function WelcomeStep({ onNext }) {
+interface WelcomeStepProps {
+  onNext: () => void;
+}
+
+export function WelcomeStep({ onNext }: WelcomeStepProps) {
   return (
     <div className="text-center animate-fade-in">
       <div className="flex flex-col items-center space-y-2">

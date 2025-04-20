@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -87,22 +86,75 @@ export default function CreateCommunityProfile() {
 
   // Map current step to component
   const currentStepKey = FORM_STEPS[stepIdx];
-  const StepComponent = {
-    welcome: WelcomeStep,
-    name: CommunityNameStep,
-    description: DescriptionStep,
-    type: TypeStep,
-    location: LocationStep,
-    startDate: StartDateStep,
-    size: SizeStep,
-    format: FormatStep,
-    eventFrequency: EventFrequencyStep,
-    website: WebsiteStep,
-    platforms: PlatformsStep,
-    socialMedia: SocialMediaStep,
-    tags: TagsStep,
-    review: ReviewSubmitStep,
-  }[currentStepKey];
+  
+  // Render the current step component
+  const renderStepComponent = () => {
+    switch (currentStepKey) {
+      case "welcome":
+        return (
+          <WelcomeStep onNext={handleNext} />
+        );
+      case "name":
+        return (
+          <CommunityNameStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "description":
+        return (
+          <DescriptionStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "type":
+        return (
+          <TypeStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "location":
+        return (
+          <LocationStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "startDate":
+        return (
+          <StartDateStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "size":
+        return (
+          <SizeStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "format":
+        return (
+          <FormatStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "eventFrequency":
+        return (
+          <EventFrequencyStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "website":
+        return (
+          <WebsiteStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "platforms":
+        return (
+          <PlatformsStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "socialMedia":
+        return (
+          <SocialMediaStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "tags":
+        return (
+          <TagsStep form={methods} onNext={handleNext} onPrev={handlePrev} />
+        );
+      case "review":
+        return (
+          <ReviewSubmitStep 
+            form={methods} 
+            onPrev={handlePrev} 
+            isSubmitting={isSubmitting} 
+            setIsSubmitting={setIsSubmitting} 
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/90 py-10 px-2">
@@ -135,15 +187,7 @@ export default function CreateCommunityProfile() {
                     exit={{ opacity: 0, x: -24 }}
                     transition={{ duration: 0.28 }}
                   >
-                    <StepComponent
-                      form={methods}
-                      onNext={handleNext}
-                      onPrev={handlePrev}
-                      isFirst={stepIdx === 0}
-                      isLast={stepIdx === FORM_STEPS.length - 1}
-                      isSubmitting={isSubmitting}
-                      setIsSubmitting={setIsSubmitting}
-                    />
+                    {renderStepComponent()}
                   </motion.div>
                 </AnimatePresence>
               </div>
