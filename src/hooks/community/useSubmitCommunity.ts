@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import * as communityService from "@/services/community/communityMutationService"
 import { CommunityFormSchema } from "./schemas/communityFormSchema"
 import { useUser } from "@/contexts/UserContext"
+import { supabase } from "@/integrations/supabase/client"
 
 export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) => {
   const { toast } = useToast();
@@ -20,6 +21,12 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
     try {
       setIsSubmitting(true);
       setSubmissionError(null);
+      
+      // Verify session
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session.session) {
+        throw new Error("You must be logged in to create a community");
+      }
       
       if (!currentUser || !currentUser.id) {
         throw new Error("You must be logged in to create a community");
@@ -56,7 +63,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         tone: values.tone,
         imageUrl: "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
         communitySize: values.size ? parseInt(values.size.toString()) : 0,
-        organizerIds: [],
+        organizerIds: [session.session.user.id], // Explicitly set current user as organizer
         memberIds: [],
         role_title: values.role_title || "",
         community_structure: values.community_structure || "",
@@ -92,7 +99,16 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
       
     } catch (error: any) {
       console.error('Error in community creation:', error);
-      const errorMessage = error?.message || "Unknown error occurred";
+      
+      // Format the error message based on common issues
+      let errorMessage = error?.message || "Unknown error occurred";
+      
+      if (errorMessage.includes("violates row level security")) {
+        errorMessage = "Permission denied: You don't have permission to create a community. Make sure your account has the correct role (Administrator or Organizer).";
+      } else if (errorMessage.includes("not found")) {
+        errorMessage = "The community could not be created due to a database configuration issue. Please contact an administrator.";
+      }
+      
       setSubmissionError(errorMessage);
       
       toast({

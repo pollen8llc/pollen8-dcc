@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +5,7 @@ import { communityFormSchema, type CommunityFormData } from "@/schemas/community
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Card } from "@/components/ui/card";
-import { useCreateCommunity } from "@/hooks/useCreateCommunity";
+import { useSubmitCommunity } from "@/hooks/community/useSubmitCommunity";
 import { useUser } from "@/contexts/UserContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
@@ -18,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export function CreateCommunityForm() {
-  const { createCommunity, isSubmitting } = useCreateCommunity();
+  const { submitCommunity, isSubmitting } = useSubmitCommunity();
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const { currentUser, isLoading: userLoading } = useUser();
   const navigate = useNavigate();
@@ -112,7 +111,7 @@ export function CreateCommunityForm() {
         return;
       }
       
-      const result = await createCommunity(data);
+      const result = await submitCommunity(data);
       
       console.log("Community created successfully:", result);
       

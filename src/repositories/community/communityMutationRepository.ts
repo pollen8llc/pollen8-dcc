@@ -40,14 +40,14 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Log the community data for debugging
     console.log("Creating community in repository with data:", community);
 
-    // Make sure owner_id is provided - this is critical for permissions
-    if (!community.organizerIds || !community.organizerIds[0]) {
-      console.error("Error: Missing owner_id for community creation");
-      throw new Error("Owner ID is required to create a community");
+    // Make sure we have the auth session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      throw new Error("Authentication required to create a community");
     }
 
-    // Extract the creator ID (first organizer) to use as owner_id in the database
-    const owner_id = community.organizerIds[0];
+    // Get owner_id from session if not provided
+    const owner_id = community.organizerIds?.[0] || sessionData.session.user.id;
 
     // Extract tags for the database
     const target_audience = Array.isArray(community.tags) ? community.tags : [];

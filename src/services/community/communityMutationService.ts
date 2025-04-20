@@ -6,6 +6,12 @@ import { Community } from "@/models/types";
 
 export const updateCommunity = async (community: Community): Promise<Community> => {
   try {
+    // Verify authentication before updating
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData?.session?.user?.id) {
+      throw new Error('Authentication required to update a community');
+    }
+    
     return await communityRepository.updateCommunity(community);
   } catch (error) {
     console.error("Error in updateCommunity service:", error);
@@ -52,22 +58,12 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
 
 export const deleteCommunity = async (communityId: string): Promise<void> => {
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
-    const userId = sessionData?.session?.user?.id;
-    
-    if (!userId) {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData?.session?.user?.id) {
       throw new Error('Authentication required to delete a community');
     }
     
-    const { data, error } = await supabase.rpc('safe_delete_community', {
-      community_id: communityId,
-      user_id: userId
-    });
-    
-    if (error) {
-      console.error('Error deleting community:', error);
-      throw new Error(error.message || 'Failed to delete community');
-    }
+    await communityRepository.deleteCommunity(communityId);
     
     // Log audit action for successful deletion
     await auditService.logAuditAction({
