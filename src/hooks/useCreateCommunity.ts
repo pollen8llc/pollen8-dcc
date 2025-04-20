@@ -29,15 +29,6 @@ export const useCreateCommunity = () => {
       return false;
     }
     
-    if (!data.startDate) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error",
-        description: "Start date is required.",
-      });
-      return false;
-    }
-    
     if (!data.targetAudience) {
       toast({
         variant: "destructive",
@@ -90,14 +81,11 @@ export const useCreateCommunity = () => {
         .insert({
           name: data.name,
           description: data.description,
-          community_type: data.communityType,
+          type: data.type,
           location: data.location,
           owner_id: session.user.id, // Explicitly set the current user as owner
           format: data.format,
-          start_date: data.startDate, // Use the string format directly
           target_audience: targetAudienceArray,
-          size_demographics: data.size,
-          event_frequency: data.eventFrequency,
           communication_platforms: communicationPlatformsObject,
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",

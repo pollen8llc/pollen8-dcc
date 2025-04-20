@@ -10,25 +10,8 @@ interface DatesAndUrlsProps {
 
 export function DatesAndUrls({ form }: DatesAndUrlsProps) {
   return (
-    <div className="space-y-6">
-      <FormField
-        control={form.control}
-        name="startDate"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Start Date * (YYYY-MM-DD)</FormLabel>
-            <FormControl>
-              <Input 
-                type="text" 
-                placeholder="YYYY-MM-DD" 
-                {...field} 
-              />
-            </FormControl>
-            <FormDescription>Enter date in YYYY-MM-DD format</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <div className="space-y-6 backdrop-blur-sm p-4 rounded-lg border border-white/10 bg-black/5">
+      <h4 className="text-lg font-medium mb-4">Web Presence</h4>
 
       <FormField
         control={form.control}
@@ -41,6 +24,7 @@ export function DatesAndUrls({ form }: DatesAndUrlsProps) {
                 type="url" 
                 placeholder="https://yourcommunity.com"
                 {...field} 
+                className="bg-black/10 backdrop-blur-sm border-white/20"
               />
             </FormControl>
             <FormDescription>Your community's main website (optional)</FormDescription>
@@ -59,7 +43,8 @@ export function DatesAndUrls({ form }: DatesAndUrlsProps) {
               <Input 
                 type="url" 
                 placeholder="https://newsletter.yourcommunity.com"
-                {...field} 
+                {...field}
+                className="bg-black/10 backdrop-blur-sm border-white/20"
               />
             </FormControl>
             <FormDescription>Link to subscribe to your newsletter (optional)</FormDescription>

@@ -1,76 +1,91 @@
 
-import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
-
-// Import the mock data and mapLegacyCommunity from getAllCommunities
-import { mockCommunities, mapLegacyCommunity } from "./getAllCommunities";
+import { Community } from "@/models/types";
 
 export const getCommunityById = async (id: string): Promise<Community | null> => {
   try {
     const { data, error } = await supabase
       .from('communities')
-      .select('*')
+      .select(`
+        id,
+        name,
+        description,
+        location,
+        logo_url,
+        website,
+        communication_platforms,
+        community_structure,
+        community_type,
+        community_values,
+        created_at,
+        event_frequency,
+        format,
+        founder_name,
+        id,
+        is_public,
+        location,
+        member_count,
+        newsletter_url,
+        owner_id,
+        personal_background,
+        role_title,
+        social_media,
+        target_audience,
+        type,
+        updated_at,
+        vision,
+        tags
+      `)
       .eq('id', id)
       .single();
-    
+
     if (error) {
-      console.error("Error fetching community:", error);
-      const mockCommunity = mockCommunities.find(community => community.id === id);
-      return mockCommunity ? mapLegacyCommunity(mockCommunity) : null;
+      if (error.code === 'PGRST116') {
+        // Record not found
+        return null;
+      }
+      throw error;
     }
-    
+
     if (!data) {
-      console.log("No community found with id:", id);
       return null;
     }
 
-    // Set organizer to the owner
-    const organizerIds = data.owner_id ? [data.owner_id] : [];
-    // For now, set members to empty array since we don't have a members table anymore
-    const memberIds = [];
-
-    // Type-safe handling of potentially non-object JSON fields
-    const communicationPlatforms = typeof data.communication_platforms === 'object' && data.communication_platforms !== null
-      ? data.communication_platforms
-      : {};
-      
-    const socialMedia = typeof data.social_media === 'object' && data.social_media !== null
-      ? data.social_media
-      : {};
-
-    return {
+    // Transform the data to match our Community model
+    const community: Community = {
       id: data.id,
       name: data.name,
-      description: data.description || '',
+      description: data.description,
       location: data.location || 'Remote',
-      imageUrl: data.logo_url || '/placeholder.svg',
-      communitySize: data.member_count?.toString() || '0', // Ensure string type
-      organizerIds: organizerIds,
-      memberIds: memberIds,
-      tags: data.target_audience || [],
+      imageUrl: data.logo_url || '',
+      communitySize: '', // We no longer store this
+      organizerIds: [data.owner_id],
+      memberIds: [],
+      tags: data.tags || [],
       isPublic: data.is_public,
-      createdAt: data.created_at || new Date().toISOString(),
-      updatedAt: data.updated_at || new Date().toISOString(),
-      website: data.website || '',
-      founder_name: data.founder_name || '',
-      role_title: data.role_title || '',
-      personal_background: data.personal_background || '',
-      community_structure: data.community_structure || '',
-      vision: data.vision || '',
-      community_values: data.community_values || '',
-      newsletterUrl: data.newsletter_url || '',
-      communication_platforms: communicationPlatforms as Record<string, string | { url?: string; details?: string }>,
-      socialMedia: socialMedia as Record<string, string | { url?: string }>,
-      communityType: data.community_type || '',
-      format: data.format || '',
-      eventFrequency: data.event_frequency || '',
-      launchDate: data.start_date || null,
-      targetAudience: data.target_audience || [],
-      size_demographics: data.size_demographics || '1-100'
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+      website: data.website,
+      communityType: data.type || data.community_type,
+      format: data.format,
+      targetAudience: data.target_audience,
+      tone: '',
+      newsletterUrl: data.newsletter_url,
+      socialMedia: data.social_media,
+      primaryPlatforms: Object.keys(data.communication_platforms || {}),
+      communication_platforms: data.communication_platforms,
+      founder_name: data.founder_name,
+      role_title: data.role_title,
+      personal_background: data.personal_background,
+      community_structure: data.community_structure,
+      vision: data.vision,
+      community_values: data.community_values,
+      eventFrequency: data.event_frequency,
     };
-  } catch (err) {
-    console.error("Error in getCommunityById:", err);
-    const mockCommunity = mockCommunities.find(community => community.id === id);
-    return mockCommunity ? mapLegacyCommunity(mockCommunity) : null;
+
+    return community;
+  } catch (error) {
+    console.error(`Error in getCommunityById(${id}):`, error);
+    throw error;
   }
 };

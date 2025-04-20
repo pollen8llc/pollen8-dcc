@@ -13,7 +13,7 @@ export function CommunityTypeAndFormat({ form }: CommunityTypeAndFormatProps) {
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <FormField
         control={form.control}
-        name="communityType"
+        name="type"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Community Type *</FormLabel>
@@ -52,8 +52,8 @@ export function CommunityTypeAndFormat({ form }: CommunityTypeAndFormatProps) {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="irl">In-person</SelectItem>
-                <SelectItem value="url">Online</SelectItem>
+                <SelectItem value="online">Online</SelectItem>
+                <SelectItem value="in-person">In-person</SelectItem>
                 <SelectItem value="hybrid">Hybrid</SelectItem>
               </SelectContent>
             </Select>
