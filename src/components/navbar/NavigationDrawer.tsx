@@ -19,6 +19,9 @@ interface NavigationDrawerProps {
   logout: () => Promise<void>;
 }
 
+// Define a type for the community structure that could be in managedCommunities
+type CommunityReference = string | { id: string; name: string };
+
 const NavigationDrawer = ({ 
   open, 
   onOpenChange,
@@ -87,7 +90,7 @@ const NavigationDrawer = ({
                   Manage Communities
                 </div>
                 <div className="flex flex-col gap-1 pb-2">
-                  {currentUser.managedCommunities.map((community) => {
+                  {currentUser.managedCommunities.map((community: CommunityReference) => {
                     // Check if it's a string or an object with id and name properties
                     const communityId = typeof community === 'string' ? community : community.id;
                     const communityName = typeof community === 'string' ? community : community.name;
