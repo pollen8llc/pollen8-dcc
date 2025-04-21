@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { logAuditAction } from "./auditService";
 
 /**
@@ -30,7 +31,7 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
     return true;
   } catch (error: any) {
     console.error("Error deactivating user:", error);
-    const { toast } = useToast();
+    // Use the toast function directly instead of the hook
     toast({
       title: "Error deactivating user",
       description: error.message || "Failed to deactivate user",
