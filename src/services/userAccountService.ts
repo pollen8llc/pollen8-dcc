@@ -15,7 +15,7 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
       throw new Error("No session found");
     }
 
-    // Call the edge function
+    // Call the edge function to handle deactivation
     const { data, error } = await supabase.functions.invoke('deactivate-user', {
       body: { userId },
       headers: {
@@ -27,6 +27,16 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
       console.error("Error deactivating user:", error);
       throw new Error(error.message);
     }
+    
+    // Log the audit action
+    await logAuditAction({
+      action: 'user_deactivated',
+      targetUserId: userId,
+      details: {
+        timestamp: new Date().toISOString(),
+        performedBy: session.user.id
+      }
+    });
     
     return true;
   } catch (error: any) {

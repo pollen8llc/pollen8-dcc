@@ -12,6 +12,8 @@ import UserRoleSelector from "./UserRoleSelector";
 import { Eye, MoreHorizontal, Mail, Users, Key, UserX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import UserActionDialogs from "./UserActionDialogs";
+import { deactivateUser } from "@/services/userAccountService";
+import { resetUserPassword } from "@/services/userInvitationService";
 
 interface UserTableActionsProps {
   user: User;
@@ -30,25 +32,46 @@ const UserTableActions = ({
 }: UserTableActionsProps) => {
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null);
   const [userToResetPassword, setUserToResetPassword] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleDeactivateConfirm = () => {
+  const handleDeactivateConfirm = async () => {
     if (userToDeactivate) {
-      toast({
-        title: "Feature not implemented",
-        description: "User deactivation will be available in a future update",
-      });
-      setUserToDeactivate(null);
+      setIsLoading(true);
+      try {
+        const success = await deactivateUser(userToDeactivate.id);
+        if (success) {
+          toast({
+            title: "User deactivated",
+            description: `${userToDeactivate.name} has been deactivated.`,
+          });
+        }
+      } catch (error) {
+        console.error("Error during deactivation:", error);
+      } finally {
+        setIsLoading(false);
+        setUserToDeactivate(null);
+      }
     }
   };
 
-  const handleResetPasswordConfirm = () => {
+  const handleResetPasswordConfirm = async () => {
     if (userToResetPassword) {
-      toast({
-        title: "Feature not implemented",
-        description: "Password reset will be available in a future update",
-      });
-      setUserToResetPassword(null);
+      setIsLoading(true);
+      try {
+        const success = await resetUserPassword(userToResetPassword.email);
+        if (success) {
+          toast({
+            title: "Password reset requested",
+            description: `A password reset email has been sent to ${userToResetPassword.email}.`,
+          });
+        }
+      } catch (error) {
+        console.error("Error during password reset:", error);
+      } finally {
+        setIsLoading(false);
+        setUserToResetPassword(null);
+      }
     }
   };
 
@@ -123,6 +146,7 @@ const UserTableActions = ({
         onResetPasswordConfirm={handleResetPasswordConfirm}
         setUserToDeactivate={setUserToDeactivate}
         setUserToResetPassword={setUserToResetPassword}
+        isLoading={isLoading}
       />
     </div>
   );

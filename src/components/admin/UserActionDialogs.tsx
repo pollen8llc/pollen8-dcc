@@ -1,6 +1,5 @@
 
 import React from "react";
-import { User } from "@/models/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,14 +10,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { User } from "@/models/types";
+import { Loader2 } from "lucide-react";
 
 interface UserActionDialogsProps {
   userToDeactivate: User | null;
   userToResetPassword: User | null;
   onDeactivateConfirm: () => void;
   onResetPasswordConfirm: () => void;
-  setUserToDeactivate: (user: User | null) => void;
-  setUserToResetPassword: (user: User | null) => void;
+  setUserToDeactivate: React.Dispatch<React.SetStateAction<User | null>>;
+  setUserToResetPassword: React.Dispatch<React.SetStateAction<User | null>>;
+  isLoading?: boolean;
 }
 
 const UserActionDialogs = ({
@@ -27,10 +29,12 @@ const UserActionDialogs = ({
   onDeactivateConfirm,
   onResetPasswordConfirm,
   setUserToDeactivate,
-  setUserToResetPassword
+  setUserToResetPassword,
+  isLoading = false,
 }: UserActionDialogsProps) => {
   return (
     <>
+      {/* Deactivate User Dialog */}
       <AlertDialog
         open={!!userToDeactivate}
         onOpenChange={(open) => !open && setUserToDeactivate(null)}
@@ -39,21 +43,34 @@ const UserActionDialogs = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Deactivate User Account</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to deactivate {userToDeactivate?.name}'s account? They will no longer be able to log in.
+              Are you sure you want to deactivate {userToDeactivate?.name}'s account? 
+              This will prevent them from logging in.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={onDeactivateConfirm}
+              onClick={(e) => {
+                e.preventDefault();
+                onDeactivateConfirm();
+              }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isLoading}
             >
-              Deactivate
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deactivating...
+                </>
+              ) : (
+                "Deactivate"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Reset Password Dialog */}
       <AlertDialog
         open={!!userToResetPassword}
         onOpenChange={(open) => !open && setUserToResetPassword(null)}
@@ -62,13 +79,27 @@ const UserActionDialogs = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Reset User Password</AlertDialogTitle>
             <AlertDialogDescription>
-              Send a password reset email to {userToResetPassword?.email}?
+              This will send a password reset link to {userToResetPassword?.email}.
+              Are you sure you want to continue?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onResetPasswordConfirm}>
-              Send Reset Email
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                onResetPasswordConfirm();
+              }}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Send Reset Link"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
