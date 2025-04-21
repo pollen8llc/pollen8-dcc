@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { testServiceHealth } from "@/utils/testService";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play, RefreshCw, Loader2 } from 'lucide-react';
+import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play, RefreshCw, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
 const HOOKS_AND_SERVICES_LIST = [
   { name: "useCreateCommunity", type: "hook" },
@@ -31,43 +31,56 @@ const initialServiceStatus = HOOKS_AND_SERVICES_LIST.reduce((acc, s) => {
 // --- Fetch real metrics ---
 function useDashboardMetrics() {
   const [serverLoad, setServerLoad] = useState<{ value: number, history: number[] }>({ value: 0, history: [] });
-  const [errorLogs, setErrorLogs] = useState<{ message: string, timestamp: string }[]>([]);
+  const [errorLogs, setErrorLogs] = useState<{ message: string, timestamp: string, action: string, details?: string }[]>([]);
   const [dbCalls, setDbCalls] = useState<{ count: number, lastCall: string }>({ count: 0, lastCall: "" });
+  const [allErrorLogs, setAllErrorLogs] = useState<{ message: string, timestamp: string, action: string, details?: string }[]>([]);
   const [recursionDetected] = useState(false); // Not supported via Supabase, fallback to false
 
   useEffect(() => {
-    // Fetch basic stats as supabase doesn't expose server load, so we use audit_logs and db usage as proxy.
     async function fetchMetrics() {
-      // 1. Server "load": Approximate by counting today's "community" DB calls (audits)
+      // Get the 100 most recent audit logs for error/metrics
       const auditResp = await supabase
         .from('audit_logs')
-        .select('id, created_at, action')
+        .select('id, created_at, action, details')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(100);
       const audits = auditResp.data || [];
-      // For "server load", we'll count the number of actions in the last 10 minutes
+
+      // For "server load", count actionable logs in last 10m
       const now = Date.now();
       const serverLoadRecent = audits.filter(a => a.created_at && ((now - new Date(a.created_at).getTime()) < 600000));
       setServerLoad({
         value: audits.length ? serverLoadRecent.length / 10 : 0,
-        history: [audits.length, Math.floor(audits.length / 2), Math.floor(audits.length / 4)] // simple mock history for real values
+        history: [
+          audits.filter(a => a.created_at && ((now - new Date(a.created_at).getTime()) < 600000)).length,
+          audits.filter(a => a.created_at && ((now - new Date(a.created_at).getTime()) < 3600000)).length,
+          audits.length
+        ]
       });
 
-      // 2. Error logs: show latest errors from audit_logs (look for "fail" or "error" in action/details)
+      // Error logs: look for "fail" or "error" in .action (case-insensitive)
       const errorRows = audits
         .filter(a =>
           typeof a.action === "string" &&
           (a.action.toLowerCase().includes('fail') || a.action.toLowerCase().includes('error'))
-        )
-        .slice(0, 3);
+        );
       setErrorLogs(
-        errorRows.map((e: any) => ({
-          message: `[${e.action}] Error`,
-          timestamp: e.created_at ? new Date(e.created_at).toLocaleTimeString() : ""
+        errorRows.slice(0, 3).map((e: any) => ({
+          message: `[${e.action}] ${e.details && typeof e.details === "object" && e.details.reason ? e.details.reason : 'Error'}`,
+          timestamp: e.created_at ? new Date(e.created_at).toLocaleTimeString() : "",
+          action: e.action,
+          details: e.details && typeof e.details === "object" && e.details.reason ? e.details.reason : (typeof e.details === "string" ? e.details : '')
+        }))
+      );
+      setAllErrorLogs(
+        errorRows.slice(0, 25).map((e: any) => ({
+          message: `[${e.action}] ${e.details && typeof e.details === "object" && e.details.reason ? e.details.reason : 'Error'}`,
+          timestamp: e.created_at ? new Date(e.created_at).toLocaleString() : "",
+          action: e.action,
+          details: typeof e.details === "string" ? e.details : JSON.stringify(e.details)
         }))
       );
 
-      // 3. DB Calls: we can't access raw query logs directly, but can count audit logs as surrogates
       setDbCalls({
         count: audits.length,
         lastCall: audits.length > 0 ? audits[0].action : "(audit log empty)"
@@ -75,20 +88,31 @@ function useDashboardMetrics() {
     }
 
     fetchMetrics();
-    // Optionally, poll every X seconds for live updates
-    const interval = setInterval(fetchMetrics, 30000);
+    const interval = setInterval(fetchMetrics, 20000);
     return () => clearInterval(interval);
   }, []);
 
-  return { serverLoad, errorLogs, dbCalls, recursionDetected };
+  return { serverLoad, errorLogs, dbCalls, allErrorLogs, recursionDetected };
+}
+
+// Logs an error to audit_logs from client-side by calling an edge function (to be implemented later)
+async function logClientError(err: Error | string, details?: Record<string, any>) {
+  // This should be expanded to call an edge function for real use, but for now, try regular upsert
+  const action = typeof err === "string" ? err : err.message;
+  await supabase.from("audit_logs").insert([{
+    action: "client_error",
+    performed_by: null, // can't log user easily from client (should be set in edge function with JWT)
+    details: { reason: action, ...details }
+  }]);
 }
 
 const DebuggerDashboard = () => {
   const navigate = useNavigate();
-  const { serverLoad, errorLogs, dbCalls, recursionDetected } = useDashboardMetrics();
+  const { serverLoad, errorLogs, dbCalls, allErrorLogs, recursionDetected } = useDashboardMetrics();
   const [serviceStatus, setServiceStatus] = useState(initialServiceStatus);
   const [testingRow, setTestingRow] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
+  const [showErrorLogsPanel, setShowErrorLogsPanel] = useState(false); // For expandable error panel
 
   const handleTest = async (name: string) => {
     setTestingRow(name);
@@ -130,6 +154,7 @@ const DebuggerDashboard = () => {
         description: err?.message || "Could not run test",
         variant: "destructive",
       });
+      logClientError(err, { context: "testServiceHealth" });
     } finally {
       setTestingRow(null);
     }
@@ -150,8 +175,9 @@ const DebuggerDashboard = () => {
         </Button>
         <h1 className="text-3xl font-bold">System Monitor Board</h1>
       </div>
-
+      {/* Panels */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Server Load */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-2">
             <Server className="h-5 w-5 text-primary" />
@@ -164,10 +190,19 @@ const DebuggerDashboard = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        {/* Error Logs */}
+        <Card
+          className="cursor-pointer"
+          onClick={() => setShowErrorLogsPanel((v) => !v)}
+        >
           <CardHeader className="flex flex-row items-center gap-2">
             <Activity className="h-5 w-5 text-red-500" />
-            <CardTitle className="text-base">Error Logs</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              Error Logs
+              {showErrorLogsPanel ?
+                <ChevronUp className="h-4 w-4" /> :
+                <ChevronDown className="h-4 w-4" />}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-1">
@@ -181,6 +216,7 @@ const DebuggerDashboard = () => {
             </ul>
           </CardContent>
         </Card>
+        {/* Database Calls */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-2">
             <Database className="h-5 w-5 text-blue-500" />
@@ -193,6 +229,7 @@ const DebuggerDashboard = () => {
             </div>
           </CardContent>
         </Card>
+        {/* Recursion Detector */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-2">
             <Repeat className="h-5 w-5 text-yellow-400" />
@@ -215,6 +252,38 @@ const DebuggerDashboard = () => {
           </CardContent>
         </Card>
       </div>
+      {/* Expandable error log view */}
+      {showErrorLogsPanel && (
+        <div className="rounded shadow bg-white dark:bg-card p-5 mb-8 transition-all">
+          <h2 className="font-bold text-lg mb-2 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-500" /> Error Logs (Last 25)
+          </h2>
+          {allErrorLogs.length === 0 ? (
+            <div className="text-xs text-muted-foreground">No error logs found.</div>
+          ) : (
+            <div className="max-h-80 overflow-y-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-muted">
+                    <th className="text-left px-2 py-1 font-bold">Timestamp</th>
+                    <th className="text-left px-2 py-1 font-bold">Action</th>
+                    <th className="text-left px-2 py-1 font-bold">Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allErrorLogs.map((err, idx) => (
+                    <tr key={idx} className="border-b hover:bg-muted/50">
+                      <td className="px-2 py-1">{err.timestamp}</td>
+                      <td className="px-2 py-1">{err.action}</td>
+                      <td className="px-2 py-1">{err.details}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       <Card className="mb-6">
         <CardHeader>
