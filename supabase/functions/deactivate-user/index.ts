@@ -1,6 +1,6 @@
 
 // Follow Deno conventions for imports
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.51.0';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // Define CORS headers
 const corsHeaders = {
