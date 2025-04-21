@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play, RefreshCw, Loader2 } from 'lucide-react';
+import { testServiceHealth } from "@/utils/testService";
+import { toast } from "@/hooks/use-toast";
 
 const fakeMetrics = {
   serverLoad: { value: 0.27, history: [0.20, 0.23, 0.19, 0.27, 0.22] },
@@ -42,22 +44,57 @@ const DebuggerDashboard = () => {
   const [errorLogs, setErrorLogs] = useState(fakeMetrics.errorLogs);
   const [serviceStatus, setServiceStatus] = useState(initialServiceStatus);
   const [testingRow, setTestingRow] = useState<string | null>(null);
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
-  const handleTest = (name: string) => {
+  const handleTest = async (name: string) => {
     setTestingRow(name);
-
-    setTimeout(() => {
-      const isOk = Math.random() > 0.5;
+    try {
+      const resp = await testServiceHealth(name);
       setServiceStatus(prev => ({
         ...prev,
         [name]: {
-          status: isOk ? "ok" : "fail",
+          status: resp.status === "ok" ? "ok" : "fail",
           lastChecked: new Date().toLocaleTimeString(),
-          error: isOk ? "" : "Permission denied for table users",
+          error: resp.error ?? ""
         }
       }));
+      setExpandedRows(old =>
+        resp.status === "ok"
+          ? old.filter(val => val !== name)
+          : Array.from(new Set([...old, name]))
+      );
+      toast({
+        title: resp.status === "ok" ? "Service healthy" : "Service failed",
+        description:
+          resp.status === "ok"
+            ? `Test succeeded for ${name}`
+            : `Error: ${resp.error || "Unknown error"}`,
+        variant: resp.status === "ok" ? "default" : "destructive",
+      });
+    } catch (err: any) {
+      setServiceStatus(prev => ({
+        ...prev,
+        [name]: {
+          status: "fail",
+          lastChecked: new Date().toLocaleTimeString(),
+          error: err?.message || "Test call failed"
+        }
+      }));
+      setExpandedRows(old => Array.from(new Set([...old, name])));
+      toast({
+        title: "Service check failed",
+        description: err?.message || "Could not run test",
+        variant: "destructive",
+      });
+    } finally {
       setTestingRow(null);
-    }, 1200);
+    }
+  };
+
+  const handleAccordionChange = (value: string) => {
+    setExpandedRows(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
   };
 
   return (
@@ -138,81 +175,81 @@ const DebuggerDashboard = () => {
           <CardTitle>Hooks &amp; Services Health</CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion type="multiple" className="w-full">
+          <div className="flex flex-col gap-2">
             {HOOKS_AND_SERVICES_LIST.map(service => {
               const stat = serviceStatus[service.name];
               const isFail = stat.status === "fail";
               const loading = testingRow === service.name;
+              const expanded = expandedRows.includes(service.name);
 
               return (
-                <AccordionItem key={service.name} value={service.name} className="border-b-0 group">
-                  <div className="flex items-center transition-all">
-                    <AccordionTrigger className={ 
-                      `w-full flex-1 px-0 py-2 hover:bg-accent rounded text-left 
-                      ${loading ? "opacity-70 pointer-events-none select-none" : "opacity-100"}`
-                    }>
-                      <div className="grid grid-cols-6 items-center w-full">
-                        <span className="col-span-2 font-medium flex items-center gap-2">
-                          {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                          <span>{service.name}</span>
-                        </span>
-                        <span className="capitalize col-span-1">{service.type}</span>
-                        <span className="col-span-1">
-                          {loading
-                            ? <span className="flex items-center gap-1 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Testing…</span>
-                            : isFail
-                              ? <span className="text-destructive flex items-center gap-1"><Activity className="h-4 w-4" /> Error</span>
-                              : <span className="text-green-500 flex items-center gap-1"><Check className="h-4 w-4" /> OK</span>
-                          }
-                        </span>
-                        <span className="col-span-1 text-xs text-muted-foreground">
-                          {loading ? <span className="opacity-60">Testing…</span> : stat.lastChecked}
-                        </span>
-                        <span className="col-span-1 flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={e => {
-                              e.stopPropagation();
-                              if (!loading) handleTest(service.name);
-                            }}
-                            className={
-                              "flex items-center gap-1 transition-all" +
-                              (loading ? " opacity-60 pointer-events-none" : "")
-                            }
-                            aria-label="Test"
-                            disabled={loading}
-                          >
-                            {loading ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <RefreshCw className="h-4 w-4" />
-                            )}
-                            <span>{loading ? "Testing" : "Test"}</span>
-                          </Button>
-                        </span>
-                      </div>
-                    </AccordionTrigger>
+                <div
+                  key={service.name}
+                  className={`transition-all rounded-lg border ${expanded ? "bg-muted/80 shadow-md border-primary" : "border-accent bg-card"} group`}
+                >
+                  <div
+                    className="flex items-center px-4 py-2 cursor-pointer select-none"
+                    onClick={() => handleAccordionChange(service.name)}
+                  >
+                    <span className="col-span-2 font-medium flex items-center gap-2 flex-1">
+                      {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                      <span>{service.name}</span>
+                    </span>
+                    <span className="capitalize flex-1 text-sm text-muted-foreground">{service.type}</span>
+                    <span className="flex-1 text-sm">
+                      {loading
+                        ? <span className="flex items-center gap-1 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Testing…</span>
+                        : isFail
+                          ? <span className="text-destructive flex items-center gap-1"><Activity className="h-4 w-4" /> Error</span>
+                          : <span className="text-green-500 flex items-center gap-1"><Check className="h-4 w-4" /> OK</span>
+                      }
+                    </span>
+                    <span className="text-xs text-muted-foreground flex-1">{loading ? <span className="opacity-60">Testing…</span> : stat.lastChecked}</span>
+                    <span className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant={loading ? "secondary" : "outline"}
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (!loading) handleTest(service.name);
+                        }}
+                        className={
+                          "flex items-center gap-1 transition-all" +
+                          (loading ? " opacity-60 pointer-events-none" : "")
+                        }
+                        aria-label="Test"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                        <span>{loading ? "Testing" : "Test"}</span>
+                      </Button>
+                    </span>
                   </div>
-                  <AccordionContent className={`bg-muted/80 transition-all ${loading ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
-                    {loading ? (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Testing connection...
-                      </div>
-                    ) : isFail ? (
-                      <div className="flex items-center text-destructive gap-2">
-                        <AlertTriangle className="h-4 w-4" /> {stat.error}
-                      </div>
-                    ) : (
-                      <div className="text-green-700 flex items-center gap-2">
-                        <Check className="h-4 w-4" /> No errors detected. Health check passed.
-                      </div>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
+                  {expanded && (
+                    <div className="px-6 pb-3 text-xs">
+                      {loading ? (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" /> Running test...
+                        </div>
+                      ) : isFail ? (
+                        <div className="flex items-center text-destructive gap-2">
+                          <AlertTriangle className="h-4 w-4" /> {stat.error || "Error details not available."}
+                        </div>
+                      ) : (
+                        <div className="text-green-700 flex items-center gap-2">
+                          <Check className="h-4 w-4" /> No errors detected. Health check passed.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               );
             })}
-          </Accordion>
+          </div>
         </CardContent>
       </Card>
     </div>
