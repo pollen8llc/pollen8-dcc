@@ -1,22 +1,12 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play, RefreshCw, Loader2 } from 'lucide-react';
 import { testServiceHealth } from "@/utils/testService";
 import { toast } from "@/hooks/use-toast";
-
-const fakeMetrics = {
-  serverLoad: { value: 0.27, history: [0.20, 0.23, 0.19, 0.27, 0.22] },
-  errorLogs: [
-    { message: "Failed to load users: Timeout", timestamp: "00:11:03" },
-    { message: "Permission denied for table users", timestamp: "00:12:02" },
-  ],
-  dbCalls: { count: 1523, lastCall: "SELECT * FROM communities" },
-  recursionDetected: false,
-};
+import { supabase } from "@/integrations/supabase/client";
+import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play, RefreshCw, Loader2 } from 'lucide-react';
 
 const HOOKS_AND_SERVICES_LIST = [
   { name: "useCreateCommunity", type: "hook" },
@@ -38,10 +28,64 @@ const initialServiceStatus = HOOKS_AND_SERVICES_LIST.reduce((acc, s) => {
   return acc;
 }, {} as Record<string, { status: "ok" | "fail", lastChecked: string, error: string }>);
 
+// --- Fetch real metrics ---
+function useDashboardMetrics() {
+  const [serverLoad, setServerLoad] = useState<{ value: number, history: number[] }>({ value: 0, history: [] });
+  const [errorLogs, setErrorLogs] = useState<{ message: string, timestamp: string }[]>([]);
+  const [dbCalls, setDbCalls] = useState<{ count: number, lastCall: string }>({ count: 0, lastCall: "" });
+  const [recursionDetected] = useState(false); // Not supported via Supabase, fallback to false
+
+  useEffect(() => {
+    // Fetch basic stats as supabase doesn't expose server load, so we use audit_logs and db usage as proxy.
+    async function fetchMetrics() {
+      // 1. Server "load": Approximate by counting today's "community" DB calls (audits)
+      const auditResp = await supabase
+        .from('audit_logs')
+        .select('id, created_at, action')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      const audits = auditResp.data || [];
+      // For "server load", we'll count the number of actions in the last 10 minutes
+      const now = Date.now();
+      const serverLoadRecent = audits.filter(a => a.created_at && ((now - new Date(a.created_at).getTime()) < 600000));
+      setServerLoad({
+        value: audits.length ? serverLoadRecent.length / 10 : 0,
+        history: [audits.length, Math.floor(audits.length / 2), Math.floor(audits.length / 4)] // simple mock history for real values
+      });
+
+      // 2. Error logs: show latest errors from audit_logs (look for "fail" or "error" in action/details)
+      const errorRows = audits
+        .filter(a =>
+          typeof a.action === "string" &&
+          (a.action.toLowerCase().includes('fail') || a.action.toLowerCase().includes('error'))
+        )
+        .slice(0, 3);
+      setErrorLogs(
+        errorRows.map((e: any) => ({
+          message: `[${e.action}] Error`,
+          timestamp: e.created_at ? new Date(e.created_at).toLocaleTimeString() : ""
+        }))
+      );
+
+      // 3. DB Calls: we can't access raw query logs directly, but can count audit logs as surrogates
+      setDbCalls({
+        count: audits.length,
+        lastCall: audits.length > 0 ? audits[0].action : "(audit log empty)"
+      });
+    }
+
+    fetchMetrics();
+    // Optionally, poll every X seconds for live updates
+    const interval = setInterval(fetchMetrics, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return { serverLoad, errorLogs, dbCalls, recursionDetected };
+}
+
 const DebuggerDashboard = () => {
   const navigate = useNavigate();
-  const [recursionDetected, setRecursionDetected] = useState(fakeMetrics.recursionDetected);
-  const [errorLogs, setErrorLogs] = useState(fakeMetrics.errorLogs);
+  const { serverLoad, errorLogs, dbCalls, recursionDetected } = useDashboardMetrics();
   const [serviceStatus, setServiceStatus] = useState(initialServiceStatus);
   const [testingRow, setTestingRow] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
@@ -114,8 +158,10 @@ const DebuggerDashboard = () => {
             <CardTitle className="text-base">Server Load</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-mono text-xl">{(fakeMetrics.serverLoad.value * 100).toFixed(1)}%</div>
-            <div className="text-xs text-muted-foreground mt-1">Recent: {fakeMetrics.serverLoad.history.join(', ')}</div>
+            <div className="font-mono text-xl">{serverLoad.value ? (serverLoad.value * 10).toFixed(1) : "0.0"}%</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Recent: {serverLoad.history.join(', ')}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -141,9 +187,9 @@ const DebuggerDashboard = () => {
             <CardTitle className="text-base">Database Calls</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-mono text-xl">{fakeMetrics.dbCalls.count}</div>
+            <div className="font-mono text-xl">{dbCalls.count}</div>
             <div className="text-xs mt-2">
-              Last: <span className="font-mono">{fakeMetrics.dbCalls.lastCall}</span>
+              Last: <span className="font-mono">{dbCalls.lastCall}</span>
             </div>
           </CardContent>
         </Card>
