@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create authenticated client
+    // Create authenticated client with anon key (for verification)
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
         headers: {
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create admin client with service role key
+    // Create a separate admin client with service role key
     const adminAuthClient = createClient(
       supabaseUrl,
       supabaseServiceKey
