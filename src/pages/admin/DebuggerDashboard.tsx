@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play } from 'lucide-react';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play, RefreshCw } from 'lucide-react';
 
 // Dummy data for system metrics and services/hooks
 const fakeMetrics = {
@@ -26,20 +27,41 @@ const HOOKS_AND_SERVICES_LIST = [
   { name: "auditService", type: "service" },
 ];
 
-const getStatus = (name: string) => {
-  // Faked: mark "useCreateCommunity" and "userAccountService" as fail if permission error
-  if (name === "useCreateCommunity" || name === "userAccountService") return "fail";
-  return "ok";
-};
+const initialServiceStatus = HOOKS_AND_SERVICES_LIST.reduce((acc, s) => {
+  acc[s.name] = {
+    status: (s.name === "useCreateCommunity" || s.name === "userAccountService") ? "fail" : "ok",
+    lastChecked: new Date().toLocaleTimeString(),
+    error: (s.name === "useCreateCommunity" || s.name === "userAccountService")
+      ? "Permission denied for table users"
+      : "",
+  };
+  return acc;
+}, {} as Record<string, { status: "ok" | "fail", lastChecked: string, error: string }>);
 
 const DebuggerDashboard = () => {
   const navigate = useNavigate();
   const [recursionDetected, setRecursionDetected] = useState(fakeMetrics.recursionDetected);
   const [errorLogs, setErrorLogs] = useState(fakeMetrics.errorLogs);
 
+  // State for each service/hook's status
+  const [serviceStatus, setServiceStatus] = useState(initialServiceStatus);
+
+  // Simulate a test (refresh) for just one service/hook row
   const handleTest = (name: string) => {
-    // Fake testing logic
-    alert(`Testing ${name}...`);
+    // Simulate a status change and update the lastChecked time
+    setServiceStatus(prev => {
+      const prevStatus = prev[name].status;
+      // Toggle for demonstration, or just refresh
+      const newStatus = prevStatus === "ok" ? "fail" : "ok";
+      return {
+        ...prev,
+        [name]: {
+          status: newStatus,
+          lastChecked: new Date().toLocaleTimeString(),
+          error: newStatus === "fail" ? "Permission denied for table users" : "",
+        }
+      };
+    });
   };
 
   return (
@@ -119,46 +141,62 @@ const DebuggerDashboard = () => {
           </CardContent>
         </Card>
       </div>
-      {/* Hooks/services table */}
+      {/* Hooks/services table with accordion rows */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Hooks &amp; Services Health</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Test</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {HOOKS_AND_SERVICES_LIST.map(service => (
-                <TableRow key={service.name}>
-                  <TableCell>{service.name}</TableCell>
-                  <TableCell className="capitalize">{service.type}</TableCell>
-                  <TableCell>
-                    {getStatus(service.name) === "ok"
-                      ? <span className="text-green-500 flex items-center gap-1"><Check className="h-4 w-4" /> OK</span>
-                      : <span className="text-destructive flex items-center gap-1"><Activity className="h-4 w-4" /> Error</span>
-                    }
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleTest(service.name)}
-                      className="flex items-center gap-1"
-                    >
-                      <Play className="h-4 w-4" /> Test
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <Accordion type="multiple" className="w-full">
+            {HOOKS_AND_SERVICES_LIST.map(service => {
+              const stat = serviceStatus[service.name];
+              const isFail = stat.status === "fail";
+              return (
+                <AccordionItem key={service.name} value={service.name} className="border-b-0">
+                  <div className="flex items-center">
+                    <AccordionTrigger className="w-full flex-1 px-0 py-2 hover:bg-accent rounded text-left">
+                      <div className="grid grid-cols-6 items-center w-full">
+                        <span className="col-span-2">{service.name}</span>
+                        <span className="capitalize col-span-1">{service.type}</span>
+                        <span className="col-span-1">
+                          {isFail
+                            ? <span className="text-destructive flex items-center gap-1"><Activity className="h-4 w-4" /> Error</span>
+                            : <span className="text-green-500 flex items-center gap-1"><Check className="h-4 w-4" /> OK</span>
+                          }
+                        </span>
+                        <span className="col-span-1 text-xs text-muted-foreground">{stat.lastChecked}</span>
+                        <span className="col-span-1 flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleTest(service.name);
+                            }}
+                            className="flex items-center gap-1"
+                            aria-label="Test"
+                          >
+                            <RefreshCw className="h-4 w-4" /> Test
+                          </Button>
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                  </div>
+                  <AccordionContent className="bg-muted px-4 py-2">
+                    {isFail ? (
+                      <div className="flex items-center text-destructive gap-2">
+                        <AlertTriangle className="h-4 w-4" /> {stat.error}
+                      </div>
+                    ) : (
+                      <div className="text-green-700 flex items-center gap-2">
+                        <Check className="h-4 w-4" /> No errors detected. Health check passed.
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         </CardContent>
       </Card>
     </div>
