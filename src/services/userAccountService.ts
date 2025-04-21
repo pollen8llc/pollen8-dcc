@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { logAuditAction } from "./auditService";
 
 /**
@@ -8,40 +8,45 @@ import { logAuditAction } from "./auditService";
  */
 export const deactivateUser = async (userId: string): Promise<boolean> => {
   try {
-    // Get the current session for authentication
-    const { data: { session } } = await supabase.auth.getSession();
+    // Check that we're not deactivating the last admin
+    const { data: adminRoles } = await supabase
+      .from('user_roles')
+      .select('user_id, roles!inner(name)')
+      .eq('roles.name', 'ADMIN')
+      .not('user_id', 'eq', userId);
     
-    if (!session) {
-      throw new Error("No session found");
+    if (!adminRoles || adminRoles.length === 0) {
+      const { toast } = useToast();
+      toast({
+        title: "Cannot deactivate user",
+        description: "You cannot deactivate the last administrator account",
+        variant: "destructive",
+      });
+      return false;
     }
-
-    // Call the edge function to handle deactivation
-    const { data, error } = await supabase.functions.invoke('deactivate-user', {
-      body: { userId },
-      headers: {
-        Authorization: `Bearer ${session.access_token}`
-      }
-    });
+    
+    // Deactivate the user in auth system
+    // Use the correct attribute for banning a user
+    const { error } = await supabase.auth.admin.updateUserById(
+      userId,
+      { user_metadata: { banned: true } }
+    );
     
     if (error) {
       console.error("Error deactivating user:", error);
       throw new Error(error.message);
     }
     
-    // Log the audit action
+    // Log the action for audit purposes
     await logAuditAction({
-      action: 'user_deactivated',
-      targetUserId: userId,
-      details: {
-        timestamp: new Date().toISOString(),
-        performedBy: session.user.id
-      }
+      action: 'deactivate_user',
+      targetUserId: userId
     });
     
     return true;
   } catch (error: any) {
     console.error("Error deactivating user:", error);
-    // Use the toast function directly instead of the hook
+    const { toast } = useToast();
     toast({
       title: "Error deactivating user",
       description: error.message || "Failed to deactivate user",
@@ -80,3 +85,4 @@ export const getUserCommunities = async (userId: string) => {
     throw error;
   }
 };
+
