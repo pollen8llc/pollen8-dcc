@@ -1,13 +1,11 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Activity, Server, Database, Repeat, Check, Play, RefreshCw, Loader2 } from 'lucide-react';
 
-// Dummy data for system metrics and services/hooks
 const fakeMetrics = {
   serverLoad: { value: 0.27, history: [0.20, 0.23, 0.19, 0.27, 0.22] },
   errorLogs: [
@@ -42,26 +40,24 @@ const DebuggerDashboard = () => {
   const navigate = useNavigate();
   const [recursionDetected, setRecursionDetected] = useState(fakeMetrics.recursionDetected);
   const [errorLogs, setErrorLogs] = useState(fakeMetrics.errorLogs);
-
-  // State for each service/hook's status
   const [serviceStatus, setServiceStatus] = useState(initialServiceStatus);
+  const [testingRow, setTestingRow] = useState<string | null>(null);
 
-  // Simulate a test (refresh) for just one service/hook row
   const handleTest = (name: string) => {
-    // Simulate a status change and update the lastChecked time
-    setServiceStatus(prev => {
-      const prevStatus = prev[name].status;
-      // Toggle for demonstration, or just refresh
-      const newStatus = prevStatus === "ok" ? "fail" : "ok";
-      return {
+    setTestingRow(name);
+
+    setTimeout(() => {
+      const isOk = Math.random() > 0.5;
+      setServiceStatus(prev => ({
         ...prev,
         [name]: {
-          status: newStatus,
+          status: isOk ? "ok" : "fail",
           lastChecked: new Date().toLocaleTimeString(),
-          error: newStatus === "fail" ? "Permission denied for table users" : "",
+          error: isOk ? "" : "Permission denied for table users",
         }
-      };
-    });
+      }));
+      setTestingRow(null);
+    }, 1200);
   };
 
   return (
@@ -74,9 +70,7 @@ const DebuggerDashboard = () => {
         <h1 className="text-3xl font-bold">System Monitor Board</h1>
       </div>
 
-      {/* Panel grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* Server Load */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-2">
             <Server className="h-5 w-5 text-primary" />
@@ -87,7 +81,6 @@ const DebuggerDashboard = () => {
             <div className="text-xs text-muted-foreground mt-1">Recent: {fakeMetrics.serverLoad.history.join(', ')}</div>
           </CardContent>
         </Card>
-        {/* Error Logs */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-2">
             <Activity className="h-5 w-5 text-red-500" />
@@ -105,7 +98,6 @@ const DebuggerDashboard = () => {
             </ul>
           </CardContent>
         </Card>
-        {/* Database Calls */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-2">
             <Database className="h-5 w-5 text-blue-500" />
@@ -118,7 +110,6 @@ const DebuggerDashboard = () => {
             </div>
           </CardContent>
         </Card>
-        {/* Recursion Detector */}
         <Card>
           <CardHeader className="flex flex-row items-center gap-2">
             <Repeat className="h-5 w-5 text-yellow-400" />
@@ -141,7 +132,7 @@ const DebuggerDashboard = () => {
           </CardContent>
         </Card>
       </div>
-      {/* Hooks/services table with accordion rows */}
+
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Hooks &amp; Services Health</CardTitle>
@@ -151,39 +142,64 @@ const DebuggerDashboard = () => {
             {HOOKS_AND_SERVICES_LIST.map(service => {
               const stat = serviceStatus[service.name];
               const isFail = stat.status === "fail";
+              const loading = testingRow === service.name;
+
               return (
-                <AccordionItem key={service.name} value={service.name} className="border-b-0">
-                  <div className="flex items-center">
-                    <AccordionTrigger className="w-full flex-1 px-0 py-2 hover:bg-accent rounded text-left">
+                <AccordionItem key={service.name} value={service.name} className="border-b-0 group">
+                  <div className="flex items-center transition-all">
+                    <AccordionTrigger className={ 
+                      `w-full flex-1 px-0 py-2 hover:bg-accent rounded text-left 
+                      ${loading ? "opacity-70 pointer-events-none select-none" : "opacity-100"}`
+                    }>
                       <div className="grid grid-cols-6 items-center w-full">
-                        <span className="col-span-2">{service.name}</span>
+                        <span className="col-span-2 font-medium flex items-center gap-2">
+                          {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                          <span>{service.name}</span>
+                        </span>
                         <span className="capitalize col-span-1">{service.type}</span>
                         <span className="col-span-1">
-                          {isFail
-                            ? <span className="text-destructive flex items-center gap-1"><Activity className="h-4 w-4" /> Error</span>
-                            : <span className="text-green-500 flex items-center gap-1"><Check className="h-4 w-4" /> OK</span>
+                          {loading
+                            ? <span className="flex items-center gap-1 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Testing…</span>
+                            : isFail
+                              ? <span className="text-destructive flex items-center gap-1"><Activity className="h-4 w-4" /> Error</span>
+                              : <span className="text-green-500 flex items-center gap-1"><Check className="h-4 w-4" /> OK</span>
                           }
                         </span>
-                        <span className="col-span-1 text-xs text-muted-foreground">{stat.lastChecked}</span>
+                        <span className="col-span-1 text-xs text-muted-foreground">
+                          {loading ? <span className="opacity-60">Testing…</span> : stat.lastChecked}
+                        </span>
                         <span className="col-span-1 flex gap-2">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={e => {
                               e.stopPropagation();
-                              handleTest(service.name);
+                              if (!loading) handleTest(service.name);
                             }}
-                            className="flex items-center gap-1"
+                            className={
+                              "flex items-center gap-1 transition-all" +
+                              (loading ? " opacity-60 pointer-events-none" : "")
+                            }
                             aria-label="Test"
+                            disabled={loading}
                           >
-                            <RefreshCw className="h-4 w-4" /> Test
+                            {loading ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <RefreshCw className="h-4 w-4" />
+                            )}
+                            <span>{loading ? "Testing" : "Test"}</span>
                           </Button>
                         </span>
                       </div>
                     </AccordionTrigger>
                   </div>
-                  <AccordionContent className="bg-muted px-4 py-2">
-                    {isFail ? (
+                  <AccordionContent className={`bg-muted/80 transition-all ${loading ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
+                    {loading ? (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Testing connection...
+                      </div>
+                    ) : isFail ? (
                       <div className="flex items-center text-destructive gap-2">
                         <AlertTriangle className="h-4 w-4" /> {stat.error}
                       </div>
@@ -204,4 +220,3 @@ const DebuggerDashboard = () => {
 };
 
 export default DebuggerDashboard;
-
