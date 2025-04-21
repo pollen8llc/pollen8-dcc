@@ -19,7 +19,7 @@ export const useProfile = (session: Session | null) => {
       let { data: profile, error: profileError } = await supabase
         .from('profiles') // Using the correct profiles table
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       if (profileError) {
