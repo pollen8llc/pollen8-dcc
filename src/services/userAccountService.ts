@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { logAuditAction } from "./auditService";
 
@@ -6,6 +7,8 @@ import { logAuditAction } from "./auditService";
  */
 export const deactivateUser = async (userId: string): Promise<boolean> => {
   try {
+    console.log(`Starting user deactivation for ${userId}`);
+    
     // Check that we're not deactivating the last admin
     const { data: adminRoles } = await supabase
       .from('user_roles')
@@ -14,13 +17,16 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
       .not('user_id', 'eq', userId);
     
     if (!adminRoles || adminRoles.length === 0) {
-      // Don't use a hook inside a service
       console.error("Cannot deactivate the last administrator account");
+      await logAuditAction({
+        action: 'deactivate_user_failed',
+        targetUserId: userId,
+        details: { error: 'Cannot deactivate last admin' }
+      });
       return false;
     }
     
     // Deactivate the user in auth system
-    // Use the correct attribute for banning a user
     const { error } = await supabase.auth.admin.updateUserById(
       userId,
       { user_metadata: { banned: true } }
@@ -28,18 +34,28 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
     
     if (error) {
       console.error("Error deactivating user:", error);
-      throw new Error(error.message);
+      await logAuditAction({
+        action: 'deactivate_user_failed',
+        targetUserId: userId,
+        details: { error: error.message }
+      });
+      return false;
     }
     
-    // Log the action for audit purposes
+    // Log successful deactivation
     await logAuditAction({
-      action: 'deactivate_user',
+      action: 'deactivate_user_success',
       targetUserId: userId
     });
     
     return true;
   } catch (error: any) {
     console.error("Error deactivating user:", error);
+    await logAuditAction({
+      action: 'deactivate_user_failed',
+      targetUserId: userId,
+      details: { error: error.message }
+    });
     return false;
   }
 };
