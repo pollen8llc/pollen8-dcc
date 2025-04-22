@@ -1,6 +1,4 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { logAuditAction } from "./auditService";
 
 /**
@@ -16,12 +14,8 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
       .not('user_id', 'eq', userId);
     
     if (!adminRoles || adminRoles.length === 0) {
-      const { toast } = useToast();
-      toast({
-        title: "Cannot deactivate user",
-        description: "You cannot deactivate the last administrator account",
-        variant: "destructive",
-      });
+      // Don't use a hook inside a service
+      console.error("Cannot deactivate the last administrator account");
       return false;
     }
     
@@ -46,12 +40,6 @@ export const deactivateUser = async (userId: string): Promise<boolean> => {
     return true;
   } catch (error: any) {
     console.error("Error deactivating user:", error);
-    const { toast } = useToast();
-    toast({
-      title: "Error deactivating user",
-      description: error.message || "Failed to deactivate user",
-      variant: "destructive",
-    });
     return false;
   }
 };
@@ -85,4 +73,3 @@ export const getUserCommunities = async (userId: string) => {
     throw error;
   }
 };
-

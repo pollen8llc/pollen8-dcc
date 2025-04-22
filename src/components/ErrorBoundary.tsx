@@ -1,7 +1,9 @@
+
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   children: ReactNode;
@@ -28,20 +30,27 @@ class ErrorBoundary extends Component<Props, State> {
     console.error("Uncaught error:", error, errorInfo);
     // Attempt to report error via Edge Function
     try {
-      const token = localStorage.getItem("sb-access-token");
-      await fetch("https://oltcuwvgdzszxshpfnre.functions.supabase.co/report-error", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          error_message: error.message,
-          error_stack: error.stack || "",
-          location: window.location.href,
-          details: errorInfo?.componentStack || "",
-        }),
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      if (token) {
+        await fetch("https://oltcuwvgdzszxshpfnre.functions.supabase.co/report-error", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            error_message: error.message,
+            error_stack: error.stack || "",
+            location: window.location.href,
+            details: errorInfo?.componentStack || "",
+          }),
+        });
+        console.log("Error reported to server");
+      } else {
+        console.warn("User not authenticated, error not reported to server");
+      }
     } catch (reportError) {
       console.warn("Failed to report client error to backend:", reportError);
     }
@@ -55,6 +64,9 @@ class ErrorBoundary extends Component<Props, State> {
     try {
       // Clear any localStorage data that might be causing issues
       localStorage.clear();
+      
+      // Logout from Supabase
+      await supabase.auth.signOut();
       
       // Redirect to login page
       window.location.href = "/auth";

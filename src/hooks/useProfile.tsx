@@ -33,6 +33,7 @@ export const useProfile = (session: Session | null) => {
             const { data: newProfile, error: createError } = await supabase.from('profiles').insert({
               id: userId,
               email: authUser.data.user.email,
+              user_id: userId, // Ensure user_id is properly set
               first_name: authUser.data.user.user_metadata?.first_name || '',
               last_name: authUser.data.user.user_metadata?.last_name || ''
             }).select('*').single();

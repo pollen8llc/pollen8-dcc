@@ -197,15 +197,17 @@ export type Database = {
           id: string
           last_name: string | null
           updated_at: string
+          user_id: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           email: string
           first_name?: string | null
-          id: string
+          id?: string
           last_name?: string | null
           updated_at?: string
+          user_id?: string
         }
         Update: {
           avatar_url?: string | null
@@ -215,6 +217,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -273,6 +276,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

@@ -18,7 +18,22 @@ export function useUserActions(onAddUserSuccess?: () => void) {
           title: "User invited",
           description: "Invitation has been sent to the user",
         });
+      } else {
+        // Handle the case where the function returns false
+        toast({
+          title: "Invitation failed",
+          description: "Failed to send invitation. User may already exist.",
+          variant: "destructive"
+        });
       }
+    },
+    onError: (error: any) => {
+      console.error("Error inviting user:", error);
+      toast({
+        title: "Error inviting user",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
     }
   });
 
@@ -30,7 +45,21 @@ export function useUserActions(onAddUserSuccess?: () => void) {
           title: "User deactivated",
           description: "User account has been deactivated",
         });
+      } else {
+        toast({
+          title: "Deactivation failed",
+          description: "Cannot deactivate this user. They may be the last administrator.",
+          variant: "destructive"
+        });
       }
+    },
+    onError: (error: any) => {
+      console.error("Error deactivating user:", error);
+      toast({
+        title: "Error deactivating user",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
     }
   });
 
@@ -42,7 +71,21 @@ export function useUserActions(onAddUserSuccess?: () => void) {
           title: "Password reset initiated",
           description: "A password reset link has been sent to the user's email",
         });
+      } else {
+        toast({
+          title: "Password reset failed",
+          description: "Failed to initiate password reset",
+          variant: "destructive"
+        });
       }
+    },
+    onError: (error: any) => {
+      console.error("Error resetting password:", error);
+      toast({
+        title: "Error resetting password",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
     }
   });
 

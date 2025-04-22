@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/models/types";
-import { useToast } from "@/hooks/use-toast";
 import { logAuditAction } from "./auditService";
 
 /**
@@ -22,12 +21,7 @@ export const inviteUser = async (
       .maybeSingle();
     
     if (existingProfile) {
-      const { toast } = useToast();
-      toast({
-        title: "User already exists",
-        description: `A user with email ${email} already exists`,
-        variant: "destructive",
-      });
+      console.error(`A user with email ${email} already exists`);
       return false;
     }
     
@@ -86,12 +80,6 @@ export const inviteUser = async (
     return true;
   } catch (error: any) {
     console.error("Error inviting user:", error);
-    const { toast } = useToast();
-    toast({
-      title: "Error inviting user",
-      description: error.message || "Failed to send invitation",
-      variant: "destructive",
-    });
     return false;
   }
 };
@@ -119,12 +107,6 @@ export const resetUserPassword = async (email: string): Promise<boolean> => {
     return true;
   } catch (error: any) {
     console.error("Error resetting password:", error);
-    const { toast } = useToast();
-    toast({
-      title: "Error resetting password",
-      description: error.message || "Failed to initiate password reset",
-      variant: "destructive",
-    });
     return false;
   }
 };
