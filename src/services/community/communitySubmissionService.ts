@@ -1,3 +1,4 @@
+
 import { CommunityFormData } from "@/schemas/communitySchema";
 import { submitCommunityDistribution, checkDistributionStatus } from "./communityDistributionService";
 
@@ -17,7 +18,7 @@ export async function submitCommunity(
     let attempts = 0;
     let status = distribution;
 
-    while (attempts < maxAttempts && status.status === 'pending' || status.status === 'processing') {
+    while (attempts < maxAttempts && (status.status === 'pending' || status.status === 'processing')) {
       await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between checks
       status = await checkDistributionStatus(distribution.id);
       attempts++;

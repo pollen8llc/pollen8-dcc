@@ -26,11 +26,17 @@ export const submitCommunityDistribution = async (
     throw new Error("Authentication required");
   }
 
+  // Handle Date objects - convert to ISO string for JSON compatibility
+  const processedData = { ...formData };
+  if (processedData.startDate instanceof Date) {
+    processedData.startDate = processedData.startDate.toISOString();
+  }
+
   // Submit to the distribution table
   const { data, error } = await supabase
     .from('community_data_distribution')
     .insert({
-      submission_data: formData,
+      submission_data: processedData,
       submitter_id: session.session.user.id
     })
     .select()
@@ -41,7 +47,15 @@ export const submitCommunityDistribution = async (
     throw new Error(error.message);
   }
 
-  return data;
+  // Cast the response to our DistributionRecord type
+  return {
+    id: data.id,
+    status: data.status as DistributionStatus,
+    error_message: data.error_message,
+    community_id: data.community_id,
+    created_at: data.created_at,
+    processed_at: data.processed_at
+  };
 };
 
 /**
@@ -61,5 +75,13 @@ export const checkDistributionStatus = async (
     throw new Error(error.message);
   }
 
-  return data;
+  // Cast the response to our DistributionRecord type
+  return {
+    id: data.id,
+    status: data.status as DistributionStatus,
+    error_message: data.error_message,
+    community_id: data.community_id,
+    created_at: data.created_at,
+    processed_at: data.processed_at
+  };
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { useForm, FormProvider } from "react-hook-form";
@@ -77,12 +76,10 @@ export default function CreateCommunityProfile() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // SUBMIT: Insert data and redirect to new profile
   const handleActualSubmit = async () => {
     setIsSubmitting(true);
     try {
       const values = methods.getValues();
-      // Map data for DB as in your community creation logic
       const targetAudienceArray = values.targetAudience
         ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
         : [];
@@ -118,7 +115,7 @@ export default function CreateCommunityProfile() {
           owner_id: session.session.user.id,
           is_public: true,
           member_count: 1,
-          community_size: values.communitySize || null, // use string value, not number!
+          community_size: values.communitySize || null,
           event_frequency: values.eventFrequency || null
         })
         .select()
@@ -227,7 +224,6 @@ export default function CreateCommunityProfile() {
             onPrev={handlePrev}
             isSubmitting={isSubmitting}
             setIsSubmitting={setIsSubmitting}
-            onActualSubmit={handleActualSubmit}
           />
         );
       default:
@@ -238,7 +234,6 @@ export default function CreateCommunityProfile() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/90 py-10 px-2">
       <div className="w-full max-w-xl">
-        {/* Progress bar */}
         <div className="mb-6">
           <div className="flex justify-between text-xs mb-2">
             <span>
@@ -249,7 +244,6 @@ export default function CreateCommunityProfile() {
           <Progress value={progress} className="h-2" />
         </div>
 
-        {/* Form Step Container */}
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
           <FormProvider {...methods}>
             <form
@@ -270,7 +264,6 @@ export default function CreateCommunityProfile() {
                   </motion.div>
                 </AnimatePresence>
               </div>
-              {/* Navigation is handled in each step, show nothing here */}
             </form>
           </FormProvider>
         </div>
