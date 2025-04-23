@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CommunityFormData } from "@/schemas/communitySchema";
 
@@ -21,8 +20,12 @@ export interface DistributionRecord {
 const formatDateString = (year?: string, month?: string, day?: string): string | null => {
   if (!year || !month || !day) return null;
   
+  // Ensure month and day are padded with leading zeros
+  const paddedMonth = month.padStart(2, '0');
+  const paddedDay = day.padStart(2, '0');
+  
   // Format: YYYY-MM-DD
-  return `${year}-${month}-${day}`;
+  return `${year}-${paddedMonth}-${paddedDay}`;
 };
 
 /**
@@ -56,12 +59,21 @@ export const submitCommunityDistribution = async (
   delete (processedData as any).startDateMonth;
   delete (processedData as any).startDateDay;
 
+  // Convert targetAudience to array if it's a string
+  if (typeof processedData.targetAudience === 'string') {
+    processedData.targetAudience = processedData.targetAudience
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(Boolean);
+  }
+
+  console.log('Submitting processed data:', processedData);
+
   // Submit to the distribution table
   const { data, error } = await supabase
     .from('community_data_distribution')
     .insert({
-      // Use the processed data as JSON
-      submission_data: processedData as any, // Cast to any to bypass type checking for the database insert
+      submission_data: processedData,
       submitter_id: session.session.user.id
     })
     .select()
@@ -72,7 +84,6 @@ export const submitCommunityDistribution = async (
     throw new Error(error.message);
   }
 
-  // Cast the response to our DistributionRecord type
   return {
     id: data.id,
     status: data.status as DistributionStatus,

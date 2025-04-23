@@ -1,4 +1,3 @@
-
 import { CommunityFormData } from "@/schemas/communitySchema";
 import { submitCommunityDistribution, checkDistributionStatus } from "./communityDistributionService";
 
@@ -9,13 +8,22 @@ export async function submitCommunity(
   addDebugLog('info', 'Starting community submission process...');
   
   try {
-    // Log the date components if present
-    if (data.startDateYear && data.startDateMonth && data.startDateDay) {
-      addDebugLog('info', `Date components: ${data.startDateYear}-${data.startDateMonth}-${data.startDateDay}`);
-    }
+    // Format and validate the data before submission
+    addDebugLog('info', 'Formatting submission data...');
+    const formattedData = {
+      ...data,
+      // Convert targetAudience to array if it's a string
+      targetAudience: data.targetAudience
+        ? data.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
+        : [],
+    };
+
+    // Log the formatted data
+    addDebugLog('info', `Formatted data: ${JSON.stringify(formattedData, null, 2)}`);
     
     // Submit to distribution system
-    const distribution = await submitCommunityDistribution(data);
+    addDebugLog('info', 'Submitting to distribution system...');
+    const distribution = await submitCommunityDistribution(formattedData);
     addDebugLog('success', `Distribution record created with ID: ${distribution.id}`);
 
     // Poll for status until completion or failure
@@ -29,11 +37,16 @@ export async function submitCommunity(
       attempts++;
       
       addDebugLog('info', `Check ${attempts}: Status is ${status.status}`);
+      
+      if (status.error_message) {
+        addDebugLog('error', `Processing error: ${status.error_message}`);
+      }
     }
 
     if (status.status === 'failed') {
-      addDebugLog('error', `Submission failed: ${status.error_message}`);
-      throw new Error(status.error_message || 'Failed to create community');
+      const errorMessage = status.error_message || 'Failed to create community';
+      addDebugLog('error', `Submission failed: ${errorMessage}`);
+      throw new Error(errorMessage);
     }
 
     if (!status.community_id) {
@@ -50,6 +63,8 @@ export async function submitCommunity(
     };
   } catch (error: any) {
     addDebugLog('error', `Error in submission process: ${error.message}`);
+    // Log the full error object for debugging
+    console.error('Full error:', error);
     throw error;
   }
 }
