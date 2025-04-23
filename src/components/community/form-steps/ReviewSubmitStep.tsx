@@ -37,6 +37,7 @@ export function ReviewSubmitStep({
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
+      // Use empty function for debug logs as we're using the status hook
       const result = await submitCommunity(form.getValues(), () => {});
       setDistributionId(result.id);
     } catch (err) {

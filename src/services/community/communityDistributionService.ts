@@ -26,9 +26,12 @@ export const submitCommunityDistribution = async (
     throw new Error("Authentication required");
   }
 
-  // Handle Date objects - convert to ISO string for JSON compatibility
+  // Create a processed copy of the data to avoid mutating the original
   const processedData = { ...formData };
+  
+  // Handle Date objects - convert to ISO string for JSON compatibility
   if (processedData.startDate instanceof Date) {
+    // Create a plain object instead of the Date instance
     processedData.startDate = processedData.startDate.toISOString();
   }
 
@@ -36,7 +39,8 @@ export const submitCommunityDistribution = async (
   const { data, error } = await supabase
     .from('community_data_distribution')
     .insert({
-      submission_data: processedData,
+      // Use the processed data as JSON
+      submission_data: processedData as any, // Cast to any to bypass type checking for the database insert
       submitter_id: session.session.user.id
     })
     .select()

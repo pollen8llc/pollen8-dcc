@@ -64,8 +64,6 @@ export default function CreateCommunityProfile() {
         linkedin: "",
         facebook: "",
       },
-      // For steps that are not in the main schema, handle with generic form context.
-      // startDate, eventFrequency, communitySize, tags may need to be added or mapped
     },
     mode: "onTouched",
   });
@@ -75,79 +73,6 @@ export default function CreateCommunityProfile() {
 
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const handleActualSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      const values = methods.getValues();
-      const targetAudienceArray = values.targetAudience
-        ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
-        : [];
-
-      const communicationPlatforms = (values.platforms || []).reduce((acc, platform) => {
-        acc[platform] = { enabled: true };
-        return acc;
-      }, {} as Record<string, any>);
-
-      const { data: session, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.session?.user) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "You must be logged in to create a community.",
-        });
-        return;
-      }
-
-      const { data: community, error: insertError } = await supabase
-        .from("communities")
-        .insert({
-          name: values.name,
-          description: values.description,
-          type: values.type,
-          format: values.format,
-          location: values.location || "Remote",
-          target_audience: targetAudienceArray,
-          communication_platforms: communicationPlatforms,
-          website: values.website || null,
-          newsletter_url: values.newsletterUrl || null,
-          social_media: values.socialMediaHandles || {},
-          owner_id: session.session.user.id,
-          is_public: true,
-          member_count: 1,
-          community_size: values.communitySize || null,
-          event_frequency: values.eventFrequency || null
-        })
-        .select()
-        .single();
-
-      if (insertError || !community) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: insertError?.message || "Failed to create community.",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      toast({
-        title: "Success",
-        description: "Community created successfully!",
-      });
-      setTimeout(() => {
-        navigate(`/community/${community.id}`);
-      }, 200);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to create community.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleNext = async () => {
     if (stepIdx < FORM_STEPS.length - 1) {
@@ -247,7 +172,7 @@ export default function CreateCommunityProfile() {
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
           <FormProvider {...methods}>
             <form
-              onSubmit={methods.handleSubmit((data) => {
+              onSubmit={methods.handleSubmit(() => {
                 // The real submit logic is inside ReviewSubmitStep
               })}
             >
