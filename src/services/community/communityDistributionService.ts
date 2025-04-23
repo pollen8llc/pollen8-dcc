@@ -31,7 +31,7 @@ export const submitCommunityDistribution = async (
   
   // Handle Date objects - convert to ISO string for JSON compatibility
   if (processedData.startDate instanceof Date) {
-    // Create a plain object instead of the Date instance
+    // Convert to ISO string but don't modify the original formData object
     processedData.startDate = processedData.startDate.toISOString();
   }
 
