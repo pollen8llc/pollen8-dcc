@@ -76,7 +76,7 @@ export type Database = {
           member_count: number | null
           name: string
           newsletter_url: string | null
-          owner_id: string
+          owner_id: string | null
           personal_background: string | null
           role_title: string | null
           social_media: Json | null
@@ -106,7 +106,7 @@ export type Database = {
           member_count?: number | null
           name: string
           newsletter_url?: string | null
-          owner_id: string
+          owner_id?: string | null
           personal_background?: string | null
           role_title?: string | null
           social_media?: Json | null
@@ -136,7 +136,7 @@ export type Database = {
           member_count?: number | null
           name?: string
           newsletter_url?: string | null
-          owner_id?: string
+          owner_id?: string | null
           personal_background?: string | null
           role_title?: string | null
           social_media?: Json | null
@@ -148,7 +148,15 @@ export type Database = {
           vision?: string | null
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "communities_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       community_data: {
         Row: {
@@ -187,6 +195,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      community_data_distribution: {
+        Row: {
+          community_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          processed_at: string | null
+          status: string
+          submission_data: Json
+          submitter_id: string
+        }
+        Insert: {
+          community_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          submission_data: Json
+          submitter_id: string
+        }
+        Update: {
+          community_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          submission_data?: Json
+          submitter_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
