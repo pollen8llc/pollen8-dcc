@@ -9,6 +9,11 @@ export async function submitCommunity(
   addDebugLog('info', 'Starting community submission process...');
   
   try {
+    // Log the date components if present
+    if (data.startDateYear && data.startDateMonth && data.startDateDay) {
+      addDebugLog('info', `Date components: ${data.startDateYear}-${data.startDateMonth}-${data.startDateDay}`);
+    }
+    
     // Submit to distribution system
     const distribution = await submitCommunityDistribution(data);
     addDebugLog('success', `Distribution record created with ID: ${distribution.id}`);

@@ -31,8 +31,12 @@ export const communityFormSchema = z.object({
     facebook: z.string().optional(),
   }).optional(),
 
+  // Date fields (replacing the Date object with string-based fields)
+  startDateMonth: z.string().optional(),
+  startDateDay: z.string().optional(),
+  startDateYear: z.string().optional(),
+  
   // Additional fields
-  startDate: z.date().optional().nullable(),
   communitySize: z.string().optional(),
   eventFrequency: z.string().optional(),
 });

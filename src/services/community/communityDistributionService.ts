@@ -16,6 +16,16 @@ export interface DistributionRecord {
 }
 
 /**
+ * Formats the date parts to an ISO-compatible date string
+ */
+const formatDateString = (year?: string, month?: string, day?: string): string | null => {
+  if (!year || !month || !day) return null;
+  
+  // Format: YYYY-MM-DD
+  return `${year}-${month}-${day}`;
+};
+
+/**
  * Submits community data to the distribution system
  */
 export const submitCommunityDistribution = async (
@@ -29,11 +39,22 @@ export const submitCommunityDistribution = async (
   // Create a processed copy of the data to avoid mutating the original
   const processedData = { ...formData };
   
-  // Handle Date objects - convert to ISO string for JSON compatibility
-  if (processedData.startDate instanceof Date) {
-    // Convert to ISO string but don't modify the original formData object
-    processedData.startDate = processedData.startDate.toISOString();
+  // Handle date components - format them into a single date string if all parts are present
+  if (processedData.startDateYear && processedData.startDateMonth && processedData.startDateDay) {
+    const dateString = formatDateString(
+      processedData.startDateYear,
+      processedData.startDateMonth,
+      processedData.startDateDay
+    );
+    
+    // Add a formatted start_date to the processed data
+    (processedData as any).start_date = dateString;
   }
+
+  // Clean up individual date fields to avoid confusion in the database function
+  delete (processedData as any).startDateYear;
+  delete (processedData as any).startDateMonth;
+  delete (processedData as any).startDateDay;
 
   // Submit to the distribution table
   const { data, error } = await supabase
