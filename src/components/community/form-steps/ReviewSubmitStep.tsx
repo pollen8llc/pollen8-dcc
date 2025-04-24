@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
@@ -22,6 +23,7 @@ export function ReviewSubmitStep({
   const [distributionId, setDistributionId] = useState<string | null>(null);
   const { status, error, communityId, isProcessing } = useSubmitCommunityStatus(distributionId);
   
+  // Navigate when community is created
   React.useEffect(() => {
     if (communityId) {
       setTimeout(() => {
@@ -32,6 +34,7 @@ export function ReviewSubmitStep({
 
   const handleSubmit = async () => {
     try {
+      // Use empty function for debug logs as we're using the status hook
       const result = await submitCommunity(form.getValues(), () => {});
       setDistributionId(result.id);
     } catch (err) {
