@@ -70,7 +70,7 @@ export async function submitCommunity(
       location: data.location,
       type: data.type,
       format: data.format,
-      targetAudience: formattedData.targetAudience,
+      targetAudience: data.targetAudience,
       website: data.website,
       newsletterUrl: data.newsletterUrl,
       socialMediaHandles: data.socialMediaHandles,
