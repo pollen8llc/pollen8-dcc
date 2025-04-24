@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { useForm, FormProvider } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { communityFormSchema, CommunityFormData } from "@/schemas/communitySchema";
 import { Toaster } from "@/components/ui/toaster";
@@ -23,6 +23,7 @@ import {
   TagsStep,
   ReviewSubmitStep,
 } from "@/components/community/form-steps";
+import { useCreateCommunityForm } from "@/hooks/useCreateCommunityForm";
 
 const FORM_STEPS = [
   "welcome",
@@ -43,33 +44,17 @@ const FORM_STEPS = [
 
 export default function CreateCommunityProfile() {
   const [stepIdx, setStepIdx] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { debugLogs, addDebugLog, clearDebugLogs } = useDebugLogger();
-
-  const methods = useForm<CommunityFormData>({
-    resolver: zodResolver(communityFormSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      type: "tech",
-      format: "hybrid",
-      location: "",
-      targetAudience: "",
-      platforms: [],
-      website: "",
-      newsletterUrl: "",
-      socialMediaHandles: {
-        twitter: "",
-        instagram: "",
-        linkedin: "",
-        facebook: "",
-      },
-      startDateMonth: "",
-      startDateDay: "",
-      startDateYear: "",
-    },
-    mode: "onTouched",
-  });
+  const { 
+    debugLogs, 
+    addDebugLog, 
+    clearDebugLogs 
+  } = useDebugLogger();
+  
+  const {
+    form,
+    isSubmitting,
+    onSubmit
+  } = useCreateCommunityForm();
 
   const totalSteps = FORM_STEPS.length;
   const progress = Math.round((stepIdx + 1) / totalSteps * 100);
@@ -104,9 +89,9 @@ export default function CreateCommunityProfile() {
         </div>
 
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
-          <FormProvider {...methods}>
+          <FormProvider {...form}>
             <form
-              onSubmit={methods.handleSubmit(() => {
+              onSubmit={form.handleSubmit(() => {
                 // The real submit logic is inside ReviewSubmitStep
               })}
             >
@@ -136,33 +121,33 @@ export default function CreateCommunityProfile() {
       case "welcome":
         return <WelcomeStep onNext={handleNext} />;
       case "name":
-        return <CommunityNameStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <CommunityNameStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "description":
-        return <DescriptionStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <DescriptionStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "type":
-        return <TypeStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <TypeStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "location":
-        return <LocationStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <LocationStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "startDate":
-        return <StartDateStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <StartDateStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "size":
-        return <SizeStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <SizeStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "format":
-        return <FormatStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <FormatStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "eventFrequency":
-        return <EventFrequencyStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <EventFrequencyStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "website":
-        return <WebsiteStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <WebsiteStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "platforms":
-        return <PlatformsStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <PlatformsStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "socialMedia":
-        return <SocialMediaStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <SocialMediaStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "tags":
-        return <TagsStep form={methods} onNext={handleNext} onPrev={handlePrev} />;
+        return <TagsStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "review":
         return (
           <ReviewSubmitStep
-            form={methods}
+            form={form}
             onPrev={handlePrev}
             isSubmitting={isSubmitting}
             setIsSubmitting={setIsSubmitting}

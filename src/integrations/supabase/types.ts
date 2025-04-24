@@ -73,7 +73,7 @@ export type Database = {
           is_public: boolean
           location: string | null
           logo_url: string | null
-          member_count: number | null
+          member_count: string | null
           name: string
           newsletter_url: string | null
           owner_id: string | null
@@ -103,7 +103,7 @@ export type Database = {
           is_public?: boolean
           location?: string | null
           logo_url?: string | null
-          member_count?: number | null
+          member_count?: string | null
           name: string
           newsletter_url?: string | null
           owner_id?: string | null
@@ -133,7 +133,7 @@ export type Database = {
           is_public?: boolean
           location?: string | null
           logo_url?: string | null
-          member_count?: number | null
+          member_count?: string | null
           name?: string
           newsletter_url?: string | null
           owner_id?: string | null

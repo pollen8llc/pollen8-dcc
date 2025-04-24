@@ -14,23 +14,13 @@ export interface DistributionRecord {
   processed_at: string | null;
 }
 
-/**
- * Formats the date parts to an ISO-compatible date string
- */
 const formatDateString = (year?: string, month?: string, day?: string): string | null => {
   if (!year || !month || !day) return null;
-  
-  // Ensure month and day are padded with leading zeros
   const paddedMonth = month.padStart(2, '0');
   const paddedDay = day.padStart(2, '0');
-  
-  // Format: YYYY-MM-DD
   return `${year}-${paddedMonth}-${paddedDay}`;
 };
 
-/**
- * Submits community data to the distribution system
- */
 export const submitCommunityDistribution = async (
   formData: CommunityFormData
 ): Promise<DistributionRecord> => {
@@ -39,37 +29,31 @@ export const submitCommunityDistribution = async (
     throw new Error("Authentication required");
   }
 
-  // Create a processed copy of the data to avoid mutating the original
+  // Create a processed copy of the data
   const processedData = { ...formData };
   
-  // Handle date components - format them into a single date string if all parts are present
+  // Handle date components
   if (processedData.startDateYear && processedData.startDateMonth && processedData.startDateDay) {
     const dateString = formatDateString(
       processedData.startDateYear,
       processedData.startDateMonth,
       processedData.startDateDay
     );
-    
-    // Add a formatted start_date to the processed data
     (processedData as any).start_date = dateString;
   }
 
-  // Clean up individual date fields to avoid confusion in the database function
+  // Clean up date fields
   delete (processedData as any).startDateYear;
   delete (processedData as any).startDateMonth;
   delete (processedData as any).startDateDay;
 
-  // Convert targetAudience to array if it's a string
-  if (typeof processedData.targetAudience === 'string') {
-    processedData.targetAudience = processedData.targetAudience
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(Boolean);
+  // Convert targetAudience to string if it's an array
+  if (Array.isArray(processedData.targetAudience)) {
+    processedData.targetAudience = processedData.targetAudience.join(',');
   }
 
   console.log('Submitting processed data:', processedData);
 
-  // Submit to the distribution table
   const { data, error } = await supabase
     .from('community_data_distribution')
     .insert({
