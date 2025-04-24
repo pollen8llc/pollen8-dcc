@@ -7,8 +7,8 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   try {
     console.log("Updating community:", community.id);
     
-    // Parse communitySize as a string for database storage (since member_count is a string in DB)
-    const memberCount = community.communitySize || "0";
+    // Parse communitySize as a string for database storage
+    const memberCount = community.communitySize?.toString() || "0";
     
     const { data, error } = await supabase
       .from('communities')
@@ -19,7 +19,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         website: community.website,
         is_public: community.isPublic,
         location: community.location,
-        member_count: memberCount // Use string value
+        member_count: memberCount
       })
       .eq('id', community.id)
       .select()

@@ -10,27 +10,23 @@ export async function submitCommunity(
   try {
     // Format and validate the data before submission
     addDebugLog('info', 'Formatting submission data...');
+    
+    // Convert targetAudience to array if it's a string
+    const targetAudience = typeof data.targetAudience === 'string' 
+      ? data.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
+      : data.targetAudience || [];
+    
     const formattedData = {
       ...data,
-      targetAudience: typeof data.targetAudience === 'string' 
-        ? data.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
-        : data.targetAudience || [],
+      targetAudience,
+      member_count: "1" // Ensure member_count is a string
     };
 
-    // Log the formatted data
     addDebugLog('info', `Formatted data: ${JSON.stringify(formattedData, null, 2)}`);
     
-    // Convert targetAudience back to string for distribution service
-    const distributionData = {
-      ...formattedData,
-      targetAudience: Array.isArray(formattedData.targetAudience) 
-        ? formattedData.targetAudience.join(',') 
-        : formattedData.targetAudience
-    };
-
     // Submit to distribution system
     addDebugLog('info', 'Submitting to distribution system...');
-    const distribution = await submitCommunityDistribution(distributionData);
+    const distribution = await submitCommunityDistribution(formattedData);
     addDebugLog('success', `Distribution record created with ID: ${distribution.id}`);
 
     // Poll for status until completion or failure
