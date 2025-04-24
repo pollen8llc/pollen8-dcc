@@ -86,7 +86,7 @@ export const useCreateCommunityForm = () => {
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",
           social_media: socialMediaObject,
-          member_count: 1 // Initialize with 1 (the owner)
+          member_count: "1" // Initialize with 1 (the owner) as a string
         })
         .select()
         .single();

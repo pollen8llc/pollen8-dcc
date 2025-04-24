@@ -7,8 +7,8 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   try {
     console.log("Updating community:", community.id);
     
-    // Parse communitySize to an integer for database storage
-    const memberCount = parseInt(community.communitySize || "0", 10);
+    // Parse communitySize as a string for database storage (since member_count is a string in DB)
+    const memberCount = community.communitySize || "0";
     
     const { data, error } = await supabase
       .from('communities')
@@ -19,7 +19,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         website: community.website,
         is_public: community.isPublic,
         location: community.location,
-        member_count: memberCount // Use parsed integer
+        member_count: memberCount // Use string value
       })
       .eq('id', community.id)
       .select()
@@ -58,10 +58,8 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Extract social media values if they exist
     const socialMedia = community.socialMedia || {};
     
-    // Parse communitySize to an integer for database storage
-    const memberCount = community.communitySize 
-      ? parseInt(community.communitySize, 10) 
-      : 1; // Default to 1 if not provided
+    // Use communitySize as string for database storage (since member_count is a string in DB)
+    const memberCount = community.communitySize || "1"; // Default to 1 if not provided
     
     // Log the final data being sent to the database
     console.log("Inserting into database with data:", {

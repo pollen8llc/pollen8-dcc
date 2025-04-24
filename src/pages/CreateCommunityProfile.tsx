@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { FormProvider } from "react-hook-form";
@@ -150,7 +151,6 @@ export default function CreateCommunityProfile() {
             form={form}
             onPrev={handlePrev}
             isSubmitting={isSubmitting}
-            setIsSubmitting={setIsSubmitting}
           />
         );
       default:

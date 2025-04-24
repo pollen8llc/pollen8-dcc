@@ -12,14 +12,12 @@ interface ReviewSubmitStepProps {
   form: UseFormReturn<CommunityFormData>;
   onPrev: () => void;
   isSubmitting: boolean;
-  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function ReviewSubmitStep({ 
   form, 
   onPrev, 
-  isSubmitting, 
-  setIsSubmitting 
+  isSubmitting 
 }: ReviewSubmitStepProps) {
   const navigate = useNavigate();
   const [distributionId, setDistributionId] = useState<string | null>(null);
@@ -36,7 +34,6 @@ export function ReviewSubmitStep({
 
   const handleSubmit = async () => {
     try {
-      setIsSubmitting(true);
       // Use empty function for debug logs as we're using the status hook
       const result = await submitCommunity(form.getValues(), () => {});
       setDistributionId(result.id);
