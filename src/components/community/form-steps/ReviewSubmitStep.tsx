@@ -36,10 +36,9 @@ export function ReviewSubmitStep({
         description: "Community created successfully!",
       });
       
-      // Updated to wait 5 seconds before navigating
       setTimeout(() => {
         navigate(`/community/${communityId}`);
-      }, 5000);
+      }, 1000);
     }
   }, [communityId, navigate, toast]);
 
@@ -90,12 +89,6 @@ export function ReviewSubmitStep({
       {status && status !== 'failed' && (
         <div className="mt-4 text-sm bg-blue-100 px-3 py-2 rounded">
           Status: {status}
-        </div>
-      )}
-      
-      {communityId && (
-        <div className="mt-4 text-sm bg-green-100 px-3 py-2 rounded text-center">
-          Community created! Redirecting to community page in 5 seconds...
         </div>
       )}
       
