@@ -48,7 +48,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Layers className="h-5 w-5" />,
       title: "Community Type",
-      value: community.communityType || community.type || "Not specified"
+      value: community.communityType || "Not specified"
     },
     {
       icon: <MapPin className="h-5 w-5" />,
@@ -58,7 +58,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Calendar className="h-5 w-5" />,
       title: "Start Date",
-      value: formatDate(community.start_date || null)
+      value: formatDate(community.launchDate || null)
     },
     {
       icon: <Users className="h-5 w-5" />,
