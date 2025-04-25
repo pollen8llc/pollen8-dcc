@@ -11,19 +11,22 @@ import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { SocialMediaLinks } from "./SocialMediaLinks";
 import { PlatformsList } from "./PlatformsList";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CommunityMetaInfoProps {
   communityId: string;
 }
 
 const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
-  const { data: community } = useQuery({
+  const { data: community, isLoading } = useQuery({
     queryKey: ['community', communityId],
     queryFn: () => communityService.getCommunityById(communityId),
     enabled: !!communityId
   });
 
-  console.log("Community data:", community); // Debug log
+  if (isLoading) {
+    return <Skeleton className="w-full h-48" />;
+  }
 
   if (!community) return null;
 
@@ -32,20 +35,20 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     try {
       return format(new Date(dateString), "MMMM dd, yyyy");
     } catch {
-      return "Invalid date";
+      return dateString;
     }
   };
 
   const basicInfo = [
     {
       icon: <User className="h-5 w-5" />,
-      title: "Community Name",
-      value: community.name
+      title: "Founder",
+      value: community.founder_name || "Not specified"
     },
     {
       icon: <Layers className="h-5 w-5" />,
       title: "Community Type",
-      value: community.communityType?.charAt(0).toUpperCase() + community.communityType?.slice(1) || "Not specified"
+      value: community.communityType || community.type || "Not specified"
     },
     {
       icon: <MapPin className="h-5 w-5" />,
@@ -55,28 +58,22 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Calendar className="h-5 w-5" />,
       title: "Start Date",
-      value: formatDate(community.launchDate || null)
+      value: formatDate(community.start_date || null)
     },
     {
       icon: <Users className="h-5 w-5" />,
-      title: "Members",
+      title: "Current Size",
       value: `${community.communitySize || 0} members`
-    },
-    {
-      icon: <Users className="h-5 w-5" />,
-      title: "Target Size",
-      value: community.size_demographics || "Not specified"
     },
     {
       icon: <LayoutList className="h-5 w-5" />,
       title: "Format",
-      value: community.format?.toUpperCase() || "Not specified"
+      value: community.format?.charAt(0).toUpperCase() + community.format?.slice(1) || "Not specified"
     },
     {
       icon: <Clock className="h-5 w-5" />,
       title: "Event Frequency",
-      value: community.eventFrequency?.replace("_", " ").charAt(0).toUpperCase() + 
-        community.eventFrequency?.slice(1) || "Not specified"
+      value: community.eventFrequency || "Not specified"
     },
     {
       icon: <LinkIcon className="h-5 w-5" />,
@@ -98,7 +95,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
               <div>
                 <p className="font-medium text-sm">{info.title}</p>
                 <p className="text-base text-muted-foreground break-words">
-                  {info.title === "Website" && info.value !== "Not specified" ? (
+                  {info.isLink && info.value !== "Not specified" ? (
                     <a 
                       href={info.value}
                       target="_blank"
@@ -117,16 +114,39 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
         ))}
       </div>
 
+      {/* Additional Details */}
       <Card className="glass dark:glass-dark">
         <CardContent className="p-6 space-y-6">
-          {/* Platforms */}
+          {/* Community Structure */}
+          {community.community_structure && (
+            <>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Community Structure</h3>
+                <p className="text-muted-foreground">{community.community_structure}</p>
+              </div>
+              <Separator className="my-4" />
+            </>
+          )}
+
+          {/* Vision */}
+          {community.vision && (
+            <>
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Vision</h3>
+                <p className="text-muted-foreground">{community.vision}</p>
+              </div>
+              <Separator className="my-4" />
+            </>
+          )}
+
+          {/* Communication Platforms */}
           <PlatformsList platforms={community.communication_platforms} />
           <Separator className="my-4" />
 
           {/* Newsletter */}
-          <div className="space-y-3">
-            <div>
-              {community.newsletterUrl ? (
+          {community.newsletterUrl && (
+            <>
+              <div>
                 <a 
                   href={community.newsletterUrl}
                   target="_blank"
@@ -134,16 +154,12 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
                   className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
                 >
                   <Mail className="h-4 w-4" />
-                  Newsletter
+                  Subscribe to Newsletter
                 </a>
-              ) : (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  <span>No newsletter available</span>
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
+              <Separator className="my-4" />
+            </>
+          )}
           
           {/* Social Media */}
           <SocialMediaLinks socialMedia={community.socialMedia} />

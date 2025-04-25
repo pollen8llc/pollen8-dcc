@@ -4,20 +4,32 @@ import { Community } from "@/models/types";
 import { ExternalLink, MapPin, Tag, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import PlexusBackground from "./PlexusBackground";
 
 interface CommunityHeaderProps {
   community: Community;
 }
 
 const CommunityHeader = ({ community }: CommunityHeaderProps) => {
+  // Extract tags from either targetAudience or tags
+  const displayTags = Array.isArray(community.targetAudience) 
+    ? community.targetAudience 
+    : Array.isArray(community.tags) 
+    ? community.tags 
+    : [];
+
   return (
     <div className="relative">
       <div className="h-56 sm:h-64 md:h-80 relative overflow-hidden">
-        <img
-          src={community.imageUrl}
-          alt={community.name}
-          className="w-full h-full object-cover"
-        />
+        {community.imageUrl ? (
+          <img
+            src={community.imageUrl}
+            alt={community.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <PlexusBackground />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent"></div>
       </div>
       
@@ -30,11 +42,11 @@ const CommunityHeader = ({ community }: CommunityHeaderProps) => {
                 <div className="flex flex-wrap items-center mt-3 gap-3">
                   <div className="flex items-center text-muted-foreground">
                     <MapPin className="h-4 w-4 mr-1" />
-                    <span>{community.location}</span>
+                    <span>{community.location || "Remote"}</span>
                   </div>
                   <div className="flex items-center text-muted-foreground">
                     <Users className="h-4 w-4 mr-1" />
-                    <span>{community.communitySize} member{community.communitySize !== "1" ? 's' : ''}</span>
+                    <span>{community.communitySize || "0"} member{community.communitySize !== "1" ? 's' : ''}</span>
                   </div>
                 </div>
               </div>
@@ -43,17 +55,21 @@ const CommunityHeader = ({ community }: CommunityHeaderProps) => {
                 <Button className="bg-aquamarine text-primary-foreground hover:bg-aquamarine/90 shadow-sm">
                   Connect
                 </Button>
-                <Button variant="outline">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
+                {community.website && (
+                  <a href={community.website} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Visit Website
+                    </Button>
+                  </a>
+                )}
               </div>
             </div>
             
             <p className="mt-6 text-lg">{community.description}</p>
             
             <div className="mt-6 flex flex-wrap gap-2">
-              {community.tags.map((tag) => (
+              {displayTags.map((tag) => (
                 <Badge
                   key={tag}
                   className="bg-muted text-muted-foreground flex items-center"
