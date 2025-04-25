@@ -57,11 +57,13 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     } else if (Array.isArray(community.targetAudience)) {
       target_audience = community.targetAudience;
     } else if (typeof community.tags === 'string' && community.tags) {
-      // Type guard to ensure tags is a string before calling split
-      target_audience = community.tags.split(',').map(t => t.trim()).filter(Boolean);
+      // Explicitly cast community.tags as string to ensure TypeScript knows it's a string
+      const tagsStr: string = community.tags;
+      target_audience = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
     } else if (typeof community.targetAudience === 'string' && community.targetAudience) {
-      // Type guard to ensure targetAudience is a string before calling split
-      target_audience = community.targetAudience.split(',').map(t => t.trim()).filter(Boolean);
+      // Explicitly cast community.targetAudience as string to ensure TypeScript knows it's a string
+      const audienceStr: string = community.targetAudience;
+      target_audience = audienceStr.split(',').map(t => t.trim()).filter(Boolean);
     }
 
     // Extract social media values if they exist
