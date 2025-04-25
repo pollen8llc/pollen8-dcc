@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { submitCommunity } from "@/services/community/communitySubmissionService";
 import { useSubmitCommunityStatus } from "@/hooks/community/useSubmitCommunityStatus";
 import CommunityCardPreview from "./CommunityCardPreview";
+import { useToast } from "@/hooks/use-toast";
 
 interface ReviewSubmitStepProps {
   form: UseFormReturn<CommunityFormData>;
@@ -17,28 +18,58 @@ interface ReviewSubmitStepProps {
 export function ReviewSubmitStep({ 
   form, 
   onPrev, 
-  isSubmitting 
+  isSubmitting: propIsSubmitting 
 }: ReviewSubmitStepProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [localIsSubmitting, setLocalIsSubmitting] = useState(false);
   const [distributionId, setDistributionId] = useState<string | null>(null);
   const { status, error, communityId, isProcessing } = useSubmitCommunityStatus(distributionId);
+  
+  // Combined submitting state
+  const isSubmitting = propIsSubmitting || localIsSubmitting;
   
   // Navigate when community is created
   React.useEffect(() => {
     if (communityId) {
+      toast({
+        title: "Success!",
+        description: "Community created successfully!",
+      });
+      
       setTimeout(() => {
         navigate(`/community/${communityId}`);
       }, 1000);
     }
-  }, [communityId, navigate]);
+  }, [communityId, navigate, toast]);
 
   const handleSubmit = async () => {
     try {
-      // Use empty function for debug logs as we're using the status hook
-      const result = await submitCommunity(form.getValues(), () => {});
+      setLocalIsSubmitting(true);
+      
+      // Create logger function that will display messages in the UI if needed
+      const addDebugLog = (type: 'info' | 'error' | 'success', message: string) => {
+        console.log(`[${type}] ${message}`);
+        if (type === 'error') {
+          toast({
+            title: "Error",
+            description: message,
+            variant: "destructive",
+          });
+        }
+      };
+      
+      // Submit the form
+      const result = await submitCommunity(form.getValues(), addDebugLog);
       setDistributionId(result.id);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Submission error:', err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to create community",
+        variant: "destructive",
+      });
+      setLocalIsSubmitting(false);
     }
   };
 

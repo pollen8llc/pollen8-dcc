@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { CommunityFormData } from "@/schemas/communitySchema";
 
@@ -47,7 +48,7 @@ export const submitCommunityDistribution = async (
   delete (processedData as any).startDateMonth;
   delete (processedData as any).startDateDay;
 
-  // Convert targetAudience to string if it's an array
+  // Ensure targetAudience is consistently formatted
   if (Array.isArray(processedData.targetAudience)) {
     processedData.targetAudience = processedData.targetAudience.join(',');
   }

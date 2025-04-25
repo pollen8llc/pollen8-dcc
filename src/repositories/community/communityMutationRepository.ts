@@ -7,9 +7,6 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   try {
     console.log("Updating community:", community.id);
     
-    // Parse communitySize as a string for database storage (since member_count is a string in DB)
-    const memberCount = community.communitySize || "0";
-    
     const { data, error } = await supabase
       .from('communities')
       .update({
@@ -19,7 +16,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         website: community.website,
         is_public: community.isPublic,
         location: community.location,
-        member_count: memberCount // Use string value
+        member_count: community.communitySize || "0" // Store as string
       })
       .eq('id', community.id)
       .select()
@@ -52,13 +49,23 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Get owner_id from session if not provided
     const owner_id = community.organizerIds?.[0] || sessionData.session.user.id;
 
-    // Extract tags for the database
-    const target_audience = Array.isArray(community.tags) ? community.tags : [];
+    // Process tags/targetAudience consistently
+    let target_audience: string[] = [];
+    
+    if (Array.isArray(community.tags)) {
+      target_audience = community.tags;
+    } else if (Array.isArray(community.targetAudience)) {
+      target_audience = community.targetAudience;
+    } else if (typeof community.tags === 'string') {
+      target_audience = community.tags.split(',').map(t => t.trim()).filter(Boolean);
+    } else if (typeof community.targetAudience === 'string') {
+      target_audience = community.targetAudience.split(',').map(t => t.trim()).filter(Boolean);
+    }
 
     // Extract social media values if they exist
     const socialMedia = community.socialMedia || {};
     
-    // Use communitySize as string for database storage (since member_count is a string in DB)
+    // Use communitySize as string for database storage
     const memberCount = community.communitySize || "1"; // Default to 1 if not provided
     
     // Log the final data being sent to the database

@@ -14,7 +14,10 @@ export const communityFormSchema = z.object({
   
   // Location and Audience
   location: z.string().min(2, "Location is required"),
-  targetAudience: z.string().min(2, "Target audience is required"),
+  targetAudience: z.union([
+    z.string().min(2, "Target audience is required"),
+    z.array(z.string())
+  ]),
 
   // Platforms
   platforms: z.array(z.string()).default([]),

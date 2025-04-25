@@ -1,14 +1,16 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   User, Layers, MapPin, Calendar, Users, 
   LayoutList, Clock, Link as LinkIcon, Mail,
-  MessageSquare, Info, Twitter, Instagram, 
-  Facebook, Linkedin
+  MessageSquare, Info
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import * as communityService from "@/services/communityService";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
+import { SocialMediaLinks } from "./SocialMediaLinks";
+import { PlatformsList } from "./PlatformsList";
 
 interface CommunityMetaInfoProps {
   communityId: string;
@@ -79,42 +81,10 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <LinkIcon className="h-5 w-5" />,
       title: "Website",
-      value: community.website || "Not specified"
+      value: community.website || "Not specified",
+      isLink: true
     }
   ];
-
-  const extractPlatforms = () => {
-    if (!community.communication_platforms) return [];
-    
-    if (Array.isArray(community.communication_platforms)) {
-      return community.communication_platforms;
-    }
-    
-    return Object.keys(community.communication_platforms);
-  };
-
-  const extractSocialMedia = () => {
-    // First try the socialMedia property (from the type definition)
-    let socialLinks = community.socialMedia;
-  
-    // If not found or empty, return an empty array
-    if (!socialLinks || Object.keys(socialLinks || {}).length === 0) {
-      return [];
-    }
-  
-    return Object.entries(socialLinks)
-      .filter(([_, value]) => {
-        if (typeof value === 'string') return value;
-        return value?.url;
-      })
-      .map(([platform, value]) => ({
-        platform,
-        url: typeof value === 'string' ? value : value?.url
-      }));
-  };
-
-  const platforms = extractPlatforms();
-  const socialMedia = extractSocialMedia();
 
   return (
     <div className="container mx-auto px-4 mb-12">
@@ -149,30 +119,11 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
 
       <Card className="glass dark:glass-dark">
         <CardContent className="p-6 space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Platforms
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {platforms.length > 0 ? (
-                platforms.map((platform) => (
-                  <span key={platform} className="text-muted-foreground">
-                    {typeof platform === 'string' 
-                      ? platform.charAt(0).toUpperCase() + platform.slice(1)
-                      : 'Unknown Platform'}
-                  </span>
-                ))
-              ) : (
-                <div className="flex items-center gap-2 text-muted-foreground col-span-full">
-                  <Info className="h-4 w-4" />
-                  <span>No platforms specified</span>
-                </div>
-              )}
-            </div>
-            <Separator className="my-4" />
-          </div>
+          {/* Platforms */}
+          <PlatformsList platforms={community.communication_platforms} />
+          <Separator className="my-4" />
 
+          {/* Newsletter */}
           <div className="space-y-3">
             <div>
               {community.newsletterUrl ? (
@@ -193,51 +144,9 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
               )}
             </div>
           </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Social Media</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {socialMedia.length > 0 ? (
-                socialMedia.map(({ platform, url }) => {
-                  let Icon;
-                  switch(platform.toLowerCase()) {
-                    case 'twitter':
-                      Icon = Twitter;
-                      break;
-                    case 'instagram':
-                      Icon = Instagram;
-                      break;
-                    case 'facebook':
-                      Icon = Facebook;
-                      break;
-                    case 'linkedin':
-                      Icon = Linkedin;
-                      break;
-                    default:
-                      Icon = LinkIcon;
-                  }
-
-                  return (
-                    <a
-                      key={platform}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
-                    >
-                      <Icon className="h-4 w-4" />
-                      {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                    </a>
-                  );
-                })
-              ) : (
-                <div className="flex items-center gap-2 text-muted-foreground col-span-full">
-                  <Info className="h-4 w-4" />
-                  <span>No social media links available</span>
-                </div>
-              )}
-            </div>
-          </div>
+          
+          {/* Social Media */}
+          <SocialMediaLinks socialMedia={community.socialMedia} />
         </CardContent>
       </Card>
     </div>

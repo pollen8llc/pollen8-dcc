@@ -1,3 +1,4 @@
+
 import { CommunityFormData } from "@/schemas/communitySchema";
 import { submitCommunityDistribution, checkDistributionStatus } from "./communityDistributionService";
 
@@ -10,24 +11,24 @@ export async function submitCommunity(
   try {
     // Format and validate the data before submission
     addDebugLog('info', 'Formatting submission data...');
-    const formattedData = {
+    
+    // Process targetAudience to ensure it's a string for the distribution service
+    let targetAudience: string = '';
+    if (Array.isArray(data.targetAudience)) {
+      targetAudience = data.targetAudience.join(',');
+    } else if (typeof data.targetAudience === 'string') {
+      targetAudience = data.targetAudience;
+    }
+    
+    // Create distribution data with consistent types
+    const distributionData = {
       ...data,
-      targetAudience: typeof data.targetAudience === 'string' 
-        ? data.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
-        : data.targetAudience || [],
+      targetAudience: targetAudience,
     };
 
     // Log the formatted data
-    addDebugLog('info', `Formatted data: ${JSON.stringify(formattedData, null, 2)}`);
+    addDebugLog('info', `Formatted data: ${JSON.stringify(distributionData, null, 2)}`);
     
-    // Convert targetAudience back to string for distribution service
-    const distributionData = {
-      ...formattedData,
-      targetAudience: Array.isArray(formattedData.targetAudience) 
-        ? formattedData.targetAudience.join(',') 
-        : formattedData.targetAudience
-    };
-
     // Submit to distribution system
     addDebugLog('info', 'Submitting to distribution system...');
     const distribution = await submitCommunityDistribution(distributionData);
