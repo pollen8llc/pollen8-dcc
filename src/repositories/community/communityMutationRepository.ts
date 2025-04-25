@@ -58,7 +58,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       target_audience = community.targetAudience;
     } else if (typeof community.tags === 'string') {
       target_audience = community.tags.split(',').map(t => t.trim()).filter(Boolean);
-    } else if (typeof community.targetAudience === 'string') {
+    } else if (typeof community.targetAudience === 'string' && community.targetAudience) {
       target_audience = community.targetAudience.split(',').map(t => t.trim()).filter(Boolean);
     }
 

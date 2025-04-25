@@ -7,11 +7,17 @@ import { CommunityFormData } from "@/schemas/communitySchema";
 // Helper to get some tags from audience or fallback
 function extractTags(formValues: CommunityFormData): string[] {
   if (formValues.targetAudience) {
-    return formValues.targetAudience
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean)
-      .slice(0, 3);
+    // Handle both string and array types
+    if (typeof formValues.targetAudience === 'string') {
+      return formValues.targetAudience
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .slice(0, 3);
+    } else if (Array.isArray(formValues.targetAudience)) {
+      // If it's already an array, just slice the first 3 items
+      return formValues.targetAudience.slice(0, 3);
+    }
   }
   return ["Tech", "Online"];
 }
@@ -108,4 +114,3 @@ const CommunityCardPreview: React.FC<CommunityCardPreviewProps> = ({ formValues 
 };
 
 export default CommunityCardPreview;
-
