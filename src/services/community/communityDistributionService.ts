@@ -9,7 +9,6 @@ export type DistributionStatus = 'pending' | 'processing' | 'completed' | 'faile
 export interface DistributionRecord {
   id: string;
   status: DistributionStatus;
-  error_message: string | null;
   community_id: string | null;
   created_at: string;
   processed_at: string | null;
@@ -48,18 +47,17 @@ export const submitCommunityDistribution = async (
   delete (processedData as any).startDateMonth;
   delete (processedData as any).startDateDay;
 
-  // Ensure targetAudience is consistently formatted
+  // Format targetAudience consistently
   if (Array.isArray(processedData.targetAudience)) {
     processedData.targetAudience = processedData.targetAudience.join(',');
   }
-
-  console.log('Submitting processed data:', processedData);
 
   const { data, error } = await supabase
     .from('community_data_distribution')
     .insert({
       submission_data: processedData,
-      submitter_id: session.session.user.id
+      submitter_id: session.session.user.id,
+      status: 'pending'
     })
     .select()
     .single();
@@ -72,16 +70,12 @@ export const submitCommunityDistribution = async (
   return {
     id: data.id,
     status: data.status as DistributionStatus,
-    error_message: data.error_message,
     community_id: data.community_id,
     created_at: data.created_at,
     processed_at: data.processed_at
   };
 };
 
-/**
- * Checks the status of a community distribution submission
- */
 export const checkDistributionStatus = async (
   distributionId: string
 ): Promise<DistributionRecord> => {
@@ -96,13 +90,12 @@ export const checkDistributionStatus = async (
     throw new Error(error.message);
   }
 
-  // Cast the response to our DistributionRecord type
   return {
     id: data.id,
     status: data.status as DistributionStatus,
-    error_message: data.error_message,
     community_id: data.community_id,
     created_at: data.created_at,
     processed_at: data.processed_at
   };
 };
+

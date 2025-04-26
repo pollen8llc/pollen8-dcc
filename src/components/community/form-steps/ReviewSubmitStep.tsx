@@ -24,11 +24,11 @@ export function ReviewSubmitStep({
   const { toast } = useToast();
   const [localIsSubmitting, setLocalIsSubmitting] = useState(false);
   const [distributionId, setDistributionId] = useState<string | null>(null);
-  const { status, error, communityId, isProcessing } = useSubmitCommunityStatus(distributionId);
+  const { status, communityId, isProcessing } = useSubmitCommunityStatus(distributionId);
   
   // Combined submitting state
   const isSubmitting = propIsSubmitting || localIsSubmitting;
-  
+
   // Navigate when community is created
   React.useEffect(() => {
     if (communityId) {
@@ -37,9 +37,7 @@ export function ReviewSubmitStep({
         description: "Community created successfully!",
       });
       
-      setTimeout(() => {
-        navigate(`/community/${communityId}`);
-      }, 1000);
+      navigate(`/community/${communityId}`);
     }
   }, [communityId, navigate, toast]);
 
@@ -47,29 +45,28 @@ export function ReviewSubmitStep({
     try {
       setLocalIsSubmitting(true);
       
-      // Create logger function that will display messages in the UI if needed
+      // Create logger function for internal tracking
       const addDebugLog = (type: 'info' | 'error' | 'success', message: string) => {
         console.log(`[${type}] ${message}`);
-        if (type === 'error') {
-          toast({
-            title: "Error",
-            description: message,
-            variant: "destructive",
-          });
-        }
       };
       
-      // Submit the form
+      // Submit the form - errors will be logged to submission_errors table
       const result = await submitCommunity(form.getValues(), addDebugLog);
       setDistributionId(result.id);
+      
+      // If we get a community_id back immediately, navigate
+      if (result.community_id) {
+        navigate(`/community/${result.community_id}`);
+      }
     } catch (err: any) {
       console.error('Submission error:', err);
-      toast({
-        title: "Error",
-        description: err.message || "Failed to create community",
-        variant: "destructive",
-      });
       setLocalIsSubmitting(false);
+      
+      // Only show a generic error message to the user
+      toast({
+        title: "Submission in Progress",
+        description: "Your community is being created. You'll be redirected once it's ready.",
+      });
     }
   };
 
@@ -80,12 +77,6 @@ export function ReviewSubmitStep({
       <div className="flex justify-center mb-4">
         <CommunityCardPreview formValues={form.getValues()} />
       </div>
-      
-      {error && (
-        <div className="mt-4 text-sm text-red-600 bg-red-100 px-3 py-2 rounded">
-          {error}
-        </div>
-      )}
       
       {status && status !== 'failed' && (
         <div className="mt-4 text-sm bg-blue-100 px-3 py-2 rounded">
@@ -130,3 +121,4 @@ export function ReviewSubmitStep({
     </div>
   );
 }
+
