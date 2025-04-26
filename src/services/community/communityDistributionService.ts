@@ -12,6 +12,7 @@ export interface DistributionRecord {
   community_id: string | null;
   created_at: string;
   processed_at: string | null;
+  error_message?: string | null; // Added error_message property
 }
 
 const formatDateString = (year?: string, month?: string, day?: string): string | null => {
@@ -72,7 +73,8 @@ export const submitCommunityDistribution = async (
     status: data.status as DistributionStatus,
     community_id: data.community_id,
     created_at: data.created_at,
-    processed_at: data.processed_at
+    processed_at: data.processed_at,
+    error_message: data.error_message
   };
 };
 
@@ -95,7 +97,7 @@ export const checkDistributionStatus = async (
     status: data.status as DistributionStatus,
     community_id: data.community_id,
     created_at: data.created_at,
-    processed_at: data.processed_at
+    processed_at: data.processed_at,
+    error_message: data.error_message
   };
 };
-

@@ -75,7 +75,8 @@ export async function submitCommunity(
       website: data.website,
       newsletterUrl: data.newsletterUrl,
       socialMediaHandles: data.socialMediaHandles,
-      eventFrequency: data.eventFrequency
+      eventFrequency: data.eventFrequency,
+      community_id: status.community_id // Add the community_id property
     };
   } catch (error: any) {
     addDebugLog('error', `Error in submission process: ${error.message}`);
