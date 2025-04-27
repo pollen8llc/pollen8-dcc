@@ -2,15 +2,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   User, Layers, MapPin, Calendar, Users, 
-  LayoutList, Clock, Link as LinkIcon, Mail,
-  MessageSquare, Info
+  Link as LinkIcon, Mail, MessageSquare 
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import * as communityService from "@/services/communityService";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { SocialMediaLinks } from "./SocialMediaLinks";
-import { PlatformsList } from "./PlatformsList";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface CommunityMetaInfoProps {
@@ -48,7 +46,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     {
       icon: <Layers className="h-5 w-5" />,
       title: "Community Type",
-      value: community.communityType || "Not specified"
+      value: community.type || "Not specified"
     },
     {
       icon: <MapPin className="h-5 w-5" />,
@@ -57,29 +55,18 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     },
     {
       icon: <Calendar className="h-5 w-5" />,
-      title: "Start Date",
-      value: formatDate(community.launchDate || null)
+      title: "Created",
+      value: formatDate(community.created_at)
     },
     {
       icon: <Users className="h-5 w-5" />,
       title: "Current Size",
-      value: `${community.communitySize || 0} members`
+      value: `${community.member_count || 0} members`
     },
     {
-      icon: <LayoutList className="h-5 w-5" />,
+      icon: <MessageSquare className="h-5 w-5" />,
       title: "Format",
       value: community.format?.charAt(0).toUpperCase() + community.format?.slice(1) || "Not specified"
-    },
-    {
-      icon: <Clock className="h-5 w-5" />,
-      title: "Event Frequency",
-      value: community.eventFrequency || "Not specified"
-    },
-    {
-      icon: <LinkIcon className="h-5 w-5" />,
-      title: "Website",
-      value: community.website || "Not specified",
-      isLink: true
     }
   ];
 
@@ -117,38 +104,29 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
       {/* Additional Details */}
       <Card className="glass dark:glass-dark">
         <CardContent className="p-6 space-y-6">
-          {/* Community Structure */}
-          {community.community_structure && (
+          {/* Target Audience */}
+          {community.target_audience && community.target_audience.length > 0 && (
             <>
               <div>
-                <h3 className="text-lg font-semibold mb-3">Community Structure</h3>
-                <p className="text-muted-foreground">{community.community_structure}</p>
+                <h3 className="text-lg font-semibold mb-3">Target Audience</h3>
+                <div className="flex flex-wrap gap-2">
+                  {community.target_audience.map((audience, index) => (
+                    <span key={index} className="px-3 py-1 bg-muted rounded-full text-sm">
+                      {audience}
+                    </span>
+                  ))}
+                </div>
               </div>
               <Separator className="my-4" />
             </>
           )}
-
-          {/* Vision */}
-          {community.vision && (
-            <>
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Vision</h3>
-                <p className="text-muted-foreground">{community.vision}</p>
-              </div>
-              <Separator className="my-4" />
-            </>
-          )}
-
-          {/* Communication Platforms */}
-          <PlatformsList platforms={community.communication_platforms} />
-          <Separator className="my-4" />
 
           {/* Newsletter */}
-          {community.newsletterUrl && (
+          {community.newsletter_url && (
             <>
               <div>
                 <a 
-                  href={community.newsletterUrl}
+                  href={community.newsletter_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
@@ -162,7 +140,9 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
           )}
           
           {/* Social Media */}
-          <SocialMediaLinks socialMedia={community.socialMedia} />
+          {community.social_media && Object.keys(community.social_media).length > 0 && (
+            <SocialMediaLinks socialMedia={community.social_media} />
+          )}
         </CardContent>
       </Card>
     </div>

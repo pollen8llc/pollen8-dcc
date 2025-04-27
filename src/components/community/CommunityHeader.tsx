@@ -11,19 +11,15 @@ interface CommunityHeaderProps {
 }
 
 const CommunityHeader = ({ community }: CommunityHeaderProps) => {
-  // Extract tags from either targetAudience or tags
-  const displayTags = Array.isArray(community.targetAudience) 
-    ? community.targetAudience 
-    : Array.isArray(community.tags) 
-    ? community.tags 
-    : [];
+  // Extract tags from targetAudience array
+  const displayTags = community.target_audience || [];
 
   return (
     <div className="relative">
       <div className="h-56 sm:h-64 md:h-80 relative overflow-hidden">
-        {community.imageUrl ? (
+        {community.logo_url ? (
           <img
-            src={community.imageUrl}
+            src={community.logo_url}
             alt={community.name}
             className="w-full h-full object-cover"
           />
@@ -46,7 +42,7 @@ const CommunityHeader = ({ community }: CommunityHeaderProps) => {
                   </div>
                   <div className="flex items-center text-muted-foreground">
                     <Users className="h-4 w-4 mr-1" />
-                    <span>{community.communitySize || "0"} member{community.communitySize !== "1" ? 's' : ''}</span>
+                    <span>{community.member_count || "0"} member{community.member_count !== "1" ? 's' : ''}</span>
                   </div>
                 </div>
               </div>
