@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Shield, Users, Settings } from "lucide-react";
+import { Shield, Users, Settings, FileText } from "lucide-react";
 
 interface AdminNavigationProps {
   onNavigate: (path: string) => void;
@@ -36,6 +36,15 @@ const AdminNavigation = ({ onNavigate }: AdminNavigationProps) => {
       >
         <Settings className="mr-2 h-4 w-4" />
         System Settings
+      </Button>
+      
+      <Button 
+        variant="ghost" 
+        className="w-full justify-start" 
+        onClick={() => onNavigate("/docs")}
+      >
+        <FileText className="mr-2 h-4 w-4" />
+        Developer Documentation
       </Button>
     </>
   );
