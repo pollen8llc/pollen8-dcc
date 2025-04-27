@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -804,3 +805,49 @@ const Documentation = () => {
                                         <TableCell>text</TableCell>
                                         <TableCell>Type of error</TableCell>
                                       </TableRow>
+                                      <TableRow>
+                                        <TableCell className="font-mono">error_message</TableCell>
+                                        <TableCell>text</TableCell>
+                                        <TableCell>Error message details</TableCell>
+                                      </TableRow>
+                                      <TableRow>
+                                        <TableCell className="font-mono">error_details</TableCell>
+                                        <TableCell>jsonb</TableCell>
+                                        <TableCell>Additional error information</TableCell>
+                                      </TableRow>
+                                      <TableRow>
+                                        <TableCell className="font-mono">created_at</TableCell>
+                                        <TableCell>timestamp</TableCell>
+                                        <TableCell>When error was logged</TableCell>
+                                      </TableRow>
+                                      <TableRow>
+                                        <TableCell className="font-mono">resolved_at</TableCell>
+                                        <TableCell>timestamp</TableCell>
+                                        <TableCell>When error was resolved</TableCell>
+                                      </TableRow>
+                                      <TableRow>
+                                        <TableCell className="font-mono">resolved_by</TableCell>
+                                        <TableCell>uuid</TableCell>
+                                        <TableCell>User who resolved the error</TableCell>
+                                      </TableRow>
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </CardContent>
+                </Card>
+              </section>
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Documentation;
