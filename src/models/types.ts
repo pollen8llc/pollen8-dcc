@@ -36,7 +36,7 @@ export interface Community {
   newsletter_url?: string;
   logo_url?: string;
   founder_name?: string;
-  communitySize: string; // Changed from number to string
+  communitySize: string; // For backward compatibility
   organizerIds: string[];
   memberIds: string[];
   tags: string[];
@@ -60,6 +60,15 @@ export interface Community {
   business_model?: string;
   challenges?: string;
   special_notes?: string;
+  // Added aliases for backward compatibility
+  imageUrl?: string; // Alias for logo_url
+  isPublic?: boolean; // Alias for is_public
+  createdAt?: string; // Alias for created_at
+  updatedAt?: string; // Alias for updated_at
+  targetAudience?: string[]; // Alias for target_audience
+  socialMedia?: Record<string, string | { url?: string }>; // Alias for social_media
+  newsletterUrl?: string; // Alias for newsletter_url
+  communityType?: string; // Alias for type
 }
 
 export interface CommunityStatistics {

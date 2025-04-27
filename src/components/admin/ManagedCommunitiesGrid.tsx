@@ -29,7 +29,7 @@ const ManagedCommunitiesGrid = ({ communities }: ManagedCommunitiesGridProps) =>
             <CardContent>
               <div className="aspect-video relative mb-4 overflow-hidden rounded-md">
                 <img 
-                  src={community.imageUrl} 
+                  src={community.logo_url || '/placeholder.svg'} 
                   alt={community.name} 
                   className="object-cover w-full h-full" 
                 />

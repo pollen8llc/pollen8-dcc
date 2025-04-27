@@ -37,7 +37,13 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
     }
   };
 
-  const basicInfo = [
+  interface InfoItem {
+    icon: JSX.Element;
+    title: string;
+    value: string;
+  }
+
+  const basicInfo: InfoItem[] = [
     {
       icon: <User className="h-5 w-5" />,
       title: "Founder",
@@ -82,18 +88,7 @@ const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
               <div>
                 <p className="font-medium text-sm">{info.title}</p>
                 <p className="text-base text-muted-foreground break-words">
-                  {info.isLink && info.value !== "Not specified" ? (
-                    <a 
-                      href={info.value}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-primary transition-colors"
-                    >
-                      {info.value}
-                    </a>
-                  ) : (
-                    info.value
-                  )}
+                  {info.value}
                 </p>
               </div>
             </CardContent>

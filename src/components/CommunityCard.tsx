@@ -43,8 +43,8 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
   const displayTags = community.tags.slice(0, displayTagCount);
   
   // Determine activity status (less than 30 days old)
-  const isActive = community.updatedAt 
-    ? (new Date().getTime() - new Date(community.updatedAt).getTime()) < (30 * 24 * 60 * 60 * 1000) 
+  const isActive = community.updated_at 
+    ? (new Date().getTime() - new Date(community.updated_at).getTime()) < (30 * 24 * 60 * 60 * 1000) 
     : false;
 
   return (

@@ -18,7 +18,7 @@ const AdminSettingsTab = ({ community }: AdminSettingsTabProps) => {
   const [name, setName] = useState(community.name);
   const [description, setDescription] = useState(community.description);
   const [location, setLocation] = useState(community.location);
-  const [isPublic, setIsPublic] = useState(community.isPublic);
+  const [isPublic, setIsPublic] = useState(community.is_public);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 

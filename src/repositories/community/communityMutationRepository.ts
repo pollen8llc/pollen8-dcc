@@ -12,9 +12,9 @@ export const updateCommunity = async (community: Community): Promise<Community> 
       .update({
         name: community.name,
         description: community.description,
-        logo_url: community.imageUrl,
+        logo_url: community.logo_url || community.imageUrl,
         website: community.website,
-        is_public: community.isPublic,
+        is_public: community.is_public,
         location: community.location,
         member_count: community.communitySize || "0" // Store as string
       })
@@ -49,25 +49,25 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Get owner_id from session if not provided
     const owner_id = community.organizerIds?.[0] || sessionData.session.user.id;
 
-    // Process tags/targetAudience consistently
+    // Process tags/target_audience consistently
     let target_audience: string[] = [];
     
     if (Array.isArray(community.tags)) {
       target_audience = community.tags;
-    } else if (Array.isArray(community.targetAudience)) {
-      target_audience = community.targetAudience;
+    } else if (Array.isArray(community.target_audience)) {
+      target_audience = community.target_audience;
     } else if (typeof community.tags === 'string' && community.tags) {
       // Explicitly cast community.tags as string to ensure TypeScript knows it's a string
       const tagsStr: string = community.tags;
       target_audience = tagsStr.split(',').map(t => t.trim()).filter(Boolean);
-    } else if (typeof community.targetAudience === 'string' && community.targetAudience) {
-      // Explicitly cast community.targetAudience as string to ensure TypeScript knows it's a string
-      const audienceStr: string = community.targetAudience;
+    } else if (typeof community.target_audience === 'string' && community.target_audience) {
+      // Explicitly cast community.target_audience as string to ensure TypeScript knows it's a string
+      const audienceStr: string = community.target_audience;
       target_audience = audienceStr.split(',').map(t => t.trim()).filter(Boolean);
     }
 
     // Extract social media values if they exist
-    const socialMedia = community.socialMedia || {};
+    const socialMedia = community.social_media || community.socialMedia || {};
     
     // Use communitySize as string for database storage
     const memberCount = community.communitySize || "1"; // Default to 1 if not provided
@@ -86,21 +86,21 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       .insert({
         name: community.name || "New Community",
         description: community.description || "",
-        logo_url: community.imageUrl || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+        logo_url: community.logo_url || community.imageUrl || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
         website: community.website || "",
-        is_public: community.isPublic !== undefined ? community.isPublic : true,
+        is_public: community.is_public !== undefined ? community.is_public : true,
         location: community.location || "Remote",
         member_count: memberCount,
         owner_id: owner_id,
         target_audience: target_audience,
-        community_type: community.communityType || null,
+        community_type: community.type || null,
         format: community.format || null,
         role_title: community.role_title || null,
         community_structure: community.community_structure || null,
         vision: community.vision || null,
         social_media: socialMedia,
         communication_platforms: community.communication_platforms || {},
-        newsletter_url: community.newsletterUrl || null
+        newsletter_url: community.newsletter_url || community.newsletterUrl || null
       })
       .select()
       .single();

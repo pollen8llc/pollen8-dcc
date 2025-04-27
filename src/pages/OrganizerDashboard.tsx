@@ -26,7 +26,7 @@ const OrganizerDashboard = () => {
     enabled: !!id,
   });
 
-  // Editing state for name, description, isPublic
+  // Editing state for name, description, is_public
   const [editMode, setEditMode] = useState(false);
   const [editedName, setEditedName] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
@@ -36,7 +36,7 @@ const OrganizerDashboard = () => {
     if (community) {
       setEditedName(community.name);
       setEditedDescription(community.description);
-      setEditedIsPublic(community.isPublic);
+      setEditedIsPublic(community.is_public);
     }
   }, [community]);
 
@@ -47,7 +47,7 @@ const OrganizerDashboard = () => {
         ...community,
         name: updatedFields.name,
         description: updatedFields.description,
-        isPublic: updatedFields.isPublic,
+        is_public: updatedFields.isPublic,
       });
     },
     onSuccess() {
@@ -106,7 +106,7 @@ const OrganizerDashboard = () => {
                         setEditMode(false);
                         setEditedName(community.name);
                         setEditedDescription(community.description);
-                        setEditedIsPublic(community.isPublic);
+                        setEditedIsPublic(community.is_public);
                       }}
                     >
                       Cancel
@@ -126,7 +126,7 @@ const OrganizerDashboard = () => {
                     </div>
                     <div>
                       <span className="block text-muted-foreground text-sm mb-1">Visibility</span>
-                      <span className="font-medium">{community.isPublic ? "Public" : "Private"}</span>
+                      <span className="font-medium">{community.is_public ? "Public" : "Private"}</span>
                     </div>
                   </div>
                 ) : (
@@ -203,7 +203,7 @@ const OrganizerDashboard = () => {
                   </div>
                   <div>
                     <div className="text-muted-foreground text-xs mb-1">Type</div>
-                    <div className="text-base">{community.communityType}</div>
+                    <div className="text-base">{community.type}</div>
                   </div>
                   <div>
                     <div className="text-muted-foreground text-xs mb-1">Location</div>
@@ -213,7 +213,7 @@ const OrganizerDashboard = () => {
                 <Separator className="my-4" />
                 <div>
                   <div className="text-muted-foreground text-xs mb-1">Last updated</div>
-                  <div>{community.updatedAt ? new Date(community.updatedAt).toLocaleString() : "N/A"}</div>
+                  <div>{community.updated_at ? new Date(community.updated_at).toLocaleString() : "N/A"}</div>
                 </div>
               </CardContent>
             </Card>
@@ -225,4 +225,3 @@ const OrganizerDashboard = () => {
 };
 
 export default OrganizerDashboard;
-

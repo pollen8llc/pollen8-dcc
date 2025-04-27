@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -102,14 +101,14 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
     name: dbCommunity.name,
     description: dbCommunity.description || '',
     location: dbCommunity.location || 'Remote',
-    imageUrl: dbCommunity.logo_url || '/placeholder.svg',
+    logo_url: dbCommunity.logo_url || '/placeholder.svg',
     communitySize: dbCommunity.member_count?.toString() || "0",
     organizerIds: dbCommunity.owner_id ? [dbCommunity.owner_id] : [],
     memberIds: [],
-    tags: dbCommunity.target_audience || [],
-    isPublic: dbCommunity.is_public,
-    createdAt: dbCommunity.created_at || new Date().toISOString(),
-    updatedAt: dbCommunity.updated_at || new Date().toISOString(),
+    tags: dbCommunity.tags || dbCommunity.target_audience || [],
+    is_public: dbCommunity.is_public,
+    created_at: dbCommunity.created_at || new Date().toISOString(),
+    updated_at: dbCommunity.updated_at || new Date().toISOString(),
     website: dbCommunity.website || '',
     founder_name: dbCommunity.founder_name || '',
     role_title: dbCommunity.role_title || '',
@@ -117,15 +116,23 @@ export const mapDbCommunity = (dbCommunity: any): Community => {
     community_structure: dbCommunity.community_structure || '',
     vision: dbCommunity.vision || '',
     community_values: dbCommunity.community_values || '',
-    newsletterUrl: dbCommunity.newsletter_url || '',
+    newsletter_url: dbCommunity.newsletter_url || '',
     communication_platforms: communicationPlatforms,
-    socialMedia: typeSafeSocialMedia,
-    communityType: dbCommunity.community_type || '',
+    social_media: typeSafeSocialMedia,
+    type: dbCommunity.type || dbCommunity.community_type || '',
     format: dbCommunity.format || '',
     eventFrequency: dbCommunity.event_frequency || '',
     launchDate: dbCommunity.start_date || null,
+    target_audience: dbCommunity.target_audience || [],
+    size_demographics: dbCommunity.size_demographics || '1-100',
+    imageUrl: dbCommunity.logo_url || '/placeholder.svg',
+    isPublic: dbCommunity.is_public,
+    createdAt: dbCommunity.created_at,
+    updatedAt: dbCommunity.updated_at,
     targetAudience: dbCommunity.target_audience || [],
-    size_demographics: dbCommunity.size_demographics || '1-100'
+    socialMedia: typeSafeSocialMedia,
+    newsletterUrl: dbCommunity.newsletter_url,
+    communityType: dbCommunity.type || dbCommunity.community_type
   };
 };
 
@@ -135,14 +142,20 @@ export const mapLegacyCommunity = (legacyCommunity: any): Community => {
     name: legacyCommunity.name,
     description: legacyCommunity.description,
     location: legacyCommunity.location,
-    imageUrl: legacyCommunity.imageUrl,
+    logo_url: legacyCommunity.imageUrl,
     communitySize: legacyCommunity.communitySize?.toString() || "0",
     organizerIds: legacyCommunity.organizerIds || [],
     memberIds: legacyCommunity.memberIds || [],
     tags: legacyCommunity.tags || [],
+    is_public: legacyCommunity.isPublic,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    imageUrl: legacyCommunity.imageUrl,
     isPublic: legacyCommunity.isPublic,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    targetAudience: legacyCommunity.tags || [],
+    social_media: {}
   };
 };
 

@@ -124,7 +124,7 @@ const CommunityPicker: React.FC = () => {
               />
               <div className="flex items-center space-x-3 flex-1">
                 <img
-                  src={community.imageUrl}
+                  src={community.logo_url || '/placeholder.svg'}
                   alt={community.name}
                   className="h-10 w-10 rounded-full object-cover"
                 />
