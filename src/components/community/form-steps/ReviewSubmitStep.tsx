@@ -45,13 +45,27 @@ export function ReviewSubmitStep({
     try {
       setLocalIsSubmitting(true);
       
+      // Get the form values
+      const formValues = form.getValues();
+      
+      // Validate format is one of the allowed values
+      if (!["online", "in-person", "hybrid"].includes(formValues.format)) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Format must be one of: online, in-person, hybrid",
+        });
+        setLocalIsSubmitting(false);
+        return;
+      }
+      
       // Create logger function for internal tracking
       const addDebugLog = (type: 'info' | 'error' | 'success', message: string) => {
         console.log(`[${type}] ${message}`);
       };
       
       // Submit the form - errors will be logged to submission_errors table
-      const result = await submitCommunity(form.getValues(), addDebugLog);
+      const result = await submitCommunity(formValues, addDebugLog);
       setDistributionId(result.id);
       
       // If we get a community_id back immediately, navigate
@@ -61,6 +75,16 @@ export function ReviewSubmitStep({
     } catch (err: any) {
       console.error('Submission error:', err);
       setLocalIsSubmitting(false);
+      
+      // Show a more specific error message if it's related to the format constraint
+      if (err.message && err.message.includes('communities_format_check')) {
+        toast({
+          variant: "destructive",
+          title: "Format Error",
+          description: "Invalid format. Must be one of: online, in-person, hybrid",
+        });
+        return;
+      }
       
       // Only show a generic error message to the user
       toast({

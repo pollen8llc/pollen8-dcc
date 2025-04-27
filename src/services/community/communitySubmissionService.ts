@@ -20,10 +20,16 @@ export async function submitCommunity(
       targetAudience = data.targetAudience;
     }
     
+    // Validate format is one of the allowed values
+    if (!["online", "in-person", "hybrid"].includes(data.format)) {
+      throw new Error("Invalid format. Must be one of: online, in-person, hybrid");
+    }
+    
     // Create distribution data with consistent types
     const distributionData = {
       ...data,
       targetAudience: targetAudience,
+      format: data.format,
     };
 
     // Log the formatted data

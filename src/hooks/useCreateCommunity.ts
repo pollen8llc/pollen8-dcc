@@ -38,6 +38,16 @@ export const useCreateCommunity = () => {
       return false;
     }
     
+    // Validate format is one of the allowed values
+    if (data.format && !["online", "in-person", "hybrid"].includes(data.format)) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Format must be one of: online, in-person, hybrid",
+      });
+      return false;
+    }
+    
     return true;
   };
 
@@ -75,6 +85,10 @@ export const useCreateCommunity = () => {
         return acc;
       }, {} as Record<string, any>) || {};
 
+      // Make sure format is exactly one of the allowed values
+      const format = data.format;
+      console.log("Using format:", format);
+
       // Create the community with the owner_id explicitly set
       const { data: community, error: insertError } = await supabase
         .from('communities')
@@ -84,7 +98,7 @@ export const useCreateCommunity = () => {
           type: data.type,
           location: data.location || "Remote",
           owner_id: session.user.id, // Explicitly set the current user as owner
-          format: data.format,
+          format: format,
           target_audience: targetAudienceArray,
           communication_platforms: communicationPlatformsObject,
           website: data.website || "",
@@ -128,6 +142,8 @@ export const useCreateCommunity = () => {
         errorMessage = "Permission denied: You don't have permission to create a community";
       } else if (error.message.includes("duplicate key")) {
         errorMessage = "A community with this name already exists";
+      } else if (error.message.includes("communities_format_check")) {
+        errorMessage = "Invalid format value. Format must be 'online', 'in-person', or 'hybrid'";
       } else if (error.message) {
         errorMessage = error.message;
       }
