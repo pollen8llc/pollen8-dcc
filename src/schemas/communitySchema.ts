@@ -8,7 +8,7 @@ export const communityFormSchema = z.object({
   type: z.enum(["tech", "creative", "wellness", "professional", "social-impact", "education", "social", "other"], {
     required_error: "Please select a community type",
   }),
-  format: z.enum(["online", "in-person", "hybrid"], {
+  format: z.enum(["online", "IRL", "hybrid"], {
     required_error: "Please select a format",
   }),
   

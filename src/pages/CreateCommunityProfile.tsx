@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { FormProvider } from "react-hook-form";
@@ -29,6 +28,7 @@ import { useCreateCommunityForm } from "@/hooks/useCreateCommunityForm";
 const FORM_STEPS = [
   "welcome",
   "name",
+  "targetAudience", // Moved to step 2
   "description",
   "type",
   "location",
@@ -39,7 +39,6 @@ const FORM_STEPS = [
   "website",
   "platforms",
   "socialMedia",
-  "tags",
   "review",
 ];
 
