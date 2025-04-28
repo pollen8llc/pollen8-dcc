@@ -72,12 +72,19 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
     // Use communitySize as string for database storage
     const memberCount = community.communitySize || "1"; // Default to 1 if not provided
     
+    // Ensure format is one of the allowed values
+    const format = community.format;
+    if (format && !["online", "IRL", "hybrid"].includes(format)) {
+      throw new Error(`Invalid format: ${format}. Must be one of: online, IRL, hybrid`);
+    }
+    
     // Log the final data being sent to the database
     console.log("Inserting into database with data:", {
       name: community.name,
       owner_id,
       target_audience,
-      member_count: memberCount
+      member_count: memberCount,
+      format
     });
 
     // Build the database record with explicit owner_id
@@ -94,7 +101,7 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
         owner_id: owner_id,
         target_audience: target_audience,
         community_type: community.type || null,
-        format: community.format || null,
+        format: format || null,
         role_title: community.role_title || null,
         community_structure: community.community_structure || null,
         vision: community.vision || null,

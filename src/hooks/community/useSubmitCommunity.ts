@@ -52,10 +52,17 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         return acc;
       }, {} as Record<string, any>) || {};
 
+      // Validate format
+      const format = values.format;
+      if (format && !["online", "IRL", "hybrid"].includes(format)) {
+        throw new Error(`Invalid format: ${format}. Must be one of: online, IRL, hybrid`);
+      }
+
       console.log("Creating community with processed data:", {
         name: values.name,
         description: values.description,
         communityType: values.communityType,
+        format: format,
         tags,
         socialMedia: socialMediaObject,
         platforms: communicationPlatformsObject
@@ -69,7 +76,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         description: values.description,
         location: values.location || "Remote",
         communityType: values.communityType,
-        format: values.format,
+        format: format,
         tags,
         communitySize: defaultSize, // Use default size
         organizerIds: [session.session.user.id],
@@ -115,6 +122,8 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         errorMessage = "Permission denied: You don't have permission to create a community. Make sure your account has the correct role (Administrator or Organizer).";
       } else if (errorMessage.includes("not found")) {
         errorMessage = "The community could not be created due to a database configuration issue. Please contact an administrator.";
+      } else if (errorMessage.includes("format")) {
+        errorMessage = "Invalid format. Must be one of: online, IRL, hybrid";
       }
       
       setSubmissionError(errorMessage);

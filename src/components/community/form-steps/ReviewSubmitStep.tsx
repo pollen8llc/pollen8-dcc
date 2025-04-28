@@ -77,7 +77,7 @@ export function ReviewSubmitStep({
       setLocalIsSubmitting(false);
       
       // Show a more specific error message if it's related to the format constraint
-      if (err.message && err.message.includes('communities_format_check')) {
+      if (err.message && err.message.includes('format')) {
         toast({
           variant: "destructive",
           title: "Format Error",

@@ -40,6 +40,17 @@ export const useCommunityForm = (onSuccess?: (communityId: string) => void) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check format validation before submitting
+    const formData = form.getValues();
+    if (formData.format && !["online", "IRL", "hybrid"].includes(formData.format)) {
+      form.setError("format", { 
+        type: "manual", 
+        message: "Format must be one of: online, IRL, hybrid" 
+      });
+      return;
+    }
+    
     form.handleSubmit(submitCommunity)(e);
   };
 

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -131,7 +132,7 @@ export const useCreateCommunityForm = () => {
         errorMessage = "Permission denied: You don't have permission to create a community";
       } else if (error.message.includes("duplicate key")) {
         errorMessage = "A community with this name already exists";
-      } else if (error.message.includes("communities_format_check")) {
+      } else if (error.message.includes("format")) {
         errorMessage = "Invalid format value. Format must be 'online', 'IRL', or 'hybrid'";
       } else if (error.message) {
         errorMessage = error.message;

@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -72,7 +73,7 @@ export function BasicCommunityForm({ form }: BasicCommunityFormProps) {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="online">Online</SelectItem>
-                  <SelectItem value="in-person">In-person</SelectItem>
+                  <SelectItem value="IRL">IRL</SelectItem>
                   <SelectItem value="hybrid">Hybrid</SelectItem>
                 </SelectContent>
               </Select>

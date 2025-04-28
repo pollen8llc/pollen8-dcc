@@ -143,7 +143,7 @@ export const useCreateCommunity = () => {
       } else if (error.message.includes("duplicate key")) {
         errorMessage = "A community with this name already exists";
       } else if (error.message.includes("communities_format_check")) {
-        errorMessage = "Invalid format value. Format must be 'online', 'in-person', or 'hybrid'";
+        errorMessage = "Invalid format value. Format must be 'online', 'IRL', or 'hybrid'";
       } else if (error.message) {
         errorMessage = error.message;
       }

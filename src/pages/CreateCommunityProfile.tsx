@@ -2,8 +2,6 @@
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { communityFormSchema, CommunityFormData } from "@/schemas/communitySchema";
 import { Toaster } from "@/components/ui/toaster";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormDebugger } from "@/components/debug/FormDebugger";
