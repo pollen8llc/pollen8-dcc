@@ -21,8 +21,8 @@ export async function submitCommunity(
     }
     
     // Validate format is one of the allowed values
-    if (!["online", "in-person", "hybrid"].includes(data.format)) {
-      throw new Error("Invalid format. Must be one of: online, in-person, hybrid");
+    if (!["online", "IRL", "hybrid"].includes(data.format)) {
+      throw new Error("Invalid format. Must be one of: online, IRL, hybrid");
     }
     
     // Create distribution data with consistent types

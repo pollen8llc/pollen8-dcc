@@ -53,7 +53,7 @@ export function CommunityTypeAndFormat({ form }: CommunityTypeAndFormatProps) {
               </FormControl>
               <SelectContent>
                 <SelectItem value="online">Online</SelectItem>
-                <SelectItem value="in-person">In-person</SelectItem>
+                <SelectItem value="IRL">IRL</SelectItem>
                 <SelectItem value="hybrid">Hybrid</SelectItem>
               </SelectContent>
             </Select>

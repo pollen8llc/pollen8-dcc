@@ -12,7 +12,7 @@ interface FormatStepProps {
   onPrev: () => void;
 }
 
-export function FormatStep({ form, onNext, onPrev }: FormatStepProps) {
+export function FormatStep({ form, onPrev, onNext }: FormatStepProps) {
   return (
     <div>
       <h2 className="text-xl font-semibold mb-5">Meeting Format</h2>

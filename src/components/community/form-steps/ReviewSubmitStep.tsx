@@ -49,11 +49,11 @@ export function ReviewSubmitStep({
       const formValues = form.getValues();
       
       // Validate format is one of the allowed values
-      if (!["online", "in-person", "hybrid"].includes(formValues.format)) {
+      if (!["online", "IRL", "hybrid"].includes(formValues.format)) {
         toast({
           variant: "destructive",
           title: "Validation Error",
-          description: "Format must be one of: online, in-person, hybrid",
+          description: "Format must be one of: online, IRL, hybrid",
         });
         setLocalIsSubmitting(false);
         return;
@@ -81,7 +81,7 @@ export function ReviewSubmitStep({
         toast({
           variant: "destructive",
           title: "Format Error",
-          description: "Invalid format. Must be one of: online, in-person, hybrid",
+          description: "Invalid format. Must be one of: online, IRL, hybrid",
         });
         return;
       }

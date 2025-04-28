@@ -5,11 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User } from "@/models/types";
 import MemberCard from "@/components/MemberCard";
 import { useUser } from "@/contexts/UserContext";
-import { Check, Users, Info } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Check, Users } from "lucide-react";
 import AdminMembersTab from "@/components/admin/AdminMembersTab";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -33,10 +29,6 @@ const CommunityTabs = ({ communityId, organizers, members, memberCount }: Commun
           <TabsTrigger value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span>Members ({memberCount || 0})</span>
-          </TabsTrigger>
-          <TabsTrigger value="about" className="flex items-center gap-2">
-            <Info className="h-4 w-4" />
-            <span>About</span>
           </TabsTrigger>
           {userIsOrganizer && (
             <TabsTrigger value="manage" className="flex items-center gap-2">
@@ -90,47 +82,6 @@ const CommunityTabs = ({ communityId, organizers, members, memberCount }: Commun
               </div>
             )}
           </div>
-        </TabsContent>
-        
-        <TabsContent value="about">
-          <Card>
-            <CardHeader>
-              <CardTitle>About this Community</CardTitle>
-              <CardDescription>Learn more about the community's mission and activities</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Community Description</h3>
-                <p className="text-muted-foreground">
-                  This community is a space for like-minded individuals to connect, share knowledge, and collaborate on projects.
-                </p>
-              </div>
-              
-              <Separator />
-              
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Activity</h3>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge>Discussion</Badge>
-                  <Badge>Knowledge Sharing</Badge>
-                  <Badge>Networking</Badge>
-                </div>
-                <p className="text-muted-foreground">
-                  Join our regular meetups and online discussions to connect with other members.
-                </p>
-              </div>
-              
-              <Separator />
-              
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Join Us</h3>
-                <p className="text-muted-foreground mb-4">
-                  Interested in joining this community? Click the button below to get started!
-                </p>
-                <Button>Join Community</Button>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
         
         {userIsOrganizer && (

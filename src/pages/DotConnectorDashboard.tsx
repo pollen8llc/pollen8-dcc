@@ -7,9 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate, Link } from "react-router-dom";
 import { UserRole, Community } from "@/models/types";
-import { Plus, Folder, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Folder, Trash2 } from "lucide-react";
 import { getManagedCommunities } from "@/services/community/communityQueryService";
-import { updateCommunity } from "@/services/community/communityMutationService";
 import { cn } from "@/lib/utils";
 import { DeleteCommunityDialog } from "@/components/community/DeleteCommunityDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +20,6 @@ const DotConnectorDashboard = () => {
   const [managedCommunities, setManagedCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(false);
   const [communityToDelete, setCommunityToDelete] = useState<Community | null>(null);
-  const [updatingVisibility, setUpdatingVisibility] = useState<string | null>(null);
 
   const loadCommunities = () => {
     if (currentUser && [UserRole.ORGANIZER, UserRole.ADMIN].includes(currentUser.role)) {
@@ -41,39 +39,6 @@ const DotConnectorDashboard = () => {
     navigate("/");
     return null;
   }
-
-  const handleToggleVisibility = async (community: Community) => {
-    try {
-      setUpdatingVisibility(community.id);
-      const updatedCommunity = {
-        ...community,
-        is_public: !community.is_public
-      };
-      
-      await updateCommunity(updatedCommunity);
-      
-      // Update local state
-      setManagedCommunities(prevCommunities => 
-        prevCommunities.map(c => 
-          c.id === community.id ? {...c, is_public: !c.is_public} : c
-        )
-      );
-      
-      toast({
-        title: "Visibility updated",
-        description: `${community.name} is now ${updatedCommunity.is_public ? 'public' : 'private'}.`,
-      });
-    } catch (error: any) {
-      console.error("Error updating community visibility:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to update visibility",
-      });
-    } finally {
-      setUpdatingVisibility(null);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -146,30 +111,6 @@ const DotConnectorDashboard = () => {
                             variant="ghost"
                             size="icon"
                             className="rounded-full p-2 h-8 w-8"
-                            title={community.is_public ? "Make Private" : "Make Public"}
-                            onClick={() => handleToggleVisibility(community)}
-                            disabled={updatingVisibility === community.id}
-                          >
-                            {community.is_public ? 
-                              <Eye className="h-4 w-4" /> : 
-                              <EyeOff className="h-4 w-4" />
-                            }
-                          </Button>
-                          <Button
-                            asChild
-                            variant="outline"
-                            size="icon"
-                            className="rounded-full p-2 h-8 w-8"
-                            title="Edit Community"
-                          >
-                            <Link to={`/organizer/community/${community.id}`}>
-                              <Edit className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full p-2 h-8 w-8"
                             title="Delete Community"
                             onClick={() => setCommunityToDelete(community)}
                           >
@@ -188,12 +129,18 @@ const DotConnectorDashboard = () => {
                           </div>
                         )}
                       </CardContent>
-                      <div className="flex justify-end pb-3 pr-4">
+                      <div className="flex justify-between pb-3 px-4">
                         <Link
-                          className="text-sm text-primary underline hover:no-underline font-medium"
+                          className="text-sm text-primary hover:underline font-medium"
                           to={`/community/${community.id}`}
                         >
                           View Community
+                        </Link>
+                        <Link
+                          className="text-sm text-primary hover:underline font-medium"
+                          to={`/organizer/community/${community.id}`}
+                        >
+                          Edit Community
                         </Link>
                       </div>
                     </Card>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -75,8 +74,8 @@ export const useCreateCommunityForm = () => {
       const format = data.format;
       
       // Make sure it's exactly one of the allowed values
-      if (!["online", "in-person", "hybrid"].includes(format)) {
-        throw new Error(`Invalid format: ${format}. Must be one of: online, in-person, hybrid`);
+      if (!["online", "IRL", "hybrid"].includes(format)) {
+        throw new Error(`Invalid format: ${format}. Must be one of: online, IRL, hybrid`);
       }
 
       // Create the community with the owner_id explicitly set
@@ -133,7 +132,7 @@ export const useCreateCommunityForm = () => {
       } else if (error.message.includes("duplicate key")) {
         errorMessage = "A community with this name already exists";
       } else if (error.message.includes("communities_format_check")) {
-        errorMessage = "Invalid format value. Format must be 'online', 'in-person', or 'hybrid'";
+        errorMessage = "Invalid format value. Format must be 'online', 'IRL', or 'hybrid'";
       } else if (error.message) {
         errorMessage = error.message;
       }

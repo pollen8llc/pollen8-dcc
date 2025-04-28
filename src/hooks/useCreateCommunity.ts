@@ -39,11 +39,11 @@ export const useCreateCommunity = () => {
     }
     
     // Validate format is one of the allowed values
-    if (data.format && !["online", "in-person", "hybrid"].includes(data.format)) {
+    if (data.format && !["online", "IRL", "hybrid"].includes(data.format)) {
       toast({
         variant: "destructive",
         title: "Validation Error",
-        description: "Format must be one of: online, in-person, hybrid",
+        description: "Format must be one of: online, IRL, hybrid",
       });
       return false;
     }

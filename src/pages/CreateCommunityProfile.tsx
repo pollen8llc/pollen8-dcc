@@ -29,7 +29,7 @@ import { useCreateCommunityForm } from "@/hooks/useCreateCommunityForm";
 const FORM_STEPS = [
   "welcome",
   "name",
-  "targetAudience", // This is step 2 
+  "targetAudience", // This is now step 2
   "description",
   "type",
   "location",
