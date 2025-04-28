@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { FormProvider } from "react-hook-form";
@@ -28,7 +29,7 @@ import { useCreateCommunityForm } from "@/hooks/useCreateCommunityForm";
 const FORM_STEPS = [
   "welcome",
   "name",
-  "targetAudience", // Moved to step 2
+  "targetAudience", // This is step 2 
   "description",
   "type",
   "location",
@@ -122,6 +123,8 @@ export default function CreateCommunityProfile() {
         return <WelcomeStep onNext={handleNext} />;
       case "name":
         return <CommunityNameStep form={form} onNext={handleNext} onPrev={handlePrev} />;
+      case "targetAudience":
+        return <TagsStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "description":
         return <DescriptionStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "type":
@@ -142,8 +145,6 @@ export default function CreateCommunityProfile() {
         return <PlatformsStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "socialMedia":
         return <SocialMediaStep form={form} onNext={handleNext} onPrev={handlePrev} />;
-      case "tags":
-        return <TagsStep form={form} onNext={handleNext} onPrev={handlePrev} />;
       case "review":
         return (
           <ReviewSubmitStep

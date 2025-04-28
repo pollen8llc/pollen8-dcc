@@ -7,23 +7,33 @@ import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate, Link } from "react-router-dom";
 import { UserRole, Community } from "@/models/types";
-import { Plus, Folder, Edit, Trash2 } from "lucide-react";
+import { Plus, Folder, Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import { getManagedCommunities } from "@/services/community/communityQueryService";
+import { updateCommunity } from "@/services/community/communityMutationService";
 import { cn } from "@/lib/utils";
+import { DeleteCommunityDialog } from "@/components/community/DeleteCommunityDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const DotConnectorDashboard = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [managedCommunities, setManagedCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(false);
+  const [communityToDelete, setCommunityToDelete] = useState<Community | null>(null);
+  const [updatingVisibility, setUpdatingVisibility] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadCommunities = () => {
     if (currentUser && [UserRole.ORGANIZER, UserRole.ADMIN].includes(currentUser.role)) {
       setLoading(true);
       getManagedCommunities(currentUser.id)
         .then((data) => setManagedCommunities(data))
         .finally(() => setLoading(false));
     }
+  };
+
+  useEffect(() => {
+    loadCommunities();
   }, [currentUser]);
 
   // Only allow ORGANIZER or ADMIN
@@ -31,6 +41,39 @@ const DotConnectorDashboard = () => {
     navigate("/");
     return null;
   }
+
+  const handleToggleVisibility = async (community: Community) => {
+    try {
+      setUpdatingVisibility(community.id);
+      const updatedCommunity = {
+        ...community,
+        is_public: !community.is_public
+      };
+      
+      await updateCommunity(updatedCommunity);
+      
+      // Update local state
+      setManagedCommunities(prevCommunities => 
+        prevCommunities.map(c => 
+          c.id === community.id ? {...c, is_public: !c.is_public} : c
+        )
+      );
+      
+      toast({
+        title: "Visibility updated",
+        description: `${community.name} is now ${updatedCommunity.is_public ? 'public' : 'private'}.`,
+      });
+    } catch (error: any) {
+      console.error("Error updating community visibility:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to update visibility",
+      });
+    } finally {
+      setUpdatingVisibility(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,28 +133,49 @@ const DotConnectorDashboard = () => {
                           <span className="font-semibold text-base truncate max-w-[140px]" title={community.name}>
                             {community.name}
                           </span>
+                          <span className={cn(
+                            "text-xs px-1.5 py-0.5 rounded-full",
+                            community.is_public ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
+                                              : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                          )}>
+                            {community.is_public ? "Public" : "Private"}
+                          </span>
                         </div>
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="icon"
-                          className="rounded-full p-2 h-8 w-8"
-                          title="Edit Community"
-                        >
-                          <Link to={`/organizer/community/${community.id}`}>
-                            <Edit className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        {/* Optionally add delete button here
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full p-2 h-8 w-8"
-                          title="Delete Community"
-                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                         </Button>
-                         */}
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full p-2 h-8 w-8"
+                            title={community.is_public ? "Make Private" : "Make Public"}
+                            onClick={() => handleToggleVisibility(community)}
+                            disabled={updatingVisibility === community.id}
+                          >
+                            {community.is_public ? 
+                              <Eye className="h-4 w-4" /> : 
+                              <EyeOff className="h-4 w-4" />
+                            }
+                          </Button>
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="icon"
+                            className="rounded-full p-2 h-8 w-8"
+                            title="Edit Community"
+                          >
+                            <Link to={`/organizer/community/${community.id}`}>
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full p-2 h-8 w-8"
+                            title="Delete Community"
+                            onClick={() => setCommunityToDelete(community)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </CardHeader>
                       <CardContent className="flex-1 py-2 px-4 flex flex-col justify-between">
                         <div className="text-sm text-muted-foreground">
@@ -140,6 +204,19 @@ const DotConnectorDashboard = () => {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Delete Community Dialog */}
+      {communityToDelete && (
+        <DeleteCommunityDialog
+          communityId={communityToDelete.id}
+          communityName={communityToDelete.name}
+          isOpen={Boolean(communityToDelete)}
+          setIsOpen={(isOpen) => {
+            if (!isOpen) setCommunityToDelete(null);
+          }}
+          onDeleted={loadCommunities}
+        />
+      )}
     </div>
   );
 };
