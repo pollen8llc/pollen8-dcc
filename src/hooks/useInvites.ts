@@ -23,7 +23,7 @@ export const useInvites = () => {
    */
   const handleCreateInvite = async (
     communityId?: string,
-    maxUses?: number,
+    maxUses?: number,  // Ensuring type is number | undefined, not string
     expiresAt?: string
   ): Promise<InviteData | null> => {
     if (!currentUser) {

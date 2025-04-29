@@ -92,10 +92,11 @@ const InviteGenerator: React.FC<InviteGeneratorProps> = ({
       ? values.expirationDate.toISOString()
       : undefined;
 
-    // Here's the fix: passing the transformed number value instead of string
+    // Fixed: We're ensuring we pass the correctly transformed number value
+    // The maxUses is already transformed to a number by the schema
     const invite = await createInvite(
       values.communityId || undefined,
-      values.maxUses, // This is now correctly typed as number | undefined
+      values.maxUses, // This now correctly passes number | undefined
       expirationDate
     );
 
