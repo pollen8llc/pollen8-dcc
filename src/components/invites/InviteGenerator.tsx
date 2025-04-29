@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useInvites } from "@/hooks/useInvites";
 import { useUser } from "@/contexts/UserContext";
@@ -164,11 +165,12 @@ const InviteGenerator: React.FC<InviteGeneratorProps> = ({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">No specific community</SelectItem>
-                            {/* Would need to load communities the user manages */}
-                            {/* This is a placeholder for the actual community list */}
-                            <SelectItem value="community-1">Community 1</SelectItem>
-                            <SelectItem value="community-2">Community 2</SelectItem>
+                            <SelectItem value="none">No specific community</SelectItem>
+                            {currentUser.managedCommunities.map((communityId) => (
+                              <SelectItem key={communityId} value={communityId}>
+                                {communityId}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />

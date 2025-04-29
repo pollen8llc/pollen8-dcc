@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
@@ -12,15 +12,24 @@ import { UserRole } from "@/models/types";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const Profile = () => {
-  const { currentUser, refreshUser } = useUser();
+  const { currentUser, refreshUser, isLoading: userLoading } = useUser();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileName, setProfileName] = useState(currentUser?.name || "");
-  const [profileImage, setProfileImage] = useState(currentUser?.imageUrl || "");
+  const [profileName, setProfileName] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+
+  // Update form values when user data is loaded
+  useEffect(() => {
+    if (currentUser) {
+      setProfileName(currentUser.name || "");
+      setProfileImage(currentUser.imageUrl || "");
+    }
+  }, [currentUser]);
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
@@ -78,6 +87,22 @@ const Profile = () => {
     }
   };
 
+  if (userLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center min-h-[50vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-lg">Loading your profile...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!currentUser) {
     return (
       <div className="min-h-screen">
@@ -103,106 +128,108 @@ const Profile = () => {
     <div className="min-h-screen">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">My Profile</h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Profile Card */}
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>Manage your personal information</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="flex flex-col items-center">
-                    <Avatar className="h-24 w-24 mb-4">
-                      <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
-                      <AvatarFallback className="text-xl">{getUserInitials()}</AvatarFallback>
-                    </Avatar>
-                    {getUserRoleBadge()}
-                  </div>
-                  
-                  <div className="flex-1 space-y-4">
-                    {isEditing ? (
-                      <>
-                        <div className="space-y-2">
-                          <label htmlFor="name" className="text-sm font-medium">
-                            Name
-                          </label>
-                          <Input
-                            id="name"
-                            value={profileName}
-                            onChange={e => setProfileName(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label htmlFor="image" className="text-sm font-medium">
-                            Profile Image URL
-                          </label>
-                          <Input
-                            id="image"
-                            value={profileImage}
-                            onChange={e => setProfileImage(e.target.value)}
-                            placeholder="https://example.com/image.jpg"
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-2">
-                          <UserIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{currentUser.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span>{currentUser.email}</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end gap-2">
-                {isEditing ? (
-                  <>
-                    <Button variant="outline" onClick={() => setIsEditing(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleSaveProfile} disabled={isSubmitting}>
-                      {isSubmitting ? "Saving..." : "Save Changes"}
-                    </Button>
-                  </>
-                ) : (
-                  <Button onClick={() => setIsEditing(true)}>
-                    Edit Profile
-                  </Button>
-                )}
-              </CardFooter>
-            </Card>
+        <ErrorBoundary>
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl font-bold mb-6">My Profile</h1>
             
-            {/* Stats Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Activity</CardTitle>
-                <CardDescription>Your community participation</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-sm text-muted-foreground">Communities</span>
-                    <p className="text-2xl font-bold">{currentUser.communities?.length || 0}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Profile Card */}
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle>Profile Information</CardTitle>
+                  <CardDescription>Manage your personal information</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex flex-col items-center">
+                      <Avatar className="h-24 w-24 mb-4">
+                        <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
+                        <AvatarFallback className="text-xl">{getUserInitials()}</AvatarFallback>
+                      </Avatar>
+                      {getUserRoleBadge()}
+                    </div>
+                    
+                    <div className="flex-1 space-y-4">
+                      {isEditing ? (
+                        <>
+                          <div className="space-y-2">
+                            <label htmlFor="name" className="text-sm font-medium">
+                              Name
+                            </label>
+                            <Input
+                              id="name"
+                              value={profileName}
+                              onChange={e => setProfileName(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor="image" className="text-sm font-medium">
+                              Profile Image URL
+                            </label>
+                            <Input
+                              id="image"
+                              value={profileImage}
+                              onChange={e => setProfileImage(e.target.value)}
+                              placeholder="https://example.com/image.jpg"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <UserIcon className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{currentUser.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <span>{currentUser.email}</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <Separator />
-                  <div>
-                    <span className="text-sm text-muted-foreground">Managing</span>
-                    <p className="text-2xl font-bold">{currentUser.managedCommunities?.length || 0}</p>
+                </CardContent>
+                <CardFooter className="flex justify-end gap-2">
+                  {isEditing ? (
+                    <>
+                      <Button variant="outline" onClick={() => setIsEditing(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleSaveProfile} disabled={isSubmitting}>
+                        {isSubmitting ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={() => setIsEditing(true)}>
+                      Edit Profile
+                    </Button>
+                  )}
+                </CardFooter>
+              </Card>
+              
+              {/* Stats Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Activity</CardTitle>
+                  <CardDescription>Your community participation</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-sm text-muted-foreground">Communities</span>
+                      <p className="text-2xl font-bold">{currentUser.communities?.length || 0}</p>
+                    </div>
+                    <Separator />
+                    <div>
+                      <span className="text-sm text-muted-foreground">Managing</span>
+                      <p className="text-2xl font-bold">{currentUser.managedCommunities?.length || 0}</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        </ErrorBoundary>
       </div>
       
       {/* Help Dialog */}
