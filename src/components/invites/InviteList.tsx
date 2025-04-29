@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useInvites } from "@/hooks/useInvites";
 import { Button } from "@/components/ui/button";
@@ -73,7 +72,7 @@ const InviteListItem: React.FC<{
     if (isMaxedOut) {
       return <Badge variant="destructive">Maxed Out</Badge>;
     }
-    return <Badge variant="success">Active</Badge>;
+    return <Badge variant="secondary">Active</Badge>;
   };
 
   return (

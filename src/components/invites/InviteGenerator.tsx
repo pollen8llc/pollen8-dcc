@@ -94,7 +94,7 @@ const InviteGenerator: React.FC<InviteGeneratorProps> = ({
 
     const invite = await createInvite(
       values.communityId || undefined,
-      values.maxUses,
+      values.maxUses, // This is now correctly typed as number | undefined
       expirationDate
     );
 

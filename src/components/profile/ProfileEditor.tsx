@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useUser } from "@/contexts/UserContext";
@@ -129,11 +128,17 @@ const ProfileEditor: React.FC = () => {
   const onSubmit = async (values: ProfileFormValues) => {
     if (!currentUser) return;
     
+    // Ensure privacy_settings has required property
+    const privacy_settings = {
+      profile_visibility: values.privacy_settings.profile_visibility
+    };
+    
     const updatedProfile: Partial<ExtendedProfile> = {
       id: currentUser.id,
       ...values,
       interests,
       social_links: socialLinks,
+      privacy_settings: privacy_settings
     };
     
     await updateProfile(updatedProfile);

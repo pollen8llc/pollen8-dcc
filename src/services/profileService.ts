@@ -37,7 +37,14 @@ export const getProfileById = async (profileId: string): Promise<ExtendedProfile
       return null;
     }
     
-    return data;
+    // Parse JSON fields to ensure type compatibility
+    return {
+      ...data,
+      social_links: data.social_links ? JSON.parse(JSON.stringify(data.social_links)) : {},
+      privacy_settings: data.privacy_settings ? JSON.parse(JSON.stringify(data.privacy_settings)) : {
+        profile_visibility: "connections"
+      }
+    };
   } catch (error) {
     console.error("Exception in getProfileById:", error);
     return null;
@@ -61,6 +68,11 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
       console.error("Cannot update another user's profile");
       return null;
     }
+
+    // Ensure privacy_settings has the required property
+    const privacy_settings = profileData.privacy_settings ? {
+      profile_visibility: profileData.privacy_settings.profile_visibility || "connections"
+    } : undefined;
     
     const { data, error } = await supabase
       .from('profiles')
@@ -71,7 +83,7 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
         location: profileData.location,
         interests: profileData.interests,
         social_links: profileData.social_links,
-        privacy_settings: profileData.privacy_settings,
+        privacy_settings: privacy_settings,
         avatar_url: profileData.avatar_url,
       })
       .eq('id', currentUser.id)
@@ -83,7 +95,14 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
       return null;
     }
     
-    return data;
+    // Parse JSON fields to ensure type compatibility
+    return {
+      ...data,
+      social_links: data.social_links ? JSON.parse(JSON.stringify(data.social_links)) : {},
+      privacy_settings: data.privacy_settings ? JSON.parse(JSON.stringify(data.privacy_settings)) : {
+        profile_visibility: "connections"
+      }
+    };
   } catch (error) {
     console.error("Exception in updateProfile:", error);
     return null;
@@ -141,10 +160,21 @@ export const getConnectedProfiles = async (
     
     let profiles = data || [];
     
+    // Process the returned data to ensure types match
+    const processedProfiles: ExtendedProfile[] = profiles.map(profile => ({
+      ...profile,
+      social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
+      privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
+        profile_visibility: "connections"
+      }
+    }));
+    
     // Apply filters
+    let filteredProfiles = [...processedProfiles];
+    
     if (filters.communityId) {
       // Filter by community - this would need to be enhanced with a more complex query
-      profiles = profiles.filter(profile => {
+      filteredProfiles = filteredProfiles.filter(profile => {
         // This is a simplified check - in reality you would need to check connections
         return true; // Placeholder
       });
@@ -152,7 +182,7 @@ export const getConnectedProfiles = async (
     
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      profiles = profiles.filter(profile => {
+      filteredProfiles = filteredProfiles.filter(profile => {
         return (
           (profile.first_name && profile.first_name.toLowerCase().includes(searchLower)) ||
           (profile.last_name && profile.last_name.toLowerCase().includes(searchLower)) ||
@@ -162,7 +192,7 @@ export const getConnectedProfiles = async (
     }
     
     if (filters.interests && filters.interests.length > 0) {
-      profiles = profiles.filter(profile => {
+      filteredProfiles = filteredProfiles.filter(profile => {
         if (!profile.interests || profile.interests.length === 0) return false;
         return filters.interests?.some(interest => 
           profile.interests?.includes(interest)
@@ -171,12 +201,12 @@ export const getConnectedProfiles = async (
     }
     
     if (filters.location) {
-      profiles = profiles.filter(profile => 
+      filteredProfiles = filteredProfiles.filter(profile => 
         profile.location && profile.location.toLowerCase().includes(filters.location!.toLowerCase())
       );
     }
     
-    return profiles;
+    return filteredProfiles;
   } catch (error) {
     console.error("Exception in getConnectedProfiles:", error);
     return [];
@@ -207,7 +237,14 @@ export const getAllProfiles = async (): Promise<ExtendedProfile[]> => {
       return [];
     }
     
-    return data;
+    // Process the returned data to ensure types match
+    return data.map(profile => ({
+      ...profile,
+      social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
+      privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
+        profile_visibility: "connections"
+      }
+    }));
   } catch (error) {
     console.error("Exception in getAllProfiles:", error);
     return [];
