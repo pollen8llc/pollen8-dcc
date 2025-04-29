@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useInvites } from "@/hooks/useInvites";
 import { useUser } from "@/contexts/UserContext";
@@ -44,7 +43,12 @@ const inviteFormSchema = z.object({
   maxUses: z
     .string()
     .optional()
-    .transform(val => (val ? parseInt(val, 10) : undefined)),
+    .transform(val => {
+      // Explicitly transform to number or undefined
+      if (!val || val === '') return undefined;
+      const num = parseInt(val, 10);
+      return isNaN(num) ? undefined : num;
+    }),
   expirationDate: z.date().optional(),
 });
 
@@ -92,11 +96,10 @@ const InviteGenerator: React.FC<InviteGeneratorProps> = ({
       ? values.expirationDate.toISOString()
       : undefined;
 
-    // Fixed: We're ensuring we pass the correctly transformed number value
-    // The maxUses is already transformed to a number by the schema
+    // Pass the correctly typed maxUses value, which is now transformed to number | undefined by the schema
     const invite = await createInvite(
       values.communityId || undefined,
-      values.maxUses, // This now correctly passes number | undefined
+      values.maxUses, // This is now correctly a number | undefined from the schema transform
       expirationDate
     );
 
