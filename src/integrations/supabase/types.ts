@@ -229,34 +229,109 @@ export type Database = {
         }
         Relationships: []
       }
+      invites: {
+        Row: {
+          code: string
+          community_id: string | null
+          created_at: string
+          creator_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          link_id: string
+          max_uses: number | null
+          updated_at: string
+          used_count: number
+        }
+        Insert: {
+          code: string
+          community_id?: string | null
+          created_at?: string
+          creator_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_id: string
+          max_uses?: number | null
+          updated_at?: string
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          community_id?: string | null
+          created_at?: string
+          creator_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_id?: string
+          max_uses?: number | null
+          updated_at?: string
+          used_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invites_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           email: string
           first_name: string | null
           id: string
+          interests: string[] | null
+          invited_by: string | null
           last_name: string | null
+          location: string | null
+          privacy_settings: Json
+          social_links: Json | null
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           email: string
           first_name?: string | null
           id?: string
+          interests?: string[] | null
+          invited_by?: string | null
           last_name?: string | null
+          location?: string | null
+          privacy_settings?: Json
+          social_links?: Json | null
           updated_at?: string
           user_id?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           email?: string
           first_name?: string | null
           id?: string
+          interests?: string[] | null
+          invited_by?: string | null
           last_name?: string | null
+          location?: string | null
+          privacy_settings?: Json
+          social_links?: Json | null
           updated_at?: string
           user_id?: string
         }
@@ -327,6 +402,65 @@ export type Database = {
           },
         ]
       }
+      user_connections: {
+        Row: {
+          community_id: string | null
+          connected_at: string
+          connection_depth: number
+          id: string
+          invite_id: string | null
+          invitee_id: string
+          inviter_id: string
+        }
+        Insert: {
+          community_id?: string | null
+          connected_at?: string
+          connection_depth?: number
+          id?: string
+          invite_id?: string | null
+          invitee_id: string
+          inviter_id: string
+        }
+        Update: {
+          community_id?: string | null
+          connected_at?: string
+          connection_depth?: number
+          id?: string
+          invite_id?: string | null
+          invitee_id?: string
+          inviter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_connections_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_connections_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_connections_invitee_id_fkey"
+            columns: ["invitee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_connections_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           assigned_at: string
@@ -379,9 +513,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_profile: {
+        Args: { viewer_id: string; profile_id: string }
+        Returns: boolean
+      }
+      generate_unique_invite_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_community_admin_status: {
         Args: { user_id: string; community_id: string }
         Returns: boolean
+      }
+      get_connected_profiles: {
+        Args: { user_id: string; max_depth?: number }
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          interests: string[] | null
+          invited_by: string | null
+          last_name: string | null
+          location: string | null
+          privacy_settings: Json
+          social_links: Json | null
+          updated_at: string
+          user_id: string
+        }[]
+      }
+      get_connection_depth: {
+        Args: { user_a: string; user_b: string }
+        Returns: number
       }
       get_highest_role: {
         Args: { user_id: string }
@@ -417,6 +582,10 @@ export type Database = {
         Args: { user_id: string; community_id: string }
         Returns: boolean
       }
+      is_connected_within_depth: {
+        Args: { viewer_id: string; profile_id: string; max_depth?: number }
+        Returns: boolean
+      }
       log_audit_action: {
         Args: {
           action_name: string
@@ -425,6 +594,10 @@ export type Database = {
           action_details?: Json
         }
         Returns: undefined
+      }
+      record_invite_use: {
+        Args: { invite_code: string; user_id: string }
+        Returns: string
       }
       safe_delete_community: {
         Args: { community_id: string; user_id: string }

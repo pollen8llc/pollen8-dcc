@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -18,6 +19,11 @@ import React from 'react';
 import DebuggerDashboard from './pages/admin/DebuggerDashboard';
 import OrganizerDashboard from "./pages/OrganizerDashboard";
 import DotConnectorDashboard from "./pages/DotConnectorDashboard";
+import InvitePage from "./pages/InvitePage";
+import ProfilePage from "./pages/ProfilePage";
+import ProfileEditPage from "./pages/ProfileEditPage";
+import ConnectionsPage from "./pages/ConnectionsPage";
+import InvitesManagementPage from "./pages/InvitesManagementPage";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -55,6 +61,25 @@ const AppRoutes = () => {
       <Route path="/profile" element={
         <ProtectedRoute requiredRole="MEMBER">
           <Profile />
+        </ProtectedRoute>
+      } />
+      
+      {/* New profile and connection routes */}
+      <Route path="/profile/:id" element={<ProfilePage />} />
+      <Route path="/profile/edit" element={
+        <ProtectedRoute requiredRole="MEMBER">
+          <ProfileEditPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/connections" element={
+        <ProtectedRoute requiredRole="MEMBER">
+          <ConnectionsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/invite/:code" element={<InvitePage />} />
+      <Route path="/organizer/invites" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <InvitesManagementPage />
         </ProtectedRoute>
       } />
       

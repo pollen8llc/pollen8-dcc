@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { User, UserRole } from "@/models/types";
@@ -9,7 +10,7 @@ import UserHeader from './drawer/UserHeader';
 import MainNavigation from './drawer/MainNavigation';
 import AdminNavigation from './drawer/AdminNavigation';
 import AuthActions from './drawer/AuthActions';
-import { Folder } from "lucide-react";
+import { Folder, Link as LinkIcon, Users, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 
@@ -127,6 +128,41 @@ const NavigationDrawer = ({
               isAdmin={isAdmin}
             />
 
+            {/* User navigation section - new */}
+            {currentUser && (
+              <>
+                <Separator className="my-4" />
+                <div className="px-2 mb-2 text-sm font-semibold text-muted-foreground">
+                  Network
+                </div>
+                <div className="flex flex-col gap-1 pb-2">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="justify-start flex gap-2 items-center"
+                    onClick={() => handleNavigation(`/profile/${currentUser.id}`)}
+                  >
+                    <Link to={`/profile/${currentUser.id}`}>
+                      <LinkIcon className="w-4 h-4 mr-1" />
+                      <span>My Profile</span>
+                    </Link>
+                  </Button>
+                  
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="justify-start flex gap-2 items-center"
+                    onClick={() => handleNavigation("/connections")}
+                  >
+                    <Link to="/connections">
+                      <Users className="w-4 h-4 mr-1" />
+                      <span>My Network</span>
+                    </Link>
+                  </Button>
+                </div>
+              </>
+            )}
+
             {/* ADMIN section */}
             {isAdmin && (
               <>
@@ -155,6 +191,19 @@ const NavigationDrawer = ({
                     <Link to="/organizer/dot-connector">
                       <span className="w-2 h-2 rounded-full bg-primary mr-2 inline-block"></span>
                       <span>Dot Connector Dashboard</span>
+                    </Link>
+                  </Button>
+                  
+                  {/* Invites management */}
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="justify-start flex gap-2 items-center"
+                    onClick={() => handleNavigation("/organizer/invites")}
+                  >
+                    <Link to="/organizer/invites">
+                      <Mail className="w-4 h-4 mr-1" />
+                      <span>Manage Invites</span>
                     </Link>
                   </Button>
                 </div>
