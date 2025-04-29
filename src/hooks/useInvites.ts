@@ -23,7 +23,7 @@ export const useInvites = () => {
    */
   const handleCreateInvite = async (
     communityId?: string,
-    maxUses?: number,  // Ensuring type is number | undefined, not string
+    maxUses?: string | number,  // Accept either string or number
     expiresAt?: string
   ): Promise<InviteData | null> => {
     if (!currentUser) {
@@ -37,7 +37,12 @@ export const useInvites = () => {
 
     setIsLoading(true);
     try {
-      const invite = await createInvite(currentUser.id, communityId, maxUses, expiresAt);
+      // Convert maxUses to number if it's a string
+      const maxUsesNum = maxUses !== undefined ? 
+        (typeof maxUses === 'string' ? parseInt(maxUses, 10) || undefined : maxUses) : 
+        undefined;
+        
+      const invite = await createInvite(currentUser.id, communityId, maxUsesNum, expiresAt);
 
       if (invite) {
         toast({

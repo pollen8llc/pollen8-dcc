@@ -40,15 +40,7 @@ import { cn } from "@/lib/utils";
 // Form schema for invite creation
 const inviteFormSchema = z.object({
   communityId: z.string().optional(),
-  maxUses: z
-    .string()
-    .optional()
-    .transform(val => {
-      // Explicitly transform to number or undefined
-      if (!val || val === '') return undefined;
-      const num = parseInt(val, 10);
-      return isNaN(num) ? undefined : num;
-    }),
+  maxUses: z.string().optional(), // Keep as string without transformation
   expirationDate: z.date().optional(),
 });
 
@@ -96,10 +88,10 @@ const InviteGenerator: React.FC<InviteGeneratorProps> = ({
       ? values.expirationDate.toISOString()
       : undefined;
 
-    // Pass the correctly typed maxUses value, which is now transformed to number | undefined by the schema
+    // Pass maxUses as string directly - handleCreateInvite will handle the conversion
     const invite = await createInvite(
       values.communityId || undefined,
-      values.maxUses, // This is now correctly a number | undefined from the schema transform
+      values.maxUses, // Now this is just a string (or undefined)
       expirationDate
     );
 
