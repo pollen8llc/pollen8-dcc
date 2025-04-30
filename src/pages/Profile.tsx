@@ -26,17 +26,11 @@ const Profile = () => {
   // Update form values when user data is loaded
   useEffect(() => {
     if (currentUser) {
-      // Safely set the name
-      if (currentUser.name) {
-        setProfileName(currentUser.name);
-      } else {
-        const firstName = currentUser.first_name || "";
-        const lastName = currentUser.last_name || "";
-        setProfileName(`${firstName} ${lastName}`.trim());
-      }
+      // Set the name from the user object
+      setProfileName(currentUser.name || "");
       
-      // Safely set the image URL
-      setProfileImage(currentUser.imageUrl || currentUser.avatar_url || "");
+      // Set the image URL from the user object
+      setProfileImage(currentUser.imageUrl || "");
     }
   }, [currentUser]);
 
@@ -50,18 +44,6 @@ const Profile = () => {
         return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
       }
       return nameParts[0][0].toUpperCase();
-    }
-    
-    // If no name in user object, try first_name and last_name
-    const firstName = currentUser.first_name || "";
-    const lastName = currentUser.last_name || "";
-    
-    if (firstName && lastName) {
-      return `${firstName[0]}${lastName[0]}`.toUpperCase();
-    } else if (firstName) {
-      return firstName[0].toUpperCase();
-    } else if (lastName) {
-      return lastName[0].toUpperCase();
     }
     
     return "?";
@@ -153,7 +135,7 @@ const Profile = () => {
   const displayEmail = currentUser.email;
   
   // Get user name for display
-  const displayName = currentUser.name || `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'User';
+  const displayName = currentUser.name || 'User';
 
   return (
     <div className="min-h-screen">
@@ -174,7 +156,7 @@ const Profile = () => {
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex flex-col items-center">
                       <Avatar className="h-24 w-24 mb-4">
-                        <AvatarImage src={currentUser.imageUrl || currentUser.avatar_url} alt={displayName} />
+                        <AvatarImage src={currentUser.imageUrl} alt={displayName} />
                         <AvatarFallback className="text-xl">{getUserInitials()}</AvatarFallback>
                       </Avatar>
                       {getUserRoleBadge()}
