@@ -91,7 +91,7 @@ const InviteGenerator: React.FC<InviteGeneratorProps> = ({
 
     // Pass maxUses as string directly - handleCreateInvite will handle the conversion
     const invite = await createInvite(
-      values.communityId || undefined,
+      values.communityId && values.communityId !== "none" ? values.communityId : undefined,
       values.maxUses, // Now this is just a string (or undefined)
       expirationDate
     );

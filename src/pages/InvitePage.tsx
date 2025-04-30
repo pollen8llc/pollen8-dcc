@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import Navbar from "@/components/Navbar";
 import AuthLayout from "@/components/auth/AuthLayout";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const InvitePage: React.FC = () => {
   const { code } = useParams<{ code: string }>();
@@ -16,6 +17,7 @@ const InvitePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isInvalid, setIsInvalid] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { currentUser } = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -25,11 +27,13 @@ const InvitePage: React.FC = () => {
     const fetchInvite = async () => {
       if (!code) {
         setIsInvalid(true);
+        setError("No invite code provided");
         setIsLoading(false);
         return;
       }
 
       try {
+        setError(null);
         let inviteData: InviteData | null = null;
         
         // First try to look up by code
@@ -42,18 +46,21 @@ const InvitePage: React.FC = () => {
         
         if (!inviteData || !inviteData.is_active) {
           setIsInvalid(true);
+          setError("This invite is invalid or has been deactivated");
           return;
         }
         
         // Check if expired
         if (inviteData.expires_at && new Date(inviteData.expires_at) < new Date()) {
           setIsInvalid(true);
+          setError("This invite has expired");
           return;
         }
         
         // Check if max uses reached
         if (inviteData.max_uses !== null && inviteData.used_count >= inviteData.max_uses) {
           setIsInvalid(true);
+          setError("This invite has reached its maximum usage limit");
           return;
         }
         
@@ -61,6 +68,7 @@ const InvitePage: React.FC = () => {
       } catch (error) {
         console.error("Error fetching invite:", error);
         setIsInvalid(true);
+        setError("Error loading invite data");
       } finally {
         setIsLoading(false);
       }
@@ -73,6 +81,7 @@ const InvitePage: React.FC = () => {
     if (!currentUser || !invite) return;
     
     setIsAccepting(true);
+    setError(null);
     
     try {
       const inviteId = await recordInviteUse(invite.code, currentUser.id);
@@ -95,6 +104,7 @@ const InvitePage: React.FC = () => {
           description: "There was a problem accepting the invite",
           variant: "destructive",
         });
+        setError("Failed to accept the invite. It may be invalid or expired.");
       }
     } catch (error) {
       console.error("Error accepting invite:", error);
@@ -103,6 +113,7 @@ const InvitePage: React.FC = () => {
         description: "There was a problem accepting the invite",
         variant: "destructive",
       });
+      setError("An error occurred while accepting the invite");
     } finally {
       setIsAccepting(false);
     }
@@ -137,7 +148,7 @@ const InvitePage: React.FC = () => {
               <CardTitle>Invalid Invite</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>This invite is invalid, expired, or has reached its maximum usage.</p>
+              <p>{error || "This invite is invalid, expired, or has reached its maximum usage."}</p>
             </CardContent>
             <CardFooter>
               <Button asChild>
@@ -153,63 +164,73 @@ const InvitePage: React.FC = () => {
   if (!currentUser) {
     // User is not logged in, show sign-in prompt
     return (
-      <AuthLayout
-        title="You've Been Invited!"
-        subtitle="Sign in or create an account to join the community"
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Join via Invite</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>You need to sign in or create an account to accept this invitation.</p>
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <Button onClick={handleSignIn}>Sign In / Sign Up</Button>
-          </CardFooter>
-        </Card>
-      </AuthLayout>
+      <ErrorBoundary>
+        <AuthLayout
+          title="You've Been Invited!"
+          subtitle="Sign in or create an account to join the community"
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Join via Invite</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>You need to sign in or create an account to accept this invitation.</p>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button onClick={handleSignIn}>Sign In / Sign Up</Button>
+            </CardFooter>
+          </Card>
+        </AuthLayout>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="container mx-auto px-4 py-16">
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle>You've Been Invited!</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>
-              You've received an invitation to connect
-              {invite?.community_id ? " and join a community" : ""}.
-            </p>
+    <ErrorBoundary>
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-4 py-16">
+          <Card className="max-w-md mx-auto">
+            <CardHeader>
+              <CardTitle>You've Been Invited!</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p>
+                You've received an invitation to connect
+                {invite?.community_id ? " and join a community" : ""}.
+              </p>
 
-            {invite && (
-              <div className="space-y-2 text-sm">
-                {invite.expires_at && (
-                  <p>
-                    <span className="font-medium">Valid until:</span>{" "}
-                    {format(new Date(invite.expires_at), "PPP")}
-                  </p>
-                )}
+              {invite && (
+                <div className="space-y-2 text-sm">
+                  {invite.expires_at && (
+                    <p>
+                      <span className="font-medium">Valid until:</span>{" "}
+                      {format(new Date(invite.expires_at), "PPP")}
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-100 rounded-md text-red-600">
+                  {error}
+                </div>
+              )}
+            </CardContent>
+            <CardFooter>
+              <div className="flex gap-4">
+                <Button variant="outline" asChild>
+                  <Link to="/">Ignore</Link>
+                </Button>
+                <Button onClick={acceptInvite} disabled={isAccepting}>
+                  {isAccepting ? "Accepting..." : "Accept Invitation"}
+                </Button>
               </div>
-            )}
-          </CardContent>
-          <CardFooter>
-            <div className="flex gap-4">
-              <Button variant="outline" asChild>
-                <Link to="/">Ignore</Link>
-              </Button>
-              <Button onClick={acceptInvite} disabled={isAccepting}>
-                {isAccepting ? "Accepting..." : "Accept Invitation"}
-              </Button>
-            </div>
-          </CardFooter>
-        </Card>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 

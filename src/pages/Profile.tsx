@@ -26,8 +26,17 @@ const Profile = () => {
   // Update form values when user data is loaded
   useEffect(() => {
     if (currentUser) {
-      setProfileName(currentUser.name || "");
-      setProfileImage(currentUser.imageUrl || "");
+      // Safely set the name
+      if (currentUser.name) {
+        setProfileName(currentUser.name);
+      } else {
+        const firstName = currentUser.first_name || "";
+        const lastName = currentUser.last_name || "";
+        setProfileName(`${firstName} ${lastName}`.trim());
+      }
+      
+      // Safely set the image URL
+      setProfileImage(currentUser.imageUrl || currentUser.avatar_url || "");
     }
   }, [currentUser]);
 
@@ -35,11 +44,27 @@ const Profile = () => {
   const getUserInitials = () => {
     if (!currentUser) return "?";
     
-    const nameParts = currentUser.name.split(" ");
-    if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+    if (currentUser.name) {
+      const nameParts = currentUser.name.split(" ");
+      if (nameParts.length >= 2) {
+        return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+      }
+      return nameParts[0][0].toUpperCase();
     }
-    return nameParts[0][0].toUpperCase();
+    
+    // If no name in user object, try first_name and last_name
+    const firstName = currentUser.first_name || "";
+    const lastName = currentUser.last_name || "";
+    
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    } else if (firstName) {
+      return firstName[0].toUpperCase();
+    } else if (lastName) {
+      return lastName[0].toUpperCase();
+    }
+    
+    return "?";
   };
 
   const getUserRoleBadge = () => {
@@ -124,6 +149,12 @@ const Profile = () => {
     );
   }
 
+  // Determine the email to display
+  const displayEmail = currentUser.email;
+  
+  // Get user name for display
+  const displayName = currentUser.name || `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'User';
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -143,7 +174,7 @@ const Profile = () => {
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex flex-col items-center">
                       <Avatar className="h-24 w-24 mb-4">
-                        <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
+                        <AvatarImage src={currentUser.imageUrl || currentUser.avatar_url} alt={displayName} />
                         <AvatarFallback className="text-xl">{getUserInitials()}</AvatarFallback>
                       </Avatar>
                       {getUserRoleBadge()}
@@ -178,11 +209,11 @@ const Profile = () => {
                         <>
                           <div className="flex items-center gap-2">
                             <UserIcon className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{currentUser.name}</span>
+                            <span className="font-medium">{displayName}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Mail className="h-4 w-4 text-muted-foreground" />
-                            <span>{currentUser.email}</span>
+                            <span>{displayEmail}</span>
                           </div>
                         </>
                       )}

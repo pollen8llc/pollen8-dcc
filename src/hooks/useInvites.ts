@@ -37,10 +37,19 @@ export const useInvites = () => {
 
     setIsLoading(true);
     try {
-      // Convert maxUses to number if it's a string
-      const maxUsesNum = maxUses !== undefined ? 
-        (typeof maxUses === 'string' ? parseInt(maxUses, 10) || undefined : maxUses) : 
-        undefined;
+      // Convert maxUses to number if it's a string and not empty
+      let maxUsesNum: number | undefined = undefined;
+      
+      if (maxUses !== undefined && maxUses !== "") {
+        if (typeof maxUses === 'string') {
+          const parsed = parseInt(maxUses, 10);
+          if (!isNaN(parsed)) {
+            maxUsesNum = parsed;
+          }
+        } else {
+          maxUsesNum = maxUses;
+        }
+      }
         
       const invite = await createInvite(currentUser.id, communityId, maxUsesNum, expiresAt);
 

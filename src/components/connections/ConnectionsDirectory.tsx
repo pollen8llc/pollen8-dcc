@@ -35,6 +35,7 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
   const [currentDepth, setCurrentDepth] = useState<number>(1);
   const [search, setSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isLoading = profilesLoading || connectionsLoading;
@@ -42,8 +43,14 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
   // Load connections and profiles on mount
   useEffect(() => {
     const loadData = async () => {
-      await getConnectionsByUser(maxDepth);
-      await handleLoadProfiles();
+      try {
+        setError(null);
+        await getConnectionsByUser(maxDepth);
+        await handleLoadProfiles();
+      } catch (err) {
+        console.error("Error loading connections data:", err);
+        setError("Failed to load connections. Please try again later.");
+      }
     };
     
     loadData();
@@ -60,22 +67,37 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
   }, [search, locationFilter, profiles]);
 
   const handleLoadProfiles = async () => {
-    const loadedProfiles = await getConnectedProfiles(currentDepth, {
-      communityId,
-      search: "",
-      location: "",
-    });
-    
-    setProfiles(loadedProfiles);
-    return loadedProfiles;
+    try {
+      setError(null);
+      const loadedProfiles = await getConnectedProfiles(currentDepth, {
+        communityId,
+        search: "",
+        location: "",
+      });
+      
+      setProfiles(Array.isArray(loadedProfiles) ? loadedProfiles : []);
+      return loadedProfiles;
+    } catch (err) {
+      console.error("Error loading profiles:", err);
+      setError("Failed to load connection profiles.");
+      setProfiles([]);
+      return [];
+    }
   };
 
   const filterProfiles = () => {
+    if (!profiles || profiles.length === 0) {
+      setFilteredProfiles([]);
+      return;
+    }
+    
     let filtered = [...profiles];
     
     if (search) {
       const searchLower = search.toLowerCase();
       filtered = filtered.filter(profile => {
+        if (!profile) return false;
+        
         const name = `${profile.first_name || ""} ${profile.last_name || ""}`.toLowerCase();
         const bio = (profile.bio || "").toLowerCase();
         const interests = profile.interests?.map(i => i.toLowerCase()) || [];
@@ -90,7 +112,7 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
     
     if (locationFilter) {
       filtered = filtered.filter(profile => 
-        profile.location && profile.location.toLowerCase().includes(locationFilter.toLowerCase())
+        profile && profile.location && profile.location.toLowerCase().includes(locationFilter.toLowerCase())
       );
     }
     
@@ -105,14 +127,30 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
   };
 
   const isConnectedWith = (profileId: string) => {
-    return connections.some(conn => 
+    return connections && connections.some(conn => 
       (conn.inviter_id === profileId || conn.invitee_id === profileId) && 
       conn.connection_depth === 1
     );
   };
 
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-500 mb-4">{error}</p>
+        <Button onClick={handleLoadProfiles}>Retry Loading</Button>
+      </div>
+    );
+  }
+
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return (
+      <div className="flex justify-center p-8">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="mt-4 text-lg">Loading connections...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -136,7 +174,6 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">All locations</SelectItem>
-            {/* We would dynamically populate this from available locations */}
             <SelectItem value="New York">New York</SelectItem>
             <SelectItem value="San Francisco">San Francisco</SelectItem>
             <SelectItem value="Remote">Remote</SelectItem>
