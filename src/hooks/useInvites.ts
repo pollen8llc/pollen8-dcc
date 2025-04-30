@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -50,13 +50,6 @@ export const useInvites = () => {
           maxUsesNum = maxUses as number;
         }
       }
-        
-      console.log("Creating invite with:", {
-        creatorId: currentUser.id,
-        communityId,
-        maxUses: maxUsesNum,
-        expiresAt
-      });
       
       const invite = await createInvite(currentUser.id, communityId, maxUsesNum, expiresAt);
 
@@ -70,18 +63,13 @@ export const useInvites = () => {
         setInvites(prev => [invite, ...prev]);
         return invite;
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to create invite",
-          variant: "destructive",
-        });
-        return null;
+        throw new Error("Failed to create invite");
       }
     } catch (error) {
       console.error("Error in handleCreateInvite:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
       return null;
@@ -93,16 +81,14 @@ export const useInvites = () => {
   /**
    * Load invites created by the current user
    */
-  const loadUserInvites = async (): Promise<InviteData[]> => {
+  const loadUserInvites = useCallback(async (): Promise<InviteData[]> => {
     if (!currentUser) {
       return [];
     }
 
     setIsLoading(true);
     try {
-      console.log("Loading invites for user:", currentUser.id);
       const loadedInvites = await getInvitesByCreator(currentUser.id);
-      console.log("Loaded invites:", loadedInvites);
       setInvites(Array.isArray(loadedInvites) ? loadedInvites : []);
       return Array.isArray(loadedInvites) ? loadedInvites : [];
     } catch (error) {
@@ -112,16 +98,17 @@ export const useInvites = () => {
         description: "Failed to load invites",
         variant: "destructive",
       });
-      return [];
+      setInvites([]);
+      throw error; // Re-throw to allow component-level error handling
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentUser, toast]);
 
   /**
    * Get invite by code
    */
-  const getInvite = async (code: string): Promise<InviteData | null> => {
+  const getInvite = useCallback(async (code: string): Promise<InviteData | null> => {
     if (!code) {
       console.error("No code provided to getInvite");
       return null;
@@ -129,9 +116,7 @@ export const useInvites = () => {
     
     setIsLoading(true);
     try {
-      console.log("Fetching invite with code:", code);
       const invite = await getInviteByCode(code);
-      console.log("Invite result:", invite);
       setCurrentInvite(invite);
       return invite;
     } catch (error) {
@@ -145,20 +130,18 @@ export const useInvites = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   /**
    * Invalidate an invite
    */
   const handleInvalidateInvite = async (inviteId: string): Promise<boolean> => {
     if (!inviteId) {
-      console.error("No inviteId provided to handleInvalidateInvite");
-      return false;
+      throw new Error("No inviteId provided");
     }
     
     setIsLoading(true);
     try {
-      console.log("Invalidating invite:", inviteId);
       const success = await invalidateInvite(inviteId);
       
       if (success) {
@@ -171,27 +154,13 @@ export const useInvites = () => {
           )
         );
         
-        toast({
-          title: "Success",
-          description: "Invite invalidated successfully",
-        });
+        return true;
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to invalidate invite",
-          variant: "destructive",
-        });
+        throw new Error("Failed to invalidate invite");
       }
-      
-      return success;
     } catch (error) {
       console.error("Error in handleInvalidateInvite:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-      return false;
+      throw error; // Re-throw for component-level handling
     } finally {
       setIsLoading(false);
     }
@@ -211,13 +180,11 @@ export const useInvites = () => {
     }
 
     if (!code) {
-      console.error("No code provided to useInvite");
-      return null;
+      throw new Error("No code provided");
     }
 
     setIsLoading(true);
     try {
-      console.log("Using invite with code:", code);
       const inviteId = await recordInviteUse(code, currentUser.id);
       
       if (inviteId) {
@@ -226,11 +193,7 @@ export const useInvites = () => {
           description: "Invite used successfully",
         });
       } else {
-        toast({
-          title: "Error",
-          description: "Invalid or expired invite",
-          variant: "destructive",
-        });
+        throw new Error("Invalid or expired invite");
       }
       
       return inviteId;
@@ -238,7 +201,7 @@ export const useInvites = () => {
       console.error("Error in useInvite:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
       return null;

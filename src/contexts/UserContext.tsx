@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { User, UserRole } from "@/models/types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,22 +26,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log("UserContext rendering, current user:", currentUser?.name, "role:", currentUser?.role);
-  }, [currentUser]);
-
   // Check for initial refresh flag - this handles the case when the user's own role was changed
   useEffect(() => {
     const shouldRefresh = localStorage.getItem('should_refresh_user_role');
     if (shouldRefresh === 'true' && currentUser) {
       console.log("Initial role refresh needed...");
       
+      // Clear the flag FIRST to prevent infinite loops
+      localStorage.removeItem('should_refresh_user_role');
+      
       // Force invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
       
-      // Clear the flag and refresh user data
-      localStorage.removeItem('should_refresh_user_role');
+      // Refresh user data
       refreshUser().then(() => {
         // Show toast notification about role change
         toast({
@@ -57,7 +55,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Force refresh user data when role might have changed
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'should_refresh_user_role') {
+      if (event.key === 'should_refresh_user_role' && event.newValue === 'true') {
+        // Clear the flag FIRST to prevent infinite loops
+        localStorage.removeItem('should_refresh_user_role');
+        
         console.log("User role change detected, refreshing...");
         
         // Force invalidate relevant queries
@@ -90,7 +91,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Call the auth logout function
       await authLogout();
       
-      // Show success toast even if there's a backend error since local state is cleared
+      // Show success toast
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account",
@@ -112,16 +113,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    currentUser, 
+    isLoading,
+    hasPermission: checkPermission, // Use the sync version for UI rendering
+    checkPermissionAsync: hasPermission, // Expose the async version for data operations
+    isOrganizer,
+    logout: handleLogout,
+    refreshUser
+  }), [currentUser, isLoading, checkPermission, hasPermission, isOrganizer, handleLogout, refreshUser]);
+
   return (
-    <UserContext.Provider value={{ 
-      currentUser, 
-      isLoading,
-      hasPermission: checkPermission, // Use the sync version for UI rendering
-      checkPermissionAsync: hasPermission, // Expose the async version for data operations
-      isOrganizer,
-      logout: handleLogout,
-      refreshUser
-    }}>
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );

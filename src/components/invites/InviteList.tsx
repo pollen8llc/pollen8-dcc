@@ -4,24 +4,30 @@ import { useInvites } from '@/hooks/useInvites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clipboard, Link2, ExternalLink, Eye, EyeOff } from 'lucide-react';
+import { Clipboard, Link2, ExternalLink, EyeOff, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { InviteData } from '@/services/inviteService';
 
 const InviteList: React.FC = () => {
   const { invites, getInvitesByCreator, invalidateInvite, isLoading } = useInvites();
-  const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [isInvalidating, setIsInvalidating] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const loadInvites = async () => {
-      await getInvitesByCreator();
-      setMounted(true);
+      try {
+        await getInvitesByCreator();
+        setError(null); // Clear any previous errors
+      } catch (err) {
+        console.error("Failed to load invites:", err);
+        setError("Failed to load invites. Please try again later.");
+      }
     };
     
     loadInvites();
+    // Only depend on getInvitesByCreator to avoid unnecessary refetching
   }, [getInvitesByCreator]);
 
   const copyToClipboard = (text: string, description: string) => {
@@ -39,6 +45,17 @@ const InviteList: React.FC = () => {
     
     try {
       await invalidateInvite(invite.id);
+      toast({
+        title: "Success",
+        description: "Invite invalidated successfully"
+      });
+    } catch (err) {
+      console.error("Failed to invalidate invite:", err);
+      toast({
+        title: "Error",
+        description: "Failed to invalidate invite. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsInvalidating(prev => ({ ...prev, [invite.id as string]: false }));
     }
@@ -48,7 +65,30 @@ const InviteList: React.FC = () => {
     return `${window.location.origin}/invite/${invite.code}`;
   };
 
-  if (isLoading && !mounted) {
+  if (error) {
+    return (
+      <Card className="bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+            <AlertCircle className="h-5 w-5" />
+            Error Loading Invites
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>{error}</p>
+          <Button 
+            variant="outline" 
+            onClick={() => getInvitesByCreator()} 
+            className="mt-2"
+          >
+            Try Again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-40">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
