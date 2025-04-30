@@ -1,95 +1,129 @@
-import React, { useEffect, useState } from "react";
-import { useUser } from "@/contexts/UserContext";
-import { Navigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import ConnectionsDirectory from "@/components/connections/ConnectionsDirectory";
+
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useConnections } from "@/hooks/useConnections";
+import { User } from "@/models/types";
+import { Loader2, UserPlus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2 } from "lucide-react";
 
-const ConnectionsPage: React.FC = () => {
-  const { currentUser, isLoading } = useUser();
-  const [error, setError] = useState<string | null>(null);
-  const [isRetrying, setIsRetrying] = useState(false);
+interface ConnectionsDirectoryProps {
+  maxDepth: number;
+  onError: (errorMsg: string) => void;
+}
 
-  // Helper function to handle errors in ConnectionsDirectory
-  const handleError = (errorMsg: string) => {
-    setError(errorMsg);
-  };
+const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({ maxDepth, onError }) => {
+  const { isLoading, connections, getConnectionsByUser } = useConnections();
+  const [connectionGraph, setConnectionGraph] = useState<{ nodes: string[], edges: any[] }>({ nodes: [], edges: [] });
+  const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
 
-  // Retry loading connections
-  const handleRetry = () => {
-    setIsRetrying(true);
-    setError(null);
-    // Force re-render ConnectionsDirectory
-    setTimeout(() => setIsRetrying(false), 100);
-  };
+  useEffect(() => {
+    const loadConnections = async () => {
+      try {
+        setIsInitialLoading(true);
+        const result = await getConnectionsByUser(maxDepth);
+        console.log("Loaded connections:", result);
+        
+        // For now just store the raw connections data
+        // In a full implementation, we would transform this data
+        // into a user-friendly format with actual user details
+        
+        setIsInitialLoading(false);
+      } catch (error) {
+        console.error("Error loading connections:", error);
+        onError("Failed to load your connections. Please try again later.");
+        setIsInitialLoading(false);
+      }
+    };
 
-  // Show loading state while checking auth
-  if (isLoading) {
+    loadConnections();
+  }, [getConnectionsByUser, maxDepth, onError]);
+
+  if (isInitialLoading) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center min-h-[50vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-lg">Loading...</p>
-            </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Loading Connections
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
-  // Redirect if user is not authenticated
-  if (!currentUser) {
-    return <Navigate to="/auth?redirectTo=/connections" replace />;
+  if (connections.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            No Connections Yet
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+          <Users className="h-16 w-16 opacity-20 mb-4" />
+          <h3 className="font-semibold text-lg">You don't have any connections yet</h3>
+          <p className="text-muted-foreground mt-1 max-w-md">
+            Your network will grow as you connect with other members of the community.
+          </p>
+          <Button className="mt-6 flex items-center gap-2">
+            <UserPlus className="h-4 w-4" />
+            Find People to Connect With
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">Your Connections</h1>
-          </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Your Connection Network
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            You have {connections.length} connection{connections.length !== 1 ? 's' : ''}.
+          </p>
           
-          {error ? (
-            <Card className="bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                  <AlertCircle className="h-5 w-5" />
-                  Error Loading Connections
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>{error}</p>
-                <Button 
-                  variant="outline" 
-                  onClick={handleRetry}
-                  disabled={isRetrying}
-                  className="mt-4"
-                >
-                  {isRetrying ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Retrying...
-                    </>
-                  ) : (
-                    <>Retry</>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            !isRetrying && <ConnectionsDirectory maxDepth={3} onError={handleError} />
-          )}
-        </div>
-      </div>
+          {/* Here we would implement the actual connection list with user details */}
+          {/* For now, showing a simple placeholder */}
+          <div className="space-y-4">
+            {connections.map((connection) => (
+              <div key={connection.id} className="flex items-center p-3 border rounded-md">
+                <div>
+                  <p className="font-medium">
+                    Connection #{connection.id}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {connection.connection_depth === 1 ? 'Direct connection' : `${connection.connection_depth}-degree connection`}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default ConnectionsPage;
+export default ConnectionsDirectory;
