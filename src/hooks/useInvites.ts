@@ -47,10 +47,17 @@ export const useInvites = () => {
             maxUsesNum = parsed;
           }
         } else {
-          maxUsesNum = maxUses;
+          maxUsesNum = maxUses as number;
         }
       }
         
+      console.log("Creating invite with:", {
+        creatorId: currentUser.id,
+        communityId,
+        maxUses: maxUsesNum,
+        expiresAt
+      });
+      
       const invite = await createInvite(currentUser.id, communityId, maxUsesNum, expiresAt);
 
       if (invite) {
@@ -93,9 +100,11 @@ export const useInvites = () => {
 
     setIsLoading(true);
     try {
+      console.log("Loading invites for user:", currentUser.id);
       const loadedInvites = await getInvitesByCreator(currentUser.id);
-      setInvites(loadedInvites);
-      return loadedInvites;
+      console.log("Loaded invites:", loadedInvites);
+      setInvites(Array.isArray(loadedInvites) ? loadedInvites : []);
+      return Array.isArray(loadedInvites) ? loadedInvites : [];
     } catch (error) {
       console.error("Error in loadUserInvites:", error);
       toast({
@@ -113,9 +122,16 @@ export const useInvites = () => {
    * Get invite by code
    */
   const getInvite = async (code: string): Promise<InviteData | null> => {
+    if (!code) {
+      console.error("No code provided to getInvite");
+      return null;
+    }
+    
     setIsLoading(true);
     try {
+      console.log("Fetching invite with code:", code);
       const invite = await getInviteByCode(code);
+      console.log("Invite result:", invite);
       setCurrentInvite(invite);
       return invite;
     } catch (error) {
@@ -135,8 +151,14 @@ export const useInvites = () => {
    * Invalidate an invite
    */
   const handleInvalidateInvite = async (inviteId: string): Promise<boolean> => {
+    if (!inviteId) {
+      console.error("No inviteId provided to handleInvalidateInvite");
+      return false;
+    }
+    
     setIsLoading(true);
     try {
+      console.log("Invalidating invite:", inviteId);
       const success = await invalidateInvite(inviteId);
       
       if (success) {
@@ -188,8 +210,14 @@ export const useInvites = () => {
       return null;
     }
 
+    if (!code) {
+      console.error("No code provided to useInvite");
+      return null;
+    }
+
     setIsLoading(true);
     try {
+      console.log("Using invite with code:", code);
       const inviteId = await recordInviteUse(code, currentUser.id);
       
       if (inviteId) {

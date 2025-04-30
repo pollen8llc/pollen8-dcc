@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import Navbar from "@/components/Navbar";
 import AuthLayout from "@/components/auth/AuthLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { supabase } from "@/integrations/supabase/client";
 
 const InvitePage: React.FC = () => {
   const { code } = useParams<{ code: string }>();
@@ -18,7 +19,7 @@ const InvitePage: React.FC = () => {
   const [isInvalid, setIsInvalid] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { currentUser } = useUser();
+  const { currentUser, refreshUser } = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -34,6 +35,7 @@ const InvitePage: React.FC = () => {
 
       try {
         setError(null);
+        console.log("Fetching invite with code/linkId:", code);
         let inviteData: InviteData | null = null;
         
         // First try to look up by code
@@ -41,12 +43,21 @@ const InvitePage: React.FC = () => {
         
         // If not found, try by link ID
         if (!inviteData) {
+          console.log("Invite not found by code, trying link ID");
           inviteData = await getInviteByLinkId(code);
         }
         
-        if (!inviteData || !inviteData.is_active) {
+        console.log("Invite data:", inviteData);
+        
+        if (!inviteData) {
           setIsInvalid(true);
-          setError("This invite is invalid or has been deactivated");
+          setError("This invite code is invalid or does not exist");
+          return;
+        }
+        
+        if (!inviteData.is_active) {
+          setIsInvalid(true);
+          setError("This invite has been deactivated");
           return;
         }
         
@@ -78,15 +89,22 @@ const InvitePage: React.FC = () => {
   }, [code]);
 
   const acceptInvite = async () => {
-    if (!currentUser || !invite) return;
+    if (!currentUser || !invite || !invite.code) {
+      setError("Unable to accept invite. Please try again.");
+      return;
+    }
     
     setIsAccepting(true);
     setError(null);
     
     try {
+      console.log("Accepting invite with code:", invite.code);
       const inviteId = await recordInviteUse(invite.code, currentUser.id);
       
       if (inviteId) {
+        // Refresh user data to get updated connections
+        await refreshUser();
+        
         toast({
           title: "Success",
           description: "You've successfully accepted the invite!",
@@ -126,6 +144,16 @@ const InvitePage: React.FC = () => {
     }
     navigate(`/auth?redirectTo=/invite/${code}`);
   };
+
+  // Check session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      console.log("Current session:", data.session ? "Active" : "None");
+    };
+    
+    checkSession();
+  }, []);
 
   if (isLoading) {
     return (

@@ -1,289 +1,158 @@
-import React, { useEffect, useState } from "react";
-import { useInvites } from "@/hooks/useInvites";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { format, formatDistanceToNow } from "date-fns";
-import { Copy, ExternalLink, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { InviteData } from "@/services/inviteService";
-import { Badge } from "@/components/ui/badge";
 
-const InviteListItem: React.FC<{
-  invite: InviteData;
-  onInvalidate: (id: string) => Promise<void>;
-}> = ({ invite, onInvalidate }) => {
-  const { toast } = useToast();
-  const baseUrl = window.location.origin;
-  const inviteLink = `${baseUrl}/invite/${invite.link_id}`;
+import React, { useEffect, useState } from 'react';
+import { useInvites } from '@/hooks/useInvites';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Clipboard, Link2, ExternalLink, Eye, EyeOff } from 'lucide-react';
+import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+import { InviteData } from '@/services/inviteService';
 
-  const copyToClipboard = (text: string, type: "code" | "link") => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied!",
-      description: `${
-        type === "code" ? "Invite code" : "Invite link"
-      } copied to clipboard`,
-    });
-  };
-
-  const isExpired = invite.expires_at && new Date(invite.expires_at) < new Date();
-  const isMaxedOut = invite.max_uses !== null && invite.used_count >= invite.max_uses;
-  const isInactive = !invite.is_active || isExpired || isMaxedOut;
-
-  const formatDate = (date: string) => {
-    try {
-      return format(new Date(date), "PPP");
-    } catch (e) {
-      return date;
-    }
-  };
-
-  const getStatusBadge = () => {
-    if (!invite.is_active) {
-      return <Badge variant="destructive">Invalidated</Badge>;
-    }
-    if (isExpired) {
-      return <Badge variant="destructive">Expired</Badge>;
-    }
-    if (isMaxedOut) {
-      return <Badge variant="destructive">Maxed Out</Badge>;
-    }
-    return <Badge variant="secondary">Active</Badge>;
-  };
-
-  return (
-    <Card className={isInactive ? "opacity-60" : ""}>
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg">Invite {invite.code}</CardTitle>
-            <CardDescription>
-              Created {formatDistanceToNow(new Date(invite.created_at), { addSuffix: true })}
-            </CardDescription>
-          </div>
-          <div>{getStatusBadge()}</div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium">Uses</p>
-              <p>
-                {invite.used_count} / {invite.max_uses === null ? "∞" : invite.max_uses}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Expires</p>
-              <p>
-                {invite.expires_at
-                  ? formatDate(invite.expires_at)
-                  : "Never"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Code</span>
-              <div className="flex items-center">
-                <span className="text-sm font-mono mr-2">{invite.code}</span>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => copyToClipboard(invite.code, "code")}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Link</span>
-              <div className="flex items-center">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="gap-1 text-xs"
-                  onClick={() => window.open(inviteLink, "_blank")}
-                >
-                  View <ExternalLink className="h-3 w-3" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => copyToClipboard(inviteLink, "link")}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <div>
-          {invite.community_id && (
-            <Badge variant="outline">Community Specific</Badge>
-          )}
-        </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="destructive" size="sm" disabled={isInactive}>
-              <Trash2 className="h-4 w-4 mr-1" /> Invalidate
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invalidate Invite</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. The invite will no longer work.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {}}>
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => onInvalidate(invite.id!)}
-              >
-                Invalidate
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </CardFooter>
-    </Card>
-  );
-};
-
-interface InviteListProps {
-  communityId?: string;
-}
-
-const InviteList: React.FC<InviteListProps> = ({ communityId }) => {
+const InviteList: React.FC = () => {
   const { invites, getInvitesByCreator, invalidateInvite, isLoading } = useInvites();
+  const [mounted, setMounted] = useState(false);
   const { toast } = useToast();
-  const [filteredInvites, setFilteredInvites] = useState<InviteData[]>([]);
-  const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
+  const [isInvalidating, setIsInvalidating] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const loadInvites = async () => {
       await getInvitesByCreator();
+      setMounted(true);
     };
-
+    
     loadInvites();
   }, [getInvitesByCreator]);
 
-  useEffect(() => {
-    // Filter invites by community ID if provided
-    let filtered = [...invites];
-    
-    if (communityId) {
-      filtered = filtered.filter(invite => invite.community_id === communityId);
-    }
-    
-    // Apply active/inactive filter
-    if (filter === "active") {
-      filtered = filtered.filter(invite => {
-        const isExpired = invite.expires_at && new Date(invite.expires_at) < new Date();
-        const isMaxedOut = invite.max_uses !== null && invite.used_count >= invite.max_uses;
-        return invite.is_active && !isExpired && !isMaxedOut;
-      });
-    } else if (filter === "inactive") {
-      filtered = filtered.filter(invite => {
-        const isExpired = invite.expires_at && new Date(invite.expires_at) < new Date();
-        const isMaxedOut = invite.max_uses !== null && invite.used_count >= invite.max_uses;
-        return !invite.is_active || isExpired || isMaxedOut;
-      });
-    }
-    
-    setFilteredInvites(filtered);
-  }, [invites, communityId, filter]);
+  const copyToClipboard = (text: string, description: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: 'Copied to clipboard',
+      description,
+    });
+  };
 
-  const handleInvalidate = async (id: string) => {
-    const success = await invalidateInvite(id);
-    if (success) {
-      toast({
-        title: "Success",
-        description: "Invite has been invalidated",
-      });
+  const handleInvalidateInvite = async (invite: InviteData) => {
+    if (!invite.id) return;
+    
+    setIsInvalidating(prev => ({ ...prev, [invite.id as string]: true }));
+    
+    try {
+      await invalidateInvite(invite.id);
+    } finally {
+      setIsInvalidating(prev => ({ ...prev, [invite.id as string]: false }));
     }
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+  const getInviteUrl = (invite: InviteData): string => {
+    return `${window.location.origin}/invite/${invite.code}`;
+  };
+
+  if (isLoading && !mounted) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!invites || invites.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>No Invites</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">You haven't created any invites yet. Use the "Create Invite" button to get started.</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Your Invites</h2>
-        <div className="flex gap-2">
-          <Button
-            variant={filter === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter("all")}
-          >
-            All
-          </Button>
-          <Button
-            variant={filter === "active" ? "default" : "outline"}
-            size="sm" 
-            onClick={() => setFilter("active")}
-          >
-            Active
-          </Button>
-          <Button
-            variant={filter === "inactive" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter("inactive")}
-          >
-            Inactive
-          </Button>
-        </div>
-      </div>
-
-      {filteredInvites.length === 0 ? (
-        <div className="text-center p-8 border rounded-lg">
-          <p className="text-muted-foreground">No invites found</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredInvites.map((invite) => (
-            <InviteListItem
-              key={invite.id}
-              invite={invite}
-              onInvalidate={handleInvalidate}
-            />
-          ))}
-        </div>
-      )}
+    <div className="space-y-4">
+      {invites.map((invite) => (
+        <Card key={invite.id} className={!invite.is_active ? 'opacity-70' : ''}>
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">Invite {invite.code}</CardTitle>
+                {!invite.is_active && <Badge variant="outline">Inactive</Badge>}
+                {invite.is_active && invite.expires_at && new Date(invite.expires_at) < new Date() && (
+                  <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">Expired</Badge>
+                )}
+                {invite.is_active && invite.max_uses && invite.used_count >= invite.max_uses && (
+                  <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">Reached Limit</Badge>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => copyToClipboard(invite.code, 'Invite code copied')}
+                  title="Copy invite code"
+                >
+                  <Clipboard className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => copyToClipboard(getInviteUrl(invite), 'Invite link copied')}
+                  title="Copy invite link"
+                >
+                  <Link2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => window.open(getInviteUrl(invite), '_blank')}
+                  title="Open invite link"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Created</p>
+                <p>{invite.created_at ? format(new Date(invite.created_at), 'PP') : 'Unknown'}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Expires</p>
+                <p>{invite.expires_at ? format(new Date(invite.expires_at), 'PP') : 'Never'}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Usage</p>
+                <p>
+                  {invite.used_count} / {invite.max_uses ?? '∞'}
+                </p>
+              </div>
+            </div>
+            
+            {invite.is_active && (
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleInvalidateInvite(invite)}
+                  disabled={isInvalidating[invite.id as string]}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  {isInvalidating[invite.id as string] ? (
+                    <>Processing...</>
+                  ) : (
+                    <>
+                      <EyeOff className="h-3 w-3 mr-1" /> Invalidate
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 };

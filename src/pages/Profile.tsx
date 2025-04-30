@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { updateUserProfile } from "@/repositories/userRepository";
 
 const Profile = () => {
   const { currentUser, refreshUser, isLoading: userLoading } = useUser();
@@ -22,31 +23,25 @@ const Profile = () => {
   const [profileImage, setProfileImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Update form values when user data is loaded
   useEffect(() => {
     if (currentUser) {
-      // Set the name from the user object
       setProfileName(currentUser.name || "");
-      
-      // Set the image URL from the user object
       setProfileImage(currentUser.imageUrl || "");
     }
   }, [currentUser]);
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
-    if (!currentUser) return "?";
+    if (!currentUser || !currentUser.name) return "?";
     
-    if (currentUser.name) {
-      const nameParts = currentUser.name.split(" ");
-      if (nameParts.length >= 2) {
-        return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
-      }
-      return nameParts[0][0].toUpperCase();
+    const nameParts = currentUser.name.split(" ");
+    if (nameParts.length >= 2) {
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
     }
-    
-    return "?";
+    return nameParts[0][0].toUpperCase();
   };
 
   const getUserRoleBadge = () => {
@@ -68,22 +63,39 @@ const Profile = () => {
     if (!currentUser) return;
     
     setIsSubmitting(true);
+    setError(null);
+    
     try {
-      // This is a placeholder for actual profile update logic
-      // In a real implementation, you would call a service method
+      // Prepare the data to update based on our fields
+      const updateData = {
+        first_name: profileName.split(' ')[0] || '',
+        last_name: profileName.split(' ').slice(1).join(' ') || '',
+        avatar_url: profileImage
+      };
+
+      // Call the repository function to update the profile
+      const result = await updateUserProfile(currentUser.id, updateData);
       
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
-      
-      await refreshUser();
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully",
-      });
-      
-      setIsEditing(false);
+      if (result) {
+        await refreshUser();
+        
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been updated successfully",
+        });
+        
+        setIsEditing(false);
+      } else {
+        setError("Failed to update profile. Please try again.");
+        toast({
+          title: "Error updating profile",
+          description: "There was a problem updating your profile. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
+      setError("An unexpected error occurred. Please try again.");
       toast({
         title: "Error updating profile",
         description: "There was a problem updating your profile. Please try again.",
@@ -153,6 +165,11 @@ const Profile = () => {
                   <CardDescription>Manage your personal information</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  {error && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-md text-red-600">
+                      {error}
+                    </div>
+                  )}
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex flex-col items-center">
                       <Avatar className="h-24 w-24 mb-4">

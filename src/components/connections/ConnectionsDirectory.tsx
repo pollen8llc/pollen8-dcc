@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ExtendedProfile } from "@/services/profileService";
-import { ConnectionData } from "@/services/connectionService";
-import { Search, Users, UsersRound } from "lucide-react";
+import { Search, Users, UsersRound, RefreshCw } from "lucide-react";
 
 interface ConnectionsDirectoryProps {
   maxDepth?: number;
@@ -29,24 +28,36 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
   communityId,
 }) => {
   const { getConnectedProfiles, isLoading: profilesLoading } = useProfiles();
-  const { connections, getConnectionsByUser, getConnectionDepth, isLoading: connectionsLoading } = useConnections();
+  const { getConnectionsByUser, isLoading: connectionsLoading } = useConnections();
   const [profiles, setProfiles] = useState<ExtendedProfile[]>([]);
   const [filteredProfiles, setFilteredProfiles] = useState<ExtendedProfile[]>([]);
   const [currentDepth, setCurrentDepth] = useState<number>(1);
   const [search, setSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
   const { toast } = useToast();
 
   const isLoading = profilesLoading || connectionsLoading;
 
-  // Load connections and profiles on mount
+  // Load connections and profiles on mount or when fetch is triggered
   useEffect(() => {
     const loadData = async () => {
       try {
         setError(null);
-        await getConnectionsByUser(maxDepth);
-        await handleLoadProfiles();
+        
+        // Get the connections first
+        const connections = await getConnectionsByUser(maxDepth);
+        console.log("Loaded connections:", connections);
+        
+        if (connections && connections.length > 0) {
+          // Now fetch the profiles
+          await handleLoadProfiles();
+        } else {
+          // No connections, set empty profiles
+          setProfiles([]);
+          setFilteredProfiles([]);
+        }
       } catch (err) {
         console.error("Error loading connections data:", err);
         setError("Failed to load connections. Please try again later.");
@@ -54,12 +65,7 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
     };
     
     loadData();
-  }, [getConnectionsByUser, maxDepth]);
-
-  // Handle depth changes
-  useEffect(() => {
-    handleLoadProfiles();
-  }, [currentDepth]);
+  }, [fetchTrigger, currentDepth, maxDepth, getConnectionsByUser]);
 
   // Filter profiles on search or location change
   useEffect(() => {
@@ -75,8 +81,16 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
         location: "",
       });
       
-      setProfiles(Array.isArray(loadedProfiles) ? loadedProfiles : []);
-      return loadedProfiles;
+      console.log("Loaded profiles:", loadedProfiles);
+      
+      if (Array.isArray(loadedProfiles)) {
+        setProfiles(loadedProfiles);
+        return loadedProfiles;
+      } else {
+        console.error("getConnectedProfiles did not return an array:", loadedProfiles);
+        setProfiles([]);
+        return [];
+      }
     } catch (err) {
       console.error("Error loading profiles:", err);
       setError("Failed to load connection profiles.");
@@ -126,18 +140,19 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
     });
   };
 
-  const isConnectedWith = (profileId: string) => {
-    return connections && connections.some(conn => 
-      (conn.inviter_id === profileId || conn.invitee_id === profileId) && 
-      conn.connection_depth === 1
-    );
+  const refreshData = () => {
+    setFetchTrigger(prev => prev + 1);
+    toast({
+      title: "Refreshing data",
+      description: "Reloading your connections and profiles..."
+    });
   };
 
   if (error) {
     return (
       <div className="p-8 text-center">
         <p className="text-red-500 mb-4">{error}</p>
-        <Button onClick={handleLoadProfiles}>Retry Loading</Button>
+        <Button onClick={refreshData}>Try Again</Button>
       </div>
     );
   }
@@ -155,7 +170,13 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Your Connections</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Your Connections</h2>
+        <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-1">
+          <RefreshCw className="h-4 w-4 mr-1" />
+          Refresh
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4">
         <div className="relative">
@@ -176,49 +197,44 @@ const ConnectionsDirectory: React.FC<ConnectionsDirectoryProps> = ({
             <SelectItem value="">All locations</SelectItem>
             <SelectItem value="New York">New York</SelectItem>
             <SelectItem value="San Francisco">San Francisco</SelectItem>
+            <SelectItem value="London">London</SelectItem>
+            <SelectItem value="Berlin">Berlin</SelectItem>
             <SelectItem value="Remote">Remote</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <Tabs defaultValue="1" value={currentDepth.toString()} onValueChange={(v) => setCurrentDepth(parseInt(v, 10))}>
-        <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="1" className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            <span>1st Connections</span>
-          </TabsTrigger>
-          <TabsTrigger value="2" className="flex items-center gap-1">
-            <UsersRound className="h-4 w-4" />
-            <span>2nd Connections</span>
-          </TabsTrigger>
-          <TabsTrigger value="3" className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            <span>3rd Connections</span>
-          </TabsTrigger>
-        </TabsList>
-
-        {[1, 2, 3].map((depth) => (
-          <TabsContent key={depth} value={depth.toString()}>
-            {filteredProfiles.length === 0 ? (
-              <div className="text-center p-8 border rounded-lg">
-                <p className="text-muted-foreground">No connections found at this level</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredProfiles.map((profile) => (
-                  <ProfileCard
-                    key={profile.id}
-                    profile={profile}
-                    connectionDepth={depth}
-                    onConnect={depth > 1 ? () => handleConnect(profile.id) : undefined}
-                    isConnected={depth === 1 || isConnectedWith(profile.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+      <div className="mt-4">
+        <Tabs defaultValue="1" onValueChange={(value) => setCurrentDepth(parseInt(value))}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="1">1st Connections</TabsTrigger>
+            <TabsTrigger value="2">2nd Connections</TabsTrigger>
+            <TabsTrigger value="3">3rd Connections</TabsTrigger>
+          </TabsList>
+          
+          {[1, 2, 3].map(depth => (
+            <TabsContent key={depth} value={depth.toString()}>
+              {filteredProfiles.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredProfiles.map((profile) => (
+                    profile && <ProfileCard key={profile.id} profile={profile} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Users className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <h3 className="mt-4 text-lg font-medium">No connections found</h3>
+                  <p className="text-muted-foreground mt-2">
+                    {search || locationFilter
+                      ? "Try adjusting your filters"
+                      : `You don't have any ${depth}${depth === 1 ? "st" : depth === 2 ? "nd" : "rd"} degree connections yet.`}
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
     </div>
   );
 };
