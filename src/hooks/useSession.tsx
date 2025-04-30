@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
@@ -9,17 +9,22 @@ export const useSession = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
   const initialCheckComplete = useRef(false);
+  const authStateInitialized = useRef(false);
 
   // Check for existing session on mount and subscribe to auth changes
   useEffect(() => {
     // Prevent multiple initializations
-    if (initialCheckComplete.current) return;
+    if (authStateInitialized.current) return;
+    authStateInitialized.current = true;
     
+    console.log("Setting up auth state listener");
     setIsLoading(true);
     
     // Set up auth state listener FIRST to prevent missing auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
+        console.log(`Auth event: ${event}`, newSession ? "Session exists" : "No session");
+        
         if (event === 'SIGNED_OUT') {
           console.log("User signed out, clearing session");
           setSession(null);
@@ -27,7 +32,11 @@ export const useSession = () => {
           console.log(`Auth event: ${event}`);
           setSession(newSession);
         }
-        setIsLoading(false);
+        
+        // Don't set isLoading=false until we've completed the initial check
+        if (initialCheckComplete.current) {
+          setIsLoading(false);
+        }
       }
     );
     
@@ -37,6 +46,7 @@ export const useSession = () => {
         console.log("Initializing auth state...");
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession ? "Session exists" : "No session");
+        
         setSession(initialSession);
         initialCheckComplete.current = true;
       } catch (error) {
@@ -51,12 +61,13 @@ export const useSession = () => {
 
     // Cleanup subscription on unmount
     return () => {
+      console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
   }, []);
 
   // Logout user with improved error handling
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     try {
       console.log("Logging out user...");
       
@@ -88,7 +99,7 @@ export const useSession = () => {
       // We'll still resolve the promise even on error to avoid blocking the UI
       return Promise.resolve();
     }
-  };
+  }, []);
 
   return { session, isLoading, logout };
 };

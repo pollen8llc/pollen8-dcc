@@ -35,7 +35,8 @@ const Auth = () => {
   // Check if user is authenticated and redirect if needed
   useEffect(() => {
     if (currentUser && !userLoading) {
-      navigate(redirectTo);
+      console.log("User already authenticated, redirecting to:", redirectTo);
+      navigate(redirectTo, { replace: true });
     }
   }, [currentUser, userLoading, navigate, redirectTo]);
 
@@ -57,26 +58,31 @@ const Auth = () => {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Attempting to sign in with email:", email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Sign in error:", error.message);
         setError(error.message);
         toast({
           title: "Error signing in",
           description: error.message,
           variant: "destructive",
         });
-      } else {
+      } else if (data?.user) {
+        console.log("Successfully signed in user:", data.user.id);
         toast({
           title: "Successfully signed in",
           description: "Welcome back!",
         });
-        navigate(redirectTo);
+        navigate(redirectTo, { replace: true });
       }
     } catch (error: any) {
+      console.error("Unexpected error during sign in:", error);
       setError(error.message || "An unexpected error occurred");
       toast({
         title: "Error signing in",
@@ -105,7 +111,9 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log("Attempting to sign up with email:", email);
+      
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -117,6 +125,7 @@ const Auth = () => {
       });
 
       if (error) {
+        console.error("Sign up error:", error.message);
         setError(error.message);
         toast({
           title: "Error signing up",
@@ -124,14 +133,17 @@ const Auth = () => {
           variant: "destructive",
         });
       } else {
+        console.log("Sign up successful, user:", data?.user?.id);
         toast({
           title: "Successfully signed up",
-          description: "Please check your email to confirm your account.",
+          description: "Your account has been created.",
         });
-        // Navigate to onboarding
-        navigate("/onboarding");
+        
+        // In development, we won't wait for email verification
+        navigate("/onboarding", { replace: true });
       }
     } catch (error: any) {
+      console.error("Unexpected error during sign up:", error);
       setError(error.message || "An unexpected error occurred");
       toast({
         title: "Error signing up",
@@ -156,6 +168,7 @@ const Auth = () => {
       });
       
       if (error) {
+        console.error("Google sign in error:", error.message);
         setError(error.message);
         toast({
           title: "Error signing in with Google",
@@ -164,6 +177,7 @@ const Auth = () => {
         });
       }
     } catch (error: any) {
+      console.error("Unexpected error during Google sign in:", error);
       setError(error.message || "An unexpected error occurred");
       toast({
         title: "Error signing in with Google",
@@ -174,6 +188,8 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
+  console.log("Auth page rendered, redirect target:", redirectTo);
 
   return (
     <AuthLayout title="Welcome to ECO8" subtitle="Sign in or create an account to get started">
