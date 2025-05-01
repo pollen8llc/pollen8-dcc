@@ -5,6 +5,7 @@ import { useSession } from "./useSession";
 import { useProfile } from "./useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useAuth = () => {
   const { session, isLoading: sessionLoading, logout } = useSession();

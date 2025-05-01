@@ -78,7 +78,7 @@ const ReviewCompleteStep = ({ formData }: ReviewCompleteStepProps) => {
   return (
     <div className="space-y-6">
       {hasIncompleteFields && (
-        <Alert variant="warning">
+        <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Missing Information</AlertTitle>
           <AlertDescription>
