@@ -100,7 +100,7 @@ export const useProfile = (session: Session | null) => {
         role: role,
         imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         email: profile?.email || "",
-        bio: "", // Default empty string as bio is not in the profiles table
+        bio: profile?.bio || "", // Now using bio from profile
         communities,
         managedCommunities,
         createdAt: profile?.created_at || new Date().toISOString()
@@ -162,7 +162,8 @@ export const useProfile = (session: Session | null) => {
           email: email,
           first_name: firstName,
           last_name: lastName,
-          privacy_settings: { profile_visibility: "connections" }
+          privacy_settings: { profile_visibility: "connections" },
+          profile_complete: false // Mark as incomplete so the wizard will show
         })
         .select()
         .single();

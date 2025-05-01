@@ -299,6 +299,7 @@ export type Database = {
           last_name: string | null
           location: string | null
           privacy_settings: Json
+          profile_complete: boolean | null
           social_links: Json | null
           updated_at: string
           user_id: string
@@ -315,6 +316,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           privacy_settings?: Json
+          profile_complete?: boolean | null
           social_links?: Json | null
           updated_at?: string
           user_id?: string
@@ -331,6 +333,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           privacy_settings?: Json
+          profile_complete?: boolean | null
           social_links?: Json | null
           updated_at?: string
           user_id?: string
@@ -539,6 +542,7 @@ export type Database = {
           last_name: string | null
           location: string | null
           privacy_settings: Json
+          profile_complete: boolean | null
           social_links: Json | null
           updated_at: string
           user_id: string

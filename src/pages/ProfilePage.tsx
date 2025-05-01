@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { MapPin, Lock, Globe, Twitter, Linkedin, Facebook, Instagram, Edit, UserCheck } from "lucide-react";
+import { MapPin, Lock, Globe, Twitter, Linkedin, Facebook, Instagram, Edit, UserCheck, Network } from "lucide-react";
 import { ExtendedProfile } from "@/services/profileService";
 import { formatDistanceToNow } from "date-fns";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -44,6 +44,7 @@ const ProfilePage: React.FC = () => {
   const [isPrivacyDialogOpen, setIsPrivacyDialogOpen] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsSetup, setNeedsSetup] = useState(false);
 
   const isOwnProfile = currentUser && id === currentUser.id;
   const isLoading = profileLoading || connectionLoading;
@@ -90,6 +91,11 @@ const ProfilePage: React.FC = () => {
         const profileData = await getProfileById(id);
         if (profileData) {
           setProfile(profileData);
+          
+          // Check if this is the user's own profile and it needs setup
+          if (isOwnProfile && profileData.profile_complete === false) {
+            setNeedsSetup(true);
+          }
         } else {
           setError("Profile not found");
         }
@@ -101,6 +107,13 @@ const ProfilePage: React.FC = () => {
     
     loadProfile();
   }, [id, currentUser, isOwnProfile, canViewProfile, getConnectionDepth, getProfileById]);
+  
+  // Redirect to setup wizard if profile needs setup
+  useEffect(() => {
+    if (needsSetup && isOwnProfile) {
+      navigate("/profile/setup");
+    }
+  }, [needsSetup, isOwnProfile, navigate]);
 
   const handleConnect = async () => {
     if (!currentUser || !profile) return;
@@ -149,6 +162,48 @@ const ProfilePage: React.FC = () => {
       return <Badge variant="outline" className="ml-2">3rd Connection</Badge>;
     }
     return null;
+  };
+  
+  const getPrivacyBadge = () => {
+    if (!profile || !profile.privacy_settings) {
+      return null;
+    }
+    
+    const visibility = profile.privacy_settings.profile_visibility;
+    
+    switch (visibility) {
+      case 'public':
+        return (
+          <div className="flex items-center gap-1">
+            <Globe className="h-4 w-4 text-blue-500" />
+            <span className="text-xs">Public</span>
+          </div>
+        );
+      case 'connections':
+        return (
+          <div className="flex items-center gap-1">
+            <UserCheck className="h-4 w-4 text-green-500" />
+            <span className="text-xs">Connections Only</span>
+          </div>
+        );
+      case 'connections2':
+      case 'connections3':
+        return (
+          <div className="flex items-center gap-1">
+            <Network className="h-4 w-4 text-purple-500" />
+            <span className="text-xs">Network</span>
+          </div>
+        );
+      case 'private':
+        return (
+          <div className="flex items-center gap-1">
+            <Lock className="h-4 w-4 text-red-500" />
+            <span className="text-xs">Private</span>
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   const getSocialIcon = (platform: string) => {
@@ -239,10 +294,17 @@ const ProfilePage: React.FC = () => {
               <Card>
                 <CardHeader className="flex flex-col md:flex-row justify-between items-start gap-4">
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage src={profile.avatar_url} alt={getFullName()} />
-                      <AvatarFallback>{getInitials()}</AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar className="h-24 w-24">
+                        <AvatarImage src={profile.avatar_url} alt={getFullName()} />
+                        <AvatarFallback>{getInitials()}</AvatarFallback>
+                      </Avatar>
+                      {isOwnProfile && (
+                        <div className="absolute -bottom-2 -right-2">
+                          {getPrivacyBadge()}
+                        </div>
+                      )}
+                    </div>
                     
                     <div>
                       <div className="flex items-center flex-wrap">

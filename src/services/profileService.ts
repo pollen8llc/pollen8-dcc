@@ -13,6 +13,7 @@ export interface ExtendedProfile {
   interests?: string[];
   social_links?: Record<string, string>;
   invited_by?: string;
+  profile_complete?: boolean;
   privacy_settings?: {
     profile_visibility: "public" | "connections" | "connections2" | "connections3" | "private";
   };
@@ -85,6 +86,7 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
         social_links: profileData.social_links,
         privacy_settings: privacy_settings,
         avatar_url: profileData.avatar_url,
+        profile_complete: profileData.profile_complete,
       })
       .eq('id', currentUser.id)
       .select()

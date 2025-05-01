@@ -4,11 +4,13 @@ import { User } from "@/models/types";
 import { useSession } from "./useSession";
 import { useProfile } from "./useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const useAuth = () => {
   const { session, isLoading: sessionLoading, logout } = useSession();
   const { currentUser, isLoading: profileLoading, refreshUser, createProfileIfNotExists } = useProfile(session);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Combined loading state
   const isLoading = sessionLoading || profileLoading;
@@ -16,6 +18,7 @@ export const useAuth = () => {
   // Use a ref to track initialization and prevent excessive logging
   const initialized = useRef(false);
   const profileCreationAttempted = useRef(false);
+  const profileCompletionChecked = useRef(false);
   
   // Log auth state for debugging, but only when it changes
   useEffect(() => {
@@ -56,6 +59,49 @@ export const useAuth = () => {
     checkAndCreateProfile();
   }, [session, currentUser, sessionLoading, profileLoading, createProfileIfNotExists, refreshUser]);
 
+  // Check if profile needs setup and redirect if necessary
+  useEffect(() => {
+    if (!sessionLoading && 
+        !profileLoading && 
+        currentUser && 
+        !profileCompletionChecked.current && 
+        window.location.pathname !== "/profile/setup") {
+      
+      // Get profile data to check completion status
+      const checkProfileCompletion = async () => {
+        try {
+          // Check profile completion status from Supabase
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('profile_complete')
+            .eq('id', currentUser.id)
+            .single();
+            
+          profileCompletionChecked.current = true;
+          
+          if (error) {
+            console.error("Error checking profile completion:", error);
+            return;
+          }
+          
+          // If profile is not complete, redirect to setup
+          if (data && data.profile_complete === false) {
+            console.log("Profile setup incomplete, redirecting to setup wizard");
+            toast({
+              title: "Complete your profile",
+              description: "Please complete your profile setup to continue",
+            });
+            navigate("/profile/setup");
+          }
+        } catch (err) {
+          console.error("Error in profile completion check:", err);
+        }
+      };
+      
+      checkProfileCompletion();
+    }
+  }, [currentUser, sessionLoading, profileLoading, navigate, toast]);
+  
   // Handle auth errors
   useEffect(() => {
     if (!sessionLoading && !profileLoading && session && !currentUser && profileCreationAttempted.current) {

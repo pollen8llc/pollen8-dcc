@@ -1,368 +1,305 @@
-import React, { useEffect, useState } from "react";
-import { useProfiles } from "@/hooks/useProfiles";
-import { useUser } from "@/contexts/UserContext";
+
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
-import { ExtendedProfile } from "@/services/profileService";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/contexts/UserContext";
+import { useProfiles } from "@/hooks/useProfiles";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Loader2, X, Plus, Lock, Users, Globe, Network } from "lucide-react";
+import LocationInterestsStep from "./wizard-steps/LocationInterestsStep";
+import SocialLinksStep from "./wizard-steps/SocialLinksStep";
+import { ExtendedProfile } from "@/services/profileService";
 
-// Form schema for profile editor
-const profileFormSchema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  bio: z.string().optional(),
-  location: z.string().optional(),
-  avatar_url: z.string().optional(),
-  privacy_settings: z.object({
-    profile_visibility: z.enum(["public", "connections", "connections2", "connections3", "private"]),
-  }),
-});
-
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
-
-const ProfileEditor: React.FC = () => {
-  const { updateProfile, getProfileById, isLoading } = useProfiles();
-  const { currentUser } = useUser();
-  const [interests, setInterests] = useState<string[]>([]);
-  const [newInterest, setNewInterest] = useState("");
-  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
-  const [newSocialPlatform, setNewSocialPlatform] = useState("");
-  const [newSocialUrl, setNewSocialUrl] = useState("");
-
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      first_name: "",
-      last_name: "",
-      bio: "",
-      location: "",
-      avatar_url: "",
-      privacy_settings: {
-        profile_visibility: "connections",
-      },
-    },
-  });
-
-  // Load initial profile data
+const ProfileEditor = () => {
+  const { currentUser, refreshUser } = useUser();
+  const { getProfileById, updateProfile } = useProfiles();
+  const { toast } = useToast();
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profile, setProfile] = useState<ExtendedProfile | null>(null);
+  const [formData, setFormData] = useState<Partial<ExtendedProfile>>({});
+  const [activeTab, setActiveTab] = useState("basic");
+  
   useEffect(() => {
-    const loadProfile = async () => {
-      if (!currentUser) return;
-      
-      const profile = await getProfileById(currentUser.id);
-      if (profile) {
-        // Set form values
-        form.reset({
-          first_name: profile.first_name || "",
-          last_name: profile.last_name || "",
-          bio: profile.bio || "",
-          location: profile.location || "",
-          avatar_url: profile.avatar_url || "",
-          privacy_settings: profile.privacy_settings || {
-            profile_visibility: "connections",
-          },
-        });
-        
-        // Set interests and social links
-        setInterests(profile.interests || []);
-        setSocialLinks(profile.social_links || {});
+    const fetchProfileData = async () => {
+      if (currentUser) {
+        setIsLoading(true);
+        try {
+          const fetchedProfile = await getProfileById(currentUser.id);
+          setProfile(fetchedProfile);
+          
+          setFormData({
+            first_name: fetchedProfile?.first_name || currentUser?.name?.split(' ')[0] || '',
+            last_name: fetchedProfile?.last_name || currentUser?.name?.split(' ').slice(1).join(' ') || '',
+            avatar_url: fetchedProfile?.avatar_url || currentUser?.imageUrl || '',
+            bio: fetchedProfile?.bio || '',
+            location: fetchedProfile?.location || '',
+            interests: fetchedProfile?.interests || [],
+            social_links: fetchedProfile?.social_links || {},
+            privacy_settings: fetchedProfile?.privacy_settings || { profile_visibility: "connections" },
+          });
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load profile data",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
     
-    loadProfile();
-  }, [currentUser, getProfileById]);
-
-  const handleAddInterest = () => {
-    if (!newInterest.trim()) return;
-    
-    if (!interests.includes(newInterest.trim())) {
-      setInterests([...interests, newInterest.trim()]);
-    }
-    
-    setNewInterest("");
+    fetchProfileData();
+  }, [currentUser, getProfileById, toast]);
+  
+  const handleUpdateFormData = (data: Partial<ExtendedProfile>) => {
+    setFormData((prev) => ({ ...prev, ...data }));
   };
-
-  const handleRemoveInterest = (interest: string) => {
-    setInterests(interests.filter((i) => i !== interest));
-  };
-
-  const handleAddSocialLink = () => {
-    if (!newSocialPlatform.trim() || !newSocialUrl.trim()) return;
-    
-    setSocialLinks({
-      ...socialLinks,
-      [newSocialPlatform.trim()]: newSocialUrl.trim(),
-    });
-    
-    setNewSocialPlatform("");
-    setNewSocialUrl("");
-  };
-
-  const handleRemoveSocialLink = (platform: string) => {
-    const updatedLinks = { ...socialLinks };
-    delete updatedLinks[platform];
-    setSocialLinks(updatedLinks);
-  };
-
-  const onSubmit = async (values: ProfileFormValues) => {
+  
+  const handleSubmit = async () => {
     if (!currentUser) return;
     
-    // Ensure privacy_settings has required property
-    const privacy_settings = {
-      profile_visibility: values.privacy_settings.profile_visibility
-    };
-    
-    const updatedProfile: Partial<ExtendedProfile> = {
-      id: currentUser.id,
-      ...values,
-      interests,
-      social_links: socialLinks,
-      privacy_settings: privacy_settings
-    };
-    
-    await updateProfile(updatedProfile);
+    setIsSubmitting(true);
+    try {
+      const dataToUpdate = {
+        ...formData,
+        id: currentUser.id,
+        profile_complete: true,
+      };
+      
+      const updatedProfile = await updateProfile(dataToUpdate);
+      
+      if (updatedProfile) {
+        await refreshUser();
+        
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been successfully updated.",
+        });
+      } else {
+        throw new Error("Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  if (!currentUser) {
-    return <div>You need to be logged in to edit your profile.</div>;
+  
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
-
+  
+  const getInitials = () => {
+    const first = formData.first_name?.charAt(0) || "";
+    const last = formData.last_name?.charAt(0) || "";
+    return (first + last).toUpperCase();
+  };
+  
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold">Edit Profile</h2>
-        <p className="text-muted-foreground">Update your profile information and privacy settings.</p>
-      </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Avatar */}
-          <div className="flex items-center gap-4">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={form.watch("avatar_url")} />
-              <AvatarFallback>
-                {`${form.watch("first_name")?.[0] || ""}${form.watch("last_name")?.[0] || ""}`}
-              </AvatarFallback>
-            </Avatar>
-
-            <FormField
-              control={form.control}
-              name="avatar_url"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Avatar URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://example.com/avatar.png" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location</FormLabel>
-                <FormControl>
-                  <Input placeholder="City, Country" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="bio"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bio</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Tell others about yourself" 
-                    {...field} 
-                    className="min-h-[120px]"
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit Profile</CardTitle>
+        <CardDescription>
+          Update your profile information and privacy settings
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="basic">Basic Info</TabsTrigger>
+            <TabsTrigger value="details">Details & Interests</TabsTrigger>
+            <TabsTrigger value="privacy">Privacy</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="basic" className="pt-6">
+            <div className="space-y-6">
+              <div className="flex flex-col items-center mb-6">
+                <div className="mb-4">
+                  <Avatar className="w-24 h-24">
+                    <AvatarImage src={formData.avatar_url} />
+                    <AvatarFallback>{getInitials() || "??"}</AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="w-full max-w-sm">
+                  <Label htmlFor="avatar">Profile Image URL</Label>
+                  <Input
+                    id="avatar"
+                    placeholder="https://example.com/avatar.jpg"
+                    value={formData.avatar_url}
+                    onChange={(e) => handleUpdateFormData({ avatar_url: e.target.value })}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Interests */}
-          <div className="space-y-4">
-            <Label>Interests</Label>
-            
-            <div className="flex flex-wrap gap-2">
-              {interests.map((interest, index) => (
-                <Badge key={index} variant="secondary" className="px-2 py-1">
-                  {interest}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-4 w-4 ml-1"
-                    onClick={() => handleRemoveInterest(interest)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
-              ))}
-            </div>
-            
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add an interest"
-                value={newInterest}
-                onChange={(e) => setNewInterest(e.target.value)}
-                className="flex-1"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddInterest();
-                  }
-                }}
-              />
-              <Button type="button" onClick={handleAddInterest}>
-                Add
-              </Button>
-            </div>
-          </div>
-
-          {/* Social Links */}
-          <div className="space-y-4">
-            <Label>Social Links</Label>
-            
-            {Object.entries(socialLinks).length > 0 && (
-              <div className="space-y-2">
-                {Object.entries(socialLinks).map(([platform, url]) => (
-                  <div key={platform} className="flex items-center justify-between p-2 border rounded-md">
-                    <div>
-                      <span className="font-medium">{platform}:</span>{" "}
-                      <a 
-                        href={url.startsWith("http") ? url : `https://${url}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:underline"
-                      >
-                        {url}
-                      </a>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveSocialLink(platform)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                </div>
               </div>
-            )}
-            
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-2">
-              <Input
-                placeholder="Platform"
-                value={newSocialPlatform}
-                onChange={(e) => setNewSocialPlatform(e.target.value)}
-              />
-              <Input
-                placeholder="URL"
-                value={newSocialUrl}
-                onChange={(e) => setNewSocialUrl(e.target.value)}
-              />
-              <Button type="button" onClick={handleAddSocialLink}>
-                Add
-              </Button>
+      
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    placeholder="Your first name"
+                    value={formData.first_name}
+                    onChange={(e) => handleUpdateFormData({ first_name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Your last name"
+                    value={formData.last_name}
+                    onChange={(e) => handleUpdateFormData({ last_name: e.target.value })}
+                  />
+                </div>
+              </div>
+      
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  placeholder="Tell us a bit about yourself..."
+                  value={formData.bio}
+                  onChange={(e) => handleUpdateFormData({ bio: e.target.value })}
+                  rows={4}
+                />
+              </div>
             </div>
-          </div>
-
-          {/* Privacy Settings */}
-          <FormField
-            control={form.control}
-            name="privacy_settings.profile_visibility"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Profile Visibility</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Who can see your profile" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="public">Everyone (Public)</SelectItem>
-                    <SelectItem value="connections">Direct Connections Only</SelectItem>
-                    <SelectItem value="connections2">Connections of Connections (2nd degree)</SelectItem>
-                    <SelectItem value="connections3">Extended Network (3rd degree)</SelectItem>
-                    <SelectItem value="private">Private (Only you)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Profile"}
-          </Button>
-        </form>
-      </Form>
-    </div>
+          </TabsContent>
+          
+          <TabsContent value="details" className="pt-6">
+            <div className="space-y-6">
+              <LocationInterestsStep formData={formData} updateFormData={handleUpdateFormData} />
+              <Separator className="my-6" />
+              <SocialLinksStep formData={formData} updateFormData={handleUpdateFormData} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="privacy" className="pt-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-medium">Privacy Settings</h3>
+                <p className="text-sm text-muted-foreground">
+                  Control who can view your profile information
+                </p>
+              </div>
+        
+              <div className="space-y-4">
+                <Label>Who can see your profile?</Label>
+                
+                <RadioGroup 
+                  value={formData.privacy_settings?.profile_visibility}
+                  onValueChange={(val) => handleUpdateFormData({
+                    privacy_settings: {
+                      ...formData.privacy_settings,
+                      profile_visibility: val as "public" | "connections" | "connections2" | "connections3" | "private"
+                    }
+                  })}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-accent transition-colors">
+                    <RadioGroupItem value="public" id="public" />
+                    <Label htmlFor="public" className="flex items-center gap-2 font-normal cursor-pointer flex-1">
+                      <Globe className="h-4 w-4 text-blue-500" />
+                      <div>
+                        <p>Everyone (Public)</p>
+                        <p className="text-xs text-muted-foreground">Anyone can view your full profile</p>
+                      </div>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-accent transition-colors">
+                    <RadioGroupItem value="connections" id="connections" />
+                    <Label htmlFor="connections" className="flex items-center gap-2 font-normal cursor-pointer flex-1">
+                      <Users className="h-4 w-4 text-green-500" />
+                      <div>
+                        <p>Direct Connections Only</p>
+                        <p className="text-xs text-muted-foreground">Only people directly connected to you can view your profile</p>
+                      </div>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-accent transition-colors">
+                    <RadioGroupItem value="connections2" id="connections2" />
+                    <Label htmlFor="connections2" className="flex items-center gap-2 font-normal cursor-pointer flex-1">
+                      <Network className="h-4 w-4 text-purple-500" />
+                      <div>
+                        <p>2nd Degree Connections</p>
+                        <p className="text-xs text-muted-foreground">Your connections and their connections can view your profile</p>
+                      </div>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-accent transition-colors">
+                    <RadioGroupItem value="connections3" id="connections3" />
+                    <Label htmlFor="connections3" className="flex items-center gap-2 font-normal cursor-pointer flex-1">
+                      <Network className="h-4 w-4 text-orange-500" />
+                      <div>
+                        <p>Extended Network (3rd degree)</p>
+                        <p className="text-xs text-muted-foreground">Connections up to 3 degrees away can view your profile</p>
+                      </div>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-accent transition-colors">
+                    <RadioGroupItem value="private" id="private" />
+                    <Label htmlFor="private" className="flex items-center gap-2 font-normal cursor-pointer flex-1">
+                      <Lock className="h-4 w-4 text-red-500" />
+                      <div>
+                        <p>Only You (Private)</p>
+                        <p className="text-xs text-muted-foreground">Only you can see your profile information</p>
+                      </div>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" onClick={() => history.back()}>
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            "Save Changes"
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

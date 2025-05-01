@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   getProfileById,
   updateProfile,
@@ -94,6 +95,31 @@ export const useProfiles = () => {
   };
 
   /**
+   * Check if profile setup is complete
+   */
+  const isProfileComplete = async (): Promise<boolean> => {
+    if (!currentUser) return false;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('profile_complete')
+        .eq('id', currentUser.id)
+        .single();
+        
+      if (error || !data) {
+        console.error("Error checking profile completion:", error);
+        return false;
+      }
+      
+      return !!data.profile_complete;
+    } catch (error) {
+      console.error("Error in isProfileComplete:", error);
+      return false;
+    }
+  };
+
+  /**
    * Check if current user can view another user's profile
    */
   const checkCanViewProfile = async (profileId: string): Promise<boolean> => {
@@ -149,6 +175,7 @@ export const useProfiles = () => {
     connectedProfiles,
     getProfileById: fetchProfile,
     updateProfile: handleUpdateProfile,
+    isProfileComplete,
     canViewProfile: checkCanViewProfile,
     getConnectedProfiles: fetchConnectedProfiles,
   };
