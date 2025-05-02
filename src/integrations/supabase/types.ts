@@ -582,6 +582,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      is_admin_or_self: {
+        Args: { check_user_id: string }
+        Returns: boolean
+      }
       is_community_owner: {
         Args: { user_id: string; community_id: string }
         Returns: boolean
