@@ -10,26 +10,30 @@ export const useProfile = (session: Session | null) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
-  // Fetch user profile from Supabase
+  // Fetch user profile from Supabase with improved error handling
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log("Fetching profile for user ID:", userId);
       
-      // Use let instead of const to allow reassignment
-      let { data: profile, error: profileError } = await supabase
-        .from('profiles') // Using the correct profiles table
+      // Get user profile from profiles table
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles') 
         .select('*')
         .eq('id', userId)
         .single();
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
-        return null;
+        if (profileError.code === 'PGRST116') {
+          console.log("Profile not found, will attempt to create one");
+          return null;
+        }
+        throw profileError;
       }
 
       console.log("Profile fetched:", profile);
 
-      // Get user's role from the 'user_roles' table
+      // Get user's role from the 'user_roles' table with better error handling
       const { data: userRoles, error: userRolesError } = await supabase
         .from('user_roles')
         .select(`
@@ -42,12 +46,12 @@ export const useProfile = (session: Session | null) => {
 
       if (userRolesError) {
         console.error("Error fetching user roles:", userRolesError);
-        // Continue without roles instead of throwing error
+        // Continue with a default role instead of throwing error
       }
 
       console.log("User roles fetched:", JSON.stringify(userRoles || [], null, 2));
       
-      // Determine the highest role
+      // Determine the highest role with fallback
       let role = UserRole.MEMBER; // Default role
       
       if (userRoles && userRoles.length > 0) {
@@ -78,18 +82,22 @@ export const useProfile = (session: Session | null) => {
       
       console.log("Determined role:", role);
 
-      // Get user's owned communities
-      const { data: ownedCommunities, error: ownedError } = await supabase
-        .rpc('get_user_owned_communities', { user_id: userId });
-        
-      if (ownedError) {
-        console.error("Error fetching owned communities:", ownedError);
-        // Continue without communities instead of throwing error
+      // Get user's owned communities with error handling
+      let managedCommunities: string[] = [];
+      try {
+        const { data: ownedCommunities, error: ownedError } = await supabase
+          .rpc('get_user_owned_communities', { user_id: userId });
+          
+        if (ownedError) {
+          console.error("Error fetching owned communities:", ownedError);
+        } else {
+          console.log("User owned communities:", ownedCommunities || []);
+          managedCommunities = ownedCommunities?.map(m => m.community_id) || [];
+        }
+      } catch (err) {
+        console.error("Exception fetching communities:", err);
       }
       
-      console.log("User owned communities:", ownedCommunities || []);
-
-      const managedCommunities = ownedCommunities?.map(m => m.community_id) || [];
       // In the new model, users are only members of communities they own
       const communities = managedCommunities;
 
@@ -115,8 +123,8 @@ export const useProfile = (session: Session | null) => {
     }
   };
 
-  // Create profile if it doesn't exist
-  const createProfileIfNotExists = useCallback(async () => {
+  // Create profile if it doesn't exist with improved error handling and retries
+  const createProfileIfNotExists = useCallback(async (retryCount = 0) => {
     try {
       if (!session?.user) return false;
       
@@ -132,6 +140,10 @@ export const useProfile = (session: Session | null) => {
         
       if (checkError) {
         console.error("Error checking for existing profile:", checkError);
+        if (retryCount < 2) {
+          console.log(`Retry attempt ${retryCount + 1} for checking profile existence`);
+          return await createProfileIfNotExists(retryCount + 1);
+        }
         return false;
       }
       
@@ -153,28 +165,49 @@ export const useProfile = (session: Session | null) => {
       const lastName = authUser.user.user_metadata?.last_name || '';
       const email = authUser.user.email || '';
       
-      // Create profile
-      const { data: newProfile, error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          user_id: userId,
-          email: email,
-          first_name: firstName,
-          last_name: lastName,
-          privacy_settings: { profile_visibility: "connections" },
-          profile_complete: false // Mark as incomplete so the wizard will show
-        })
-        .select()
-        .single();
-        
-      if (insertError) {
-        console.error("Error creating profile:", insertError);
-        return false;
-      }
+      // Create profile with retry logic
+      const createProfile = async (attempt = 0) => {
+        try {
+          console.log(`Creating profile, attempt ${attempt + 1}`);
+          
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              user_id: userId,
+              email: email,
+              first_name: firstName,
+              last_name: lastName,
+              privacy_settings: { profile_visibility: "connections" },
+              profile_complete: false // Mark as incomplete so the wizard will show
+            })
+            .select()
+            .single();
+            
+          if (insertError) {
+            console.error("Error creating profile:", insertError);
+            
+            if (attempt < 2) {
+              console.log("Retrying profile creation...");
+              await new Promise(r => setTimeout(r, 500)); // Add delay before retry
+              return createProfile(attempt + 1);
+            }
+            
+            return false;
+          }
+          
+          console.log("Profile created successfully:", newProfile);
+          return true;
+        } catch (err) {
+          console.error("Exception in profile creation:", err);
+          if (attempt < 2) {
+            return createProfile(attempt + 1);
+          }
+          return false;
+        }
+      };
       
-      console.log("Profile created successfully:", newProfile);
-      return true;
+      return await createProfile();
       
     } catch (error) {
       console.error("Error in createProfileIfNotExists:", error);
