@@ -1,162 +1,149 @@
 
+import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { ExtendedProfile } from "@/services/profileService";
-import { MapPin, Globe, Twitter, Linkedin, Facebook, Instagram, Lock, Users, Network } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ExtendedProfile } from '@/services/profileService';
+import { CheckCircle, Globe, Users, UserCircle, Lock } from 'lucide-react';
 
 interface ReviewCompleteStepProps {
   formData: Partial<ExtendedProfile>;
 }
 
 const ReviewCompleteStep = ({ formData }: ReviewCompleteStepProps) => {
-  const getInitials = () => {
-    const first = formData.first_name?.charAt(0) || "";
-    const last = formData.last_name?.charAt(0) || "";
-    return (first + last).toUpperCase();
-  };
+  const socialLinks = formData.social_links || {};
+  const privacy = formData.privacy_settings?.profile_visibility || 'connections';
 
-  const getFullName = () => {
-    return [formData.first_name, formData.last_name]
-      .filter(Boolean)
-      .join(" ") || "Anonymous User";
-  };
-
-  const getSocialIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case 'twitter':
-        return <Twitter className="h-4 w-4" />;
-      case 'linkedin':
-        return <Linkedin className="h-4 w-4" />;
-      case 'facebook':
-        return <Facebook className="h-4 w-4" />;
-      case 'instagram':
-        return <Instagram className="h-4 w-4" />;
-      default:
-        return <Globe className="h-4 w-4" />;
-    }
-  };
-
-  const getPrivacyIcon = () => {
-    switch (formData.privacy_settings?.profile_visibility) {
+  const renderPrivacyDescription = () => {
+    switch (privacy) {
       case 'public':
-        return <Globe className="h-4 w-4 text-blue-500" />;
+        return (
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            <span>Your profile will be visible to everyone</span>
+          </div>
+        );
       case 'connections':
-        return <Users className="h-4 w-4 text-green-500" />;
+        return (
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span>Only your direct connections will see your profile</span>
+          </div>
+        );
       case 'connections2':
+        return (
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span>Connections and their connections will see your profile</span>
+          </div>
+        );
       case 'connections3':
-        return <Network className="h-4 w-4 text-purple-500" />;
+        return (
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span>Extended network (3 degrees) will see your profile</span>
+          </div>
+        );
       case 'private':
-        return <Lock className="h-4 w-4 text-red-500" />;
+        return (
+          <div className="flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            <span>Only you can see your profile</span>
+          </div>
+        );
       default:
-        return <Users className="h-4 w-4 text-green-500" />;
+        return (
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span>Only your direct connections will see your profile</span>
+          </div>
+        );
     }
   };
-
-  const getPrivacyText = () => {
-    switch (formData.privacy_settings?.profile_visibility) {
-      case 'public':
-        return "Everyone can view your profile";
-      case 'connections':
-        return "Only direct connections can view your profile";
-      case 'connections2':
-        return "Connections up to 2nd degree can view your profile";
-      case 'connections3':
-        return "Connections up to 3rd degree can view your profile";
-      case 'private':
-        return "Only you can view your profile";
-      default:
-        return "Only direct connections can view your profile";
-    }
-  };
-
-  const socialLinks = formData.social_links as Record<string, string> || {};
-  const hasIncompleteFields = !formData.first_name || !formData.last_name;
 
   return (
     <div className="space-y-6">
-      {hasIncompleteFields && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Missing Information</AlertTitle>
-          <AlertDescription>
-            Some fields appear to be incomplete. Consider filling them before finalizing your profile.
-          </AlertDescription>
-        </Alert>
-      )}
+      <Alert className="bg-green-50 border-green-200">
+        <CheckCircle className="h-4 w-4 text-green-600" />
+        <AlertDescription className="text-green-800">
+          Your profile is almost ready! Please review your information below before completing the setup.
+        </AlertDescription>
+      </Alert>
 
-      <div>
-        <h3 className="text-lg font-medium mb-6">Review Your Profile</h3>
-        
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex flex-col items-center">
-            <Avatar className="h-24 w-24 mb-4">
-              <AvatarImage src={formData.avatar_url} alt={getFullName()} />
-              <AvatarFallback>{getInitials()}</AvatarFallback>
-            </Avatar>
-            
-            <div className="flex items-center text-sm gap-1">
-              {getPrivacyIcon()}
-              <span className="text-muted-foreground">{getPrivacyText()}</span>
-            </div>
-          </div>
-          
-          <div className="flex-1 space-y-4">
-            <div>
-              <h4 className="text-xl font-medium">{getFullName()}</h4>
-              {formData.location && (
-                <div className="flex items-center text-muted-foreground mt-1">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  <span>{formData.location}</span>
-                </div>
-              )}
-            </div>
-            
-            {formData.bio && (
-              <div>
-                <span className="font-medium">Bio</span>
-                <p className="text-sm mt-1">{formData.bio}</p>
-              </div>
-            )}
-          </div>
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex-shrink-0 flex flex-col items-center">
+          <Avatar className="h-24 w-24 md:h-32 md:w-32">
+            <AvatarImage src={formData.avatar_url || ''} />
+            <AvatarFallback>
+              <UserCircle className="h-12 w-12 opacity-50" />
+            </AvatarFallback>
+          </Avatar>
         </div>
-        
-        <Separator className="my-4" />
-        
-        {formData.interests && formData.interests.length > 0 && (
-          <div className="space-y-2">
-            <span className="font-medium">Interests</span>
-            <div className="flex flex-wrap gap-2">
-              {formData.interests.map((interest) => (
-                <Badge key={interest} variant="secondary">
-                  {interest}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        <Separator className="my-4" />
-        
-        <div className="space-y-2">
-          <span className="font-medium">Social Links</span>
-          <div className="flex flex-wrap gap-3">
-            {Object.entries(socialLinks).length > 0 ? (
-              Object.entries(socialLinks).map(([platform, url]) => (
-                <div
-                  key={platform}
-                  className="flex items-center gap-1.5 text-sm text-muted-foreground"
-                >
-                  {getSocialIcon(platform)}
-                  <span className="capitalize">{platform}</span>
+
+        <div className="flex-grow space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="font-medium mb-4">Basic Information</h3>
+              <dl className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-muted-foreground">First Name</dt>
+                  <dd className="font-medium">{formData.first_name || 'Not provided'}</dd>
                 </div>
-              ))
-            ) : (
-              <span className="text-sm text-muted-foreground">No social links added</span>
-            )}
-          </div>
+                <div>
+                  <dt className="text-muted-foreground">Last Name</dt>
+                  <dd className="font-medium">{formData.last_name || 'Not provided'}</dd>
+                </div>
+                <div className="md:col-span-2">
+                  <dt className="text-muted-foreground">Bio</dt>
+                  <dd>{formData.bio || 'No bio provided'}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Location</dt>
+                  <dd>{formData.location || 'Not specified'}</dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+
+          {formData.interests && formData.interests.length > 0 && (
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-medium mb-4">Interests</h3>
+                <div className="flex flex-wrap gap-2">
+                  {formData.interests.map((interest, index) => (
+                    <span key={index} className="bg-secondary px-2 py-1 rounded-md text-xs">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {Object.keys(socialLinks).length > 0 && (
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-medium mb-4">Social Links</h3>
+                <dl className="space-y-2 text-sm">
+                  {Object.entries(socialLinks).map(([platform, url]) => (
+                    <div key={platform}>
+                      <dt className="text-muted-foreground capitalize">{platform}</dt>
+                      <dd className="font-medium break-all">{url}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="font-medium mb-4">Privacy Settings</h3>
+              <div className="text-sm">
+                {renderPrivacyDescription()}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

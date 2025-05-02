@@ -10,7 +10,7 @@ import { AlertTriangle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const ProfileSetupPage: React.FC = () => {
-  const { currentUser, isLoading } = useUser();
+  const { currentUser, isLoading, recoverUserSession } = useUser();
   const navigate = useNavigate();
   const [authError, setAuthError] = useState<string | null>(null);
   const [isRecovering, setIsRecovering] = useState(false);
@@ -28,17 +28,11 @@ const ProfileSetupPage: React.FC = () => {
   const handleRecoveryAttempt = async () => {
     setIsRecovering(true);
     try {
-      // Try to refresh the session
-      const { data, error } = await supabase.auth.refreshSession();
+      // Use the recoverUserSession function from useAuth
+      const recovered = await recoverUserSession();
       
-      if (error) {
-        console.error("Error refreshing session:", error);
+      if (!recovered) {
         setAuthError("Failed to restore your session. Please try logging in again.");
-      } else if (data.session) {
-        // Force page reload to initialize everything fresh
-        window.location.reload();
-      } else {
-        setAuthError("Could not restore your session. Please log in again.");
       }
     } catch (err) {
       console.error("Error during recovery:", err);

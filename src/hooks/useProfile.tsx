@@ -34,55 +34,55 @@ export const useProfile = (session: Session | null) => {
       console.log("Profile fetched:", profile);
 
       // Get user's role from the 'user_roles' table with better error handling
-      const { data: userRoles, error: userRolesError } = await supabase
-        .from('user_roles')
-        .select(`
-          role_id,
-          roles:role_id (
-            name
-          )
-        `)
-        .eq('user_id', userId);
-
-      if (userRolesError) {
-        console.error("Error fetching user roles:", userRolesError);
-        // Continue with a default role instead of throwing error
-      }
-
-      console.log("User roles fetched:", JSON.stringify(userRoles || [], null, 2));
-      
-      // Determine the highest role with fallback
       let role = UserRole.MEMBER; // Default role
       
-      if (userRoles && userRoles.length > 0) {
-        // Check for admin role
-        const hasAdminRole = userRoles.some(r => {
-          return r.roles && r.roles.name === 'ADMIN';
-        });
-        
-        if (hasAdminRole) {
-          role = UserRole.ADMIN;
-          console.log("User has ADMIN role");
-        } else {
-          // Check for organizer role
-          const hasOrganizerRole = userRoles.some(r => {
-            return r.roles && r.roles.name === 'ORGANIZER';
+      try {
+        const { data: userRoles, error: userRolesError } = await supabase
+          .from('user_roles')
+          .select(`
+            role_id,
+            roles:role_id (
+              name
+            )
+          `)
+          .eq('user_id', userId);
+
+        if (userRolesError) {
+          console.error("Error fetching user roles:", userRolesError);
+          // Continue with a default role instead of throwing error
+        } else if (userRoles && userRoles.length > 0) {
+          console.log("User roles fetched:", JSON.stringify(userRoles, null, 2));
+          
+          // Check for admin role
+          const hasAdminRole = userRoles.some(r => {
+            return r.roles && r.roles.name === 'ADMIN';
           });
           
-          if (hasOrganizerRole) {
-            role = UserRole.ORGANIZER;
-            console.log("User has ORGANIZER role");
+          if (hasAdminRole) {
+            role = UserRole.ADMIN;
+            console.log("User has ADMIN role");
           } else {
-            console.log("User is a regular MEMBER");
+            // Check for organizer role
+            const hasOrganizerRole = userRoles.some(r => {
+              return r.roles && r.roles.name === 'ORGANIZER';
+            });
+            
+            if (hasOrganizerRole) {
+              role = UserRole.ORGANIZER;
+              console.log("User has ORGANIZER role");
+            } else {
+              console.log("User is a regular MEMBER");
+            }
           }
+        } else {
+          console.log("No roles found, defaulting to MEMBER");
         }
-      } else {
-        console.log("No roles found, defaulting to MEMBER");
+      } catch (roleErr) {
+        console.error("Exception in role fetching:", roleErr);
+        // Continue with default role
       }
       
-      console.log("Determined role:", role);
-
-      // Get user's owned communities with error handling
+      // Try to get user's owned communities with error handling
       let managedCommunities: string[] = [];
       try {
         const { data: ownedCommunities, error: ownedError } = await supabase
@@ -108,7 +108,7 @@ export const useProfile = (session: Session | null) => {
         role: role,
         imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
         email: profile?.email || "",
-        bio: profile?.bio || "", // Now using bio from profile
+        bio: profile?.bio || "", 
         communities,
         managedCommunities,
         createdAt: profile?.created_at || new Date().toISOString()
@@ -142,6 +142,7 @@ export const useProfile = (session: Session | null) => {
         console.error("Error checking for existing profile:", checkError);
         if (retryCount < 2) {
           console.log(`Retry attempt ${retryCount + 1} for checking profile existence`);
+          await new Promise(r => setTimeout(r, 500)); // Add delay before retry
           return await createProfileIfNotExists(retryCount + 1);
         }
         return false;
