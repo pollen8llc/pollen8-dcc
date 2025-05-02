@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { User, UserRole } from "@/models/types";
 import { useToast } from "@/hooks/use-toast";
@@ -15,12 +14,13 @@ interface UserContextType {
   isOrganizer: (communityId?: string) => boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  recoverUserSession: () => Promise<boolean>; // Added missing function type
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser, isLoading, logout: authLogout, refreshUser } = useAuth();
+  const { currentUser, isLoading, logout: authLogout, refreshUser, recoverUserSession } = useAuth();
   const { hasPermission, checkPermission, isOrganizer } = usePermissions(currentUser);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -121,8 +121,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkPermissionAsync: hasPermission, // Expose the async version for data operations
     isOrganizer,
     logout: handleLogout,
-    refreshUser
-  }), [currentUser, isLoading, checkPermission, hasPermission, isOrganizer, handleLogout, refreshUser]);
+    refreshUser,
+    recoverUserSession // Add the recover function to the context value
+  }), [currentUser, isLoading, checkPermission, hasPermission, isOrganizer, handleLogout, refreshUser, recoverUserSession]);
 
   return (
     <UserContext.Provider value={contextValue}>
