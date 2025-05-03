@@ -1,7 +1,6 @@
 
-import { User } from "@/models/types";
-import { UserRole } from "@/models/types";
-import UserBadge from "./UserBadge";
+import { User, UserRole } from "@/models/types";
+import AccountButton from "./AccountButton";
 
 interface UserActionsProps {
   currentUser: User;
@@ -9,14 +8,16 @@ interface UserActionsProps {
   logout: () => Promise<void>;
 }
 
-const UserActions = ({ currentUser }: UserActionsProps) => {
+const UserActions = ({ currentUser, isOrganizer, logout }: UserActionsProps) => {
   // Use the actual role from currentUser
   const isAdmin = currentUser.role === UserRole.ADMIN;
 
   return (
-    <div className="flex items-center">
-      <UserBadge currentUser={currentUser} isAdmin={isAdmin} />
-    </div>
+    <AccountButton 
+      currentUser={currentUser} 
+      isAdmin={isAdmin} 
+      logout={logout}
+    />
   );
 };
 

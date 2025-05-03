@@ -1,14 +1,16 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useUser } from "@/contexts/UserContext";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NavigationDrawer from "./navbar/NavigationDrawer";
+import UserActions from "./navbar/UserActions";
+import GuestActions from "./navbar/GuestActions";
 
 const Navbar = () => {
-  const { currentUser, isOrganizer, logout } = useUser();
+  const { currentUser, isOrganizer, logout, isLoading } = useUser();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
@@ -19,6 +21,18 @@ const Navbar = () => {
         </Link>
         
         <div className="flex items-center gap-3">
+          {!isLoading && (
+            currentUser ? (
+              <UserActions 
+                currentUser={currentUser} 
+                isOrganizer={isOrganizer} 
+                logout={logout} 
+              />
+            ) : (
+              <GuestActions />
+            )
+          )}
+          
           <ThemeToggle />
           
           <Button 
