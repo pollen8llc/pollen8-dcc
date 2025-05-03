@@ -8,7 +8,8 @@ import {
   User as UserIcon, 
   Library,
   Settings,
-  Shield
+  Shield,
+  Users
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -25,15 +26,17 @@ import { Badge } from "@/components/ui/badge";
 interface AccountButtonProps {
   currentUser: User | null;
   isAdmin: boolean;
+  isOrganizer: boolean;
   logout: () => Promise<void>;
 }
 
-const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => {
+const AccountButton = ({ currentUser, isAdmin, isOrganizer, logout }: AccountButtonProps) => {
   // Debug logging to track account button rendering
   console.log("AccountButton rendering with:", {
     user: currentUser?.id || "No user",
     role: currentUser?.role || "No role",
-    isAdmin
+    isAdmin,
+    isOrganizer
   });
 
   const getUserInitials = () => {
@@ -60,16 +63,15 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
       return "bg-purple-500";
     }
     
-    if (!currentUser) return "bg-gray-500";
-    
-    switch (currentUser.role) {
-      case UserRole.ORGANIZER:
-        return "bg-blue-500";
-      case UserRole.MEMBER:
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
+    if (isOrganizer) {
+      return "bg-blue-500";
     }
+    
+    if (currentUser?.role === UserRole.MEMBER) {
+      return "bg-green-500";
+    }
+    
+    return "bg-gray-500";
   };
 
   const getBadgeText = () => {
@@ -77,16 +79,15 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
       return "Admin";
     }
     
-    if (!currentUser) return "Guest";
-    
-    switch (currentUser.role) {
-      case UserRole.ORGANIZER:
-        return "Organizer";
-      case UserRole.MEMBER:
-        return "Member";
-      default:
-        return "Guest";
+    if (isOrganizer) {
+      return "Organizer";
     }
+    
+    if (currentUser?.role === UserRole.MEMBER) {
+      return "Member";
+    }
+    
+    return "Guest";
   };
 
   return (
@@ -100,10 +101,7 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
                 <AvatarFallback>{getUserInitials()}</AvatarFallback>
               </Avatar>
               <span className="hidden md:inline-block text-sm font-medium">
-                {currentUser.name} 
-                {isAdmin && <span className="ml-1 text-purple-500">(Admin)</span>}
-                {currentUser.role === UserRole.ORGANIZER && !isAdmin && <span className="ml-1 text-blue-500">(Organizer)</span>}
-                {currentUser.role === UserRole.MEMBER && !isAdmin && !currentUser.managedCommunities?.length && <span className="ml-1 text-green-500">(Member)</span>}
+                {currentUser.name}
               </span>
             </>
           ) : (
@@ -142,18 +140,31 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
               </Link>
             </DropdownMenuItem>
             
-            {(isAdmin || currentUser.role === UserRole.ORGANIZER) && (
+            {(isAdmin || isOrganizer) && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
                   Management
                 </DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Link to="/admin" className="cursor-pointer flex w-full items-center">
-                    <Shield className="mr-2 h-4 w-4" />
-                    <span>{isAdmin ? "Admin Dashboard" : "Community Management"}</span>
-                  </Link>
-                </DropdownMenuItem>
+                
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="cursor-pointer flex w-full items-center">
+                      <Shield className="mr-2 h-4 w-4" />
+                      <span>Admin Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                
+                {isOrganizer && !isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/organizer/dot-connector" className="cursor-pointer flex w-full items-center">
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>Community Management</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                
                 {isAdmin && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin?tab=settings" className="cursor-pointer flex w-full items-center">

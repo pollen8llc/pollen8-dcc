@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -19,31 +19,39 @@ const UserHeader = ({ currentUser }: UserHeaderProps) => {
   };
 
   const getBadgeColor = () => {
-    if (currentUser.role === 'ADMIN') {
+    if (currentUser.role === UserRole.ADMIN) {
       return "bg-purple-500";
     }
-    switch (currentUser.role) {
-      case 'ORGANIZER':
-        return "bg-blue-500";
-      case 'MEMBER':
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
+    
+    // Check if the user is an organizer either by role or by managing communities
+    if (currentUser.role === UserRole.ORGANIZER || 
+        (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) {
+      return "bg-blue-500";
     }
+    
+    if (currentUser.role === UserRole.MEMBER) {
+      return "bg-green-500";
+    }
+    
+    return "bg-gray-500";
   };
 
   const getBadgeText = () => {
-    if (currentUser.role === 'ADMIN') {
+    if (currentUser.role === UserRole.ADMIN) {
       return "Admin";
     }
-    switch (currentUser.role) {
-      case 'ORGANIZER':
-        return "Organizer";
-      case 'MEMBER':
-        return "Member";
-      default:
-        return "Guest";
+    
+    // Check if the user is an organizer either by role or by managing communities
+    if (currentUser.role === UserRole.ORGANIZER || 
+        (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) {
+      return "Organizer";
     }
+    
+    if (currentUser.role === UserRole.MEMBER) {
+      return "Member";
+    }
+    
+    return "Guest";
   };
 
   return (

@@ -10,31 +10,41 @@ interface UserBadgeProps {
 
 const UserBadge = ({ currentUser, isAdmin }: UserBadgeProps) => {
   const getBadgeColor = () => {
-    // Use only the currentUser.role for determining badge color, ignore isAdmin param
-    switch (currentUser.role) {
-      case UserRole.ADMIN:
-        return "bg-purple-500 hover:bg-purple-600";
-      case UserRole.ORGANIZER:
-        return "bg-blue-500 hover:bg-blue-600";
-      case UserRole.MEMBER:
-        return "bg-green-500 hover:bg-green-600";
-      default:
-        return "bg-gray-500 hover:bg-gray-600";
+    // Handle different role types
+    if (currentUser.role === UserRole.ADMIN) {
+      return "bg-purple-500 hover:bg-purple-600";
     }
+    
+    // Check if the user is an organizer
+    if (currentUser.role === UserRole.ORGANIZER || 
+        (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) {
+      return "bg-blue-500 hover:bg-blue-600";
+    }
+    
+    if (currentUser.role === UserRole.MEMBER) {
+      return "bg-green-500 hover:bg-green-600";
+    }
+    
+    return "bg-gray-500 hover:bg-gray-600";
   };
 
   const getBadgeText = () => {
-    // Use only the currentUser.role for determining badge text, ignore isAdmin param
-    switch (currentUser.role) {
-      case UserRole.ADMIN:
-        return "Admin";
-      case UserRole.ORGANIZER:
-        return "Organizer";
-      case UserRole.MEMBER:
-        return "Member";
-      default:
-        return "Guest";
+    // Handle different role types
+    if (currentUser.role === UserRole.ADMIN) {
+      return "Admin";
     }
+    
+    // Check if the user is an organizer
+    if (currentUser.role === UserRole.ORGANIZER || 
+        (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) {
+      return "Organizer";
+    }
+    
+    if (currentUser.role === UserRole.MEMBER) {
+      return "Member";
+    }
+    
+    return "Guest";
   };
 
   return (

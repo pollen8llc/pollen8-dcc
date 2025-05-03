@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { User } from "@/models/types";
+import { User, UserRole } from "@/models/types";
 import {
   Sheet,
   SheetContent,
@@ -11,6 +11,7 @@ import {
 import MainNavigation from "./drawer/MainNavigation";
 import AuthActions from "./drawer/AuthActions";
 import UserHeader from "./drawer/UserHeader";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface NavigationDrawerProps {
   open: boolean;
@@ -28,6 +29,7 @@ const NavigationDrawer = ({
   logout,
 }: NavigationDrawerProps) => {
   const navigate = useNavigate();
+  const { checkPermission } = usePermissions(currentUser);
 
   // Add debug logging for drawer authentication state
   console.log("NavigationDrawer rendering with user:", currentUser?.id || "No user");
@@ -42,7 +44,12 @@ const NavigationDrawer = ({
     handleNavigate("/auth");
   };
 
-  const isAdmin = currentUser?.role === "ADMIN";
+  // Determine admin status from current user role
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
+  
+  // Determine organizer status - either has ORGANIZER role or manages communities
+  const hasOrganizerRole = currentUser?.role === UserRole.ORGANIZER || 
+    (currentUser?.managedCommunities && currentUser.managedCommunities.length > 0);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -55,6 +62,7 @@ const NavigationDrawer = ({
               onNavigate={handleNavigate} 
               currentUser={!!currentUser} 
               isAdmin={isAdmin}
+              isOrganizer={hasOrganizerRole}
             />
           </div>
         </div>
