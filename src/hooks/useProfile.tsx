@@ -33,35 +33,36 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Profile fetched:", profile);
 
-      // Get user's role from the 'user_roles' table with better error handling
+      // First check if user has admin role using our non-recursive function
       let role = UserRole.MEMBER; // Default role
       
       try {
-        const { data: userRoles, error: userRolesError } = await supabase
-          .from('user_roles')
-          .select(`
-            role_id,
-            roles:role_id (
-              name
-            )
-          `)
-          .eq('user_id', userId);
+        // Use the new non-recursive function to check admin status
+        const { data: isAdmin, error: adminError } = await supabase
+          .rpc('get_is_admin', { user_id: userId });
+          
+        if (adminError) {
+          console.error("Error checking admin status:", adminError);
+        } else if (isAdmin) {
+          role = UserRole.ADMIN;
+          console.log("User has ADMIN role");
+        } else {
+          // If not admin, check for other roles
+          const { data: userRoles, error: userRolesError } = await supabase
+            .from('user_roles')
+            .select(`
+              role_id,
+              roles:role_id (
+                name
+              )
+            `)
+            .eq('user_id', userId);
 
-        if (userRolesError) {
-          console.error("Error fetching user roles:", userRolesError);
-          // Continue with a default role instead of throwing error
-        } else if (userRoles && userRoles.length > 0) {
-          console.log("User roles fetched:", JSON.stringify(userRoles, null, 2));
-          
-          // Check for admin role
-          const hasAdminRole = userRoles.some(r => {
-            return r.roles && r.roles.name === 'ADMIN';
-          });
-          
-          if (hasAdminRole) {
-            role = UserRole.ADMIN;
-            console.log("User has ADMIN role");
-          } else {
+          if (userRolesError) {
+            console.error("Error fetching user roles:", userRolesError);
+          } else if (userRoles && userRoles.length > 0) {
+            console.log("User roles fetched:", JSON.stringify(userRoles, null, 2));
+            
             // Check for organizer role
             const hasOrganizerRole = userRoles.some(r => {
               return r.roles && r.roles.name === 'ORGANIZER';
@@ -74,8 +75,6 @@ export const useProfile = (session: Session | null) => {
               console.log("User is a regular MEMBER");
             }
           }
-        } else {
-          console.log("No roles found, defaulting to MEMBER");
         }
       } catch (roleErr) {
         console.error("Exception in role fetching:", roleErr);

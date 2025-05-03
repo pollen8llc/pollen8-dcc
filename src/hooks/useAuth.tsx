@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useAuth = () => {
-  const { session, isLoading: sessionLoading, logout } = useSession();
+  const { session, isLoading: sessionLoading, logout, refreshSession } = useSession();
   const { currentUser, isLoading: profileLoading, refreshUser, createProfileIfNotExists } = useProfile(session);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -21,6 +21,7 @@ export const useAuth = () => {
   const profileCreationAttempted = useRef(false);
   const profileCompletionChecked = useRef(false);
   const authErrorShown = useRef(false);
+  const recoveryAttempted = useRef(false);
   
   // Log auth state for debugging, but only when it changes
   useEffect(() => {
@@ -88,6 +89,46 @@ export const useAuth = () => {
     
     checkAndCreateProfile();
   }, [session, currentUser, sessionLoading, profileLoading, createProfileIfNotExists, refreshUser, toast]);
+
+  // Add recovery mechanism for session/auth issues
+  useEffect(() => {
+    // If we have a session but can't load the user after multiple attempts, try recovery
+    if (!sessionLoading && session && !currentUser && profileCreationAttempted.current && 
+        !recoveryAttempted.current && !authErrorShown.current) {
+      recoveryAttempted.current = true;
+      
+      // Auto-attempt recovery of session
+      const attemptRecovery = async () => {
+        console.log("Attempting automatic session recovery...");
+        
+        try {
+          // Try refreshing the session first
+          const refreshSuccess = await refreshSession();
+          
+          if (refreshSuccess) {
+            console.log("Session refreshed successfully, attempting to reload user");
+            // Wait a moment for refresh to complete
+            setTimeout(async () => {
+              await refreshUser();
+            }, 500);
+          } else {
+            console.warn("Session refresh failed, recovery unsuccessful");
+            authErrorShown.current = true;
+            toast({
+              title: "Session issue detected",
+              description: "We're having trouble loading your profile. Try refreshing the page or logging out and back in.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error during automatic recovery:", error);
+        }
+      };
+      
+      // Wait a bit before trying recovery to avoid race conditions
+      setTimeout(attemptRecovery, 1000);
+    }
+  }, [session, currentUser, sessionLoading, profileLoading, toast, refreshUser, refreshSession]);
 
   // Check if profile needs setup and redirect if necessary with improved error handling
   useEffect(() => {
@@ -176,13 +217,14 @@ export const useAuth = () => {
       profileCreationAttempted.current = false;
       profileCompletionChecked.current = false;
       authErrorShown.current = false;
+      recoveryAttempted.current = false;
       
       // Refresh the session
-      const { data, error } = await supabase.auth.refreshSession();
+      const refreshSuccess = await refreshSession();
       
-      if (error) {
-        console.error("Error refreshing session:", error);
-        throw error;
+      if (!refreshSuccess) {
+        console.error("Error refreshing session during recovery");
+        throw new Error("Failed to refresh session");
       }
       
       // Reset user state
@@ -205,7 +247,7 @@ export const useAuth = () => {
       
       return false;
     }
-  }, [refreshUser, toast]);
+  }, [refreshUser, refreshSession, toast]);
 
   return { 
     currentUser, 

@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import { UserCircle } from "lucide-react";
 
 const GuestActions = () => {
+  // Add debug log to track when guest actions are used
+  console.log("Rendering GuestActions component");
+
   return (
     <Button variant="ghost" size="sm" className="flex items-center gap-2 px-3" asChild>
       <Link to="/auth">

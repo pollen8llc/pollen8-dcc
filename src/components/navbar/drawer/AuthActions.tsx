@@ -10,12 +10,16 @@ interface AuthActionsProps {
 }
 
 const AuthActions = ({ currentUser, onNavigate, onLogout }: AuthActionsProps) => {
+  // Add debug logging
+  console.log("AuthActions rendering with currentUser:", currentUser);
+
   const handleLogout = async () => {
     try {
+      console.log("Logout initiated from drawer");
       await onLogout();
       // Navigation is handled in the parent component
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error("Error during logout from drawer:", error);
     }
   };
 

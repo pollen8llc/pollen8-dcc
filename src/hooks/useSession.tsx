@@ -10,6 +10,7 @@ export const useSession = () => {
   const { toast } = useToast();
   const initialCheckComplete = useRef(false);
   const authStateInitialized = useRef(false);
+  const refreshAttempts = useRef(0);
 
   // Check for existing session on mount and subscribe to auth changes
   useEffect(() => {
@@ -66,10 +67,35 @@ export const useSession = () => {
     };
   }, []);
 
+  // Function to manually refresh the session token
+  const refreshSession = useCallback(async (): Promise<boolean> => {
+    try {
+      console.log("Manually refreshing session token...");
+      const { data, error } = await supabase.auth.refreshSession();
+      
+      if (error) {
+        console.error("Error refreshing session:", error);
+        return false;
+      }
+      
+      if (data.session) {
+        console.log("Session refreshed successfully");
+        setSession(data.session);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Exception in refreshSession:", error);
+      return false;
+    }
+  }, []);
+
   // Logout user with improved error handling
   const logout = useCallback(async (): Promise<void> => {
     try {
       console.log("Logging out user...");
+      refreshAttempts.current = 0;
       
       // Clear all cached data first
       Object.keys(localStorage).forEach(key => {
@@ -79,6 +105,7 @@ export const useSession = () => {
       });
       
       localStorage.removeItem('shouldRedirectToAdmin');
+      localStorage.removeItem('should_refresh_user_role');
       
       // Attempt to sign out with Supabase
       const { error } = await supabase.auth.signOut();
@@ -101,5 +128,10 @@ export const useSession = () => {
     }
   }, []);
 
-  return { session, isLoading, logout };
+  return { 
+    session, 
+    isLoading, 
+    logout,
+    refreshSession
+  };
 };

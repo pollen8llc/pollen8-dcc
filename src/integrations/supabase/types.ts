@@ -556,6 +556,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      get_is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       get_user_memberships: {
         Args: { user_id: string }
         Returns: {

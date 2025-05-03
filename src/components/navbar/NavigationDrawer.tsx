@@ -29,6 +29,9 @@ const NavigationDrawer = ({
 }: NavigationDrawerProps) => {
   const navigate = useNavigate();
 
+  // Add debug logging for drawer authentication state
+  console.log("NavigationDrawer rendering with user:", currentUser?.id || "No user");
+
   const handleNavigate = (path: string) => {
     navigate(path);
     onOpenChange(false);

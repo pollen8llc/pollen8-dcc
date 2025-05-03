@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { User, UserRole } from "@/models/types";
 import { useToast } from "@/hooks/use-toast";
@@ -14,7 +15,7 @@ interface UserContextType {
   isOrganizer: (communityId?: string) => boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  recoverUserSession: () => Promise<boolean>; // Added missing function type
+  recoverUserSession: () => Promise<boolean>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -82,11 +83,58 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [refreshUser, toast, queryClient]);
 
+  // Add automatic session recovery if we detect UI state issues
+  useEffect(() => {
+    // Check if we have a situation where currentUser is null but localStorage has JWT
+    // This indicates a potential token refresh failure
+    const checkForBrokenAuthState = () => {
+      if (!isLoading && !currentUser) {
+        try {
+          const hasLocalStorageAuth = localStorage.getItem('sb-oltcuwvgdzszxshpfnre-auth') !== null;
+          
+          if (hasLocalStorageAuth) {
+            console.log("Detected potential auth state mismatch - local storage has auth data but no user state");
+            
+            // Only attempt recovery once by setting a flag
+            const hasAttemptedRecovery = sessionStorage.getItem('auth_recovery_attempted');
+            
+            if (!hasAttemptedRecovery) {
+              sessionStorage.setItem('auth_recovery_attempted', 'true');
+              
+              // Add slight delay before attempting recovery to avoid race conditions
+              setTimeout(() => {
+                recoverUserSession().then(success => {
+                  if (!success) {
+                    console.log("Auto-recovery failed, user may need to log out and back in");
+                  }
+                });
+              }, 2000);
+            }
+          }
+        } catch (err) {
+          // LocalStorage might be unavailable in some environments
+          console.error("Error checking local storage auth:", err);
+        }
+      } else if (currentUser) {
+        // Clear recovery attempted flag when we have a user
+        sessionStorage.removeItem('auth_recovery_attempted');
+      }
+    };
+    
+    // Run once after initial loading completes
+    if (!isLoading) {
+      checkForBrokenAuthState();
+    }
+  }, [isLoading, currentUser, recoverUserSession]);
+
   // Wrap logout to add toast notifications and handle errors better
   const handleLogout = async (): Promise<void> => {
     try {
       // Clear any React Query caches
       queryClient.clear();
+      
+      // Remove auth recovery attempt flag
+      sessionStorage.removeItem('auth_recovery_attempted');
       
       // Call the auth logout function
       await authLogout();
@@ -122,7 +170,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isOrganizer,
     logout: handleLogout,
     refreshUser,
-    recoverUserSession // Add the recover function to the context value
+    recoverUserSession
   }), [currentUser, isLoading, checkPermission, hasPermission, isOrganizer, handleLogout, refreshUser, recoverUserSession]);
 
   return (

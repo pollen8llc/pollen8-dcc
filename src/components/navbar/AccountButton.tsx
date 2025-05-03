@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { User, UserRole } from "@/models/types";
 import { 
@@ -28,6 +29,13 @@ interface AccountButtonProps {
 }
 
 const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => {
+  // Debug logging to track account button rendering
+  console.log("AccountButton rendering with:", {
+    user: currentUser?.id || "No user",
+    role: currentUser?.role || "No role",
+    isAdmin
+  });
+
   const getUserInitials = () => {
     if (!currentUser) return "?";
     
@@ -40,6 +48,7 @@ const AccountButton = ({ currentUser, isAdmin, logout }: AccountButtonProps) => 
 
   const handleLogout = async () => {
     try {
+      console.log("Logout initiated from account button");
       await logout();
     } catch (error) {
       console.error("Error logging out:", error);
