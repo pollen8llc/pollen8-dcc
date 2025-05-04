@@ -2,15 +2,25 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Home, Users, Bug, Shield, Mail } from "lucide-react";
+import { User } from "@/models/types";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface MainNavigationProps {
   onNavigate: (path: string) => void;
-  currentUser?: boolean;
-  isAdmin?: boolean;
-  isOrganizer?: boolean;
+  currentUser: User | null;
 }
 
-const MainNavigation = ({ onNavigate, currentUser, isAdmin, isOrganizer }: MainNavigationProps) => {
+const MainNavigation = ({ onNavigate, currentUser }: MainNavigationProps) => {
+  const { isAdmin, isOrganizer } = usePermissions(currentUser);
+  
+  // Add debug logging
+  console.log("MainNavigation rendering with:", {
+    user: currentUser?.id || "No user",
+    isAdmin: isAdmin(),
+    isOrganizer: isOrganizer(),
+    role: currentUser?.role || "No role"
+  });
+
   return (
     <>
       <h3 className="text-sm font-medium mb-1">Navigation</h3>
@@ -23,16 +33,18 @@ const MainNavigation = ({ onNavigate, currentUser, isAdmin, isOrganizer }: MainN
         Home
       </Button>
       
-      <Button 
-        variant="ghost" 
-        className="w-full justify-start" 
-        onClick={() => onNavigate("/communities/join")}
-      >
-        <Users className="mr-2 h-4 w-4" />
-        Join Communities
-      </Button>
+      {currentUser && (
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start" 
+          onClick={() => onNavigate("/communities/join")}
+        >
+          <Users className="mr-2 h-4 w-4" />
+          Join Communities
+        </Button>
+      )}
       
-      {isOrganizer && !isAdmin && (
+      {isOrganizer() && !isAdmin() && (
         <Button 
           variant="ghost" 
           className="w-full justify-start" 
@@ -43,7 +55,7 @@ const MainNavigation = ({ onNavigate, currentUser, isAdmin, isOrganizer }: MainN
         </Button>
       )}
       
-      {isOrganizer && !isAdmin && (
+      {isOrganizer() && !isAdmin() && (
         <Button 
           variant="ghost" 
           className="w-full justify-start" 
@@ -54,7 +66,7 @@ const MainNavigation = ({ onNavigate, currentUser, isAdmin, isOrganizer }: MainN
         </Button>
       )}
       
-      {isAdmin && (
+      {isAdmin() && (
         <>
           <Button 
             variant="ghost" 

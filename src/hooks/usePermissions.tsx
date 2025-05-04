@@ -10,7 +10,7 @@ export const usePermissions = (currentUser: User | null) => {
     console.log("Checking permission for user:", currentUser.id, "role:", currentUser.role);
     
     // System admins have all permissions
-    if (currentUser.role === UserRole.ADMIN) {
+    if (isAdmin()) {
       console.log("User is ADMIN, granting permission");
       return true;
     }
@@ -59,7 +59,7 @@ export const usePermissions = (currentUser: User | null) => {
     if (!currentUser) return false;
     
     // System admins have all permissions
-    if (currentUser.role === UserRole.ADMIN) {
+    if (isAdmin()) {
       return true;
     }
     
@@ -81,12 +81,34 @@ export const usePermissions = (currentUser: User | null) => {
     }
   };
 
+  // Helper functions for clear role checks - centralized here to avoid duplication
+  const isAdmin = (): boolean => {
+    return currentUser?.role === UserRole.ADMIN;
+  };
+  
+  // Check if user is an organizer (either by role OR by managing communities)
+  const isOrganizer = (communityId?: string): boolean => {
+    if (!currentUser) return false;
+    
+    // System admins have all permissions
+    if (isAdmin()) return true;
+    
+    // Check for ORGANIZER role
+    if (currentUser.role === UserRole.ORGANIZER) return true;
+    
+    // If no communityId provided, check if user manages any communities
+    if (!communityId) return currentUser.managedCommunities?.length > 0 || false;
+    
+    // Check if user manages the specific community
+    return currentUser.managedCommunities?.includes(communityId) || false;
+  };
+  
   // Check if user is an owner of a specific community - this is distinct from being an organizer
   const isOwner = async (communityId: string): Promise<boolean> => {
     if (!currentUser) return false;
     
     // System admins have all permissions
-    if (currentUser.role === UserRole.ADMIN) return true;
+    if (isAdmin()) return true;
     
     // Call the Supabase function to check ownership
     try {
@@ -101,19 +123,31 @@ export const usePermissions = (currentUser: User | null) => {
     }
   };
 
-  // Check if user is an organizer (but might not be the owner)
-  const isOrganizer = (communityId?: string): boolean => {
-    if (!currentUser) return false;
+  // Helper function to determine role badge for UI
+  const getRoleBadge = () => {
+    if (!currentUser) return { text: "Guest", color: "bg-gray-500 hover:bg-gray-600" };
     
-    // System admins have all permissions
-    if (currentUser.role === UserRole.ADMIN) return true;
+    if (isAdmin()) {
+      return { text: "Admin", color: "bg-purple-500 hover:bg-purple-600" };
+    }
     
-    // If no communityId provided, check if user manages any communities
-    if (!communityId) return currentUser.managedCommunities?.length > 0 || false;
+    if (isOrganizer()) {
+      return { text: "Organizer", color: "bg-blue-500 hover:bg-blue-600" };
+    }
     
-    // Check if user manages the specific community
-    return currentUser.managedCommunities?.includes(communityId) || false;
+    if (currentUser.role === UserRole.MEMBER) {
+      return { text: "Member", color: "bg-green-500 hover:bg-green-600" };
+    }
+    
+    return { text: "Guest", color: "bg-gray-500 hover:bg-gray-600" };
   };
 
-  return { hasPermission, checkPermission, isOrganizer, isOwner };
+  return { 
+    hasPermission, 
+    checkPermission, 
+    isAdmin, 
+    isOrganizer, 
+    isOwner,
+    getRoleBadge
+  };
 };

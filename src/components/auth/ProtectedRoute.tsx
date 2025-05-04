@@ -2,6 +2,7 @@
 import { Navigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { UserRole } from "@/models/types";
+import { usePermissions } from "@/hooks/usePermissions"; 
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ const ProtectedRoute = ({
   communityId 
 }: ProtectedRouteProps) => {
   const { currentUser, isLoading } = useUser();
+  const { isAdmin, isOrganizer } = usePermissions(currentUser);
 
   // Add debugging to track protection flow
   console.log("ProtectedRoute - Path protection:", {
@@ -23,6 +25,8 @@ const ProtectedRoute = ({
     communityId,
     isLoading,
     hasUser: !!currentUser,
+    isAdmin: isAdmin(),
+    isOrganizer: isOrganizer(communityId),
     managedCommunities: currentUser?.managedCommunities || []
   });
 
@@ -49,17 +53,14 @@ const ProtectedRoute = ({
   const roleEnum = UserRole[requiredRole as keyof typeof UserRole];
   
   // For admin routes specifically, only allow ADMIN role
-  if (roleEnum === UserRole.ADMIN && currentUser.role !== UserRole.ADMIN) {
-    console.log("ProtectedRoute - Access denied: User is not admin", currentUser.role);
+  if (roleEnum === UserRole.ADMIN && !isAdmin()) {
+    console.log("ProtectedRoute - Access denied: User is not admin");
     return <Navigate to="/" replace />;
   }
   
   // For organizer routes, allow ADMIN or ORGANIZER with management permissions
   if (roleEnum === UserRole.ORGANIZER) {
-    const hasAccess = 
-      currentUser.role === UserRole.ADMIN || 
-      currentUser.role === UserRole.ORGANIZER ||
-      (communityId !== undefined && currentUser.managedCommunities?.includes(communityId));
+    const hasAccess = isAdmin() || isOrganizer(communityId);
       
     if (!hasAccess) {
       console.log("ProtectedRoute - Access denied: User is not organizer", {
@@ -74,8 +75,8 @@ const ProtectedRoute = ({
   // For member routes, allow ADMIN, ORGANIZER, or MEMBER
   if (roleEnum === UserRole.MEMBER) {
     const hasAccess = 
-      currentUser.role === UserRole.ADMIN || 
-      currentUser.role === UserRole.ORGANIZER || 
+      isAdmin() || 
+      isOrganizer() || 
       currentUser.role === UserRole.MEMBER;
       
     if (!hasAccess) {

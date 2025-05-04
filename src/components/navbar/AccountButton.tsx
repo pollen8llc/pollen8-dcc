@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { User, UserRole } from "@/models/types";
+import { User } from "@/models/types";
 import { 
   UserCircle, 
   LogIn, 
@@ -22,21 +22,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface AccountButtonProps {
   currentUser: User | null;
-  isAdmin: boolean;
-  isOrganizer: boolean;
   logout: () => Promise<void>;
 }
 
-const AccountButton = ({ currentUser, isAdmin, isOrganizer, logout }: AccountButtonProps) => {
+const AccountButton = ({ currentUser, logout }: AccountButtonProps) => {
+  const { isAdmin, isOrganizer, getRoleBadge } = usePermissions(currentUser);
+  
   // Debug logging to track account button rendering
   console.log("AccountButton rendering with:", {
     user: currentUser?.id || "No user",
     role: currentUser?.role || "No role",
-    isAdmin,
-    isOrganizer
+    isAdmin: isAdmin(),
+    isOrganizer: isOrganizer()
   });
 
   const getUserInitials = () => {
@@ -58,37 +59,10 @@ const AccountButton = ({ currentUser, isAdmin, isOrganizer, logout }: AccountBut
     }
   };
 
-  const getBadgeColor = () => {
-    if (isAdmin) {
-      return "bg-purple-500";
-    }
-    
-    if (isOrganizer) {
-      return "bg-blue-500";
-    }
-    
-    if (currentUser?.role === UserRole.MEMBER) {
-      return "bg-green-500";
-    }
-    
-    return "bg-gray-500";
-  };
-
-  const getBadgeText = () => {
-    if (isAdmin) {
-      return "Admin";
-    }
-    
-    if (isOrganizer) {
-      return "Organizer";
-    }
-    
-    if (currentUser?.role === UserRole.MEMBER) {
-      return "Member";
-    }
-    
-    return "Guest";
-  };
+  // Get role badge information
+  const { text: badgeText, color: badgeColor } = currentUser ? 
+    getRoleBadge() : 
+    { text: "Guest", color: "bg-gray-500" };
 
   return (
     <DropdownMenu>
@@ -121,8 +95,8 @@ const AccountButton = ({ currentUser, isAdmin, isOrganizer, logout }: AccountBut
                 <p className="text-xs leading-none text-muted-foreground">
                   {currentUser.email}
                 </p>
-                <Badge className={`mt-1 ${getBadgeColor()} text-white w-fit`}>
-                  {getBadgeText()}
+                <Badge className={`mt-1 ${badgeColor} text-white w-fit`}>
+                  {badgeText}
                 </Badge>
               </div>
             </DropdownMenuLabel>
@@ -140,14 +114,14 @@ const AccountButton = ({ currentUser, isAdmin, isOrganizer, logout }: AccountBut
               </Link>
             </DropdownMenuItem>
             
-            {(isAdmin || isOrganizer) && (
+            {(isOrganizer() || isAdmin()) && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
                   Management
                 </DropdownMenuLabel>
                 
-                {isAdmin && (
+                {isAdmin() && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin" className="cursor-pointer flex w-full items-center">
                       <Shield className="mr-2 h-4 w-4" />
@@ -156,7 +130,7 @@ const AccountButton = ({ currentUser, isAdmin, isOrganizer, logout }: AccountBut
                   </DropdownMenuItem>
                 )}
                 
-                {isOrganizer && !isAdmin && (
+                {isOrganizer() && !isAdmin() && (
                   <DropdownMenuItem asChild>
                     <Link to="/organizer/dot-connector" className="cursor-pointer flex w-full items-center">
                       <Users className="mr-2 h-4 w-4" />
@@ -165,7 +139,7 @@ const AccountButton = ({ currentUser, isAdmin, isOrganizer, logout }: AccountBut
                   </DropdownMenuItem>
                 )}
                 
-                {isAdmin && (
+                {isAdmin() && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin?tab=settings" className="cursor-pointer flex w-full items-center">
                       <Settings className="mr-2 h-4 w-4" />

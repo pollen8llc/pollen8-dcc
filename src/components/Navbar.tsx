@@ -10,7 +10,7 @@ import UserActions from "./navbar/UserActions";
 import GuestActions from "./navbar/GuestActions";
 
 const Navbar = () => {
-  const { currentUser, isOrganizer, logout, isLoading, recoverUserSession } = useUser();
+  const { currentUser, logout, isLoading, recoverUserSession } = useUser();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
 
@@ -66,7 +66,6 @@ const Navbar = () => {
             currentUser ? (
               <UserActions 
                 currentUser={currentUser} 
-                isOrganizer={isOrganizer} 
                 logout={logout} 
               />
             ) : (
@@ -94,7 +93,6 @@ const Navbar = () => {
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
         currentUser={currentUser} 
-        isOrganizer={isOrganizer} 
         logout={logout}
       />
     </header>
