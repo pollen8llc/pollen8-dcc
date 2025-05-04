@@ -16,6 +16,7 @@ export interface User {
   managedCommunities?: string[]; // Communities where user is organizer
   createdAt?: string;
   lastLoginAt?: string;
+  profile_complete?: boolean; // Added this property to fix the type error
 }
 
 export interface Community {

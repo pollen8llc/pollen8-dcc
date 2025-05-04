@@ -86,8 +86,9 @@ const ProtectedRoute = ({
     
     // If profile is not complete, redirect to profile setup
     // This maintains the "Complete Your Profile" functionality
+    // Fix: Check profile_complete from supabase directly or add a flag to the user object
     if (
-      !currentUser.isProfileComplete && 
+      currentUser.profile_complete === false && 
       window.location.pathname !== '/profile/setup' &&
       window.location.pathname !== '/auth'
     ) {
@@ -102,3 +103,4 @@ const ProtectedRoute = ({
 };
 
 export default ProtectedRoute;
+
