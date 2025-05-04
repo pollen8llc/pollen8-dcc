@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Home, Users, Bug, Shield, Mail } from "lucide-react";
+import { Home, Users, Bug, Shield, Mail, FolderKanban } from "lucide-react";
 import { User } from "@/models/types";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -18,7 +18,8 @@ const MainNavigation = ({ onNavigate, currentUser }: MainNavigationProps) => {
     user: currentUser?.id || "No user",
     isAdmin: isAdmin(),
     isOrganizer: isOrganizer(),
-    role: currentUser?.role || "No role"
+    role: currentUser?.role || "No role",
+    managedCommunities: currentUser?.managedCommunities || []
   });
 
   return (
@@ -44,18 +45,18 @@ const MainNavigation = ({ onNavigate, currentUser }: MainNavigationProps) => {
         </Button>
       )}
       
-      {isOrganizer() && !isAdmin() && (
+      {isOrganizer() && (
         <Button 
           variant="ghost" 
           className="w-full justify-start" 
           onClick={() => onNavigate("/organizer/dot-connector")}
         >
-          <Users className="mr-2 h-4 w-4" />
+          <FolderKanban className="mr-2 h-4 w-4" />
           Manage Communities
         </Button>
       )}
       
-      {isOrganizer() && !isAdmin() && (
+      {isOrganizer() && (
         <Button 
           variant="ghost" 
           className="w-full justify-start" 
@@ -68,6 +69,7 @@ const MainNavigation = ({ onNavigate, currentUser }: MainNavigationProps) => {
       
       {isAdmin() && (
         <>
+          <h3 className="text-sm font-medium text-purple-500 mt-4 mb-1">Admin</h3>
           <Button 
             variant="ghost" 
             className="w-full justify-start" 

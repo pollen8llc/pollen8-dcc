@@ -81,7 +81,18 @@ const ProtectedRoute = ({
       
     if (!hasAccess) {
       console.log("ProtectedRoute - Access denied: User is not a member");
-      return <Navigate to="/" replace />;
+      return <Navigate to="/auth" replace />;
+    }
+    
+    // If profile is not complete, redirect to profile setup
+    // This maintains the "Complete Your Profile" functionality
+    if (
+      !currentUser.isProfileComplete && 
+      window.location.pathname !== '/profile/setup' &&
+      window.location.pathname !== '/auth'
+    ) {
+      console.log("ProtectedRoute - Redirecting to profile setup");
+      return <Navigate to="/profile/setup" replace />;
     }
   }
 

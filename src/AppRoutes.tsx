@@ -26,13 +26,14 @@ import ConnectionsPage from "./pages/ConnectionsPage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
 
 const AppRoutes = () => {
-  const { currentUser } = useUser();
+  const { currentUser, isLoading } = useUser();
   const navigate = useNavigate();
 
   console.log("AppRoutes - Current user state:", { 
     id: currentUser?.id,
     role: currentUser?.role,
-    isOrganizer: currentUser?.role === UserRole.ORGANIZER || (currentUser?.managedCommunities?.length || 0) > 0
+    isOrganizer: currentUser?.role === UserRole.ORGANIZER || (currentUser?.managedCommunities?.length || 0) > 0,
+    isAdmin: currentUser?.role === UserRole.ADMIN
   });
 
   useEffect(() => {
@@ -84,47 +85,38 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       <Route path="/invite/:code" element={<InvitePage />} />
+      
+      {/* Organizer routes */}
       <Route path="/organizer/invites" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <InvitesManagementPage />
         </ProtectedRoute>
       } />
-      
-      <Route 
-        path="/admin" 
-        element={
-          <ProtectedRoute requiredRole="ADMIN">
-            <AdminDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/community/:id" 
-        element={
-          <ProtectedRoute requiredRole="ORGANIZER">
-            <AdminDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/admin/debug" 
-        element={
-          <ProtectedRoute requiredRole="ADMIN">
-            <DebuggerDashboard />
-          </ProtectedRoute>
-        } 
-      />
-      
       <Route path="/organizer/community/:id" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <OrganizerDashboard />
         </ProtectedRoute>
       } />
-      
       <Route path="/organizer/dot-connector" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <DotConnectorDashboard />
+        </ProtectedRoute>
+      } />
+      
+      {/* Admin routes */}
+      <Route path="/admin" element={
+        <ProtectedRoute requiredRole="ADMIN">
+          <AdminDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/community/:id" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <AdminDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/debug" element={
+        <ProtectedRoute requiredRole="ADMIN">
+          <DebuggerDashboard />
         </ProtectedRoute>
       } />
       

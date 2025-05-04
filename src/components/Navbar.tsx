@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import NavigationDrawer from "./navbar/NavigationDrawer";
 import UserActions from "./navbar/UserActions";
 import GuestActions from "./navbar/GuestActions";
+import { UserRole } from "@/models/types";
 
 const Navbar = () => {
   const { currentUser, logout, isLoading, recoverUserSession } = useUser();

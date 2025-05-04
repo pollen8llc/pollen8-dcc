@@ -91,6 +91,24 @@ export const useSession = () => {
     }
   }, []);
 
+  // Attempt to recover user session if necessary
+  const recoverUserSession = useCallback(async (): Promise<boolean> => {
+    if (refreshAttempts.current >= 3) {
+      console.log("Too many refresh attempts, giving up");
+      return false;
+    }
+    
+    refreshAttempts.current += 1;
+    
+    try {
+      console.log("Attempting to recover user session...");
+      return await refreshSession();
+    } catch (error) {
+      console.error("Error recovering session:", error);
+      return false;
+    }
+  }, [refreshSession]);
+
   // Logout user with improved error handling
   const logout = useCallback(async (): Promise<void> => {
     try {
@@ -132,6 +150,7 @@ export const useSession = () => {
     session, 
     isLoading, 
     logout,
-    refreshSession
+    refreshSession,
+    recoverUserSession
   };
 };

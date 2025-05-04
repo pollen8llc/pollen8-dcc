@@ -7,11 +7,8 @@ export const usePermissions = (currentUser: User | null) => {
   const hasPermission = async (resource: string, action: string): Promise<boolean> => {
     if (!currentUser) return false;
     
-    console.log("Checking permission for user:", currentUser.id, "role:", currentUser.role);
-    
     // System admins have all permissions
     if (isAdmin()) {
-      console.log("User is ADMIN, granting permission");
       return true;
     }
     
@@ -21,7 +18,7 @@ export const usePermissions = (currentUser: User | null) => {
         const communityId = resource.split(':')[1];
         if (!communityId) return false;
         
-        // Check if user is the owner (creator) of the community - this is the key distinction
+        // Check if user is the owner (creator) of the community
         const { data: isOwner } = await supabase.rpc('is_community_owner', {
           user_id: currentUser.id,
           community_id: communityId
@@ -31,7 +28,7 @@ export const usePermissions = (currentUser: User | null) => {
         if (isOwner) return true;
         
         // If they're not the owner but an organizer, they have limited permissions
-        if (currentUser.managedCommunities?.includes(communityId)) {
+        if (isOrganizer(communityId)) {
           return action === 'read' || action === 'update' || action === 'manage_members';
         }
         
@@ -65,6 +62,8 @@ export const usePermissions = (currentUser: User | null) => {
     
     // Basic role-based check for UI rendering
     switch (currentUser.role) {
+      case UserRole.ADMIN:
+        return true;
       case UserRole.ORGANIZER:
         if (resource.startsWith('community')) {
           const communityId = resource.split(':')[1];
@@ -97,13 +96,13 @@ export const usePermissions = (currentUser: User | null) => {
     if (currentUser.role === UserRole.ORGANIZER) return true;
     
     // If no communityId provided, check if user manages any communities
-    if (!communityId) return currentUser.managedCommunities?.length > 0 || false;
+    if (!communityId) return Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.length > 0;
     
     // Check if user manages the specific community
-    return currentUser.managedCommunities?.includes(communityId) || false;
+    return Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.includes(communityId);
   };
   
-  // Check if user is an owner of a specific community - this is distinct from being an organizer
+  // Check if user is an owner of a specific community
   const isOwner = async (communityId: string): Promise<boolean> => {
     if (!currentUser) return false;
     
