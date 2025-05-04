@@ -1,187 +1,181 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUser } from '@/contexts/UserContext';
 import { useToast } from "@/hooks/use-toast";
-import { useProfiles } from "@/hooks/useProfiles";
-import { useUser } from "@/contexts/UserContext";
-import { Loader2, AlertTriangle } from "lucide-react";
-import { Steps } from "@/components/ui/steps";
-import BasicInfoStep from "./wizard-steps/BasicInfoStep";
-import LocationInterestsStep from "./wizard-steps/LocationInterestsStep";
-import SocialLinksStep from "./wizard-steps/SocialLinksStep";
-import PrivacySettingsStep from "./wizard-steps/PrivacySettingsStep";
-import ReviewCompleteStep from "./wizard-steps/ReviewCompleteStep";
-import { ExtendedProfile } from "@/services/profileService";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useForm } from 'react-hook-form';
+import { supabase } from '@/integrations/supabase/client';
+
+// Import your wizard steps components
+import BasicInfoStep from './steps/BasicInfoStep';
+import BioStep from './steps/BioStep';
+import InterestsStep from './steps/InterestsStep';
+import PrivacyStep from './steps/PrivacyStep';
+
+const steps = ['basic-info', 'bio', 'interests', 'privacy'];
 
 const ProfileSetupWizard = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { currentUser, refreshUser } = useUser();
-  const { updateProfile, isLoading } = useProfiles();
-  
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<Partial<ExtendedProfile>>({
-    first_name: currentUser?.name?.split(' ')[0] || '',
-    last_name: currentUser?.name?.split(' ').slice(1).join(' ') || '',
-    avatar_url: currentUser?.imageUrl || '',
-    bio: '',
-    location: '',
-    interests: [],
-    social_links: {},
-    privacy_settings: { profile_visibility: "connections" },
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  if (!currentUser) {
-    return null;
-  }
-
-  const steps = ["Basic Info", "Location & Interests", "Social Links", "Privacy", "Complete"];
-
+  const navigate = useNavigate();
+  const { currentUser, refreshUser } = useUser();
+  const { toast } = useToast();
+  
+  const form = useForm({
+    defaultValues: {
+      firstName: currentUser?.name.split(' ')[0] || '',
+      lastName: currentUser?.name.split(' ').slice(1).join(' ') || '',
+      avatar: null as File | null,
+      avatarUrl: currentUser?.imageUrl || '',
+      bio: currentUser?.bio || '',
+      location: '',
+      interests: [] as string[],
+      profileVisibility: 'connections',
+      socialLinks: {} as Record<string, string>
+    }
+  });
+  
   const handleNext = () => {
-    // Clear any previous errors when moving to next step
-    setError(null);
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
   };
-
+  
   const handleBack = () => {
-    // Clear any previous errors when moving back
-    setError(null);
-    setCurrentStep((prev) => Math.max(prev - 1, 0));
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
   };
-
-  const handleUpdateFormData = (data: Partial<ExtendedProfile>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
-  };
-
-  const handleSubmit = async () => {
+  
+  const onSubmit = async (data: any) => {
+    if (!currentUser) return;
+    
     setIsSubmitting(true);
-    setError(null);
     
     try {
-      // Basic validation for required fields
-      if (!formData.first_name || !formData.last_name) {
-        setError("First and last name are required to complete your profile.");
-        setIsSubmitting(false);
-        return;
+      // Upload avatar if provided
+      let avatarUrl = data.avatarUrl;
+      if (data.avatar) {
+        const fileExt = data.avatar.name.split('.').pop();
+        const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, data.avatar);
+          
+        if (uploadError) {
+          console.error('Error uploading avatar:', uploadError);
+          throw new Error('Failed to upload profile image');
+        }
+        
+        // Get public URL
+        const { data: publicUrl } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+          
+        avatarUrl = publicUrl.publicUrl;
       }
       
-      // Mark profile as complete
-      const dataToUpdate = {
-        ...formData,
-        id: currentUser.id,
-        profile_complete: true,
-      };
-      
-      console.log("Submitting profile data:", dataToUpdate);
-      
-      const updatedProfile = await updateProfile(dataToUpdate);
-      
-      if (updatedProfile) {
-        console.log("Profile updated successfully:", updatedProfile);
+      // Update profile in database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: data.firstName,
+          last_name: data.lastName, 
+          avatar_url: avatarUrl,
+          bio: data.bio,
+          location: data.location,
+          interests: data.interests,
+          social_links: data.socialLinks,
+          privacy_settings: { profile_visibility: data.profileVisibility },
+          profile_complete: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', currentUser.id);
         
-        // Refresh user context
-        await refreshUser();
-        
-        toast({
-          title: "Profile setup complete",
-          description: "Your profile has been successfully created.",
-        });
-        
-        // Redirect to profile page
-        navigate(`/profile/${currentUser.id}`);
-      } else {
-        throw new Error("Failed to update profile - no profile data returned");
+      if (updateError) {
+        console.error('Error updating profile:', updateError);
+        throw new Error('Failed to update profile');
       }
-    } catch (error: any) {
-      console.error("Error completing profile setup:", error);
-      setError(error?.message || "Failed to complete profile setup. Please try again.");
+      
+      // Refresh user data to get the latest changes
+      await refreshUser();
+      
       toast({
-        title: "Error",
-        description: "Failed to complete profile setup. Please try again.",
-        variant: "destructive",
+        title: 'Profile setup complete',
+        description: 'Your profile has been successfully updated.',
       });
+      
+      // Navigate to profile page
+      navigate('/profile');
+      
+    } catch (error: any) {
+      toast({
+        title: 'Error updating profile',
+        description: error.message || 'Something went wrong.',
+        variant: 'destructive',
+      });
+      
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return <BasicInfoStep formData={formData} updateFormData={handleUpdateFormData} />;
-      case 1:
-        return <LocationInterestsStep formData={formData} updateFormData={handleUpdateFormData} />;
-      case 2:
-        return <SocialLinksStep formData={formData} updateFormData={handleUpdateFormData} />;
-      case 3:
-        return <PrivacySettingsStep formData={formData} updateFormData={handleUpdateFormData} />;
-      case 4:
-        return <ReviewCompleteStep formData={formData} />;
+  
+  const renderStep = () => {
+    switch (steps[currentStep]) {
+      case 'basic-info':
+        return <BasicInfoStep form={form} />;
+      case 'bio':
+        return <BioStep form={form} />;
+      case 'interests':
+        return <InterestsStep form={form} />;
+      case 'privacy':
+        return <PrivacyStep form={form} />;
       default:
         return null;
     }
   };
-
-  const isLastStep = currentStep === steps.length - 1;
-
+  
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Complete Your Profile</CardTitle>
+        <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
         <CardDescription>
-          Please complete your profile to get the most out of our platform.
+          Step {currentStep + 1} of {steps.length}: {steps[currentStep].replace('-', ' ')}
         </CardDescription>
       </CardHeader>
+      
       <CardContent>
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        <div className="mb-8">
-          <Steps currentStep={currentStep} steps={steps} />
-        </div>
-        
-        {renderStepContent()}
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          {renderStep()}
+        </form>
       </CardContent>
+      
       <CardFooter className="flex justify-between">
         <Button 
+          type="button" 
           variant="outline" 
-          onClick={handleBack} 
+          onClick={handleBack}
           disabled={currentStep === 0 || isSubmitting}
         >
           Back
         </Button>
         
-        <div>
-          {isLastStep ? (
-            <Button 
-              onClick={handleSubmit} 
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Completing...
-                </>
-              ) : (
-                "Complete Setup"
-              )}
-            </Button>
-          ) : (
-            <Button onClick={handleNext}>
-              Next Step
-            </Button>
-          )}
-        </div>
+        {currentStep < steps.length - 1 ? (
+          <Button type="button" onClick={handleNext}>
+            Next
+          </Button>
+        ) : (
+          <Button 
+            type="submit" 
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Complete Setup'}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

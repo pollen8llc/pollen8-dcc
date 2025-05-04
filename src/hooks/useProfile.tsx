@@ -10,6 +10,28 @@ export const useProfile = (session: Session | null) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
+  // Listen for role change events via localStorage to support cross-tab updates
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'should_refresh_user_role' && e.newValue === 'true') {
+        console.log("Role change detected via localStorage, refreshing user data");
+        refreshUser();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check on mount if we need to refresh
+    if (localStorage.getItem('should_refresh_user_role') === 'true') {
+      console.log("Role refresh flag detected on mount, refreshing user data");
+      refreshUser();
+    }
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   // Fetch user profile from Supabase with improved error handling
   const fetchUserProfile = async (userId: string) => {
     try {
@@ -110,7 +132,8 @@ export const useProfile = (session: Session | null) => {
         bio: profile?.bio || "", 
         communities,
         managedCommunities,
-        createdAt: profile?.created_at || new Date().toISOString()
+        createdAt: profile?.created_at || new Date().toISOString(),
+        profile_complete: profile?.profile_complete || false
       };
 
       console.log("User data constructed:", userData);
