@@ -230,7 +230,7 @@ const ProfilePage: React.FC = () => {
             {isOwnProfile && (
               <div className="flex gap-2">
                 <Button 
-                  onClick={() => navigate("/profile/setup")}
+                  onClick={() => navigate("/profile/edit")}
                   variant="outline"
                 >
                   <Edit className="h-4 w-4 mr-2" /> Edit Profile

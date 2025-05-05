@@ -1,22 +1,21 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import Navbar from "@/components/Navbar";
-import ProfileSetupWizard from "@/components/profile/ProfileSetupWizard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import UnifiedProfileForm from "@/components/profile/UnifiedProfileForm";
 
 const ProfileSetupPage: React.FC = () => {
   const { currentUser, isLoading, recoverUserSession } = useUser();
   const navigate = useNavigate();
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [isRecovering, setIsRecovering] = useState(false);
+  const [authError, setAuthError] = React.useState<string | null>(null);
+  const [isRecovering, setIsRecovering] = React.useState(false);
 
   // Check if user is authenticated
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isLoading && !currentUser) {
       setAuthError("You need to be logged in to set up your profile.");
     } else {
@@ -28,7 +27,6 @@ const ProfileSetupPage: React.FC = () => {
   const handleRecoveryAttempt = async () => {
     setIsRecovering(true);
     try {
-      // Use the recoverUserSession function from useAuth
       const recovered = await recoverUserSession();
       
       if (!recovered) {
@@ -107,7 +105,7 @@ const ProfileSetupPage: React.FC = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <ProfileSetupWizard />
+          <UnifiedProfileForm mode="setup" />
         </div>
       </div>
     </div>

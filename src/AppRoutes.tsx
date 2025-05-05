@@ -22,6 +22,7 @@ import InvitePage from "./pages/InvitePage";
 import ProfilePage from "./pages/ProfilePage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
+import ProfileSearchPage from "./pages/ProfileSearchPage";
 import ConnectionsPage from "./pages/ConnectionsPage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
 
@@ -65,10 +66,17 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* New profile setup wizard route */}
+      {/* Profile setup wizard route */}
       <Route path="/profile/setup" element={
         <ProtectedRoute requiredRole="MEMBER">
           <ProfileSetupPage />
+        </ProtectedRoute>
+      } />
+      
+      {/* Profile search page */}
+      <Route path="/profiles/search" element={
+        <ProtectedRoute requiredRole="MEMBER">
+          <ProfileSearchPage />
         </ProtectedRoute>
       } />
       

@@ -2,17 +2,40 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { useProfiles } from "@/hooks/useProfiles";
 import Navbar from "@/components/Navbar";
-import ProfileEditor from "@/components/profile/ProfileEditor";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import UnifiedProfileForm from "@/components/profile/UnifiedProfileForm";
 
 const ProfileEditPage: React.FC = () => {
-  const { currentUser, isLoading } = useUser();
   const navigate = useNavigate();
+  const { currentUser, isLoading } = useUser();
+  const { profile, getProfileById, isLoading: profileLoading } = useProfiles();
+  const [profileData, setProfileData] = React.useState<any>(null);
 
-  // Show loading state while checking auth
-  if (isLoading) {
+  // Fetch profile data
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      if (currentUser) {
+        const fetchedProfile = await getProfileById(currentUser.id);
+        setProfileData(fetchedProfile);
+      }
+    };
+
+    if (currentUser && !isLoading) {
+      fetchProfile();
+    }
+  }, [currentUser, isLoading, getProfileById]);
+
+  // Redirect if user is not authenticated
+  if (!isLoading && !currentUser) {
+    navigate("/auth?redirectTo=/profile/edit");
+    return null;
+  }
+
+  // Show loading state
+  if (isLoading || profileLoading || !profileData) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -26,12 +49,6 @@ const ProfileEditPage: React.FC = () => {
         </div>
       </div>
     );
-  }
-
-  // Redirect if user is not authenticated
-  if (!currentUser) {
-    navigate("/auth?redirectTo=/profile/edit");
-    return null;
   }
 
   return (
@@ -50,7 +67,11 @@ const ProfileEditPage: React.FC = () => {
             </Button>
           </div>
           
-          <ProfileEditor />
+          <UnifiedProfileForm 
+            mode="edit" 
+            existingData={profileData}
+            onComplete={() => navigate(`/profile/${currentUser.id}`)}
+          />
         </div>
       </div>
     </div>
