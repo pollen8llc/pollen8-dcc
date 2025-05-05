@@ -7,14 +7,15 @@ import { useUser } from '@/contexts/UserContext';
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from 'react-hook-form';
 import { supabase } from '@/integrations/supabase/client';
+import { Steps } from '@/components/ui/steps';
 
-// Import your wizard steps components
+// Import step components
 import BasicInfoStep from './steps/BasicInfoStep';
 import BioStep from './steps/BioStep';
 import InterestsStep from './steps/InterestsStep';
 import PrivacyStep from './steps/PrivacyStep';
 
-const steps = ['basic-info', 'bio', 'interests', 'privacy'];
+const stepNames = ['Basic Info', 'Bio & Location', 'Interests', 'Privacy'];
 
 const ProfileSetupWizard = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -38,7 +39,7 @@ const ProfileSetupWizard = () => {
   });
   
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < stepNames.length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -124,14 +125,14 @@ const ProfileSetupWizard = () => {
   };
   
   const renderStep = () => {
-    switch (steps[currentStep]) {
-      case 'basic-info':
+    switch (currentStep) {
+      case 0:
         return <BasicInfoStep form={form} />;
-      case 'bio':
+      case 1:
         return <BioStep form={form} />;
-      case 'interests':
+      case 2:
         return <InterestsStep form={form} />;
-      case 'privacy':
+      case 3:
         return <PrivacyStep form={form} />;
       default:
         return null;
@@ -142,9 +143,14 @@ const ProfileSetupWizard = () => {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-        <CardDescription>
-          Step {currentStep + 1} of {steps.length}: {steps[currentStep].replace('-', ' ')}
+        <CardDescription className="mb-4">
+          Step {currentStep + 1} of {stepNames.length}
         </CardDescription>
+        <Steps 
+          steps={stepNames} 
+          currentStep={currentStep}
+          className="mt-2"
+        />
       </CardHeader>
       
       <CardContent>
@@ -163,7 +169,7 @@ const ProfileSetupWizard = () => {
           Back
         </Button>
         
-        {currentStep < steps.length - 1 ? (
+        {currentStep < stepNames.length - 1 ? (
           <Button type="button" onClick={handleNext}>
             Next
           </Button>

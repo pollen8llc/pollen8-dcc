@@ -35,6 +35,9 @@ interface ProfileData {
     profile_visibility: string;
   };
   profile_complete: boolean;
+  // Add other fields that might be in the database but not used here
+  user_id?: string;
+  invited_by?: string | null;
 }
 
 const ProfilePage: React.FC = () => {
@@ -80,7 +83,36 @@ const ProfilePage: React.FC = () => {
           return;
         }
         
-        setProfile(data);
+        // Convert data.social_links from any JSON type to Record<string, string>
+        const social_links = data.social_links ? 
+          (typeof data.social_links === 'string' ? 
+            JSON.parse(data.social_links) : data.social_links) as Record<string, string> : null;
+            
+        // Similarly handle privacy_settings
+        const privacy_settings = data.privacy_settings ? 
+          (typeof data.privacy_settings === 'string' ? 
+            JSON.parse(data.privacy_settings) : data.privacy_settings) : { profile_visibility: "connections" };
+        
+        // Create a ProfileData object with properly typed fields
+        const profileData: ProfileData = {
+          id: data.id,
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
+          email: data.email || '',
+          bio: data.bio,
+          location: data.location,
+          avatar_url: data.avatar_url,
+          created_at: data.created_at,
+          updated_at: data.updated_at,
+          interests: data.interests,
+          social_links: social_links,
+          privacy_settings: privacy_settings,
+          profile_complete: !!data.profile_complete,
+          user_id: data.user_id,
+          invited_by: data.invited_by,
+        };
+        
+        setProfile(profileData);
       } catch (error) {
         console.error("Error in fetchProfile:", error);
         setError("An unexpected error occurred");
