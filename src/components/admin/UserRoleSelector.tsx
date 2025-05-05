@@ -84,6 +84,10 @@ const UserRoleSelector = ({
     setIsUpdating(true);
     try {
       await onUpdateRole(userId, selectedRole);
+      
+      // Trigger a refresh of the user's role across all tabs
+      localStorage.setItem('should_refresh_user_role', 'true');
+      
       toast({
         title: "Role updated",
         description: `User role has been updated to ${UserRole[selectedRole]}`,

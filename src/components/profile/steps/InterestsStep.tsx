@@ -1,37 +1,39 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { Badge } from "@/components/ui/badge";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { X, Plus } from "lucide-react";
+import { X } from "lucide-react";
 
 interface InterestsStepProps {
   form: UseFormReturn<any>;
 }
 
 const InterestsStep = ({ form }: InterestsStepProps) => {
-  const [newInterest, setNewInterest] = useState("");
-
-  // Get current interests from form
+  const [newInterest, setNewInterest] = React.useState('');
+  
   const interests = form.watch('interests') || [];
 
-  // Add new interest
   const handleAddInterest = () => {
-    if (!newInterest.trim() || interests.includes(newInterest.trim())) {
-      return;
-    }
+    if (!newInterest.trim()) return;
     
     const updatedInterests = [...interests, newInterest.trim()];
     form.setValue('interests', updatedInterests);
-    setNewInterest("");
+    setNewInterest('');
   };
 
-  // Remove an interest
-  const handleRemoveInterest = (interest: string) => {
-    const updatedInterests = interests.filter((i: string) => i !== interest);
+  const handleRemoveInterest = (index: number) => {
+    const updatedInterests = [...interests];
+    updatedInterests.splice(index, 1);
     form.setValue('interests', updatedInterests);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddInterest();
+    }
   };
 
   return (
@@ -41,52 +43,47 @@ const InterestsStep = ({ form }: InterestsStepProps) => {
         name="interests"
         render={() => (
           <FormItem>
-            <FormLabel>Interests</FormLabel>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {interests.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Add some interests to help connect with like-minded people</p>
-              ) : (
-                interests.map((interest: string, index: number) => (
-                  <Badge key={index} className="px-2 py-1">
-                    {interest}
-                    <button 
-                      type="button"
-                      onClick={() => handleRemoveInterest(interest)}
-                      className="ml-1 text-xs"
+            <FormLabel>Your Interests</FormLabel>
+            <FormControl>
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={newInterest}
+                    onChange={(e) => setNewInterest(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Enter an interest and press Enter"
+                    className="flex-1"
+                  />
+                  <Button type="button" onClick={handleAddInterest}>Add</Button>
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {interests.map((interest: string, index: number) => (
+                    <div 
+                      key={index} 
+                      className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full flex items-center gap-1"
                     >
-                      <X size={14} />
-                    </button>
-                  </Badge>
-                ))
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Input 
-                value={newInterest}
-                onChange={e => setNewInterest(e.target.value)}
-                placeholder="Add an interest..."
-                className="flex-1"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddInterest();
-                  }
-                }}
-              />
-              <Button 
-                type="button" 
-                onClick={handleAddInterest}
-                size="sm"
-                variant="secondary"
-              >
-                <Plus size={16} className="mr-1" />
-                Add
-              </Button>
-            </div>
+                      <span>{interest}</span>
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemoveInterest(index)}
+                        className="text-secondary-foreground/70 hover:text-secondary-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+      
+      <p className="text-sm text-muted-foreground">
+        Add interests to connect with like-minded community members
+      </p>
     </div>
   );
 };
