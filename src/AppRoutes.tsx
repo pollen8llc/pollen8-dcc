@@ -1,10 +1,9 @@
+
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { UserRole } from "@/models/types";
 import Index from "./pages/Index";
-import Profile from "./pages/Profile";
-import CommunityProfile from "./pages/CommunityProfile";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -20,8 +19,7 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 import InvitePage from "./pages/InvitePage";
 import ProfilePage from "./pages/ProfilePage";
-import ProfileEditPage from "./pages/ProfileEditPage";
-import ProfileSetupPage from "./pages/ProfileSetupPage";
+import CommunityProfile from "./pages/CommunityProfile";
 import ProfileSearchPage from "./pages/ProfileSearchPage";
 import ConnectionsPage from "./pages/ConnectionsPage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
@@ -60,18 +58,14 @@ const AppRoutes = () => {
       <Route path="/create-admin" element={<CreateAdminForm />} />
       <Route path="/community/:id" element={<CommunityProfile />} />
       <Route path="/documentation" element={<Documentation />} />
+      
+      {/* Profile routes */}
       <Route path="/profile" element={
         <ProtectedRoute requiredRole="MEMBER">
-          <Profile />
+          <ProfilePage />
         </ProtectedRoute>
       } />
-      
-      {/* Profile setup wizard route */}
-      <Route path="/profile/setup" element={
-        <ProtectedRoute requiredRole="MEMBER">
-          <ProfileSetupPage />
-        </ProtectedRoute>
-      } />
+      <Route path="/profile/:id" element={<ProfilePage />} />
       
       {/* Profile search page */}
       <Route path="/profiles/search" element={
@@ -80,13 +74,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Existing profile and connection routes */}
-      <Route path="/profile/:id" element={<ProfilePage />} />
-      <Route path="/profile/edit" element={
-        <ProtectedRoute requiredRole="MEMBER">
-          <ProfileEditPage />
-        </ProtectedRoute>
-      } />
       <Route path="/connections" element={
         <ProtectedRoute requiredRole="MEMBER">
           <ConnectionsPage />

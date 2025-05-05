@@ -1,236 +1,361 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/contexts/UserContext';
-import { Search, User, MapPin } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, UserSearch, MapPin } from "lucide-react";
+import { ExtendedProfile } from "@/services/profileService";
+import { useDebounce } from "@/hooks/useDebounce";
 
-interface ProfileResult {
-  id: string;
-  first_name: string;
-  last_name: string;
-  avatar_url: string | null;
-  location: string | null;
-  interests: string[] | null;
-  bio: string | null;
-}
-
-const ProfileSearchPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [interestFilter, setInterestFilter] = useState('');
-  const [searchResults, setSearchResults] = useState<ProfileResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const { toast } = useToast();
+const ProfileSearchPage: React.FC = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [interestFilter, setInterestFilter] = useState<string[]>([]);
+  const [profiles, setProfiles] = useState<ExtendedProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [allInterests, setAllInterests] = useState<string[]>([]);
+  const [selectedInterest, setSelectedInterest] = useState<string>("");
+  
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
+  // Redirect if user is not authenticated
   useEffect(() => {
-    // Load initial profiles on first load
-    fetchProfiles();
-    setIsInitialLoad(false);
+    if (!currentUser) {
+      navigate("/auth?redirectTo=/profiles/search");
+    }
+  }, [currentUser, navigate]);
+
+  // Fetch all unique interests for the filter
+  useEffect(() => {
+    const fetchInterests = async () => {
+      try {
+        const { data, error } = await supabase
+          .rpc('get_all_unique_interests');
+          
+        if (error) {
+          console.error("Error fetching interests:", error);
+          return;
+        }
+        
+        if (data) {
+          // Flatten the array of arrays into a single array of unique interests
+          const interests = Array.from(new Set(data.flat())).filter(Boolean) as string[];
+          setAllInterests(interests);
+        }
+      } catch (error) {
+        console.error("Error in fetchInterests:", error);
+      }
+    };
+    
+    fetchInterests();
   }, []);
 
-  const fetchProfiles = async () => {
-    if (!currentUser) return;
-    
-    setIsLoading(true);
-    
-    try {
-      // Start with a base query
-      let query = supabase
-        .from('profiles')
-        .select('id, first_name, last_name, avatar_url, location, interests, bio')
-        .neq('id', currentUser.id); // Exclude current user
+  // Search profiles
+  useEffect(() => {
+    const searchProfiles = async () => {
+      if (!currentUser) return;
+      
+      setIsLoading(true);
+      try {
+        let query = supabase
+          .from('profiles')
+          .select('*');
         
-      // Add filters if provided
-      if (searchQuery) {
-        query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,bio.ilike.%${searchQuery}%`);
-      }
-      
-      if (locationFilter) {
-        query = query.ilike('location', `%${locationFilter}%`);
-      }
-      
-      if (interestFilter) {
-        // This is tricky with array fields, we'll use a filter on the result instead
-      }
-      
-      // Fetch results
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error('Error fetching profiles:', error);
+        // Add search filter if provided
+        if (debouncedSearchQuery) {
+          query = query.or(
+            `first_name.ilike.%${debouncedSearchQuery}%,last_name.ilike.%${debouncedSearchQuery}%,bio.ilike.%${debouncedSearchQuery}%`
+          );
+        }
+        
+        // Add location filter if provided
+        if (locationFilter) {
+          query = query.ilike('location', `%${locationFilter}%`);
+        }
+        
+        // Add interest filter if provided
+        if (interestFilter.length > 0) {
+          // We'll need overlap operator for array contains
+          query = query.overlaps('interests', interestFilter);
+        }
+        
+        // Execute the query
+        const { data, error } = await query;
+        
+        if (error) {
+          console.error("Error searching profiles:", error);
+          toast({
+            title: "Search failed",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Process the results
+        const searchResults = data.map(profile => ({
+          ...profile,
+          social_links: profile.social_links ? 
+            (typeof profile.social_links === 'string' ? 
+              JSON.parse(profile.social_links) : profile.social_links) : {},
+          privacy_settings: profile.privacy_settings ? 
+            (typeof profile.privacy_settings === 'string' ? 
+              JSON.parse(profile.privacy_settings) : profile.privacy_settings) : { 
+                profile_visibility: "connections" 
+              }
+        }));
+        
+        setProfiles(searchResults);
+      } catch (error) {
+        console.error("Error in searchProfiles:", error);
         toast({
-          title: 'Error',
-          description: 'Failed to load profiles',
-          variant: 'destructive'
+          title: "Search error",
+          description: "An unexpected error occurred while searching profiles.",
+          variant: "destructive",
         });
-        return;
+      } finally {
+        setIsLoading(false);
       }
-      
-      // Filter by interests if needed (client-side filter)
-      let filteredResults = data || [];
-      if (interestFilter && filteredResults.length > 0) {
-        filteredResults = filteredResults.filter(profile => 
-          profile.interests?.some((interest: string) => 
-            interest.toLowerCase().includes(interestFilter.toLowerCase())
-          )
-        );
-      }
-      
-      setSearchResults(filteredResults);
-      
-    } catch (error) {
-      console.error('Error in profile search:', error);
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
+    };
+    
+    searchProfiles();
+  }, [currentUser, debouncedSearchQuery, locationFilter, interestFilter, toast]);
+
+  // Handle adding an interest filter
+  const handleAddInterestFilter = () => {
+    if (!selectedInterest) return;
+    
+    if (!interestFilter.includes(selectedInterest)) {
+      setInterestFilter([...interestFilter, selectedInterest]);
     }
+    
+    setSelectedInterest("");
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchProfiles();
+  // Handle removing an interest filter
+  const handleRemoveInterestFilter = (interest: string) => {
+    setInterestFilter(interestFilter.filter(i => i !== interest));
   };
-  
-  const getInitials = (profile: ProfileResult) => {
-    if (!profile.first_name && !profile.last_name) return "??";
+
+  // Get initials for avatar fallback
+  const getInitials = (firstName?: string, lastName?: string) => {
+    if (!firstName && !lastName) return "?";
     
-    return `${(profile.first_name || "")[0] || ""}${(profile.last_name || "")[0] || ""}`.toUpperCase();
-  };
-  
-  const getFullName = (profile: ProfileResult) => {
-    return [profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Anonymous User";
+    const firstInitial = firstName ? firstName[0].toUpperCase() : "";
+    const lastInitial = lastName ? lastName[0].toUpperCase() : "";
+    
+    return `${firstInitial}${lastInitial}`.trim() || "?";
   };
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Find People</h1>
-          
-          <div className="bg-card rounded-lg shadow-sm p-6 mb-8">
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label htmlFor="searchQuery" className="text-sm font-medium block mb-1">
-                    Name or Bio
-                  </label>
-                  <Input
-                    id="searchQuery"
-                    placeholder="Search by name or bio"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="locationFilter" className="text-sm font-medium block mb-1">
-                    Location
-                  </label>
-                  <Input
-                    id="locationFilter"
-                    placeholder="Filter by location"
-                    value={locationFilter}
-                    onChange={(e) => setLocationFilter(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="interestFilter" className="text-sm font-medium block mb-1">
-                    Interest
-                  </label>
-                  <Input
-                    id="interestFilter"
-                    placeholder="Filter by interest"
-                    value={interestFilter}
-                    onChange={(e) => setInterestFilter(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Searching...
-                    </span>
-                  ) : (
-                    <span className="flex items-center">
-                      <Search className="mr-2 h-4 w-4" />
-                      Search
-                    </span>
-                  )}
-                </Button>
-              </div>
-            </form>
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold flex items-center justify-center gap-2 mb-2">
+              <UserSearch className="h-6 w-6" />
+              Find People
+            </h1>
+            <p className="text-muted-foreground">
+              Search for people by name, location, or interests
+            </p>
           </div>
           
-          <div className="space-y-4">
-            {searchResults.length === 0 && !isLoading && !isInitialLoad && (
-              <div className="text-center py-8">
-                <User className="mx-auto h-12 w-12 text-muted-foreground/60" />
-                <h3 className="mt-4 text-lg font-medium">No profiles found</h3>
-                <p className="text-muted-foreground">Try adjusting your search filters</p>
-              </div>
-            )}
-            
-            {searchResults.map(profile => (
-              <Card 
-                key={profile.id} 
-                className="cursor-pointer hover:bg-accent/50 transition-colors"
-                onClick={() => navigate(`/profile/${profile.id}`)}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={profile.avatar_url || ""} alt={getFullName(profile)} />
-                      <AvatarFallback>{getInitials(profile)}</AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1">
-                      <h3 className="font-medium">{getFullName(profile)}</h3>
-                      {profile.location && (
-                        <div className="flex items-center text-sm text-muted-foreground mt-1">
-                          <MapPin className="h-3.5 w-3.5 mr-1" />
-                          <span>{profile.location}</span>
-                        </div>
+          <Card className="mb-8">
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Search input */}
+                <div className="md:col-span-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search by name or bio..."
+                      className="pl-10"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                {/* Location filter */}
+                <div>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Filter by location..."
+                      className="pl-10"
+                      value={locationFilter}
+                      onChange={(e) => setLocationFilter(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                {/* Interest filter */}
+                <div className="md:col-span-2 flex gap-2">
+                  <Select
+                    value={selectedInterest}
+                    onValueChange={setSelectedInterest}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by interest..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allInterests.map((interest) => (
+                        <SelectItem key={interest} value={interest}>
+                          {interest}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button 
+                    variant="outline" 
+                    onClick={handleAddInterestFilter}
+                    disabled={!selectedInterest}
+                  >
+                    Add
+                  </Button>
+                </div>
+                
+                {/* Active filters */}
+                {interestFilter.length > 0 && (
+                  <div className="md:col-span-3 mt-2">
+                    <div className="flex flex-wrap gap-2">
+                      {interestFilter.map((interest) => (
+                        <Badge key={interest} variant="secondary" className="px-3 py-1">
+                          {interest}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveInterestFilter(interest)}
+                            className="ml-2 text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            <span>×</span>
+                          </button>
+                        </Badge>
+                      ))}
+                      
+                      {interestFilter.length > 0 && (
+                        <Button 
+                          variant="link" 
+                          onClick={() => setInterestFilter([])}
+                          className="h-auto p-0 text-muted-foreground"
+                        >
+                          Clear all
+                        </Button>
                       )}
                     </div>
                   </div>
-                  
-                  {profile.bio && (
-                    <p className="text-muted-foreground text-sm mt-3 line-clamp-2">{profile.bio}</p>
-                  )}
-                  
-                  {profile.interests && profile.interests.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {profile.interests.slice(0, 4).map((interest, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">{interest}</Badge>
-                      ))}
-                      {profile.interests.length > 4 && (
-                        <Badge variant="outline" className="text-xs">+{profile.interests.length - 4} more</Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Search results */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">
+                {isLoading ? (
+                  "Searching..."
+                ) : (
+                  `Found ${profiles.length} ${profiles.length === 1 ? "person" : "people"}`
+                )}
+              </h2>
+            </div>
+            
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+              </div>
+            ) : profiles.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {profiles.map((profile) => (
+                  <Card key={profile.id} className="overflow-hidden">
+                    <div className="p-4">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-16 w-16">
+                          <AvatarImage src={profile.avatar_url || ""} />
+                          <AvatarFallback>
+                            {getInitials(profile.first_name, profile.last_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className="flex-1">
+                          <h3 className="font-medium text-lg">
+                            {[profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Anonymous User"}
+                          </h3>
+                          
+                          {profile.location && (
+                            <div className="flex items-center text-muted-foreground mt-1">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              <span className="text-sm">{profile.location}</span>
+                            </div>
+                          )}
+                          
+                          {profile.bio && (
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                              {profile.bio}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {profile.interests && profile.interests.length > 0 && (
+                        <>
+                          <Separator className="my-3" />
+                          <div className="flex flex-wrap gap-1">
+                            {profile.interests.slice(0, 3).map((interest, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">
+                                {interest}
+                              </Badge>
+                            ))}
+                            {profile.interests.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{profile.interests.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        </>
                       )}
+                      
+                      <div className="mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => navigate(`/profile/${profile.id}`)}
+                        >
+                          View Profile
+                        </Button>
+                      </div>
                     </div>
-                  )}
-                </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <div className="mb-4 flex justify-center">
+                  <UserSearch className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">No profiles found</h3>
+                <p className="text-muted-foreground">
+                  Try changing your search criteria or filters to find more people.
+                </p>
               </Card>
-            ))}
+            )}
           </div>
         </div>
       </div>
