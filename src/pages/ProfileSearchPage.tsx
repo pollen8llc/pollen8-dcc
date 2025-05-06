@@ -42,8 +42,10 @@ const ProfileSearchPage: React.FC = () => {
   useEffect(() => {
     const fetchInterests = async () => {
       try {
+        // Fetch all profiles to extract unique interests
         const { data, error } = await supabase
-          .rpc('get_all_unique_interests');
+          .from('profiles')
+          .select('interests');
           
         if (error) {
           console.error("Error fetching interests:", error);
@@ -54,10 +56,10 @@ const ProfileSearchPage: React.FC = () => {
           // Process the result to get unique interests
           const allInterestsArray: string[] = [];
           
-          // Each item in data is an array of interests
-          data.forEach((interestsArray: string[]) => {
-            if (interestsArray && Array.isArray(interestsArray)) {
-              allInterestsArray.push(...interestsArray);
+          // Each item in data has an interests array
+          data.forEach((profile) => {
+            if (profile.interests && Array.isArray(profile.interests)) {
+              allInterestsArray.push(...profile.interests);
             }
           });
           

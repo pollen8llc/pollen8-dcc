@@ -50,6 +50,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
             memberIds: [],
             tags: comm.tags || [],
             isPublic: comm.is_public,
+            created_at: comm.created_at,
+            updated_at: comm.updated_at,
+            is_public: comm.is_public,
             // Adding additional fields from DB to match Community type
             type: comm.type,
             format: comm.format,
