@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { useUser } from "@/contexts/UserContext";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useToast } from "@/hooks/use-toast";
@@ -33,21 +33,10 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
   const { updateProfile } = useProfiles();
   const { toast } = useToast();
   
-  const stepNames = ['Basic Info', 'Bio & Location', 'Interests', 'Privacy'];
+  // Instead of creating a new form instance, we use the parent's form context
+  const form = useFormContext();
   
-  const form = useForm({
-    defaultValues: {
-      firstName: existingData?.first_name || currentUser?.name?.split(' ')[0] || '',
-      lastName: existingData?.last_name || currentUser?.name?.split(' ').slice(1).join(' ') || '',
-      avatar: null as File | null,
-      avatarUrl: existingData?.avatar_url || currentUser?.imageUrl || '',
-      bio: existingData?.bio || '',
-      location: existingData?.location || '',
-      interests: existingData?.interests || [] as string[],
-      profileVisibility: existingData?.privacy_settings?.profile_visibility || 'connections',
-      socialLinks: existingData?.social_links || {} as Record<string, string>
-    }
-  });
+  const stepNames = ['Basic Info', 'Bio & Location', 'Interests', 'Privacy'];
   
   const handleNext = () => {
     if (currentStep < stepNames.length - 1) {
@@ -64,13 +53,13 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <BasicInfoStep form={form} />;
+        return <BasicInfoStep />;
       case 1:
-        return <BioStep form={form} />;
+        return <BioStep />;
       case 2:
-        return <InterestsStep form={form} />;
+        return <InterestsStep />;
       case 3:
-        return <PrivacyStep form={form} />;
+        return <PrivacyStep />;
       default:
         return null;
     }
@@ -79,13 +68,13 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
   const renderTabContent = () => {
     switch (activeTab) {
       case "basic":
-        return <BasicInfoStep form={form} />;
+        return <BasicInfoStep />;
       case "bio":
-        return <BioStep form={form} />;
+        return <BioStep />;
       case "interests":
-        return <InterestsStep form={form} />;
+        return <InterestsStep />;
       case "privacy":
-        return <PrivacyStep form={form} />;
+        return <PrivacyStep />;
       default:
         return null;
     }
@@ -103,41 +92,56 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
         const fileExt = data.avatar.name.split('.').pop();
         const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
         
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(fileName, data.avatar);
+        try {
+          const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(fileName, data.avatar);
+            
+          if (uploadError) {
+            console.error('Error uploading avatar:', uploadError);
+            throw new Error('Failed to upload profile image');
+          }
           
-        if (uploadError) {
-          console.error('Error uploading avatar:', uploadError);
-          throw new Error('Failed to upload profile image');
+          // Get public URL
+          const { data: publicUrl } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(fileName);
+            
+          avatarUrl = publicUrl.publicUrl;
+        } catch (error) {
+          console.error('Error in avatar upload:', error);
+          // Continue with profile update even if avatar upload fails
         }
-        
-        // Get public URL
-        const { data: publicUrl } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(fileName);
-          
-        avatarUrl = publicUrl.publicUrl;
       }
       
       // Update profile data
-      const profileData = {
-        id: currentUser.id,
-        first_name: data.firstName,
-        last_name: data.lastName,
-        avatar_url: avatarUrl,
-        bio: data.bio,
-        location: data.location,
-        interests: data.interests,
-        social_links: data.socialLinks,
-        privacy_settings: { profile_visibility: data.profileVisibility },
-        profile_complete: true,
-      };
+      try {
+        const profileData = {
+          id: currentUser.id,
+          first_name: data.firstName,
+          last_name: data.lastName,
+          avatar_url: avatarUrl,
+          bio: data.bio,
+          location: data.location,
+          interests: data.interests,
+          social_links: data.socialLinks,
+          privacy_settings: { profile_visibility: data.profileVisibility || 'public' },
+          profile_complete: true,
+        };
+        
+        await updateProfile(profileData);
+      } catch (profileError) {
+        console.error('Error updating profile data:', profileError);
+        throw new Error('Failed to update profile information');
+      }
       
-      await updateProfile(profileData);
-      
-      // Refresh user data
-      await refreshUser();
+      try {
+        // Refresh user data
+        await refreshUser();
+      } catch (refreshError) {
+        console.error('Error refreshing user data:', refreshError);
+        // Continue with flow even if refresh fails
+      }
       
       toast({
         title: mode === 'setup' ? 'Profile setup complete' : 'Profile updated',
@@ -181,9 +185,7 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
         </CardHeader>
         
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            {renderStepContent()}
-          </form>
+          {renderStepContent()}
         </CardContent>
         
         <CardFooter className="flex justify-between">

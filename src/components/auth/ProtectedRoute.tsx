@@ -51,7 +51,7 @@ const ProtectedRoute = ({
   // Check if user is authenticated
   if (!currentUser) {
     console.log("ProtectedRoute - No user, redirecting to auth");
-    // Redirect to login page with return URL
+    // Store the current location to return to after login
     const returnPath = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/auth?redirectTo=${returnPath}`} replace />;
   }
@@ -91,9 +91,10 @@ const ProtectedRoute = ({
       return <Navigate to="/auth" replace />;
     }
     
-    // If profile is not complete, redirect to profile setup
+    // Special case: Don't redirect from profile setup page to itself
+    // This prevents infinite redirection loops
     if (
-      requireCompleteProfile &&
+      requireCompleteProfile && 
       currentUser.profile_complete === false && 
       !location.pathname.includes('/profile/setup') &&
       !location.pathname.includes('/auth')

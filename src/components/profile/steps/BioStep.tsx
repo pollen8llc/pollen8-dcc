@@ -1,48 +1,56 @@
 
 import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { useFormContext } from 'react-hook-form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 
-interface BioStepProps {
-  form: UseFormReturn<any>;
-}
-
-const BioStep = ({ form }: BioStepProps) => {
+const BioStep = () => {
+  const { register, formState: { errors } } = useFormContext();
+  
   return (
     <div className="space-y-6">
       <FormField
-        control={form.control}
         name="bio"
-        render={({ field }) => (
+        control={undefined}
+        render={() => (
           <FormItem>
-            <FormLabel>About You</FormLabel>
+            <FormLabel>Bio</FormLabel>
+            <FormDescription>
+              Tell others a bit about yourself
+            </FormDescription>
             <FormControl>
-              <Textarea
-                {...field}
-                placeholder="Tell us a bit about yourself..."
-                rows={4}
+              <Textarea 
+                {...register('bio')}
+                placeholder="Share a little about yourself, your interests, expertise, or what you're looking for..."
+                className="min-h-32"
               />
             </FormControl>
-            <FormMessage />
+            {errors.bio && (
+              <FormMessage>{errors.bio.message as string}</FormMessage>
+            )}
           </FormItem>
         )}
       />
-
+      
       <FormField
-        control={form.control}
         name="location"
-        render={({ field }) => (
+        control={undefined}
+        render={() => (
           <FormItem>
             <FormLabel>Location</FormLabel>
+            <FormDescription>
+              Where are you based?
+            </FormDescription>
             <FormControl>
-              <Input
-                {...field}
-                placeholder="City, Country"
+              <Input 
+                {...register('location')}
+                placeholder="City, State, Country" 
               />
             </FormControl>
-            <FormMessage />
+            {errors.location && (
+              <FormMessage>{errors.location.message as string}</FormMessage>
+            )}
           </FormItem>
         )}
       />

@@ -1,89 +1,119 @@
 
-import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import React, { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
+import { X, Plus } from 'lucide-react';
 
-interface InterestsStepProps {
-  form: UseFormReturn<any>;
-}
+// A list of suggested interests to help users
+const SUGGESTED_INTERESTS = [
+  'Technology', 'Business', 'Marketing', 'Design', 'Education',
+  'Health', 'Finance', 'Art', 'Music', 'Travel', 'Science',
+  'Environment', 'Photography', 'Fitness', 'Food', 'Literature'
+];
 
-const InterestsStep = ({ form }: InterestsStepProps) => {
-  const [newInterest, setNewInterest] = React.useState('');
+const InterestsStep = () => {
+  const { setValue, watch } = useFormContext();
+  const [newInterest, setNewInterest] = useState('');
   
-  const interests = form.watch('interests') || [];
-
-  const handleAddInterest = () => {
-    if (!newInterest.trim()) return;
-    
-    const updatedInterests = [...interests, newInterest.trim()];
-    form.setValue('interests', updatedInterests);
+  // Get current interests from form
+  const interests = watch('interests') || [];
+  
+  const addInterest = (interest: string) => {
+    const trimmedInterest = interest.trim();
+    if (trimmedInterest && !interests.includes(trimmedInterest)) {
+      setValue('interests', [...interests, trimmedInterest]);
+    }
     setNewInterest('');
   };
-
-  const handleRemoveInterest = (index: number) => {
+  
+  const removeInterest = (index: number) => {
     const updatedInterests = [...interests];
     updatedInterests.splice(index, 1);
-    form.setValue('interests', updatedInterests);
+    setValue('interests', updatedInterests);
   };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleAddInterest();
+      addInterest(newInterest);
     }
   };
-
+  
+  const handleSuggestionClick = (suggestion: string) => {
+    addInterest(suggestion);
+  };
+  
   return (
     <div className="space-y-6">
       <FormField
-        control={form.control}
         name="interests"
+        control={undefined}
         render={() => (
           <FormItem>
-            <FormLabel>Your Interests</FormLabel>
-            <FormControl>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    value={newInterest}
-                    onChange={(e) => setNewInterest(e.target.value)}
-                    onKeyDown={handleKeyPress}
-                    placeholder="Enter an interest and press Enter"
-                    className="flex-1"
-                  />
-                  <Button type="button" onClick={handleAddInterest}>Add</Button>
-                </div>
-                
-                <div className="flex flex-wrap gap-2 mt-2">
+            <FormLabel>Interests</FormLabel>
+            <FormDescription>
+              Add topics that interest you so we can help you connect with like-minded people
+            </FormDescription>
+            
+            <div className="flex gap-2">
+              <FormControl>
+                <Input 
+                  placeholder="Add an interest" 
+                  value={newInterest}
+                  onChange={(e) => setNewInterest(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                />
+              </FormControl>
+              <Button type="button" onClick={() => addInterest(newInterest)} disabled={!newInterest.trim()}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="mt-3">
+              {interests.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
                   {interests.map((interest: string, index: number) => (
-                    <div 
-                      key={index} 
-                      className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full flex items-center gap-1"
-                    >
-                      <span>{interest}</span>
+                    <Badge key={index} variant="secondary" className="px-3 py-2">
+                      {interest}
                       <button 
                         type="button" 
-                        onClick={() => handleRemoveInterest(index)}
-                        className="text-secondary-foreground/70 hover:text-secondary-foreground"
+                        onClick={() => removeInterest(index)}
+                        className="ml-2 text-muted-foreground hover:text-foreground"
                       >
                         <X className="h-3 w-3" />
                       </button>
-                    </div>
+                    </Badge>
                   ))}
                 </div>
-              </div>
-            </FormControl>
-            <FormMessage />
+              ) : (
+                <p className="text-sm text-muted-foreground">No interests added yet</p>
+              )}
+            </div>
           </FormItem>
         )}
       />
       
-      <p className="text-sm text-muted-foreground">
-        Add interests to connect with like-minded community members
-      </p>
+      <div className="mt-6">
+        <h4 className="text-sm font-medium mb-2">Suggested interests</h4>
+        <div className="flex flex-wrap gap-2">
+          {SUGGESTED_INTERESTS.filter(suggestion => !interests.includes(suggestion))
+            .slice(0, 8)
+            .map((suggestion, index) => (
+              <Badge 
+                key={index} 
+                variant="outline" 
+                className="cursor-pointer hover:bg-secondary"
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </Badge>
+            ))
+          }
+        </div>
+      </div>
     </div>
   );
 };

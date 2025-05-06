@@ -6,14 +6,37 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import UnifiedProfileForm from "@/components/profile/UnifiedProfileForm";
 import { Clipboard, User, UserCheck } from "lucide-react";
+import { FormProvider, useForm } from "react-hook-form";
 
 const ProfileSetupPage: React.FC = () => {
   const { currentUser, refreshUser } = useUser();
   const navigate = useNavigate();
 
+  // Create the form context at the top-level component
+  // This ensures all child components have access to the form context
+  const methods = useForm({
+    defaultValues: {
+      firstName: currentUser?.name?.split(' ')[0] || '',
+      lastName: currentUser?.name?.split(' ').slice(1).join(' ') || '',
+      avatarUrl: currentUser?.imageUrl || '',
+      avatar: null,
+      bio: currentUser?.bio || '',
+      location: '',
+      interests: [] as string[],
+      profileVisibility: 'public', // Default to public for discoverability
+      socialLinks: {} as Record<string, string>
+    }
+  });
+
   const handleComplete = async () => {
-    await refreshUser();
-    navigate('/profile');
+    try {
+      await refreshUser();
+      navigate('/profile');
+    } catch (error) {
+      console.error("Error refreshing user after profile setup:", error);
+      // Still navigate even if refresh fails
+      navigate('/profile');
+    }
   };
 
   return (
@@ -35,11 +58,14 @@ const ProfileSetupPage: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
-              <UnifiedProfileForm 
-                mode="setup" 
-                existingData={currentUser} 
-                onComplete={handleComplete}
-              />
+              {/* Wrap the form with FormProvider to provide context */}
+              <FormProvider {...methods}>
+                <UnifiedProfileForm 
+                  mode="setup" 
+                  existingData={currentUser} 
+                  onComplete={handleComplete}
+                />
+              </FormProvider>
             </div>
             
             <div className="space-y-4">
