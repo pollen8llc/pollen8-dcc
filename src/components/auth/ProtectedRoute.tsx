@@ -1,5 +1,5 @@
 
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { UserRole } from "@/models/types";
 import { usePermissions } from "@/hooks/usePermissions"; 
@@ -8,18 +8,22 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: keyof typeof UserRole;
   communityId?: string;
+  requireCompleteProfile?: boolean;
 }
 
 const ProtectedRoute = ({ 
   children, 
   requiredRole = "MEMBER", 
-  communityId 
+  communityId,
+  requireCompleteProfile = true
 }: ProtectedRouteProps) => {
   const { currentUser, isLoading } = useUser();
   const { isAdmin, isOrganizer } = usePermissions(currentUser);
+  const location = useLocation();
 
   // Add debugging to track protection flow
   console.log("ProtectedRoute - Path protection:", {
+    path: location.pathname,
     requiredRole,
     currentUserRole: currentUser?.role,
     communityId,
@@ -27,6 +31,8 @@ const ProtectedRoute = ({
     hasUser: !!currentUser,
     isAdmin: isAdmin(),
     isOrganizer: isOrganizer(communityId),
+    profile_complete: currentUser?.profile_complete,
+    requireCompleteProfile,
     managedCommunities: currentUser?.managedCommunities || []
   });
 
@@ -45,8 +51,9 @@ const ProtectedRoute = ({
   // Check if user is authenticated
   if (!currentUser) {
     console.log("ProtectedRoute - No user, redirecting to auth");
-    // Redirect to login page
-    return <Navigate to="/auth" replace />;
+    // Redirect to login page with return URL
+    const returnPath = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/auth?redirectTo=${returnPath}`} replace />;
   }
 
   // Check if user has required role
@@ -86,9 +93,10 @@ const ProtectedRoute = ({
     
     // If profile is not complete, redirect to profile setup
     if (
+      requireCompleteProfile &&
       currentUser.profile_complete === false && 
-      window.location.pathname !== '/profile/setup' &&
-      window.location.pathname !== '/auth'
+      !location.pathname.includes('/profile/setup') &&
+      !location.pathname.includes('/auth')
     ) {
       console.log("ProtectedRoute - Redirecting to profile setup");
       return <Navigate to="/profile/setup" replace />;

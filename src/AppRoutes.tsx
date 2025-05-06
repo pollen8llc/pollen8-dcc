@@ -19,6 +19,7 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 import InvitePage from "./pages/InvitePage";
 import ProfilePage from "./pages/ProfilePage";
+import ProfileSetupPage from "./pages/ProfileSetupPage";
 import CommunityProfile from "./pages/CommunityProfile";
 import ProfileSearchPage from "./pages/ProfileSearchPage";
 import ConnectionsPage from "./pages/ConnectionsPage";
@@ -32,7 +33,8 @@ const AppRoutes = () => {
     id: currentUser?.id,
     role: currentUser?.role,
     isOrganizer: currentUser?.role === UserRole.ORGANIZER || (currentUser?.managedCommunities?.length || 0) > 0,
-    isAdmin: currentUser?.role === UserRole.ADMIN
+    isAdmin: currentUser?.role === UserRole.ADMIN,
+    profile_complete: currentUser?.profile_complete
   });
 
   useEffect(() => {
@@ -41,6 +43,14 @@ const AppRoutes = () => {
     if (shouldRedirectToAdmin === 'true' && currentUser?.role === UserRole.ADMIN) {
       navigate('/admin');
       localStorage.removeItem('shouldRedirectToAdmin');
+    }
+    
+    // Redirect incomplete profiles to setup page
+    if (currentUser && currentUser.profile_complete === false && 
+        !window.location.pathname.includes('/profile/setup') && 
+        !window.location.pathname.includes('/auth')) {
+      console.log("Profile incomplete, redirecting to setup page");
+      navigate('/profile/setup');
     }
   }, [currentUser, navigate]);
 
@@ -66,6 +76,11 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       <Route path="/profile/:id" element={<ProfilePage />} />
+      <Route path="/profile/setup" element={
+        <ProtectedRoute requiredRole="MEMBER">
+          <ProfileSetupPage />
+        </ProtectedRoute>
+      } />
       
       {/* Profile search page */}
       <Route path="/profiles/search" element={

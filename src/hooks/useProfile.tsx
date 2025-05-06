@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 export const useProfile = (session: Session | null) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Listen for role change events via localStorage to support cross-tab updates
@@ -36,6 +37,7 @@ export const useProfile = (session: Session | null) => {
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log("Fetching profile for user ID:", userId);
+      setError(null);
       
       // Get user profile from profiles table
       const { data: profile, error: profileError } = await supabase
@@ -48,8 +50,10 @@ export const useProfile = (session: Session | null) => {
         console.error("Error fetching profile:", profileError);
         if (profileError.code === 'PGRST116') {
           console.log("Profile not found, will attempt to create one");
+          setError("Profile not found");
           return null;
         }
+        setError(`Error fetching profile: ${profileError.message}`);
         throw profileError;
       }
 
@@ -139,9 +143,11 @@ export const useProfile = (session: Session | null) => {
 
       console.log("User data constructed:", userData);
       setCurrentUser(userData);
+      setError(null);
       return userData;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in fetchUserProfile:", error);
+      setError(`Failed to load profile: ${error.message || "Unknown error"}`);
       return null;
     }
   };
@@ -153,6 +159,7 @@ export const useProfile = (session: Session | null) => {
       
       const userId = session.user.id;
       console.log("Attempting to create profile for user:", userId);
+      setError(null);
       
       // First check if profile exists
       const { data: existingProfile, error: checkError } = await supabase
@@ -163,6 +170,7 @@ export const useProfile = (session: Session | null) => {
         
       if (checkError) {
         console.error("Error checking for existing profile:", checkError);
+        setError(`Error checking for profile: ${checkError.message}`);
         if (retryCount < 2) {
           console.log(`Retry attempt ${retryCount + 1} for checking profile existence`);
           await new Promise(r => setTimeout(r, 500)); // Add delay before retry
@@ -181,6 +189,7 @@ export const useProfile = (session: Session | null) => {
       const { data: authUser } = await supabase.auth.getUser();
       if (!authUser?.user) {
         console.error("Could not get auth user data");
+        setError("Could not get user authentication data");
         return false;
       }
       
@@ -202,7 +211,7 @@ export const useProfile = (session: Session | null) => {
               email: email,
               first_name: firstName,
               last_name: lastName,
-              privacy_settings: { profile_visibility: "connections" },
+              privacy_settings: { profile_visibility: "public" }, // Set to public for new users
               profile_complete: false // Mark as incomplete so the wizard will show
             })
             .select()
@@ -210,6 +219,7 @@ export const useProfile = (session: Session | null) => {
             
           if (insertError) {
             console.error("Error creating profile:", insertError);
+            setError(`Error creating profile: ${insertError.message}`);
             
             if (attempt < 2) {
               console.log("Retrying profile creation...");
@@ -221,9 +231,14 @@ export const useProfile = (session: Session | null) => {
           }
           
           console.log("Profile created successfully:", newProfile);
+          toast({
+            title: "Profile created",
+            description: "Your profile has been set up and is ready to customize"
+          });
           return true;
-        } catch (err) {
+        } catch (err: any) {
           console.error("Exception in profile creation:", err);
+          setError(`Exception in profile creation: ${err.message || "Unknown error"}`);
           if (attempt < 2) {
             return createProfile(attempt + 1);
           }
@@ -233,16 +248,18 @@ export const useProfile = (session: Session | null) => {
       
       return await createProfile();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in createProfileIfNotExists:", error);
+      setError(`Error creating profile: ${error.message || "Unknown error"}`);
       return false;
     }
-  }, [session]);
+  }, [session, toast]);
 
   // Effect to update user data when session changes
   useEffect(() => {
     const updateUserData = async () => {
       setIsLoading(true);
+      setError(null);
       
       try {
         if (session && session.user) {
@@ -250,12 +267,14 @@ export const useProfile = (session: Session | null) => {
           if (!profile) {
             // Don't set currentUser to null yet, we'll handle profile creation in useAuth
             console.log("No profile found for user");
+            setError("No profile found for user");
           }
         } else {
           setCurrentUser(null);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error updating user data:", error);
+        setError(`Error updating user data: ${error.message || "Unknown error"}`);
         setCurrentUser(null);
       } finally {
         setIsLoading(false);
@@ -273,14 +292,16 @@ export const useProfile = (session: Session | null) => {
     }
     
     setIsLoading(true);
+    setError(null);
     console.log("Refreshing user data, session:", session);
     
     try {
       await fetchUserProfile(session.user.id);
       // Clear the role refresh flag after successful refresh
       localStorage.removeItem('should_refresh_user_role');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error refreshing user data:", error);
+      setError(`Error refreshing user data: ${error.message || "Unknown error"}`);
     } finally {
       setIsLoading(false);
     }
@@ -291,6 +312,7 @@ export const useProfile = (session: Session | null) => {
     isLoading, 
     refreshUser, 
     fetchUserProfile, 
-    createProfileIfNotExists 
+    createProfileIfNotExists,
+    error
   };
 };

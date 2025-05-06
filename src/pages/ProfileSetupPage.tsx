@@ -1,111 +1,91 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; 
 import { useUser } from "@/contexts/UserContext";
 import Navbar from "@/components/Navbar";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import UnifiedProfileForm from "@/components/profile/UnifiedProfileForm";
+import { Clipboard, User, UserCheck } from "lucide-react";
 
 const ProfileSetupPage: React.FC = () => {
-  const { currentUser, isLoading, recoverUserSession } = useUser();
+  const { currentUser, refreshUser } = useUser();
   const navigate = useNavigate();
-  const [authError, setAuthError] = React.useState<string | null>(null);
-  const [isRecovering, setIsRecovering] = React.useState(false);
 
-  // Check if user is authenticated
-  React.useEffect(() => {
-    if (!isLoading && !currentUser) {
-      setAuthError("You need to be logged in to set up your profile.");
-    } else {
-      setAuthError(null);
-    }
-  }, [currentUser, isLoading]);
-
-  // Handle manual recovery attempt
-  const handleRecoveryAttempt = async () => {
-    setIsRecovering(true);
-    try {
-      const recovered = await recoverUserSession();
-      
-      if (!recovered) {
-        setAuthError("Failed to restore your session. Please try logging in again.");
-      }
-    } catch (err) {
-      console.error("Error during recovery:", err);
-      setAuthError("An unexpected error occurred. Please try logging in again.");
-    } finally {
-      setIsRecovering(false);
-    }
+  const handleComplete = async () => {
+    await refreshUser();
+    navigate('/profile');
   };
-
-  // Handle navigation to login
-  const handleNavigateToLogin = () => {
-    navigate("/auth?redirectTo=/profile/setup");
-  };
-
-  // Show loading state while checking auth
-  if (isLoading) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center min-h-[50vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-lg">Loading your profile...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state if authentication failed
-  if (authError) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-md mx-auto">
-            <Alert variant="destructive" className="mb-6">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Authentication Error</AlertTitle>
-              <AlertDescription>{authError}</AlertDescription>
-            </Alert>
-            
-            <div className="flex flex-col gap-3">
-              <Button 
-                onClick={handleRecoveryAttempt} 
-                variant="outline"
-                disabled={isRecovering}
-                className="flex items-center gap-2"
-              >
-                {isRecovering ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                {isRecovering ? "Recovering..." : "Try to recover session"}
-              </Button>
-              
-              <Button onClick={handleNavigateToLogin}>
-                Go to login page
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <UnifiedProfileForm mode="setup" />
+          <div className="mb-8 text-center">
+            <div className="flex justify-center mb-3">
+              <div className="p-3 rounded-full bg-primary/10">
+                <User className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold mb-2">Complete Your Profile</h1>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Welcome! Let's set up your profile so others can find you and you can connect with the community.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2">
+              <UnifiedProfileForm 
+                mode="setup" 
+                existingData={currentUser} 
+                onComplete={handleComplete}
+              />
+            </div>
+            
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center space-x-2">
+                    <UserCheck className="h-5 w-5 text-green-500" />
+                    <CardTitle className="text-lg">Why complete your profile?</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm">A complete profile helps you:</p>
+                  <ul className="text-sm space-y-2">
+                    <li className="flex items-start gap-2">
+                      <div className="h-5 w-5 flex items-center justify-center rounded-full bg-green-100 text-green-600 shrink-0 mt-0.5">✓</div>
+                      <span>Connect with like-minded people</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="h-5 w-5 flex items-center justify-center rounded-full bg-green-100 text-green-600 shrink-0 mt-0.5">✓</div>
+                      <span>Find relevant communities to join</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="h-5 w-5 flex items-center justify-center rounded-full bg-green-100 text-green-600 shrink-0 mt-0.5">✓</div>
+                      <span>Share your interests and expertise</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center space-x-2">
+                    <Clipboard className="h-5 w-5 text-blue-500" />
+                    <CardTitle className="text-lg">Profile Tips</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="text-sm space-y-2">
+                    <li className="text-muted-foreground">Add a profile photo to make your profile more recognizable</li>
+                    <li className="text-muted-foreground">Include specific interests to help with matching</li>
+                    <li className="text-muted-foreground">Set your location to find nearby communities</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

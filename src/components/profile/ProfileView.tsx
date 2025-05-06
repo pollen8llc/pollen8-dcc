@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Edit, MapPin, Globe, User, Users } from "lucide-react";
+import { Edit, MapPin, Globe, User, Users, AlertCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Community } from "@/models/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ProfileViewProps {
   profile: any;
@@ -19,12 +20,18 @@ interface ProfileViewProps {
 const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit }) => {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserCommunities = async () => {
-      if (!profile?.id) return;
+      if (!profile?.id) {
+        setError("Cannot fetch communities: Profile ID is missing");
+        return;
+      }
       
       setIsLoading(true);
+      setError(null);
+      
       try {
         // Get communities where the user is the owner
         const { data, error } = await supabase
@@ -34,6 +41,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
           
         if (error) {
           console.error("Error fetching communities:", error);
+          setError("Failed to load communities");
           return;
         }
         
@@ -91,6 +99,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
         }
       } catch (error) {
         console.error("Error in fetchUserCommunities:", error);
+        setError("An unexpected error occurred while loading communities");
       } finally {
         setIsLoading(false);
       }
@@ -100,7 +109,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
   }, [profile?.id]);
 
   const getFullName = () => {
-    if (!profile) return "";
+    if (!profile) return "Anonymous User";
     
     return [profile.first_name, profile.last_name]
       .filter(Boolean)
@@ -124,6 +133,20 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
     return '?';
   };
 
+  if (!profile) {
+    return (
+      <Card className="max-w-3xl mx-auto">
+        <CardContent className="pt-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>Profile data could not be loaded</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="max-w-3xl mx-auto">
       <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4">
@@ -141,7 +164,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
               </div>
             )}
             <p className="text-sm text-muted-foreground mt-1">
-              Member since {formatDistanceToNow(new Date(profile?.created_at), { addSuffix: true })}
+              Member since {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'recently'}
             </p>
           </div>
         </div>
@@ -170,7 +193,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
         {/* Interests Section */}
         <section>
           <h3 className="font-medium text-lg mb-2">Interests</h3>
-          {profile?.interests && profile.interests.length > 0 ? (
+          {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {profile.interests.map((interest: string, idx: number) => (
                 <Badge key={idx} variant="secondary">{interest}</Badge>
@@ -186,7 +209,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
         {/* Social Links Section */}
         <section>
           <h3 className="font-medium text-lg mb-2">Social Links</h3>
-          {profile?.social_links && Object.keys(profile.social_links).length > 0 ? (
+          {profile?.social_links && typeof profile.social_links === 'object' && 
+           Object.keys(profile.social_links).length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {Object.entries(profile.social_links).map(([platform, url]) => (
                 <a 
@@ -214,6 +238,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
             <Users className="h-5 w-5" />
             Communities
           </h3>
+          
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           
           {isLoading ? (
             <div className="flex justify-center py-4">

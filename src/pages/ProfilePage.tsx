@@ -8,8 +8,9 @@ import Navbar from "@/components/Navbar";
 import ProfileView from "@/components/profile/ProfileView";
 import ProfileEdit from "@/components/profile/ProfileEdit";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Edit, Eye } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Edit, Eye, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ProfileData {
   id: string;
@@ -51,6 +52,14 @@ const ProfilePage: React.FC = () => {
       setError(null);
       
       try {
+        // Check if user is authenticated
+        if (!currentUser) {
+          console.log("User not authenticated, redirecting to login");
+          navigate("/auth?redirectTo=" + window.location.pathname);
+          return;
+        }
+        
+        // Get profile data
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -59,7 +68,12 @@ const ProfilePage: React.FC = () => {
           
         if (error) {
           console.error("Error fetching profile:", error);
-          setError("Failed to load profile data");
+          
+          if (error.code === 'PGRST116') {
+            setError("Profile not found");
+          } else {
+            setError("Failed to load profile data: " + error.message);
+          }
           return;
         }
         
@@ -84,27 +98,32 @@ const ProfilePage: React.FC = () => {
           social_links,
           privacy_settings,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error in fetchProfile:", error);
-        setError("An unexpected error occurred");
+        setError("An unexpected error occurred: " + (error.message || "Unknown error"));
       } finally {
         setIsLoading(false);
       }
     }
     
     fetchProfile();
-  }, [profileId, isEditing]);
+  }, [profileId, isEditing, currentUser, navigate]);
 
   // Handle profile update
   const handleProfileUpdate = async (updatedProfile: Partial<ProfileData>) => {
     if (!currentUser || !isOwnProfile) return;
     
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('profiles')
         .update({
           ...updatedProfile,
           updated_at: new Date().toISOString(),
+          privacy_settings: {
+            ...updatedProfile.privacy_settings,
+            profile_visibility: updatedProfile.privacy_settings?.profile_visibility || "public" // Default to public
+          }
         })
         .eq('id', currentUser.id)
         .select()
@@ -112,6 +131,7 @@ const ProfilePage: React.FC = () => {
         
       if (error) {
         console.error("Error updating profile:", error);
+        setError("Update failed: " + error.message);
         toast({
           title: "Update failed",
           description: error.message,
@@ -135,7 +155,7 @@ const ProfilePage: React.FC = () => {
       const privacy_settings = data.privacy_settings ? 
         (typeof data.privacy_settings === 'string' ? 
           JSON.parse(data.privacy_settings) : data.privacy_settings) : { 
-            profile_visibility: "connections" 
+            profile_visibility: "public" 
           };
       
       setProfile({
@@ -143,8 +163,9 @@ const ProfilePage: React.FC = () => {
         social_links,
         privacy_settings,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in handleProfileUpdate:", error);
+      setError("Update failed: " + (error.message || "Unknown error"));
       toast({
         title: "Update failed",
         description: "An unexpected error occurred.",
@@ -173,10 +194,27 @@ const ProfilePage: React.FC = () => {
       <div className="min-h-screen">
         <Navbar />
         <div className="container mx-auto py-8 px-4">
-          <Card className="max-w-md mx-auto p-6">
-            <h2 className="text-xl font-semibold mb-4">Error</h2>
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => navigate("/")}>Go Home</Button>
+          <Card className="max-w-md mx-auto">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="h-5 w-5 text-red-500" />
+                <h2 className="text-xl font-semibold">Error</h2>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Alert variant="destructive" className="mb-4">
+                <AlertTitle>Profile Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+              <div className="flex gap-2 mt-4">
+                <Button onClick={() => navigate("/")}>Go Home</Button>
+                {!isOwnProfile && currentUser && (
+                  <Button variant="outline" onClick={() => navigate("/profile")}>
+                    View Your Profile
+                  </Button>
+                )}
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>
