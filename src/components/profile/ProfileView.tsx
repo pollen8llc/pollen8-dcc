@@ -39,37 +39,54 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
         
         // Map the fetched data to match the Community type expected by the state
         if (data) {
-          const mappedCommunities: Community[] = data.map(comm => ({
-            id: comm.id,
-            name: comm.name,
-            description: comm.description,
-            location: comm.location || '',
-            imageUrl: comm.logo_url || '',
-            communitySize: comm.community_size || '',
-            organizerIds: [comm.owner_id || ''],
-            memberIds: [],
-            tags: comm.tags || [],
-            isPublic: comm.is_public,
-            created_at: comm.created_at,
-            updated_at: comm.updated_at,
-            is_public: comm.is_public,
-            // Adding additional fields from DB to match Community type
-            type: comm.type,
-            format: comm.format,
-            target_audience: comm.target_audience,
-            social_media: comm.social_media,
-            website: comm.website,
-            newsletter_url: comm.newsletter_url,
-            logo_url: comm.logo_url,
-            founder_name: comm.founder_name,
-            // Aliases for backward compatibility
-            createdAt: comm.created_at,
-            updatedAt: comm.updated_at,
-            targetAudience: comm.target_audience,
-            socialMedia: comm.social_media,
-            newsletterUrl: comm.newsletter_url,
-            communityType: comm.type
-          }));
+          const mappedCommunities: Community[] = data.map(comm => {
+            // Properly handle social_media to ensure it's a Record type
+            let typeSafeSocialMedia: Record<string, string | { url?: string }> = {};
+            
+            if (comm.social_media && typeof comm.social_media === 'object') {
+              Object.keys(comm.social_media).forEach(key => {
+                const value = comm.social_media[key];
+                if (typeof value === 'string') {
+                  typeSafeSocialMedia[key] = value;
+                } else if (typeof value === 'object' && value !== null) {
+                  typeSafeSocialMedia[key] = value;
+                }
+              });
+            }
+            
+            return {
+              id: comm.id,
+              name: comm.name,
+              description: comm.description || '',
+              location: comm.location || '',
+              imageUrl: comm.logo_url || '',
+              communitySize: comm.community_size || '',
+              organizerIds: [comm.owner_id || ''],
+              memberIds: [],
+              tags: comm.tags || [],
+              isPublic: comm.is_public,
+              created_at: comm.created_at,
+              updated_at: comm.updated_at,
+              is_public: comm.is_public,
+              // Adding additional fields from DB to match Community type
+              type: comm.type,
+              format: comm.format,
+              target_audience: comm.target_audience || [],
+              social_media: typeSafeSocialMedia, // Use our properly typed social_media
+              website: comm.website || '',
+              newsletter_url: comm.newsletter_url,
+              logo_url: comm.logo_url,
+              founder_name: comm.founder_name,
+              // Aliases for backward compatibility
+              createdAt: comm.created_at,
+              updatedAt: comm.updated_at,
+              targetAudience: comm.target_audience || [],
+              socialMedia: typeSafeSocialMedia, // Also update the alias
+              newsletterUrl: comm.newsletter_url,
+              communityType: comm.type || comm.community_type
+            };
+          });
+          
           setCommunities(mappedCommunities);
         }
       } catch (error) {
