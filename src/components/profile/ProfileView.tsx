@@ -37,7 +37,38 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
           return;
         }
         
-        setCommunities(data || []);
+        // Map the fetched data to match the Community type expected by the state
+        if (data) {
+          const mappedCommunities: Community[] = data.map(comm => ({
+            id: comm.id,
+            name: comm.name,
+            description: comm.description,
+            location: comm.location || '',
+            imageUrl: comm.logo_url || '',
+            communitySize: comm.community_size || '',
+            organizerIds: [comm.owner_id || ''],
+            memberIds: [],
+            tags: comm.tags || [],
+            isPublic: comm.is_public,
+            // Adding additional fields from DB to match Community type
+            type: comm.type,
+            format: comm.format,
+            target_audience: comm.target_audience,
+            social_media: comm.social_media,
+            website: comm.website,
+            newsletter_url: comm.newsletter_url,
+            logo_url: comm.logo_url,
+            founder_name: comm.founder_name,
+            // Aliases for backward compatibility
+            createdAt: comm.created_at,
+            updatedAt: comm.updated_at,
+            targetAudience: comm.target_audience,
+            socialMedia: comm.social_media,
+            newsletterUrl: comm.newsletter_url,
+            communityType: comm.type
+          }));
+          setCommunities(mappedCommunities);
+        }
       } catch (error) {
         console.error("Error in fetchUserCommunities:", error);
       } finally {

@@ -51,9 +51,19 @@ const ProfileSearchPage: React.FC = () => {
         }
         
         if (data) {
-          // Flatten the array of arrays into a single array of unique interests
-          const interests = Array.from(new Set(data.flat())).filter(Boolean) as string[];
-          setAllInterests(interests);
+          // Process the result to get unique interests
+          const allInterestsArray: string[] = [];
+          
+          // Each item in data is an array of interests
+          data.forEach((interestsArray: string[]) => {
+            if (interestsArray && Array.isArray(interestsArray)) {
+              allInterestsArray.push(...interestsArray);
+            }
+          });
+          
+          // Create a Set to get unique values, then convert back to array
+          const uniqueInterests = Array.from(new Set(allInterestsArray)).filter(Boolean) as string[];
+          setAllInterests(uniqueInterests);
         }
       } catch (error) {
         console.error("Error in fetchInterests:", error);
