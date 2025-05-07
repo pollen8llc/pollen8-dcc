@@ -8,7 +8,6 @@ import Navbar from "@/components/Navbar";
 import CommunityHeader from "@/components/community/CommunityHeader";
 import CommunityMetaInfo from "@/components/community/CommunityMetaInfo";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import * as communityService from "@/services/communityService";
 import NotFoundState from "@/components/community/NotFoundState";
@@ -31,7 +30,12 @@ const communityFormSchema = z.object({
     linkedin: z.string().url().optional().or(z.literal('')),
     instagram: z.string().url().optional().or(z.literal('')),
     facebook: z.string().url().optional().or(z.literal(''))
-  }).optional(),
+  }).optional().default({
+    twitter: "",
+    linkedin: "",
+    instagram: "",
+    facebook: ""
+  }),
   founder_name: z.string().optional(),
   role_title: z.string().optional(),
   vision: z.string().optional(),
@@ -83,6 +87,13 @@ const OrganizerDashboard = () => {
   // Update form values when community data is loaded
   useEffect(() => {
     if (community) {
+      // Extract social media values with fallbacks to empty strings
+      const socialMedia = community.social_media || {};
+      const twitter = typeof socialMedia.twitter === 'string' ? socialMedia.twitter : '';
+      const linkedin = typeof socialMedia.linkedin === 'string' ? socialMedia.linkedin : '';
+      const instagram = typeof socialMedia.instagram === 'string' ? socialMedia.instagram : '';
+      const facebook = typeof socialMedia.facebook === 'string' ? socialMedia.facebook : '';
+      
       form.reset({
         name: community.name,
         description: community.description,
@@ -96,10 +107,10 @@ const OrganizerDashboard = () => {
         website: community.website || "",
         newsletterUrl: community.newsletter_url || community.newsletterUrl || "",
         social_media: {
-          twitter: community.social_media?.twitter || "",
-          linkedin: community.social_media?.linkedin || "",
-          instagram: community.social_media?.instagram || "",
-          facebook: community.social_media?.facebook || ""
+          twitter,
+          linkedin,
+          instagram,
+          facebook
         },
         founder_name: community.founder_name || "",
         role_title: community.role_title || "",

@@ -113,6 +113,24 @@ const OnlinePresenceStep = () => {
           </FormItem>
         )}
       />
+      
+      <FormField
+        name="social_media.facebook"
+        control={form.control}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Facebook</FormLabel>
+            <FormControl>
+              <Input 
+                {...field}
+                placeholder="https://facebook.com/pagename" 
+                type="url"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 };

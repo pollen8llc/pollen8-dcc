@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,13 +25,13 @@ interface UnifiedCommunityFormProps {
 
 const UnifiedCommunityForm = ({ mode, community, onComplete, onCancel }: UnifiedCommunityFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const navigate = useNavigate();
   const { toast } = useToast();
   
   // Use the form context from the parent
   const form = useFormContext();
+  const { formState: { isSubmitting } } = form;
   
   const stepNames = ['Basic Details', 'Location & Format', 'Online Presence', 'Additional Details'];
   
@@ -77,38 +77,6 @@ const UnifiedCommunityForm = ({ mode, community, onComplete, onCancel }: Unified
     }
   };
   
-  const onSubmit = async (data: any) => {
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-      // For edit mode, log the data being updated
-      console.log("Updating community with data:", data);
-      
-      // Show success toast
-      toast({
-        title: mode === 'setup' ? 'Community created' : 'Community updated',
-        description: mode === 'setup' ? 'Your community has been created.' : 'Your community has been updated.',
-      });
-      
-      // Handle completion
-      if (onComplete) {
-        onComplete();
-      }
-    } catch (error: any) {
-      console.error('Error updating community:', error);
-      
-      toast({
-        title: 'Error',
-        description: error.message || 'Something went wrong.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
   // Setup mode with steps
   if (mode === 'setup') {
     return (
@@ -146,7 +114,6 @@ const UnifiedCommunityForm = ({ mode, community, onComplete, onCancel }: Unified
           ) : (
             <Button 
               type="submit" 
-              onClick={form.handleSubmit(onSubmit)}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -184,9 +151,7 @@ const UnifiedCommunityForm = ({ mode, community, onComplete, onCancel }: Unified
           </TabsList>
           
           <div className="mt-6">
-            <form id="community-form" onSubmit={form.handleSubmit(onSubmit)}>
-              {renderTabContent()}
-            </form>
+            {renderTabContent()}
           </div>
         </Tabs>
       </CardContent>
@@ -196,9 +161,8 @@ const UnifiedCommunityForm = ({ mode, community, onComplete, onCancel }: Unified
           Cancel
         </Button>
         <Button 
-          onClick={form.handleSubmit(onSubmit)}
+          type="submit"
           disabled={isSubmitting}
-          form="community-form"
         >
           {isSubmitting ? (
             <>

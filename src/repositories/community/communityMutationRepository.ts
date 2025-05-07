@@ -7,6 +7,17 @@ export const updateCommunity = async (community: Community): Promise<Community> 
   try {
     console.log("Updating community:", community.id);
     
+    // Prepare social media data to ensure it's in the correct format
+    const socialMedia = community.social_media || {};
+    
+    // Prepare target audience to ensure it's in array format
+    let targetAudience: string[] = [];
+    if (Array.isArray(community.target_audience)) {
+      targetAudience = community.target_audience;
+    } else if (typeof community.target_audience === 'string') {
+      targetAudience = community.target_audience.split(',').map(tag => tag.trim()).filter(Boolean);
+    }
+    
     const { data, error } = await supabase
       .from('communities')
       .update({
@@ -16,7 +27,17 @@ export const updateCommunity = async (community: Community): Promise<Community> 
         website: community.website,
         is_public: community.is_public,
         location: community.location,
-        member_count: community.communitySize || "0" // Store as string
+        member_count: community.communitySize || "0", // Store as string
+        target_audience: targetAudience,
+        type: community.type,
+        format: community.format,
+        social_media: socialMedia,
+        founder_name: community.founder_name,
+        role_title: community.role_title,
+        vision: community.vision,
+        community_values: community.community_values,
+        community_structure: community.community_structure,
+        newsletter_url: community.newsletter_url || community.newsletterUrl
       })
       .eq('id', community.id)
       .select()
