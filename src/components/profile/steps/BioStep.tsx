@@ -6,14 +6,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 
 const BioStep = () => {
-  const { register, formState: { errors } } = useFormContext();
+  const form = useFormContext();
   
   return (
     <div className="space-y-6">
       <FormField
         name="bio"
-        control={undefined}
-        render={() => (
+        control={form.control}
+        render={({ field }) => (
           <FormItem>
             <FormLabel>Bio</FormLabel>
             <FormDescription>
@@ -21,22 +21,20 @@ const BioStep = () => {
             </FormDescription>
             <FormControl>
               <Textarea 
-                {...register('bio')}
+                {...field}
                 placeholder="Share a little about yourself, your interests, expertise, or what you're looking for..."
                 className="min-h-32"
               />
             </FormControl>
-            {errors.bio && (
-              <FormMessage>{errors.bio.message as string}</FormMessage>
-            )}
+            <FormMessage />
           </FormItem>
         )}
       />
       
       <FormField
         name="location"
-        control={undefined}
-        render={() => (
+        control={form.control}
+        render={({ field }) => (
           <FormItem>
             <FormLabel>Location</FormLabel>
             <FormDescription>
@@ -44,13 +42,11 @@ const BioStep = () => {
             </FormDescription>
             <FormControl>
               <Input 
-                {...register('location')}
+                {...field}
                 placeholder="City, State, Country" 
               />
             </FormControl>
-            {errors.location && (
-              <FormMessage>{errors.location.message as string}</FormMessage>
-            )}
+            <FormMessage />
           </FormItem>
         )}
       />

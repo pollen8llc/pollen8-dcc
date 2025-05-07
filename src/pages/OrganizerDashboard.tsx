@@ -1,24 +1,51 @@
 
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import CommunityHeader from "@/components/community/CommunityHeader";
 import CommunityMetaInfo from "@/components/community/CommunityMetaInfo";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import * as communityService from "@/services/communityService";
 import NotFoundState from "@/components/community/NotFoundState";
 import { useState, useEffect } from "react";
+import UnifiedCommunityForm from "@/components/community/form/UnifiedCommunityForm";
+
+// Define schema for community form
+const communityFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  is_public: z.boolean().default(true),
+  location: z.string().optional(),
+  format: z.enum(["online", "IRL", "hybrid"]).optional(),
+  type: z.string().optional(),
+  target_audience: z.string().optional(),
+  website: z.string().url().optional().or(z.literal('')),
+  newsletterUrl: z.string().url().optional().or(z.literal('')),
+  social_media: z.object({
+    twitter: z.string().url().optional().or(z.literal('')),
+    linkedin: z.string().url().optional().or(z.literal('')),
+    instagram: z.string().url().optional().or(z.literal('')),
+    facebook: z.string().url().optional().or(z.literal(''))
+  }).optional(),
+  founder_name: z.string().optional(),
+  role_title: z.string().optional(),
+  vision: z.string().optional(),
+  community_values: z.string().optional(),
+  community_structure: z.string().optional()
+});
+
+type CommunityFormValues = z.infer<typeof communityFormSchema>;
 
 const OrganizerDashboard = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const { data: community, isLoading, error } = useQuery({
     queryKey: ["community", id],
@@ -26,28 +53,89 @@ const OrganizerDashboard = () => {
     enabled: !!id,
   });
 
-  // Editing state for name, description, is_public
-  const [editMode, setEditMode] = useState(false);
-  const [editedName, setEditedName] = useState("");
-  const [editedDescription, setEditedDescription] = useState("");
-  const [editedIsPublic, setEditedIsPublic] = useState(true);
+  // Create form with zod validation
+  const form = useForm<CommunityFormValues>({
+    resolver: zodResolver(communityFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      is_public: true,
+      location: "",
+      format: undefined,
+      type: "",
+      target_audience: "",
+      website: "",
+      newsletterUrl: "",
+      social_media: {
+        twitter: "",
+        linkedin: "",
+        instagram: "",
+        facebook: ""
+      },
+      founder_name: "",
+      role_title: "",
+      vision: "",
+      community_values: "",
+      community_structure: ""
+    }
+  });
 
+  // Update form values when community data is loaded
   useEffect(() => {
     if (community) {
-      setEditedName(community.name);
-      setEditedDescription(community.description);
-      setEditedIsPublic(community.is_public);
+      form.reset({
+        name: community.name,
+        description: community.description,
+        is_public: community.is_public,
+        location: community.location || "",
+        format: (community.format as "online" | "IRL" | "hybrid") || undefined,
+        type: community.type || "",
+        target_audience: Array.isArray(community.target_audience) 
+          ? community.target_audience.join(', ') 
+          : (community.target_audience as string) || "",
+        website: community.website || "",
+        newsletterUrl: community.newsletter_url || community.newsletterUrl || "",
+        social_media: {
+          twitter: community.social_media?.twitter || "",
+          linkedin: community.social_media?.linkedin || "",
+          instagram: community.social_media?.instagram || "",
+          facebook: community.social_media?.facebook || ""
+        },
+        founder_name: community.founder_name || "",
+        role_title: community.role_title || "",
+        vision: community.vision || "",
+        community_values: community.community_values || "",
+        community_structure: community.community_structure || ""
+      });
     }
-  }, [community]);
+  }, [community, form]);
 
   const mutation = useMutation({
-    mutationFn: async (updatedFields: { name: string; description: string; isPublic: boolean }) => {
+    mutationFn: async (updatedValues: CommunityFormValues) => {
       if (!community) throw new Error("No community loaded");
+      
+      // Convert target_audience from string to array if needed
+      let targetAudienceArray = updatedValues.target_audience 
+        ? updatedValues.target_audience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+        : [];
+        
       return await communityService.updateCommunity({
         ...community,
-        name: updatedFields.name,
-        description: updatedFields.description,
-        is_public: updatedFields.isPublic,
+        name: updatedValues.name,
+        description: updatedValues.description,
+        is_public: updatedValues.is_public,
+        location: updatedValues.location,
+        format: updatedValues.format,
+        type: updatedValues.type,
+        target_audience: targetAudienceArray,
+        website: updatedValues.website,
+        newsletter_url: updatedValues.newsletterUrl,
+        social_media: updatedValues.social_media,
+        founder_name: updatedValues.founder_name,
+        role_title: updatedValues.role_title,
+        vision: updatedValues.vision,
+        community_values: updatedValues.community_values,
+        community_structure: updatedValues.community_structure
       });
     },
     onSuccess() {
@@ -55,8 +143,8 @@ const OrganizerDashboard = () => {
         title: "Community updated",
         description: "Community details have been updated successfully.",
       });
-      setEditMode(false);
       queryClient.invalidateQueries({ queryKey: ["community", id] });
+      setIsFormOpen(false);
     },
     onError(error: any) {
       toast({
@@ -66,6 +154,11 @@ const OrganizerDashboard = () => {
       });
     },
   });
+
+  const onSubmit = (values: CommunityFormValues) => {
+    console.log("Form submitted with values:", values);
+    mutation.mutate(values);
+  };
 
   if (isLoading) {
     return (
@@ -89,135 +182,24 @@ const OrganizerDashboard = () => {
           <CommunityHeader community={community} />
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="flex-1">
-            <Card className="glass dark:glass-dark mb-8">
-              <CardContent className="p-7">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold">Overview & Edit</h2>
-                  {!editMode ? (
-                    <Button variant="outline" onClick={() => setEditMode(true)}>
-                      Edit
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="destructive"
-                      onClick={() => {
-                        setEditMode(false);
-                        setEditedName(community.name);
-                        setEditedDescription(community.description);
-                        setEditedIsPublic(community.is_public);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </div>
-                {/* Editing form */}
-                {!editMode ? (
-                  <div className="space-y-4">
-                    <div>
-                      <span className="block text-muted-foreground text-sm mb-1">Community name</span>
-                      <span className="text-lg font-bold">{community.name}</span>
-                    </div>
-                    <div>
-                      <span className="block text-muted-foreground text-sm mb-1">Description</span>
-                      <span className="">{community.description}</span>
-                    </div>
-                    <div>
-                      <span className="block text-muted-foreground text-sm mb-1">Visibility</span>
-                      <span className="font-medium">{community.is_public ? "Public" : "Private"}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <form
-                    className="space-y-4"
-                    onSubmit={e => {
-                      e.preventDefault();
-                      mutation.mutate({
-                        name: editedName,
-                        description: editedDescription,
-                        isPublic: editedIsPublic,
-                      });
-                    }}
-                  >
-                    <div>
-                      <label className="block text-muted-foreground text-sm mb-1" htmlFor="name">
-                        Community name
-                      </label>
-                      <Input
-                        id="name"
-                        value={editedName}
-                        onChange={e => setEditedName(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-muted-foreground text-sm mb-1" htmlFor="desc">
-                        Description
-                      </label>
-                      <Textarea
-                        id="desc"
-                        value={editedDescription}
-                        onChange={e => setEditedDescription(e.target.value)}
-                        rows={3}
-                        required
-                      />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <label className="text-muted-foreground" htmlFor="isPublic">Public</label>
-                      <Switch
-                        id="isPublic"
-                        checked={editedIsPublic}
-                        onCheckedChange={setEditedIsPublic}
-                      />
-                    </div>
-                    <Button type="submit" disabled={mutation.isPending} className="w-full sm:w-auto">
-                      {mutation.isPending ? "Saving..." : "Save"}
-                    </Button>
-                  </form>
-                )}
-              </CardContent>
-            </Card>
+        <div className="flex flex-col gap-8">
+          <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <UnifiedCommunityForm
+                mode="edit"
+                community={community}
+                onComplete={() => queryClient.invalidateQueries({ queryKey: ["community", id] })}
+                onCancel={() => setIsFormOpen(false)}
+              />
+            </form>
+          </FormProvider>
 
-            <Card className="glass dark:glass-dark">
-              <CardContent className="p-7">
-                <h2 className="text-xl font-semibold mb-3">Meta Information</h2>
-                <CommunityMetaInfo communityId={community.id} />
-              </CardContent>
-            </Card>
-          </div>
-          {/* Right panel for stats or additional features */}
-          <div className="flex-1 min-w-0">
-            <Card className="glass dark:glass-dark">
-              <CardContent className="p-7 flex flex-col gap-4">
-                <h2 className="font-semibold text-lg mb-3">Quick Stats</h2>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <div>
-                    <div className="text-muted-foreground text-xs mb-1">Members</div>
-                    <div className="text-2xl font-bold">{community.communitySize}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground text-xs mb-1">Format</div>
-                    <div className="text-base">{community.format}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground text-xs mb-1">Type</div>
-                    <div className="text-base">{community.type}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground text-xs mb-1">Location</div>
-                    <div className="text-base">{community.location}</div>
-                  </div>
-                </div>
-                <Separator className="my-4" />
-                <div>
-                  <div className="text-muted-foreground text-xs mb-1">Last updated</div>
-                  <div>{community.updated_at ? new Date(community.updated_at).toLocaleString() : "N/A"}</div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="glass dark:glass-dark">
+            <CardContent className="p-7">
+              <h2 className="text-xl font-semibold mb-3">Meta Information</h2>
+              <CommunityMetaInfo communityId={community.id} />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
