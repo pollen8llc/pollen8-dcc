@@ -30,6 +30,7 @@ const OnlinePresenceStep = () => {
                 {...field}
                 placeholder="https://example.com" 
                 type="url"
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />
@@ -51,6 +52,7 @@ const OnlinePresenceStep = () => {
                 {...field}
                 placeholder="https://newsletter.example.com" 
                 type="url"
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />
@@ -71,6 +73,7 @@ const OnlinePresenceStep = () => {
                 {...field}
                 placeholder="https://twitter.com/username" 
                 type="url"
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />
@@ -89,6 +92,7 @@ const OnlinePresenceStep = () => {
                 {...field}
                 placeholder="https://linkedin.com/company/name" 
                 type="url"
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />
@@ -107,6 +111,7 @@ const OnlinePresenceStep = () => {
                 {...field}
                 placeholder="https://instagram.com/username" 
                 type="url"
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />
@@ -125,6 +130,7 @@ const OnlinePresenceStep = () => {
                 {...field}
                 placeholder="https://facebook.com/pagename" 
                 type="url"
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />

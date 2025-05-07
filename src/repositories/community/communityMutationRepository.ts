@@ -1,4 +1,3 @@
-
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbCommunity } from "../base/baseRepository";
@@ -12,11 +11,16 @@ export const updateCommunity = async (community: Community): Promise<Community> 
     
     // Prepare target audience to ensure it's in array format
     let targetAudience: string[] = [];
+    
+    // Check if target_audience is an array
     if (Array.isArray(community.target_audience)) {
       targetAudience = community.target_audience;
-    } else if (typeof community.target_audience === 'string') {
+    } 
+    // Check if it's a string that needs to be split
+    else if (typeof community.target_audience === 'string' && community.target_audience) {
       targetAudience = community.target_audience.split(',').map(tag => tag.trim()).filter(Boolean);
     }
+    // Otherwise, leave as empty array
     
     const { data, error } = await supabase
       .from('communities')

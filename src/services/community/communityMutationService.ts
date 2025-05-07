@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import * as communityRepository from "@/repositories/community";
 import * as auditService from "@/services/auditService";
@@ -12,10 +11,41 @@ export const updateCommunity = async (community: Community): Promise<Community> 
       throw new Error('Authentication required to update a community');
     }
     
-    return await communityRepository.updateCommunity(community);
-  } catch (error) {
+    // Log the update attempt for debugging
+    console.log("Updating community with data:", JSON.stringify({
+      id: community.id,
+      name: community.name,
+      fields: Object.keys(community)
+    }));
+    
+    // Attempt to update the community
+    const updatedCommunity = await communityRepository.updateCommunity(community);
+    
+    // Log audit action for successful update
+    await auditService.logAuditAction({
+      action: 'community_updated',
+      details: {
+        community_id: updatedCommunity.id,
+        community_name: updatedCommunity.name,
+        timestamp: new Date().toISOString()
+      }
+    });
+    
+    return updatedCommunity;
+  } catch (error: any) {
+    // Detailed error logging for debugging
     console.error("Error in updateCommunity service:", error);
-    throw error;
+    
+    // Format error message for better user experience
+    let errorMessage = error?.message || "Unknown error occurred";
+    
+    if (errorMessage.includes("permission denied")) {
+      errorMessage = "Permission denied: You don't have permission to update this community.";
+    } else if (errorMessage.includes("not found")) {
+      errorMessage = "Community not found or has been deleted.";
+    }
+    
+    throw new Error(`Failed to update community: ${errorMessage}`);
   }
 };
 
