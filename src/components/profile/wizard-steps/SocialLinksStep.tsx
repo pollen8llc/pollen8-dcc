@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,11 +24,21 @@ const platformOptions = [
 
 const SocialLinksStep = ({ formData, updateFormData, form }: SocialLinksStepProps) => {
   // Use form values if form is provided, otherwise fall back to formData
-  const socialLinksData = form?.getValues('socialLinks') || (formData?.social_links as Record<string, string>) || {};
+  const initialSocialLinks = form?.getValues('socialLinks') || (formData?.social_links as Record<string, string>) || {};
   
-  const [socialLinks, setSocialLinks] = useState<Record<string, string>>(socialLinksData);
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>(initialSocialLinks);
   const [platform, setPlatform] = useState("");
   const [url, setUrl] = useState("");
+  
+  // Update local state when form values change externally
+  useEffect(() => {
+    if (form) {
+      const formSocialLinks = form.getValues('socialLinks');
+      if (formSocialLinks && Object.keys(formSocialLinks).length > 0) {
+        setSocialLinks(formSocialLinks);
+      }
+    }
+  }, [form]);
 
   const handleAddLink = () => {
     if (platform && url) {
