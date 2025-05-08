@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Twitter, Linkedin, Facebook, Instagram, Globe, Trash2 } from "lucide-react";
 import { ExtendedProfile } from "@/services/profileService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UseFormReturn } from "react-hook-form";
 
 interface SocialLinksStepProps {
-  formData: Partial<ExtendedProfile>;
-  updateFormData: (data: Partial<ExtendedProfile>) => void;
+  formData?: Partial<ExtendedProfile>;
+  updateFormData?: (data: Partial<ExtendedProfile>) => void;
+  form?: UseFormReturn<any>;
 }
 
 const platformOptions = [
@@ -20,10 +22,11 @@ const platformOptions = [
   { value: "website", label: "Website", icon: Globe }
 ];
 
-const SocialLinksStep = ({ formData, updateFormData }: SocialLinksStepProps) => {
-  const [socialLinks, setSocialLinks] = useState<Record<string, string>>(
-    formData.social_links as Record<string, string> || {}
-  );
+const SocialLinksStep = ({ formData, updateFormData, form }: SocialLinksStepProps) => {
+  // Use form values if form is provided, otherwise fall back to formData
+  const socialLinksData = form?.getValues('socialLinks') || (formData?.social_links as Record<string, string>) || {};
+  
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>(socialLinksData);
   const [platform, setPlatform] = useState("");
   const [url, setUrl] = useState("");
 
@@ -34,7 +37,14 @@ const SocialLinksStep = ({ formData, updateFormData }: SocialLinksStepProps) => 
         [platform]: url
       };
       setSocialLinks(updatedLinks);
-      updateFormData({ social_links: updatedLinks });
+      
+      // Update form if available
+      if (form) {
+        form.setValue('socialLinks', updatedLinks);
+      } else if (updateFormData) {
+        updateFormData({ social_links: updatedLinks });
+      }
+      
       setPlatform("");
       setUrl("");
     }
@@ -43,7 +53,13 @@ const SocialLinksStep = ({ formData, updateFormData }: SocialLinksStepProps) => 
   const handleRemoveLink = (key: string) => {
     const { [key]: removed, ...updatedLinks } = socialLinks;
     setSocialLinks(updatedLinks);
-    updateFormData({ social_links: updatedLinks });
+    
+    // Update form if available
+    if (form) {
+      form.setValue('socialLinks', updatedLinks);
+    } else if (updateFormData) {
+      updateFormData({ social_links: updatedLinks });
+    }
   };
 
   const getPlatformIcon = (platformKey: string) => {
