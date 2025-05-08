@@ -1,3 +1,4 @@
+
 import { Community } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 import { mapDbCommunity } from "../base/baseRepository";
@@ -17,7 +18,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
       targetAudience = community.target_audience;
     } 
     // Check if it's a string that needs to be split
-    else if (typeof community.target_audience === 'string' && community.target_audience) {
+    else if (typeof community.target_audience === 'string' && community.target_audience !== "") {
       targetAudience = community.target_audience.split(',').map(tag => tag.trim()).filter(Boolean);
     }
     // Otherwise, leave as empty array
@@ -81,9 +82,9 @@ export const createCommunity = async (community: Partial<Community>): Promise<Co
       target_audience = community.tags;
     } else if (Array.isArray(community.target_audience)) {
       target_audience = community.target_audience;
-    } else if (typeof community.tags === 'string' && community.tags) {
+    } else if (typeof community.tags === 'string' && community.tags !== "") {
       target_audience = community.tags.split(',').map(t => t.trim()).filter(Boolean);
-    } else if (typeof community.target_audience === 'string' && community.target_audience) {
+    } else if (typeof community.target_audience === 'string' && community.target_audience !== "") {
       target_audience = community.target_audience.split(',').map(t => t.trim()).filter(Boolean);
     }
 
