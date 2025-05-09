@@ -20,7 +20,8 @@ import {
   Building,
   Briefcase,
   User,
-  Calendar
+  Calendar,
+  Tags
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -34,37 +35,34 @@ interface ContactListProps {
 const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 350);
-  const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts"],
     queryFn: getContacts,
   });
 
-  // Filter contacts based on search term and selected community
+  // Filter contacts based on search term and selected tag
   const filteredContacts = contacts.filter((contact) => {
     const matchesSearch = !debouncedSearch || 
       contact.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
       contact.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
       contact.organization?.toLowerCase().includes(debouncedSearch.toLowerCase());
     
-    const matchesCommunity = !selectedCommunity || contact.community_id === selectedCommunity;
+    const matchesTag = !selectedTag || 
+      (contact.tags && contact.tags.includes(selectedTag));
     
-    return matchesSearch && matchesCommunity;
+    return matchesSearch && matchesTag;
   });
 
-  // Get unique communities for the filter
-  const communities = Array.from(
+  // Get unique tags for the filter
+  const uniqueTags = Array.from(
     new Set(
       contacts
-        .filter(contact => contact.community_id)
-        .map(contact => ({ 
-          id: contact.community_id, 
-          name: (contact as any).communities?.name 
-        }))
-        .filter(community => community.name)
+        .flatMap(contact => contact.tags || [])
+        .filter(tag => tag) // Filter out empty/null tags
     )
-  );
+  ).sort();
 
   return (
     <div className="space-y-4">
@@ -81,13 +79,13 @@ const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }
         <div className="flex gap-2 w-full sm:w-auto">
           <select
             className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            value={selectedCommunity || ""}
-            onChange={(e) => setSelectedCommunity(e.target.value || null)}
+            value={selectedTag || ""}
+            onChange={(e) => setSelectedTag(e.target.value || null)}
           >
-            <option value="">All Communities</option>
-            {communities.map((community) => (
-              <option key={community.id} value={community.id}>
-                {community.name}
+            <option value="">All Tags</option>
+            {uniqueTags.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
               </option>
             ))}
           </select>
@@ -110,8 +108,8 @@ const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }
           <User className="h-12 w-12 text-muted-foreground/50 mx-auto" />
           <h3 className="mt-2 text-lg font-medium">No contacts found</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {debouncedSearch
-              ? "Try a different search term"
+            {debouncedSearch || selectedTag
+              ? "Try a different search term or tag"
               : "Add your first contact to get started"}
           </p>
           {onAddContact && (
@@ -129,7 +127,7 @@ const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }
                 <TableHead>Name</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Organization</TableHead>
-                <TableHead>Community</TableHead>
+                <TableHead>Tags</TableHead>
                 <TableHead>Last Contact</TableHead>
               </TableRow>
             </TableHeader>
@@ -172,12 +170,17 @@ const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }
                     )}
                   </TableCell>
                   <TableCell>
-                    {(contact as any).communities?.name ? (
-                      <Badge variant="outline" className="font-normal">
-                        {(contact as any).communities.name}
-                      </Badge>
+                    {contact.tags && contact.tags.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        <Tags className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+                        {contact.tags.map(tag => (
+                          <Badge key={tag} variant="outline" className="font-normal">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
                     ) : (
-                      <span className="text-muted-foreground text-xs">None</span>
+                      <span className="text-muted-foreground text-xs">No tags</span>
                     )}
                   </TableCell>
                   <TableCell>

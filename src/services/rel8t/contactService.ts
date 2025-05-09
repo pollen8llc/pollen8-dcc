@@ -10,7 +10,7 @@ export interface Contact {
   phone?: string;
   organization?: string;
   role?: string;
-  community_id?: string;
+  tags?: string[];
   notes?: string;
   last_contact_date?: string;
   created_at?: string;
@@ -21,7 +21,7 @@ export const getContacts = async (): Promise<Contact[]> => {
   try {
     const { data, error } = await supabase
       .from("rms_contacts")
-      .select("*, communities(name)")
+      .select("*")
       .order("name");
 
     if (error) throw error;
@@ -41,7 +41,7 @@ export const getContact = async (id: string): Promise<Contact | null> => {
   try {
     const { data, error } = await supabase
       .from("rms_contacts")
-      .select("*, communities(name)")
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -60,9 +60,15 @@ export const getContact = async (id: string): Promise<Contact | null> => {
 
 export const createContact = async (contact: Omit<Contact, "id" | "user_id" | "created_at" | "updated_at">): Promise<Contact | null> => {
   try {
+    // Add user_id to contact
+    const dataToInsert = {
+      ...contact,
+      user_id: supabase.auth.getUser().then(res => res.data.user?.id)
+    };
+
     const { data, error } = await supabase
       .from("rms_contacts")
-      .insert([contact])
+      .insert([dataToInsert])
       .select()
       .single();
 
@@ -139,36 +145,34 @@ export const deleteContact = async (id: string): Promise<boolean> => {
   }
 };
 
-export const getContactsByCommunityCounts = async (): Promise<{ communityName: string; count: number }[]> => {
+export const getContactsByTags = async (tag: string): Promise<{ tagName: string; count: number }[]> => {
   try {
     const { data, error } = await supabase
       .from("rms_contacts")
       .select(`
-        communities (
-          id,
-          name
-        )
+        tags
       `);
 
     if (error) throw error;
 
-    const communityMap = new Map<string, { communityName: string; count: number }>();
+    const tagMap = new Map<string, { tagName: string; count: number }>();
     
     data.forEach((record) => {
-      if (record.communities) {
-        const communityName = record.communities.name;
-        const existing = communityMap.get(record.communities.id) || { 
-          communityName,
-          count: 0
-        };
-        existing.count++;
-        communityMap.set(record.communities.id, existing);
+      if (record.tags && Array.isArray(record.tags)) {
+        record.tags.forEach((tag: string) => {
+          const existing = tagMap.get(tag) || { 
+            tagName: tag,
+            count: 0
+          };
+          existing.count++;
+          tagMap.set(tag, existing);
+        });
       }
     });
 
-    return Array.from(communityMap.values());
+    return Array.from(tagMap.values());
   } catch (error: any) {
-    console.error("Error fetching community contact counts:", error);
+    console.error("Error fetching contact tag counts:", error);
     return [];
   }
 };
