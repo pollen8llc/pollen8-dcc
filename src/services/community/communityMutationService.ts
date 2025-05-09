@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import * as communityRepository from "@/repositories/community";
 import * as auditService from "@/services/auditService";
@@ -9,6 +10,27 @@ export const updateCommunity = async (community: Community): Promise<Community> 
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData?.session?.user?.id) {
       throw new Error('Authentication required to update a community');
+    }
+    
+    // Get the current user ID
+    const userId = sessionData.session.user.id;
+    
+    // Check if user can manage this community using our DB function
+    const { data: canManage, error: permissionError } = await supabase.rpc(
+      'can_manage_community', 
+      { 
+        user_id: userId,
+        community_id: community.id
+      }
+    );
+    
+    if (permissionError) {
+      console.error("Permission check error:", permissionError);
+      throw new Error(`Permission check failed: ${permissionError.message}`);
+    }
+    
+    if (!canManage) {
+      throw new Error('Permission denied: You do not have permission to update this community');
     }
     
     // Log the update attempt for debugging
@@ -39,7 +61,7 @@ export const updateCommunity = async (community: Community): Promise<Community> 
     // Format error message for better user experience
     let errorMessage = error?.message || "Unknown error occurred";
     
-    if (errorMessage.includes("permission denied")) {
+    if (errorMessage.includes("permission denied") || errorMessage.includes("Permission denied")) {
       errorMessage = "Permission denied: You don't have permission to update this community.";
     } else if (errorMessage.includes("not found")) {
       errorMessage = "Community not found or has been deleted.";

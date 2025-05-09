@@ -1,5 +1,5 @@
 
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,10 @@ import * as communityService from "@/services/communityService";
 import NotFoundState from "@/components/community/NotFoundState";
 import { useState, useEffect } from "react";
 import UnifiedCommunityForm from "@/components/community/form/UnifiedCommunityForm";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useUser } from "@/contexts/UserContext";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Shield, AlertTriangle } from "lucide-react";
 
 // Define schema for community form
 const communityFormSchema = z.object({
@@ -50,6 +54,9 @@ const OrganizerDashboard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { currentUser } = useUser();
+  const { isAdmin, isOrganizer, isOwner } = usePermissions(currentUser);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   const { data: community, isLoading, error } = useQuery({
     queryKey: ["community", id],
@@ -83,6 +90,40 @@ const OrganizerDashboard = () => {
       community_structure: ""
     }
   });
+
+  // Check if user has permission to edit this community
+  useEffect(() => {
+    const checkPermission = async () => {
+      if (!community || !currentUser) return;
+      
+      // Admin always has permission
+      if (isAdmin()) {
+        setHasPermission(true);
+        return;
+      }
+      
+      // Check if user is organizer and community owner
+      if (isOrganizer()) {
+        if (community.owner_id === currentUser.id) {
+          setHasPermission(true);
+          return;
+        }
+        
+        // For organizers who aren't owners, we need to check if they're specifically allowed
+        try {
+          const ownerStatus = await isOwner(community.id);
+          setHasPermission(ownerStatus);
+        } catch (error) {
+          console.error("Error checking ownership permission:", error);
+          setHasPermission(false);
+        }
+      } else {
+        setHasPermission(false);
+      }
+    };
+    
+    checkPermission();
+  }, [community, currentUser, isAdmin, isOrganizer, isOwner]);
 
   // Update form values when community data is loaded
   useEffect(() => {
@@ -170,6 +211,16 @@ const OrganizerDashboard = () => {
     console.log("Form submitted with values:", values);
     mutation.mutate(values);
   };
+  
+  // If the user doesn't have permission, redirect them
+  if (hasPermission === false && !isLoading && community) {
+    toast({
+      title: "Permission denied",
+      description: "You don't have permission to edit this community.",
+      variant: "destructive",
+    });
+    return <Navigate to={`/community/${id}`} />;
+  }
 
   if (isLoading) {
     return (
@@ -181,6 +232,7 @@ const OrganizerDashboard = () => {
       </div>
     );
   }
+  
   if (error || !community) {
     return <NotFoundState />;
   }
@@ -192,6 +244,16 @@ const OrganizerDashboard = () => {
         <div className="mb-8">
           <CommunityHeader community={community} />
         </div>
+
+        {mutation.error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {mutation.error.message || "Failed to update community. Please try again."}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex flex-col gap-8">
           <FormProvider {...form}>

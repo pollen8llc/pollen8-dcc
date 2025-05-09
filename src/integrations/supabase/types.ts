@@ -516,6 +516,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_community: {
+        Args: { user_id: string; community_id: string }
+        Returns: boolean
+      }
       can_view_profile: {
         Args: { viewer_id: string; profile_id: string }
         Returns: boolean
