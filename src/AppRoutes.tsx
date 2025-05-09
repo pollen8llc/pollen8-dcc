@@ -24,6 +24,11 @@ import CommunityProfile from "./pages/CommunityProfile";
 import ProfileSearchPage from "./pages/ProfileSearchPage";
 import ConnectionsPage from "./pages/ConnectionsPage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
+// Import REL8T pages
+import Rel8tDashboard from "./pages/rel8t/Dashboard";
+import Relationships from "./pages/rel8t/Relationships";
+import Contacts from "./pages/rel8t/Contacts";
+import Analytics from "./pages/rel8t/Analytics";
 
 const AppRoutes = () => {
   const { currentUser, isLoading } = useUser();
@@ -52,6 +57,14 @@ const AppRoutes = () => {
       console.log("Profile incomplete, redirecting to setup page");
       navigate('/profile/setup');
     }
+
+    // Redirect organizers to REL8T dashboard if they land on the root page
+    if (currentUser && 
+        (currentUser.role === UserRole.ORGANIZER || (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) &&
+        window.location.pathname === '/') {
+      console.log("Organizer detected, redirecting to REL8T dashboard");
+      navigate('/rel8t/dashboard');
+    }
   }, [currentUser, navigate]);
 
   return (
@@ -68,6 +81,28 @@ const AppRoutes = () => {
       <Route path="/create-admin" element={<CreateAdminForm />} />
       <Route path="/community/:id" element={<CommunityProfile />} />
       <Route path="/documentation" element={<Documentation />} />
+      
+      {/* REL8T Routes */}
+      <Route path="/rel8t/dashboard" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <Rel8tDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/rel8t/relationships" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <Relationships />
+        </ProtectedRoute>
+      } />
+      <Route path="/rel8t/contacts" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <Contacts />
+        </ProtectedRoute>
+      } />
+      <Route path="/rel8t/analytics" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <Analytics />
+        </ProtectedRoute>
+      } />
       
       {/* Profile routes */}
       <Route path="/profile" element={

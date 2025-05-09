@@ -21,7 +21,11 @@ import {
   FileText,
   UserSearch,
   Shield,
-  Network
+  Network,
+  LayoutDashboard,
+  ContactIcon,
+  BarChart3,
+  ListTodo
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 
@@ -110,6 +114,52 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Join Communities
+                </Button>
+              </>
+            )}
+
+            {/* REL8T menu items (for organizers) */}
+            {isOrganizer && (
+              <>
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  REL8T
+                </p>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/dashboard")}
+                >
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/relationships")}
+                >
+                  <ListTodo className="mr-2 h-4 w-4" />
+                  Relationships
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/contacts")}
+                >
+                  <ContactIcon className="mr-2 h-4 w-4" />
+                  Contacts
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/analytics")}
+                >
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Analytics
                 </Button>
               </>
             )}

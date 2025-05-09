@@ -340,6 +340,164 @@ export type Database = {
         }
         Relationships: []
       }
+      rms_contacts: {
+        Row: {
+          community_id: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          last_contact_date: string | null
+          name: string
+          notes: string | null
+          organization: string | null
+          phone: string | null
+          role: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          community_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          last_contact_date?: string | null
+          name: string
+          notes?: string | null
+          organization?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          community_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          last_contact_date?: string | null
+          name?: string
+          notes?: string | null
+          organization?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_contacts_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_outreach: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          due_date: string
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          priority: string
+          status: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rms_outreach_contacts: {
+        Row: {
+          contact_id: string
+          id: string
+          outreach_id: string
+        }
+        Insert: {
+          contact_id: string
+          id?: string
+          outreach_id: string
+        }
+        Update: {
+          contact_id?: string
+          id?: string
+          outreach_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_outreach_contacts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_outreach_contacts_outreach_id_fkey"
+            columns: ["outreach_id"]
+            isOneToOne: false
+            referencedRelation: "rms_outreach"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_triggers: {
+        Row: {
+          action: string
+          condition: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          condition: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          condition?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       roles: {
         Row: {
           created_at: string
