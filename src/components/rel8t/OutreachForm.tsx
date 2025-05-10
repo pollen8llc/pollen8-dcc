@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,7 +38,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { getContacts } from "@/services/rel8t/contactService";
+import { getContacts, Contact } from "@/services/rel8t/contactService";
 
 const outreachFormSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 characters." }),
@@ -88,9 +87,10 @@ const OutreachForm: React.FC<OutreachFormProps> = ({
 
   const selectedContactIds = form.watch("contactIds");
   
-  const selectedContacts = contactsData.filter(contact => 
-    selectedContactIds.includes(contact.id)
-  );
+  const selectedContacts = contactsData && Array.isArray(contactsData) ? 
+    contactsData.filter(contact => 
+      selectedContactIds.includes(contact.id)
+    ) : [];
 
   const handleSubmit = (values: OutreachFormValues) => {
     onSubmit(values);
@@ -232,7 +232,7 @@ const OutreachForm: React.FC<OutreachFormProps> = ({
                           <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
                         </div>
                       ) : (
-                        contactsData.map((contact) => (
+                        contactsData && Array.isArray(contactsData) && contactsData.map((contact) => (
                           <CommandItem
                             key={contact.id}
                             value={contact.id}

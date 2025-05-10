@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getContacts, Contact } from "@/services/rel8t/contactService";
@@ -43,7 +42,7 @@ const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }
   });
 
   // Filter contacts based on search term and selected tag
-  const filteredContacts = contacts.filter((contact) => {
+  const filteredContacts = Array.isArray(contacts) ? contacts.filter((contact) => {
     const matchesSearch = !debouncedSearch || 
       contact.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
       contact.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
@@ -53,16 +52,16 @@ const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }
       (contact.tags && contact.tags.includes(selectedTag));
     
     return matchesSearch && matchesTag;
-  });
+  }) : [];
 
   // Get unique tags for the filter
-  const uniqueTags = Array.from(
+  const uniqueTags = Array.isArray(contacts) ? Array.from(
     new Set(
       contacts
         .flatMap(contact => contact.tags || [])
         .filter(tag => tag) // Filter out empty/null tags
     )
-  ).sort();
+  ).sort() : [];
 
   return (
     <div className="space-y-4">

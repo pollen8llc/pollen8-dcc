@@ -90,9 +90,12 @@ const Dashboard = () => {
   };
 
   // Calculate dynamic progress values
-  const contactsWithoutOutreachCount = outreachCounts ? Math.max(0, contactCount - (outreachCounts.today + outreachCounts.upcoming + outreachCounts.overdue + outreachCounts.completed)) : 0;
+  const contactsWithoutOutreachCount = typeof contactCount === 'number' && typeof outreachCounts.today === 'number' && 
+    typeof outreachCounts.upcoming === 'number' && typeof outreachCounts.overdue === 'number' && 
+    typeof outreachCounts.completed === 'number' ? 
+    Math.max(0, contactCount - (outreachCounts.today + outreachCounts.upcoming + outreachCounts.overdue + outreachCounts.completed)) : 0;
   
-  const outreachProgress = contactCount > 0 
+  const outreachProgress = typeof contactCount === 'number' && contactCount > 0 
     ? Math.min(100, 100 - Math.round((contactsWithoutOutreachCount / contactCount) * 100))
     : 0;
 
