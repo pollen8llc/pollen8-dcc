@@ -26,8 +26,24 @@ interface SelectTriggersStepProps {
   onPrevious: () => void;
 }
 
+// Define types for template delay
+interface TemplateDelay {
+  value: number;
+  unit: string;
+}
+
+// Define type for trigger template
+interface TriggerTemplate {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  delay: TemplateDelay;
+  isCustomDate?: boolean;
+}
+
 // Trigger template options
-const triggerTemplates = [
+const triggerTemplates: TriggerTemplate[] = [
   {
     id: "follow-up-1",
     name: "Initial Follow-up",
@@ -85,11 +101,11 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
       // Calculate date based on template delay
       let triggerDate = new Date();
       
-      if (template.unit === "day") {
+      if (template.delay.unit === "day") {
         triggerDate = addDays(triggerDate, template.delay.value);
-      } else if (template.unit === "week") {
+      } else if (template.delay.unit === "week") {
         triggerDate = addWeeks(triggerDate, template.delay.value);
-      } else if (template.unit === "month") {
+      } else if (template.delay.unit === "month") {
         triggerDate = addMonths(triggerDate, template.delay.value);
       }
       

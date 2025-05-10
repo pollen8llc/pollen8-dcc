@@ -163,7 +163,7 @@ const Notifications = () => {
             title="Reminders"
             value={reminderCount}
             icon={<Calendar className="h-5 w-5" />}
-            color="primary"
+            color="success"
           />
           
           <MetricCard
