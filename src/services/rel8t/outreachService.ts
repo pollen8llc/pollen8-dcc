@@ -91,7 +91,7 @@ export const getOutreach = async (status?: string): Promise<Outreach[]> => {
         .map((oc: any) => oc.rms_contacts)
         .filter(Boolean);
 
-      // Convert to the expected type
+      // Convert to the expected type with proper type casting
       const outreach: Outreach = {
         id: item.id,
         user_id: item.user_id,
@@ -210,9 +210,11 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       description: "Your relationship outreach has been successfully created.",
     });
     
-    // Return the created outreach with empty contacts array
+    // Return the created outreach with empty contacts array and proper type casting
     return {
       ...data,
+      priority: data.priority as OutreachPriority,
+      status: data.status as OutreachStatus,
       contacts: []
     };
   } catch (error: any) {

@@ -14,7 +14,8 @@ import {
 } from "@/services/rel8t/contactService";
 import {
   getOutreach,
-  getOutreachStatusCounts
+  getOutreachStatusCounts,
+  OutreachStatusCounts
 } from "@/services/rel8t/outreachService";
 import {
   getActiveTriggerCount
@@ -27,7 +28,6 @@ import {
 } from "@/components/ui/dialog";
 import ContactForm from "@/components/rel8t/ContactForm";
 import OutreachForm from "@/components/rel8t/OutreachForm";
-import { useState as useStateFromHooks } from 'react';
 import { createContact } from "@/services/rel8t/contactService";
 import { createOutreach } from "@/services/rel8t/outreachService";
 import { useNavigate } from "react-router-dom";
@@ -90,13 +90,15 @@ const Dashboard = () => {
   };
 
   // Calculate dynamic progress values
-  const contactsWithoutOutreachCount = typeof contactCount === 'number' && typeof outreachCounts.today === 'number' && 
-    typeof outreachCounts.upcoming === 'number' && typeof outreachCounts.overdue === 'number' && 
-    typeof outreachCounts.completed === 'number' ? 
-    Math.max(0, contactCount - (outreachCounts.today + outreachCounts.upcoming + outreachCounts.overdue + outreachCounts.completed)) : 0;
+  const contactsWithoutOutreachCount = 
+    Math.max(0, Number(contactCount) - 
+      (Number(outreachCounts.today) + 
+       Number(outreachCounts.upcoming) + 
+       Number(outreachCounts.overdue) + 
+       Number(outreachCounts.completed)));
   
-  const outreachProgress = typeof contactCount === 'number' && contactCount > 0 
-    ? Math.min(100, 100 - Math.round((contactsWithoutOutreachCount / contactCount) * 100))
+  const outreachProgress = Number(contactCount) > 0 
+    ? Math.min(100, 100 - Math.round((Number(contactsWithoutOutreachCount) / Number(contactCount)) * 100))
     : 0;
 
   return (

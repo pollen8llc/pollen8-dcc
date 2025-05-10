@@ -272,7 +272,7 @@ const OutreachForm: React.FC<OutreachFormProps> = ({
               {/* Show selected contacts as badges */}
               {selectedContacts.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1.5">
-                  {selectedContacts.map(contact => (
+                  {selectedContacts.map((contact: Contact) => (
                     <Badge
                       key={contact.id}
                       variant="secondary"

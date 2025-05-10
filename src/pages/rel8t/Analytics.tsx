@@ -28,10 +28,10 @@ const Analytics = () => {
 
   // Prepare data for charts
   const outreachStatusData = [
-    { name: "Today", value: outreachCounts.today, color: "#f59e0b" },
-    { name: "Upcoming", value: outreachCounts.upcoming, color: "#3b82f6" },
-    { name: "Overdue", value: outreachCounts.overdue, color: "#ef4444" },
-    { name: "Completed", value: outreachCounts.completed, color: "#10b981" },
+    { name: "Today", value: Number(outreachCounts.today), color: "#f59e0b" },
+    { name: "Upcoming", value: Number(outreachCounts.upcoming), color: "#3b82f6" },
+    { name: "Overdue", value: Number(outreachCounts.overdue), color: "#ef4444" },
+    { name: "Completed", value: Number(outreachCounts.completed), color: "#10b981" },
   ].filter(item => item.value > 0);
 
   const communityDistributionData = communityCounts.map((item, index) => {
