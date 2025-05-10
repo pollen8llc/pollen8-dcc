@@ -342,7 +342,6 @@ export type Database = {
       }
       rms_contacts: {
         Row: {
-          community_id: string | null
           created_at: string | null
           email: string | null
           id: string
@@ -352,11 +351,11 @@ export type Database = {
           organization: string | null
           phone: string | null
           role: string | null
+          tags: string[] | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
-          community_id?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -366,11 +365,11 @@ export type Database = {
           organization?: string | null
           phone?: string | null
           role?: string | null
+          tags?: string[] | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
-          community_id?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -380,18 +379,11 @@ export type Database = {
           organization?: string | null
           phone?: string | null
           role?: string | null
+          tags?: string[] | null
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "rms_contacts_community_id_fkey"
-            columns: ["community_id"]
-            isOneToOne: false
-            referencedRelation: "communities"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       rms_outreach: {
         Row: {

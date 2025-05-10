@@ -28,9 +28,16 @@ export interface OutreachWithContacts extends Outreach {
   }[];
 }
 
-export const getOutreach = async (): Promise<Outreach[]> => {
+export interface OutreachStatusCounts {
+  today: number;
+  upcoming: number;
+  overdue: number;
+  completed: number;
+}
+
+export const getOutreach = async (status?: string): Promise<Outreach[]> => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("rms_outreach")
       .select(`
         *,
@@ -41,8 +48,40 @@ export const getOutreach = async (): Promise<Outreach[]> => {
             name
           )
         )
-      `)
-      .order("due_date");
+      `);
+    
+    if (status) {
+      const now = new Date();
+      const today = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const startOfTomorrow = new Date(tomorrow.setHours(0, 0, 0, 0)).toISOString();
+      
+      switch (status) {
+        case "today":
+          query = query
+            .eq("status", "pending")
+            .lte("due_date", today);
+          break;
+        case "upcoming":
+          query = query
+            .eq("status", "pending")
+            .gt("due_date", today);
+          break;
+        case "overdue":
+          query = query
+            .eq("status", "overdue");
+          break;
+        case "completed":
+          query = query
+            .eq("status", "completed");
+          break;
+      }
+    }
+    
+    query = query.order("due_date");
+    
+    const { data, error } = await query;
 
     if (error) throw error;
 
@@ -130,7 +169,7 @@ export const getOutreachWithDetail = async (id: string): Promise<OutreachWithCon
   }
 };
 
-export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" | "created_at" | "updated_at">, contactIds: string[]): Promise<Outreach | null> => {
+export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" | "created_at" | "updated_at" | "status">, contactIds: string[]): Promise<Outreach | null> => {
   try {
     // Get the current user's ID
     const { data: { user } } = await supabase.auth.getUser();
@@ -140,6 +179,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     // Create the outreach
     const outreachToInsert = {
       ...outreach,
+      status: "pending" as OutreachStatus, // Set default status
       user_id: user.id
     };
 
@@ -293,30 +333,52 @@ export const deleteOutreach = async (id: string): Promise<boolean> => {
   }
 };
 
-export const getOutreachByStatus = async (): Promise<{ status: string; count: number }[]> => {
+export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> => {
   try {
+    // Get current date info
+    const now = new Date();
+    const today = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+    
+    // Get all outreach
     const { data, error } = await supabase
       .from("rms_outreach")
-      .select('status');
+      .select('*');
 
     if (error) throw error;
 
-    const statusCounts: { [key: string]: number } = {
-      pending: 0,
-      completed: 0,
-      overdue: 0
+    // Initialize counters
+    const counts: OutreachStatusCounts = {
+      today: 0,
+      upcoming: 0,
+      overdue: 0,
+      completed: 0
     };
     
+    // Count outreach by status
     data.forEach(item => {
-      if (item.status in statusCounts) {
-        statusCounts[item.status]++;
+      if (item.status === 'completed') {
+        counts.completed++;
+      } else if (item.status === 'overdue') {
+        counts.overdue++;
+      } else if (item.status === 'pending') {
+        // Check if due today or upcoming
+        if (new Date(item.due_date) <= new Date(today)) {
+          counts.today++;
+        } else {
+          counts.upcoming++;
+        }
       }
     });
     
-    return Object.entries(statusCounts).map(([status, count]) => ({ status, count }));
+    return counts;
   } catch (error: any) {
     console.error("Error fetching outreach status counts:", error);
-    return [];
+    return {
+      today: 0,
+      upcoming: 0,
+      overdue: 0,
+      completed: 0
+    };
   }
 };
 
