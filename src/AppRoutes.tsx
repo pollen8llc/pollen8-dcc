@@ -25,10 +25,11 @@ import ProfileSearchPage from "./pages/ProfileSearchPage";
 import ConnectionsPage from "./pages/ConnectionsPage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
 // Import REL8T pages
-import Rel8tDashboard from "./pages/rel8t/Dashboard";
+import Analytics from "./pages/rel8t/Analytics";
 import Relationships from "./pages/rel8t/Relationships";
 import Contacts from "./pages/rel8t/Contacts";
-import Analytics from "./pages/rel8t/Analytics";
+import Notifications from "./pages/rel8t/Notifications";
+import RelationshipWizard from "./pages/rel8t/RelationshipWizard";
 
 const AppRoutes = () => {
   const { currentUser, isLoading } = useUser();
@@ -58,12 +59,12 @@ const AppRoutes = () => {
       navigate('/profile/setup');
     }
 
-    // Redirect organizers to REL8T dashboard if they land on the root page
+    // Redirect organizers to REL8T analytics if they land on the root page
     if (currentUser && 
         (currentUser.role === UserRole.ORGANIZER || (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) &&
         window.location.pathname === '/') {
-      console.log("Organizer detected, redirecting to REL8T dashboard");
-      navigate('/rel8t/dashboard');
+      console.log("Organizer detected, redirecting to REL8T analytics");
+      navigate('/rel8t/analytics');
     }
   }, [currentUser, navigate]);
 
@@ -78,14 +79,24 @@ const AppRoutes = () => {
           <JoinCommunities />
         </ProtectedRoute>
       } />
-      <Route path="/create-admin" element={<CreateAdminForm />} />
       <Route path="/community/:id" element={<CommunityProfile />} />
       <Route path="/documentation" element={<Documentation />} />
+      <Route path="/create-admin" element={<CreateAdminForm />} />
       
       {/* REL8T Routes */}
       <Route path="/rel8t/dashboard" element={
         <ProtectedRoute requiredRole="ORGANIZER">
-          <Rel8tDashboard />
+          <Navigate to="/rel8t/analytics" replace />
+        </ProtectedRoute>
+      } />
+      <Route path="/rel8t/analytics" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <Analytics />
+        </ProtectedRoute>
+      } />
+      <Route path="/rel8t/notifications" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <Notifications />
         </ProtectedRoute>
       } />
       <Route path="/rel8t/relationships" element={
@@ -98,9 +109,9 @@ const AppRoutes = () => {
           <Contacts />
         </ProtectedRoute>
       } />
-      <Route path="/rel8t/analytics" element={
+      <Route path="/rel8t/wizard" element={
         <ProtectedRoute requiredRole="ORGANIZER">
-          <Analytics />
+          <RelationshipWizard />
         </ProtectedRoute>
       } />
       

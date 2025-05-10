@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,9 @@ import {
   LayoutDashboard,
   ContactIcon,
   BarChart3,
-  ListTodo
+  ListTodo,
+  Import,
+  Bell
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 
@@ -129,10 +130,19 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/dashboard")}
+                  onClick={() => handleNavigation("/rel8t/analytics")}
                 >
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Analytics Dashboard
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/notifications")}
+                >
+                  <Bell className="mr-2 h-4 w-4" />
+                  Notifications
                 </Button>
                 
                 <Button
@@ -156,10 +166,10 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/analytics")}
+                  onClick={() => handleNavigation("/rel8t/wizard")}
                 >
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Analytics
+                  <Import className="mr-2 h-4 w-4" />
+                  Build Relationship
                 </Button>
               </>
             )}
