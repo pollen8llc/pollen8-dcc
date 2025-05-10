@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -270,7 +269,12 @@ export const updateOutreach = async (id: string, outreach: Partial<Outreach>, co
       description: "Your relationship outreach has been successfully updated.",
     });
     
-    return data;
+    // Make sure to cast the priority and status to the correct types
+    return {
+      ...data,
+      priority: data.priority as OutreachPriority,
+      status: data.status as OutreachStatus
+    };
   } catch (error: any) {
     console.error(`Error updating outreach ${id}:`, error);
     toast({
