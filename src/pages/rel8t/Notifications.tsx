@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/rel8t/MetricCard";
 import { Bell, Calendar, Clock, Check, AlertCircle, Mail } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { TriggerManagement } from "@/components/rel8t/TriggerManagement";
+import { getEmailStatistics } from "@/services/rel8t/emailService";
+import { getActiveTriggerCount } from "@/services/rel8t/triggerService";
 
 type Notification = {
   id: string;
@@ -119,6 +122,18 @@ const NotificationCard = ({ notification }: { notification: Notification }) => {
 const Notifications = () => {
   const [activeTab, setActiveTab] = useState("all");
   
+  // Fetch email statistics
+  const { data: emailStats = { pending: 0, sent: 0, failed: 0, total: 0 } } = useQuery({
+    queryKey: ["email-statistics"],
+    queryFn: getEmailStatistics,
+  });
+
+  // Fetch active trigger count
+  const { data: activeTriggerCount = 0 } = useQuery({
+    queryKey: ["active-trigger-count"],
+    queryFn: getActiveTriggerCount,
+  });
+  
   // Filter notifications based on active tab
   const filteredNotifications = activeTab === "all" 
     ? mockNotifications 
@@ -132,6 +147,9 @@ const Notifications = () => {
   const systemCount = mockNotifications.filter(n => n.type === 'system').length;
   const unreadCount = mockNotifications.filter(n => !n.read).length;
 
+  // Main tab state for the page (notifications vs trigger management)
+  const [mainTab, setMainTab] = useState("notifications");
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -140,92 +158,140 @@ const Notifications = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Notifications</h1>
           <p className="text-muted-foreground mt-1">
-            View messages and alerts from your REL8T system
+            View messages, alerts and manage outreach triggers
           </p>
         </div>
 
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <MetricCard
-            title="Unread Notifications"
-            value={unreadCount}
-            icon={<Bell className="h-5 w-5" />}
-            color={unreadCount > 0 ? "warning" : "default"}
-          />
-          
-          <MetricCard
-            title="Email Notifications"
-            value={emailCount}
-            icon={<Mail className="h-5 w-5" />}
-          />
-          
-          <MetricCard
-            title="Reminders"
-            value={reminderCount}
-            icon={<Calendar className="h-5 w-5" />}
-            color="success"
-          />
-          
-          <MetricCard
-            title="System Updates"
-            value={systemCount}
-            icon={<AlertCircle className="h-5 w-5" />}
-          />
-        </div>
+        {/* Main tabs for the page */}
+        <Tabs value={mainTab} onValueChange={setMainTab} className="mb-8">
+          <TabsList className="mb-4">
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="triggers">Trigger Management</TabsTrigger>
+          </TabsList>
 
-        {/* Notifications List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Notifications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-              <TabsList className="mb-4">
-                <TabsTrigger value="all">
-                  All
-                </TabsTrigger>
-                <TabsTrigger value="unread" className="relative">
-                  Unread
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
-                      {unreadCount}
-                    </span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="email">
-                  Emails
-                </TabsTrigger>
-                <TabsTrigger value="reminder">
-                  Reminders
-                </TabsTrigger>
-                <TabsTrigger value="system">
-                  System
-                </TabsTrigger>
-              </TabsList>
+          {/* Notifications Tab Content */}
+          <TabsContent value="notifications">
+            {/* Metrics Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <MetricCard
+                title="Unread Notifications"
+                value={unreadCount}
+                icon={<Bell className="h-5 w-5" />}
+                color={unreadCount > 0 ? "warning" : "default"}
+              />
               
-              <TabsContent value={activeTab}>
-                {filteredNotifications.length === 0 ? (
-                  <div className="text-center py-12 border border-dashed rounded-lg">
-                    <Bell className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                    <h3 className="mt-2 font-semibold">No notifications</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      You don't have any {activeTab !== 'all' ? activeTab + ' ' : ''}notifications yet.
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    {filteredNotifications.map((notification) => (
-                      <NotificationCard 
-                        key={notification.id} 
-                        notification={notification} 
-                      />
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+              <MetricCard
+                title="Email Notifications"
+                value={emailCount}
+                icon={<Mail className="h-5 w-5" />}
+              />
+              
+              <MetricCard
+                title="Reminders"
+                value={reminderCount}
+                icon={<Calendar className="h-5 w-5" />}
+                color="success"
+              />
+              
+              <MetricCard
+                title="System Updates"
+                value={systemCount}
+                icon={<AlertCircle className="h-5 w-5" />}
+              />
+            </div>
+
+            {/* Notifications List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Notifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="all">
+                      All
+                    </TabsTrigger>
+                    <TabsTrigger value="unread" className="relative">
+                      Unread
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger value="email">
+                      Emails
+                    </TabsTrigger>
+                    <TabsTrigger value="reminder">
+                      Reminders
+                    </TabsTrigger>
+                    <TabsTrigger value="system">
+                      System
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value={activeTab}>
+                    {filteredNotifications.length === 0 ? (
+                      <div className="text-center py-12 border border-dashed rounded-lg">
+                        <Bell className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                        <h3 className="mt-2 font-semibold">No notifications</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          You don't have any {activeTab !== 'all' ? activeTab + ' ' : ''}notifications yet.
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        {filteredNotifications.map((notification) => (
+                          <NotificationCard 
+                            key={notification.id} 
+                            notification={notification} 
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Trigger Management Tab Content */}
+          <TabsContent value="triggers">
+            {/* Metrics Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <MetricCard
+                title="Active Triggers"
+                value={activeTriggerCount}
+                icon={<Calendar className="h-5 w-5" />}
+                color="success"
+              />
+              
+              <MetricCard
+                title="Pending Emails"
+                value={emailStats.pending}
+                icon={<Mail className="h-5 w-5" />}
+                color="warning"
+              />
+              
+              <MetricCard
+                title="Sent Emails"
+                value={emailStats.sent}
+                icon={<Check className="h-5 w-5" />}
+                color="default"
+              />
+              
+              <MetricCard
+                title="Failed Emails"
+                value={emailStats.failed}
+                icon={<AlertCircle className="h-5 w-5" />}
+                color="danger"
+              />
+            </div>
+
+            {/* Trigger Management Component */}
+            <TriggerManagement />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

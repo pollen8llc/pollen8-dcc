@@ -179,55 +179,57 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
 
       <h3 className="text-lg font-medium mb-4">Outreach Reminders</h3>
       
-      {/* Trigger templates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {triggerTemplates.map((template) => (
+      {/* Trigger templates - Wrapped in RadioGroup to fix the error */}
+      <RadioGroup value={selectedTemplate} onValueChange={handleTemplateSelect}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {triggerTemplates.map((template) => (
+            <div
+              key={template.id}
+              className={cn(
+                "border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
+                selectedTemplate === template.id ? "border-primary bg-primary/5" : ""
+              )}
+              onClick={() => handleTemplateSelect(template.id)}
+            >
+              <div className="flex items-start">
+                <div className="mr-3 mt-0.5">
+                  <RadioGroupItem 
+                    value={template.id}
+                    checked={selectedTemplate === template.id}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <h4 className="font-medium">{template.name}</h4>
+                  <p className="text-sm text-muted-foreground">{template.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+          
           <div
-            key={template.id}
             className={cn(
               "border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
-              selectedTemplate === template.id ? "border-primary bg-primary/5" : ""
+              showCustomForm ? "border-primary bg-primary/5" : ""
             )}
-            onClick={() => handleTemplateSelect(template.id)}
+            onClick={handleCustomTriggerToggle}
           >
             <div className="flex items-start">
               <div className="mr-3 mt-0.5">
                 <RadioGroupItem 
-                  value={template.id}
-                  checked={selectedTemplate === template.id}
+                  value="custom"
+                  checked={showCustomForm}
                   className="mt-1"
                 />
               </div>
               <div>
-                <h4 className="font-medium">{template.name}</h4>
-                <p className="text-sm text-muted-foreground">{template.description}</p>
+                <h4 className="font-medium">Custom Reminder</h4>
+                <p className="text-sm text-muted-foreground">Create a custom outreach reminder</p>
               </div>
             </div>
           </div>
-        ))}
-        
-        <div
-          className={cn(
-            "border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
-            showCustomForm ? "border-primary bg-primary/5" : ""
-          )}
-          onClick={handleCustomTriggerToggle}
-        >
-          <div className="flex items-start">
-            <div className="mr-3 mt-0.5">
-              <RadioGroupItem 
-                value="custom"
-                checked={showCustomForm}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <h4 className="font-medium">Custom Reminder</h4>
-              <p className="text-sm text-muted-foreground">Create a custom outreach reminder</p>
-            </div>
-          </div>
         </div>
-      </div>
+      </RadioGroup>
       
       {/* Custom trigger form */}
       {(showCustomForm || selectedTemplate) && (
