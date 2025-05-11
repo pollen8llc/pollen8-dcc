@@ -1,118 +1,109 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Steps } from "@/components/ui/steps";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "@/hooks/use-toast";
-import { ContactIcon, Clock, Users, FileUp } from "lucide-react";
-
-// Step components
+import { Card, CardContent } from "@/components/ui/card";
+import { Steps, Step } from "@/components/ui/steps";
 import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
 import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
-import { createOutreach } from "@/services/rel8t/outreachService";
 import { Contact } from "@/services/rel8t/contactService";
-
-const steps = ["Select Contacts", "Set Reminders", "Review & Submit"];
+import { Trigger } from "@/services/rel8t/triggerService";
+import { createOutreach } from "@/services/rel8t/outreachService";
+import { toast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [importMethod, setImportMethod] = useState<string | null>(null);
-  const [showImport, setShowImport] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // State to store the selected data throughout the wizard
-  const [selectedData, setSelectedData] = useState({
-    contacts: [] as Contact[],
-    triggers: [] as any[],
-    notes: ""
+  const [step, setStep] = useState(1);
+  const [selectedData, setSelectedData] = useState<{
+    contacts: Contact[];
+    triggers: Trigger[];
+    notes?: string;
+  }>({
+    contacts: [],
+    triggers: [],
+    notes: "",
   });
 
-  // Create outreach mutation
   const createOutreachMutation = useMutation({
-    mutationFn: async (data: any) => {
-      // Create the outreach
-      const outreach = await createOutreach(
-        {
-          title: `Outreach for ${data.contacts.map((c: Contact) => c.name).join(", ")}`,
-          description: data.notes || `Relationship plan created on ${new Date().toLocaleDateString()}`,
-          priority: "medium",
-          due_date: data.triggers.length > 0 
-            ? new Date(data.triggers[0].dateTime).toISOString()
-            : new Date().toISOString(),
-          status: "pending"
-        },
-        data.contacts.map((c: Contact) => c.id)
-      );
-      return outreach;
-    },
+    mutationFn: createOutreach,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["outreach"] });
       toast({
         title: "Relationship plan created",
-        description: "Your outreach plan has been successfully created."
+        description: "Your relationship plan has been created successfully!",
       });
-      navigate("/rel8t/relationships");
+      navigate("/rel8t");
     },
-    onError: (error: any) => {
-      console.error("Error creating relationship plan:", error);
+    onError: (error) => {
       toast({
         title: "Error creating relationship plan",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
-  // Handler for moving to the next step
-  const handleNext = (stepData: any) => {
-    // Save the data from current step
-    setSelectedData({
-      ...selectedData,
-      ...stepData
-    });
-    
-    // Move to next step
-    setCurrentStep(currentStep + 1);
-    window.scrollTo(0, 0);
+  const handleNext = (data: Partial<typeof selectedData> = {}) => {
+    setSelectedData((prev) => ({ ...prev, ...data }));
+    setStep((prev) => prev + 1);
   };
 
-  // Handler for moving to the previous step
   const handlePrevious = () => {
-    setCurrentStep(currentStep - 1);
-    window.scrollTo(0, 0);
+    setStep((prev) => prev - 1);
   };
 
-  // Handler for form submission on final step
-  const handleSubmit = async (finalData: any) => {
-    setIsSubmitting(true);
-    try {
-      const completeData = {
-        ...selectedData,
-        ...finalData
-      };
-      
-      await createOutreachMutation.mutateAsync(completeData);
-    } catch (error) {
-      console.error("Error submitting relationship:", error);
-    } finally {
-      setIsSubmitting(false);
+  const handleSubmit = async (data: Partial<typeof selectedData> = {}) => {
+    const finalData = { ...selectedData, ...data };
+    
+    // Create outreach plans for each contact
+    for (const contact of finalData.contacts) {
+      await createOutreachMutation.mutateAsync({
+        contact_id: contact.id,
+        triggers: finalData.triggers.map(trigger => trigger.id),
+        notes: finalData.notes,
+        is_active: true
+      });
     }
   };
 
-  // Handler for toggling between direct selection and import
-  const toggleImportView = () => {
-    setShowImport(!showImport);
-    // Reset import method when toggling
-    if (!showImport) {
-      setImportMethod(null);
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return (
+          <SelectContactsStep
+            selectedContacts={selectedData.contacts}
+            onNext={handleNext}
+          />
+        );
+      case 2:
+        return (
+          <SelectTriggersStep
+            selectedTriggers={selectedData.triggers}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+          />
+        );
+      case 3:
+        return (
+          <ReviewSubmitStep
+            selectedData={selectedData}
+            onSubmit={handleSubmit}
+            onPrevious={handlePrevious}
+            isSubmitting={createOutreachMutation.isPending}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const handleCancel = () => {
+    if (confirm("Are you sure you want to cancel? All progress will be lost.")) {
+      navigate("/rel8t");
     }
   };
 
@@ -120,90 +111,34 @@ const RelationshipWizard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Build a Relationship</h1>
+          <Button 
+            variant="ghost" 
+            className="mb-4" 
+            onClick={handleCancel}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          
+          <h1 className="text-3xl font-bold">Build Relationships</h1>
           <p className="text-muted-foreground mt-1">
-            Create outreach plans and set reminders for your contacts
+            Create a plan to nurture and strengthen your network connections
           </p>
         </div>
         
-        {/* Progress indicator */}
         <div className="mb-8">
-          <Steps 
-            steps={steps} 
-            currentStep={currentStep}
-          />
+          <Steps className="max-w-xl mx-auto" currentStep={step}>
+            <Step title="Select Contacts" />
+            <Step title="Schedule Reminders" />
+            <Step title="Review & Submit" />
+          </Steps>
         </div>
         
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>
-              {currentStep === 0 && (showImport ? "Import Contacts" : "Select Contacts")}
-              {currentStep === 1 && "Set Outreach Reminders"}
-              {currentStep === 2 && "Review & Submit"}
-            </CardTitle>
-          </CardHeader>
-          
-          <CardContent>
-            {/* Step 1: Select or Import Contacts */}
-            {currentStep === 0 && (
-              <div>
-                <div className="mb-4">
-                  <Button 
-                    variant={showImport ? "outline" : "default"}
-                    onClick={toggleImportView}
-                    className="mr-2"
-                  >
-                    <ContactIcon className="mr-2 h-4 w-4" />
-                    Select Existing Contacts
-                  </Button>
-                  <Button 
-                    variant={showImport ? "default" : "outline"}
-                    onClick={toggleImportView}
-                  >
-                    <FileUp className="mr-2 h-4 w-4" />
-                    Import New Contacts
-                  </Button>
-                </div>
-                
-                <Separator className="my-4" />
-                
-                {showImport ? (
-                  <ImportContactsStep 
-                    onImportComplete={(importedContacts) => {
-                      // Add newly imported contacts to selection
-                      handleNext({ contacts: importedContacts });
-                    }}
-                  />
-                ) : (
-                  <SelectContactsStep 
-                    selectedContacts={selectedData.contacts}
-                    onNext={handleNext}
-                  />
-                )}
-              </div>
-            )}
-            
-            {/* Step 2: Set Outreach Triggers/Reminders */}
-            {currentStep === 1 && (
-              <SelectTriggersStep 
-                selectedContacts={selectedData.contacts}
-                selectedTriggers={selectedData.triggers}
-                onNext={handleNext}
-                onPrevious={handlePrevious}
-              />
-            )}
-            
-            {/* Step 3: Review and Submit */}
-            {currentStep === 2 && (
-              <ReviewSubmitStep 
-                selectedData={selectedData}
-                onSubmit={handleSubmit}
-                onPrevious={handlePrevious}
-                isSubmitting={isSubmitting}
-              />
-            )}
+        <Card>
+          <CardContent className="pt-6">
+            {renderStepContent()}
           </CardContent>
         </Card>
       </div>

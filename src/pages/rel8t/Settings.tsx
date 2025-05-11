@@ -10,7 +10,7 @@ import { HexColorPicker } from "react-colorful";
 import { toast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import {
-  Category,
+  Folder,
   Plus,
   Save,
   Trash2,
@@ -52,15 +52,25 @@ const Settings = () => {
       if (error) throw error;
       return data || [];
     },
-    onSuccess: (data) => setCategories(data),
   });
+  
+  // Update categories state when data is fetched
+  useState(() => {
+    if (fetchedCategories) {
+      setCategories(fetchedCategories);
+    }
+  }, [fetchedCategories]);
   
   // Add category mutation
   const addCategoryMutation = useMutation({
-    mutationFn: async (category: Omit<ContactCategory, "id">) => {
+    mutationFn: async (category: { name: string, color: string }) => {
       const { data, error } = await supabase
         .from("rms_contact_categories")
-        .insert([category])
+        .insert([{ 
+          name: category.name,
+          color: category.color,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        }])
         .select();
         
       if (error) throw error;
@@ -257,7 +267,7 @@ const Settings = () => {
                     <div className="text-center py-4">Loading categories...</div>
                   ) : categories.length === 0 ? (
                     <div className="text-center py-8 border border-dashed rounded-lg">
-                      <Category className="mx-auto h-10 w-10 text-muted-foreground/50" />
+                      <Folder className="mx-auto h-10 w-10 text-muted-foreground/50" />
                       <h3 className="mt-2 text-lg font-semibold">No categories yet</h3>
                       <p className="text-muted-foreground mt-1">
                         Create categories to organize your contacts

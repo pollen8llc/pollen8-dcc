@@ -1,303 +1,185 @@
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MetricCard } from "@/components/rel8t/MetricCard";
-import { Bell, Calendar, Clock, Check, AlertCircle, Mail, Plus } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import { TriggerStatsCards } from "@/components/rel8t/triggers/TriggerStatsCards";
-import { EmailNotificationsList } from "@/components/rel8t/triggers/EmailNotificationsList";
-import { getEmailStatistics, getEmailNotifications } from "@/services/rel8t/emailService";
-import { getActiveTriggerCount } from "@/services/rel8t/triggerService";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import Navbar from '@/components/Navbar';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
+import { MetricCard } from '@/components/rel8t/MetricCard';
+import { OutreachCard } from '@/components/rel8t/OutreachCard';
+import { DistributionChart } from '@/components/rel8t/DistributionChart';
+import { StatisticsChart } from '@/components/rel8t/StatisticsChart';
+import { Bell, CalendarClock, Users, UserPlus, Settings as SettingsIcon } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getOutreachNotifications } from '@/services/rel8t/outreachService';
 
-// Mock notification type - normally this would come from a service
-type Notification = {
-  id: string;
-  type: 'email' | 'reminder' | 'system';
-  title: string;
-  message: string;
-  date: string;
-  read: boolean;
-};
-
-// Mock data for notifications - in a real app, this would come from an API
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'email',
-    title: 'Monthly Newsletter',
-    message: 'The monthly newsletter has been sent to your contacts.',
-    date: '2025-05-05T10:30:00',
-    read: false
-  },
-  {
-    id: '2',
-    type: 'reminder',
-    title: 'Follow-up with John Doe',
-    message: 'Reminder to follow up with John Doe about the project proposal.',
-    date: '2025-05-04T15:45:00',
-    read: true
-  },
-  {
-    id: '3',
-    type: 'system',
-    title: '3 New Contacts Added',
-    message: 'You have successfully imported 3 new contacts from CSV.',
-    date: '2025-05-03T09:15:00',
-    read: true
-  },
-  {
-    id: '4',
-    type: 'reminder',
-    title: 'Check in with Sarah Smith',
-    message: 'Time to send a follow-up message to Sarah Smith.',
-    date: '2025-05-06T08:00:00',
-    read: false
-  },
-  {
-    id: '5',
-    type: 'email',
-    title: 'Welcome Email Sent',
-    message: 'Welcome email has been sent to 2 new contacts.',
-    date: '2025-05-01T11:20:00',
-    read: true
-  }
-];
-
-const NotificationCard = ({ notification }: { notification: Notification }) => {
-  const [isRead, setIsRead] = useState(notification.read);
-  
-  const markAsRead = () => {
-    setIsRead(true);
-    // In a real app, you would call an API to mark the notification as read
-  };
-  
-  const formattedDate = new Date(notification.date).toLocaleString();
-  
-  let icon;
-  let bgColor = isRead ? 'bg-background' : 'bg-primary/5';
-  
-  switch (notification.type) {
-    case 'email':
-      icon = <Mail className="h-5 w-5 text-blue-500" />;
-      break;
-    case 'reminder':
-      icon = <Clock className="h-5 w-5 text-amber-500" />;
-      break;
-    case 'system':
-      icon = <AlertCircle className="h-5 w-5 text-purple-500" />;
-      break;
-  }
-  
-  return (
-    <div className={`p-4 border rounded-md mb-3 ${bgColor} transition-colors`}>
-      <div className="flex items-start">
-        <div className="mr-3 mt-1">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <div className="flex justify-between items-start">
-            <h4 className={`text-base font-medium ${!isRead ? 'text-primary' : ''}`}>
-              {notification.title}
-            </h4>
-            {!isRead && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-6 px-2"
-                onClick={markAsRead}
-              >
-                Mark read
-              </Button>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
-          <div className="text-xs text-muted-foreground mt-2">{formattedDate}</div>
-        </div>
-      </div>
-    </div>
-  );
+// Placeholder data for analytics until we connect to real data
+const mockStats = {
+  contacts: 24,
+  outreach: 12,
+  pending: 5,
+  distribution: [
+    { name: 'Team A', value: 35 },
+    { name: 'Team B', value: 25 },
+    { name: 'Team C', value: 20 },
+    { name: 'Team D', value: 20 }
+  ],
+  dailyStats: [
+    { name: 'Mon', outreach: 4, contacts: 2 },
+    { name: 'Tue', outreach: 3, contacts: 5 },
+    { name: 'Wed', outreach: 5, contacts: 3 },
+    { name: 'Thu', outreach: 2, contacts: 8 },
+    { name: 'Fri', outreach: 6, contacts: 4 },
+    { name: 'Sat', outreach: 2, contacts: 1 },
+    { name: 'Sun', outreach: 1, contacts: 0 }
+  ]
 };
 
 const Notifications = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("all");
-  
-  // Fetch email statistics
-  const { data: emailStats = { pending: 0, sent: 0, failed: 0, total: 0 } } = useQuery({
-    queryKey: ["email-statistics"],
-    queryFn: getEmailStatistics,
+  const [activeTab, setActiveTab] = React.useState('all');
+
+  // Fetch notifications
+  const { data: notifications = [], isLoading } = useQuery({
+    queryKey: ['outreach-notifications'],
+    queryFn: getOutreachNotifications,
   });
 
-  // Fetch active trigger count
-  const { data: activeTriggerCount = 0 } = useQuery({
-    queryKey: ["active-trigger-count"],
-    queryFn: getActiveTriggerCount,
-  });
-  
-  // Fetch email notifications
-  const { data: emailNotifications = [] } = useQuery({
-    queryKey: ["email-notifications"],
-    queryFn: () => getEmailNotifications(),
-  });
-  
   // Filter notifications based on active tab
-  const filteredNotifications = activeTab === "all" 
-    ? mockNotifications 
-    : activeTab === "unread"
-    ? mockNotifications.filter(notification => !notification.read)
-    : mockNotifications.filter(notification => notification.type === activeTab);
+  const filteredNotifications = activeTab === 'all'
+    ? notifications
+    : activeTab === 'pending'
+      ? notifications.filter(n => n.status === 'pending')
+      : notifications.filter(n => n.status === 'completed');
 
-  // Count notifications by type
-  const emailCount = mockNotifications.filter(n => n.type === 'email').length;
-  const reminderCount = mockNotifications.filter(n => n.type === 'reminder').length;
-  const systemCount = mockNotifications.filter(n => n.type === 'system').length;
-  const unreadCount = mockNotifications.filter(n => !n.read).length;
+  const handleCreateOutreach = () => {
+    navigate('/rel8t/wizard');
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Notifications</h1>
+            <h1 className="text-3xl font-bold">REL8T Dashboard</h1>
             <p className="text-muted-foreground mt-1">
-              Track your outreach and notification activity
+              Manage your relationships and outreach activities
             </p>
           </div>
-          <div className="mt-4 md:mt-0">
-            <Button onClick={() => navigate("/rel8t/wizard")}>
-              <Plus className="mr-2 h-4 w-4" />
-              Build a Relationship
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/rel8t/contacts')}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Contacts
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/rel8t/settings')}
+            >
+              <SettingsIcon className="mr-2 h-4 w-4" />
+              Settings
+            </Button>
+            <Button onClick={handleCreateOutreach}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Build Relationship
             </Button>
           </div>
         </div>
 
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <MetricCard
-            title="Unread Notifications"
-            value={unreadCount}
-            icon={<Bell className="h-5 w-5" />}
-            color={unreadCount > 0 ? "warning" : "default"}
+            title="Total Contacts"
+            value={mockStats.contacts}
+            icon={<Users className="h-6 w-6 text-blue-500" />}
+            description="People in your network"
           />
-          
           <MetricCard
-            title="Email Notifications"
-            value={emailCount}
-            icon={<Mail className="h-5 w-5" />}
+            title="Outreach Activities"
+            value={mockStats.outreach}
+            icon={<Bell className="h-6 w-6 text-green-500" />}
+            description="Total relationship touchpoints"
           />
-          
           <MetricCard
-            title="Reminders"
-            value={reminderCount}
-            icon={<Calendar className="h-5 w-5" />}
-            color="success"
-          />
-          
-          <MetricCard
-            title="System Updates"
-            value={systemCount}
-            icon={<AlertCircle className="h-5 w-5" />}
+            title="Pending Actions"
+            value={mockStats.pending}
+            icon={<CalendarClock className="h-6 w-6 text-amber-500" />}
+            description="Upcoming actions needed"
+            actionLabel="View All"
+            onAction={() => setActiveTab('pending')}
           />
         </div>
-
-        {/* Email Stats Cards */}
+        
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">Email Activity</h2>
-          <TriggerStatsCards
-            pendingEmails={emailStats.pending}
-            sentEmails={emailStats.sent}
-            activeTriggers={activeTriggerCount}
-          />
-        </div>
-
-        {/* Notifications List */}
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Recent Notifications</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => navigate("/rel8t/settings")}>
-                <Settings className="h-4 w-4 mr-2" />
-                Manage Triggers
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-6">
-              <div className="flex space-x-2 mb-4">
-                <Button 
-                  variant={activeTab === "all" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setActiveTab("all")}
-                >
-                  All
-                </Button>
-                <Button 
-                  variant={activeTab === "unread" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setActiveTab("unread")}
-                  className="relative"
-                >
-                  Unread
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
-                      {unreadCount}
-                    </span>
-                  )}
-                </Button>
-                <Button 
-                  variant={activeTab === "email" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setActiveTab("email")}
-                >
-                  Emails
-                </Button>
-                <Button 
-                  variant={activeTab === "reminder" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setActiveTab("reminder")}
-                >
-                  Reminders
-                </Button>
-                <Button 
-                  variant={activeTab === "system" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setActiveTab("system")}
-                >
-                  System
-                </Button>
-              </div>
-              
-              {filteredNotifications.length === 0 ? (
-                <div className="text-center py-12 border border-dashed rounded-lg">
-                  <Bell className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="mt-2 font-semibold">No notifications</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    You don't have any {activeTab !== 'all' ? activeTab + ' ' : ''}notifications yet.
+          <Card>
+            <CardHeader>
+              <CardTitle>Upcoming Relationship Activities</CardTitle>
+              <CardDescription>
+                Manage your outreach and reminder activities
+              </CardDescription>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
+                <TabsList>
+                  <TabsTrigger value="all">
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger value="pending">
+                    Pending <Badge variant="secondary" className="ml-1">{notifications.filter(n => n.status === 'pending').length}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="completed">
+                    Completed
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Loading activities...</p>
+                </div>
+              ) : filteredNotifications.length === 0 ? (
+                <div className="text-center py-8 border border-dashed rounded-lg">
+                  <Bell className="mx-auto h-10 w-10 text-muted-foreground/50" />
+                  <h3 className="mt-2 text-lg font-semibold">No activities yet</h3>
+                  <p className="text-muted-foreground mt-1">
+                    {activeTab === 'all' 
+                      ? "You haven't created any relationship activities" 
+                      : activeTab === 'pending'
+                        ? "You don't have any pending activities"
+                        : "You haven't completed any activities yet"
+                    }
                   </p>
+                  <Button onClick={handleCreateOutreach} className="mt-4">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Create Relationship Plan
+                  </Button>
                 </div>
               ) : (
-                <div>
+                <div className="divide-y">
                   {filteredNotifications.map((notification) => (
-                    <NotificationCard 
+                    <OutreachCard 
                       key={notification.id} 
-                      notification={notification} 
+                      outreach={notification}
                     />
                   ))}
                 </div>
               )}
-            </div>
-
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-4">Email Notifications</h3>
-              <EmailNotificationsList notifications={emailNotifications} />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+            <CardFooter className="flex justify-center border-t">
+              <Button 
+                variant="outline" 
+                onClick={handleCreateOutreach} 
+                className="w-full sm:w-auto"
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Build New Relationships
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     </div>
   );
