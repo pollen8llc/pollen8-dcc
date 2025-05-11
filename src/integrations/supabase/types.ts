@@ -340,8 +340,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rms_contact_categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       rms_contacts: {
         Row: {
+          category: string | null
           created_at: string | null
           email: string | null
           id: string
@@ -356,6 +384,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -370,6 +399,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           email?: string | null
           id?: string

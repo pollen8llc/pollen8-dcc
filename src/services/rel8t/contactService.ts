@@ -11,7 +11,17 @@ export interface Contact {
   role?: string;
   notes?: string;
   tags: string[];
+  category?: string;
   last_contact_date?: string;
+  user_id: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ContactCategory {
+  id: string;
+  name: string;
+  color: string;
   user_id: string;
   created_at?: string;
   updated_at?: string;
@@ -225,5 +235,86 @@ export const getContactsByCommunityCounts = async (): Promise<{ communityName: s
   } catch (error) {
     console.error("Error fetching contacts by community:", error);
     return [];
+  }
+};
+
+export const getCategories = async (): Promise<ContactCategory[]> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) throw new Error("User not authenticated");
+    
+    const { data, error } = await supabase
+      .from("rms_contact_categories")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("name");
+
+    if (error) throw error;
+    
+    return data || [];
+  } catch (error: any) {
+    console.error("Error fetching contact categories:", error);
+    toast({
+      title: "Error fetching categories",
+      description: error.message,
+      variant: "destructive",
+    });
+    return [];
+  }
+};
+
+export const createCategory = async (category: Omit<ContactCategory, "id" | "user_id" | "created_at" | "updated_at">): Promise<ContactCategory | null> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) throw new Error("User not authenticated");
+    
+    const { data, error } = await supabase
+      .from("rms_contact_categories")
+      .insert([{ ...category, user_id: user.id }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error("Error creating contact category:", error);
+    throw error;
+  }
+};
+
+export const updateCategory = async (id: string, category: Partial<ContactCategory>): Promise<ContactCategory | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("rms_contact_categories")
+      .update(category)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    return data;
+  } catch (error: any) {
+    console.error(`Error updating contact category ${id}:`, error);
+    throw error;
+  }
+};
+
+export const deleteCategory = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("rms_contact_categories")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    
+    return true;
+  } catch (error: any) {
+    console.error(`Error deleting contact category ${id}:`, error);
+    throw error;
   }
 };

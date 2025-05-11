@@ -1,265 +1,257 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Contact } from "@/services/rel8t/contactService";
-import { Badge } from "@/components/ui/badge";
-import { X, Plus } from "lucide-react";
-
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().optional().or(z.literal("")),
-  organization: z.string().optional().or(z.literal("")),
-  role: z.string().optional().or(z.literal("")),
-  notes: z.string().optional().or(z.literal("")),
-  last_contact_date: z.string().optional().or(z.literal("")),
-  tags: z.array(z.string()).default([]),
-});
-
-type ContactFormValues = z.infer<typeof formSchema>;
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { getCategories, ContactCategory } from "@/services/rel8t/contactService";
 
 interface ContactFormProps {
-  contact?: Contact;
-  onSubmit: (values: ContactFormValues) => Promise<void>;
+  initialValues?: {
+    name: string;
+    email?: string;
+    phone?: string;
+    organization?: string;
+    role?: string;
+    notes?: string;
+    tags?: string[];
+    category?: string;
+  };
+  onSubmit: (values: any) => void;
   onCancel: () => void;
   isSubmitting: boolean;
 }
 
-const ContactForm: React.FC<ContactFormProps> = ({
-  contact,
+const DEFAULT_VALUES = {
+  name: "",
+  email: "",
+  phone: "",
+  organization: "",
+  role: "",
+  notes: "",
+  tags: [],
+  category: ""
+};
+
+const ContactForm = ({
+  initialValues = DEFAULT_VALUES,
   onSubmit,
   onCancel,
-  isSubmitting,
-}) => {
-  const [tagInput, setTagInput] = useState("");
-
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: contact?.name || "",
-      email: contact?.email || "",
-      phone: contact?.phone || "",
-      organization: contact?.organization || "",
-      role: contact?.role || "",
-      notes: contact?.notes || "",
-      last_contact_date: contact?.last_contact_date 
-        ? new Date(contact.last_contact_date).toISOString().split("T")[0]
-        : "",
-      tags: contact?.tags || [],
-    },
-  });
-
-  const handleAddTag = () => {
-    const tag = tagInput.trim();
-    if (!tag) return;
+  isSubmitting
+}: ContactFormProps) => {
+  const [values, setValues] = useState(initialValues);
+  const [tagsInput, setTagsInput] = useState("");
+  const [categories, setCategories] = useState<ContactCategory[]>([]);
+  
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const fetchedCategories = await getCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+      }
+    };
     
-    const currentTags = form.getValues("tags") || [];
-    if (!currentTags.includes(tag)) {
-      form.setValue("tags", [...currentTags, tag]);
-    }
-    
-    setTagInput("");
+    loadCategories();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setValues({ ...values, [name]: value });
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    const currentTags = form.getValues("tags");
-    form.setValue(
-      "tags",
-      currentTags.filter((tag) => tag !== tagToRemove)
-    );
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+  const handleTagsKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
-      handleAddTag();
+      
+      if (!tagsInput.trim()) return;
+      
+      // Add the tag if it doesn't exist already
+      const newTag = tagsInput.trim();
+      if (!values.tags?.includes(newTag)) {
+        setValues({
+          ...values,
+          tags: [...(values.tags || []), newTag]
+        });
+      }
+      
+      // Clear the input
+      setTagsInput("");
     }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setValues({
+      ...values,
+      tags: values.tags?.filter(tag => tag !== tagToRemove) || []
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(values);
+  };
+
+  const handleSelectCategory = (category: string) => {
+    setValues({
+      ...values,
+      category
+    });
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Name field */}
+      <div>
+        <Label htmlFor="name">Name*</Label>
+        <Input
+          id="name"
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="John Doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          value={values.name}
+          onChange={handleChange}
+          required
         />
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="john.doe@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      {/* Email field */}
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          value={values.email}
+          onChange={handleChange}
+        />
+      </div>
 
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone</FormLabel>
-                <FormControl>
-                  <Input placeholder="+1 (555) 123-4567" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+      {/* Phone field */}
+      <div>
+        <Label htmlFor="phone">Phone</Label>
+        <Input
+          id="phone"
+          name="phone"
+          value={values.phone}
+          onChange={handleChange}
+        />
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Organization</FormLabel>
-                <FormControl>
-                  <Input placeholder="Company name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      {/* Organization field */}
+      <div>
+        <Label htmlFor="organization">Organization</Label>
+        <Input
+          id="organization"
+          name="organization"
+          value={values.organization}
+          onChange={handleChange}
+        />
+      </div>
 
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role</FormLabel>
-                <FormControl>
-                  <Input placeholder="Job title" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <FormLabel>Tags</FormLabel>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {form.watch("tags")?.map((tag) => (
-              <Badge key={tag} className="pl-2 pr-1 py-1 flex items-center gap-1">
-                {tag}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 rounded-full"
-                  onClick={() => handleRemoveTag(tag)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
+      {/* Role field */}
+      <div>
+        <Label htmlFor="role">Role</Label>
+        <Input
+          id="role"
+          name="role"
+          value={values.role}
+          onChange={handleChange}
+        />
+      </div>
+      
+      {/* Category field */}
+      <div>
+        <Label htmlFor="category">Category</Label>
+        <Select
+          value={values.category}
+          onValueChange={handleSelectCategory}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">None</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                <span className="flex items-center gap-2">
+                  <span 
+                    className="inline-block w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: category.color }} 
+                  />
+                  {category.name}
+                </span>
+              </SelectItem>
             ))}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add a tag (e.g. client, vendor)"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-1"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddTag}
-              disabled={!tagInput.trim()}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Tags field */}
+      <div>
+        <Label htmlFor="tags">Tags</Label>
+        <div className="flex flex-wrap gap-1 border rounded-md p-2 min-h-[42px]">
+          {values.tags?.map((tag) => (
+            <span
+              key={tag}
+              className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center gap-1"
             >
-              <Plus className="h-4 w-4 mr-1" />
-              Add
-            </Button>
-          </div>
-          <FormDescription>
-            Tags help you categorize your contacts (e.g., vendor, client, sponsor)
-          </FormDescription>
+              {tag}
+              <button
+                type="button"
+                onClick={() => removeTag(tag)}
+                className="text-xs hover:text-destructive focus:outline-none"
+              >
+                &times;
+              </button>
+            </span>
+          ))}
+          <Input
+            id="tagsInput"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+            onKeyDown={handleTagsKeyDown}
+            className="flex-1 min-w-[100px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-7 p-0"
+            placeholder={values.tags?.length ? "" : "Add tags (press Enter)"}
+          />
         </div>
+      </div>
 
-        <FormField
-          control={form.control}
-          name="last_contact_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Last Contact Date</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormDescription>
-                When did you last interact with this contact?
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
+      {/* Notes field */}
+      <div>
+        <Label htmlFor="notes">Notes</Label>
+        <Textarea
+          id="notes"
           name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Add any relevant notes about this contact..."
-                  className="resize-none"
-                  rows={4}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          value={values.notes}
+          onChange={handleChange}
+          rows={4}
         />
+      </div>
 
-        <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : contact ? "Update Contact" : "Add Contact"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      {/* Form actions */}
+      <div className="flex justify-end gap-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save Contact"}
+        </Button>
+      </div>
+    </form>
   );
 };
 

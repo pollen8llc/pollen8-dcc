@@ -1,34 +1,74 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Steps } from "@/components/ui/steps";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, ArrowUp, ContactIcon, Clock, Users, FileUp } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { ContactIcon, Clock, Users, FileUp } from "lucide-react";
 
 // Step components
 import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
 import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
+import { createOutreach } from "@/services/rel8t/outreachService";
+import { Contact } from "@/services/rel8t/contactService";
 
 const steps = ["Select Contacts", "Set Reminders", "Review & Submit"];
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(0);
   const [importMethod, setImportMethod] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // State to store the selected data throughout the wizard
   const [selectedData, setSelectedData] = useState({
-    contacts: [],
-    triggers: [],
+    contacts: [] as Contact[],
+    triggers: [] as any[],
     notes: ""
+  });
+
+  // Create outreach mutation
+  const createOutreachMutation = useMutation({
+    mutationFn: async (data: any) => {
+      // Create the outreach
+      const outreach = await createOutreach(
+        {
+          title: `Outreach for ${data.contacts.map((c: Contact) => c.name).join(", ")}`,
+          description: data.notes || `Relationship plan created on ${new Date().toLocaleDateString()}`,
+          priority: "medium",
+          due_date: data.triggers.length > 0 
+            ? new Date(data.triggers[0].dateTime).toISOString()
+            : new Date().toISOString(),
+          status: "pending"
+        },
+        data.contacts.map((c: Contact) => c.id)
+      );
+      return outreach;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["outreach"] });
+      toast({
+        title: "Relationship plan created",
+        description: "Your outreach plan has been successfully created."
+      });
+      navigate("/rel8t/relationships");
+    },
+    onError: (error: any) => {
+      console.error("Error creating relationship plan:", error);
+      toast({
+        title: "Error creating relationship plan",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   });
 
   // Handler for moving to the next step
@@ -52,17 +92,18 @@ const RelationshipWizard = () => {
 
   // Handler for form submission on final step
   const handleSubmit = async (finalData: any) => {
+    setIsSubmitting(true);
     try {
-      // In a real app, you would submit the data to your API
-      console.log("Submitting relationship data:", {
+      const completeData = {
         ...selectedData,
         ...finalData
-      });
+      };
       
-      // Navigate to relationships page after successful submission
-      navigate("/rel8t/relationships");
+      await createOutreachMutation.mutateAsync(completeData);
     } catch (error) {
       console.error("Error submitting relationship:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -160,6 +201,7 @@ const RelationshipWizard = () => {
                 selectedData={selectedData}
                 onSubmit={handleSubmit}
                 onPrevious={handlePrevious}
+                isSubmitting={isSubmitting}
               />
             )}
           </CardContent>

@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { createOutreach } from "@/services/rel8t/outreachService";
 import { useDebounce } from "@/hooks/useDebounce";
 
 const Relationships = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("today");
   const [outreachDialogOpen, setOutreachDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,7 +80,7 @@ const Relationships = () => {
             </p>
           </div>
           <div className="mt-4 md:mt-0">
-            <Button onClick={() => setOutreachDialogOpen(true)}>
+            <Button onClick={() => navigate("/rel8t/wizard")}>
               <Plus className="mr-2 h-4 w-4" />
               Build a Relationship
             </Button>
@@ -159,7 +161,7 @@ const Relationships = () => {
                     }
                   </p>
                   {!debouncedSearch && (
-                    <Button onClick={() => setOutreachDialogOpen(true)} className="mt-4">
+                    <Button onClick={() => navigate("/rel8t/wizard")} className="mt-4">
                       <Plus className="mr-2 h-4 w-4" />
                       Build a Relationship
                     </Button>

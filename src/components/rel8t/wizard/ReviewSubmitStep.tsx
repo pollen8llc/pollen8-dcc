@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,26 +14,22 @@ interface ReviewSubmitStepProps {
   };
   onSubmit: (data: any) => void;
   onPrevious: () => void;
+  isSubmitting: boolean;
 }
 
 export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({
   selectedData,
   onSubmit,
   onPrevious,
+  isSubmitting,
 }) => {
   const [additionalNotes, setAdditionalNotes] = useState(selectedData.notes || "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      await onSubmit({
-        ...selectedData,
-        notes: additionalNotes,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    await onSubmit({
+      ...selectedData,
+      notes: additionalNotes,
+    });
   };
 
   return (
@@ -78,33 +75,39 @@ export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({
         
         <div className="border rounded-lg p-4">
           <div className="space-y-3">
-            {selectedData.triggers.map((trigger) => (
-              <div
-                key={trigger.id}
-                className="flex items-start gap-3 p-3 border rounded-md"
-              >
-                <div className="mt-1">
-                  {trigger.type === 'email' ? (
-                    <Mail className="h-5 w-5 text-blue-500" />
-                  ) : trigger.type === 'notification' ? (
-                    <Bell className="h-5 w-5 text-amber-500" />
-                  ) : (
-                    <Calendar className="h-5 w-5 text-green-500" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium">{trigger.name}</div>
-                  <div className="text-sm text-muted-foreground">{trigger.description}</div>
-                  <div className="text-xs text-muted-foreground mt-1 flex items-center">
-                    <Calendar className="h-3.5 w-3.5 mr-1" />
-                    {format(new Date(trigger.dateTime), "PPP")}
-                    <span className="mx-1">•</span>
-                    <Clock className="h-3.5 w-3.5 mr-1" />
-                    {format(new Date(trigger.dateTime), "p")}
+            {selectedData.triggers.length > 0 ? (
+              selectedData.triggers.map((trigger) => (
+                <div
+                  key={trigger.id}
+                  className="flex items-start gap-3 p-3 border rounded-md"
+                >
+                  <div className="mt-1">
+                    {trigger.type === 'email' ? (
+                      <Mail className="h-5 w-5 text-blue-500" />
+                    ) : trigger.type === 'notification' ? (
+                      <Bell className="h-5 w-5 text-amber-500" />
+                    ) : (
+                      <Calendar className="h-5 w-5 text-green-500" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium">{trigger.name}</div>
+                    <div className="text-sm text-muted-foreground">{trigger.description}</div>
+                    <div className="text-xs text-muted-foreground mt-1 flex items-center">
+                      <Calendar className="h-3.5 w-3.5 mr-1" />
+                      {format(new Date(trigger.dateTime), "PPP")}
+                      <span className="mx-1">•</span>
+                      <Clock className="h-3.5 w-3.5 mr-1" />
+                      {format(new Date(trigger.dateTime), "p")}
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                No reminders scheduled
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -140,16 +143,18 @@ export const ReviewSubmitStep: React.FC<ReviewSubmitStepProps> = ({
             <Check className="h-4 w-4 text-green-500" />
             <span>Scheduled {selectedData.triggers.length} outreach reminders</span>
           </li>
-          <li className="flex items-center gap-2">
-            <Check className="h-4 w-4 text-green-500" />
-            <span>First reminder scheduled for {selectedData.triggers.length > 0 && 
-              format(new Date(selectedData.triggers[0].dateTime), "PPP")}</span>
-          </li>
+          {selectedData.triggers.length > 0 && (
+            <li className="flex items-center gap-2">
+              <Check className="h-4 w-4 text-green-500" />
+              <span>First reminder scheduled for {
+                format(new Date(selectedData.triggers[0].dateTime), "PPP")}</span>
+            </li>
+          )}
         </ul>
       </div>
       
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrevious}>
+        <Button variant="outline" onClick={onPrevious} disabled={isSubmitting}>
           Back
         </Button>
         <Button 

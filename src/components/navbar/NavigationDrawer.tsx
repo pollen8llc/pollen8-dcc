@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,12 +22,10 @@ import {
   UserSearch,
   Shield,
   Network,
-  LayoutDashboard,
   ContactIcon,
-  BarChart3,
-  ListTodo,
+  Bell,
   Import,
-  Bell
+  ListTodo,
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 
@@ -130,16 +129,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/analytics")}
-                >
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Analytics Dashboard
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/notifications")}
+                  onClick={() => handleNavigation("/rel8t")}
                 >
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
@@ -170,6 +160,15 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 >
                   <Import className="mr-2 h-4 w-4" />
                   Build Relationship
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/settings")}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
                 </Button>
               </>
             )}
