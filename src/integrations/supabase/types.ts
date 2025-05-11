@@ -385,6 +385,78 @@ export type Database = {
         }
         Relationships: []
       }
+      rms_email_notifications: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          recipient_email: string
+          recipient_name: string | null
+          scheduled_for: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          trigger_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          recipient_email: string
+          recipient_name?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          trigger_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          recipient_email?: string
+          recipient_name?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          trigger_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rms_email_templates: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          name: string
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       rms_outreach: {
         Row: {
           created_at: string | null

@@ -34,7 +34,7 @@ export const getEmailTemplates = async (): Promise<EmailTemplate[]> => {
     const { data, error } = await supabase
       .from("rms_email_templates")
       .select("*")
-      .order("name");
+      .order("name") as { data: EmailTemplate[], error: any };
 
     if (error) throw error;
     return data || [];
@@ -60,7 +60,7 @@ export const createEmailTemplate = async (
       .from("rms_email_templates")
       .insert([template])
       .select()
-      .single();
+      .single() as { data: EmailTemplate, error: any };
 
     if (error) throw error;
 
@@ -94,7 +94,7 @@ export const updateEmailTemplate = async (
       .update(template)
       .eq("id", id)
       .select()
-      .single();
+      .single() as { data: EmailTemplate, error: any };
 
     if (error) throw error;
 
@@ -166,7 +166,7 @@ export const scheduleEmailNotification = async (
       .from("rms_email_notifications")
       .insert([notificationToInsert])
       .select()
-      .single();
+      .single() as { data: EmailNotification, error: any };
 
     if (error) throw error;
 
@@ -202,7 +202,7 @@ export const getEmailNotifications = async (status?: string): Promise<EmailNotif
     
     query = query.order("created_at", { ascending: false });
     
-    const { data, error } = await query;
+    const { data, error } = await query as { data: EmailNotification[], error: any };
 
     if (error) throw error;
     return data || [];
@@ -229,7 +229,7 @@ export const getEmailStatistics = async (): Promise<{
   try {
     const { data, error } = await supabase
       .from("rms_email_notifications")
-      .select("status");
+      .select("status") as { data: { status: string }[], error: any };
 
     if (error) throw error;
 
@@ -240,7 +240,7 @@ export const getEmailStatistics = async (): Promise<{
       total: data.length
     };
 
-    data.forEach((notification: EmailNotification) => {
+    data.forEach((notification) => {
       if (notification.status === "pending") stats.pending++;
       if (notification.status === "sent") stats.sent++;
       if (notification.status === "failed") stats.failed++;
