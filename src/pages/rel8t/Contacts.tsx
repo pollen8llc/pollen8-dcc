@@ -60,7 +60,7 @@ const Contacts = () => {
             <Button 
               variant="outline"
               onClick={() => setActiveTab("import")}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-border/40"
             >
               <Upload className="h-4 w-4" />
               Import
@@ -75,7 +75,7 @@ const Contacts = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 border-border/40">
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="import">Import</TabsTrigger>
           </TabsList>
@@ -85,7 +85,7 @@ const Contacts = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search contacts..."
-                className="pl-10"
+                className="pl-10 border-border/40"
                 value={searchQuery}
                 onChange={handleSearch}
               />
