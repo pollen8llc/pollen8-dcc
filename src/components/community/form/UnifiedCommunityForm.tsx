@@ -87,9 +87,9 @@ const UnifiedCommunityForm = ({ mode, community, onComplete, onCancel }: Unified
             Step {currentStep + 1} of {stepNames.length}
           </CardDescription>
           <Steps 
-            steps={stepNames} 
-            currentStep={currentStep}
+            currentStep={currentStep + 1}
             className="mt-2"
+            steps={stepNames}
           />
         </CardHeader>
         

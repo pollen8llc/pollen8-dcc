@@ -94,6 +94,7 @@ const RelationshipWizard = () => {
       case 2:
         return (
           <SelectTriggersStep
+            selectedContacts={selectedData.contacts}
             selectedTriggers={selectedData.triggers}
             onNext={handleNext}
             onPrevious={handlePrevious}

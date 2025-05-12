@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Contact {
@@ -25,13 +24,22 @@ export interface ContactCategory {
 }
 
 // Get all contacts
-export const getContacts = async (options?: { searchQuery?: string }): Promise<Contact[]> => {
+export const getContacts = async (options?: string | { searchQuery?: string }): Promise<Contact[]> => {
   let query = supabase
     .from("rms_contacts")
     .select("*");
   
-  if (options?.searchQuery) {
-    query = query.or(`name.ilike.%${options.searchQuery}%,email.ilike.%${options.searchQuery}%,organization.ilike.%${options.searchQuery}%`);
+  let searchQuery = "";
+  
+  // Handle either string or options object parameter
+  if (typeof options === "string") {
+    searchQuery = options;
+  } else if (options && typeof options === "object" && "searchQuery" in options) {
+    searchQuery = options.searchQuery || "";
+  }
+  
+  if (searchQuery) {
+    query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,organization.ilike.%${searchQuery}%`);
   }
   
   const { data, error } = await query.order("name");
@@ -54,6 +62,16 @@ export const getContactCount = async (): Promise<number> => {
   }
   
   return count || 0;
+};
+
+// Add the missing getContactsByCommunityCounts function
+export const getContactsByCommunityCounts = async (): Promise<Record<string, number>> => {
+  // Placeholder implementation - in a real app, this would query community-related contact counts
+  return {
+    total: 0,
+    active: 0,
+    inactive: 0
+  };
 };
 
 // Get a contact by ID

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
@@ -178,9 +177,9 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
             Step {currentStep + 1} of {stepNames.length}
           </CardDescription>
           <Steps 
-            steps={stepNames} 
-            currentStep={currentStep}
+            currentStep={currentStep + 1}
             className="mt-2"
+            steps={stepNames}
           />
         </CardHeader>
         

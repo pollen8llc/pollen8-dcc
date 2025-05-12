@@ -1,14 +1,16 @@
 
 import { cn } from "@/lib/utils";
-
-interface StepsProps {
-  currentStep: number;
-  className?: string;
-  children?: React.ReactNode;
-}
+import React from "react";
 
 export interface StepProps {
   title: string;
+}
+
+export interface StepsProps {
+  currentStep: number;
+  className?: string;
+  children?: React.ReactNode;
+  steps?: string[]; // Add support for simple array of step titles
 }
 
 export const Step: React.FC<StepProps> = ({ title }) => {
@@ -20,24 +22,27 @@ export const Step: React.FC<StepProps> = ({ title }) => {
 export const Steps: React.FC<StepsProps> = ({ 
   currentStep, 
   className,
-  children
+  children,
+  steps
 }) => {
-  // Extract step titles from children
-  const steps = React.Children.toArray(children)
-    .filter(child => React.isValidElement(child) && child.type === Step)
-    .map((child, index) => ({
-      title: React.isValidElement(child) ? (child.props as StepProps).title : `Step ${index + 1}`,
-      index
-    }));
+  // Extract step titles from children or use provided steps prop
+  const stepsData = steps 
+    ? steps.map((title, index) => ({ title, index }))
+    : React.Children.toArray(children)
+      .filter(child => React.isValidElement(child) && child.type === Step)
+      .map((child, index) => ({
+        title: React.isValidElement(child) ? (child.props as StepProps).title : `Step ${index + 1}`,
+        index
+      }));
 
   return (
     <div className={cn("flex w-full", className)}>
-      {steps.map((step, index) => (
+      {stepsData.map((step, index) => (
         <div
           key={step.title}
           className={cn(
             "flex-1 flex flex-col items-center",
-            index !== steps.length - 1 && "relative"
+            index !== stepsData.length - 1 && "relative"
           )}
         >
           <div
@@ -55,7 +60,7 @@ export const Steps: React.FC<StepsProps> = ({
           
           <div className="text-xs mt-2 text-center">{step.title}</div>
           
-          {index !== steps.length - 1 && (
+          {index !== stepsData.length - 1 && (
             <div
               className={cn(
                 "absolute top-4 left-1/2 w-full h-0.5",

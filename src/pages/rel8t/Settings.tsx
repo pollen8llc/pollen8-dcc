@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,7 @@ const Settings = () => {
   });
   
   // Update categories state when data is fetched
-  useState(() => {
+  useEffect(() => {
     if (fetchedCategories) {
       setCategories(fetchedCategories);
     }

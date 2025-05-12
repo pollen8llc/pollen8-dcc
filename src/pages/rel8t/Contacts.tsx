@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import ContactList from "@/components/rel8t/ContactList"; // Fix import
+import ContactList from "@/components/rel8t/ContactList"; // Import as default
 import ContactForm from "@/components/rel8t/ContactForm";
 import { toast } from "@/hooks/use-toast";
 import { 
