@@ -81,7 +81,15 @@ const Contacts = () => {
           </TabsList>
           
           <TabsContent value="contacts">
-           
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search contacts..."
+                className="pl-10 border-border/40"
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+            </div>
             
             <ContactList
               contacts={contacts}
