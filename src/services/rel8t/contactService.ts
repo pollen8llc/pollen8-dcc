@@ -13,8 +13,10 @@ export interface Contact {
   created_at: string;
   updated_at: string;
   user_id: string;
-  category?: string;
+  category_id?: string;
   last_contact_date?: string;
+  // Include category details when joined
+  category?: ContactCategory;
 }
 
 export interface ContactCategory {
@@ -28,7 +30,14 @@ export interface ContactCategory {
 export const getContacts = async (options?: { searchQuery?: string }): Promise<Contact[]> => {
   let query = supabase
     .from("rms_contacts")
-    .select("*");
+    .select(`
+      *,
+      category:category_id (
+        id,
+        name,
+        color
+      )
+    `);
   
   let searchQuery = "";
   
@@ -67,7 +76,14 @@ export const getContactCount = async (): Promise<number> => {
 export const getContactById = async (id: string): Promise<Contact> => {
   const { data, error } = await supabase
     .from("rms_contacts")
-    .select("*")
+    .select(`
+      *,
+      category:category_id (
+        id,
+        name,
+        color
+      )
+    `)
     .eq("id", id)
     .single();
   
@@ -85,7 +101,14 @@ export const createContact = async (contact: Omit<Contact, "id" | "created_at" |
   const { data, error } = await supabase
     .from("rms_contacts")
     .insert([{ ...contact, user_id: user.user?.id }])
-    .select();
+    .select(`
+      *,
+      category:category_id (
+        id,
+        name,
+        color
+      )
+    `);
   
   if (error) {
     throw new Error(error.message);
@@ -100,7 +123,14 @@ export const updateContact = async (id: string, contact: Partial<Contact>): Prom
     .from("rms_contacts")
     .update(contact)
     .eq("id", id)
-    .select();
+    .select(`
+      *,
+      category:category_id (
+        id,
+        name,
+        color
+      )
+    `);
   
   if (error) {
     throw new Error(error.message);

@@ -1,11 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Plus } from "lucide-react";
-import { getContacts, Contact } from "@/services/rel8t/contactService";
+import { Search, Plus, Tag, Filter } from "lucide-react";
+import { getContacts, Contact, getCategories } from "@/services/rel8t/contactService";
 import { 
   Dialog, 
   DialogContent, 
@@ -16,6 +16,7 @@ import ContactForm from "@/components/rel8t/ContactForm";
 import { createContact } from "@/services/rel8t/contactService";
 import { useQueryClient } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 interface SelectContactsStepProps {
   selectedContacts: Contact[];
@@ -31,11 +32,19 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
   const [selectedContacts, setSelectedContacts] = useState<Contact[]>(initialSelectedContacts || []);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts"],
     queryFn: () => getContacts({}),
+  });
+
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ["contact-categories"],
+    queryFn: () => getCategories(),
   });
 
   const handleSubmit = () => {
@@ -68,16 +77,27 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
     }
   };
 
-  // Filter contacts based on search term
+  // Get unique tags for the filter
+  const uniqueTags = Array.from(
+    new Set(
+      contacts
+        .flatMap(contact => contact.tags || [])
+        .filter(tag => tag) // Filter out empty/null tags
+    )
+  ).sort();
+
+  // Filter contacts based on search term, selected tag, and selected category
   const filteredContacts = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (contact.organization && contact.organization.toLowerCase().includes(searchTerm.toLowerCase()))
+    (contact.organization && contact.organization.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+    (!selectedTag || (contact.tags && contact.tags.includes(selectedTag))) &&
+    (!selectedCategory || contact.category_id === selectedCategory)
   );
 
   return (
     <div>
-      <div className="flex mb-4 gap-2">
+      <div className="flex flex-col sm:flex-row mb-4 gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -87,9 +107,41 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <select
+            className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            value={selectedCategory || ""}
+            onChange={(e) => setSelectedCategory(e.target.value || null)}
+          >
+            <option value="">All Categories</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Tag className="h-4 w-4 text-muted-foreground" />
+          <select
+            className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            value={selectedTag || ""}
+            onChange={(e) => setSelectedTag(e.target.value || null)}
+          >
+            <option value="">All Tags</option>
+            {uniqueTags.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
+            ))}
+          </select>
+        </div>
         <Button onClick={() => setContactDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Contact
+          Add
         </Button>
       </div>
 
@@ -101,7 +153,9 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
         <div className="text-center py-12 border border-dashed rounded-lg">
           <h3 className="mt-2 font-semibold">No contacts found</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {searchTerm ? "Try adjusting your search term" : "Add your first contact to get started"}
+            {searchTerm || selectedTag || selectedCategory 
+              ? "Try adjusting your search or filters" 
+              : "Add your first contact to get started"}
           </p>
           <Button onClick={() => setContactDialogOpen(true)} className="mt-4">
             <Plus className="mr-2 h-4 w-4" />
@@ -123,26 +177,36 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
                 />
                 <label
                   htmlFor={`contact-${contact.id}`}
-                  className="flex-1 flex items-center cursor-pointer text-sm"
+                  className="flex-1 flex items-center justify-between cursor-pointer text-sm"
                 >
                   <div className="flex-1">
                     <div className="font-medium">{contact.name}</div>
-                    {contact.email && (
-                      <div className="text-muted-foreground text-xs">{contact.email}</div>
-                    )}
-                    {contact.organization && (
-                      <div className="text-muted-foreground text-xs">{contact.organization}</div>
-                    )}
+                    <div className="flex flex-col">
+                      {contact.email && (
+                        <span className="text-muted-foreground text-xs">{contact.email}</span>
+                      )}
+                      {contact.organization && (
+                        <span className="text-muted-foreground text-xs">{contact.organization}</span>
+                      )}
+                      {contact.category && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: contact.category.color }} />
+                          <span className="text-xs">{contact.category.name}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  
                   {contact.tags && contact.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 max-w-[150px] justify-end">
                       {contact.tags.map((tag, i) => (
-                        <span
+                        <Badge
                           key={i}
-                          className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded"
+                          variant="outline" 
+                          className="text-xs px-2 py-1"
                         >
                           {tag}
-                        </span>
+                        </Badge>
                       ))}
                     </div>
                   )}

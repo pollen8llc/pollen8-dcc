@@ -369,7 +369,7 @@ export type Database = {
       }
       rms_contacts: {
         Row: {
-          category: string | null
+          category_id: string | null
           created_at: string | null
           email: string | null
           id: string
@@ -384,7 +384,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          category?: string | null
+          category_id?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -399,7 +399,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          category?: string | null
+          category_id?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
@@ -413,7 +413,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rms_contacts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contact_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rms_email_notifications: {
         Row: {

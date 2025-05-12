@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getContacts, Contact } from "@/services/rel8t/contactService";
+import { getContacts, Contact, getCategories, ContactCategory } from "@/services/rel8t/contactService";
 import {
   Table,
   TableBody,
@@ -20,7 +21,9 @@ import {
   Briefcase,
   User,
   Calendar,
-  Tags
+  Tags,
+  RefreshCcw,
+  Filter
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +35,7 @@ interface ContactListProps {
   onEdit?: (contact: Contact) => void;
   onDelete?: (id: string) => void;
   onAddContact?: () => void;
-  onRefresh?: () => void; // Added onRefresh prop
+  onRefresh?: () => void;
 }
 
 const ContactList: React.FC<ContactListProps> = ({ 
@@ -46,6 +49,7 @@ const ContactList: React.FC<ContactListProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 350);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const { data: fetchedContacts = [], isLoading: isLoadingContacts } = useQuery({
     queryKey: ["contacts", debouncedSearch],
@@ -53,16 +57,25 @@ const ContactList: React.FC<ContactListProps> = ({
     enabled: !propContacts, // Only fetch if contacts are not provided as props
   });
 
+  // Get categories for filtering
+  const { data: categories = [] } = useQuery({
+    queryKey: ["contact-categories"],
+    queryFn: () => getCategories(),
+  });
+
   // Use contacts from props if provided, otherwise use fetched contacts
   const contacts = propContacts || fetchedContacts;
   const isLoading = propIsLoading !== undefined ? propIsLoading : isLoadingContacts;
 
-  // Filter contacts based on search term and selected tag
+  // Filter contacts based on search term, selected tag and category
   const filteredContacts = Array.isArray(contacts) ? contacts.filter((contact) => {
     const matchesTag = !selectedTag || 
       (contact.tags && contact.tags.includes(selectedTag));
     
-    return matchesTag;
+    const matchesCategory = !selectedCategory || 
+      (contact.category_id === selectedCategory);
+    
+    return matchesTag && matchesCategory;
   }) : [];
 
   // Get unique tags for the filter
@@ -87,22 +100,44 @@ const ContactList: React.FC<ContactListProps> = ({
           />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <select
-            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            value={selectedTag || ""}
-            onChange={(e) => setSelectedTag(e.target.value || null)}
-          >
-            <option value="">All Tags</option>
-            {uniqueTags.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              value={selectedTag || ""}
+              onChange={(e) => setSelectedTag(e.target.value || null)}
+            >
+              <option value="">All Tags</option>
+              {uniqueTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              value={selectedCategory || ""}
+              onChange={(e) => setSelectedCategory(e.target.value || null)}
+            >
+              <option value="">All Categories</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {onRefresh && (
+            <Button variant="outline" onClick={onRefresh} size="icon" title="Refresh contacts">
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+          )}
           {onAddContact && (
             <Button onClick={onAddContact} className="gap-1">
               <Plus className="h-4 w-4" />
-              Add Contact
+              <span className="hidden sm:inline">Add Contact</span>
             </Button>
           )}
         </div>
@@ -118,8 +153,8 @@ const ContactList: React.FC<ContactListProps> = ({
           <User className="h-12 w-12 text-muted-foreground/50 mx-auto" />
           <h3 className="mt-2 text-lg font-medium">No contacts found</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {debouncedSearch || selectedTag
-              ? "Try a different search term or tag"
+            {debouncedSearch || selectedTag || selectedCategory
+              ? "Try a different search term, tag, or category"
               : "Add your first contact to get started"}
           </p>
           {onAddContact && (
@@ -137,6 +172,7 @@ const ContactList: React.FC<ContactListProps> = ({
                 <TableHead>Name</TableHead>
                 <TableHead>Contact</TableHead>
                 <TableHead>Organization</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Tags</TableHead>
                 <TableHead>Last Contact</TableHead>
               </TableRow>
@@ -177,6 +213,19 @@ const ContactList: React.FC<ContactListProps> = ({
                         <Briefcase className="h-3 w-3" />
                         {contact.role}
                       </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {contact.category ? (
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: contact.category.color }} 
+                        />
+                        <span>{contact.category.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">None</span>
                     )}
                   </TableCell>
                   <TableCell>

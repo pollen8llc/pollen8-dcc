@@ -22,7 +22,7 @@ interface ContactFormProps {
     role?: string;
     notes?: string;
     tags?: string[];
-    category?: string;
+    category_id?: string;
   };
   onSubmit: (values: any) => void;
   onCancel: () => void;
@@ -37,7 +37,7 @@ const DEFAULT_VALUES = {
   role: "",
   notes: "",
   tags: [],
-  category: ""
+  category_id: ""
 };
 
 const ContactForm = ({
@@ -102,10 +102,10 @@ const ContactForm = ({
     onSubmit(values);
   };
 
-  const handleSelectCategory = (category: string) => {
+  const handleSelectCategory = (category_id: string) => {
     setValues({
       ...values,
-      category
+      category_id
     });
   };
 
@@ -172,7 +172,7 @@ const ContactForm = ({
       <div>
         <Label htmlFor="category">Category</Label>
         <Select
-          value={values.category}
+          value={values.category_id}
           onValueChange={handleSelectCategory}
         >
           <SelectTrigger>
