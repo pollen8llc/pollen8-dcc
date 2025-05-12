@@ -15,7 +15,7 @@ const Contacts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const { data: contacts = [], isLoading } = useQuery({
+  const { data: contacts = [], isLoading, refetch } = useQuery({
     queryKey: ["contacts", debouncedSearchQuery],
     queryFn: () => getContacts({ searchQuery: debouncedSearchQuery }),
   });
@@ -26,6 +26,10 @@ const Contacts = () => {
 
   const handleAddContact = () => {
     navigate("/rel8t/contacts/new");
+  };
+
+  const handleRefresh = () => {
+    refetch();
   };
 
   return (
@@ -62,7 +66,8 @@ const Contacts = () => {
         <ContactList
           contacts={contacts}
           isLoading={isLoading}
-          onRefresh={() => {}}
+          onRefresh={handleRefresh}
+          onAddContact={handleAddContact}
         />
       </div>
     </div>

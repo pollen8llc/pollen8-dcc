@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getContacts, Contact } from "@/services/rel8t/contactService";
@@ -33,6 +32,7 @@ interface ContactListProps {
   onEdit?: (contact: Contact) => void;
   onDelete?: (id: string) => void;
   onAddContact?: () => void;
+  onRefresh?: () => void; // Added onRefresh prop
 }
 
 const ContactList: React.FC<ContactListProps> = ({ 
@@ -40,7 +40,8 @@ const ContactList: React.FC<ContactListProps> = ({
   isLoading: propIsLoading, 
   onEdit, 
   onDelete,
-  onAddContact 
+  onAddContact,
+  onRefresh 
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 350);

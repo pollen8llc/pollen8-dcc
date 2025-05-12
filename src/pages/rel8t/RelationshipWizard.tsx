@@ -11,7 +11,7 @@ import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { Contact } from "@/services/rel8t/contactService";
 import { Trigger } from "@/services/rel8t/triggerService";
-import { createOutreach } from "@/services/rel8t/outreachService";
+import { createOutreach, OutreachPriority } from "@/services/rel8t/outreachService";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 
@@ -36,7 +36,7 @@ const RelationshipWizard = () => {
       is_active: boolean;
       title: string;
       description?: string;
-      priority: string;
+      priority: OutreachPriority;
       due_date: string;
     }) => createOutreach(
       {
@@ -84,7 +84,7 @@ const RelationshipWizard = () => {
         is_active: true,
         title: `Outreach for ${contact.name || "Contact"}`,
         description: finalData.notes,
-        priority: "medium",
+        priority: "medium" as OutreachPriority, // Fixed the type by explicitly casting to OutreachPriority
         due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 1 week from now
       });
     }
