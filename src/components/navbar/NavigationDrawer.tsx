@@ -108,7 +108,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
               </>
             )}
 
-            {/* REL8T menu items (for organizers) */}
+            {/* REL8 menu items (for organizers) */}
             {isOrganizer && (
               <>
                 <Separator className="my-2" />
