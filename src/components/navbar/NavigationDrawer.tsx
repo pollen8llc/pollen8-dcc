@@ -122,7 +122,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   onClick={() => handleNavigation("/rel8t")}
                 >
                   <Bell className="mr-2 h-4 w-4" />
-                  Notifications
+                  Rel8t Dashboard
                 </Button>
                 
                 <Button
@@ -131,7 +131,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   onClick={() => handleNavigation("/rel8t/relationships")}
                 >
                   <ListTodo className="mr-2 h-4 w-4" />
-                  Outreach manager
+                  Relationship builder
                 </Button>
                 
                
