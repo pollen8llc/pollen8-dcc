@@ -31,7 +31,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 25% 18%;
+    --border: 215 25% 20%;
     --input: 215 25% 18%;
     --ring: 174 100% 46%;
 
@@ -54,11 +54,11 @@
 @layer utilities {
   /* Glass morphism styles */
   .glass {
-    @apply bg-background/50 backdrop-blur-md border border-border/50 shadow-sm;
+    @apply bg-background/50 backdrop-blur-md border border-border/40 shadow-sm;
   }
 
   .glass-dark {
-    @apply bg-card/40 backdrop-blur-md border border-border/20 shadow-md;
+    @apply bg-card/40 backdrop-blur-md border border-border/40 shadow-md;
   }
 
   /* Animation utilities */
@@ -116,4 +116,9 @@
 
 ::-webkit-scrollbar-thumb {
   @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-all duration-200;
+}
+
+/* Add global style for subtle borders */
+.border, .border-b, .border-t, .border-l, .border-r {
+  @apply border-border/40;
 }

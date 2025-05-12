@@ -172,14 +172,14 @@ const ContactForm = ({
       <div>
         <Label htmlFor="category">Category</Label>
         <Select
-          value={values.category_id}
+          value={values.category_id || undefined}
           onValueChange={handleSelectCategory}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="none">None</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 <span className="flex items-center gap-2">
@@ -198,7 +198,7 @@ const ContactForm = ({
       {/* Tags field */}
       <div>
         <Label htmlFor="tags">Tags</Label>
-        <div className="flex flex-wrap gap-1 border rounded-md p-2 min-h-[42px]">
+        <div className="flex flex-wrap gap-1 border border-border/40 rounded-md p-2 min-h-[42px]">
           {values.tags?.map((tag) => (
             <span
               key={tag}

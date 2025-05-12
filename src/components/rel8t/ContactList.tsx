@@ -2,16 +2,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getContacts, Contact, getCategories, ContactCategory } from "@/services/rel8t/contactService";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Search,
   Plus,
@@ -26,7 +20,6 @@ import {
   Filter
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface ContactListProps {
@@ -165,97 +158,77 @@ const ContactList: React.FC<ContactListProps> = ({
           )}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Organization</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Last Contact</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredContacts.map((contact) => (
-                <TableRow 
-                  key={contact.id} 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onEdit && onEdit(contact)}
-                >
-                  <TableCell>
-                    <div className="font-medium">{contact.name}</div>
-                  </TableCell>
-                  <TableCell>
-                    {contact.email && (
-                      <div className="flex items-center gap-1 text-sm">
-                        <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="truncate max-w-[180px]">{contact.email}</span>
-                      </div>
-                    )}
-                    {contact.phone && (
-                      <div className="flex items-center gap-1 text-sm mt-0.5">
-                        <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                        {contact.phone}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {contact.organization && (
-                      <div className="flex items-center gap-1">
-                        <Building className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span>{contact.organization}</span>
-                      </div>
-                    )}
-                    {contact.role && (
-                      <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <Briefcase className="h-3 w-3" />
-                        {contact.role}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {contact.category ? (
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: contact.category.color }} 
-                        />
-                        <span>{contact.category.name}</span>
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">None</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {contact.tags && contact.tags.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredContacts.map((contact) => (
+            <Card 
+              key={contact.id} 
+              className="cursor-pointer hover:bg-muted/20 transition-colors border-border/40"
+              onClick={() => onEdit && onEdit(contact)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium text-lg truncate">{contact.name}</h3>
+                  {contact.category && (
+                    <div className="flex items-center gap-1.5">
+                      <div 
+                        className="w-2.5 h-2.5 rounded-full" 
+                        style={{ backgroundColor: contact.category.color }} 
+                      />
+                      <span className="text-xs text-muted-foreground">{contact.category.name}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-1.5 mb-3">
+                  {contact.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{contact.email}</span>
+                    </div>
+                  )}
+                  {contact.phone && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      <span>{contact.phone}</span>
+                    </div>
+                  )}
+                  {contact.organization && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Building className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{contact.organization}</span>
+                      {contact.role && (
+                        <span className="text-xs text-muted-foreground ml-1">({contact.role})</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  {contact.tags && contact.tags.length > 0 && (
+                    <div className="flex items-start gap-1.5">
+                      <Tags className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <div className="flex flex-wrap gap-1">
-                        <Tags className="h-3.5 w-3.5 text-muted-foreground mr-1" />
                         {contact.tags.map(tag => (
-                          <Badge key={tag} variant="outline" className="font-normal">
+                          <Badge key={tag} variant="outline" className="font-normal text-xs py-0">
                             {tag}
                           </Badge>
                         ))}
                       </div>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">No tags</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {contact.last_contact_date ? (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDistanceToNow(new Date(contact.last_contact_date), { addSuffix: true })}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">No record</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </div>
+                  )}
+                  
+                  {contact.last_contact_date && (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+                      <Calendar className="h-3 w-3 flex-shrink-0" />
+                      <span>
+                        Last contact: {formatDistanceToNow(new Date(contact.last_contact_date), { addSuffix: true })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
     </div>
