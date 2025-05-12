@@ -122,7 +122,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   onClick={() => handleNavigation("/rel8t")}
                 >
                   <Bell className="mr-2 h-4 w-4" />
-                  RMS Updates
+                  Notifications
                 </Button>
                 
                 <Button
