@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,13 +8,11 @@ import { OutreachCard } from "@/components/rel8t/OutreachCard";
 import { Users, AlertCircle, UserCheck, Zap, Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { 
-  getContactCount,
-  getContactsByCommunityCounts
+  getContactCount
 } from "@/services/rel8t/contactService";
 import {
   getOutreach,
-  getOutreachStatusCounts,
-  OutreachStatusCounts
+  getOutreachStatusCounts
 } from "@/services/rel8t/outreachService";
 import {
   getActiveTriggerCount

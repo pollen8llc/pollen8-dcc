@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
@@ -37,41 +38,7 @@
     --radius: 1rem;
   }
 
-  .dark {
-    --background: 215 25% 8%;
-    --foreground: 0 0% 100%;
-
-    --card: 215 25% 10%;
-    --card-foreground: 0 0% 100%;
-
-    --popover: 215 25% 10%;
-    --popover-foreground: 0 0% 100%;
-
-    --primary: 174 100% 46%;
-    --primary-foreground: 0 0% 0%;
-
-    --secondary: 215 25% 18%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 215 25% 18%;
-    --muted-foreground: 0 0% 80%;
-
-    --accent: 174 100% 46%;
-    --accent-foreground: 0 0% 0%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 215 25% 18%;
-    --input: 215 25% 18%;
-    --ring: 174 100% 46%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
+  /* No light mode theme variables needed - always use dark mode */
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
@@ -79,6 +46,8 @@
 
   html {
     @apply scroll-smooth;
+    /* Force dark mode always */
+    color-scheme: dark;
   }
 }
 

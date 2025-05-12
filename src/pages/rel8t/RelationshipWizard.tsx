@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Steps, Step } from "@/components/ui/steps";
+import { Steps } from "@/components/ui/steps";
 import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
 import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
@@ -34,12 +34,16 @@ const RelationshipWizard = () => {
       triggers: string[];
       notes?: string;
       is_active: boolean;
+      title: string;
+      description?: string;
+      priority: string;
+      due_date: string;
     }) => createOutreach(
       {
-        title: `Outreach for ${selectedData.contacts.find(c => c.id === data.contact_id)?.name || "Contact"}`,
-        description: data.notes,
-        priority: "medium",
-        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        due_date: data.due_date,
       }, 
       [data.contact_id]
     ),
@@ -77,7 +81,11 @@ const RelationshipWizard = () => {
         contact_id: contact.id,
         triggers: finalData.triggers.map(trigger => trigger.id),
         notes: finalData.notes,
-        is_active: true
+        is_active: true,
+        title: `Outreach for ${contact.name || "Contact"}`,
+        description: finalData.notes,
+        priority: "medium",
+        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 1 week from now
       });
     }
   };
@@ -120,6 +128,8 @@ const RelationshipWizard = () => {
     }
   };
 
+  const stepTitles = ["Select Contacts", "Schedule Reminders", "Review & Submit"];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -142,11 +152,7 @@ const RelationshipWizard = () => {
         </div>
         
         <div className="mb-8">
-          <Steps currentStep={step} className="max-w-xl mx-auto">
-            <Step title="Select Contacts" />
-            <Step title="Schedule Reminders" />
-            <Step title="Review & Submit" />
-          </Steps>
+          <Steps currentStep={step} steps={stepTitles} className="max-w-xl mx-auto" />
         </div>
         
         <Card>

@@ -10,7 +10,7 @@ export interface StepsProps {
   currentStep: number;
   className?: string;
   children?: React.ReactNode;
-  steps?: string[]; // Add support for simple array of step titles
+  steps?: string[]; // Add support for steps array
 }
 
 export const Step: React.FC<StepProps> = ({ title }) => {

@@ -27,7 +27,6 @@ import {
   Import,
   ListTodo,
 } from "lucide-react";
-import ThemeToggle from "../ThemeToggle";
 
 interface NavigationDrawerProps {
   open: boolean;
@@ -105,15 +104,6 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 >
                   <Network className="mr-2 h-4 w-4" />
                   My Connections
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/communities/join")}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Join Communities
                 </Button>
               </>
             )}
@@ -252,11 +242,6 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
         </div>
 
         <div className="border-t pt-4 flex flex-col gap-2">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-sm">Theme</span>
-            <ThemeToggle />
-          </div>
-          
           {currentUser ? (
             <Button
               variant="outline"
