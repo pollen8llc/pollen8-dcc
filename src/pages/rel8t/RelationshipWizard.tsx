@@ -9,7 +9,6 @@ import { Steps, Step } from "@/components/ui/steps";
 import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
 import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
-import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
 import { Contact } from "@/services/rel8t/contactService";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { createOutreach } from "@/services/rel8t/outreachService";
@@ -30,7 +29,20 @@ const RelationshipWizard = () => {
   });
 
   const createOutreachMutation = useMutation({
-    mutationFn: createOutreach,
+    mutationFn: (data: {
+      contact_id: string;
+      triggers: string[];
+      notes?: string;
+      is_active: boolean;
+    }) => createOutreach(
+      {
+        title: `Outreach for ${selectedData.contacts.find(c => c.id === data.contact_id)?.name || "Contact"}`,
+        description: data.notes,
+        priority: "medium",
+        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
+      }, 
+      [data.contact_id]
+    ),
     onSuccess: () => {
       toast({
         title: "Relationship plan created",
@@ -129,7 +141,7 @@ const RelationshipWizard = () => {
         </div>
         
         <div className="mb-8">
-          <Steps className="max-w-xl mx-auto" currentStep={step}>
+          <Steps currentStep={step} className="max-w-xl mx-auto">
             <Step title="Select Contacts" />
             <Step title="Schedule Reminders" />
             <Step title="Review & Submit" />

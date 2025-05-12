@@ -12,7 +12,7 @@ import { DistributionChart } from '@/components/rel8t/DistributionChart';
 import { StatisticsChart } from '@/components/rel8t/StatisticsChart';
 import { Bell, CalendarClock, Users, UserPlus, Settings as SettingsIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { getOutreachNotifications } from '@/services/rel8t/outreachService';
+import { getOutreach } from '@/services/rel8t/outreachService';
 
 // Placeholder data for analytics until we connect to real data
 const mockStats = {
@@ -43,7 +43,7 @@ const Notifications = () => {
   // Fetch notifications
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['outreach-notifications'],
-    queryFn: getOutreachNotifications,
+    queryFn: () => getOutreach(),
   });
 
   // Filter notifications based on active tab
@@ -52,6 +52,9 @@ const Notifications = () => {
     : activeTab === 'pending'
       ? notifications.filter(n => n.status === 'pending')
       : notifications.filter(n => n.status === 'completed');
+
+  const pendingCount = notifications.filter(n => n.status === 'pending').length;
+  const completedCount = notifications.filter(n => n.status === 'completed').length;
 
   const handleCreateOutreach = () => {
     navigate('/rel8t/wizard');
@@ -106,11 +109,10 @@ const Notifications = () => {
           />
           <MetricCard
             title="Pending Actions"
-            value={mockStats.pending}
+            value={pendingCount}
             icon={<CalendarClock className="h-6 w-6 text-amber-500" />}
             description="Upcoming actions needed"
-            actionLabel="View All"
-            onAction={() => setActiveTab('pending')}
+            onActionClick={() => setActiveTab('pending')}
           />
         </div>
         
@@ -127,7 +129,7 @@ const Notifications = () => {
                     All
                   </TabsTrigger>
                   <TabsTrigger value="pending">
-                    Pending <Badge variant="secondary" className="ml-1">{notifications.filter(n => n.status === 'pending').length}</Badge>
+                    Pending <Badge variant="secondary" className="ml-1">{pendingCount}</Badge>
                   </TabsTrigger>
                   <TabsTrigger value="completed">
                     Completed

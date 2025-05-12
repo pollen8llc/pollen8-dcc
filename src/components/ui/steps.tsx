@@ -2,17 +2,39 @@
 import { cn } from "@/lib/utils";
 
 interface StepsProps {
-  steps: string[];
   currentStep: number;
   className?: string;
+  children?: React.ReactNode;
 }
 
-export function Steps({ steps, currentStep, className }: StepsProps) {
+export interface StepProps {
+  title: string;
+}
+
+export const Step: React.FC<StepProps> = ({ title }) => {
+  // This is a dummy component that just serves to provide type safety
+  // The actual rendering happens in the Steps component
+  return null;
+};
+
+export const Steps: React.FC<StepsProps> = ({ 
+  currentStep, 
+  className,
+  children
+}) => {
+  // Extract step titles from children
+  const steps = React.Children.toArray(children)
+    .filter(child => React.isValidElement(child) && child.type === Step)
+    .map((child, index) => ({
+      title: React.isValidElement(child) ? (child.props as StepProps).title : `Step ${index + 1}`,
+      index
+    }));
+
   return (
     <div className={cn("flex w-full", className)}>
       {steps.map((step, index) => (
         <div
-          key={step}
+          key={step.title}
           className={cn(
             "flex-1 flex flex-col items-center",
             index !== steps.length - 1 && "relative"
@@ -21,23 +43,23 @@ export function Steps({ steps, currentStep, className }: StepsProps) {
           <div
             className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center",
-              currentStep === index
+              currentStep === index + 1
                 ? "bg-primary text-primary-foreground"
-                : currentStep > index
+                : currentStep > index + 1
                 ? "bg-primary/80 text-primary-foreground"
                 : "bg-muted text-muted-foreground"
             )}
           >
-            {currentStep > index ? "✓" : index + 1}
+            {currentStep > index + 1 ? "✓" : index + 1}
           </div>
           
-          <div className="text-xs mt-2 text-center">{step}</div>
+          <div className="text-xs mt-2 text-center">{step.title}</div>
           
           {index !== steps.length - 1 && (
             <div
               className={cn(
                 "absolute top-4 left-1/2 w-full h-0.5",
-                currentStep > index ? "bg-primary/80" : "bg-muted"
+                currentStep > index + 1 ? "bg-primary/80" : "bg-muted"
               )}
             />
           )}
@@ -45,4 +67,4 @@ export function Steps({ steps, currentStep, className }: StepsProps) {
       ))}
     </div>
   );
-}
+};

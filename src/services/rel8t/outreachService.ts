@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -110,6 +111,64 @@ export const getOutreach = async (status?: string): Promise<Outreach[]> => {
     console.error("Error fetching outreach:", error);
     toast({
       title: "Error fetching outreach",
+      description: error.message,
+      variant: "destructive",
+    });
+    return [];
+  }
+};
+
+// Added function to get outreach notifications
+export const getOutreachNotifications = async (): Promise<Outreach[]> => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error("User not authenticated");
+    }
+
+    const { data, error } = await supabase
+      .from("rms_outreach")
+      .select(`
+        *,
+        rms_outreach_contacts(
+          *,
+          rms_contacts(
+            id,
+            name,
+            email,
+            organization
+          )
+        )
+      `)
+      .eq("user_id", user.user.id)
+      .order("due_date");
+
+    if (error) throw error;
+
+    return (data || []).map(item => {
+      const contacts = item.rms_outreach_contacts
+        .map((oc: any) => oc.rms_contacts)
+        .filter(Boolean);
+
+      const outreach: Outreach = {
+        id: item.id,
+        user_id: item.user_id,
+        title: item.title,
+        description: item.description,
+        priority: item.priority as OutreachPriority,
+        status: item.status as OutreachStatus,
+        due_date: item.due_date,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        contacts
+      };
+      
+      return outreach;
+    });
+  } catch (error: any) {
+    console.error("Error fetching outreach notifications:", error);
+    toast({
+      title: "Error fetching notifications",
       description: error.message,
       variant: "destructive",
     });

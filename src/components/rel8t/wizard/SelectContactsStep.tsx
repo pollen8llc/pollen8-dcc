@@ -35,7 +35,7 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts"],
-    queryFn: getContacts,
+    queryFn: () => getContacts({}),
   });
 
   const handleSubmit = () => {

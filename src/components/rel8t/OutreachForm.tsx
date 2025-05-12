@@ -72,7 +72,7 @@ const OutreachForm: React.FC<OutreachFormProps> = ({
   // Query to get contacts for the multi-select
   const { data: contactsData = [], isLoading: contactsLoading } = useQuery({
     queryKey: ["contacts"],
-    queryFn: getContacts,
+    queryFn: () => getContacts({}),
   });
 
   const form = useForm<OutreachFormValues>({

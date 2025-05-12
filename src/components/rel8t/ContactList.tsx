@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getContacts, Contact } from "@/services/rel8t/contactService";
@@ -27,31 +28,40 @@ import { Badge } from "@/components/ui/badge";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface ContactListProps {
+  contacts?: Contact[];
+  isLoading?: boolean;
+  onEdit?: (contact: Contact) => void;
+  onDelete?: (id: string) => void;
   onAddContact?: () => void;
-  onEditContact?: (contact: Contact) => void;
 }
 
-const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }) => {
+const ContactList: React.FC<ContactListProps> = ({ 
+  contacts: propContacts, 
+  isLoading: propIsLoading, 
+  onEdit, 
+  onDelete,
+  onAddContact 
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 350);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   
-  const { data: contacts = [], isLoading } = useQuery({
-    queryKey: ["contacts"],
-    queryFn: getContacts,
+  const { data: fetchedContacts = [], isLoading: isLoadingContacts } = useQuery({
+    queryKey: ["contacts", debouncedSearch],
+    queryFn: () => getContacts({ searchQuery: debouncedSearch }),
+    enabled: !propContacts, // Only fetch if contacts are not provided as props
   });
+
+  // Use contacts from props if provided, otherwise use fetched contacts
+  const contacts = propContacts || fetchedContacts;
+  const isLoading = propIsLoading !== undefined ? propIsLoading : isLoadingContacts;
 
   // Filter contacts based on search term and selected tag
   const filteredContacts = Array.isArray(contacts) ? contacts.filter((contact) => {
-    const matchesSearch = !debouncedSearch || 
-      contact.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
-      contact.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
-      contact.organization?.toLowerCase().includes(debouncedSearch.toLowerCase());
-    
     const matchesTag = !selectedTag || 
       (contact.tags && contact.tags.includes(selectedTag));
     
-    return matchesSearch && matchesTag;
+    return matchesTag;
   }) : [];
 
   // Get unique tags for the filter
@@ -135,7 +145,7 @@ const ContactList: React.FC<ContactListProps> = ({ onAddContact, onEditContact }
                 <TableRow 
                   key={contact.id} 
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onEditContact && onEditContact(contact)}
+                  onClick={() => onEdit && onEdit(contact)}
                 >
                   <TableCell>
                     <div className="font-medium">{contact.name}</div>

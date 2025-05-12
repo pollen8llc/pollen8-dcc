@@ -14,6 +14,7 @@ export interface Contact {
   updated_at: string;
   user_id: string;
   category?: string;
+  last_contact_date?: string;
 }
 
 export interface ContactCategory {
@@ -24,13 +25,13 @@ export interface ContactCategory {
 }
 
 // Get all contacts
-export const getContacts = async (searchQuery: string = ""): Promise<Contact[]> => {
+export const getContacts = async (options?: { searchQuery?: string }): Promise<Contact[]> => {
   let query = supabase
     .from("rms_contacts")
     .select("*");
   
-  if (searchQuery) {
-    query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,organization.ilike.%${searchQuery}%`);
+  if (options?.searchQuery) {
+    query = query.or(`name.ilike.%${options.searchQuery}%,email.ilike.%${options.searchQuery}%,organization.ilike.%${options.searchQuery}%`);
   }
   
   const { data, error } = await query.order("name");
@@ -40,6 +41,19 @@ export const getContacts = async (searchQuery: string = ""): Promise<Contact[]> 
   }
   
   return data || [];
+};
+
+// Get contact count
+export const getContactCount = async (): Promise<number> => {
+  const { count, error } = await supabase
+    .from("rms_contacts")
+    .select("*", { count: 'exact', head: true });
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return count || 0;
 };
 
 // Get a contact by ID
