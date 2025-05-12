@@ -122,7 +122,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   onClick={() => handleNavigation("/rel8t")}
                 >
                   <Bell className="mr-2 h-4 w-4" />
-                  Notifications
+                  RMS Updates
                 </Button>
                 
                 <Button
@@ -131,35 +131,10 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   onClick={() => handleNavigation("/rel8t/relationships")}
                 >
                   <ListTodo className="mr-2 h-4 w-4" />
-                  Relationships
+                  Outreach manager
                 </Button>
                 
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/contacts")}
-                >
-                  <ContactIcon className="mr-2 h-4 w-4" />
-                  Contacts
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/wizard")}
-                >
-                  <Import className="mr-2 h-4 w-4" />
-                  Build Relationship
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/settings")}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </Button>
+               
               </>
             )}
 
@@ -169,33 +144,14 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Separator className="my-2" />
                 <p className="px-4 py-2 text-sm font-medium opacity-70">
                   Organizer
-                </p>
-                
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/create-community")}
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Create Community
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/organizer/invites")}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Manage Invites
-                </Button>
-                
+                </p>      
                 <Button
                   variant="ghost"
                   className="justify-start"
                   onClick={() => handleNavigation("/organizer/dot-connector")}
                 >
                   <Network className="mr-2 h-4 w-4" />
-                  Dot Connector
+                  Organizer Dashboard 
                 </Button>
               </>
             )}
