@@ -23,7 +23,8 @@ export interface ContactCategory {
   id: string;
   name: string;
   color: string;
-  user_id: string;
+  // Make user_id optional since it's not returned in joined queries
+  user_id?: string;
 }
 
 // Get all contacts
