@@ -46,17 +46,17 @@ export interface ContactAffiliation {
   id: string;
   contact_id: string;
   user_id: string;
-  affiliated_user_id?: string;
-  affiliated_contact_id?: string;
-  affiliated_community_id?: string;
+  affiliated_user_id?: string | null;
+  affiliated_contact_id?: string | null;
+  affiliated_community_id?: string | null;
   affiliation_type: 'user' | 'contact' | 'community';
   relationship?: string;
   created_at: string;
   updated_at: string;
-  // Join data
-  affiliated_user?: { id: string; email: string };
-  affiliated_contact?: Contact;
-  affiliated_community?: { id: string; name: string };
+  // Join data - make all joined properties optional
+  affiliated_user?: { id: string; email: string } | null;
+  affiliated_contact?: Contact | null;
+  affiliated_community?: { id: string; name: string } | null;
 }
 
 // Get all contacts
@@ -151,11 +151,19 @@ export const getContactById = async (id: string): Promise<Contact> => {
     console.error("Error fetching affiliations:", affiliationsError);
   }
 
-  // Type casting to ensure affiliation_type is correctly typed
-  const affiliations: ContactAffiliation[] = affiliationsData?.map(affiliation => ({
-    ...affiliation,
-    affiliation_type: affiliation.affiliation_type as 'user' | 'contact' | 'community'
-  })) || [];
+  // Type casting and proper null handling for affiliations
+  const affiliations: ContactAffiliation[] = (affiliationsData || []).map(affiliation => {
+    // Ensure affiliation_type is correctly typed
+    const typedAffiliation = {
+      ...affiliation,
+      affiliation_type: affiliation.affiliation_type as 'user' | 'contact' | 'community',
+      // Ensure the joined objects are properly handled
+      affiliated_user: affiliation.affiliated_user || null,
+      affiliated_contact: affiliation.affiliated_contact || null,
+      affiliated_community: affiliation.affiliated_community || null
+    };
+    return typedAffiliation;
+  });
 
   // Get groups that this contact belongs to
   const { data: groupMembers, error: groupMembersError } = await supabase
@@ -263,7 +271,10 @@ export const addAffiliation = async (
   
   const result = {
     ...data[0],
-    affiliation_type: data[0].affiliation_type as 'user' | 'contact' | 'community'
+    affiliation_type: data[0].affiliation_type as 'user' | 'contact' | 'community',
+    affiliated_user: null,
+    affiliated_contact: null,
+    affiliated_community: null
   };
   
   return result;
