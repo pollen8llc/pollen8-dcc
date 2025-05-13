@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -80,7 +79,7 @@ const Contacts = () => {
   });
 
   const handleEditContact = (contact: any) => {
-    navigate(`/rel8t/contacts/${contact.id}/edit`);
+    navigate(`/rel8t/contacts/${contact.id}`);
   };
 
   const handleNextWizardStep = (data: any) => {
