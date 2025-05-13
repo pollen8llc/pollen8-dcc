@@ -130,6 +130,7 @@ const Dashboard = () => {
             icon={<Users className="h-5 w-5" />}
             progress={75}
             isLoading={contactCountLoading}
+            onActionClick={() => navigate("/rel8t/contacts")}
           />
           
           <MetricCard
