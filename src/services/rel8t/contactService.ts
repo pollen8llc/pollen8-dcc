@@ -53,10 +53,10 @@ export interface ContactAffiliation {
   relationship?: string;
   created_at: string;
   updated_at: string;
-  // Join data - make all joined properties optional
-  affiliated_user?: { id: string; email: string } | null;
-  affiliated_contact?: Contact | null;
-  affiliated_community?: { id: string; name: string } | null;
+  // Join data with proper error handling
+  affiliated_user?: { id: string; email: string } | null | Record<string, any>;
+  affiliated_contact?: Contact | null | Record<string, any>;
+  affiliated_community?: { id: string; name: string } | null | Record<string, any>;
 }
 
 // Get all contacts
@@ -151,17 +151,49 @@ export const getContactById = async (id: string): Promise<Contact> => {
     console.error("Error fetching affiliations:", affiliationsError);
   }
 
-  // Type casting and proper null handling for affiliations
+  // Process affiliations with more robust error handling
   const affiliations: ContactAffiliation[] = (affiliationsData || []).map(affiliation => {
-    // Ensure affiliation_type is correctly typed
-    const typedAffiliation = {
-      ...affiliation,
+    // Check if affiliated_user is valid or an error object
+    let affiliated_user = null;
+    if (affiliation.affiliated_user && 
+        typeof affiliation.affiliated_user === 'object' && 
+        !('error' in affiliation.affiliated_user)) {
+      affiliated_user = affiliation.affiliated_user;
+    }
+
+    // Check if affiliated_contact is valid or an error object
+    let affiliated_contact = null;
+    if (affiliation.affiliated_contact && 
+        typeof affiliation.affiliated_contact === 'object' && 
+        !('error' in affiliation.affiliated_contact)) {
+      affiliated_contact = affiliation.affiliated_contact;
+    }
+
+    // Check if affiliated_community is valid or an error object
+    let affiliated_community = null;
+    if (affiliation.affiliated_community && 
+        typeof affiliation.affiliated_community === 'object' && 
+        !('error' in affiliation.affiliated_community)) {
+      affiliated_community = affiliation.affiliated_community;
+    }
+
+    // Create properly typed affiliation object
+    const typedAffiliation: ContactAffiliation = {
+      id: affiliation.id,
+      contact_id: affiliation.contact_id,
+      user_id: affiliation.user_id,
+      affiliated_user_id: affiliation.affiliated_user_id,
+      affiliated_contact_id: affiliation.affiliated_contact_id,
+      affiliated_community_id: affiliation.affiliated_community_id,
       affiliation_type: affiliation.affiliation_type as 'user' | 'contact' | 'community',
-      // Ensure the joined objects are properly handled
-      affiliated_user: affiliation.affiliated_user || null,
-      affiliated_contact: affiliation.affiliated_contact || null,
-      affiliated_community: affiliation.affiliated_community || null
+      relationship: affiliation.relationship,
+      created_at: affiliation.created_at,
+      updated_at: affiliation.updated_at,
+      affiliated_user,
+      affiliated_contact,
+      affiliated_community
     };
+    
     return typedAffiliation;
   });
 
@@ -269,7 +301,8 @@ export const addAffiliation = async (
     throw new Error(error.message);
   }
   
-  const result = {
+  // Return a properly typed affiliation object
+  const result: ContactAffiliation = {
     ...data[0],
     affiliation_type: data[0].affiliation_type as 'user' | 'contact' | 'community',
     affiliated_user: null,
