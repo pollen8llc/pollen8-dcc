@@ -127,6 +127,7 @@ const Dashboard = () => {
           <MetricCard
             title="Total Contacts"
             value={contactCountLoading ? "-" : contactCount}
+            description={contactCountLoading ? undefined : `${contactCount} People in your network`}
             icon={<Users className="h-5 w-5" />}
             progress={75}
             isLoading={contactCountLoading}
