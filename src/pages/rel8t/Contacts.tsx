@@ -98,11 +98,23 @@ const Contacts = () => {
     }
   };
 
-  const handleImportComplete = (importedContacts: any[]) => {
-    // Here we would implement the logic to add imported contacts to the database
+  const handleImportComplete = async (importedContacts: any[]) => {
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const contact of importedContacts) {
+      try {
+        await createContact(contact);
+        successCount++;
+      } catch (error) {
+        errorCount++;
+        // Optionally, log or collect errors for user feedback
+      }
+    }
+
     toast({
       title: "Contacts imported",
-      description: `Successfully imported ${importedContacts.length} contacts.`
+      description: `Successfully imported ${successCount} contacts.${errorCount ? ` ${errorCount} failed.` : ""}`
     });
     setImportDialogOpen(false);
     queryClient.invalidateQueries({ queryKey: ["contacts"] });
