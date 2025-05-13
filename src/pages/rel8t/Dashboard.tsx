@@ -105,7 +105,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">REL8T Dashboard</h1>
+            <h1 className="text-3xl font-bold">REL8 Dashboard</h1>
             <p className="text-muted-foreground mt-1">
               Track and manage your professional relationships
             </p>
