@@ -155,7 +155,7 @@ export const getContactById = async (id: string): Promise<Contact> => {
   const affiliations: ContactAffiliation[] = (affiliationsData || []).map(affiliation => {
     // Check if affiliated_user is valid or an error object
     let affiliated_user = null;
-    if (affiliation.affiliated_user && 
+    if (affiliation.affiliated_user !== null && 
         typeof affiliation.affiliated_user === 'object' && 
         !('error' in affiliation.affiliated_user)) {
       affiliated_user = affiliation.affiliated_user;
@@ -163,7 +163,7 @@ export const getContactById = async (id: string): Promise<Contact> => {
 
     // Check if affiliated_contact is valid or an error object
     let affiliated_contact = null;
-    if (affiliation.affiliated_contact && 
+    if (affiliation.affiliated_contact !== null && 
         typeof affiliation.affiliated_contact === 'object' && 
         !('error' in affiliation.affiliated_contact)) {
       affiliated_contact = affiliation.affiliated_contact;
@@ -171,7 +171,7 @@ export const getContactById = async (id: string): Promise<Contact> => {
 
     // Check if affiliated_community is valid or an error object
     let affiliated_community = null;
-    if (affiliation.affiliated_community && 
+    if (affiliation.affiliated_community !== null && 
         typeof affiliation.affiliated_community === 'object' && 
         !('error' in affiliation.affiliated_community)) {
       affiliated_community = affiliation.affiliated_community;
