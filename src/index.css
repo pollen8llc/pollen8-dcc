@@ -5,6 +5,7 @@
 
 @layer base {
   :root {
+    /* Light mode - kept for reference but forcing dark mode */
     --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
@@ -24,30 +25,31 @@
     --destructive: 0 100% 50%;
     --destructive-foreground: 210 40% 98%;
     --ring: 215 20.2% 65.1%;
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
 
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 215 20.2% 65.1%;
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 1.2%;
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 216 34% 17%;
-    --radius: 0.5rem;
+    /* Dark mode with the requested palette */
+    --background: 215 25% 8%;        /* Background: hsl(215 25% 8%) */
+    --foreground: 0 0% 100%;         /* Text/Foreground: hsl(0 0% 100%) */
+    --muted: 215 25% 12%;            /* Slightly lighter than background */
+    --muted-foreground: 0 0% 70%;    /* Slightly dimmed text */
+    --popover: 215 25% 10%;          /* Surface (cards, popovers): hsl(215 25% 10%) */
+    --popover-foreground: 0 0% 100%; /* White text on popover */
+    --border: 215 25% 18%;           /* Input/Borders: hsl(215 25% 18%) */
+    --input: 215 25% 18%;            /* Input/Borders: hsl(215 25% 18%) */
+    --card: 215 25% 10%;             /* Surface (cards, popovers): hsl(215 25% 10%) */
+    --card-foreground: 0 0% 100%;    /* White text on cards */
+    --primary: 174 100% 46%;         /* Primary Highlight Color: Teal #00eada */
+    --primary-foreground: 0 0% 0%;   /* Black text on primary */
+    --secondary: 215 25% 16%;        /* Slightly lighter than border */
+    --secondary-foreground: 0 0% 100%; /* White text on secondary */
+    --accent: 174 100% 46%;          /* Accent using the teal highlight */
+    --accent-foreground: 0 0% 0%;    /* Black text on accent */
+    --destructive: 0 63% 31%;        /* Dark red */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive */
+    --ring: 174 100% 46%;            /* Teal ring for focus */
+    --radius: 1rem;                   /* Rounded-2xl */
   }
 }
 
@@ -59,6 +61,15 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  /* Force dark mode for the entire application */
+  :root {
+    color-scheme: dark;
+  }
+  
+  html {
+    @apply dark;
+  }
 }
 
 /* More subtle borders */
@@ -68,6 +79,24 @@
 
 .border-border {
   @apply border-opacity-30 dark:border-opacity-20;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-[#00eada] text-black font-medium hover:bg-[#00eada]/90 rounded-xl transition-colors;
+}
+
+.btn-outline {
+  @apply bg-transparent border border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10 rounded-xl transition-colors;
+}
+
+.btn-ghost {
+  @apply bg-transparent text-white hover:bg-white/10 rounded-xl transition-colors;
+}
+
+/* Glass effect for cards */
+.glass {
+  @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl;
 }
 
 /* Mobile optimizations */
@@ -102,4 +131,21 @@ button {
 /* Input focus styles */
 input:focus, textarea:focus, select:focus {
   @apply ring-opacity-50;
+}
+
+/* Chart coloring */
+.recharts-cartesian-axis-tick text {
+  @apply fill-foreground/70;
+}
+
+.recharts-cartesian-grid line {
+  @apply stroke-border/30;
+}
+
+.recharts-tooltip-cursor {
+  @apply fill-muted stroke-border/50;
+}
+
+.recharts-default-tooltip {
+  @apply bg-popover border border-border text-foreground rounded-xl !important;
 }

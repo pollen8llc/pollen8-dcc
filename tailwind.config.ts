@@ -66,7 +66,7 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        aquamarine: "#00eada", // Updated teal/turquoise color
+        aquamarine: "#00eada", // Teal highlight color
       },
       borderRadius: {
         lg: "var(--radius)",

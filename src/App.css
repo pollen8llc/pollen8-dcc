@@ -41,3 +41,45 @@
 .read-the-docs {
   color: hsl(0 0% 80%);
 }
+
+/* Business Dashboard UI Improvements */
+.dashboard-card {
+  @apply rounded-2xl border border-border/30 bg-card shadow-lg transition-all duration-300 hover:shadow-xl;
+}
+
+.dashboard-card-hover {
+  @apply hover:border-[#00eada]/20 hover:shadow-[#00eada]/5;
+}
+
+.dashboard-card-header {
+  @apply border-b border-border/20 p-5;
+}
+
+.dashboard-card-title {
+  @apply text-xl font-bold text-foreground;
+}
+
+.dashboard-card-content {
+  @apply p-5;
+}
+
+/* Stat Cards */
+.stat-card {
+  @apply flex flex-col rounded-2xl border border-border/30 bg-card p-5 shadow-sm;
+}
+
+.stat-card-value {
+  @apply text-2xl font-bold text-foreground;
+}
+
+.stat-card-label {
+  @apply text-sm text-muted-foreground;
+}
+
+.stat-card-trend-up {
+  @apply text-[#00eada] flex items-center gap-1;
+}
+
+.stat-card-trend-down {
+  @apply text-destructive flex items-center gap-1;
+}
