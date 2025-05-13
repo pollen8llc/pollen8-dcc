@@ -12,18 +12,12 @@ const defaultToastOptions = {
 // Extend toast with default options
 const enhancedToast = {
   ...toast,
-  // Override the default toast function
-  default: (props: Parameters<typeof toast.default>[0]) => 
-    toast.default({ ...defaultToastOptions, ...props }),
-  // Other toast variants
-  success: (props: Parameters<typeof toast.success>[0]) => 
-    toast.success({ ...defaultToastOptions, ...props }),
+  // Default toast
+  show: (props: Parameters<typeof toast>[0]) => 
+    toast({ ...defaultToastOptions, ...props }),
+  // Destructive toast
   error: (props: Parameters<typeof toast.error>[0]) => 
     toast.error({ ...defaultToastOptions, ...props }),
-  warning: (props: Parameters<typeof toast.warning>[0]) => 
-    toast.warning({ ...defaultToastOptions, ...props }),
-  info: (props: Parameters<typeof toast.info>[0]) => 
-    toast.info({ ...defaultToastOptions, ...props }),
 };
 
 export { useToast, enhancedToast as toast };

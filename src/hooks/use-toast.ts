@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { ToastActionElement, type ToastProps } from "@/components/ui/toast"
 
@@ -162,12 +161,6 @@ function toast({ ...props }: Toast) {
     update,
   }
 }
-
-// Simple custom variants for toast
-toast.success = (props: Toast) => toast({ ...props, variant: "success" });
-toast.error = (props: Toast) => toast({ ...props, variant: "destructive" });
-toast.warning = (props: Toast) => toast({ ...props, variant: "warning" });
-toast.info = (props: Toast) => toast({ ...props, variant: "default" });
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)

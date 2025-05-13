@@ -143,6 +143,10 @@ export const getContactById = async (id: string): Promise<Contact | null> => {
     const affiliations: ContactAffiliation[] = [];
     if (data.contact_affiliations && Array.isArray(data.contact_affiliations)) {
       for (const affiliation of data.contact_affiliations) {
+        // Skip if this is a SelectQueryError (error object)
+        if (affiliation && typeof affiliation === 'object' && 'message' in affiliation && 'code' in affiliation) {
+          continue;
+        }
         if (
           affiliation.affiliation_type === "user" &&
           affiliation.affiliated_user &&
