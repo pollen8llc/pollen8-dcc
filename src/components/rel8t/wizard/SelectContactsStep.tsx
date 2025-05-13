@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -139,10 +138,6 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
             ))}
           </select>
         </div>
-        <Button onClick={() => setContactDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add
-        </Button>
       </div>
 
       {isLoading ? (
@@ -157,10 +152,6 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
               ? "Try adjusting your search or filters" 
               : "Add your first contact to get started"}
           </p>
-          <Button onClick={() => setContactDialogOpen(true)} className="mt-4">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Contact
-          </Button>
         </div>
       ) : (
         <ScrollArea className="h-[400px] pr-4">
