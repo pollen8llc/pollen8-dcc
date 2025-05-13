@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -457,18 +456,31 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({
       {/* Format selector */}
       <div className="mb-4">
         <Label htmlFor="format">CSV Format</Label>
-        <select
-          id="format"
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-          value={selectedFormat}
-          onChange={handleFormatChange}
-        >
-          <option value="auto">Auto-detect</option>
-          <option value="generic">Generic CSV</option>
-          <option value="eventbrite">Eventbrite</option>
-          <option value="luma">Luma</option>
-          <option value="partiful">Partiful</option>
-        </select>
+        <div className="flex gap-2 flex-wrap mt-2">
+          {[
+            { value: 'auto', label: 'Auto-detect' },
+            { value: 'generic', label: 'Generic CSV' },
+            { value: 'eventbrite', label: 'Eventbrite' },
+            { value: 'luma', label: 'Luma' },
+            { value: 'partiful', label: 'Partiful' },
+          ].map(option => (
+            <button
+              key={option.value}
+              type="button"
+              className={`px-3 py-1 rounded-full border text-sm transition-colors ${
+                selectedFormat === option.value
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background text-foreground border-border hover:bg-muted'
+              }`}
+              onClick={() => {
+                setSelectedFormat(option.value);
+                if (file) parseCSVFile(file);
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* File upload area */}
