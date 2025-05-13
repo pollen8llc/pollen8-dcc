@@ -143,48 +143,54 @@ export const getContactById = async (id: string): Promise<Contact | null> => {
     const affiliations: ContactAffiliation[] = [];
     if (data.contact_affiliations && Array.isArray(data.contact_affiliations)) {
       for (const affiliation of data.contact_affiliations) {
-        if (affiliation.affiliation_type === "user" && affiliation.affiliated_user) {
-          // Add null check for affiliated_user
-          if (affiliation.affiliated_user && !('error' in affiliation.affiliated_user)) {
-            affiliations.push({
-              id: affiliation.id,
-              type: "user",
-              user: {
-                id: affiliation.affiliated_user.id,
-                email: affiliation.affiliated_user.email,
-              },
-              notes: affiliation.notes,
-              created_at: affiliation.created_at,
-            });
-          }
-        } else if (affiliation.affiliation_type === "contact" && affiliation.affiliated_contact) {
-          // Add null check for affiliated_contact
-          if (affiliation.affiliated_contact && !('error' in affiliation.affiliated_contact)) {
-            affiliations.push({
-              id: affiliation.id,
-              type: "contact",
-              contact: {
-                id: affiliation.affiliated_contact.id,
-                name: affiliation.affiliated_contact.name,
-              },
-              notes: affiliation.notes,
-              created_at: affiliation.created_at,
-            });
-          }
-        } else if (affiliation.affiliation_type === "community" && affiliation.affiliated_community) {
-          // Add null check for affiliated_community
-          if (affiliation.affiliated_community && !('error' in affiliation.affiliated_community)) {
-            affiliations.push({
-              id: affiliation.id,
-              type: "community",
-              community: {
-                id: affiliation.affiliated_community.id,
-                name: affiliation.affiliated_community.name,
-              },
-              notes: affiliation.notes,
-              created_at: affiliation.created_at,
-            });
-          }
+        if (
+          affiliation.affiliation_type === "user" &&
+          affiliation.affiliated_user &&
+          typeof affiliation.affiliated_user === "object" &&
+          !('error' in affiliation.affiliated_user)
+        ) {
+          affiliations.push({
+            id: affiliation.id,
+            type: "user",
+            user: {
+              id: affiliation.affiliated_user?.id,
+              email: affiliation.affiliated_user?.email,
+            },
+            notes: affiliation.notes,
+            created_at: affiliation.created_at,
+          });
+        } else if (
+          affiliation.affiliation_type === "contact" &&
+          affiliation.affiliated_contact &&
+          typeof affiliation.affiliated_contact === "object" &&
+          !('error' in affiliation.affiliated_contact)
+        ) {
+          affiliations.push({
+            id: affiliation.id,
+            type: "contact",
+            contact: {
+              id: affiliation.affiliated_contact?.id,
+              name: affiliation.affiliated_contact?.name,
+            },
+            notes: affiliation.notes,
+            created_at: affiliation.created_at,
+          });
+        } else if (
+          affiliation.affiliation_type === "community" &&
+          affiliation.affiliated_community &&
+          typeof affiliation.affiliated_community === "object" &&
+          !('error' in affiliation.affiliated_community)
+        ) {
+          affiliations.push({
+            id: affiliation.id,
+            type: "community",
+            community: {
+              id: affiliation.affiliated_community?.id,
+              name: affiliation.affiliated_community?.name,
+            },
+            notes: affiliation.notes,
+            created_at: affiliation.created_at,
+          });
         }
       }
     }
