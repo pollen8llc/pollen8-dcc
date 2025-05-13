@@ -126,7 +126,7 @@ export const getContactById = async (id: string): Promise<Contact> => {
   }
 
   // Get contact's affiliations
-  const { data: affiliations, error: affiliationsError } = await supabase
+  const { data: affiliationsData, error: affiliationsError } = await supabase
     .from("rms_contact_affiliations")
     .select(`
       *,
@@ -151,6 +151,12 @@ export const getContactById = async (id: string): Promise<Contact> => {
     console.error("Error fetching affiliations:", affiliationsError);
   }
 
+  // Type casting to ensure affiliation_type is correctly typed
+  const affiliations: ContactAffiliation[] = affiliationsData?.map(affiliation => ({
+    ...affiliation,
+    affiliation_type: affiliation.affiliation_type as 'user' | 'contact' | 'community'
+  })) || [];
+
   // Get groups that this contact belongs to
   const { data: groupMembers, error: groupMembersError } = await supabase
     .from("rms_contact_group_members")
@@ -159,7 +165,10 @@ export const getContactById = async (id: string): Promise<Contact> => {
         id,
         name,
         description,
-        color
+        color,
+        user_id,
+        created_at,
+        updated_at
       )
     `)
     .eq("contact_id", id);
@@ -169,12 +178,12 @@ export const getContactById = async (id: string): Promise<Contact> => {
   }
 
   // Add affiliations and groups to the contact
-  const groups = groupMembers?.map(member => member.group) || [];
+  const groups = groupMembers?.map(member => member.group as ContactGroup) || [];
   
   return {
     ...contact,
-    affiliations: affiliations || [],
-    groups: groups || []
+    affiliations,
+    groups
   };
 };
 
@@ -252,7 +261,12 @@ export const addAffiliation = async (
     throw new Error(error.message);
   }
   
-  return data[0];
+  const result = {
+    ...data[0],
+    affiliation_type: data[0].affiliation_type as 'user' | 'contact' | 'community'
+  };
+  
+  return result;
 };
 
 // Remove an affiliation
@@ -289,7 +303,7 @@ export const createContactGroup = async (
     throw new Error(error.message);
   }
   
-  return data[0];
+  return data[0] as ContactGroup;
 };
 
 // Get all contact groups
@@ -303,7 +317,7 @@ export const getContactGroups = async (): Promise<ContactGroup[]> => {
     throw new Error(error.message);
   }
   
-  return data || [];
+  return data as ContactGroup[];
 };
 
 // Add a contact to a group
