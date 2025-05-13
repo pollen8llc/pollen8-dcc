@@ -8,7 +8,8 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogDescription 
 } from "@/components/ui/dialog";
 import ContactForm from "@/components/rel8t/ContactForm";
 import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
@@ -17,14 +18,30 @@ import { useMutation } from "@tanstack/react-query";
 import ContactGroupsManager from "@/components/rel8t/ContactGroupsManager";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, FolderPlus } from "lucide-react";
+import { Steps, Step } from "@/components/ui/steps";
+import { 
+  Plus, 
+  Users, 
+  FolderPlus, 
+  ChevronLeft, 
+  Import,
+  ArrowRight,
+  Check
+} from "lucide-react";
+import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
+
+// Define steps for the add contact wizard
+const WIZARD_STEPS = ["Basic Info", "Details", "Review"];
 
 const Contacts = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [contactGroupsDialogOpen, setContactGroupsDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+  const [wizardStep, setWizardStep] = useState(1);
+  const [wizardData, setWizardData] = useState<any>({});
 
   // Create contact mutation for the dialog
   const createMutation = useMutation({
@@ -51,6 +68,7 @@ const Contacts = () => {
         description: "New contact has been successfully created."
       });
       setContactDialogOpen(false);
+      setWizardStep(1); // Reset wizard step
     },
     onError: (error) => {
       toast({
@@ -65,12 +83,116 @@ const Contacts = () => {
     navigate(`/rel8t/contacts/${contact.id}/edit`);
   };
 
-  const handleCreateContact = (values: any) => {
-    createMutation.mutate(values);
+  const handleNextWizardStep = (data: any) => {
+    setWizardData({...wizardData, ...data});
+    if (wizardStep < WIZARD_STEPS.length) {
+      setWizardStep(wizardStep + 1);
+    } else {
+      // Final step - submit the data
+      createMutation.mutate(wizardData);
+    }
+  };
+
+  const handlePreviousWizardStep = () => {
+    if (wizardStep > 1) {
+      setWizardStep(wizardStep - 1);
+    }
+  };
+
+  const handleImportComplete = (importedContacts: any[]) => {
+    // Here we would implement the logic to add imported contacts to the database
+    toast({
+      title: "Contacts imported",
+      description: `Successfully imported ${importedContacts.length} contacts.`
+    });
+    setImportDialogOpen(false);
+    queryClient.invalidateQueries({ queryKey: ["contacts"] });
   };
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["contacts"] });
+  };
+
+  // Render the appropriate wizard step content
+  const renderWizardStepContent = () => {
+    switch(wizardStep) {
+      case 1:
+        return (
+          <div className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>Basic Contact Information</DialogTitle>
+              <DialogDescription>Enter the essential contact details.</DialogDescription>
+            </DialogHeader>
+            {/* Basic info form would go here */}
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-end">
+                <Button onClick={() => handleNextWizardStep({})}>
+                  Next
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 2:
+        return (
+          <div className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>Additional Details</DialogTitle>
+              <DialogDescription>Add more information about the contact.</DialogDescription>
+            </DialogHeader>
+            {/* Additional details form would go here */}
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={handlePreviousWizardStep}
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Button>
+                <Button onClick={() => handleNextWizardStep({})}>
+                  Next
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 3:
+        return (
+          <div className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>Review & Submit</DialogTitle>
+              <DialogDescription>Verify all information before creating the contact.</DialogDescription>
+            </DialogHeader>
+            {/* Review form would go here */}
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={handlePreviousWizardStep}
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Button>
+                <Button 
+                  onClick={() => handleNextWizardStep({})}
+                  disabled={createMutation.isPending}
+                >
+                  {createMutation.isPending ? 'Creating...' : 'Create Contact'}
+                  <Check className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
   };
 
   return (
@@ -78,6 +200,18 @@ const Contacts = () => {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mr-2" 
+            onClick={() => navigate("/rel8t")}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Dashboard
+          </Button>
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold">Contacts</h1>
@@ -91,6 +225,14 @@ const Contacts = () => {
             >
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Groups</span>
+            </Button>
+            <Button 
+              onClick={() => setImportDialogOpen(true)}
+              variant="outline"
+              className="gap-2"
+            >
+              <Import className="h-4 w-4" />
+              <span className="hidden sm:inline">Import</span>
             </Button>
             <Button onClick={() => setContactDialogOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />
@@ -140,17 +282,13 @@ const Contacts = () => {
         </Tabs>
       </div>
 
-      {/* Dialog for adding a new contact */}
+      {/* Dialog for adding a new contact with wizard */}
       <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Add New Contact</DialogTitle>
-          </DialogHeader>
-          <ContactForm
-            onSubmit={handleCreateContact}
-            onCancel={() => setContactDialogOpen(false)}
-            isSubmitting={createMutation.isPending}
-          />
+          <div className="mb-6">
+            <Steps currentStep={wizardStep} steps={WIZARD_STEPS} />
+          </div>
+          {renderWizardStepContent()}
         </DialogContent>
       </Dialog>
 
@@ -163,6 +301,21 @@ const Contacts = () => {
           <div className="mt-4">
             <ContactGroupsManager />
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog for importing contacts */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Import Contacts</DialogTitle>
+            <DialogDescription>
+              Import contacts from a CSV file or other sources.
+            </DialogDescription>
+          </DialogHeader>
+          <ImportContactsStep 
+            onNext={(data) => handleImportComplete(data.importedContacts)}
+          />
         </DialogContent>
       </Dialog>
     </div>

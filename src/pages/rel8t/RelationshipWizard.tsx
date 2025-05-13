@@ -3,13 +3,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
-import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
 import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { Contact } from "@/services/rel8t/contactService";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type WizardStep = 
   | "select-contacts" 
@@ -34,17 +34,10 @@ const RelationshipWizard = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<WizardStep>("select-contacts");
   const [data, setData] = useState<WizardData>(initialData);
-  const [importTab, setImportTab] = useState<string>("select");
 
   const handleSelectContactsNext = (stepData: { contacts: Contact[] }) => {
     setData(prev => ({ ...prev, contacts: stepData.contacts }));
     setStep("select-triggers");
-  };
-
-  const handleImportContactsNext = (stepData: { importedContacts: any[] }) => {
-    setData(prev => ({ ...prev, importedContacts: stepData.importedContacts }));
-    setImportTab("select");
-    // Don't advance to next step - let the user select the imported contacts
   };
 
   const handleSelectTriggersNext = (stepData: { triggers: any[], priority: 'low' | 'medium' | 'high' }) => {
@@ -79,6 +72,18 @@ const RelationshipWizard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mr-2" 
+            onClick={() => navigate("/rel8t")}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Dashboard
+          </Button>
+        </div>
+        
         <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">{getStepTitle()}</h1>
@@ -115,21 +120,10 @@ const RelationshipWizard = () => {
         <Card className="border-border/20">
           <CardContent className="p-6">
             {step === "select-contacts" && (
-              <Tabs defaultValue={importTab} onValueChange={setImportTab}>
-                <TabsList className="mb-4">
-                  <TabsTrigger value="select">Select Contacts</TabsTrigger>
-                  <TabsTrigger value="import">Import Contacts</TabsTrigger>
-                </TabsList>
-                <TabsContent value="select">
-                  <SelectContactsStep
-                    selectedContacts={data.contacts}
-                    onNext={handleSelectContactsNext}
-                  />
-                </TabsContent>
-                <TabsContent value="import">
-                  <ImportContactsStep onNext={handleImportContactsNext} />
-                </TabsContent>
-              </Tabs>
+              <SelectContactsStep
+                selectedContacts={data.contacts}
+                onNext={handleSelectContactsNext}
+              />
             )}
 
             {step === "select-triggers" && (
