@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -96,15 +95,6 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   <UserSearch className="mr-2 h-4 w-4" />
                   Find People
                 </Button>
-                
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/connections")}
-                >
-                  <Network className="mr-2 h-4 w-4" />
-                  My Connections
-                </Button>
               </>
             )}
 
@@ -122,7 +112,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   onClick={() => handleNavigation("/rel8t")}
                 >
                   <Bell className="mr-2 h-4 w-4" />
-                  Rel8t Dashboard
+                  REL8
                 </Button>
                 
                 <Button
