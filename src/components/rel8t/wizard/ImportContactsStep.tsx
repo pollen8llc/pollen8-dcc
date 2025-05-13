@@ -1,647 +1,598 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileUp, Mail, Table, Phone, Check, AlertCircle, Loader2 } from "lucide-react";
-import { createContact, Contact } from "@/services/rel8t/contactService";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import { 
+  AlertCircle, 
+  CheckCircle2, 
+  Upload, 
+  FileText, 
+  X,
+  Import
+} from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
 interface ImportContactsStepProps {
-  onImportComplete: (contacts: Contact[]) => void;
+  onNext: (data: { importedContacts: any[] }) => void;
+  onPrevious?: () => void;
 }
 
-export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({
-  onImportComplete
+interface ParsedContact {
+  name: string;
+  email?: string;
+  phone?: string;
+  organization?: string;
+  role?: string;
+  location?: string;
+  tags?: string[];
+  duplicate?: boolean;
+  duplicateOf?: string;
+  source?: string;
+  [key: string]: any;
+}
+
+const COMMON_FIELD_MAPPINGS: {[key: string]: string} = {
+  // Name variations
+  'name': 'name',
+  'fullname': 'name',
+  'full name': 'name',
+  'full_name': 'name',
+  'contact name': 'name',
+  'contact': 'name',
+  'attendee': 'name',
+  'attendee name': 'name',
+  'guest': 'name',
+  'guest name': 'name',
+  'firstname': 'name',
+  'first name': 'name',
+  'fname': 'name',
+  
+  // Email variations
+  'email': 'email',
+  'email address': 'email',
+  'e-mail': 'email',
+  'mail': 'email',
+  'contact email': 'email',
+  'attendee email': 'email',
+  
+  // Phone variations
+  'phone': 'phone',
+  'phone number': 'phone',
+  'telephone': 'phone',
+  'tel': 'phone',
+  'mobile': 'phone',
+  'cell': 'phone',
+  'contact phone': 'phone',
+  
+  // Organization variations
+  'organization': 'organization',
+  'organisation': 'organization',
+  'company': 'organization',
+  'business': 'organization',
+  'employer': 'organization',
+  'org': 'organization',
+  'workplace': 'organization',
+  
+  // Role/Title variations
+  'role': 'role',
+  'job title': 'role',
+  'job': 'role',
+  'title': 'role',
+  'position': 'role',
+  'job role': 'role',
+  'occupation': 'role',
+  
+  // Location variations
+  'location': 'location',
+  'address': 'location',
+  'city': 'location',
+  'state': 'location',
+  'country': 'location',
+  'region': 'location',
+  'place': 'location',
+  
+  // Tags/Notes variations
+  'tags': 'tags',
+  'tag': 'tags',
+  'categories': 'tags',
+  'category': 'tags',
+  'labels': 'tags',
+  'notes': 'notes',
+  'note': 'notes',
+  'comments': 'notes',
+  'description': 'notes'
+};
+
+// Detect header match by comparing header text with common variations
+const matchHeader = (header: string): string | null => {
+  const normalized = header.toLowerCase().trim();
+  return COMMON_FIELD_MAPPINGS[normalized] || null;
+};
+
+// Special processor for Eventbrite format
+const processEventbriteFormat = (data: any[]): ParsedContact[] => {
+  return data.map(row => ({
+    name: `${row['First Name'] || ''} ${row['Last Name'] || ''}`.trim(),
+    email: row['Email'] || row['Email Address'],
+    phone: row['Phone'] || row['Cell Phone'],
+    organization: row['Company'] || row['Organization'],
+    role: row['Job Title'] || row['Position'],
+    location: row['Shipping Address'] || row['Billing Address'] || row['Address'],
+    tags: ['Eventbrite'],
+    source: 'Eventbrite'
+  }));
+};
+
+// Special processor for Luma format
+const processLumaFormat = (data: any[]): ParsedContact[] => {
+  return data.map(row => ({
+    name: row['Name'] || row['Guest Name'] || row['Attendee Name'] || `${row['First Name'] || ''} ${row['Last Name'] || ''}`.trim(),
+    email: row['Email'] || row['Email Address'],
+    phone: row['Phone'] || row['Phone Number'],
+    organization: row['Organization'] || row['Company'],
+    role: row['Role'] || row['Job Title'],
+    location: row['Location'] || row['City'],
+    tags: ['Luma'],
+    source: 'Luma'
+  }));
+};
+
+// Special processor for Partiful format
+const processPartifulFormat = (data: any[]): ParsedContact[] => {
+  return data.map(row => ({
+    name: row['Name'] || row['Guest'] || `${row['First Name'] || ''} ${row['Last Name'] || ''}`.trim(),
+    email: row['Email'] || row['Guest Email'],
+    phone: row['Phone'],
+    tags: ['Partiful'],
+    source: 'Partiful'
+  }));
+};
+
+export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ 
+  onNext,
+  onPrevious
 }) => {
-  const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("csv");
-  const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [isImporting, setIsImporting] = useState(false);
-  const [importedContacts, setImportedContacts] = useState<Contact[]>([]);
-  const [progress, setProgress] = useState(0);
-  const [importStatus, setImportStatus] = useState<"idle" | "importing" | "preview" | "complete" | "error">("idle");
-  const [previewData, setPreviewData] = useState<any[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [importSummary, setImportSummary] = useState<{total: number, success: number, failed: number}>({
-    total: 0,
-    success: 0,
-    failed: 0
-  });
-  const [authStatus, setAuthStatus] = useState<{
-    google: "connected" | "disconnected" | "connecting",
-    outlook: "connected" | "disconnected" | "connecting",
-    phone: "connected" | "disconnected" | "connecting"
-  }>({
-    google: "disconnected",
-    outlook: "disconnected",
-    phone: "disconnected"
-  });
+  const [file, setFile] = useState<File | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [parsedContacts, setParsedContacts] = useState<ParsedContact[]>([]);
+  const [duplicates, setDuplicates] = useState<number>(0);
+  const [selectedFormat, setSelectedFormat] = useState<string>('auto');
+
+  // Handle file drop
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const uploadedFile = e.dataTransfer.files[0];
+      if (uploadedFile.type === 'text/csv' || uploadedFile.name.endsWith('.csv')) {
+        setFile(uploadedFile);
+        parseCSVFile(uploadedFile);
+      } else {
+        setParseError('Please upload a CSV file.');
+      }
+    }
+  }, []);
 
   // Handle file selection
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setCsvFile(file);
-      readFilePreview(file);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const uploadedFile = e.target.files[0];
+      if (uploadedFile.type === 'text/csv' || uploadedFile.name.endsWith('.csv')) {
+        setFile(uploadedFile);
+        parseCSVFile(uploadedFile);
+      } else {
+        setParseError('Please upload a CSV file.');
+      }
     }
   };
 
-  // Read file for preview
-  const readFilePreview = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const text = e.target?.result as string;
-        const lines = text.split("\n");
-        const headers = lines[0].split(",").map(h => h.trim());
-        
-        const previewRows = lines.slice(1, 6).map(line => {
-          const values = line.split(",").map(v => v.trim());
-          const row: any = {};
-          
-          headers.forEach((header, index) => {
-            row[header] = values[index] || '';
-          });
-          
-          return row;
-        });
-        
-        setPreviewData(previewRows);
-        setImportStatus("preview");
-      } catch (error) {
-        setErrorMessage("The file format is invalid. Please check your CSV file.");
-        setImportStatus("error");
-        toast({
-          title: "Error parsing CSV",
-          description: "The file format is invalid. Please check your CSV file.",
-          variant: "destructive",
-        });
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  // Process CSV import
-  const processImport = async () => {
-    if (!csvFile) return;
-    
-    setIsImporting(true);
-    setImportStatus("importing");
-    setProgress(0);
-    setImportSummary({ total: 0, success: 0, failed: 0 });
+  // Parse CSV file
+  const parseCSVFile = async (csvFile: File) => {
+    setParsing(true);
+    setParseError(null);
     
     try {
-      const reader = new FileReader();
+      const text = await csvFile.text();
+      const rows = text.split('\n');
       
-      reader.onload = async (e) => {
-        const text = e.target?.result as string;
-        const lines = text.split("\n").filter(line => line.trim());
-        const headers = lines[0].split(",").map(h => h.trim());
+      // Parse headers
+      const headers = rows[0].split(',').map(header => header.trim().replace(/^"|"$/g, ''));
+      
+      // Check if data is empty
+      if (rows.length <= 1) {
+        throw new Error('The CSV file appears to be empty.');
+      }
+      
+      // Parse data
+      const parsedData: any[] = [];
+      for (let i = 1; i < rows.length; i++) {
+        if (!rows[i].trim()) continue; // Skip empty rows
         
-        const importedData: Contact[] = [];
-        const totalRows = lines.length - 1;
-        let successCount = 0;
-        let failedCount = 0;
+        const values = rows[i].split(',').map(value => value.trim().replace(/^"|"$/g, ''));
+        const rowData: any = {};
         
-        // Process each row (skip header)
-        for (let i = 1; i < lines.length; i++) {
-          const values = lines[i].split(",").map(v => v.trim());
-          
-          // Map CSV columns to contact properties
-          const contactData: any = {
-            name: values[headers.indexOf("name")] || `Contact ${i}`,
-            email: values[headers.indexOf("email")] || undefined,
-            phone: values[headers.indexOf("phone")] || undefined,
-            organization: values[headers.indexOf("organization")] || undefined,
-            role: values[headers.indexOf("role")] || undefined,
-            notes: values[headers.indexOf("notes")] || undefined,
-            tags: values[headers.indexOf("tags")] ? values[headers.indexOf("tags")].split(";").map((tag: string) => tag.trim()) : []
-          };
-          
-          try {
-            // Create the contact in the database
-            const newContact = await createContact(contactData);
-            if (newContact) {
-              importedData.push(newContact);
-              successCount++;
-            }
-          } catch (error) {
-            console.error("Error creating contact:", error);
-            failedCount++;
+        headers.forEach((header, index) => {
+          if (index < values.length) {
+            rowData[header] = values[index];
           }
-          
-          // Update progress and summary
-          setProgress(Math.round(((i) / totalRows) * 100));
-          setImportSummary({
-            total: totalRows,
-            success: successCount,
-            failed: failedCount
-          });
-        }
-        
-        // Finalize import
-        setImportedContacts(importedData);
-        setImportStatus("complete");
-        queryClient.invalidateQueries({ queryKey: ["contacts"] });
-        
-        toast({
-          title: "Import Completed",
-          description: `Successfully imported ${successCount} contacts. ${failedCount > 0 ? `Failed to import ${failedCount} contacts.` : ''}`,
-          variant: failedCount > 0 ? "destructive" : "default",
         });
-      };
+        
+        parsedData.push(rowData);
+      }
       
-      reader.readAsText(csvFile);
+      // Detect format and process accordingly
+      let processedContacts: ParsedContact[];
+      
+      // Check if we should use a specific format processor
+      const formatDetection = detectFormat(headers);
+      const useFormat = selectedFormat === 'auto' ? formatDetection : selectedFormat;
+      
+      switch (useFormat) {
+        case 'eventbrite':
+          processedContacts = processEventbriteFormat(parsedData);
+          break;
+        case 'luma':
+          processedContacts = processLumaFormat(parsedData);
+          break;
+        case 'partiful':
+          processedContacts = processPartifulFormat(parsedData);
+          break;
+        default:
+          // Generic CSV format - map headers to fields
+          processedContacts = processGenericFormat(parsedData, headers);
+          break;
+      }
+      
+      // Detect duplicates
+      const deduplicatedContacts = detectDuplicates(processedContacts);
+      const duplicateCount = deduplicatedContacts.filter(c => c.duplicate).length;
+      
+      setParsedContacts(deduplicatedContacts);
+      setDuplicates(duplicateCount);
+      setParsing(false);
+      
     } catch (error) {
-      setImportStatus("error");
-      setErrorMessage("An error occurred during import. Please try again.");
-      toast({
-        title: "Import Failed",
-        description: "An error occurred during import. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsImporting(false);
+      console.error('Error parsing CSV:', error);
+      setParseError('Failed to parse the CSV file. Please ensure it is correctly formatted.');
+      setParsing(false);
     }
   };
 
-  // Mock functions for other import methods
-  const connectToGmail = () => {
-    setAuthStatus(prev => ({ ...prev, google: "connecting" }));
+  // Process generic CSV format by mapping headers to known fields
+  const processGenericFormat = (data: any[], headers: string[]): ParsedContact[] => {
+    // Map headers to our standard fields
+    const fieldMapping: {[key: string]: string} = {};
     
-    // Simulate connection process
-    setTimeout(() => {
-      setAuthStatus(prev => ({ ...prev, google: "connected" }));
-      toast({
-        title: "Gmail Connected",
-        description: "Successfully connected to Gmail. You can now import your contacts.",
-      });
-    }, 2000);
-  };
-
-  const connectToOutlook = () => {
-    setAuthStatus(prev => ({ ...prev, outlook: "connecting" }));
-    
-    // Simulate connection process
-    setTimeout(() => {
-      setAuthStatus(prev => ({ ...prev, outlook: "connected" }));
-      toast({
-        title: "Outlook Connected",
-        description: "Successfully connected to Outlook. You can now import your contacts.",
-      });
-    }, 2000);
-  };
-
-  const connectToPhone = () => {
-    setAuthStatus(prev => ({ ...prev, phone: "connecting" }));
-    
-    // Simulate connection process
-    setTimeout(() => {
-      setAuthStatus(prev => ({ ...prev, phone: "connected" }));
-      toast({
-        title: "Phone Connected",
-        description: "Successfully connected to your phone. You can now import your contacts.",
-      });
-    }, 2000);
-  };
-
-  const importFromProvider = (provider: 'google' | 'outlook' | 'phone') => {
-    setIsImporting(true);
-    setImportStatus("importing");
-    setProgress(0);
-    
-    // Simulate import process
-    const totalSteps = 100;
-    let currentStep = 0;
-    
-    const progressInterval = setInterval(() => {
-      if (currentStep < totalSteps) {
-        currentStep += 1;
-        setProgress(currentStep);
-      } else {
-        clearInterval(progressInterval);
-        setIsImporting(false);
-        setImportStatus("complete");
-        setImportSummary({
-          total: Math.floor(Math.random() * 50) + 10,
-          success: Math.floor(Math.random() * 40) + 10,
-          failed: Math.floor(Math.random() * 5)
-        });
-        
-        toast({
-          title: `${provider.charAt(0).toUpperCase() + provider.slice(1)} Import Complete`,
-          description: `Successfully imported contacts from ${provider}.`,
-        });
-        
-        // Refresh contacts list
-        queryClient.invalidateQueries({ queryKey: ["contacts"] });
+    headers.forEach(header => {
+      const match = matchHeader(header);
+      if (match) {
+        fieldMapping[header] = match;
       }
-    }, 30);
+    });
+    
+    return data.map(row => {
+      const contact: ParsedContact = { name: '' };
+      
+      // Build contact record from mapped fields
+      Object.keys(row).forEach(header => {
+        const field = fieldMapping[header];
+        if (field) {
+          if (field === 'tags' && row[header]) {
+            // Handle tags as comma or semicolon separated values
+            contact.tags = row[header].split(/[,;]/).map((t: string) => t.trim()).filter((t: string) => t);
+          } else {
+            contact[field] = row[header];
+          }
+        }
+      });
+      
+      // If we don't have a name field, try to build one from first/last name
+      if (!contact.name && (row['First Name'] || row['Last Name'])) {
+        contact.name = `${row['First Name'] || ''} ${row['Last Name'] || ''}`.trim();
+      }
+      
+      // Tag as 'CSV Import' if no source is specified
+      if (!contact.source) {
+        contact.source = 'CSV Import';
+        if (!contact.tags) contact.tags = [];
+        if (!contact.tags.includes('CSV Import')) {
+          contact.tags.push('CSV Import');
+        }
+      }
+      
+      return contact;
+    }).filter(contact => contact.name || contact.email); // Filter out empty contacts
+  };
+
+  // Detect duplicates within the imported batch
+  const detectDuplicates = (contacts: ParsedContact[]): ParsedContact[] => {
+    const emailMap: {[key: string]: number} = {};
+    const phoneMap: {[key: string]: number} = {};
+    const nameMap: {[key: string]: number} = {};
+    
+    // First pass: record all unique identifiers
+    contacts.forEach((contact, index) => {
+      if (contact.email) {
+        const normalizedEmail = contact.email.toLowerCase().trim();
+        if (!emailMap[normalizedEmail]) {
+          emailMap[normalizedEmail] = index;
+        }
+      }
+      
+      if (contact.phone) {
+        const normalizedPhone = contact.phone.replace(/\D/g, ''); // Strip non-digits
+        if (normalizedPhone && !phoneMap[normalizedPhone]) {
+          phoneMap[normalizedPhone] = index;
+        }
+      }
+      
+      if (contact.name) {
+        const normalizedName = contact.name.toLowerCase().trim();
+        // Only use name for matching if we have a very specific name
+        if (normalizedName && normalizedName.split(' ').length > 1 && !nameMap[normalizedName]) {
+          nameMap[normalizedName] = index;
+        }
+      }
+    });
+    
+    // Second pass: mark duplicates
+    return contacts.map((contact, index) => {
+      // Check for duplicates using email (most reliable)
+      if (contact.email) {
+        const normalizedEmail = contact.email.toLowerCase().trim();
+        const firstIndex = emailMap[normalizedEmail];
+        if (firstIndex !== undefined && firstIndex !== index) {
+          return {
+            ...contact,
+            duplicate: true,
+            duplicateOf: `${contacts[firstIndex].name || 'Unknown'} (${contacts[firstIndex].email})`
+          };
+        }
+      }
+      
+      // Check for duplicates using phone
+      if (!contact.duplicate && contact.phone) {
+        const normalizedPhone = contact.phone.replace(/\D/g, '');
+        if (normalizedPhone) {
+          const firstIndex = phoneMap[normalizedPhone];
+          if (firstIndex !== undefined && firstIndex !== index) {
+            return {
+              ...contact,
+              duplicate: true,
+              duplicateOf: `${contacts[firstIndex].name || 'Unknown'} (${contacts[firstIndex].phone})`
+            };
+          }
+        }
+      }
+      
+      // Use name as last resort, only if email and phone didn't match
+      if (!contact.duplicate && contact.name) {
+        const normalizedName = contact.name.toLowerCase().trim();
+        if (normalizedName.split(' ').length > 1) { // Only match on full names
+          const firstIndex = nameMap[normalizedName];
+          if (firstIndex !== undefined && firstIndex !== index) {
+            return {
+              ...contact,
+              duplicate: true,
+              duplicateOf: contacts[firstIndex].name
+            };
+          }
+        }
+      }
+      
+      return contact;
+    });
+  };
+
+  // Detect CSV format based on headers
+  const detectFormat = (headers: string[]): string => {
+    const headerSet = new Set(headers.map(h => h.toLowerCase().trim()));
+    
+    // Eventbrite format typically has these fields
+    const eventbriteMarkers = ['Order #', 'Attendee Status', 'Event Name', 'Ticket Type'];
+    if (eventbriteMarkers.some(marker => headerSet.has(marker.toLowerCase()))) {
+      return 'eventbrite';
+    }
+    
+    // Luma format typically has these fields
+    const lumaMarkers = ['Guest ID', 'Guest Status', 'Event Name', 'Ticket Type', 'RSVP Status'];
+    if (lumaMarkers.some(marker => headerSet.has(marker.toLowerCase()))) {
+      return 'luma';
+    }
+    
+    // Partiful format typically has these fields
+    const partifulMarkers = ['Guest Name', 'RSVP Status', 'Party', 'Plus Ones'];
+    if (partifulMarkers.some(marker => headerSet.has(marker.toLowerCase()))) {
+      return 'partiful';
+    }
+    
+    // Default to generic format
+    return 'generic';
+  };
+
+  // Handle format selection
+  const handleFormatChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedFormat(e.target.value);
+    if (file) {
+      // Re-parse the file with the new format
+      parseCSVFile(file);
+    }
+  };
+
+  // Handle proceed/next action
+  const handleProceed = () => {
+    // Filter out duplicates if needed and proceed
+    const contacts = parsedContacts.filter(c => !c.duplicate).map(contact => {
+      // Convert contact to the format expected by the next step
+      const { duplicate, duplicateOf, source, ...cleanContact } = contact;
+      return cleanContact;
+    });
+    
+    onNext({ importedContacts: contacts });
+  };
+
+  // Remove a contact from the import list
+  const removeContact = (index: number) => {
+    setParsedContacts(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
-    <div>
-      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="mb-4 grid grid-cols-4">
-          <TabsTrigger value="csv">
-            <Table className="mr-2 h-4 w-4" />
-            CSV
-          </TabsTrigger>
-          <TabsTrigger value="gmail">
-            <Mail className="mr-2 h-4 w-4" />
-            Gmail
-          </TabsTrigger>
-          <TabsTrigger value="outlook">
-            <Mail className="mr-2 h-4 w-4" />
-            Outlook
-          </TabsTrigger>
-          <TabsTrigger value="phone">
-            <Phone className="mr-2 h-4 w-4" />
-            Phone
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="csv" className="space-y-4">
-          {importStatus === "idle" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Upload CSV File</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Upload a CSV file containing your contacts. The first row should include headers
-                  such as name, email, phone, organization, role, notes, tags.
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold mb-2 flex items-center">
+          <Import className="mr-2 h-5 w-5" /> Import Contacts
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Import your contacts from a CSV file. We support various formats including 
+          standard CSV, Eventbrite, Luma, and Partiful exports.
+        </p>
+      </div>
+
+      {/* Format selector */}
+      <div className="mb-4">
+        <Label htmlFor="format">CSV Format</Label>
+        <select
+          id="format"
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          value={selectedFormat}
+          onChange={handleFormatChange}
+        >
+          <option value="auto">Auto-detect</option>
+          <option value="generic">Generic CSV</option>
+          <option value="eventbrite">Eventbrite</option>
+          <option value="luma">Luma</option>
+          <option value="partiful">Partiful</option>
+        </select>
+      </div>
+
+      {/* File upload area */}
+      {!parsedContacts.length && (
+        <div
+          className={`border-2 border-dashed rounded-lg p-8 text-center ${
+            parseError ? 'border-destructive/50' : 'border-border/40'
+          }`}
+          onDrop={handleDrop}
+          onDragOver={(e) => e.preventDefault()}
+        >
+          <div className="flex flex-col items-center justify-center">
+            <FileText className="h-10 w-10 text-muted-foreground mb-2" />
+            <h3 className="font-medium">Drag and drop a CSV file here</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              or click to browse your files
+            </p>
+            <input
+              type="file"
+              id="file-upload"
+              className="hidden"
+              accept=".csv"
+              onChange={handleFileChange}
+            />
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById('file-upload')?.click()}
+              disabled={parsing}
+            >
+              {parsing ? 'Processing...' : 'Select CSV File'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Error message */}
+      {parseError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{parseError}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Preview of parsed contacts */}
+      {parsedContacts.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">Preview ({parsedContacts.length} contacts)</h3>
+              {duplicates > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {duplicates} potential duplicates found
                 </p>
-                
-                <div className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center">
-                  <FileUp className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-                  <p className="mb-4 text-sm text-muted-foreground">
-                    Drag and drop your CSV file here, or click to browse
-                  </p>
-                  <Input
-                    type="file"
-                    accept=".csv"
-                    onChange={handleFileChange}
-                    className="max-w-xs mx-auto"
-                  />
-                  {csvFile && (
-                    <p className="mt-2 text-sm">
-                      Selected file: <span className="font-medium">{csvFile.name}</span>
-                    </p>
-                  )}
-                </div>
-                
-                <div className="flex justify-end mt-4">
-                  <Button
-                    disabled={!csvFile}
-                    onClick={() => readFilePreview(csvFile!)}
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setFile(null);
+                setParsedContacts([]);
+                setParseError(null);
+              }}
+            >
+              Clear <X className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+
+          <ScrollArea className="h-[300px] border rounded-md">
+            <div className="p-4 space-y-3">
+              {parsedContacts.map((contact, index) => (
+                <div 
+                  key={index} 
+                  className={`flex items-start justify-between border p-3 rounded-md ${
+                    contact.duplicate ? 'border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800' : 'border-border/30'
+                  }`}
+                >
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{contact.name || 'No Name'}</span>
+                      {contact.duplicate && (
+                        <Badge variant="outline" className="text-xs bg-amber-100 dark:bg-amber-900 border-amber-200 dark:border-amber-800">
+                          Duplicate
+                        </Badge>
+                      )}
+                      {contact.source && (
+                        <Badge variant="secondary" className="text-xs">
+                          {contact.source}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {contact.email && <div>{contact.email}</div>}
+                      {contact.phone && <div>{contact.phone}</div>}
+                      {contact.organization && <div>{contact.organization} {contact.role && `(${contact.role})`}</div>}
+                      {contact.duplicate && <div className="text-xs italic mt-1">Appears to be a duplicate of {contact.duplicateOf}</div>}
+                    </div>
+                  </div>
+                  <button 
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                    onClick={() => removeContact(index)}
                   >
-                    Next
-                  </Button>
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {importStatus === "preview" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Preview Import</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Review the first 5 rows of your CSV file below. If everything looks correct, click Import to continue.
-                </p>
-                
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-muted">
-                        {previewData[0] && Object.keys(previewData[0]).map((header, i) => (
-                          <th key={i} className="p-2 text-left text-xs font-medium">{header}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {previewData.map((row, i) => (
-                        <tr key={i} className="border-b">
-                          {Object.values(row).map((value: any, j) => (
-                            <td key={j} className="p-2 text-xs">{value}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                
-                <div className="flex justify-end mt-4 gap-2">
-                  <Button variant="outline" onClick={() => setImportStatus("idle")}>
-                    Back
-                  </Button>
-                  <Button onClick={processImport}>
-                    Import Contacts
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {importStatus === "importing" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Importing Contacts</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
-                <Loader2 className="animate-spin h-10 w-10 text-primary mb-4" />
-                <p className="font-medium">Processing your contacts...</p>
-                <Progress value={progress} className="w-full mt-4" />
-                <div className="flex justify-between w-full mt-2 text-sm text-muted-foreground">
-                  <span>Success: {importSummary.success}</span>
-                  <span>Progress: {progress}%</span>
-                  <span>Failed: {importSummary.failed}</span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {importStatus === "error" && (
-            <Card className="border-destructive">
-              <CardHeader>
-                <CardTitle className="text-lg text-destructive flex items-center">
-                  <AlertCircle className="h-5 w-5 mr-2" />
-                  Import Failed
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">{errorMessage}</p>
-                <div className="flex justify-end">
-                  <Button onClick={() => setImportStatus("idle")}>
-                    Try Again
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {importStatus === "complete" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Import Completed</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-                  <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <p className="font-medium">Successfully imported {importSummary.success} contacts</p>
-                
-                {importSummary.failed > 0 && (
-                  <Badge variant="destructive" className="mt-2">
-                    Failed to import {importSummary.failed} contacts
-                  </Badge>
-                )}
-                
-                <p className="text-sm text-muted-foreground my-2">
-                  Your contacts have been added to your database and are ready to use.
-                </p>
-                
-                <div className="w-full flex justify-center mt-6">
-                  <Button onClick={() => onImportComplete(importedContacts)}>
-                    View Contacts
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="gmail">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Import Gmail Contacts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {authStatus.google === "disconnected" && (
-                <div className="flex flex-col items-center py-4">
-                  <Mail className="h-12 w-12 text-primary mb-4" />
-                  <p className="font-medium mb-2">Connect to Gmail</p>
-                  <p className="text-sm text-muted-foreground text-center mb-4">
-                    Connect your Gmail account to import contacts from your Google account.
-                  </p>
-                  <Button onClick={connectToGmail}>
-                    Connect Gmail Account
-                  </Button>
-                </div>
-              )}
-              
-              {authStatus.google === "connecting" && (
-                <div className="flex flex-col items-center py-4">
-                  <Loader2 className="animate-spin h-12 w-12 text-primary mb-4" />
-                  <p className="font-medium mb-2">Connecting to Gmail...</p>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Please wait while we connect to your Gmail account.
-                  </p>
-                </div>
-              )}
-              
-              {authStatus.google === "connected" && (
-                <div className="flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <Check className="h-5 w-5 text-green-500 mr-2" />
-                      <p className="font-medium">Connected to Gmail</p>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => setAuthStatus(prev => ({ ...prev, google: "disconnected" }))}>
-                      Disconnect
-                    </Button>
-                  </div>
-                  
-                  <Separator className="my-4" />
-                  
-                  {importStatus === "importing" ? (
-                    <div className="flex flex-col items-center py-4">
-                      <Loader2 className="animate-spin h-10 w-10 text-primary mb-4" />
-                      <p className="font-medium mb-2">Importing Contacts...</p>
-                      <Progress value={progress} className="w-full mt-2" />
-                      <p className="text-sm text-muted-foreground mt-2">{progress}% complete</p>
-                    </div>
-                  ) : importStatus === "complete" ? (
-                    <div className="flex flex-col items-center py-4">
-                      <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-                        <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
-                      </div>
-                      <p className="font-medium">Successfully imported {importSummary.success} contacts</p>
-                      <Button onClick={() => onImportComplete([])} className="mt-4">
-                        View Contacts
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center py-4">
-                      <p className="text-sm text-muted-foreground mb-4 text-center">
-                        Your Gmail account is connected. Click the button below to import your contacts.
-                      </p>
-                      <Button onClick={() => importFromProvider('google')}>Import Gmail Contacts</Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="outlook">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Import Outlook Contacts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {authStatus.outlook === "disconnected" && (
-                <div className="flex flex-col items-center py-4">
-                  <Mail className="h-12 w-12 text-primary mb-4" />
-                  <p className="font-medium mb-2">Connect to Outlook</p>
-                  <p className="text-sm text-muted-foreground text-center mb-4">
-                    Connect your Microsoft account to import contacts from Outlook.
-                  </p>
-                  <Button onClick={connectToOutlook}>
-                    Connect Outlook Account
-                  </Button>
-                </div>
-              )}
-              
-              {authStatus.outlook === "connecting" && (
-                <div className="flex flex-col items-center py-4">
-                  <Loader2 className="animate-spin h-12 w-12 text-primary mb-4" />
-                  <p className="font-medium mb-2">Connecting to Outlook...</p>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Please wait while we connect to your Outlook account.
-                  </p>
-                </div>
-              )}
-              
-              {authStatus.outlook === "connected" && (
-                <div className="flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <Check className="h-5 w-5 text-green-500 mr-2" />
-                      <p className="font-medium">Connected to Outlook</p>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => setAuthStatus(prev => ({ ...prev, outlook: "disconnected" }))}>
-                      Disconnect
-                    </Button>
-                  </div>
-                  
-                  <Separator className="my-4" />
-                  
-                  {importStatus === "importing" ? (
-                    <div className="flex flex-col items-center py-4">
-                      <Loader2 className="animate-spin h-10 w-10 text-primary mb-4" />
-                      <p className="font-medium mb-2">Importing Contacts...</p>
-                      <Progress value={progress} className="w-full mt-2" />
-                      <p className="text-sm text-muted-foreground mt-2">{progress}% complete</p>
-                    </div>
-                  ) : importStatus === "complete" ? (
-                    <div className="flex flex-col items-center py-4">
-                      <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-                        <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
-                      </div>
-                      <p className="font-medium">Successfully imported {importSummary.success} contacts</p>
-                      <Button onClick={() => onImportComplete([])} className="mt-4">
-                        View Contacts
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center py-4">
-                      <p className="text-sm text-muted-foreground mb-4 text-center">
-                        Your Outlook account is connected. Click the button below to import your contacts.
-                      </p>
-                      <Button onClick={() => importFromProvider('outlook')}>Import Outlook Contacts</Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="phone">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Import Phone Contacts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {authStatus.phone === "disconnected" && (
-                <div className="flex flex-col items-center py-4">
-                  <Phone className="h-12 w-12 text-primary mb-4" />
-                  <p className="font-medium mb-2">Connect to Your Phone</p>
-                  <p className="text-sm text-muted-foreground text-center mb-4">
-                    Connect your phone to import contacts from your mobile device.
-                  </p>
-                  <Button onClick={connectToPhone}>
-                    Connect Phone
-                  </Button>
-                </div>
-              )}
-              
-              {authStatus.phone === "connecting" && (
-                <div className="flex flex-col items-center py-4">
-                  <Loader2 className="animate-spin h-12 w-12 text-primary mb-4" />
-                  <p className="font-medium mb-2">Connecting to Phone...</p>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Please wait while we connect to your phone.
-                  </p>
-                </div>
-              )}
-              
-              {authStatus.phone === "connected" && (
-                <div className="flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <Check className="h-5 w-5 text-green-500 mr-2" />
-                      <p className="font-medium">Connected to Phone</p>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => setAuthStatus(prev => ({ ...prev, phone: "disconnected" }))}>
-                      Disconnect
-                    </Button>
-                  </div>
-                  
-                  <Separator className="my-4" />
-                  
-                  {importStatus === "importing" ? (
-                    <div className="flex flex-col items-center py-4">
-                      <Loader2 className="animate-spin h-10 w-10 text-primary mb-4" />
-                      <p className="font-medium mb-2">Importing Contacts...</p>
-                      <Progress value={progress} className="w-full mt-2" />
-                      <p className="text-sm text-muted-foreground mt-2">{progress}% complete</p>
-                    </div>
-                  ) : importStatus === "complete" ? (
-                    <div className="flex flex-col items-center py-4">
-                      <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-                        <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
-                      </div>
-                      <p className="font-medium">Successfully imported {importSummary.success} contacts</p>
-                      <Button onClick={() => onImportComplete([])} className="mt-4">
-                        View Contacts
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center py-4">
-                      <p className="text-sm text-muted-foreground mb-4 text-center">
-                        Your phone is connected. Click the button below to import your contacts.
-                      </p>
-                      <Button onClick={() => importFromProvider('phone')}>Import Phone Contacts</Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              ))}
+            </div>
+          </ScrollArea>
+
+          <div className="flex justify-between pt-4">
+            {onPrevious && (
+              <Button variant="outline" onClick={onPrevious}>
+                Previous
+              </Button>
+            )}
+            <Button onClick={handleProceed}>
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Continue with {parsedContacts.filter(c => !c.duplicate).length} Contacts
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+export default ImportContactsStep;

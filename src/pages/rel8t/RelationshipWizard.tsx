@@ -1,163 +1,152 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Steps } from "@/components/ui/steps";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
+import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
 import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { Contact } from "@/services/rel8t/contactService";
-import { Trigger } from "@/services/rel8t/triggerService";
-import { createOutreach, OutreachPriority } from "@/services/rel8t/outreachService";
-import { toast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+
+type WizardStep = 
+  | "select-contacts" 
+  | "select-triggers" 
+  | "review";
+
+type WizardData = {
+  contacts: Contact[];
+  triggers: any[];
+  importedContacts: any[];
+  priority: 'low' | 'medium' | 'high';
+};
+
+const initialData: WizardData = {
+  contacts: [],
+  triggers: [],
+  importedContacts: [],
+  priority: 'medium',
+};
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [selectedData, setSelectedData] = useState<{
-    contacts: Contact[];
-    triggers: Trigger[];
-    notes?: string;
-  }>({
-    contacts: [],
-    triggers: [],
-    notes: "",
-  });
+  const [step, setStep] = useState<WizardStep>("select-contacts");
+  const [data, setData] = useState<WizardData>(initialData);
+  const [importTab, setImportTab] = useState<string>("select");
 
-  const createOutreachMutation = useMutation({
-    mutationFn: (data: {
-      contact_id: string;
-      triggers: string[];
-      notes?: string;
-      is_active: boolean;
-      title: string;
-      description?: string;
-      priority: OutreachPriority;
-      due_date: string;
-    }) => createOutreach(
-      {
-        title: data.title,
-        description: data.description,
-        priority: data.priority,
-        due_date: data.due_date,
-      }, 
-      [data.contact_id]
-    ),
-    onSuccess: () => {
-      toast({
-        title: "Relationship plan created",
-        description: "Your relationship plan has been created successfully!",
-      });
-      navigate("/rel8t");
-    },
-    onError: (error) => {
-      toast({
-        title: "Error creating relationship plan",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleNext = (data: Partial<typeof selectedData> = {}) => {
-    setSelectedData((prev) => ({ ...prev, ...data }));
-    setStep((prev) => prev + 1);
+  const handleSelectContactsNext = (stepData: { contacts: Contact[] }) => {
+    setData(prev => ({ ...prev, contacts: stepData.contacts }));
+    setStep("select-triggers");
   };
 
-  const handlePrevious = () => {
-    setStep((prev) => prev - 1);
+  const handleImportContactsNext = (stepData: { importedContacts: any[] }) => {
+    setData(prev => ({ ...prev, importedContacts: stepData.importedContacts }));
+    setImportTab("select");
+    // Don't advance to next step - let the user select the imported contacts
   };
 
-  const handleSubmit = async (data: Partial<typeof selectedData> = {}) => {
-    const finalData = { ...selectedData, ...data };
-    
-    // Create outreach plans for each contact
-    for (const contact of finalData.contacts) {
-      await createOutreachMutation.mutateAsync({
-        contact_id: contact.id,
-        triggers: finalData.triggers.map(trigger => trigger.id),
-        notes: finalData.notes,
-        is_active: true,
-        title: `Outreach for ${contact.name || "Contact"}`,
-        description: finalData.notes,
-        priority: "medium" as OutreachPriority, // Fixed the type by explicitly casting to OutreachPriority
-        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 1 week from now
-      });
-    }
+  const handleSelectTriggersNext = (stepData: { triggers: any[], priority: 'low' | 'medium' | 'high' }) => {
+    setData(prev => ({ 
+      ...prev, 
+      triggers: stepData.triggers,
+      priority: stepData.priority
+    }));
+    setStep("review");
   };
 
-  const renderStepContent = () => {
+  const handleReviewSubmit = () => {
+    // In a real scenario, we would submit the data to the server here
+    navigate("/rel8t/relationships");
+  };
+
+  const getStepTitle = () => {
     switch (step) {
-      case 1:
-        return (
-          <SelectContactsStep
-            selectedContacts={selectedData.contacts}
-            onNext={handleNext}
-          />
-        );
-      case 2:
-        return (
-          <SelectTriggersStep
-            selectedContacts={selectedData.contacts}
-            selectedTriggers={selectedData.triggers}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-          />
-        );
-      case 3:
-        return (
-          <ReviewSubmitStep
-            selectedData={selectedData}
-            onSubmit={handleSubmit}
-            onPrevious={handlePrevious}
-            isSubmitting={createOutreachMutation.isPending}
-          />
-        );
+      case "select-contacts":
+        return "Select Contacts";
+      case "select-triggers":
+        return "Set Reminders";
+      case "review":
+        return "Review & Submit";
       default:
-        return null;
+        return "Build Relationship";
     }
   };
-
-  const handleCancel = () => {
-    if (confirm("Are you sure you want to cancel? All progress will be lost.")) {
-      navigate("/rel8t");
-    }
-  };
-
-  const stepTitles = ["Select Contacts", "Schedule Reminders", "Review & Submit"];
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            className="mb-4" 
-            onClick={handleCancel}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
+        <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">{getStepTitle()}</h1>
+            <p className="text-muted-foreground">
+              Create a plan to build relationships with contacts
+            </p>
+          </div>
           
-          <h1 className="text-3xl font-bold">Build Relationships</h1>
-          <p className="text-muted-foreground mt-1">
-            Create a plan to nurture and strengthen your network connections
-          </p>
+          <div className="flex gap-2 ml-auto">
+            {step !== "select-contacts" && data.contacts.length > 0 && (
+              <Badge variant="outline" className="px-3 py-1 bg-primary/5">
+                {data.contacts.length} contacts selected
+              </Badge>
+            )}
+            {step === "review" && data.triggers.length > 0 && (
+              <Badge variant="outline" className="px-3 py-1 bg-primary/5">
+                {data.triggers.length} reminders
+              </Badge>
+            )}
+            {step !== "select-contacts" && (
+              <Badge variant="outline" className={`px-3 py-1 ${
+                data.priority === 'high' 
+                  ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300' 
+                  : data.priority === 'low'
+                    ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300'
+                    : 'bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'
+              }`}>
+                {data.priority.charAt(0).toUpperCase() + data.priority.slice(1)} Priority
+              </Badge>
+            )}
+          </div>
         </div>
-        
-        <div className="mb-8">
-          <Steps currentStep={step} steps={stepTitles} className="max-w-xl mx-auto" />
-        </div>
-        
-        <Card>
-          <CardContent className="pt-6">
-            {renderStepContent()}
+
+        <Card className="border-border/20">
+          <CardContent className="p-6">
+            {step === "select-contacts" && (
+              <Tabs defaultValue={importTab} onValueChange={setImportTab}>
+                <TabsList className="mb-4">
+                  <TabsTrigger value="select">Select Contacts</TabsTrigger>
+                  <TabsTrigger value="import">Import Contacts</TabsTrigger>
+                </TabsList>
+                <TabsContent value="select">
+                  <SelectContactsStep
+                    selectedContacts={data.contacts}
+                    onNext={handleSelectContactsNext}
+                  />
+                </TabsContent>
+                <TabsContent value="import">
+                  <ImportContactsStep onNext={handleImportContactsNext} />
+                </TabsContent>
+              </Tabs>
+            )}
+
+            {step === "select-triggers" && (
+              <SelectTriggersStep
+                onNext={handleSelectTriggersNext}
+                onPrevious={() => setStep("select-contacts")}
+                selectedContacts={data.contacts}
+              />
+            )}
+            
+            {step === "review" && (
+              <ReviewSubmitStep
+                wizardData={data}
+                onSubmit={handleReviewSubmit}
+                onPrevious={() => setStep("select-triggers")}
+              />
+            )}
           </CardContent>
         </Card>
       </div>

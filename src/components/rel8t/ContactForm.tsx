@@ -11,7 +11,21 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { getCategories, ContactCategory } from "@/services/rel8t/contactService";
+import { 
+  getCategories, 
+  ContactCategory, 
+  ContactGroup, 
+  getContactGroups 
+} from "@/services/rel8t/contactService";
+import { 
+  MapPin,
+  User,
+  Building,
+  Users
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ContactFormProps {
   initialValues?: {
@@ -23,6 +37,9 @@ interface ContactFormProps {
     notes?: string;
     tags?: string[];
     category_id?: string;
+    location?: string;
+    groups?: ContactGroup[];
+    affiliations?: any[];
   };
   onSubmit: (values: any) => void;
   onCancel: () => void;
@@ -37,7 +54,10 @@ const DEFAULT_VALUES = {
   role: "",
   notes: "",
   tags: [],
-  category_id: ""
+  category_id: "",
+  location: "",
+  groups: [],
+  affiliations: []
 };
 
 const ContactForm = ({
@@ -49,6 +69,10 @@ const ContactForm = ({
   const [values, setValues] = useState(initialValues);
   const [tagsInput, setTagsInput] = useState("");
   const [categories, setCategories] = useState<ContactCategory[]>([]);
+  const [groups, setGroups] = useState<ContactGroup[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>(
+    initialValues.groups?.map(g => g.id) || []
+  );
   
   useEffect(() => {
     const loadCategories = async () => {
@@ -60,7 +84,17 @@ const ContactForm = ({
       }
     };
     
+    const loadGroups = async () => {
+      try {
+        const fetchedGroups = await getContactGroups();
+        setGroups(fetchedGroups);
+      } catch (error) {
+        console.error("Error loading groups:", error);
+      }
+    };
+    
     loadCategories();
+    loadGroups();
   }, []);
 
   const handleChange = (
@@ -99,13 +133,30 @@ const ContactForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(values);
+    
+    // Prepare form data with selected groups
+    const formData = {
+      ...values,
+      selectedGroups // Pass selected groups for processing in the parent component
+    };
+    
+    onSubmit(formData);
   };
 
   const handleSelectCategory = (category_id: string) => {
     setValues({
       ...values,
-      category_id
+      category_id: category_id === "none" ? undefined : category_id
+    });
+  };
+
+  const toggleGroupSelection = (groupId: string) => {
+    setSelectedGroups(prev => {
+      if (prev.includes(groupId)) {
+        return prev.filter(id => id !== groupId);
+      } else {
+        return [...prev, groupId];
+      }
     });
   };
 
@@ -146,9 +197,25 @@ const ContactForm = ({
         />
       </div>
 
+      {/* Location field */}
+      <div>
+        <Label htmlFor="location" className="flex items-center gap-1.5">
+          <MapPin className="h-4 w-4 text-muted-foreground" /> Location
+        </Label>
+        <Input
+          id="location"
+          name="location"
+          value={values.location || ""}
+          onChange={handleChange}
+          placeholder="City, State, Country"
+        />
+      </div>
+
       {/* Organization field */}
       <div>
-        <Label htmlFor="organization">Organization</Label>
+        <Label htmlFor="organization" className="flex items-center gap-1.5">
+          <Building className="h-4 w-4 text-muted-foreground" /> Organization
+        </Label>
         <Input
           id="organization"
           name="organization"
@@ -172,7 +239,7 @@ const ContactForm = ({
       <div>
         <Label htmlFor="category">Category</Label>
         <Select
-          value={values.category_id || undefined}
+          value={values.category_id || ""}
           onValueChange={handleSelectCategory}
         >
           <SelectTrigger>
@@ -194,6 +261,42 @@ const ContactForm = ({
           </SelectContent>
         </Select>
       </div>
+
+      {/* Groups field */}
+      {groups.length > 0 && (
+        <div>
+          <Label htmlFor="groups" className="flex items-center gap-1.5 mb-2">
+            <Users className="h-4 w-4 text-muted-foreground" /> Groups
+          </Label>
+          <div className="border border-border/40 rounded-md p-2 max-h-40">
+            <ScrollArea className="h-32">
+              <div className="space-y-2">
+                {groups.map((group) => (
+                  <div key={group.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`group-${group.id}`}
+                      checked={selectedGroups.includes(group.id)}
+                      onCheckedChange={() => toggleGroupSelection(group.id)}
+                    />
+                    <label
+                      htmlFor={`group-${group.id}`}
+                      className="flex items-center gap-2 text-sm cursor-pointer"
+                    >
+                      {group.color && (
+                        <div 
+                          className="w-2 h-2 rounded-full" 
+                          style={{ backgroundColor: group.color }}
+                        />
+                      )}
+                      {group.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      )}
 
       {/* Tags field */}
       <div>

@@ -1,382 +1,220 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format, addDays, addWeeks, addMonths } from "date-fns";
-import { cn } from "@/lib/utils";
-import { CalendarIcon, Clock, Plus, Bell } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Contact } from "@/services/rel8t/contactService";
+import { Label } from "@/components/ui/label";
+import { Check, AlertCircle, Flag } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+interface TriggerData {
+  id: string;
+  name: string;
+  description?: string;
+  action: string;
+  condition: string;
+  is_active: boolean;
+  user_id: string;
+  // Other fields...
+}
 
 interface SelectTriggersStepProps {
   selectedContacts: Contact[];
-  selectedTriggers: any[];
-  onNext: (data: { triggers: any[] }) => void;
-  onPrevious: () => void;
+  onNext: (data: { triggers: TriggerData[], priority: 'low' | 'medium' | 'high' }) => void;
+  onPrevious?: () => void;
 }
-
-// Define types for template delay
-interface TemplateDelay {
-  value: number;
-  unit: string;
-}
-
-// Define type for trigger template
-interface TriggerTemplate {
-  id: string;
-  name: string;
-  description: string;
-  type: string;
-  delay: TemplateDelay;
-  isCustomDate?: boolean;
-}
-
-// Trigger template options
-const triggerTemplates: TriggerTemplate[] = [
-  {
-    id: "follow-up-1",
-    name: "Initial Follow-up",
-    description: "Send a follow-up email one week after initial contact",
-    type: "email",
-    delay: { value: 1, unit: "week" }
-  },
-  {
-    id: "check-in-1",
-    name: "Quarterly Check-in",
-    description: "Regular quarterly check-in with important contacts",
-    type: "email",
-    delay: { value: 3, unit: "month" }
-  },
-  {
-    id: "birthday",
-    name: "Birthday Greeting",
-    description: "Send birthday wishes on contact's birthday",
-    type: "email",
-    delay: { value: 0, unit: "custom" },
-    isCustomDate: true
-  },
-  {
-    id: "project-update",
-    name: "Project Update",
-    description: "Send a project status update",
-    type: "email",
-    delay: { value: 2, unit: "week" }
-  },
-];
 
 export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
   selectedContacts,
-  selectedTriggers: initialTriggers,
   onNext,
   onPrevious,
 }) => {
-  const [triggers, setTriggers] = useState<any[]>(initialTriggers || []);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
-  const [customTrigger, setCustomTrigger] = useState({
-    name: "",
-    description: "",
-    type: "email",
-    date: new Date(),
-    time: "09:00"
+  const [selectedTriggers, setSelectedTriggers] = useState<TriggerData[]>([]);
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+
+  // Demo triggers - in a real app, these would come from the database
+  const demoTriggers: TriggerData[] = [
+    {
+      id: "1",
+      name: "Monthly Check-in",
+      description: "Send a reminder to check in with this contact every month",
+      action: "Send email reminder",
+      condition: "Monthly",
+      is_active: true,
+      user_id: "current-user",
+    },
+    {
+      id: "2",
+      name: "Quarterly Review",
+      description: "Review relationship status every quarter",
+      action: "Create calendar reminder",
+      condition: "Quarterly",
+      is_active: true,
+      user_id: "current-user",
+    },
+    {
+      id: "3",
+      name: "Birthday Reminder",
+      description: "Get notified about contact's birthday",
+      action: "Send notification",
+      condition: "Annual",
+      is_active: true,
+      user_id: "current-user",
+    },
+  ];
+
+  const { data: triggers = demoTriggers, isLoading } = useQuery({
+    queryKey: ["triggers"],
+    queryFn: () => Promise.resolve(demoTriggers),
+    // In a real app, you'd fetch from API using:
+    // queryFn: () => getTriggers(),
   });
-  const [showCustomForm, setShowCustomForm] = useState(false);
 
-  const handleTemplateSelect = (templateId: string) => {
-    setSelectedTemplate(templateId);
-    setShowCustomForm(false);
-    
-    const template = triggerTemplates.find(t => t.id === templateId);
-    if (template) {
-      // Calculate date based on template delay
-      let triggerDate = new Date();
-      
-      if (template.delay.unit === "day") {
-        triggerDate = addDays(triggerDate, template.delay.value);
-      } else if (template.delay.unit === "week") {
-        triggerDate = addWeeks(triggerDate, template.delay.value);
-      } else if (template.delay.unit === "month") {
-        triggerDate = addMonths(triggerDate, template.delay.value);
+  const toggleTrigger = (trigger: TriggerData) => {
+    setSelectedTriggers((prev) => {
+      const isSelected = prev.some((t) => t.id === trigger.id);
+      if (isSelected) {
+        return prev.filter((t) => t.id !== trigger.id);
+      } else {
+        return [...prev, trigger];
       }
-      
-      setCustomTrigger({
-        name: template.name,
-        description: template.description,
-        type: template.type,
-        date: triggerDate,
-        time: "09:00"
-      });
-    }
-  };
-
-  const addTrigger = () => {
-    if (!customTrigger.name) {
-      return;
-    }
-    
-    const newTrigger = {
-      id: `trigger-${Date.now()}`,
-      ...customTrigger,
-      dateTime: new Date(
-        customTrigger.date.setHours(
-          parseInt(customTrigger.time.split(":")[0]),
-          parseInt(customTrigger.time.split(":")[1]),
-          0
-        )
-      ).toISOString()
-    };
-    
-    setTriggers([...triggers, newTrigger]);
-    setShowCustomForm(false);
-    setCustomTrigger({
-      name: "",
-      description: "",
-      type: "email",
-      date: new Date(),
-      time: "09:00"
     });
-    setSelectedTemplate("");
   };
 
-  const removeTrigger = (id: string) => {
-    setTriggers(triggers.filter(trigger => trigger.id !== id));
-  };
-
-  const handleNext = () => {
-    onNext({ triggers });
-  };
-
-  const handleCustomTriggerToggle = () => {
-    setShowCustomForm(true);
-    setSelectedTemplate("");
+  const handleSubmit = () => {
+    onNext({ triggers: selectedTriggers, priority });
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <div className="mb-6">
-        <h3 className="text-lg font-medium mb-2">Selected Contacts ({selectedContacts.length})</h3>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {selectedContacts.map((contact) => (
-            <div
-              key={contact.id}
-              className="bg-secondary text-secondary-foreground text-sm px-3 py-1 rounded-full"
+        <h3 className="text-lg font-medium mb-2">Set Relationship Priority</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Choose the priority level for these contacts to help organize your relationship management
+        </p>
+        
+        <RadioGroup 
+          value={priority} 
+          onValueChange={(value) => setPriority(value as 'low' | 'medium' | 'high')}
+          className="flex flex-col sm:flex-row gap-4"
+        >
+          <div className={`flex items-center space-x-2 border rounded-md p-4 cursor-pointer transition-colors ${
+            priority === 'low' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-border/40 hover:bg-muted/50'
+          }`}>
+            <RadioGroupItem value="low" id="low" />
+            <Label 
+              htmlFor="low" 
+              className={`cursor-pointer flex items-center gap-2 font-medium ${
+                priority === 'low' ? 'text-blue-600 dark:text-blue-400' : ''
+              }`}
             >
-              {contact.name}
-            </div>
-          ))}
-        </div>
+              <Flag className="h-4 w-4 text-blue-500" /> Low Priority
+            </Label>
+          </div>
+          <div className={`flex items-center space-x-2 border rounded-md p-4 cursor-pointer transition-colors ${
+            priority === 'medium' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20' : 'border-border/40 hover:bg-muted/50'
+          }`}>
+            <RadioGroupItem value="medium" id="medium" />
+            <Label 
+              htmlFor="medium" 
+              className={`cursor-pointer flex items-center gap-2 font-medium ${
+                priority === 'medium' ? 'text-amber-600 dark:text-amber-400' : ''
+              }`}
+            >
+              <Flag className="h-4 w-4 text-amber-500" /> Medium Priority
+            </Label>
+          </div>
+          <div className={`flex items-center space-x-2 border rounded-md p-4 cursor-pointer transition-colors ${
+            priority === 'high' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-border/40 hover:bg-muted/50'
+          }`}>
+            <RadioGroupItem value="high" id="high" />
+            <Label 
+              htmlFor="high" 
+              className={`cursor-pointer flex items-center gap-2 font-medium ${
+                priority === 'high' ? 'text-red-600 dark:text-red-400' : ''
+              }`}
+            >
+              <Flag className="h-4 w-4 text-red-500" /> High Priority
+            </Label>
+          </div>
+        </RadioGroup>
       </div>
 
-      <h3 className="text-lg font-medium mb-4">Outreach Reminders</h3>
-      
-      {/* Trigger templates - Wrapped in RadioGroup to fix the error */}
-      <RadioGroup value={selectedTemplate} onValueChange={handleTemplateSelect}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {triggerTemplates.map((template) => (
-            <div
-              key={template.id}
-              className={cn(
-                "border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
-                selectedTemplate === template.id ? "border-primary bg-primary/5" : ""
-              )}
-              onClick={() => handleTemplateSelect(template.id)}
-            >
-              <div className="flex items-start">
-                <div className="mr-3 mt-0.5">
-                  <RadioGroupItem 
-                    value={template.id}
-                    checked={selectedTemplate === template.id}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-medium">{template.name}</h4>
-                  <p className="text-sm text-muted-foreground">{template.description}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-          
-          <div
-            className={cn(
-              "border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
-              showCustomForm ? "border-primary bg-primary/5" : ""
-            )}
-            onClick={handleCustomTriggerToggle}
-          >
-            <div className="flex items-start">
-              <div className="mr-3 mt-0.5">
-                <RadioGroupItem 
-                  value="custom"
-                  checked={showCustomForm}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <h4 className="font-medium">Custom Reminder</h4>
-                <p className="text-sm text-muted-foreground">Create a custom outreach reminder</p>
-              </div>
-            </div>
-          </div>
+      <div>
+        <h3 className="text-lg font-medium mb-2">Add Reminders</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Select reminders to help you stay in touch with 
+          {selectedContacts.length === 1 
+            ? " this contact" 
+            : ` these ${selectedContacts.length} contacts`}
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Loading reminders...</p>
         </div>
-      </RadioGroup>
-      
-      {/* Custom trigger form */}
-      {(showCustomForm || selectedTemplate) && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-lg">
-              {selectedTemplate ? "Template Details" : "Custom Reminder"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="trigger-name">Reminder Name</Label>
-                <Input
-                  id="trigger-name"
-                  value={customTrigger.name}
-                  onChange={(e) => setCustomTrigger({ ...customTrigger, name: e.target.value })}
-                  placeholder="e.g., Follow-up Meeting"
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="trigger-description">Description</Label>
-                <Textarea
-                  id="trigger-description"
-                  value={customTrigger.description}
-                  onChange={(e) => setCustomTrigger({ ...customTrigger, description: e.target.value })}
-                  placeholder="Add details about this reminder"
-                  className="mt-1 min-h-[100px]"
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Reminder Type</Label>
-                  <Select
-                    value={customTrigger.type}
-                    onValueChange={(value) => setCustomTrigger({ ...customTrigger, type: value })}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select reminder type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="email">Email</SelectItem>
-                      <SelectItem value="notification">Notification</SelectItem>
-                      <SelectItem value="task">Task</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label>Reminder Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "mt-1 w-full justify-start text-left font-normal",
-                          !customTrigger.date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {customTrigger.date ? format(customTrigger.date, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={customTrigger.date}
-                        onSelect={(date) => setCustomTrigger({ ...customTrigger, date: date || new Date() })}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="trigger-time">Reminder Time</Label>
-                <Input
-                  id="trigger-time"
-                  type="time"
-                  value={customTrigger.time}
-                  onChange={(e) => setCustomTrigger({ ...customTrigger, time: e.target.value })}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div className="flex justify-end">
-                <Button onClick={addTrigger}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Reminder
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Added triggers list */}
-      {triggers.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-2">Scheduled Reminders</h3>
-          <div className="space-y-3">
-            {triggers.map((trigger) => (
-              <div
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {triggers.map((trigger) => {
+            const isSelected = selectedTriggers.some((t) => t.id === trigger.id);
+            return (
+              <Card
                 key={trigger.id}
-                className="flex items-center justify-between border rounded-lg p-4"
+                className={`cursor-pointer transition-colors ${
+                  isSelected
+                    ? "border-primary bg-primary/5"
+                    : "hover:bg-muted/50 border-border/30"
+                }`}
+                onClick={() => toggleTrigger(trigger)}
               >
-                <div className="flex items-start">
-                  {trigger.type === 'email' ? (
-                    <Bell className="h-5 w-5 mr-3 text-blue-500" />
-                  ) : trigger.type === 'notification' ? (
-                    <Bell className="h-5 w-5 mr-3 text-amber-500" />
-                  ) : (
-                    <Clock className="h-5 w-5 mr-3 text-green-500" />
-                  )}
-                  <div>
-                    <h4 className="font-medium">{trigger.name}</h4>
-                    <p className="text-sm text-muted-foreground">{trigger.description}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {format(new Date(trigger.dateTime), "PPP 'at' p")}
-                    </p>
+                <CardHeader className="p-4 pb-2">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-base">{trigger.name}</CardTitle>
+                    {isSelected ? (
+                      <Check className="h-5 w-5 text-primary" />
+                    ) : null}
                   </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeTrigger(trigger.id)}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>
+                  <CardDescription>{trigger.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-2">
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="outline">
+                      {trigger.condition}
+                    </Badge>
+                    <Badge variant="secondary">
+                      {trigger.action}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
-      
-      <div className="flex justify-between mt-6">
-        <Button variant="outline" onClick={onPrevious}>
-          Back
-        </Button>
-        <Button
-          onClick={handleNext}
-          disabled={triggers.length === 0}
-        >
+
+      <div className="flex justify-between pt-6">
+        {onPrevious && (
+          <Button variant="outline" onClick={onPrevious}>
+            Back
+          </Button>
+        )}
+        <Button onClick={handleSubmit}>
           Continue
         </Button>
       </div>

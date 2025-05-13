@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ContactForm from "@/components/rel8t/ContactForm";
-import { getContactById, updateContact, deleteContact } from "@/services/rel8t/contactService";
+import { 
+  getContactById, 
+  updateContact, 
+  deleteContact, 
+  addContactToGroup,
+  removeContactFromGroup
+} from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -34,7 +40,37 @@ const ContactEdit = () => {
 
   // Update contact mutation
   const updateMutation = useMutation({
-    mutationFn: (values: any) => updateContact(id as string, values),
+    mutationFn: async (values: any) => {
+      // Extract selectedGroups from values before updating contact
+      const { selectedGroups, ...contactData } = values;
+      
+      // Update basic contact data
+      const updatedContact = await updateContact(id as string, contactData);
+      
+      // Handle group membership changes
+      if (selectedGroups && contact?.groups) {
+        // Find groups to add and remove
+        const currentGroupIds = contact.groups.map(g => g.id);
+        const groupsToAdd = selectedGroups.filter((g: string) => !currentGroupIds.includes(g));
+        const groupsToRemove = currentGroupIds.filter(g => !selectedGroups.includes(g));
+        
+        // Add contact to new groups
+        await Promise.all(
+          groupsToAdd.map((groupId: string) => 
+            addContactToGroup(id as string, groupId)
+          )
+        );
+        
+        // Remove contact from old groups
+        await Promise.all(
+          groupsToRemove.map((groupId: string) => 
+            removeContactFromGroup(id as string, groupId)
+          )
+        );
+      }
+      
+      return updatedContact;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       queryClient.invalidateQueries({ queryKey: ["contact", id] });
@@ -146,7 +182,7 @@ const ContactEdit = () => {
           </Button>
         </div>
 
-        <div className="bg-card rounded-lg border p-6">
+        <div className="bg-card rounded-lg border border-border/20 p-6">
           {contact && (
             <ContactForm
               initialValues={{
@@ -158,6 +194,9 @@ const ContactEdit = () => {
                 notes: contact.notes,
                 tags: contact.tags || [],
                 category_id: contact.category_id,
+                location: contact.location,
+                groups: contact.groups || [],
+                affiliations: contact.affiliations || []
               }}
               onSubmit={handleSubmit}
               onCancel={handleCancel}

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ContactForm from "@/components/rel8t/ContactForm";
-import { createContact } from "@/services/rel8t/contactService";
+import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 
 const ContactCreate = () => {
@@ -14,7 +14,22 @@ const ContactCreate = () => {
 
   // Create contact mutation
   const createMutation = useMutation({
-    mutationFn: (values: any) => createContact(values),
+    mutationFn: async (values: any) => {
+      // Extract selectedGroups from values before creating contact
+      const { selectedGroups, ...contactData } = values;
+      const newContact = await createContact(contactData);
+      
+      // If groups are selected, add the contact to groups
+      if (selectedGroups && selectedGroups.length > 0) {
+        await Promise.all(
+          selectedGroups.map((groupId: string) => 
+            addContactToGroup(newContact.id, groupId)
+          )
+        );
+      }
+      
+      return newContact;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       toast({
@@ -59,7 +74,7 @@ const ContactCreate = () => {
           </div>
         </div>
 
-        <div className="bg-card rounded-lg border p-6">
+        <div className="bg-card rounded-lg border border-border/20 p-6">
           <ContactForm
             onSubmit={handleSubmit}
             onCancel={handleCancel}

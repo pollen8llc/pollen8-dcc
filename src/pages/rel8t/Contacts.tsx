@@ -1,110 +1,170 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Search, Upload } from "lucide-react";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import ContactList from "@/components/rel8t/ContactList";
-import { getContacts, Contact } from "@/services/rel8t/contactService";
-import { useDebounce } from "@/hooks/useDebounce";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
+import ContactForm from "@/components/rel8t/ContactForm";
+import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
+import { toast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import ContactGroupsManager from "@/components/rel8t/ContactGroupsManager";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Plus, Users, FolderPlus } from "lucide-react";
 
 const Contacts = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  const [activeTab, setActiveTab] = useState("contacts");
+  const queryClient = useQueryClient();
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [contactGroupsDialogOpen, setContactGroupsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
 
-  const { data: contacts = [], isLoading, refetch } = useQuery({
-    queryKey: ["contacts", debouncedSearchQuery],
-    queryFn: () => getContacts({ searchQuery: debouncedSearchQuery }),
+  // Create contact mutation for the dialog
+  const createMutation = useMutation({
+    mutationFn: async (values: any) => {
+      // Extract selectedGroups from values before creating contact
+      const { selectedGroups, ...contactData } = values;
+      const newContact = await createContact(contactData);
+      
+      // If groups are selected, add the contact to groups
+      if (selectedGroups && selectedGroups.length > 0) {
+        await Promise.all(
+          selectedGroups.map((groupId: string) => 
+            addContactToGroup(newContact.id, groupId)
+          )
+        );
+      }
+      
+      return newContact;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      toast({
+        title: "Contact created",
+        description: "New contact has been successfully created."
+      });
+      setContactDialogOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create contact",
+        variant: "destructive"
+      });
+    }
   });
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+  const handleEditContact = (contact: any) => {
+    navigate(`/rel8t/contacts/${contact.id}/edit`);
   };
 
-  const handleAddContact = () => {
-    navigate("/rel8t/contacts/new");
+  const handleCreateContact = (values: any) => {
+    createMutation.mutate(values);
   };
 
   const handleRefresh = () => {
-    refetch();
-  };
-
-  const handleEditContact = (contact: Contact) => {
-    navigate(`/rel8t/contacts/${contact.id}`);
-  };
-
-  const handleImportComplete = (importedContacts: Contact[]) => {
-    refetch();
-    setActiveTab("contacts");
+    queryClient.invalidateQueries({ queryKey: ["contacts"] });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold">Contacts</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage your relationship network
-            </p>
+            <p className="text-muted-foreground">Manage your professional network</p>
           </div>
-          <div className="flex gap-2 mt-4 md:mt-0">
-            <Button 
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setContactGroupsDialogOpen(true)}
               variant="outline"
-              onClick={() => setActiveTab("import")}
-              className="flex items-center gap-2 border-border/40"
+              className="gap-2"
             >
-              <Upload className="h-4 w-4" />
-              Import
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Groups</span>
             </Button>
-            <Button 
-              onClick={handleAddContact}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Contact
+            <Button onClick={() => setContactDialogOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Add Contact</span>
             </Button>
           </div>
         </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="mb-4 border-border/40">
-            <TabsTrigger value="contacts">Contacts</TabsTrigger>
-            <TabsTrigger value="import">Import</TabsTrigger>
-          </TabsList>
+
+        <Tabs
+          defaultValue={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="all">All Contacts</TabsTrigger>
+              <TabsTrigger value="recent">Recent</TabsTrigger>
+              <TabsTrigger value="favorites">Favorites</TabsTrigger>
+            </TabsList>
+          </div>
           
-          <TabsContent value="contacts">
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search contacts..."
-                className="pl-10 border-border/40"
-                value={searchQuery}
-                onChange={handleSearch}
-              />
-            </div>
-            
+          <TabsContent value="all" className="mt-0">
             <ContactList
-              contacts={contacts}
-              isLoading={isLoading}
-              onRefresh={handleRefresh}
-              onAddContact={handleAddContact}
               onEdit={handleEditContact}
+              onAddContact={() => setContactDialogOpen(true)}
+              onRefresh={handleRefresh}
             />
           </TabsContent>
           
-          <TabsContent value="import">
-            <ImportContactsStep onImportComplete={handleImportComplete} />
+          <TabsContent value="recent" className="mt-0">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium">Recent contacts feature coming soon</h3>
+              <p className="text-muted-foreground mt-2">
+                We're still working on this feature. Check back later!
+              </p>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="favorites" className="mt-0">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium">Favorites feature coming soon</h3>
+              <p className="text-muted-foreground mt-2">
+                We're still working on this feature. Check back later!
+              </p>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialog for adding a new contact */}
+      <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Add New Contact</DialogTitle>
+          </DialogHeader>
+          <ContactForm
+            onSubmit={handleCreateContact}
+            onCancel={() => setContactDialogOpen(false)}
+            isSubmitting={createMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog for managing contact groups */}
+      <Dialog open={contactGroupsDialogOpen} onOpenChange={setContactGroupsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Contact Groups</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <ContactGroupsManager />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

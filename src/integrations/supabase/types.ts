@@ -340,6 +340,67 @@ export type Database = {
         }
         Relationships: []
       }
+      rms_contact_affiliations: {
+        Row: {
+          affiliated_community_id: string | null
+          affiliated_contact_id: string | null
+          affiliated_user_id: string | null
+          affiliation_type: string
+          contact_id: string
+          created_at: string | null
+          id: string
+          relationship: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          affiliated_community_id?: string | null
+          affiliated_contact_id?: string | null
+          affiliated_user_id?: string | null
+          affiliation_type: string
+          contact_id: string
+          created_at?: string | null
+          id?: string
+          relationship?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          affiliated_community_id?: string | null
+          affiliated_contact_id?: string | null
+          affiliated_user_id?: string | null
+          affiliation_type?: string
+          contact_id?: string
+          created_at?: string | null
+          id?: string
+          relationship?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_contact_affiliations_affiliated_community_id_fkey"
+            columns: ["affiliated_community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_contact_affiliations_affiliated_contact_id_fkey"
+            columns: ["affiliated_contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_contact_affiliations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rms_contact_categories: {
         Row: {
           color: string | null
@@ -367,6 +428,72 @@ export type Database = {
         }
         Relationships: []
       }
+      rms_contact_group_members: {
+        Row: {
+          added_at: string | null
+          contact_id: string
+          group_id: string
+          id: string
+        }
+        Insert: {
+          added_at?: string | null
+          contact_id: string
+          group_id: string
+          id?: string
+        }
+        Update: {
+          added_at?: string | null
+          contact_id?: string
+          group_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_contact_group_members_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_contact_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contact_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_contact_groups: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       rms_contacts: {
         Row: {
           category_id: string | null
@@ -374,6 +501,7 @@ export type Database = {
           email: string | null
           id: string
           last_contact_date: string | null
+          location: string | null
           name: string
           notes: string | null
           organization: string | null
@@ -389,6 +517,7 @@ export type Database = {
           email?: string | null
           id?: string
           last_contact_date?: string | null
+          location?: string | null
           name: string
           notes?: string | null
           organization?: string | null
@@ -404,6 +533,7 @@ export type Database = {
           email?: string | null
           id?: string
           last_contact_date?: string | null
+          location?: string | null
           name?: string
           notes?: string | null
           organization?: string | null
