@@ -1,238 +1,175 @@
-import { useState, useEffect } from "react";
+
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { getContacts } from "@/services/rel8t/contactService";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Plus, Tag, Filter } from "lucide-react";
-import { getContacts, Contact, getCategories } from "@/services/rel8t/contactService";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
-import ContactForm from "@/components/rel8t/ContactForm";
-import { createContact } from "@/services/rel8t/contactService";
-import { useQueryClient } from "@tanstack/react-query";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+import { ContactForm } from "@/components/rel8t/ContactForm";
 
 interface SelectContactsStepProps {
-  selectedContacts: Contact[];
-  onNext: (data: { contacts: Contact[] }) => void;
+  onNext: (selectedContacts: string[]) => void;
+  onBack?: () => void;
+  initialSelected?: string[];
 }
 
-export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
-  selectedContacts: initialSelectedContacts,
+const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
   onNext,
+  onBack,
+  initialSelected = []
 }) => {
-  const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedContacts, setSelectedContacts] = useState<Contact[]>(initialSelectedContacts || []);
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  // Fetch contacts
+  const [selectedContacts, setSelectedContacts] = useState<string[]>(initialSelected);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [createNew, setCreateNew] = useState(false);
+  
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts"],
-    queryFn: () => getContacts({}),
+    queryFn: () => getContacts(),
   });
-
-  // Fetch categories
-  const { data: categories = [] } = useQuery({
-    queryKey: ["contact-categories"],
-    queryFn: () => getCategories(),
-  });
-
-  const handleSubmit = () => {
-    onNext({ contacts: selectedContacts });
-  };
-
-  const toggleContactSelection = (contact: Contact) => {
-    setSelectedContacts(prev => {
-      const isSelected = prev.some(c => c.id === contact.id);
-      if (isSelected) {
-        return prev.filter(c => c.id !== contact.id);
-      } else {
-        return [...prev, contact];
-      }
-    });
-  };
-
-  const handleCreateContact = async (values: any) => {
-    setIsSubmitting(true);
-    try {
-      const newContact = await createContact(values);
-      if (newContact) {
-        queryClient.invalidateQueries({ queryKey: ["contacts"] });
-        setContactDialogOpen(false);
-        // Automatically select the newly created contact
-        setSelectedContacts(prev => [...prev, newContact]);
-      }
-    } finally {
-      setIsSubmitting(false);
+  
+  const filteredContacts = contacts.filter(
+    contact => contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  const handleSelectContact = (contactId: string) => {
+    if (selectedContacts.includes(contactId)) {
+      setSelectedContacts(selectedContacts.filter(id => id !== contactId));
+    } else {
+      setSelectedContacts([...selectedContacts, contactId]);
     }
   };
-
-  // Get unique tags for the filter
-  const uniqueTags = Array.from(
-    new Set(
-      contacts
-        .flatMap(contact => contact.tags || [])
-        .filter(tag => tag) // Filter out empty/null tags
-    )
-  ).sort();
-
-  // Filter contacts based on search term, selected tag, and selected category
-  const filteredContacts = contacts.filter(contact => 
-    (contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (contact.organization && contact.organization.toLowerCase().includes(searchTerm.toLowerCase()))) &&
-    (!selectedTag || (contact.tags && contact.tags.includes(selectedTag))) &&
-    (!selectedCategory || contact.category_id === selectedCategory)
-  );
-
+  
+  const handleSelectAll = () => {
+    if (selectedContacts.length === filteredContacts.length) {
+      setSelectedContacts([]);
+    } else {
+      setSelectedContacts(filteredContacts.map(contact => contact.id));
+    }
+  };
+  
+  const handleContactCreated = (contactId: string) => {
+    setSelectedContacts([...selectedContacts, contactId]);
+    setCreateNew(false);
+  };
+  
+  if (createNew) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Add New Contact</h2>
+        <ContactForm 
+          onCancel={() => setCreateNew(false)}
+          onSuccess={handleContactCreated}
+        />
+      </div>
+    );
+  }
+  
   return (
     <div>
-      <div className="flex flex-col sm:flex-row mb-4 gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search contacts..."
-            className="pl-9"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      <h2 className="text-xl font-semibold mb-4">Select Contacts</h2>
+      
+      <RadioGroup defaultValue="existing" className="mb-4">
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="existing" id="existing" checked={!createNew} onChange={() => setCreateNew(false)} />
+          <Label htmlFor="existing">Select existing contacts</Label>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <select
-            className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            value={selectedCategory || ""}
-            onChange={(e) => setSelectedCategory(e.target.value || null)}
-          >
-            <option value="">All Categories</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="new" id="new" checked={createNew} onChange={() => setCreateNew(true)} />
+          <Label htmlFor="new">Create new contact</Label>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Tag className="h-4 w-4 text-muted-foreground" />
-          <select
-            className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            value={selectedTag || ""}
-            onChange={(e) => setSelectedTag(e.target.value || null)}
-          >
-            <option value="">All Tags</option>
-            {uniqueTags.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag}
-              </option>
-            ))}
-          </select>
-        </div>
+      </RadioGroup>
+      
+      <div className="relative mb-4">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search contacts..."
+          className="pl-8"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
-
+      
       {isLoading ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
         </div>
       ) : filteredContacts.length === 0 ? (
-        <div className="text-center py-12 border border-dashed rounded-lg">
-          <h3 className="mt-2 font-semibold">No contacts found</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {searchTerm || selectedTag || selectedCategory 
-              ? "Try adjusting your search or filters" 
-              : "Add your first contact to get started"}
-          </p>
+        <div className="text-center py-8 border border-dashed rounded-lg">
+          <p className="text-muted-foreground">No contacts found</p>
+          <Button onClick={() => setCreateNew(true)} variant="outline" className="mt-2">
+            Create New Contact
+          </Button>
         </div>
       ) : (
-        <ScrollArea className="h-[400px] pr-4">
-          <div className="space-y-2">
-            {filteredContacts.map((contact) => (
-              <div
-                key={contact.id}
-                className="flex items-center space-x-3 border rounded-md p-3 hover:bg-secondary/20 transition-colors"
-              >
-                <Checkbox
-                  checked={selectedContacts.some(c => c.id === contact.id)}
-                  onCheckedChange={() => toggleContactSelection(contact)}
-                  id={`contact-${contact.id}`}
-                />
-                <label
-                  htmlFor={`contact-${contact.id}`}
-                  className="flex-1 flex items-center justify-between cursor-pointer text-sm"
-                >
-                  <div className="flex-1">
-                    <div className="font-medium">{contact.name}</div>
-                    <div className="flex flex-col">
-                      {contact.email && (
-                        <span className="text-muted-foreground text-xs">{contact.email}</span>
-                      )}
-                      {contact.organization && (
-                        <span className="text-muted-foreground text-xs">{contact.organization}</span>
-                      )}
-                      {contact.category && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: contact.category.color }} />
-                          <span className="text-xs">{contact.category.name}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {contact.tags && contact.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 max-w-[150px] justify-end">
-                      {contact.tags.map((tag, i) => (
-                        <Badge
-                          key={i}
-                          variant="outline" 
-                          className="text-xs px-2 py-1"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </label>
-              </div>
-            ))}
+        <>
+          <div className="flex items-center justify-between mb-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleSelectAll}
+              className="text-xs"
+            >
+              {selectedContacts.length === filteredContacts.length ? "Deselect all" : "Select all"}
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              {selectedContacts.length} selected
+            </span>
           </div>
-        </ScrollArea>
+          
+          <ScrollArea className="h-[300px] border rounded-md">
+            <div className="p-4 space-y-2">
+              {filteredContacts.map((contact) => (
+                <div 
+                  key={contact.id}
+                  className={`flex items-center space-x-2 p-2 rounded ${
+                    selectedContacts.includes(contact.id) ? "bg-muted" : ""
+                  }`}
+                  onClick={() => handleSelectContact(contact.id)}
+                >
+                  <Checkbox 
+                    checked={selectedContacts.includes(contact.id)}
+                    onCheckedChange={() => handleSelectContact(contact.id)}
+                    id={`contact-${contact.id}`}
+                  />
+                  <div className="flex-1">
+                    <Label 
+                      htmlFor={`contact-${contact.id}`}
+                      className="font-medium cursor-pointer"
+                    >
+                      {contact.name}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {contact.email}
+                      {contact.organization ? ` • ${contact.organization}` : ""}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </>
       )}
-
-      <div className="mt-6 flex justify-between">
-        <div className="text-sm text-muted-foreground">
-          {selectedContacts.length} contact{selectedContacts.length !== 1 ? 's' : ''} selected
-        </div>
-        <Button
-          onClick={handleSubmit}
+      
+      <div className="flex justify-between mt-6">
+        {onBack && (
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+        )}
+        <Button 
+          onClick={() => onNext(selectedContacts)}
           disabled={selectedContacts.length === 0}
+          className={!onBack ? "ml-auto" : ""}
         >
           Continue
         </Button>
       </div>
-
-      {/* Dialog for adding a new contact */}
-      <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Add New Contact</DialogTitle>
-          </DialogHeader>
-          <ContactForm
-            onSubmit={handleCreateContact}
-            onCancel={() => setContactDialogOpen(false)}
-            isSubmitting={isSubmitting}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
+
+export default SelectContactsStep;

@@ -37,10 +37,11 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("today");
+  const [activeTab, setActiveTab] = useState<"today" | "upcoming" | "overdue" | "completed">("today");
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [outreachDialogOpen, setOutreachDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,6 +98,24 @@ const Dashboard = () => {
   const outreachProgress = Number(contactCount) > 0 
     ? Math.min(100, 100 - Math.round((Number(contactsWithoutOutreachCount) / Number(contactCount)) * 100))
     : 0;
+
+  // Sample data for charts
+  const distributionData = [
+    { name: "Today", value: outreachCounts.today, color: "#4338ca" },
+    { name: "Upcoming", value: outreachCounts.upcoming, color: "#3b82f6" },
+    { name: "Overdue", value: outreachCounts.overdue, color: "#ef4444" },
+    { name: "Completed", value: outreachCounts.completed, color: "#10b981" },
+  ];
+
+  const statisticsData = [
+    { name: "Mon", value: 4 },
+    { name: "Tue", value: 7 },
+    { name: "Wed", value: 5 },
+    { name: "Thu", value: 8 },
+    { name: "Fri", value: 12 },
+    { name: "Sat", value: 3 },
+    { name: "Sun", value: 1 },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,7 +203,11 @@ const Dashboard = () => {
           <TabsContent value="outreach">
             {/* Outreach Section */}
             <h2 className="text-lg font-medium mb-4">Relationship Management</h2>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+            <Tabs 
+              value={activeTab} 
+              onValueChange={(value) => setActiveTab(value as "today" | "upcoming" | "overdue" | "completed")} 
+              className="mb-6"
+            >
               <TabsList className="mb-4">
                 <TabsTrigger value="today" className="relative">
                   Today
@@ -221,19 +244,15 @@ const Dashboard = () => {
           
           <TabsContent value="relationships">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-card rounded-lg border p-4">
-                <h3 className="text-lg font-medium mb-4">Contact Distribution</h3>
-                <div className="h-72">
-                  <DistributionChart />
-                </div>
-              </div>
+              <DistributionChart 
+                data={distributionData}
+                title="Contact Distribution"
+              />
               
-              <div className="bg-card rounded-lg border p-4">
-                <h3 className="text-lg font-medium mb-4">Outreach Statistics</h3>
-                <div className="h-72">
-                  <StatisticsChart />
-                </div>
-              </div>
+              <StatisticsChart 
+                data={statisticsData}
+                title="Outreach Statistics"
+              />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

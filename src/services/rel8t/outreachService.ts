@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { OutreachProps } from "@/components/rel8t/OutreachCard";
+import { OutreachFilterType } from "@/components/rel8t/OutreachList";
 
 export interface OutreachCounts {
   today: number;
@@ -10,7 +11,7 @@ export interface OutreachCounts {
 }
 
 export async function getOutreach(
-  filter: "today" | "upcoming" | "overdue" | "completed" = "today",
+  filter: OutreachFilterType = "today",
   limit?: number
 ): Promise<OutreachProps[]> {
   const currentDate = new Date();

@@ -17,8 +17,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+export type OutreachFilterType = "today" | "upcoming" | "overdue" | "completed";
+
 interface OutreachListProps {
-  defaultTab?: string;
+  defaultTab?: OutreachFilterType;
   showTabs?: boolean;
   limit?: number;
 }
@@ -29,7 +31,7 @@ const OutreachList = ({
   limit
 }: OutreachListProps) => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [activeTab, setActiveTab] = useState<OutreachFilterType>(defaultTab);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [outreachToDelete, setOutreachToDelete] = useState<string | null>(null);
   
@@ -96,7 +98,7 @@ const OutreachList = ({
   return (
     <div>
       {showTabs && (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterType)} className="mb-6">
           <TabsList className="mb-4">
             <TabsTrigger value="today">Today</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>

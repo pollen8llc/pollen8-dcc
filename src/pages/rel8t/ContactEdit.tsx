@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { ContactForm } from "@/components/rel8t/ContactForm";
-import { getContact, updateContact, deleteContact } from "@/services/rel8t/contactService";
+import { getContactById, updateContact, deleteContact } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -34,7 +33,7 @@ const ContactEdit = () => {
   // Get contact data
   const { data: contact, isLoading, error } = useQuery({
     queryKey: ["contact", id],
-    queryFn: () => getContact(id as string),
+    queryFn: () => getContactById(id as string),
   });
 
   // Update contact mutation
