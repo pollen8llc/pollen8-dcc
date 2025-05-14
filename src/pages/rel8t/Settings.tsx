@@ -19,9 +19,17 @@ import {
   Check,
   Mail,
   Calendar,
+  ArrowLeft
 } from "lucide-react";
 import { TriggerManagement } from "@/components/rel8t/TriggerManagement";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 // Type definitions
 interface ContactCategory {
@@ -179,11 +187,33 @@ const Settings = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">REL8T Settings</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your relationship settings, categories and triggers
-          </p>
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink>Settings</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">REL8T Settings</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your relationship settings, categories and triggers
+            </p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => window.location.href = '/rel8t/dashboard'}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Button>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">

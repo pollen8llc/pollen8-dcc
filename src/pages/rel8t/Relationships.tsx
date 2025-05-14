@@ -2,202 +2,144 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
-import { OutreachCard } from "@/components/rel8t/OutreachCard";
 import Navbar from "@/components/Navbar";
-import { getOutreach, getOutreachStatusCounts } from "@/services/rel8t/outreachService";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
+import { getContactCount, getCategories } from "@/services/rel8t/contactService";
+import { Calendar, Users, PlusCircle } from "lucide-react";
+import OutreachList from "@/components/rel8t/OutreachList";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import OutreachForm from "@/components/rel8t/OutreachForm";
-import { createOutreach } from "@/services/rel8t/outreachService";
-import { useDebounce } from "@/hooks/useDebounce";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const Relationships = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("today");
-  const [outreachDialogOpen, setOutreachDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearch = useDebounce(searchTerm, 350);
-
-  const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 }, isLoading: countLoading } = useQuery({
+  const [activeTab, setActiveTab] = useState("outreach");
+  
+  // Get outreach status counts
+  const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 } } = useQuery({
     queryKey: ["outreach-counts"],
     queryFn: getOutreachStatusCounts,
   });
-
-  // Get outreach data based on active tab
-  const { data: outreach = [], isLoading: outreachLoading } = useQuery({
-    queryKey: ["outreach", activeTab],
-    queryFn: () => getOutreach(activeTab),
+  
+  // Get contact count
+  const { data: contactCount = 0 } = useQuery({
+    queryKey: ["contact-count"],
+    queryFn: getContactCount,
   });
 
-  const handleCreateOutreach = async (values: any) => {
-    setIsSubmitting(true);
-    try {
-      await createOutreach(
-        {
-          title: values.title,
-          description: values.description,
-          priority: values.priority,
-          due_date: values.due_date.toISOString(),
-        },
-        values.contactIds
-      );
-      setOutreachDialogOpen(false);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Filter outreach based on search term
-  const filteredOutreach = debouncedSearch 
-    ? outreach.filter(item => 
-        item.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        (item.description?.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
-        item.contacts?.some(contact => 
-          contact.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-        )
-      )
-    : outreach;
-
+  // Get categories for filters
+  const { data: categories = [] } = useQuery({
+    queryKey: ["contact-categories"],
+    queryFn: getCategories,
+  });
+  
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink>Relationships</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Relationship Management</h1>
+            <h1 className="text-3xl font-bold">Relationships</h1>
             <p className="text-muted-foreground mt-1">
-              Track and manage your professional relationships
+              Manage your outreach and nurture your network
             </p>
           </div>
-          <div className="mt-4 md:mt-0">
-            <Button onClick={() => navigate("/rel8t/wizard")}>
-              <Plus className="mr-2 h-4 w-4" />
-              Build a Relationship
-            </Button>
-          </div>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search relationships..."
-              className="pl-9"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <select
-            className="h-9 rounded-md border border-input bg-background px-4 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          
+          <Button 
+            onClick={() => navigate("/rel8t/wizard")}
+            className="flex items-center gap-2"
           >
-            <option value="all">All Priority Levels</option>
-            <option value="high">High Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="low">Low Priority</option>
-          </select>
+            <PlusCircle className="h-4 w-4" />
+            Create Outreach
+          </Button>
         </div>
-
-        {/* Tabs and Outreach listing */}
+        
+        {/* Metrics cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Today</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <Calendar className="h-8 w-8 mr-3 text-primary" />
+                <div className="text-2xl font-bold">{outreachCounts.today}</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <Calendar className="h-8 w-8 mr-3 text-primary" />
+                <div className="text-2xl font-bold">{outreachCounts.upcoming}</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <Calendar className="h-8 w-8 mr-3 text-destructive" />
+                <div className="text-2xl font-bold">{outreachCounts.overdue}</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Contacts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <Users className="h-8 w-8 mr-3 text-primary" />
+                <div className="text-2xl font-bold">{contactCount}</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Main content tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="mb-4">
-            <TabsTrigger value="today" className="relative">
-              Today
-              {outreachCounts.today > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
-                  {outreachCounts.today}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="upcoming" className="relative">
-              Upcoming
-              {outreachCounts.upcoming > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-blue-600 text-[10px] text-white px-1">
-                  {outreachCounts.upcoming}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="overdue" className="relative">
-              Needs Attention
-              {outreachCounts.overdue > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-600 text-[10px] text-white px-1">
-                  {outreachCounts.overdue}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed
-            </TabsTrigger>
+          <TabsList className="mb-6">
+            <TabsTrigger value="outreach">Outreach Tasks</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
           </TabsList>
           
-          {["today", "upcoming", "overdue", "completed"].map((tab) => (
-            <TabsContent key={tab} value={tab}>
-              {outreachLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-                </div>
-              ) : filteredOutreach.length === 0 ? (
-                <div className="text-center py-12 border border-dashed rounded-lg">
-                  <h3 className="mt-2 font-semibold">
-                    {debouncedSearch
-                      ? "No matching relationships found"
-                      : `No ${tab === "completed" ? "completed" : tab === "upcoming" ? "upcoming" : tab === "overdue" ? "overdue" : "today's"} relationships`
-                    }
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {debouncedSearch
-                      ? "Try adjusting your search term"
-                      : `You don't have any ${tab} relationship outreach.`
-                    }
-                  </p>
-                  {!debouncedSearch && (
-                    <Button onClick={() => navigate("/rel8t/wizard")} className="mt-4">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Build a Relationship
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  {debouncedSearch && (
-                    <p className="mb-4 text-sm text-muted-foreground">
-                      Found {filteredOutreach.length} results matching "{debouncedSearch}"
-                    </p>
-                  )}
-                  <div className="grid grid-cols-1 gap-4">
-                    {filteredOutreach.map((item) => (
-                      <OutreachCard key={item.id} outreach={item} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-          ))}
+          <TabsContent value="outreach">
+            <OutreachList defaultTab="today" />
+          </TabsContent>
+          
+          <TabsContent value="completed">
+            <OutreachList defaultTab="completed" showTabs={false} />
+          </TabsContent>
         </Tabs>
-
-        {/* Dialog */}
-        <Dialog open={outreachDialogOpen} onOpenChange={setOutreachDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Build a Relationship</DialogTitle>
-            </DialogHeader>
-            <OutreachForm
-              onSubmit={handleCreateOutreach}
-              onCancel={() => setOutreachDialogOpen(false)}
-              isSubmitting={isSubmitting}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

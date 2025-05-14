@@ -7,6 +7,13 @@ import Navbar from "@/components/Navbar";
 import ContactForm from "@/components/rel8t/ContactForm";
 import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const ContactCreate = () => {
   const navigate = useNavigate();
@@ -60,6 +67,22 @@ const ContactCreate = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink>New Contact</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
         <div className="flex items-center mb-6">
           <Button
             variant="ghost"
