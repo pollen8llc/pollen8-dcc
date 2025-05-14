@@ -1,11 +1,18 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { ContactForm } from "@/components/rel8t/ContactForm";
-import { getContactById, updateContact, deleteContact } from "@/services/rel8t/contactService";
+import ContactForm from "@/components/rel8t/ContactForm";
+import { 
+  getContactById, 
+  updateContact, 
+  deleteContact, 
+  addContactToGroup,
+  removeContactFromGroup
+} from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -22,25 +29,54 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
 const ContactEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  // Get contact data
-  const { data: contact, isLoading, error } = useQuery({
+  // Fetch contact details
+  const { data: contact, isLoading } = useQuery({
     queryKey: ["contact", id],
     queryFn: () => getContactById(id as string),
+    enabled: !!id,
   });
 
   // Update contact mutation
   const updateMutation = useMutation({
     mutationFn: async (values: any) => {
-      if (!id) throw new Error("Contact ID is missing");
-      return updateContact(id, values);
+      // Extract selectedGroups from values before updating contact
+      const { selectedGroups, ...contactData } = values;
+      
+      // Update basic contact data
+      const updatedContact = await updateContact(id as string, contactData);
+      
+      // Handle group membership changes
+      if (selectedGroups && contact?.groups) {
+        // Find groups to add and remove
+        const currentGroupIds = contact.groups.map(g => g.id);
+        const groupsToAdd = selectedGroups.filter((g: string) => !currentGroupIds.includes(g));
+        const groupsToRemove = currentGroupIds.filter(g => !selectedGroups.includes(g));
+        
+        // Add contact to new groups
+        await Promise.all(
+          groupsToAdd.map((groupId: string) => 
+            addContactToGroup(id as string, groupId)
+          )
+        );
+        
+        // Remove contact from old groups
+        await Promise.all(
+          groupsToRemove.map((groupId: string) => 
+            removeContactFromGroup(id as string, groupId)
+          )
+        );
+      }
+      
+      return updatedContact;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
@@ -49,11 +85,12 @@ const ContactEdit = () => {
         title: "Contact updated",
         description: "Contact has been successfully updated.",
       });
+      navigate("/rel8t/contacts");
     },
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update contact",
+        description: error.message || "Failed to update contact.",
         variant: "destructive",
       });
     },
@@ -61,10 +98,7 @@ const ContactEdit = () => {
 
   // Delete contact mutation
   const deleteMutation = useMutation({
-    mutationFn: async () => {
-      if (!id) throw new Error("Contact ID is missing");
-      return deleteContact(id);
-    },
+    mutationFn: () => deleteContact(id as string),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       toast({
@@ -76,7 +110,7 @@ const ContactEdit = () => {
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete contact",
+        description: error.message || "Failed to delete contact.",
         variant: "destructive",
       });
     },
@@ -91,29 +125,69 @@ const ContactEdit = () => {
   };
 
   const handleDelete = () => {
-    setConfirmDelete(true);
+    setDeleteDialogOpen(true);
   };
 
-  const confirmDeleteContact = () => {
+  const confirmDelete = () => {
     deleteMutation.mutate();
-    setConfirmDelete(false);
   };
 
-  if (error) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-red-500">Error loading contact</h3>
-            <p className="mt-2">
-              {error instanceof Error ? error.message : "Failed to load contact details"}
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/rel8t/contacts")}
-              className="mt-4"
-            >
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink>Edit Contact</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <Loader2 className="animate-spin h-8 w-8 mx-auto text-primary" />
+              <p className="mt-4">Loading contact details...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!contact && !isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink>Not Found</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Contact not found</h2>
+            <Button onClick={() => navigate("/rel8t/contacts")}>
               Back to Contacts
             </Button>
           </div>
@@ -126,77 +200,81 @@ const ContactEdit = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6">
-        {/* Sleek translucent breadcrumb */}
-        <Breadcrumb className="mb-4 p-2 rounded-md bg-cyan-500/10 backdrop-blur-sm border border-cyan-200/20 shadow-sm">
+      <div className="container mx-auto px-4 py-8">
+        <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t" className="text-cyan-700 hover:text-cyan-900">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
+            <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t/contacts" className="text-cyan-700 hover:text-cyan-900">Contacts</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
             </BreadcrumbItem>
+            <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-cyan-700">{isLoading ? "Loading..." : contact?.name}</BreadcrumbLink>
+              <BreadcrumbLink>Edit Contact</BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/rel8t/contacts")}
-              className="mr-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold">Edit Contact</h1>
-              <p className="text-sm text-muted-foreground">Update contact information</p>
-            </div>
-          </div>
-          <Button 
-            variant="destructive" 
-            onClick={handleDelete} 
-            disabled={deleteMutation.isPending}
+        <div className="flex items-center mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/rel8t/contacts")}
+            className="mr-4"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Edit Contact</h1>
+            <p className="text-muted-foreground">Update contact information</p>
+          </div>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            className="ml-auto"
+            disabled={updateMutation.isPending || deleteMutation.isPending}
+          >
             Delete Contact
           </Button>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-          </div>
-        ) : (
-          <div className="bg-card rounded-lg border p-6">
+        <div className="bg-card rounded-lg border border-border/20 p-6">
+          {contact && (
             <ContactForm
-              contact={contact}
+              initialValues={{
+                name: contact.name,
+                email: contact.email,
+                phone: contact.phone,
+                organization: contact.organization,
+                role: contact.role,
+                notes: contact.notes,
+                tags: contact.tags || [],
+                category_id: contact.category_id,
+                location: contact.location,
+                groups: contact.groups || [],
+                affiliations: contact.affiliations || []
+              }}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
               isSubmitting={updateMutation.isPending}
             />
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the contact
-              and all associated data.
+              and remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDeleteContact}
-              className="bg-destructive text-destructive-foreground"
-            >
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

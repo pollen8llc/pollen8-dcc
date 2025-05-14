@@ -69,10 +69,10 @@ const OutreachForm: React.FC<OutreachFormProps> = ({
 }) => {
   const [openContactSelect, setOpenContactSelect] = useState(false);
   
-  // Updated query to use proper parameter type
+  // Query to get contacts for the multi-select
   const { data: contactsData = [], isLoading: contactsLoading } = useQuery({
     queryKey: ["contacts"],
-    queryFn: () => getContacts(),
+    queryFn: () => getContacts({}),
   });
 
   const form = useForm<OutreachFormValues>({

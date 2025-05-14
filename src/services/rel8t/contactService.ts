@@ -4,33 +4,32 @@ import { supabase } from "@/integrations/supabase/client";
 export interface Contact {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
   organization?: string;
   role?: string;
   notes?: string;
-  created_at: string;
   tags?: string[];
-  image_url?: string;
-  category_id?: string;
   location?: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  category_id?: string;
   last_contact_date?: string;
-  category?: {
-    id: string;
-    name: string;
-    color: string;
-  };
-  groups?: {
-    id: string;
-    name: string;
-  }[];
+  // Include category details when joined
+  category?: ContactCategory;
+  // Include affiliations when joined
+  affiliations?: ContactAffiliation[];
+  // Include groups when joined
+  groups?: ContactGroup[];
 }
 
 export interface ContactCategory {
   id: string;
   name: string;
   color: string;
-  user_id: string;
+  // Make user_id optional since it's not returned in joined queries
+  user_id?: string;
 }
 
 export interface ContactGroup {
@@ -39,179 +38,445 @@ export interface ContactGroup {
   description?: string;
   color?: string;
   user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
-// Get all contacts or filter by query
-export async function getContacts(options?: { searchQuery?: string }): Promise<Contact[]> {
-  // This is mock data
-  const mockContacts = [
-    {
-      id: "1",
-      name: "Alex Johnson",
-      email: "alex@example.com",
-      phone: "555-123-4567",
-      organization: "TechCorp",
-      role: "CTO",
-      notes: "Met at the SF conference",
-      created_at: "2023-06-12T00:00:00.000Z",
-      tags: ["tech", "investor"],
-      category_id: "cat1",
-      location: "San Francisco, CA",
-      last_contact_date: "2023-10-15T00:00:00.000Z",
-      category: {
-        id: "cat1",
-        name: "Client",
-        color: "#4f46e5"
-      },
-      groups: [
-        { id: "group1", name: "VIP" }
-      ]
-    },
-    {
-      id: "2",
-      name: "Jamie Smith",
-      email: "jamie@example.com",
-      phone: "555-987-6543",
-      organization: "DesignStudio",
-      role: "Designer",
-      notes: "Worked together on the rebrand project",
-      created_at: "2023-07-15T00:00:00.000Z",
-      tags: ["design", "freelancer"],
-      category_id: "cat2",
-      location: "New York, NY",
-      last_contact_date: "2023-11-02T00:00:00.000Z",
-      category: {
-        id: "cat2",
-        name: "Partner",
-        color: "#10b981"
-      },
-      groups: [
-        { id: "group2", name: "Design" }
-      ]
-    },
-    {
-      id: "3",
-      name: "Taylor Wilson",
-      email: "taylor@example.com",
-      phone: "555-567-8901",
-      organization: "InnovateCo",
-      role: "Product Manager",
-      notes: "Introduced by Jamie",
-      created_at: "2023-08-20T00:00:00.000Z",
-      tags: ["product", "manager"],
-      category_id: "cat3",
-      location: "Austin, TX",
-      last_contact_date: "2023-12-01T00:00:00.000Z",
-      category: {
-        id: "cat3",
-        name: "Lead",
-        color: "#f59e0b"
-      },
-      groups: [
-        { id: "group1", name: "VIP" },
-        { id: "group3", name: "Product" }
-      ]
-    }
-  ];
-
-  if (options?.searchQuery) {
-    const lowerQuery = options.searchQuery.toLowerCase();
-    return mockContacts.filter(contact => 
-      contact.name.toLowerCase().includes(lowerQuery) || 
-      contact.email.toLowerCase().includes(lowerQuery) || 
-      (contact.organization && contact.organization.toLowerCase().includes(lowerQuery))
-    );
-  }
-
-  return mockContacts;
+export interface ContactAffiliation {
+  id: string;
+  contact_id: string;
+  user_id: string;
+  affiliated_user_id?: string | null;
+  affiliated_contact_id?: string | null;
+  affiliated_community_id?: string | null;
+  affiliation_type: 'user' | 'contact' | 'community';
+  relationship?: string;
+  created_at: string;
+  updated_at: string;
+  // Join data with proper error handling
+  affiliated_user?: { id: string; email: string } | null | Record<string, any>;
+  affiliated_contact?: Contact | null | Record<string, any>;
+  affiliated_community?: { id: string; name: string } | null | Record<string, any>;
 }
 
-// Get a single contact by ID
-export async function getContactById(id: string): Promise<Contact | null> {
-  const contacts = await getContacts();
-  return contacts.find(contact => contact.id === id) || null;
-}
-
-// Add this alias for backward compatibility
-export async function getContact(id: string): Promise<Contact | null> {
-  return getContactById(id);
-}
-
-export async function createContact(values: Partial<Contact>): Promise<Contact> {
-  // This is a mock implementation
-  console.log(`Creating contact with values:`, values);
-  const newContact = {
-    id: `new-${Math.floor(Math.random() * 1000)}`,
-    name: values.name || "New Contact",
-    email: values.email || "",
-    created_at: new Date().toISOString(),
-    ...values
-  };
+// Get all contacts
+export const getContacts = async (options?: { searchQuery?: string }): Promise<Contact[]> => {
+  let query = supabase
+    .from("rms_contacts")
+    .select(`
+      *,
+      category:category_id (
+        id,
+        name,
+        color
+      )
+    `);
   
-  return newContact as Contact;
-}
-
-export async function updateContact(id: string, values: Partial<Contact>): Promise<Contact> {
-  // This is a mock implementation
-  console.log(`Updating contact ${id} with values:`, values);
-  return { id, ...values } as Contact;
-}
-
-export async function deleteContact(id: string): Promise<boolean> {
-  // This is a mock implementation
-  console.log(`Deleting contact ${id}`);
-  return true;
-}
-
-export async function deleteMultipleContacts(ids: string[]): Promise<boolean> {
-  // This is a mock implementation
-  console.log(`Deleting contacts: ${ids.join(', ')}`);
-  return true;
-}
+  let searchQuery = "";
+  
+  // Handle options parameter
+  if (options && typeof options === "object" && "searchQuery" in options) {
+    searchQuery = options.searchQuery || "";
+  }
+  
+  if (searchQuery) {
+    query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%,organization.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
+  }
+  
+  const { data, error } = await query.order("name");
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data || [];
+};
 
 // Get contact count
-export async function getContactCount(): Promise<number> {
-  const contacts = await getContacts();
-  return contacts.length;
-}
+export const getContactCount = async (): Promise<number> => {
+  const { count, error } = await supabase
+    .from("rms_contacts")
+    .select("*", { count: 'exact', head: true });
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return count || 0;
+};
 
-// Get contact categories
-export async function getCategories(): Promise<ContactCategory[]> {
-  // Mock categories
-  return [
-    { id: "cat1", name: "Client", color: "#4f46e5", user_id: "user1" },
-    { id: "cat2", name: "Partner", color: "#10b981", user_id: "user1" },
-    { id: "cat3", name: "Lead", color: "#f59e0b", user_id: "user1" },
-    { id: "cat4", name: "Vendor", color: "#ef4444", user_id: "user1" }
-  ];
-}
+// Get a contact by ID with affiliations and groups
+export const getContactById = async (id: string): Promise<Contact | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("rms_contacts")
+      .select(`
+        *,
+        category:category_id (
+          id,
+          name,
+          color
+        )
+      `)
+      .eq("id", id)
+      .single();
 
-// Get contact groups
-export async function getContactGroups(): Promise<ContactGroup[]> {
-  // Mock groups
-  return [
-    { id: "group1", name: "VIP", description: "Very important contacts", color: "#4f46e5", user_id: "user1" },
-    { id: "group2", name: "Design", description: "Design contacts", color: "#10b981", user_id: "user1" },
-    { id: "group3", name: "Product", description: "Product contacts", color: "#f59e0b", user_id: "user1" }
-  ];
-}
+    if (error) {
+      console.error("Error fetching contact:", error);
+      throw new Error(error.message);
+    }
 
-// Create a new contact group
-export async function createContactGroup(values: Partial<ContactGroup>): Promise<ContactGroup> {
-  // Mock implementation
-  console.log(`Creating contact group with values:`, values);
-  return {
-    id: `group-${Math.floor(Math.random() * 1000)}`,
-    name: values.name || "New Group",
-    description: values.description,
-    color: values.color || "#4f46e5",
-    user_id: "user1"
+    if (!data) {
+      return null;
+    }
+
+    // Get affiliations separately to avoid type errors
+    const { data: affiliationsData, error: affiliationsError } = await supabase
+      .from("rms_contact_affiliations")
+      .select(`
+        id, 
+        affiliation_type,
+        affiliated_user_id,
+        affiliated_contact_id,
+        affiliated_community_id,
+        relationship,
+        created_at
+      `)
+      .eq("contact_id", id);
+
+    if (affiliationsError) {
+      console.error("Error fetching affiliations:", affiliationsError);
+    }
+
+    // Process affiliations safely
+    const affiliations: ContactAffiliation[] = [];
+    
+    if (affiliationsData && Array.isArray(affiliationsData)) {
+      for (const affiliation of affiliationsData) {
+        if (affiliation && typeof affiliation === 'object') {
+          const newAffiliation: ContactAffiliation = {
+            id: affiliation.id,
+            contact_id: id,
+            user_id: data.user_id,
+            affiliation_type: affiliation.affiliation_type as 'user' | 'contact' | 'community',
+            affiliated_user_id: affiliation.affiliated_user_id,
+            affiliated_contact_id: affiliation.affiliated_contact_id,
+            affiliated_community_id: affiliation.affiliated_community_id,
+            relationship: affiliation.relationship,
+            created_at: affiliation.created_at,
+            updated_at: affiliation.created_at // Use created_at as fallback
+          };
+          affiliations.push(newAffiliation);
+        }
+      }
+    }
+
+    // Get groups that this contact belongs to
+    const { data: groupMembers, error: groupMembersError } = await supabase
+      .from("rms_contact_group_members")
+      .select(`
+        group:group_id (
+          id,
+          name,
+          description,
+          color,
+          user_id,
+          created_at,
+          updated_at
+        )
+      `)
+      .eq("contact_id", id);
+    
+    if (groupMembersError) {
+      console.error("Error fetching group memberships:", groupMembersError);
+    }
+
+    // Add affiliations and groups to the contact
+    const groups = groupMembers?.map(member => member.group as ContactGroup) || [];
+    
+    return {
+      ...data,
+      affiliations,
+      groups
+    };
+  } catch (error) {
+    console.error("Error in getContactById:", error);
+    throw error;
+  }
+};
+
+// Create a new contact
+export const createContact = async (contact: Omit<Contact, "id" | "created_at" | "updated_at" | "user_id">): Promise<Contact> => {
+  const { data: user } = await supabase.auth.getUser();
+  
+  const { data, error } = await supabase
+    .from("rms_contacts")
+    .insert([{ ...contact, user_id: user.user?.id }])
+    .select(`
+      *,
+      category:category_id (
+        id,
+        name,
+        color
+      )
+    `);
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data[0];
+};
+
+// Update a contact
+export const updateContact = async (id: string, contact: Partial<Contact>): Promise<Contact> => {
+  // Remove affiliations and groups from the contact data as they're stored in separate tables
+  const { affiliations, groups, ...contactData } = contact;
+  
+  const { data, error } = await supabase
+    .from("rms_contacts")
+    .update(contactData)
+    .eq("id", id)
+    .select(`
+      *,
+      category:category_id (
+        id,
+        name,
+        color
+      )
+    `);
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data[0];
+};
+
+// Add an affiliation to a contact
+export const addAffiliation = async (
+  contactId: string,
+  affiliation: {
+    affiliation_type: 'user' | 'contact' | 'community';
+    affiliated_user_id?: string;
+    affiliated_contact_id?: string;
+    affiliated_community_id?: string;
+    relationship?: string;
+  }
+): Promise<ContactAffiliation> => {
+  const { data: user } = await supabase.auth.getUser();
+  
+  const { data, error } = await supabase
+    .from("rms_contact_affiliations")
+    .insert([{ 
+      contact_id: contactId, 
+      user_id: user.user?.id,
+      ...affiliation
+    }])
+    .select();
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  // Return a properly typed affiliation object
+  const result: ContactAffiliation = {
+    ...data[0],
+    affiliation_type: data[0].affiliation_type as 'user' | 'contact' | 'community',
+    affiliated_user: null,
+    affiliated_contact: null,
+    affiliated_community: null
   };
-}
+  
+  return result;
+};
+
+// Remove an affiliation
+export const removeAffiliation = async (affiliationId: string): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contact_affiliations")
+    .delete()
+    .eq("id", affiliationId);
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+// Create a contact group
+export const createContactGroup = async (
+  group: {
+    name: string;
+    description?: string;
+    color?: string;
+  }
+): Promise<ContactGroup> => {
+  const { data: user } = await supabase.auth.getUser();
+  
+  const { data, error } = await supabase
+    .from("rms_contact_groups")
+    .insert([{ 
+      ...group,
+      user_id: user.user?.id
+    }])
+    .select();
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data[0] as ContactGroup;
+};
+
+// Get all contact groups
+export const getContactGroups = async (): Promise<ContactGroup[]> => {
+  const { data, error } = await supabase
+    .from("rms_contact_groups")
+    .select("*")
+    .order("name");
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data as ContactGroup[];
+};
 
 // Add a contact to a group
-export async function addContactToGroup(contactId: string, groupId: string): Promise<boolean> {
-  // Mock implementation
-  console.log(`Adding contact ${contactId} to group ${groupId}`);
-  return true;
-}
+export const addContactToGroup = async (
+  contactId: string,
+  groupId: string
+): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contact_group_members")
+    .insert([{ 
+      contact_id: contactId,
+      group_id: groupId
+    }]);
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+// Remove a contact from a group
+export const removeContactFromGroup = async (
+  contactId: string,
+  groupId: string
+): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contact_group_members")
+    .delete()
+    .match({ 
+      contact_id: contactId,
+      group_id: groupId
+    });
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+// Get all contacts in a group
+export const getContactsInGroup = async (groupId: string): Promise<Contact[]> => {
+  const { data, error } = await supabase
+    .from("rms_contact_group_members")
+    .select(`
+      contact:contact_id (
+        *,
+        category:category_id (
+          id,
+          name,
+          color
+        )
+      )
+    `)
+    .eq("group_id", groupId);
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data.map(item => item.contact) || [];
+};
+
+// Delete a contact
+export const deleteContact = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contacts")
+    .delete()
+    .eq("id", id);
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+// Delete multiple contacts
+export const deleteMultipleContacts = async (ids: string[]): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contacts")
+    .delete()
+    .in("id", ids);
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+// Get contact categories
+export const getCategories = async (): Promise<ContactCategory[]> => {
+  const { data, error } = await supabase
+    .from("rms_contact_categories")
+    .select("*")
+    .order("name");
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data || [];
+};
+
+// Create a new category
+export const createCategory = async (category: Omit<ContactCategory, "id" | "user_id">): Promise<ContactCategory> => {
+  const { data: user } = await supabase.auth.getUser();
+  
+  const { data, error } = await supabase
+    .from("rms_contact_categories")
+    .insert([{ ...category, user_id: user.user?.id }])
+    .select();
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data[0];
+};
+
+// Update a category
+export const updateCategory = async (id: string, category: Partial<ContactCategory>): Promise<ContactCategory> => {
+  const { data, error } = await supabase
+    .from("rms_contact_categories")
+    .update(category)
+    .eq("id", id)
+    .select();
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data[0];
+};
+
+// Delete a category
+export const deleteCategory = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contact_categories")
+    .delete()
+    .eq("id", id);
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+};

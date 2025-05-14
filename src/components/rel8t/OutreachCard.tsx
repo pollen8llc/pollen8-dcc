@@ -1,164 +1,89 @@
 
-import { format, formatDistanceToNow } from "date-fns";
-import { ChevronDown, Check, Trash2 } from "lucide-react";
+import React from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-export interface OutreachProps {
-  id: string;
-  title: string;
-  description?: string;
-  due_date: string;
-  priority: string;
-  status: string;
-  contacts: Array<{
-    id: string;
-    name: string;
-    email?: string;
-    organization?: string;
-  }>;
-}
+import { Check, Calendar, AlertCircle } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { Outreach, updateOutreachStatus } from "@/services/rel8t/outreachService";
+import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface OutreachCardProps {
-  outreach: OutreachProps;
-  onStatusChange?: (id: string, status: string) => void;
-  onDelete?: (id: string) => void;
+  outreach: Outreach;
 }
 
-export const OutreachCard: React.FC<OutreachCardProps> = ({
-  outreach,
-  onStatusChange,
-  onDelete
-}) => {
-  const dueDate = new Date(outreach.due_date);
-  const isOverdue = outreach.status !== "completed" && dueDate < new Date();
-  const isToday = outreach.status !== "completed" && 
-    new Date().toDateString() === dueDate.toDateString();
+export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
+  const queryClient = useQueryClient();
   
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case "high": return "bg-red-500";
-      case "medium": return "bg-yellow-500";
-      case "low": return "bg-green-500";
-      default: return "bg-blue-500";
+  const handleMarkComplete = async () => {
+    const success = await updateOutreachStatus(outreach.id, "completed");
+    if (success) {
+      queryClient.invalidateQueries({ queryKey: ["outreach"] });
     }
   };
 
-  const getStatusColor = () => {
-    if (outreach.status === "completed") return "success";
-    if (isOverdue) return "destructive";
-    if (isToday) return "warning";
-    return "default";
+  const priorityColor = {
+    low: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+    medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+    high: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
   };
 
-  const getStatusDisplay = () => {
-    if (outreach.status === "completed") return "Completed";
-    if (isOverdue) return "Overdue";
-    if (isToday) return "Today";
-    return "Upcoming";
-  };
+  const isOverdue = new Date(outreach.due_date) < new Date() && outreach.status === "pending";
 
   return (
-    <Card className="overflow-hidden border-border/20">
-      <CardContent className="p-0">
-        <div className="flex flex-col md:flex-row">
-          {/* Priority indicator */}
-          <div className={`w-full md:w-1.5 ${getPriorityColor(outreach.priority)}`} />
+    <Card className={cn("mb-4", isOverdue && "border-red-300 dark:border-red-800")}>
+      <CardHeader className="px-4 py-3 border-b bg-muted/50">
+        <div className="flex justify-between items-center">
+          <Badge variant="outline" className={cn(priorityColor[outreach.priority])}>
+            {outreach.priority} priority
+          </Badge>
           
-          <div className="p-4 flex-1">
-            <div className="flex flex-wrap justify-between gap-2 mb-2">
-              <h3 className="font-medium text-lg">{outreach.title}</h3>
-              <div className="flex items-center gap-2">
-                <Badge variant={getStatusColor() as any}>
-                  {getStatusDisplay()}
-                </Badge>
-                
-                <div className="flex items-center gap-1">
-                  {onStatusChange && outreach.status !== "completed" && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0"
-                      onClick={() => onStatusChange(outreach.id, "completed")}
-                      title="Mark as completed"
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                  )}
-                  
-                  {onDelete && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                      onClick={() => onDelete(outreach.id)}
-                      title="Delete outreach"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                  
-                  {onStatusChange && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0"
-                        >
-                          <ChevronDown className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-popover text-popover-foreground">
-                        <DropdownMenuItem
-                          onClick={() => onStatusChange(outreach.id, "pending")}
-                          className="cursor-pointer"
-                        >
-                          Mark as Pending
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onStatusChange(outreach.id, "completed")}
-                          className="cursor-pointer"
-                        >
-                          Mark as Completed
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {outreach.description && (
-              <p className="text-sm text-muted-foreground mb-3">{outreach.description}</p>
-            )}
-
-            <div className="flex flex-col gap-2">
-              <p className="text-sm">
-                <span className="font-medium">Due:</span>{" "}
-                {format(dueDate, "PPP")} ({formatDistanceToNow(dueDate, { addSuffix: true })})
-              </p>
-
-              <div>
-                <p className="text-sm font-medium mb-1">Contacts:</p>
-                <div className="flex flex-wrap gap-1">
-                  {outreach.contacts.map((contact) => (
-                    <Badge key={contact.id} variant="outline" className="bg-secondary/50">
-                      {contact.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
+          {isOverdue && (
+            <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              Overdue
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      
+      <CardContent className="p-4">
+        <h3 className="text-lg font-medium mb-1">{outreach.title}</h3>
+        {outreach.description && (
+          <p className="text-muted-foreground text-sm mb-3">{outreach.description}</p>
+        )}
+        
+        <div className="mb-3">
+          <h4 className="text-sm font-medium mb-1">Contacts</h4>
+          <div className="flex flex-wrap gap-1">
+            {outreach.contacts?.map((contact) => (
+              <Badge key={contact.id} variant="secondary" className="font-normal">
+                {contact.name}
+              </Badge>
+            ))}
           </div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Calendar className="h-4 w-4 mr-1" />
+            <span>
+              {formatDistanceToNow(new Date(outreach.due_date), { addSuffix: true })}
+            </span>
+          </div>
+          
+          {outreach.status === "pending" && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-1"
+              onClick={handleMarkComplete}
+            >
+              <Check className="h-4 w-4" />
+              Mark Complete
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

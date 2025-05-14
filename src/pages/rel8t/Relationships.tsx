@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
-import { getContactCount } from "@/services/rel8t/contactService";
+import { getContactCount, getCategories } from "@/services/rel8t/contactService";
 import { Calendar, Users, PlusCircle } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
 import {
@@ -33,6 +34,12 @@ const Relationships = () => {
     queryFn: getContactCount,
   });
 
+  // Get categories for filters
+  const { data: categories = [] } = useQuery({
+    queryKey: ["contact-categories"],
+    queryFn: getCategories,
+  });
+  
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -76,7 +83,7 @@ const Relationships = () => {
             <CardContent>
               <div className="flex items-center">
                 <Calendar className="h-8 w-8 mr-3 text-primary" />
-                <div className="text-2xl font-bold">{outreachCounts.today || 0}</div>
+                <div className="text-2xl font-bold">{outreachCounts.today}</div>
               </div>
             </CardContent>
           </Card>

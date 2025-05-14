@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { ContactForm } from "@/components/rel8t/ContactForm";
+import ContactForm from "@/components/rel8t/ContactForm";
 import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -12,6 +12,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
 const ContactCreate = () => {
@@ -47,7 +48,7 @@ const ContactCreate = () => {
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create contact",
+        description: error.message || "Failed to create contact.",
         variant: "destructive",
       });
     },
@@ -65,18 +66,19 @@ const ContactCreate = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6">
-        {/* Sleek translucent breadcrumb */}
-        <Breadcrumb className="mb-4 p-2 rounded-md bg-cyan-500/10 backdrop-blur-sm border border-cyan-200/20 shadow-sm">
+      <div className="container mx-auto px-4 py-8">
+        <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t" className="text-cyan-700 hover:text-cyan-900">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
+            <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t/contacts" className="text-cyan-700 hover:text-cyan-900">Contacts</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
             </BreadcrumbItem>
+            <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-cyan-700">New Contact</BreadcrumbLink>
+              <BreadcrumbLink>New Contact</BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -91,7 +93,7 @@ const ContactCreate = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Create New Contact</h1>
-            <p className="text-sm text-muted-foreground">Add a new contact to your network</p>
+            <p className="text-muted-foreground">Add a new contact to your network</p>
           </div>
         </div>
 
