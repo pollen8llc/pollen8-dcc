@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -320,84 +319,86 @@ const ContactList: React.FC<ContactListProps> = ({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredContacts.map((contact) => (
             <Card 
               key={contact.id} 
-              className="cursor-pointer hover:bg-muted/10 transition-colors border-border/20"
+              className="cursor-pointer hover:bg-muted/10 transition-colors border-border/20 overflow-hidden"
             >
-              <CardContent className="p-4">
+              <CardContent className="p-0">
                 <div className="flex items-start">
                   <Checkbox
-                    className="mr-2 mt-1.5"
+                    className="m-4"
                     checked={selectedContacts.includes(contact.id)}
                     onCheckedChange={() => toggleContactSelection(contact.id)}
                     onClick={(e) => e.stopPropagation()}
                   />
+                  
                   <div className="flex-1" onClick={() => onEdit && onEdit(contact)}>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium text-lg truncate">{contact.name}</h3>
-                      {contact.category && (
-                        <div className="flex items-center gap-1.5">
-                          <div 
-                            className="w-2.5 h-2.5 rounded-full" 
-                            style={{ backgroundColor: contact.category.color }} 
-                          />
-                          <span className="text-xs text-muted-foreground">{contact.category.name}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-1.5 mb-3">
-                      {contact.email && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">{contact.email}</span>
-                        </div>
-                      )}
-                      {contact.phone && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span>{contact.phone}</span>
-                        </div>
-                      )}
-                      {contact.location && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">{contact.location}</span>
-                        </div>
-                      )}
+                    {/* Card Header with color based on category */}
+                    <div 
+                      className={`p-3 ${contact.category ? "" : "bg-muted/20"}`}
+                      style={contact.category ? { backgroundColor: `${contact.category.color}20` } : {}}
+                    >
+                      <h3 className="font-medium text-lg truncate">
+                        {contact.name}
+                      </h3>
                       {contact.organization && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Building className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">{contact.organization}</span>
-                          {contact.role && (
-                            <span className="text-xs text-muted-foreground ml-1">({contact.role})</span>
-                          )}
-                        </div>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {contact.organization} {contact.role && `(${contact.role})`}
+                        </p>
                       )}
                     </div>
                     
-                    <div className="flex flex-col gap-2">
-                      {contact.tags && contact.tags.length > 0 && (
-                        <div className="flex items-start gap-1.5">
-                          <Tags className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                          <div className="flex flex-wrap gap-1">
-                            {contact.tags.map(tag => (
-                              <Badge key={tag} variant="outline" className="font-normal text-xs py-0">
-                                {tag}
-                              </Badge>
-                            ))}
+                    {/* Contact Details */}
+                    <div className="p-4 space-y-3">
+                      <div className="space-y-1.5">
+                        {contact.email && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">{contact.email}</span>
                           </div>
-                        </div>
-                      )}
+                        )}
+                        {contact.phone && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                            <span>{contact.phone}</span>
+                          </div>
+                        )}
+                      </div>
                       
+                      {/* Tags and Category Badges */}
+                      <div className="flex flex-wrap gap-1.5 pt-2">
+                        {contact.category && (
+                          <Badge 
+                            variant="outline" 
+                            className="font-normal text-xs py-0"
+                            style={{ 
+                              borderColor: contact.category.color,
+                              color: contact.category.color
+                            }}
+                          >
+                            {contact.category.name}
+                          </Badge>
+                        )}
+                        
+                        {contact.tags && contact.tags.slice(0, 3).map(tag => (
+                          <Badge key={tag} variant="secondary" className="font-normal text-xs py-0">
+                            {tag}
+                          </Badge>
+                        ))}
+                        
+                        {contact.tags && contact.tags.length > 3 && (
+                          <Badge variant="outline" className="font-normal text-xs py-0">
+                            +{contact.tags.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {/* Last Contact Date - only show if exists */}
                       {contact.last_contact_date && (
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-                          <Calendar className="h-3 w-3 flex-shrink-0" />
-                          <span>
-                            Last contact: {formatDistanceToNow(new Date(contact.last_contact_date), { addSuffix: true })}
-                          </span>
+                        <div className="text-xs text-muted-foreground border-t pt-2 mt-2">
+                          Last contact: {formatDistanceToNow(new Date(contact.last_contact_date), { addSuffix: true })}
                         </div>
                       )}
                     </div>

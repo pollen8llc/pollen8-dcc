@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import ContactList from "@/components/rel8t/ContactList";
+import Rel8Navigation from "@/components/rel8t/Rel8Navigation";
 import { 
   Dialog, 
   DialogContent, 
@@ -10,56 +12,35 @@ import {
   DialogTitle,
   DialogDescription 
 } from "@/components/ui/dialog";
-import ContactForm from "@/components/rel8t/ContactForm";
-import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
-import { toast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import ContactGroupsManager from "@/components/rel8t/ContactGroupsManager";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Steps, Step } from "@/components/ui/steps";
 import { 
   Plus, 
-  Users, 
-  FolderPlus, 
-  ChevronLeft, 
-  Import,
-  ArrowRight,
-  Check
+  Users,
+  Import
 } from "lucide-react";
-import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
-
-// Define steps for the add contact wizard
-const WIZARD_STEPS = ["Basic Info", "Details", "Review"];
+import { createContact } from "@/services/rel8t/contactService";
+import { toast } from "@/hooks/use-toast";
+import { getContactGroups } from "@/services/rel8t/contactService";
 
 const Contacts = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [contactGroupsDialogOpen, setContactGroupsDialogOpen] = useState(false);
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [wizardStep, setWizardStep] = useState(1);
-  const [wizardData, setWizardData] = useState<any>({});
+  
+  // Fetch contact groups for the group tab
+  const { data: groups = [] } = useQuery({
+    queryKey: ["contact-groups"],
+    queryFn: getContactGroups,
+  });
 
   // Create contact mutation for the dialog
   const createMutation = useMutation({
-    mutationFn: async (values: any) => {
-      // Extract selectedGroups from values before creating contact
-      const { selectedGroups, ...contactData } = values;
-      const newContact = await createContact(contactData);
-      
-      // If groups are selected, add the contact to groups
-      if (selectedGroups && selectedGroups.length > 0) {
-        await Promise.all(
-          selectedGroups.map((groupId: string) => 
-            addContactToGroup(newContact.id, groupId)
-          )
-        );
-      }
-      
-      return newContact;
-    },
+    mutationFn: createContact,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       toast({
@@ -67,7 +48,6 @@ const Contacts = () => {
         description: "New contact has been successfully created."
       });
       setContactDialogOpen(false);
-      setWizardStep(1); // Reset wizard step
     },
     onError: (error) => {
       toast({
@@ -82,128 +62,12 @@ const Contacts = () => {
     navigate(`/rel8t/contacts/${contact.id}`);
   };
 
-  const handleNextWizardStep = (data: any) => {
-    setWizardData({...wizardData, ...data});
-    if (wizardStep < WIZARD_STEPS.length) {
-      setWizardStep(wizardStep + 1);
-    } else {
-      // Final step - submit the data
-      createMutation.mutate(wizardData);
-    }
-  };
-
-  const handlePreviousWizardStep = () => {
-    if (wizardStep > 1) {
-      setWizardStep(wizardStep - 1);
-    }
-  };
-
-  const handleImportComplete = async (importedContacts: any[]) => {
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (const contact of importedContacts) {
-      try {
-        await createContact(contact);
-        successCount++;
-      } catch (error) {
-        errorCount++;
-        // Optionally, log or collect errors for user feedback
-      }
-    }
-
-    toast({
-      title: "Contacts imported",
-      description: `Successfully imported ${successCount} contacts.${errorCount ? ` ${errorCount} failed.` : ""}`
-    });
-    setImportDialogOpen(false);
-    queryClient.invalidateQueries({ queryKey: ["contacts"] });
-  };
-
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["contacts"] });
   };
 
-  // Render the appropriate wizard step content
-  const renderWizardStepContent = () => {
-    switch(wizardStep) {
-      case 1:
-        return (
-          <div className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>Basic Contact Information</DialogTitle>
-              <DialogDescription>Enter the essential contact details.</DialogDescription>
-            </DialogHeader>
-            {/* Basic info form would go here */}
-            <div className="mt-6 space-y-4">
-              <div className="flex justify-end">
-                <Button onClick={() => handleNextWizardStep({})}>
-                  Next
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        );
-      
-      case 2:
-        return (
-          <div className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>Additional Details</DialogTitle>
-              <DialogDescription>Add more information about the contact.</DialogDescription>
-            </DialogHeader>
-            {/* Additional details form would go here */}
-            <div className="mt-6 space-y-4">
-              <div className="flex justify-between">
-                <Button 
-                  variant="outline" 
-                  onClick={handlePreviousWizardStep}
-                >
-                  <ChevronLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Button>
-                <Button onClick={() => handleNextWizardStep({})}>
-                  Next
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        );
-      
-      case 3:
-        return (
-          <div className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>Review & Submit</DialogTitle>
-              <DialogDescription>Verify all information before creating the contact.</DialogDescription>
-            </DialogHeader>
-            {/* Review form would go here */}
-            <div className="mt-6 space-y-4">
-              <div className="flex justify-between">
-                <Button 
-                  variant="outline" 
-                  onClick={handlePreviousWizardStep}
-                >
-                  <ChevronLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Button>
-                <Button 
-                  onClick={() => handleNextWizardStep({})}
-                  disabled={createMutation.isPending}
-                >
-                  {createMutation.isPending ? 'Creating...' : 'Create Contact'}
-                  <Check className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        );
-      
-      default:
-        return null;
-    }
+  const handleImport = () => {
+    navigate('/rel8t/import');
   };
 
   return (
@@ -211,18 +75,8 @@ const Contacts = () => {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mr-2" 
-            onClick={() => navigate("/rel8t")}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
-          </Button>
-        </div>
-
+        <Rel8Navigation />
+        
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold">Contacts</h1>
@@ -238,14 +92,14 @@ const Contacts = () => {
               <span className="hidden sm:inline">Groups</span>
             </Button>
             <Button 
-              onClick={() => setImportDialogOpen(true)}
+              onClick={handleImport}
               variant="outline"
               className="gap-2"
             >
               <Import className="h-4 w-4" />
               <span className="hidden sm:inline">Import</span>
             </Button>
-            <Button onClick={() => setContactDialogOpen(true)} className="gap-2">
+            <Button onClick={() => navigate("/rel8t/contacts/new")} className="gap-2">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add Contact</span>
             </Button>
@@ -257,9 +111,10 @@ const Contacts = () => {
           onValueChange={setActiveTab}
           className="space-y-4"
         >
-          <div className="flex items-center justify-between">
-            <TabsList>
+          <div className="flex items-center justify-between overflow-x-auto">
+            <TabsList className="mb-4">
               <TabsTrigger value="all">All Contacts</TabsTrigger>
+              <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="recent">Recent</TabsTrigger>
               <TabsTrigger value="favorites">Favorites</TabsTrigger>
             </TabsList>
@@ -268,9 +123,60 @@ const Contacts = () => {
           <TabsContent value="all" className="mt-0">
             <ContactList
               onEdit={handleEditContact}
-              onAddContact={() => setContactDialogOpen(true)}
+              onAddContact={() => navigate("/rel8t/contacts/new")}
               onRefresh={handleRefresh}
             />
+          </TabsContent>
+          
+          <TabsContent value="groups" className="mt-0">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Contact Groups</h3>
+                <Button onClick={() => setContactGroupsDialogOpen(true)} variant="outline" size="sm">
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  Manage Groups
+                </Button>
+              </div>
+              
+              {groups.length === 0 ? (
+                <div className="text-center py-12 border border-dashed rounded-lg">
+                  <Users className="h-12 w-12 text-muted-foreground/50 mx-auto" />
+                  <h3 className="mt-2 font-semibold">No contact groups</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Create groups to organize your contacts
+                  </p>
+                  <Button onClick={() => setContactGroupsDialogOpen(true)} className="mt-4">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Group
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {groups.map((group: any) => (
+                    <div 
+                      key={group.id} 
+                      className="border rounded-lg p-4 hover:bg-muted/30 transition-colors cursor-pointer"
+                      onClick={() => {
+                        // Set a group filter and switch back to all contacts tab
+                        // Implementation would need state modification for group filtering
+                        setActiveTab("all");
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: group.color || '#6366f1' }} 
+                        />
+                        <h4 className="font-medium">{group.name}</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {group.contact_count || 0} contacts
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
           
           <TabsContent value="recent" className="mt-0">
@@ -293,16 +199,6 @@ const Contacts = () => {
         </Tabs>
       </div>
 
-      {/* Dialog for adding a new contact with wizard */}
-      <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <div className="mb-6">
-            <Steps currentStep={wizardStep} steps={WIZARD_STEPS} />
-          </div>
-          {renderWizardStepContent()}
-        </DialogContent>
-      </Dialog>
-
       {/* Dialog for managing contact groups */}
       <Dialog open={contactGroupsDialogOpen} onOpenChange={setContactGroupsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
@@ -312,21 +208,6 @@ const Contacts = () => {
           <div className="mt-4">
             <ContactGroupsManager />
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog for importing contacts */}
-      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent className="sm:max-w-[700px]">
-          <DialogHeader>
-            <DialogTitle>Import Contacts</DialogTitle>
-            <DialogDescription>
-              Import contacts from a CSV file or other sources.
-            </DialogDescription>
-          </DialogHeader>
-          <ImportContactsStep 
-            onNext={(data) => handleImportComplete(data.importedContacts)}
-          />
         </DialogContent>
       </Dialog>
     </div>

@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -25,10 +26,10 @@ import ConnectionsPage from "./pages/ConnectionsPage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
 // Import REL8T pages
 import Notifications from "./pages/rel8t/Notifications";
-import Relationships from "./pages/rel8t/Relationships";
 import Contacts from "./pages/rel8t/Contacts";
 import RelationshipWizard from "./pages/rel8t/RelationshipWizard";
 import Settings from "./pages/rel8t/Settings";
+import ImportContacts from "./pages/rel8t/ImportContacts";
 import ContactCreate from "./pages/rel8t/ContactCreate";
 import ContactEdit from "./pages/rel8t/ContactEdit";
 
@@ -100,9 +101,9 @@ const AppRoutes = () => {
           <Settings />
         </ProtectedRoute>
       } />
-      <Route path="/rel8t/relationships" element={
+      <Route path="/rel8t/import" element={
         <ProtectedRoute requiredRole="ORGANIZER">
-          <Relationships />
+          <ImportContacts />
         </ProtectedRoute>
       } />
       <Route path="/rel8t/contacts" element={
