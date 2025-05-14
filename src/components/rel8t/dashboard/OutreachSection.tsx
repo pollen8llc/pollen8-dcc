@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { OutreachList } from "@/components/rel8t/OutreachList";
+import OutreachList from "@/components/rel8t/OutreachList";
 import { OutreachFilterType } from "@/components/rel8t/OutreachList";
 
 export function OutreachSection() {

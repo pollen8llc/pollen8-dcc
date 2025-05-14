@@ -6,7 +6,7 @@ import { getContactCount } from "@/services/rel8t/contactService";
 import { Calendar, Users } from "lucide-react";
 import { DistributionChart } from "@/components/rel8t/DistributionChart";
 import { StatisticsChart } from "@/components/rel8t/StatisticsChart";
-import { OutreachList } from "@/components/rel8t/OutreachList";
+import OutreachList from "@/components/rel8t/OutreachList";
 
 export function RelationshipAnalytics() {
   const { data: contactCount = 0 } = useQuery({
