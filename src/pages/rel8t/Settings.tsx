@@ -2,6 +2,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Rel8Navigation from '@/components/rel8t/Rel8Navigation';
+import { TriggerManagement } from '/src/components/rel8t/TriggerManagement.tsx';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import TriggerManagement from '@/components/rel8t/TriggerManagement';
 
