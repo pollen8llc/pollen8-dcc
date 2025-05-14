@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,11 +24,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import ContactForm from "@/components/rel8t/ContactForm";
+import ContactWizard from "@/components/rel8t/ContactWizard";
 import OutreachForm from "@/components/rel8t/OutreachForm";
-import { createContact } from "@/services/rel8t/contactService";
 import { createOutreach } from "@/services/rel8t/outreachService";
 import { useNavigate } from "react-router-dom";
+import { DistributionChart } from "@/components/rel8t/DistributionChart";
+import { StatisticsChart } from "@/components/rel8t/StatisticsChart";
+import OutreachList from "@/components/rel8t/OutreachList";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+} from "@/components/ui/breadcrumb";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -35,6 +44,7 @@ const Dashboard = () => {
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [outreachDialogOpen, setOutreachDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showRelationships, setShowRelationships] = useState(false);
 
   // Get metrics data
   const { data: contactCount = 0, isLoading: contactCountLoading } = useQuery({
@@ -57,16 +67,6 @@ const Dashboard = () => {
     queryKey: ["outreach", activeTab],
     queryFn: () => getOutreach(activeTab),
   });
-
-  const handleCreateContact = async (values: any) => {
-    setIsSubmitting(true);
-    try {
-      await createContact(values);
-      setContactDialogOpen(false);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleCreateOutreach = async (values: any) => {
     setIsSubmitting(true);
@@ -102,11 +102,23 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+      <div className="container mx-auto px-4 py-6">
+        {/* Sleek translucent breadcrumb */}
+        <Breadcrumb className="mb-4 p-2 rounded-md bg-cyan-500/10 backdrop-blur-sm border border-cyan-200/20 shadow-sm">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/" className="text-cyan-700 hover:text-cyan-900">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8t" className="text-cyan-700 hover:text-cyan-900">REL8T</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold">REL8 Dashboard</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl font-bold">REL8 Dashboard</h1>
+            <p className="text-muted-foreground text-sm">
               Track and manage your professional relationships
             </p>
           </div>
@@ -123,7 +135,7 @@ const Dashboard = () => {
         </div>
 
         {/* Metrics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <MetricCard
             title="Total Contacts"
             value={contactCountLoading ? "-" : contactCount}
@@ -161,159 +173,134 @@ const Dashboard = () => {
             isLoading={triggerCountLoading}
           />
         </div>
-
-        {/* Outreach Section */}
-        <h2 className="text-xl font-medium mb-4">Relationship Management</h2>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+        
+        {/* Main Dashboard Tabs */}
+        <Tabs defaultValue="outreach" onValueChange={(value) => setShowRelationships(value === "relationships")}>
           <TabsList className="mb-4">
-            <TabsTrigger value="today" className="relative">
-              Today
-              {outreachCounts.today > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
-                  {outreachCounts.today}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="upcoming" className="relative">
-              Upcoming
-              {outreachCounts.upcoming > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-blue-600 text-[10px] text-white px-1">
-                  {outreachCounts.upcoming}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="overdue" className="relative">
-              Needs Attention
-              {outreachCounts.overdue > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-600 text-[10px] text-white px-1">
-                  {outreachCounts.overdue}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed
-            </TabsTrigger>
+            <TabsTrigger value="outreach">Outreach Tasks</TabsTrigger>
+            <TabsTrigger value="relationships">Relationship Analytics</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="today">
-            {outreachLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-              </div>
-            ) : outreach.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-2 font-semibold">No outreach for today</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You don't have any relationship outreach scheduled for today.
-                </p>
-                <Button onClick={() => setOutreachDialogOpen(true)} className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Build a Relationship
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {outreach.map((item) => (
-                  <OutreachCard key={item.id} outreach={item} />
-                ))}
-              </div>
-            )}
+          <TabsContent value="outreach">
+            {/* Outreach Section */}
+            <h2 className="text-lg font-medium mb-4">Relationship Management</h2>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+              <TabsList className="mb-4">
+                <TabsTrigger value="today" className="relative">
+                  Today
+                  {outreachCounts.today > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
+                      {outreachCounts.today}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="upcoming" className="relative">
+                  Upcoming
+                  {outreachCounts.upcoming > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-blue-600 text-[10px] text-white px-1">
+                      {outreachCounts.upcoming}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="overdue" className="relative">
+                  Needs Attention
+                  {outreachCounts.overdue > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-600 text-[10px] text-white px-1">
+                      {outreachCounts.overdue}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="completed">
+                  Completed
+                </TabsTrigger>
+              </TabsList>
+              
+              <OutreachList defaultTab={activeTab} showTabs={false} />
+            </Tabs>
           </TabsContent>
           
-          <TabsContent value="upcoming">
-            {outreachLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
+          <TabsContent value="relationships">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="bg-card rounded-lg border p-4">
+                <h3 className="text-lg font-medium mb-4">Contact Distribution</h3>
+                <div className="h-72">
+                  <DistributionChart />
+                </div>
               </div>
-            ) : outreach.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-2 font-semibold">No upcoming outreach</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You don't have any upcoming relationship outreach scheduled.
-                </p>
-                <Button onClick={() => setOutreachDialogOpen(true)} className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Build a Relationship
-                </Button>
+              
+              <div className="bg-card rounded-lg border p-4">
+                <h3 className="text-lg font-medium mb-4">Outreach Statistics</h3>
+                <div className="h-72">
+                  <StatisticsChart />
+                </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {outreach.map((item) => (
-                  <OutreachCard key={item.id} outreach={item} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="overdue">
-            {outreachLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-              </div>
-            ) : outreach.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <UserCheck className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-2 font-semibold">No overdue outreach</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You're all caught up with your relationships!
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {outreach.map((item) => (
-                  <OutreachCard key={item.id} outreach={item} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="completed">
-            {outreachLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-              </div>
-            ) : outreach.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-2 font-semibold">No completed outreach</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You haven't completed any relationship outreach yet.
-                </p>
-                <Button onClick={() => setOutreachDialogOpen(true)} className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Build a Relationship
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {outreach.map((item) => (
-                  <OutreachCard key={item.id} outreach={item} />
-                ))}
-              </div>
-            )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Today</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <Calendar className="h-8 w-8 mr-3 text-primary" />
+                    <div className="text-2xl font-bold">{outreachCounts.today}</div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <Calendar className="h-8 w-8 mr-3 text-primary" />
+                    <div className="text-2xl font-bold">{outreachCounts.upcoming}</div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <Calendar className="h-8 w-8 mr-3 text-destructive" />
+                    <div className="text-2xl font-bold">{outreachCounts.overdue}</div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Contacts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <Users className="h-8 w-8 mr-3 text-primary" />
+                    <div className="text-2xl font-bold">{contactCount}</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-medium mb-4">Recent Completed Outreach</h3>
+              <OutreachList defaultTab="completed" showTabs={false} limit={5} />
+            </div>
           </TabsContent>
         </Tabs>
-        
-        <Button 
-          variant="outline"
-          className="mb-8" 
-          onClick={() => navigate("/rel8t/relationships")}
-        >
-          View All Relationship Management
-        </Button>
 
         {/* Dialogs */}
         <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Add New Contact</DialogTitle>
+              <DialogTitle>Manage Contacts</DialogTitle>
             </DialogHeader>
-            <ContactForm
-              onSubmit={handleCreateContact}
-              onCancel={() => setContactDialogOpen(false)}
-              isSubmitting={isSubmitting}
+            <ContactWizard 
+              onClose={() => setContactDialogOpen(false)}
             />
           </DialogContent>
         </Dialog>

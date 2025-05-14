@@ -1,27 +1,11 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  getOutreach,
-  updateOutreachStatus,
-  deleteOutreach,
-  OutreachStatus,
-  Outreach
-} from "@/services/rel8t/outreachService";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDistanceToNow, format, isPast, isToday } from "date-fns";
-import { 
-  Loader2, 
-  Calendar, 
-  Clock, 
-  CheckCircle2, 
-  XCircle,
-  AlertTriangle,
-  Trash2
-} from "lucide-react";
+import { getOutreach, updateOutreachStatus, deleteOutreach } from "@/services/rel8t/outreachService";
+import { OutreachCard } from "./OutreachCard";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,130 +15,141 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 interface OutreachListProps {
-  maxItems?: number;
+  defaultTab?: string;
   showTabs?: boolean;
-  defaultTab?: "today" | "upcoming" | "overdue" | "completed";
-  className?: string;
+  limit?: number;
 }
 
 const OutreachList = ({ 
-  maxItems, 
-  showTabs = true, 
   defaultTab = "today", 
-  className = "" 
+  showTabs = true,
+  limit
 }: OutreachListProps) => {
-  const [activeTab, setActiveTab] = useState<string>(defaultTab);
-  const [outreachToDelete, setOutreachToDelete] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [outreachToDelete, setOutreachToDelete] = useState<string | null>(null);
   
-  // Query to fetch outreach data based on active tab
-  const { data: outreachItems = [], isLoading } = useQuery({
-    queryKey: ["outreach", activeTab],
-    queryFn: () => getOutreach(activeTab),
+  const { data: outreach = [], isLoading } = useQuery({
+    queryKey: ["outreach", activeTab, limit],
+    queryFn: () => getOutreach(activeTab, limit),
   });
-
-  // Display specific number of items if maxItems is provided
-  const displayedItems = maxItems ? outreachItems.slice(0, maxItems) : outreachItems;
-
-  // Mutation for updating outreach status
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string, status: OutreachStatus }) => 
+  
+  const updateMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string, status: string }) => 
       updateOutreachStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
+      queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
+      toast({
+        title: "Outreach updated",
+        description: "Status has been updated successfully"
+      });
     },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update outreach",
+        variant: "destructive"
+      });
+    }
   });
 
-  // Mutation for deleting outreach
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteOutreach(id),
     onSuccess: () => {
-      setOutreachToDelete(null);
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
+      queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
+      toast({
+        title: "Outreach deleted",
+        description: "Outreach has been deleted successfully"
+      });
+      setDeleteDialogOpen(false);
     },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete outreach",
+        variant: "destructive"
+      });
+    }
   });
-
-  // Handle status change
-  const handleStatusChange = (id: string, status: OutreachStatus) => {
-    updateStatusMutation.mutate({ id, status });
+  
+  const handleStatusChange = (id: string, status: string) => {
+    updateMutation.mutate({ id, status });
   };
 
-  // Handle delete confirmation
-  const handleDeleteConfirm = () => {
+  const handleDeleteOutreach = (outreachId: string) => {
+    setOutreachToDelete(outreachId);
+    setDeleteDialogOpen(true);
+  };
+  
+  const confirmDelete = () => {
     if (outreachToDelete) {
       deleteMutation.mutate(outreachToDelete);
     }
   };
-
-  // Priority badge variants
-  const priorityVariant = (priority: string) => {
-    switch (priority) {
-      case "high": return "destructive";
-      case "medium": return "default";
-      case "low": return "secondary";
-      default: return "outline";
-    }
-  };
-
-  // Format the due date display
-  const formatDueDate = (dueDate: string) => {
-    const date = new Date(dueDate);
-    if (isToday(date)) {
-      return `Today at ${format(date, "h:mm a")}`;
-    } else if (isPast(date)) {
-      return `${formatDistanceToNow(date)} ago`;
-    } else {
-      return formatDistanceToNow(date, { addSuffix: true });
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-6">
-        <Loader2 className="animate-spin h-6 w-6 mr-2" /> 
-        Loading outreach data...
-      </div>
-    );
-  }
-
+  
   return (
-    <div className={className}>
+    <div>
       {showTabs && (
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4 mb-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="mb-4">
             <TabsTrigger value="today">Today</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="overdue">Overdue</TabsTrigger>
+            <TabsTrigger value="overdue">Needs Attention</TabsTrigger>
             <TabsTrigger value="completed">Completed</TabsTrigger>
           </TabsList>
-          
-          {["today", "upcoming", "overdue", "completed"].map(tab => (
-            <TabsContent key={tab} value={tab} className="mt-0">
-              {renderOutreachContent()}
-            </TabsContent>
-          ))}
         </Tabs>
       )}
+      
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
+        </div>
+      ) : outreach.length === 0 ? (
+        <div className="text-center py-12 border border-dashed rounded-lg">
+          <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
+          <h3 className="mt-2 font-semibold">No outreach found</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {activeTab === "completed" 
+              ? "You haven't completed any outreach yet."
+              : activeTab === "upcoming"
+                ? "You don't have any upcoming outreach scheduled."
+                : activeTab === "overdue"
+                  ? "You're all caught up with your relationships!"
+                  : "You don't have any outreach for today."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {outreach.map((item) => (
+            <OutreachCard 
+              key={item.id}
+              outreach={item} 
+              onStatusChange={handleStatusChange}
+              onDelete={() => handleDeleteOutreach(item.id)}
+            />
+          ))}
+        </div>
+      )}
 
-      {!showTabs && renderOutreachContent()}
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!outreachToDelete} onOpenChange={() => setOutreachToDelete(null)}>
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Delete outreach?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this outreach reminder.
+              This will permanently delete this outreach reminder. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDeleteConfirm} 
+              onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground"
             >
               Delete
@@ -164,133 +159,6 @@ const OutreachList = ({
       </AlertDialog>
     </div>
   );
-
-  function renderOutreachContent() {
-    if (displayedItems.length === 0) {
-      return (
-        <div className="text-center py-12 border border-dashed rounded-xl">
-          <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-          <h3 className="text-lg font-medium">No outreach tasks</h3>
-          <p className="text-muted-foreground mt-2">
-            {activeTab === "completed" 
-              ? "You haven't completed any outreach tasks yet." 
-              : "No scheduled outreach tasks for this period."}
-          </p>
-        </div>
-      );
-    }
-
-    return displayedItems.map((outreach) => (
-      <Card key={outreach.id} className="mb-4 overflow-hidden">
-        <CardContent className="p-0">
-          <div className="relative">
-            {/* Priority indicator */}
-            <div 
-              className={`absolute top-0 bottom-0 left-0 w-1 ${
-                outreach.priority === "high" 
-                  ? "bg-destructive" 
-                  : outreach.priority === "medium" 
-                    ? "bg-primary" 
-                    : "bg-secondary"
-              }`}
-            />
-            
-            <div className="p-4 pl-5">
-              {/* Title and actions */}
-              <div className="flex justify-between items-start">
-                <h3 className="font-medium text-lg">{outreach.title}</h3>
-                <div className="flex space-x-2">
-                  {/* Delete button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setOutreachToDelete(outreach.id)}
-                    className="hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Description */}
-              {outreach.description && (
-                <p className="text-muted-foreground mt-1 line-clamp-2">{outreach.description}</p>
-              )}
-              
-              {/* Metadata and actions */}
-              <div className="mt-4 flex flex-wrap items-center justify-between">
-                <div className="flex flex-wrap items-center gap-3">
-                  {/* Due date */}
-                  <div className="flex items-center gap-1 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>{formatDueDate(outreach.due_date)}</span>
-                  </div>
-                  
-                  {/* Priority badge */}
-                  <Badge variant={priorityVariant(outreach.priority)} className="capitalize">
-                    {outreach.priority}
-                  </Badge>
-                  
-                  {/* Status badge */}
-                  <Badge variant="outline" className="capitalize">
-                    {outreach.status}
-                  </Badge>
-                </div>
-                
-                {/* Contact avatars or count */}
-                {outreach.contacts && outreach.contacts.length > 0 && (
-                  <div className="mt-2 sm:mt-0 text-sm flex items-center gap-1">
-                    <span className="text-muted-foreground">Contacts:</span>
-                    <span className="font-medium">{outreach.contacts.length}</span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Action buttons */}
-              {outreach.status !== "completed" && (
-                <div className="mt-4 flex space-x-2 justify-end">
-                  {outreach.status !== "overdue" && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => handleStatusChange(outreach.id, "overdue")}
-                      className="text-amber-500 border-amber-500/20 hover:bg-amber-500/10"
-                    >
-                      <AlertTriangle className="h-4 w-4 mr-1" />
-                      Mark Overdue
-                    </Button>
-                  )}
-                  
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleStatusChange(outreach.id, "completed")}
-                    className="text-green-500 border-green-500/20 hover:bg-green-500/10"
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-1" />
-                    Complete
-                  </Button>
-                </div>
-              )}
-              
-              {outreach.status === "completed" && (
-                <div className="mt-4 flex justify-end">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => handleStatusChange(outreach.id, "pending")}
-                  >
-                    <XCircle className="h-4 w-4 mr-1" />
-                    Reopen
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    ));
-  }
 };
 
 export default OutreachList;
