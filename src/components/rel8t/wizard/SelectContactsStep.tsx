@@ -62,7 +62,12 @@ const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
         <h2 className="text-xl font-semibold mb-4">Add New Contact</h2>
         <ContactForm 
           onCancel={() => setCreateNew(false)}
-          onSuccess={handleContactCreated}
+          onSubmit={(data) => {
+            // Here we'd normally create the contact and then call handleContactCreated
+            // For now we'll just fake it with a random ID
+            const fakeNewId = `new-${Math.floor(Math.random() * 1000)}`;
+            handleContactCreated(fakeNewId);
+          }}
         />
       </div>
     );

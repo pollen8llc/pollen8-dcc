@@ -1,146 +1,122 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import { Steps, Step } from "@/components/ui/steps";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
-import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
-import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
-import { Contact } from "@/services/rel8t/contactService";
-import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-type WizardStep = 
-  | "select-contacts" 
-  | "select-triggers" 
-  | "review";
-
-type WizardData = {
-  contacts: Contact[];
-  triggers: any[];
-  importedContacts: any[];
-  priority: 'low' | 'medium' | 'high';
-};
-
-const initialData: WizardData = {
-  contacts: [],
-  triggers: [],
-  importedContacts: [],
-  priority: 'medium',
-};
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import SelectContactsStep from "@/components/rel8t/wizard/SelectContactsStep";
+import OutreachForm from "@/components/rel8t/OutreachForm";
+import { createOutreach } from "@/services/rel8t/outreachService";
+import { toast } from "@/hooks/use-toast";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+} from "@/components/ui/breadcrumb";
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<WizardStep>("select-contacts");
-  const [data, setData] = useState<WizardData>(initialData);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSelectContactsNext = (stepData: { contacts: Contact[] }) => {
-    setData(prev => ({ ...prev, contacts: stepData.contacts }));
-    setStep("select-triggers");
+  const totalSteps = 3;
+
+  const handleNext = () => {
+    setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
-  const handleSelectTriggersNext = (stepData: { triggers: any[], priority: 'low' | 'medium' | 'high' }) => {
-    setData(prev => ({ 
-      ...prev, 
-      triggers: stepData.triggers,
-      priority: stepData.priority
-    }));
-    setStep("review");
+  const handleBack = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleReviewSubmit = () => {
-    // In a real scenario, we would submit the data to the server here
-    navigate("/rel8t/relationships");
+  const handleSelectContacts = (contacts: string[]) => {
+    setSelectedContacts(contacts);
+    handleNext();
   };
 
-  const getStepTitle = () => {
-    switch (step) {
-      case "select-contacts":
-        return "Select Contacts";
-      case "select-triggers":
-        return "Set Reminders";
-      case "review":
-        return "Review & Submit";
-      default:
-        return "Build Relationship";
+  const handleCreateOutreach = async (values: any) => {
+    setIsSubmitting(true);
+    try {
+      await createOutreach(
+        {
+          title: values.title,
+          description: values.description,
+          priority: values.priority,
+          due_date: values.due_date.toISOString(),
+        },
+        selectedContacts
+      );
+      toast({
+        title: "Outreach Created",
+        description: "Your outreach task has been successfully created.",
+      });
+      navigate("/rel8t/relationships");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mr-2" 
-            onClick={() => navigate("/rel8t")}
+
+      <div className="container mx-auto px-4 py-6">
+        {/* Sleek translucent breadcrumb */}
+        <Breadcrumb className="mb-4 p-2 rounded-md bg-cyan-500/10 backdrop-blur-sm border border-cyan-200/20 shadow-sm">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8t" className="text-cyan-700 hover:text-cyan-900">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8t/relationships" className="text-cyan-700 hover:text-cyan-900">Relationships</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="text-cyan-700">New Outreach</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="flex items-center mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/rel8t/relationships")}
+            className="mr-4"
           >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
+            <ChevronLeft className="h-4 w-4 mr-2" /> Back
           </Button>
-        </div>
-        
-        <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold">{getStepTitle()}</h1>
-            <p className="text-muted-foreground">
-              Create a plan to build relationships with contacts
-            </p>
-          </div>
-          
-          <div className="flex gap-2 ml-auto">
-            {step !== "select-contacts" && data.contacts.length > 0 && (
-              <Badge variant="outline" className="px-3 py-1 bg-primary/5">
-                {data.contacts.length} contacts selected
-              </Badge>
-            )}
-            {step === "review" && data.triggers.length > 0 && (
-              <Badge variant="outline" className="px-3 py-1 bg-primary/5">
-                {data.triggers.length} reminders
-              </Badge>
-            )}
-            {step !== "select-contacts" && (
-              <Badge variant="outline" className={`px-3 py-1 ${
-                data.priority === 'high' 
-                  ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300' 
-                  : data.priority === 'low'
-                    ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300'
-                    : 'bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300'
-              }`}>
-                {data.priority.charAt(0).toUpperCase() + data.priority.slice(1)} Priority
-              </Badge>
-            )}
+            <h1 className="text-2xl font-bold">Create New Outreach</h1>
+            <p className="text-sm text-muted-foreground">Plan your outreach and nurture your network</p>
           </div>
         </div>
 
         <Card className="border-border/20">
           <CardContent className="p-6">
-            {step === "select-contacts" && (
-              <SelectContactsStep
-                selectedContacts={data.contacts}
-                onNext={handleSelectContactsNext}
-              />
-            )}
+            <Steps currentStep={currentStep} steps={["Select Contacts", "Details", "Review"]} />
 
-            {step === "select-triggers" && (
-              <SelectTriggersStep
-                onNext={handleSelectTriggersNext}
-                onPrevious={() => setStep("select-contacts")}
-                selectedContacts={data.contacts}
-              />
-            )}
-            
-            {step === "review" && (
-              <ReviewSubmitStep
-                wizardData={data}
-                onSubmit={handleReviewSubmit}
-                onPrevious={() => setStep("select-triggers")}
-              />
-            )}
+            <div className="mt-8">
+              {currentStep === 1 && (
+                <SelectContactsStep
+                  onNext={handleSelectContacts}
+                />
+              )}
+              {currentStep === 2 && (
+                <OutreachForm
+                  onSubmit={handleCreateOutreach}
+                  onCancel={handleBack}
+                  isSubmitting={isSubmitting}
+                />
+              )}
+              {currentStep === 3 && (
+                <div>
+                  <h2>Review</h2>
+                  <p>Confirm details and submit</p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

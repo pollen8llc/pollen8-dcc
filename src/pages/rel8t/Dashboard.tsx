@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,9 +7,7 @@ import { MetricCard } from "@/components/rel8t/MetricCard";
 import { OutreachCard } from "@/components/rel8t/OutreachCard";
 import { Users, AlertCircle, UserCheck, Zap, Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { 
-  getContactCount
-} from "@/services/rel8t/contactService";
+import { getContactCount } from "@/services/rel8t/contactService";
 import {
   getOutreach,
   getOutreachStatusCounts
@@ -263,7 +260,7 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="flex items-center">
                     <Calendar className="h-8 w-8 mr-3 text-primary" />
-                    <div className="text-2xl font-bold">{outreachCounts.today}</div>
+                    <div className="text-2xl font-bold">{outreachCounts.today || 0}</div>
                   </div>
                 </CardContent>
               </Card>
