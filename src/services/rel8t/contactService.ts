@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Contact {
@@ -115,16 +116,6 @@ export const getContactById = async (id: string): Promise<Contact | null> => {
           id,
           name,
           color
-        ),
-        contact_affiliations:rms_contact_affiliations (
-          id,
-          affiliation_type,
-          affiliated_user:affiliated_user_id (*),
-          affiliated_contact:affiliated_contact_id (*),
-          affiliated_community:affiliated_community_id (*),
-          notes,
-          created_at,
-          user_id
         )
       `)
       .eq("id", id)
@@ -139,62 +130,43 @@ export const getContactById = async (id: string): Promise<Contact | null> => {
       return null;
     }
 
-    // Process affiliations
+    // Get affiliations separately to avoid type errors
+    const { data: affiliationsData, error: affiliationsError } = await supabase
+      .from("rms_contact_affiliations")
+      .select(`
+        id, 
+        affiliation_type,
+        affiliated_user_id,
+        affiliated_contact_id,
+        affiliated_community_id,
+        relationship,
+        created_at
+      `)
+      .eq("contact_id", id);
+
+    if (affiliationsError) {
+      console.error("Error fetching affiliations:", affiliationsError);
+    }
+
+    // Process affiliations safely
     const affiliations: ContactAffiliation[] = [];
-    if (data.contact_affiliations && Array.isArray(data.contact_affiliations)) {
-      for (const affiliation of data.contact_affiliations) {
-        // Skip if this is a SelectQueryError (error object)
-        if (affiliation && typeof affiliation === 'object' && 'message' in affiliation && 'code' in affiliation) {
-          continue;
-        }
-        if (
-          affiliation.affiliation_type === "user" &&
-          affiliation.affiliated_user &&
-          typeof affiliation.affiliated_user === "object" &&
-          !('error' in affiliation.affiliated_user)
-        ) {
-          affiliations.push({
+    
+    if (affiliationsData && Array.isArray(affiliationsData)) {
+      for (const affiliation of affiliationsData) {
+        if (affiliation && typeof affiliation === 'object') {
+          const newAffiliation: ContactAffiliation = {
             id: affiliation.id,
-            type: "user",
-            user: {
-              id: affiliation.affiliated_user?.id,
-              email: affiliation.affiliated_user?.email,
-            },
-            notes: affiliation.notes,
+            contact_id: id,
+            user_id: data.user_id,
+            affiliation_type: affiliation.affiliation_type as 'user' | 'contact' | 'community',
+            affiliated_user_id: affiliation.affiliated_user_id,
+            affiliated_contact_id: affiliation.affiliated_contact_id,
+            affiliated_community_id: affiliation.affiliated_community_id,
+            relationship: affiliation.relationship,
             created_at: affiliation.created_at,
-          });
-        } else if (
-          affiliation.affiliation_type === "contact" &&
-          affiliation.affiliated_contact &&
-          typeof affiliation.affiliated_contact === "object" &&
-          !('error' in affiliation.affiliated_contact)
-        ) {
-          affiliations.push({
-            id: affiliation.id,
-            type: "contact",
-            contact: {
-              id: affiliation.affiliated_contact?.id,
-              name: affiliation.affiliated_contact?.name,
-            },
-            notes: affiliation.notes,
-            created_at: affiliation.created_at,
-          });
-        } else if (
-          affiliation.affiliation_type === "community" &&
-          affiliation.affiliated_community &&
-          typeof affiliation.affiliated_community === "object" &&
-          !('error' in affiliation.affiliated_community)
-        ) {
-          affiliations.push({
-            id: affiliation.id,
-            type: "community",
-            community: {
-              id: affiliation.affiliated_community?.id,
-              name: affiliation.affiliated_community?.name,
-            },
-            notes: affiliation.notes,
-            created_at: affiliation.created_at,
-          });
+            updated_at: affiliation.created_at // Use created_at as fallback
+          };
+          affiliations.push(newAffiliation);
         }
       }
     }

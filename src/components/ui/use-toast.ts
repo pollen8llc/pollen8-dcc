@@ -1,3 +1,4 @@
+
 import { useToast, toast } from "@/hooks/use-toast";
 
 // Customize default toast settings with the new theme
@@ -13,11 +14,14 @@ const defaultToastOptions = {
 const enhancedToast = {
   ...toast,
   // Default toast
-  show: (props: Parameters<typeof toast>[0]) => 
-    toast({ ...defaultToastOptions, ...props }),
-  // Destructive toast
-  error: (props: Parameters<typeof toast.error>[0]) => 
-    toast.error({ ...defaultToastOptions, ...props }),
+  success: (props: Parameters<typeof toast>[0]) => 
+    toast({ ...defaultToastOptions, ...props, variant: "default" }),
+  // Destructive toast for errors
+  error: (props: Parameters<typeof toast>[0]) => 
+    toast({ ...defaultToastOptions, ...props, variant: "destructive" }),
+  // Warning toast
+  warning: (props: Parameters<typeof toast>[0]) => 
+    toast({ ...defaultToastOptions, ...props, variant: "destructive" }),
 };
 
 export { useToast, enhancedToast as toast };
