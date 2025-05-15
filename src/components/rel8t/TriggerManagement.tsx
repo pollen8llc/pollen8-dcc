@@ -29,6 +29,7 @@ import { TriggersList } from "./triggers/TriggersList";
 import { EmailNotificationsList } from "./triggers/EmailNotificationsList";
 import { EditTriggerDialog } from "./triggers/EditTriggerDialog";
 import { useTriggerManagement } from "@/hooks/rel8t/useTriggerManagement";
+import { Calendar, Mail, Bell, AlertCircle } from "lucide-react";
 
 export function TriggerManagement() {
   const {
@@ -71,6 +72,22 @@ export function TriggerManagement() {
       });
     } catch (error) {
       console.error("Error creating trigger:", error);
+    }
+  };
+
+  // Function to render icons based on action type
+  const renderIcon = (action: string) => {
+    switch (action) {
+      case "send_email":
+        return <Mail className="h-5 w-5 text-blue-500" />;
+      case "create_task":
+        return <Calendar className="h-5 w-5 text-green-500" />;
+      case "add_reminder":
+        return <Bell className="h-5 w-5 text-amber-500" />;
+      case "send_notification":
+        return <AlertCircle className="h-5 w-5 text-purple-500" />;
+      default:
+        return <Mail className="h-5 w-5 text-blue-500" />;
     }
   };
 
@@ -169,7 +186,11 @@ export function TriggerManagement() {
         </Dialog>
       </div>
 
-      <TriggerStatsCards stats={emailStats} />
+      <TriggerStatsCards 
+        pendingEmails={emailStats.pending} 
+        sentEmails={emailStats.sent} 
+        activeTriggers={triggers.filter(t => t.is_active).length} 
+      />
 
       <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
@@ -185,6 +206,7 @@ export function TriggerManagement() {
             onEdit={handleEditTrigger}
             onDelete={handleDeleteTrigger}
             onToggleActive={handleToggleActive}
+            renderIcon={renderIcon}
           />
         </TabsContent>
         <TabsContent value="inactive" className="space-y-4">
@@ -194,6 +216,7 @@ export function TriggerManagement() {
             onEdit={handleEditTrigger}
             onDelete={handleDeleteTrigger}
             onToggleActive={handleToggleActive}
+            renderIcon={renderIcon}
           />
         </TabsContent>
         <TabsContent value="all" className="space-y-4">
@@ -203,6 +226,7 @@ export function TriggerManagement() {
             onEdit={handleEditTrigger}
             onDelete={handleDeleteTrigger}
             onToggleActive={handleToggleActive}
+            renderIcon={renderIcon}
           />
         </TabsContent>
         <TabsContent value="notifications" className="space-y-4">

@@ -47,3 +47,6 @@ export const Rel8Navigation = () => {
     </nav>
   );
 };
+
+// For backward compatibility, export with both names
+export const Rel8TNavigation = Rel8Navigation;

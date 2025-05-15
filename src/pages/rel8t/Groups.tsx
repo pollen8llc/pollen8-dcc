@@ -33,7 +33,7 @@ import {
   ContactGroup 
 } from "@/services/rel8t/contactService";
 import { ChevronLeft, Plus, Users, Trash2, Edit, Circle } from "lucide-react";
-import { Rel8TNavigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
