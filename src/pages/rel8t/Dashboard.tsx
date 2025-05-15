@@ -85,7 +85,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <MetricCard
             title="Total Contacts"
-            value={contactCountLoading ? "-" : contactCount}
+            value={contactCountLoading ? "-" : String(contactCount)}
             description={contactCountLoading ? undefined : `${contactCount} People in your network`}
             icon={<Users className="h-5 w-5" />}
             progress={75}
@@ -95,7 +95,7 @@ const Dashboard = () => {
           
           <MetricCard
             title="Inactive Contacts"
-            value={contactsWithoutOutreachCount}
+            value={String(contactsWithoutOutreachCount)}
             description={contactsWithoutOutreachCount === 1 ? "needs connection" : "need connections"}
             icon={<AlertCircle className="h-5 w-5" />}
             color={contactsWithoutOutreachCount > 0 ? "warning" : "success"}
@@ -106,7 +106,7 @@ const Dashboard = () => {
           
           <MetricCard
             title="Active Triggers"
-            value={triggerCountLoading ? "-" : activeTriggerCount}
+            value={triggerCountLoading ? "-" : String(activeTriggerCount)}
             description="Automation rules"
             icon={<Zap className="h-5 w-5" />}
             isLoading={triggerCountLoading}
@@ -115,7 +115,7 @@ const Dashboard = () => {
           
           <MetricCard
             title="Total Activities"
-            value={totalOutreachActivities}
+            value={String(totalOutreachActivities)}
             description="Relationship actions"
             icon={<TrendingUp className="h-5 w-5" />}
             color="success"

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -162,6 +161,35 @@ export const deleteTrigger = async (id: string): Promise<void> => {
   } catch (error) {
     console.error(`Error deleting trigger with ID ${id}:`, error);
     throw error;
+  }
+};
+
+/**
+ * Get active trigger count for the current user
+ */
+export const getActiveTriggerCount = async (): Promise<number> => {
+  try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { count, error } = await supabase
+      .from('rms_triggers')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+
+    if (error) {
+      throw error;
+    }
+
+    return count || 0;
+  } catch (error) {
+    console.error('Error getting active trigger count:', error);
+    return 0;
   }
 };
 
