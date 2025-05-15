@@ -23,19 +23,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Trigger, 
-  createTrigger, 
-  getTriggers, 
-  TIME_TRIGGER_TYPES, 
-  TRIGGER_ACTIONS 
-} from "@/services/rel8t/triggerService";
+import { Trigger, createTrigger, getTriggers } from "@/services/rel8t/triggerService";
 import { TriggerStatsCards } from "./triggers/TriggerStatsCards";
 import { TriggersList } from "./triggers/TriggersList";
 import { EmailNotificationsList } from "./triggers/EmailNotificationsList";
 import { EditTriggerDialog } from "./triggers/EditTriggerDialog";
 import { useTriggerManagement } from "@/hooks/rel8t/useTriggerManagement";
-import { Calendar, Clock, Calendar as CalendarIcon, AlertCircle, Bell } from "lucide-react";
+import { Calendar, Mail, Bell, AlertCircle } from "lucide-react";
 
 export function TriggerManagement() {
   const {
@@ -60,8 +54,8 @@ export function TriggerManagement() {
   const [newTrigger, setNewTrigger] = useState<Partial<Trigger>>({
     name: "",
     description: "",
-    condition: TIME_TRIGGER_TYPES.DAILY, // Default to daily
-    action: TRIGGER_ACTIONS.SEND_EMAIL,
+    condition: "contact_added",
+    action: "send_email",
     is_active: true
   });
   
@@ -72,8 +66,8 @@ export function TriggerManagement() {
       setNewTrigger({
         name: "",
         description: "",
-        condition: TIME_TRIGGER_TYPES.DAILY,
-        action: TRIGGER_ACTIONS.SEND_EMAIL,
+        condition: "contact_added",
+        action: "send_email",
         is_active: true
       });
     } catch (error) {
@@ -81,23 +75,19 @@ export function TriggerManagement() {
     }
   };
 
-  // Function to render icons based on time frequency
-  const renderIcon = (condition: string) => {
-    switch (condition) {
-      case TIME_TRIGGER_TYPES.HOURLY:
-        return <Clock className="h-5 w-5 text-blue-500" />;
-      case TIME_TRIGGER_TYPES.DAILY:
+  // Function to render icons based on action type
+  const renderIcon = (action: string) => {
+    switch (action) {
+      case "send_email":
+        return <Mail className="h-5 w-5 text-blue-500" />;
+      case "create_task":
         return <Calendar className="h-5 w-5 text-green-500" />;
-      case TIME_TRIGGER_TYPES.WEEKLY:
-        return <Calendar className="h-5 w-5 text-purple-500" />;
-      case TIME_TRIGGER_TYPES.MONTHLY:
-        return <Calendar className="h-5 w-5 text-amber-500" />;
-      case TIME_TRIGGER_TYPES.QUARTERLY:
-        return <Calendar className="h-5 w-5 text-red-500" />;
-      case TIME_TRIGGER_TYPES.YEARLY:
-        return <Calendar className="h-5 w-5 text-indigo-500" />;
+      case "add_reminder":
+        return <Bell className="h-5 w-5 text-amber-500" />;
+      case "send_notification":
+        return <AlertCircle className="h-5 w-5 text-purple-500" />;
       default:
-        return <Bell className="h-5 w-5 text-gray-500" />;
+        return <Mail className="h-5 w-5 text-blue-500" />;
     }
   };
 
@@ -105,20 +95,20 @@ export function TriggerManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold">Time-Based Automations</h2>
+          <h2 className="text-2xl font-semibold">Automation Triggers</h2>
           <p className="text-muted-foreground">
-            Create automated actions that run on a schedule
+            Create automated actions based on specific events
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>Create Time Trigger</Button>
+            <Button>Create Trigger</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Create Time-Based Automation</DialogTitle>
+              <DialogTitle>Create Automation Trigger</DialogTitle>
               <DialogDescription>
-                Set up a new automation that will run at specific time intervals.
+                Set up a new automation that will run when specific conditions are met.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -126,7 +116,7 @@ export function TriggerManagement() {
                 <Label htmlFor="trigger-name">Trigger Name</Label>
                 <Input
                   id="trigger-name"
-                  placeholder="Monthly Contact Check-in"
+                  placeholder="Follow-up after meeting"
                   value={newTrigger.name}
                   onChange={(e) => setNewTrigger({ ...newTrigger, name: e.target.value })}
                 />
@@ -135,33 +125,32 @@ export function TriggerManagement() {
                 <Label htmlFor="trigger-description">Description (Optional)</Label>
                 <Textarea
                   id="trigger-description"
-                  placeholder="Send monthly check-in emails to important contacts"
+                  placeholder="Send a follow-up email after meeting with a contact"
                   value={newTrigger.description || ""}
                   onChange={(e) => setNewTrigger({ ...newTrigger, description: e.target.value })}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="trigger-condition">Frequency</Label>
+                  <Label htmlFor="trigger-condition">When this happens</Label>
                   <Select
                     value={newTrigger.condition}
                     onValueChange={(value) => setNewTrigger({ ...newTrigger, condition: value })}
                   >
                     <SelectTrigger id="trigger-condition">
-                      <SelectValue placeholder="Select frequency" />
+                      <SelectValue placeholder="Select condition" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={TIME_TRIGGER_TYPES.HOURLY}>Hourly</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.DAILY}>Daily</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.WEEKLY}>Weekly</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.MONTHLY}>Monthly</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.QUARTERLY}>Quarterly</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.YEARLY}>Yearly</SelectItem>
+                      <SelectItem value="contact_added">New contact added</SelectItem>
+                      <SelectItem value="birthday_upcoming">Birthday approaching</SelectItem>
+                      <SelectItem value="anniversary_upcoming">Anniversary approaching</SelectItem>
+                      <SelectItem value="no_contact_30days">No contact for 30 days</SelectItem>
+                      <SelectItem value="meeting_scheduled">Meeting scheduled</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="trigger-action">Action</Label>
+                  <Label htmlFor="trigger-action">Do this</Label>
                   <Select
                     value={newTrigger.action}
                     onValueChange={(value) => setNewTrigger({ ...newTrigger, action: value })}
@@ -170,10 +159,10 @@ export function TriggerManagement() {
                       <SelectValue placeholder="Select action" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={TRIGGER_ACTIONS.SEND_EMAIL}>Send email</SelectItem>
-                      <SelectItem value={TRIGGER_ACTIONS.CREATE_TASK}>Create task</SelectItem>
-                      <SelectItem value={TRIGGER_ACTIONS.ADD_REMINDER}>Add reminder</SelectItem>
-                      <SelectItem value={TRIGGER_ACTIONS.SEND_NOTIFICATION}>Send notification</SelectItem>
+                      <SelectItem value="send_email">Send email</SelectItem>
+                      <SelectItem value="create_task">Create task</SelectItem>
+                      <SelectItem value="add_reminder">Add reminder</SelectItem>
+                      <SelectItem value="send_notification">Send notification</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

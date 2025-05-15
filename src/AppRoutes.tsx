@@ -34,7 +34,6 @@ import ImportContacts from "./pages/rel8t/ImportContacts";
 import Groups from "./pages/rel8t/Groups";
 import Dashboard from "./pages/rel8t/Dashboard";
 import RelationshipWizard from "./pages/rel8t/RelationshipWizard";
-import Relationships from "./pages/rel8t/Relationships";
 
 const AppRoutes = () => {
   const { currentUser, isLoading } = useUser();
@@ -124,11 +123,6 @@ const AppRoutes = () => {
       <Route path="/rel8/groups" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <Groups />
-        </ProtectedRoute>
-      } />
-      <Route path="/rel8/relationships" element={
-        <ProtectedRoute requiredRole="ORGANIZER">
-          <Relationships />
         </ProtectedRoute>
       } />
       
