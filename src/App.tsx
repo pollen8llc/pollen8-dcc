@@ -12,7 +12,7 @@ import Contacts from "./pages/rel8t/Contacts";
 import Groups from "./pages/rel8t/Groups";
 import Settings from "./pages/rel8t/Settings";
 import Import from "./pages/rel8t/Import";
-import Relationships from "./pages/rel8/Relationships";
+import Relationships from "./pages/rel8t/Relationships"; // Fix the path from rel8 to rel8t
 import Notifications from "./pages/rel8t/Notifications";
 import RelationshipWizard from "./pages/rel8t/RelationshipWizard";
 
