@@ -1,17 +1,15 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { MetricCard } from "@/components/rel8t/MetricCard";
-import { OutreachCard } from "@/components/rel8t/OutreachCard";
-import { Users, AlertCircle, UserCheck, Zap, Calendar } from "lucide-react";
+import { Users, AlertCircle, Zap, TrendingUp } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { 
   getContactCount
 } from "@/services/rel8t/contactService";
 import {
-  getOutreach,
   getOutreachStatusCounts
 } from "@/services/rel8t/outreachService";
 import {
@@ -28,10 +26,12 @@ import OutreachForm from "@/components/rel8t/OutreachForm";
 import { createContact } from "@/services/rel8t/contactService";
 import { createOutreach } from "@/services/rel8t/outreachService";
 import { useNavigate } from "react-router-dom";
+import { Rel8TNavigation } from "@/components/rel8t/Rel8TNavigation";
+import { OutreachSection } from "@/components/rel8t/dashboard/OutreachSection";
+import { ContactGrowthChart } from "@/components/rel8t/dashboard/ContactGrowthChart";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("today");
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [outreachDialogOpen, setOutreachDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,12 +50,6 @@ const Dashboard = () => {
   const { data: activeTriggerCount = 0, isLoading: triggerCountLoading } = useQuery({
     queryKey: ["trigger-count"],
     queryFn: getActiveTriggerCount,
-  });
-
-  // Get outreach data based on active tab
-  const { data: outreach = [], isLoading: outreachLoading } = useQuery({
-    queryKey: ["outreach", activeTab],
-    queryFn: () => getOutreach(activeTab),
   });
 
   const handleCreateContact = async (values: any) => {
@@ -103,17 +97,19 @@ const Dashboard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <Rel8TNavigation />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
           <div>
-            <h1 className="text-3xl font-bold">REL8 Dashboard</h1>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground mt-1">
               Track and manage your professional relationships
             </p>
           </div>
           <div className="flex mt-4 md:mt-0 gap-2">
-            <Button variant="outline" onClick={() => setContactDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Contact
+            <Button variant="outline" onClick={() => navigate("/rel8t/contacts")}>
+              <Users className="mr-2 h-4 w-4" />
+              View Contacts
             </Button>
             <Button onClick={() => setOutreachDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -135,15 +131,6 @@ const Dashboard = () => {
           />
           
           <MetricCard
-            title="Today's Outreach"
-            value={outreachCountsLoading ? "-" : outreachCounts.today}
-            description="Due today"
-            icon={<Calendar className="h-5 w-5" />}
-            color={outreachCounts.today > 0 ? "warning" : "default"}
-            isLoading={outreachCountsLoading}
-          />
-          
-          <MetricCard
             title="Inactive Contacts"
             value={contactsWithoutOutreachCount}
             description={contactsWithoutOutreachCount === 1 ? "needs connection" : "need connections"}
@@ -159,151 +146,29 @@ const Dashboard = () => {
             description="Automation rules"
             icon={<Zap className="h-5 w-5" />}
             isLoading={triggerCountLoading}
+            onActionClick={() => navigate("/rel8t/settings")}
           />
+          
+          <MetricCard
+            title="Network Growth"
+            value={"+5"}
+            description="Last 30 days"
+            icon={<TrendingUp className="h-5 w-5" />}
+            color="success"
+          />
+        </div>
+        
+        {/* Contact Growth Chart */}
+        <div className="mb-8">
+          <h2 className="text-xl font-medium mb-4">Contact Growth</h2>
+          <div className="bg-card rounded-lg border shadow-sm p-4">
+            <ContactGrowthChart />
+          </div>
         </div>
 
         {/* Outreach Section */}
-        <h2 className="text-xl font-medium mb-4">Relationship Management</h2>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="mb-4">
-            <TabsTrigger value="today" className="relative">
-              Today
-              {outreachCounts.today > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
-                  {outreachCounts.today}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="upcoming" className="relative">
-              Upcoming
-              {outreachCounts.upcoming > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-blue-600 text-[10px] text-white px-1">
-                  {outreachCounts.upcoming}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="overdue" className="relative">
-              Needs Attention
-              {outreachCounts.overdue > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-600 text-[10px] text-white px-1">
-                  {outreachCounts.overdue}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="today">
-            {outreachLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-              </div>
-            ) : outreach.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-2 font-semibold">No outreach for today</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You don't have any relationship outreach scheduled for today.
-                </p>
-                <Button onClick={() => setOutreachDialogOpen(true)} className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Build a Relationship
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {outreach.map((item) => (
-                  <OutreachCard key={item.id} outreach={item} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="upcoming">
-            {outreachLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-              </div>
-            ) : outreach.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-2 font-semibold">No upcoming outreach</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You don't have any upcoming relationship outreach scheduled.
-                </p>
-                <Button onClick={() => setOutreachDialogOpen(true)} className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Build a Relationship
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {outreach.map((item) => (
-                  <OutreachCard key={item.id} outreach={item} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="overdue">
-            {outreachLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-              </div>
-            ) : outreach.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <UserCheck className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-2 font-semibold">No overdue outreach</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You're all caught up with your relationships!
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {outreach.map((item) => (
-                  <OutreachCard key={item.id} outreach={item} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="completed">
-            {outreachLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-              </div>
-            ) : outreach.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-lg">
-                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-2 font-semibold">No completed outreach</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  You haven't completed any relationship outreach yet.
-                </p>
-                <Button onClick={() => setOutreachDialogOpen(true)} className="mt-4">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Build a Relationship
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4">
-                {outreach.map((item) => (
-                  <OutreachCard key={item.id} outreach={item} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+        <OutreachSection />
         
-        <Button 
-          variant="outline"
-          className="mb-8" 
-          onClick={() => navigate("/rel8t/relationships")}
-        >
-          View All Relationship Management
-        </Button>
-
         {/* Dialogs */}
         <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
           <DialogContent className="sm:max-w-[600px]">

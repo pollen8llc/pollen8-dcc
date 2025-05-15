@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,8 @@ import {
   ContactIcon,
   Bell,
   Import,
-  ListTodo,
+  Grid3x3,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface NavigationDrawerProps {
@@ -111,20 +113,45 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   className="justify-start"
                   onClick={() => handleNavigation("/rel8t")}
                 >
-                  <Bell className="mr-2 h-4 w-4" />
-                  REL8
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
                 </Button>
                 
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/relationships")}
+                  onClick={() => handleNavigation("/rel8t/contacts")}
                 >
-                  <ListTodo className="mr-2 h-4 w-4" />
-                  Relationship builder
+                  <ContactIcon className="mr-2 h-4 w-4" />
+                  Contacts
                 </Button>
                 
-               
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/groups")}
+                >
+                  <Grid3x3 className="mr-2 h-4 w-4" />
+                  Groups
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/import")}
+                >
+                  <Import className="mr-2 h-4 w-4" />
+                  Import
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8t/settings")}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </Button>
               </>
             )}
 

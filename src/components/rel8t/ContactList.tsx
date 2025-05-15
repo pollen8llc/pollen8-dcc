@@ -20,28 +20,18 @@ import {
   Mail,
   Phone,
   Building,
-  Briefcase,
   User,
   Calendar,
-  Tags,
   RefreshCcw,
   Filter,
-  MapPin,
   Trash2,
   Users,
-  FolderPlus
+  FolderPlus,
+  Contact as ContactIcon
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useDebounce } from "@/hooks/useDebounce";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
-} from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import ContactGroupsManager from "./ContactGroupsManager";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +48,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ContactListProps {
   contacts?: Contact[];
@@ -76,17 +69,22 @@ const ContactList: React.FC<ContactListProps> = ({
   onAddContact,
   onRefresh 
 }) => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 350);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-  const [showContactGroups, setShowContactGroups] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  
+  // Get group ID from URL if present
+  const groupIdFromUrl = searchParams.get("group");
   
   const queryClient = useQueryClient();
   
+  // Query to fetch contacts
   const { data: fetchedContacts = [], isLoading: isLoadingContacts } = useQuery({
     queryKey: ["contacts", debouncedSearch],
     queryFn: () => getContacts({ searchQuery: debouncedSearch }),
@@ -129,18 +127,32 @@ const ContactList: React.FC<ContactListProps> = ({
   const contacts = propContacts || fetchedContacts;
   const isLoading = propIsLoading !== undefined ? propIsLoading : isLoadingContacts;
 
-  // Filter contacts based on search term, selected tag, category and group
+  // Filter contacts based on activeTab, search term, selected tag, category and group
   const filteredContacts = Array.isArray(contacts) ? contacts.filter((contact) => {
+    // First, filter by tag if selected
     const matchesTag = !selectedTag || 
       (contact.tags && contact.tags.includes(selectedTag));
     
+    // Filter by category if selected
     const matchesCategory = !selectedCategory || 
       (contact.category_id === selectedCategory);
     
-    const matchesGroup = !selectedGroupId || 
-      (contact.groups && contact.groups.some(g => g.id === selectedGroupId));
+    // Filter by group from URL if present
+    const matchesGroup = !groupIdFromUrl || 
+      (contact.groups && contact.groups.some(g => g.id === groupIdFromUrl));
     
-    return matchesTag && matchesCategory && (!selectedGroupId || matchesGroup);
+    // Filter by favorites tab
+    if (activeTab === "favorites") {
+      // This is a placeholder. In a real app, you'd have a "favorite" flag in your contact data
+      return false; // No favorites implemented yet
+    }
+    
+    // Filter by groups tab
+    if (activeTab === "groups") {
+      return contact.groups && contact.groups.length > 0 && matchesTag && matchesCategory && matchesGroup;
+    }
+    
+    return matchesTag && matchesCategory && (!groupIdFromUrl || matchesGroup);
   }) : [];
 
   // Get unique tags for the filter
@@ -180,9 +192,24 @@ const ContactList: React.FC<ContactListProps> = ({
     }
   };
 
+  // Handle group navigation
+  const handleGroupNav = (groupId: string) => {
+    setSearchParams({ group: groupId });
+  };
+
   // Check if all visible contacts are selected
   const allSelected = filteredContacts.length > 0 && 
     selectedContacts.length === filteredContacts.length;
+
+  // Navigate to groups management
+  const navigateToGroups = () => {
+    navigate("/rel8t/groups");
+  };
+
+  // Navigate to import contacts
+  const navigateToImport = () => {
+    navigate("/rel8t/import");
+  };
 
   return (
     <div className="space-y-4">
@@ -226,12 +253,7 @@ const ContactList: React.FC<ContactListProps> = ({
               ))}
             </select>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowContactGroups(true)}
-            size="icon"
-            title="Filter by group"
-          >
+          <Button variant="outline" onClick={navigateToGroups} size="icon" title="Manage groups">
             <Users className="h-4 w-4" />
           </Button>
           {onRefresh && (
@@ -239,14 +261,32 @@ const ContactList: React.FC<ContactListProps> = ({
               <RefreshCcw className="h-4 w-4" />
             </Button>
           )}
+          <Button variant="outline" onClick={navigateToImport} className="gap-1">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Import</span>
+          </Button>
           {onAddContact && (
             <Button onClick={onAddContact} className="gap-1">
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Contact</span>
+              <span className="hidden sm:inline">Add</span>
             </Button>
           )}
         </div>
       </div>
+
+      {/* Tabs for different contact views */}
+      <Tabs
+        defaultValue={activeTab}
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="mb-6"
+      >
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="all">All Contacts</TabsTrigger>
+          <TabsTrigger value="favorites">Favorites</TabsTrigger>
+          <TabsTrigger value="groups">Groups</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Bulk actions bar - visible when contacts are selected */}
       {selectedContacts.length > 0 && (
@@ -298,6 +338,27 @@ const ContactList: React.FC<ContactListProps> = ({
         </div>
       )}
 
+      {/* Groups section when on Groups tab */}
+      {activeTab === "groups" && groups.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {groups.map(group => (
+            <Button
+              key={group.id}
+              variant={groupIdFromUrl === group.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleGroupNav(group.id)}
+              className="flex items-center gap-2"
+            >
+              <div 
+                className="w-2 h-2 rounded-full" 
+                style={{ backgroundColor: group.color || '#6366f1' }} 
+              />
+              {group.name}
+            </Button>
+          ))}
+        </div>
+      )}
+
       {isLoading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -305,10 +366,10 @@ const ContactList: React.FC<ContactListProps> = ({
         </div>
       ) : filteredContacts.length === 0 ? (
         <div className="text-center py-8">
-          <User className="h-12 w-12 text-muted-foreground/50 mx-auto" />
+          <ContactIcon className="h-12 w-12 text-muted-foreground/50 mx-auto" />
           <h3 className="mt-2 text-lg font-medium">No contacts found</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {debouncedSearch || selectedTag || selectedCategory || selectedGroupId
+            {debouncedSearch || selectedTag || selectedCategory || groupIdFromUrl
               ? "Try a different search term, tag, category, or group"
               : "Add your first contact to get started"}
           </p>
@@ -324,107 +385,95 @@ const ContactList: React.FC<ContactListProps> = ({
           {filteredContacts.map((contact) => (
             <Card 
               key={contact.id} 
-              className="cursor-pointer hover:bg-muted/10 transition-colors border-border/20"
+              className="overflow-hidden hover:shadow-md transition-shadow"
             >
-              <CardContent className="p-4">
-                <div className="flex items-start">
-                  <Checkbox
-                    className="mr-2 mt-1.5"
-                    checked={selectedContacts.includes(contact.id)}
-                    onCheckedChange={() => toggleContactSelection(contact.id)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <div className="flex-1" onClick={() => onEdit && onEdit(contact)}>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium text-lg truncate">{contact.name}</h3>
-                      {contact.category && (
-                        <div className="flex items-center gap-1.5">
-                          <div 
-                            className="w-2.5 h-2.5 rounded-full" 
-                            style={{ backgroundColor: contact.category.color }} 
-                          />
-                          <span className="text-xs text-muted-foreground">{contact.category.name}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-1.5 mb-3">
-                      {contact.email && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">{contact.email}</span>
-                        </div>
-                      )}
-                      {contact.phone && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span>{contact.phone}</span>
-                        </div>
-                      )}
-                      {contact.location && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">{contact.location}</span>
-                        </div>
-                      )}
-                      {contact.organization && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Building className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">{contact.organization}</span>
-                          {contact.role && (
-                            <span className="text-xs text-muted-foreground ml-1">({contact.role})</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex flex-col gap-2">
-                      {contact.tags && contact.tags.length > 0 && (
-                        <div className="flex items-start gap-1.5">
-                          <Tags className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                          <div className="flex flex-wrap gap-1">
-                            {contact.tags.map(tag => (
-                              <Badge key={tag} variant="outline" className="font-normal text-xs py-0">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {contact.last_contact_date && (
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-                          <Calendar className="h-3 w-3 flex-shrink-0" />
-                          <span>
-                            Last contact: {formatDistanceToNow(new Date(contact.last_contact_date), { addSuffix: true })}
-                          </span>
-                        </div>
-                      )}
+              <CardContent className="p-0">
+                {/* Card Header with contact name and category */}
+                <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      className="mr-1"
+                      checked={selectedContacts.includes(contact.id)}
+                      onCheckedChange={() => toggleContactSelection(contact.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div 
+                      className="cursor-pointer flex-1" 
+                      onClick={() => onEdit && onEdit(contact)}
+                    >
+                      <h3 className="font-medium text-base truncate">{contact.name}</h3>
                     </div>
                   </div>
+                  {contact.category && (
+                    <Badge 
+                      variant="outline"
+                      className="ml-2"
+                      style={{ 
+                        borderColor: contact.category.color,
+                        color: contact.category.color 
+                      }}
+                    >
+                      {contact.category.name}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Card Body with contact details */}
+                <div 
+                  className="p-3 cursor-pointer" 
+                  onClick={() => onEdit && onEdit(contact)}
+                >
+                  {/* Essential Info */}
+                  <div className="space-y-1 mb-2">
+                    {contact.email && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                        <span className="truncate">{contact.email}</span>
+                      </div>
+                    )}
+                    {contact.phone && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                        <span>{contact.phone}</span>
+                      </div>
+                    )}
+                    {contact.organization && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Building className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                        <span className="truncate">{contact.organization}</span>
+                        {contact.role && (
+                          <span className="text-xs text-muted-foreground ml-1">({contact.role})</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tags */}
+                  {contact.tags && contact.tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {contact.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="font-normal text-xs py-0">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Last Contact Date */}
+                  {contact.last_contact_date && (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-3">
+                      <Calendar className="h-3 w-3 flex-shrink-0" />
+                      <span>
+                        Last contact: {formatDistanceToNow(new Date(contact.last_contact_date), { addSuffix: true })}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
-
-      {/* Contact Groups Dialog */}
-      <Dialog open={showContactGroups} onOpenChange={setShowContactGroups}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Contact Groups</DialogTitle>
-          </DialogHeader>
-          <div className="pt-4">
-            <ContactGroupsManager 
-              onSelectGroup={(groupId) => {
-                setSelectedGroupId(groupId === selectedGroupId ? null : groupId);
-                setShowContactGroups(false);
-              }} 
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Confirmation dialog for bulk delete */}
       <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
