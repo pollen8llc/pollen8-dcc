@@ -10,15 +10,15 @@ import {
   ContactIcon
 } from "lucide-react";
 
-export const Rel8TNavigation = () => {
+export const Rel8Navigation = () => {
   const location = useLocation();
   
   const navigationItems = [
-    { name: "Dashboard", href: "/rel8t", icon: LayoutDashboard },
-    { name: "Contacts", href: "/rel8t/contacts", icon: ContactIcon },
-    { name: "Import", href: "/rel8t/import", icon: Import },
-    { name: "Groups", href: "/rel8t/groups", icon: Grid3x3 },
-    { name: "Settings", href: "/rel8t/settings", icon: Settings }
+    { name: "Dashboard", href: "/rel8", icon: LayoutDashboard },
+    { name: "Contacts", href: "/rel8/contacts", icon: ContactIcon },
+    { name: "Import", href: "/rel8/import", icon: Import },
+    { name: "Groups", href: "/rel8/groups", icon: Grid3x3 },
+    { name: "Settings", href: "/rel8/settings", icon: Settings }
   ];
 
   return (

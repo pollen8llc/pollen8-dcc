@@ -2,8 +2,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { MetricCard } from "@/components/rel8t/MetricCard";
 import { Users, AlertCircle, Zap, TrendingUp } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { 
@@ -15,26 +13,14 @@ import {
 import {
   getActiveTriggerCount
 } from "@/services/rel8t/triggerService";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import ContactForm from "@/components/rel8t/ContactForm";
-import OutreachForm from "@/components/rel8t/OutreachForm";
-import { createContact } from "@/services/rel8t/contactService";
-import { createOutreach } from "@/services/rel8t/outreachService";
 import { useNavigate } from "react-router-dom";
-import { Rel8TNavigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { OutreachSection } from "@/components/rel8t/dashboard/OutreachSection";
 import { ContactGrowthChart } from "@/components/rel8t/dashboard/ContactGrowthChart";
+import { MetricCard } from "@/components/rel8t/MetricCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
-  const [outreachDialogOpen, setOutreachDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get metrics data
   const { data: contactCount = 0, isLoading: contactCountLoading } = useQuery({
@@ -51,34 +37,6 @@ const Dashboard = () => {
     queryKey: ["trigger-count"],
     queryFn: getActiveTriggerCount,
   });
-
-  const handleCreateContact = async (values: any) => {
-    setIsSubmitting(true);
-    try {
-      await createContact(values);
-      setContactDialogOpen(false);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCreateOutreach = async (values: any) => {
-    setIsSubmitting(true);
-    try {
-      await createOutreach(
-        {
-          title: values.title,
-          description: values.description,
-          priority: values.priority,
-          due_date: values.due_date.toISOString(),
-        },
-        values.contactIds
-      );
-      setOutreachDialogOpen(false);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   // Calculate dynamic progress values
   const contactsWithoutOutreachCount = 
@@ -97,7 +55,7 @@ const Dashboard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Rel8TNavigation />
+        <Rel8Navigation />
         
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
           <div>
@@ -107,12 +65,11 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex mt-4 md:mt-0 gap-2">
-            <Button variant="outline" onClick={() => navigate("/rel8t/contacts")}>
+            <Button variant="outline" onClick={() => navigate("/rel8/contacts")}>
               <Users className="mr-2 h-4 w-4" />
               View Contacts
             </Button>
-            <Button onClick={() => setOutreachDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
+            <Button onClick={() => navigate("/rel8/wizard")}>
               Build a Relationship
             </Button>
           </div>
@@ -127,7 +84,7 @@ const Dashboard = () => {
             icon={<Users className="h-5 w-5" />}
             progress={75}
             isLoading={contactCountLoading}
-            onActionClick={() => navigate("/rel8t/contacts")}
+            onActionClick={() => navigate("/rel8/contacts")}
           />
           
           <MetricCard
@@ -146,7 +103,7 @@ const Dashboard = () => {
             description="Automation rules"
             icon={<Zap className="h-5 w-5" />}
             isLoading={triggerCountLoading}
-            onActionClick={() => navigate("/rel8t/settings")}
+            onActionClick={() => navigate("/rel8/settings")}
           />
           
           <MetricCard
@@ -168,33 +125,6 @@ const Dashboard = () => {
 
         {/* Outreach Section */}
         <OutreachSection />
-        
-        {/* Dialogs */}
-        <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Add New Contact</DialogTitle>
-            </DialogHeader>
-            <ContactForm
-              onSubmit={handleCreateContact}
-              onCancel={() => setContactDialogOpen(false)}
-              isSubmitting={isSubmitting}
-            />
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={outreachDialogOpen} onOpenChange={setOutreachDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Build a Relationship</DialogTitle>
-            </DialogHeader>
-            <OutreachForm
-              onSubmit={handleCreateOutreach}
-              onCancel={() => setOutreachDialogOpen(false)}
-              isSubmitting={isSubmitting}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { Contact } from "@/services/rel8t/contactService";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 
 type WizardStep = 
   | "select-contacts" 
@@ -51,7 +52,7 @@ const RelationshipWizard = () => {
 
   const handleReviewSubmit = () => {
     // In a real scenario, we would submit the data to the server here
-    navigate("/rel8t/relationships");
+    navigate("/rel8");
   };
 
   const getStepTitle = () => {
@@ -77,12 +78,14 @@ const RelationshipWizard = () => {
             variant="ghost" 
             size="sm" 
             className="mr-2" 
-            onClick={() => navigate("/rel8t")}
+            onClick={() => navigate("/rel8")}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to Dashboard
           </Button>
         </div>
+        
+        <Rel8Navigation />
         
         <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
           <div>

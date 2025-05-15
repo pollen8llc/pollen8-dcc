@@ -24,7 +24,7 @@ import CommunityProfile from "./pages/CommunityProfile";
 import ProfileSearchPage from "./pages/ProfileSearchPage";
 import ConnectionsPage from "./pages/ConnectionsPage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
-// Import REL8T pages
+// Import REL8 pages
 import Notifications from "./pages/rel8t/Notifications";
 import Contacts from "./pages/rel8t/Contacts";
 import Settings from "./pages/rel8t/Settings";
@@ -63,12 +63,12 @@ const AppRoutes = () => {
       navigate('/profile/setup');
     }
 
-    // Redirect organizers to REL8T dashboard if they land on the root page
+    // Redirect organizers to REL8 dashboard if they land on the root page
     if (currentUser && 
         (currentUser.role === UserRole.ORGANIZER || (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) &&
         window.location.pathname === '/') {
-      console.log("Organizer detected, redirecting to REL8T dashboard");
-      navigate('/rel8t');
+      console.log("Organizer detected, redirecting to REL8 dashboard");
+      navigate('/rel8');
     }
   }, [currentUser, navigate]);
 
@@ -87,40 +87,40 @@ const AppRoutes = () => {
       <Route path="/documentation" element={<Documentation />} />
       <Route path="/create-admin" element={<CreateAdminForm />} />
       
-      {/* REL8T Routes */}
-      <Route path="/rel8t" element={
+      {/* REL8 Routes */}
+      <Route path="/rel8" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <Dashboard />
         </ProtectedRoute>
       } />
-      <Route path="/rel8t/notifications" element={
+      <Route path="/rel8/notifications" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <Notifications />
         </ProtectedRoute>
       } />
-      <Route path="/rel8t/settings" element={
+      <Route path="/rel8/settings" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <Settings />
         </ProtectedRoute>
       } />
-      <Route path="/rel8t/contacts" element={
+      <Route path="/rel8/contacts" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <Contacts />
         </ProtectedRoute>
       } />
-      <Route path="/rel8t/contacts/new" element={<ContactCreate />} />
-      <Route path="/rel8t/contacts/:id" element={<ContactEdit />} />
-      <Route path="/rel8t/wizard" element={
+      <Route path="/rel8/contacts/new" element={<ContactCreate />} />
+      <Route path="/rel8/contacts/:id" element={<ContactEdit />} />
+      <Route path="/rel8/wizard" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <RelationshipWizard />
         </ProtectedRoute>
       } />
-      <Route path="/rel8t/import" element={
+      <Route path="/rel8/import" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <ImportContacts />
         </ProtectedRoute>
       } />
-      <Route path="/rel8t/groups" element={
+      <Route path="/rel8/groups" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <Groups />
         </ProtectedRoute>
