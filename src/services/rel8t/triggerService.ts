@@ -14,6 +14,24 @@ export interface Trigger {
   updated_at?: string;
 }
 
+// Time-based trigger types
+export const TIME_TRIGGER_TYPES = {
+  HOURLY: 'hourly',
+  DAILY: 'daily',
+  WEEKLY: 'weekly',
+  MONTHLY: 'monthly',
+  QUARTERLY: 'quarterly',
+  YEARLY: 'yearly'
+};
+
+// Action types
+export const TRIGGER_ACTIONS = {
+  SEND_EMAIL: 'send_email',
+  CREATE_TASK: 'create_task',
+  ADD_REMINDER: 'add_reminder',
+  SEND_NOTIFICATION: 'send_notification'
+};
+
 export const getTriggers = async (): Promise<Trigger[]> => {
   try {
     const { data, error } = await supabase
@@ -77,7 +95,7 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
     
     toast({
       title: "Trigger created",
-      description: "Automation trigger has been successfully created.",
+      description: "Time-based automation trigger has been successfully created.",
     });
     
     return data;
@@ -158,5 +176,43 @@ export const getActiveTriggerCount = async (): Promise<number> => {
   } catch (error) {
     console.error("Error fetching active trigger count:", error);
     return 0;
+  }
+};
+
+// Get trigger statistics by time frequency
+export const getTriggerStatsByFrequency = async (): Promise<Record<string, number>> => {
+  try {
+    const { data, error } = await supabase
+      .from("rms_triggers")
+      .select("condition")
+      .eq("is_active", true);
+
+    if (error) throw error;
+
+    // Count by frequency type
+    const stats = {
+      hourly: 0,
+      daily: 0,
+      weekly: 0,
+      monthly: 0,
+      quarterly: 0,
+      yearly: 0,
+      other: 0
+    };
+    
+    data?.forEach(trigger => {
+      if (trigger.condition === TIME_TRIGGER_TYPES.HOURLY) stats.hourly++;
+      else if (trigger.condition === TIME_TRIGGER_TYPES.DAILY) stats.daily++;
+      else if (trigger.condition === TIME_TRIGGER_TYPES.WEEKLY) stats.weekly++;
+      else if (trigger.condition === TIME_TRIGGER_TYPES.MONTHLY) stats.monthly++;
+      else if (trigger.condition === TIME_TRIGGER_TYPES.QUARTERLY) stats.quarterly++;
+      else if (trigger.condition === TIME_TRIGGER_TYPES.YEARLY) stats.yearly++;
+      else stats.other++;
+    });
+    
+    return stats;
+  } catch (error) {
+    console.error("Error fetching trigger statistics by frequency:", error);
+    return { hourly: 0, daily: 0, weekly: 0, monthly: 0, quarterly: 0, yearly: 0, other: 0 };
   }
 };

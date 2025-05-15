@@ -1,15 +1,17 @@
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Calendar, Clock, CheckCircle2, AlertTriangle, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getOutreach, getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import OutreachList from "@/components/rel8t/OutreachList";
 
 export const OutreachSection = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("today");
 
   // Get outreach data counts
@@ -18,30 +20,18 @@ export const OutreachSection = () => {
     queryFn: getOutreachStatusCounts,
   });
 
-  // Get outreach data based on active tab
-  const { data: todayOutreach = [], isLoading: todayLoading } = useQuery({
-    queryKey: ["outreach", "today"],
-    queryFn: () => getOutreach("today"),
-  });
-
-  const { data: upcomingOutreach = [], isLoading: upcomingLoading } = useQuery({
-    queryKey: ["outreach", "upcoming"],
-    queryFn: () => getOutreach("upcoming"),
-  });
-
-  const { data: overdueOutreach = [], isLoading: overdueLoading } = useQuery({
-    queryKey: ["outreach", "overdue"],
-    queryFn: () => getOutreach("overdue"),
-  });
-
-  const { data: completedOutreach = [], isLoading: completedLoading } = useQuery({
-    queryKey: ["outreach", "completed"],
-    queryFn: () => getOutreach("completed"),
-  });
-
   return (
     <div>
-      <h2 className="text-xl font-medium mb-4">Relationship Activities</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-medium">Relationship Activities</h2>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => navigate("/rel8/relationships")}
+        >
+          View All
+        </Button>
+      </div>
       
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -122,82 +112,62 @@ export const OutreachSection = () => {
         </Card>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="mb-4">
-          <TabsTrigger value="today" className="relative">
-            Today
-            {outreachCounts.today > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
-                {outreachCounts.today}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="upcoming" className="relative">
-            Upcoming
-            {outreachCounts.upcoming > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-blue-600 text-[10px] text-white px-1">
-                {outreachCounts.upcoming}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="overdue" className="relative">
-            Needs Attention
-            {outreachCounts.overdue > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-600 text-[10px] text-white px-1">
-                {outreachCounts.overdue}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="completed">
-            Completed
-          </TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <TabsList>
+            <TabsTrigger value="today" className="relative">
+              Today
+              {outreachCounts.today > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-[10px] text-primary-foreground px-1">
+                  {outreachCounts.today}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="upcoming" className="relative">
+              Upcoming
+              {outreachCounts.upcoming > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-blue-600 text-[10px] text-white px-1">
+                  {outreachCounts.upcoming}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="overdue" className="relative">
+              Needs Attention
+              {outreachCounts.overdue > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-600 text-[10px] text-white px-1">
+                  {outreachCounts.overdue}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/rel8/wizard')}
+            className="flex items-center gap-1"
+          >
+            <Plus className="h-3.5 w-3.5" /> New
+          </Button>
+        </div>
         
         <TabsContent value="today">
-          {todayLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <OutreachList maxItems={3} showTabs={false} />
-          )}
+          <OutreachList maxItems={3} defaultTab="today" showTabs={false} />
         </TabsContent>
         
         <TabsContent value="upcoming">
-          {upcomingLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <OutreachList maxItems={3} showTabs={false} />
-          )}
+          <OutreachList maxItems={3} defaultTab="upcoming" showTabs={false} />
         </TabsContent>
         
         <TabsContent value="overdue">
-          {overdueLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <OutreachList maxItems={3} showTabs={false} />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="completed">
-          {completedLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <OutreachList maxItems={3} showTabs={false} />
-          )}
+          <OutreachList maxItems={3} defaultTab="overdue" showTabs={false} />
         </TabsContent>
       </Tabs>
       
       <Button 
         variant="outline"
-        className="mb-8"
-        onClick={() => window.location.href = "/rel8t/settings"}
+        className="w-full"
+        onClick={() => navigate("/rel8/relationships")}
       >
         View All Relationship Activities
       </Button>

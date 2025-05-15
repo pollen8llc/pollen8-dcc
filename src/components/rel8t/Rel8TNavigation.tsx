@@ -7,7 +7,8 @@ import {
   Settings, 
   Import, 
   Grid3x3, 
-  ContactIcon
+  ContactIcon,
+  Calendar
 } from "lucide-react";
 
 export const Rel8Navigation = () => {
@@ -16,6 +17,7 @@ export const Rel8Navigation = () => {
   const navigationItems = [
     { name: "Dashboard", href: "/rel8", icon: LayoutDashboard },
     { name: "Contacts", href: "/rel8/contacts", icon: ContactIcon },
+    { name: "Relationships", href: "/rel8/relationships", icon: Calendar },
     { name: "Import", href: "/rel8/import", icon: Import },
     { name: "Groups", href: "/rel8/groups", icon: Grid3x3 },
     { name: "Settings", href: "/rel8/settings", icon: Settings }

@@ -45,7 +45,9 @@ export const getOutreach = async (status?: string): Promise<Outreach[]> => {
           *,
           rms_contacts(
             id,
-            name
+            name,
+            email,
+            organization
           )
         )
       `);
@@ -53,9 +55,6 @@ export const getOutreach = async (status?: string): Promise<Outreach[]> => {
     if (status) {
       const now = new Date();
       const today = new Date(now.setHours(23, 59, 59, 999)).toISOString();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const startOfTomorrow = new Date(tomorrow.setHours(0, 0, 0, 0)).toISOString();
       
       switch (status) {
         case "today":
@@ -75,6 +74,9 @@ export const getOutreach = async (status?: string): Promise<Outreach[]> => {
         case "completed":
           query = query
             .eq("status", "completed");
+          break;
+        case "all":
+          // Don't filter by status for "all"
           break;
       }
     }
@@ -111,64 +113,6 @@ export const getOutreach = async (status?: string): Promise<Outreach[]> => {
     console.error("Error fetching outreach:", error);
     toast({
       title: "Error fetching outreach",
-      description: error.message,
-      variant: "destructive",
-    });
-    return [];
-  }
-};
-
-// Added function to get outreach notifications
-export const getOutreachNotifications = async (): Promise<Outreach[]> => {
-  try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error("User not authenticated");
-    }
-
-    const { data, error } = await supabase
-      .from("rms_outreach")
-      .select(`
-        *,
-        rms_outreach_contacts(
-          *,
-          rms_contacts(
-            id,
-            name,
-            email,
-            organization
-          )
-        )
-      `)
-      .eq("user_id", user.user.id)
-      .order("due_date");
-
-    if (error) throw error;
-
-    return (data || []).map(item => {
-      const contacts = item.rms_outreach_contacts
-        .map((oc: any) => oc.rms_contacts)
-        .filter(Boolean);
-
-      const outreach: Outreach = {
-        id: item.id,
-        user_id: item.user_id,
-        title: item.title,
-        description: item.description,
-        priority: item.priority as OutreachPriority,
-        status: item.status as OutreachStatus,
-        due_date: item.due_date,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        contacts
-      };
-      
-      return outreach;
-    });
-  } catch (error: any) {
-    console.error("Error fetching outreach notifications:", error);
-    toast({
-      title: "Error fetching notifications",
       description: error.message,
       variant: "destructive",
     });
@@ -264,11 +208,11 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     }
     
     toast({
-      title: "Relationship outreach created",
-      description: "Your relationship outreach has been successfully created.",
+      title: "Relationship activity created",
+      description: "Your relationship activity has been successfully created.",
     });
     
-    // Return the created outreach with empty contacts array and proper type casting
+    // Return the created outreach with empty contacts array
     return {
       ...data,
       priority: data.priority as OutreachPriority,
@@ -278,7 +222,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
   } catch (error: any) {
     console.error("Error creating outreach:", error);
     toast({
-      title: "Error creating outreach",
+      title: "Error creating activity",
       description: error.message,
       variant: "destructive",
     });
@@ -324,11 +268,10 @@ export const updateOutreach = async (id: string, outreach: Partial<Outreach>, co
     }
     
     toast({
-      title: "Outreach updated",
-      description: "Your relationship outreach has been successfully updated.",
+      title: "Activity updated",
+      description: "Your relationship activity has been successfully updated.",
     });
     
-    // Make sure to cast the priority and status to the correct types
     return {
       ...data,
       priority: data.priority as OutreachPriority,
@@ -337,7 +280,7 @@ export const updateOutreach = async (id: string, outreach: Partial<Outreach>, co
   } catch (error: any) {
     console.error(`Error updating outreach ${id}:`, error);
     toast({
-      title: "Error updating outreach",
+      title: "Error updating activity",
       description: error.message,
       variant: "destructive",
     });
@@ -355,15 +298,15 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
     if (error) throw error;
     
     toast({
-      title: "Outreach status updated",
-      description: `Outreach has been marked as ${status}.`,
+      title: "Activity status updated",
+      description: `Activity has been marked as ${status}.`,
     });
     
     return true;
   } catch (error: any) {
     console.error(`Error updating outreach status ${id}:`, error);
     toast({
-      title: "Error updating outreach status",
+      title: "Error updating activity status",
       description: error.message,
       variant: "destructive",
     });
@@ -382,15 +325,15 @@ export const deleteOutreach = async (id: string): Promise<boolean> => {
     if (error) throw error;
     
     toast({
-      title: "Outreach deleted",
-      description: "The relationship outreach has been successfully removed.",
+      title: "Activity deleted",
+      description: "The relationship activity has been successfully removed.",
     });
     
     return true;
   } catch (error: any) {
     console.error(`Error deleting outreach ${id}:`, error);
     toast({
-      title: "Error deleting outreach",
+      title: "Error deleting activity",
       description: error.message,
       variant: "destructive",
     });
@@ -487,5 +430,35 @@ export const getInactiveContactsCount = async (): Promise<number> => {
   } catch (error) {
     console.error("Error calculating inactive contacts:", error);
     return 0;
+  }
+};
+
+// Function to check for overdue items and update their status
+export const checkAndUpdateOverdueItems = async (): Promise<void> => {
+  try {
+    const now = new Date().toISOString();
+    
+    // Get all pending outreach items that are past their due date
+    const { data, error } = await supabase
+      .from("rms_outreach")
+      .select("id")
+      .eq("status", "pending")
+      .lt("due_date", now);
+      
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      // Update all overdue items
+      const { error: updateError } = await supabase
+        .from("rms_outreach")
+        .update({ status: "overdue" })
+        .in("id", data.map(item => item.id));
+        
+      if (updateError) throw updateError;
+      
+      console.log(`Updated ${data.length} overdue outreach items`);
+    }
+  } catch (error) {
+    console.error("Error checking for overdue items:", error);
   }
 };

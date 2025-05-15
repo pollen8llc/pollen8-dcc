@@ -1,12 +1,13 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { 
   getTriggers, 
   deleteTrigger, 
   updateTrigger, 
-  Trigger 
+  Trigger,
+  getTriggerStats
 } from "@/services/rel8t/triggerService";
 import { 
   getEmailStatistics, 
@@ -15,6 +16,7 @@ import {
 } from "@/services/rel8t/emailService";
 
 export function useTriggerManagement() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("active");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingTrigger, setEditingTrigger] = useState<Trigger | null>(null);
@@ -34,7 +36,7 @@ export function useTriggerManagement() {
     data: emailStats = { pending: 0, sent: 0, failed: 0, total: 0 } 
   } = useQuery({
     queryKey: ["email-statistics"],
-    queryFn: getEmailStatistics,
+    queryFn: getTriggerStats,
   });
 
   // Fetch email notifications
@@ -63,7 +65,8 @@ export function useTriggerManagement() {
     try {
       await updateTrigger(editingTrigger.id, editingTrigger);
       setIsEditDialogOpen(false);
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["triggers"] });
+      queryClient.invalidateQueries({ queryKey: ["email-statistics"] });
     } catch (error) {
       console.error("Error updating trigger:", error);
       toast({
@@ -78,7 +81,8 @@ export function useTriggerManagement() {
     if (confirm("Are you sure you want to delete this trigger?")) {
       try {
         await deleteTrigger(id);
-        refetch();
+        queryClient.invalidateQueries({ queryKey: ["triggers"] });
+        queryClient.invalidateQueries({ queryKey: ["email-statistics"] });
       } catch (error) {
         console.error("Error deleting trigger:", error);
         toast({
@@ -93,7 +97,8 @@ export function useTriggerManagement() {
   const handleToggleActive = async (id: string, isActive: boolean) => {
     try {
       await updateTrigger(id, { is_active: !isActive });
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["triggers"] });
+      queryClient.invalidateQueries({ queryKey: ["email-statistics"] });
     } catch (error) {
       console.error("Error updating trigger status:", error);
       toast({
