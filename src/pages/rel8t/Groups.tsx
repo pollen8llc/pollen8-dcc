@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
@@ -121,14 +120,14 @@ const Groups = () => {
             variant="ghost" 
             size="sm" 
             className="mr-2" 
-            onClick={() => navigate("/rel8t")}
+            onClick={() => navigate("/rel8")}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to Dashboard
           </Button>
         </div>
 
-        <Rel8TNavigation />
+        <Rel8Navigation />
         
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
           <div>
