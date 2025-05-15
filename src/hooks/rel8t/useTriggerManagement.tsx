@@ -64,6 +64,10 @@ export function useTriggerManagement() {
       await updateTrigger(editingTrigger.id, editingTrigger);
       setIsEditDialogOpen(false);
       refetch();
+      toast({
+        title: "Success",
+        description: "Trigger has been updated successfully.",
+      });
     } catch (error) {
       console.error("Error updating trigger:", error);
       toast({
@@ -79,6 +83,10 @@ export function useTriggerManagement() {
       try {
         await deleteTrigger(id);
         refetch();
+        toast({
+          title: "Success",
+          description: "Trigger has been deleted successfully.",
+        });
       } catch (error) {
         console.error("Error deleting trigger:", error);
         toast({
@@ -94,6 +102,10 @@ export function useTriggerManagement() {
     try {
       await updateTrigger(id, { is_active: !isActive });
       refetch();
+      toast({
+        title: "Success",
+        description: `Trigger has been ${!isActive ? "activated" : "deactivated"} successfully.`,
+      });
     } catch (error) {
       console.error("Error updating trigger status:", error);
       toast({

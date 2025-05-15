@@ -49,6 +49,12 @@ const Dashboard = () => {
   const outreachProgress = Number(contactCount) > 0 
     ? Math.min(100, 100 - Math.round((Number(contactsWithoutOutreachCount) / Number(contactCount)) * 100))
     : 0;
+  
+  const totalOutreachActivities = 
+    Number(outreachCounts.today) + 
+    Number(outreachCounts.upcoming) + 
+    Number(outreachCounts.overdue) + 
+    Number(outreachCounts.completed);
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,8 +75,8 @@ const Dashboard = () => {
               <Users className="mr-2 h-4 w-4" />
               View Contacts
             </Button>
-            <Button onClick={() => navigate("/rel8/wizard")}>
-              Build a Relationship
+            <Button onClick={() => navigate("/rel8/relationships")}>
+              Manage Relationships
             </Button>
           </div>
         </div>
@@ -95,6 +101,7 @@ const Dashboard = () => {
             color={contactsWithoutOutreachCount > 0 ? "warning" : "success"}
             progress={outreachProgress}
             isLoading={outreachCountsLoading || contactCountLoading}
+            onActionClick={() => navigate("/rel8/relationships")}
           />
           
           <MetricCard
@@ -107,11 +114,12 @@ const Dashboard = () => {
           />
           
           <MetricCard
-            title="Network Growth"
-            value={"+5"}
-            description="Last 30 days"
+            title="Total Activities"
+            value={totalOutreachActivities}
+            description="Relationship actions"
             icon={<TrendingUp className="h-5 w-5" />}
             color="success"
+            onActionClick={() => navigate("/rel8/relationships")}
           />
         </div>
         

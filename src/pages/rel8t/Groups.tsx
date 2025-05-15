@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
@@ -107,7 +108,7 @@ const Groups = () => {
 
   // View contacts in group
   const handleViewContacts = (groupId: string) => {
-    navigate(`/rel8t/contacts?group=${groupId}`);
+    navigate(`/rel8/contacts?group=${groupId}`);
   };
 
   return (

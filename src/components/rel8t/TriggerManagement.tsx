@@ -23,13 +23,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Trigger, createTrigger, getTriggers } from "@/services/rel8t/triggerService";
+import { Trigger, TIME_TRIGGER_TYPES, createTrigger, getTriggers } from "@/services/rel8t/triggerService";
 import { TriggerStatsCards } from "./triggers/TriggerStatsCards";
 import { TriggersList } from "./triggers/TriggersList";
 import { EmailNotificationsList } from "./triggers/EmailNotificationsList";
 import { EditTriggerDialog } from "./triggers/EditTriggerDialog";
 import { useTriggerManagement } from "@/hooks/rel8t/useTriggerManagement";
-import { Calendar, Mail, Bell, AlertCircle } from "lucide-react";
+import { Calendar, Mail, Bell, AlertCircle, Clock } from "lucide-react";
 
 export function TriggerManagement() {
   const {
@@ -54,7 +54,7 @@ export function TriggerManagement() {
   const [newTrigger, setNewTrigger] = useState<Partial<Trigger>>({
     name: "",
     description: "",
-    condition: "contact_added",
+    condition: TIME_TRIGGER_TYPES.DAILY,
     action: "send_email",
     is_active: true
   });
@@ -66,7 +66,7 @@ export function TriggerManagement() {
       setNewTrigger({
         name: "",
         description: "",
-        condition: "contact_added",
+        condition: TIME_TRIGGER_TYPES.DAILY,
         action: "send_email",
         is_active: true
       });
@@ -97,7 +97,7 @@ export function TriggerManagement() {
         <div>
           <h2 className="text-2xl font-semibold">Automation Triggers</h2>
           <p className="text-muted-foreground">
-            Create automated actions based on specific events
+            Create automated actions based on specific time intervals
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -108,7 +108,7 @@ export function TriggerManagement() {
             <DialogHeader>
               <DialogTitle>Create Automation Trigger</DialogTitle>
               <DialogDescription>
-                Set up a new automation that will run when specific conditions are met.
+                Set up a new time-based automation that will run at specific intervals.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -116,7 +116,7 @@ export function TriggerManagement() {
                 <Label htmlFor="trigger-name">Trigger Name</Label>
                 <Input
                   id="trigger-name"
-                  placeholder="Follow-up after meeting"
+                  placeholder="Monthly contact follow-up"
                   value={newTrigger.name}
                   onChange={(e) => setNewTrigger({ ...newTrigger, name: e.target.value })}
                 />
@@ -125,32 +125,33 @@ export function TriggerManagement() {
                 <Label htmlFor="trigger-description">Description (Optional)</Label>
                 <Textarea
                   id="trigger-description"
-                  placeholder="Send a follow-up email after meeting with a contact"
+                  placeholder="Send a follow-up message every month to maintain connection"
                   value={newTrigger.description || ""}
                   onChange={(e) => setNewTrigger({ ...newTrigger, description: e.target.value })}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="trigger-condition">When this happens</Label>
+                  <Label htmlFor="trigger-condition">Time Interval</Label>
                   <Select
                     value={newTrigger.condition}
                     onValueChange={(value) => setNewTrigger({ ...newTrigger, condition: value })}
                   >
                     <SelectTrigger id="trigger-condition">
-                      <SelectValue placeholder="Select condition" />
+                      <SelectValue placeholder="Select time interval" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="contact_added">New contact added</SelectItem>
-                      <SelectItem value="birthday_upcoming">Birthday approaching</SelectItem>
-                      <SelectItem value="anniversary_upcoming">Anniversary approaching</SelectItem>
-                      <SelectItem value="no_contact_30days">No contact for 30 days</SelectItem>
-                      <SelectItem value="meeting_scheduled">Meeting scheduled</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.HOURLY}>Hourly</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.DAILY}>Daily</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.WEEKLY}>Weekly</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.MONTHLY}>Monthly</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.QUARTERLY}>Quarterly</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.YEARLY}>Yearly</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="trigger-action">Do this</Label>
+                  <Label htmlFor="trigger-action">Action</Label>
                   <Select
                     value={newTrigger.action}
                     onValueChange={(value) => setNewTrigger({ ...newTrigger, action: value })}

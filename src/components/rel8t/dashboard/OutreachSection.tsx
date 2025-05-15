@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import { getOutreach, getOutreachStatusCounts } from "@/services/rel8t/outreachS
 import OutreachList from "@/components/rel8t/OutreachList";
 
 export const OutreachSection = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("today");
 
   // Get outreach data counts
@@ -197,7 +199,7 @@ export const OutreachSection = () => {
       <Button 
         variant="outline"
         className="mb-8"
-        onClick={() => window.location.href = "/rel8t/settings"}
+        onClick={() => navigate("/rel8/relationships")}
       >
         View All Relationship Activities
       </Button>

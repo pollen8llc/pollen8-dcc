@@ -14,6 +14,15 @@ export interface Trigger {
   updated_at?: string;
 }
 
+export const TIME_TRIGGER_TYPES = {
+  HOURLY: 'hourly',
+  DAILY: 'daily',
+  WEEKLY: 'weekly',
+  MONTHLY: 'monthly',
+  QUARTERLY: 'quarterly',
+  YEARLY: 'yearly'
+};
+
 export const getTriggers = async (): Promise<Trigger[]> => {
   try {
     const { data, error } = await supabase
@@ -158,5 +167,48 @@ export const getActiveTriggerCount = async (): Promise<number> => {
   } catch (error) {
     console.error("Error fetching active trigger count:", error);
     return 0;
+  }
+};
+
+export const getTimeTriggerStats = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("rms_triggers")
+      .select("condition, count")
+      .eq("is_active", true)
+      .group_by("condition");
+    
+    if (error) throw error;
+    
+    const stats = {
+      hourly: 0,
+      daily: 0,
+      weekly: 0,
+      monthly: 0, 
+      quarterly: 0,
+      yearly: 0,
+      other: 0
+    };
+    
+    data?.forEach(item => {
+      if (Object.values(TIME_TRIGGER_TYPES).includes(item.condition)) {
+        stats[item.condition as keyof typeof stats] = item.count;
+      } else {
+        stats.other += item.count;
+      }
+    });
+    
+    return stats;
+  } catch (error) {
+    console.error("Error fetching trigger stats:", error);
+    return {
+      hourly: 0,
+      daily: 0,
+      weekly: 0, 
+      monthly: 0,
+      quarterly: 0,
+      yearly: 0,
+      other: 0
+    };
   }
 };
