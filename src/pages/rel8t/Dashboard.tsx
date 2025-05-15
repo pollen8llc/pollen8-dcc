@@ -49,12 +49,6 @@ const Dashboard = () => {
   const outreachProgress = Number(contactCount) > 0 
     ? Math.min(100, 100 - Math.round((Number(contactsWithoutOutreachCount) / Number(contactCount)) * 100))
     : 0;
-  
-  const totalOutreachActivities = 
-    Number(outreachCounts.today) + 
-    Number(outreachCounts.upcoming) + 
-    Number(outreachCounts.overdue) + 
-    Number(outreachCounts.completed);
 
   return (
     <div className="min-h-screen bg-background">
@@ -75,8 +69,8 @@ const Dashboard = () => {
               <Users className="mr-2 h-4 w-4" />
               View Contacts
             </Button>
-            <Button onClick={() => navigate("/rel8/relationships")}>
-              Manage Relationships
+            <Button onClick={() => navigate("/rel8/wizard")}>
+              Build a Relationship
             </Button>
           </div>
         </div>
@@ -85,7 +79,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <MetricCard
             title="Total Contacts"
-            value={contactCountLoading ? "-" : String(contactCount)}
+            value={contactCountLoading ? "-" : contactCount}
             description={contactCountLoading ? undefined : `${contactCount} People in your network`}
             icon={<Users className="h-5 w-5" />}
             progress={75}
@@ -95,18 +89,17 @@ const Dashboard = () => {
           
           <MetricCard
             title="Inactive Contacts"
-            value={String(contactsWithoutOutreachCount)}
+            value={contactsWithoutOutreachCount}
             description={contactsWithoutOutreachCount === 1 ? "needs connection" : "need connections"}
             icon={<AlertCircle className="h-5 w-5" />}
             color={contactsWithoutOutreachCount > 0 ? "warning" : "success"}
             progress={outreachProgress}
             isLoading={outreachCountsLoading || contactCountLoading}
-            onActionClick={() => navigate("/rel8/relationships")}
           />
           
           <MetricCard
             title="Active Triggers"
-            value={triggerCountLoading ? "-" : String(activeTriggerCount)}
+            value={triggerCountLoading ? "-" : activeTriggerCount}
             description="Automation rules"
             icon={<Zap className="h-5 w-5" />}
             isLoading={triggerCountLoading}
@@ -114,12 +107,11 @@ const Dashboard = () => {
           />
           
           <MetricCard
-            title="Total Activities"
-            value={String(totalOutreachActivities)}
-            description="Relationship actions"
+            title="Network Growth"
+            value={"+5"}
+            description="Last 30 days"
             icon={<TrendingUp className="h-5 w-5" />}
             color="success"
-            onActionClick={() => navigate("/rel8/relationships")}
           />
         </div>
         
