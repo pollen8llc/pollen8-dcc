@@ -48,7 +48,7 @@ const Relationships = () => {
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -66,7 +66,7 @@ const Relationships = () => {
           </div>
           
           <Button 
-            onClick={() => navigate("/rel8t/wizard")}
+            onClick={() => navigate("/rel8/wizard")}
             className="flex items-center gap-2"
           >
             <PlusCircle className="h-4 w-4" />

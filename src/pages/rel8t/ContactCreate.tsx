@@ -43,7 +43,7 @@ const ContactCreate = () => {
         title: "Contact created",
         description: "New contact has been successfully created.",
       });
-      navigate("/rel8t/contacts");
+      navigate("/rel8/contacts");
     },
     onError: (error) => {
       toast({
@@ -59,7 +59,7 @@ const ContactCreate = () => {
   };
 
   const handleCancel = () => {
-    navigate("/rel8t/contacts");
+    navigate("/rel8/contacts");
   };
 
   return (
@@ -70,11 +70,11 @@ const ContactCreate = () => {
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -86,7 +86,7 @@ const ContactCreate = () => {
         <div className="flex items-center mb-6">
           <Button
             variant="ghost"
-            onClick={() => navigate("/rel8t/contacts")}
+            onClick={() => navigate("/rel8/contacts")}
             className="mr-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" /> Back

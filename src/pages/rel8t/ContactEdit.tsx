@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -85,7 +84,7 @@ const ContactEdit = () => {
         title: "Contact updated",
         description: "Contact has been successfully updated.",
       });
-      navigate("/rel8t/contacts");
+      navigate("/rel8/contacts");
     },
     onError: (error) => {
       toast({
@@ -105,7 +104,7 @@ const ContactEdit = () => {
         title: "Contact deleted",
         description: "Contact has been successfully deleted.",
       });
-      navigate("/rel8t/contacts");
+      navigate("/rel8/contacts");
     },
     onError: (error) => {
       toast({
@@ -121,7 +120,7 @@ const ContactEdit = () => {
   };
 
   const handleCancel = () => {
-    navigate("/rel8t/contacts");
+    navigate("/rel8/contacts");
   };
 
   const handleDelete = () => {
@@ -140,11 +139,11 @@ const ContactEdit = () => {
           <Breadcrumb className="mb-6">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
+                <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -172,11 +171,11 @@ const ContactEdit = () => {
           <Breadcrumb className="mb-6">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
+                <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -187,7 +186,7 @@ const ContactEdit = () => {
           
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Contact not found</h2>
-            <Button onClick={() => navigate("/rel8t/contacts")}>
+            <Button onClick={() => navigate("/rel8/contacts")}>
               Back to Contacts
             </Button>
           </div>
@@ -204,11 +203,11 @@ const ContactEdit = () => {
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t/dashboard">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8t/contacts">Contacts</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -220,7 +219,7 @@ const ContactEdit = () => {
         <div className="flex items-center mb-6">
           <Button
             variant="ghost"
-            onClick={() => navigate("/rel8t/contacts")}
+            onClick={() => navigate("/rel8/contacts")}
             className="mr-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" /> Back
