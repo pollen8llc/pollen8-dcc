@@ -23,7 +23,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Trigger, createTrigger, getTriggers } from "@/services/rel8t/triggerService";
+import { 
+  Trigger, 
+  createTrigger, 
+  getTriggers,
+  TIME_TRIGGER_TYPES,
+  TRIGGER_ACTIONS 
+} from "@/services/rel8t/triggerService";
 import { TriggerStatsCards } from "./triggers/TriggerStatsCards";
 import { TriggersList } from "./triggers/TriggersList";
 import { EmailNotificationsList } from "./triggers/EmailNotificationsList";
@@ -41,6 +47,7 @@ export function TriggerManagement() {
     setEditingTrigger,
     triggers,
     emailStats,
+    triggerStats,
     emailNotifications,
     filteredTriggers,
     isLoading,
@@ -146,6 +153,12 @@ export function TriggerManagement() {
                       <SelectItem value="anniversary_upcoming">Anniversary approaching</SelectItem>
                       <SelectItem value="no_contact_30days">No contact for 30 days</SelectItem>
                       <SelectItem value="meeting_scheduled">Meeting scheduled</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.HOURLY}>Hourly</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.DAILY}>Daily</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.WEEKLY}>Weekly</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.MONTHLY}>Monthly</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.QUARTERLY}>Quarterly</SelectItem>
+                      <SelectItem value={TIME_TRIGGER_TYPES.YEARLY}>Yearly</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -159,10 +172,10 @@ export function TriggerManagement() {
                       <SelectValue placeholder="Select action" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="send_email">Send email</SelectItem>
-                      <SelectItem value="create_task">Create task</SelectItem>
-                      <SelectItem value="add_reminder">Add reminder</SelectItem>
-                      <SelectItem value="send_notification">Send notification</SelectItem>
+                      <SelectItem value={TRIGGER_ACTIONS.SEND_EMAIL}>Send email</SelectItem>
+                      <SelectItem value={TRIGGER_ACTIONS.CREATE_TASK}>Create task</SelectItem>
+                      <SelectItem value={TRIGGER_ACTIONS.ADD_REMINDER}>Add reminder</SelectItem>
+                      <SelectItem value={TRIGGER_ACTIONS.SEND_NOTIFICATION}>Send notification</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

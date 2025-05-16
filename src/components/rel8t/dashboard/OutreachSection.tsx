@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,27 +17,6 @@ export const OutreachSection = () => {
   const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 }, isLoading: countsLoading } = useQuery({
     queryKey: ["outreach-counts"],
     queryFn: getOutreachStatusCounts,
-  });
-
-  // Get outreach data based on active tab
-  const { data: todayOutreach = [], isLoading: todayLoading } = useQuery({
-    queryKey: ["outreach", "today"],
-    queryFn: () => getOutreach("today"),
-  });
-
-  const { data: upcomingOutreach = [], isLoading: upcomingLoading } = useQuery({
-    queryKey: ["outreach", "upcoming"],
-    queryFn: () => getOutreach("upcoming"),
-  });
-
-  const { data: overdueOutreach = [], isLoading: overdueLoading } = useQuery({
-    queryKey: ["outreach", "overdue"],
-    queryFn: () => getOutreach("overdue"),
-  });
-
-  const { data: completedOutreach = [], isLoading: completedLoading } = useQuery({
-    queryKey: ["outreach", "completed"],
-    queryFn: () => getOutreach("completed"),
   });
 
   return (
@@ -154,52 +134,30 @@ export const OutreachSection = () => {
         </TabsList>
         
         <TabsContent value="today">
-          {todayLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <OutreachList maxItems={3} showTabs={false} />
-          )}
+          <OutreachList maxItems={3} showTabs={false} defaultTab="today" />
         </TabsContent>
         
         <TabsContent value="upcoming">
-          {upcomingLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <OutreachList maxItems={3} showTabs={false} />
-          )}
+          <OutreachList maxItems={3} showTabs={false} defaultTab="upcoming" />
         </TabsContent>
         
         <TabsContent value="overdue">
-          {overdueLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <OutreachList maxItems={3} showTabs={false} />
-          )}
+          <OutreachList maxItems={3} showTabs={false} defaultTab="overdue" />
         </TabsContent>
         
         <TabsContent value="completed">
-          {completedLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <OutreachList maxItems={3} showTabs={false} />
-          )}
+          <OutreachList maxItems={3} showTabs={false} defaultTab="completed" />
         </TabsContent>
       </Tabs>
       
       <Button 
         variant="outline"
         className="mb-8"
-        onClick={() => window.location.href = "/rel8t/settings"}
+        asChild
       >
-        View All Relationship Activities
+        <Link to="/rel8t/relationships">
+          View All Relationship Activities
+        </Link>
       </Button>
     </div>
   );

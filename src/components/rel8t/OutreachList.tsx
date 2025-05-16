@@ -6,7 +6,8 @@ import {
   updateOutreachStatus,
   deleteOutreach,
   OutreachStatus,
-  Outreach
+  Outreach,
+  OutreachFilterTab
 } from "@/services/rel8t/outreachService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,7 +38,7 @@ import {
 interface OutreachListProps {
   maxItems?: number;
   showTabs?: boolean;
-  defaultTab?: "today" | "upcoming" | "overdue" | "completed";
+  defaultTab?: OutreachFilterTab;
   className?: string;
 }
 
@@ -47,7 +48,7 @@ const OutreachList = ({
   defaultTab = "today", 
   className = "" 
 }: OutreachListProps) => {
-  const [activeTab, setActiveTab] = useState<string>(defaultTab);
+  const [activeTab, setActiveTab] = useState<OutreachFilterTab>(defaultTab);
   const [outreachToDelete, setOutreachToDelete] = useState<string | null>(null);
   const queryClient = useQueryClient();
   
@@ -124,7 +125,7 @@ const OutreachList = ({
   return (
     <div className={className}>
       {showTabs && (
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterTab)}>
           <TabsList className="grid grid-cols-4 mb-6">
             <TabsTrigger value="today">Today</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
@@ -132,7 +133,7 @@ const OutreachList = ({
             <TabsTrigger value="completed">Completed</TabsTrigger>
           </TabsList>
           
-          {["today", "upcoming", "overdue", "completed"].map(tab => (
+          {(["today", "upcoming", "overdue", "completed"] as OutreachFilterTab[]).map(tab => (
             <TabsContent key={tab} value={tab} className="mt-0">
               {renderOutreachContent()}
             </TabsContent>

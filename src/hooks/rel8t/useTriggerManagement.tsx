@@ -6,7 +6,8 @@ import {
   getTriggers, 
   deleteTrigger, 
   updateTrigger, 
-  Trigger 
+  Trigger,
+  getTriggerStats
 } from "@/services/rel8t/triggerService";
 import { 
   getEmailStatistics, 
@@ -35,6 +36,14 @@ export function useTriggerManagement() {
   } = useQuery({
     queryKey: ["email-statistics"],
     queryFn: getEmailStatistics,
+  });
+
+  // Fetch trigger statistics
+  const { 
+    data: triggerStats = { active: 0, pending: 0, sent: 0, failed: 0, total: 0 } 
+  } = useQuery({
+    queryKey: ["trigger-statistics"],
+    queryFn: getTriggerStats,
   });
 
   // Fetch email notifications
@@ -113,6 +122,7 @@ export function useTriggerManagement() {
     setEditingTrigger,
     triggers,
     emailStats,
+    triggerStats,
     emailNotifications,
     filteredTriggers,
     isLoading,

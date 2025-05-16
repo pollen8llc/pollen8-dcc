@@ -1,26 +1,14 @@
 
-// Note: This is a complete reimplementation of the ContactList component with a sleeker, more mobile-friendly design
 import { useEffect, useState } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { getContacts, deleteMultipleContacts } from "@/services/rel8t/contactService";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
-import { MoreHorizontal, RefreshCcw, Search, Trash2 } from "lucide-react";
+import { RefreshCcw, Search, Trash2 } from "lucide-react";
+import ContactCard from "./ContactCard";
 
 interface ContactListProps {
   onEdit: (contact: any) => void;
@@ -77,16 +65,30 @@ const ContactList = ({ onEdit, onRefresh }: ContactListProps) => {
     }
   };
 
-  const toggleSelectContact = (contactId: string) => {
-    if (selectedContacts.includes(contactId)) {
-      setSelectedContacts(selectedContacts.filter(id => id !== contactId));
-    } else {
+  const toggleSelectContact = (contactId: string, selected: boolean) => {
+    if (selected) {
       setSelectedContacts([...selectedContacts, contactId]);
+    } else {
+      setSelectedContacts(selectedContacts.filter(id => id !== contactId));
     }
   };
-
-  const getCategoryColor = (color: string) => {
-    return `bg-${color}-100 text-${color}-800 dark:bg-${color}-900/20 dark:text-${color}-300`;
+  
+  const handleDeleteContact = (id: string) => {
+    deleteMultipleContacts([id])
+      .then(() => {
+        toast({
+          title: "Contact deleted",
+          description: "The contact has been successfully deleted."
+        });
+        queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      })
+      .catch((error) => {
+        toast({
+          title: "Error",
+          description: "There was an error deleting the contact.",
+          variant: "destructive"
+        });
+      });
   };
   
   if (isLoading) {
@@ -161,77 +163,14 @@ const ContactList = ({ onEdit, onRefresh }: ContactListProps) => {
           <ScrollArea className="h-[calc(100vh-320px)]">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {contacts.map((contact) => (
-                <Card 
-                  key={contact.id} 
-                  className={`overflow-hidden transition-all ${
-                    selectedContacts.includes(contact.id) ? 'ring-2 ring-primary' : ''
-                  }`}
-                >
-                  <div className={`h-2 w-full ${contact.category ? `bg-${contact.category.color}-500` : 'bg-gray-200'}`}></div>
-                  <div className="p-2 flex items-center">
-                    <Checkbox
-                      checked={selectedContacts.includes(contact.id)}
-                      onCheckedChange={() => toggleSelectContact(contact.id)}
-                      aria-label={`Select ${contact.name}`}
-                      className="mr-2"
-                    />
-                    <h3 className="font-semibold text-lg line-clamp-1 flex-1">{contact.name}</h3>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit(contact)}>
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => toggleSelectContact(contact.id)}>
-                          {selectedContacts.includes(contact.id) ? 'Deselect' : 'Select'}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  
-                  <CardContent className="p-4 pt-2">
-                    <div className="space-y-2 mb-3">
-                      {contact.category && (
-                        <Badge variant="secondary" className="mr-1">
-                          {contact.category.name}
-                        </Badge>
-                      )}
-                      {contact.organization && (
-                        <Badge variant="outline" className="mr-1">
-                          {contact.organization}
-                        </Badge>
-                      )}
-                      {contact.location && (
-                        <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/10 mr-1">
-                          {contact.location}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    {contact.email && (
-                      <p className="text-sm text-muted-foreground truncate mb-1">{contact.email}</p>
-                    )}
-                    {contact.phone && (
-                      <p className="text-sm text-muted-foreground truncate">{contact.phone}</p>
-                    )}
-                    
-                    <div className="mt-2 flex justify-end">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => onEdit(contact)}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ContactCard
+                  key={contact.id}
+                  contact={contact}
+                  onEdit={onEdit}
+                  onDelete={handleDeleteContact}
+                  onSelect={toggleSelectContact}
+                  isSelected={selectedContacts.includes(contact.id)}
+                />
               ))}
             </div>
           </ScrollArea>

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Contact {
@@ -478,5 +477,45 @@ export const deleteCategory = async (id: string): Promise<void> => {
   
   if (error) {
     throw new Error(error.message);
+  }
+};
+
+// Delete a contact group
+export const deleteContactGroup = async (id: string): Promise<boolean> => {
+  try {
+    // First, remove all members from this group
+    const { error: memberError } = await supabase
+      .from("rms_contact_group_members")
+      .delete()
+      .eq("group_id", id);
+
+    if (memberError) {
+      throw new Error(`Error removing group members: ${memberError.message}`);
+    }
+    
+    // Then delete the group itself
+    const { error } = await supabase
+      .from("rms_contact_groups")
+      .delete()
+      .eq("id", id);
+    
+    if (error) {
+      throw new Error(`Error deleting group: ${error.message}`);
+    }
+    
+    toast({
+      title: "Group deleted",
+      description: "Contact group has been successfully removed.",
+    });
+    
+    return true;
+  } catch (error: any) {
+    console.error(`Error deleting contact group ${id}:`, error);
+    toast({
+      title: "Error deleting group",
+      description: error.message,
+      variant: "destructive",
+    });
+    return false;
   }
 };

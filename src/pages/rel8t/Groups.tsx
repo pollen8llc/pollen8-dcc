@@ -1,113 +1,114 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
-import Navbar from "@/components/Navbar";
+import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronLeft, Users, Plus, Trash2, Edit } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { 
-  getContactGroups, 
-  createContactGroup, 
-  getContactsInGroup, 
-  ContactGroup 
-} from "@/services/rel8t/contactService";
-import { ChevronLeft, Plus, Users, Trash2, Edit, Circle } from "lucide-react";
-import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
-import { HexColorPicker } from "react-colorful";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from "@/components/ui/alert-dialog";
+import { getContactGroups, createContactGroup, ContactGroup, deleteContactGroup } from "@/services/rel8t/contactService";
+import { toast } from "@/hooks/use-toast";
 
 const Groups = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
-  const [groupToEdit, setGroupToEdit] = useState<ContactGroup | null>(null);
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    color: "#6366f1" // Default color
-  });
-
-  // Get all groups
-  const { data: groups = [], isLoading } = useQuery({
-    queryKey: ["contact-groups"],
-    queryFn: getContactGroups,
-  });
-
-  // Create group mutation
-  const createMutation = useMutation({
-    mutationFn: createContactGroup,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["contact-groups"] });
-      setIsCreateDialogOpen(false);
-      toast({
-        title: "Group created",
-        description: "The contact group has been successfully created."
-      });
-      resetForm();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create group",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Reset form data
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      description: "",
-      color: "#6366f1"
-    });
+  const [newGroup, setNewGroup] = useState({ name: "", description: "", color: "blue" });
+  const [isOpen, setIsOpen] = useState(false);
+  const [groupToDelete, setGroupToDelete] = useState<ContactGroup | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  const handleCloseDialog = () => {
+    setIsOpen(false);
   };
-
-  // Handle create group
-  const handleCreateGroup = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) {
+  
+  const handleSubmit = async () => {
+    if (!newGroup.name) {
       toast({
-        title: "Validation error",
-        description: "Group name is required",
+        title: "Group name required",
+        description: "Please enter a name for the group",
         variant: "destructive"
       });
       return;
     }
-    createMutation.mutate(formData);
+    
+    try {
+      await createContactGroup({
+        name: newGroup.name,
+        description: newGroup.description,
+        color: newGroup.color,
+      });
+      
+      toast({
+        title: "Group created",
+        description: "Contact group has been successfully created",
+      });
+      
+      setNewGroup({ name: "", description: "", color: "blue" });
+      setIsOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["contact-groups"] });
+    } catch (error) {
+      toast({
+        title: "Error creating group",
+        description: "There was a problem creating the contact group",
+        variant: "destructive"
+      });
+    }
   };
 
-  // Handle input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleDeleteGroup = async () => {
+    if (!groupToDelete) return;
+    
+    try {
+      await deleteContactGroup(groupToDelete.id);
+      setGroupToDelete(null);
+      setIsDeleteDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["contact-groups"] });
+      
+      toast({
+        title: "Group deleted",
+        description: "Contact group has been successfully deleted",
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting group",
+        description: "There was a problem deleting the contact group",
+        variant: "destructive"
+      });
+    }
   };
-
-  // View contacts in group
-  const handleViewContacts = (groupId: string) => {
-    navigate(`/rel8t/contacts?group=${groupId}`);
+  
+  const { data: groups = [], isLoading } = useQuery({
+    queryKey: ["contact-groups"],
+    queryFn: getContactGroups
+  });
+  
+  const getColorClass = (color: string | undefined) => {
+    const colorMap: Record<string, string> = {
+      'blue': 'bg-blue-500',
+      'green': 'bg-green-500',
+      'red': 'bg-red-500',
+      'yellow': 'bg-yellow-500',
+      'purple': 'bg-purple-500',
+      'pink': 'bg-pink-500',
+      'indigo': 'bg-indigo-500',
+      'gray': 'bg-gray-500'
+    };
+    
+    return colorMap[color || 'blue'] || 'bg-blue-500';
   };
 
   return (
@@ -120,13 +121,13 @@ const Groups = () => {
             variant="ghost" 
             size="sm" 
             className="mr-2" 
-            onClick={() => navigate("/rel8")}
+            onClick={() => navigate("/rel8t")}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to Dashboard
           </Button>
         </div>
-
+        
         <Rel8Navigation />
         
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
@@ -134,72 +135,150 @@ const Groups = () => {
             <h1 className="text-3xl font-bold">Contact Groups</h1>
             <p className="text-muted-foreground">Organize your contacts into groups</p>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Create Group
-          </Button>
+          
+          <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            <AlertDialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                New Group
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Create New Group</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Add a new group to organize your contacts.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="group-name">Group Name</Label>
+                  <Input
+                    id="group-name"
+                    placeholder="Friends, Colleagues, Family, etc."
+                    value={newGroup.name}
+                    onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="group-description">Description (Optional)</Label>
+                  <Input
+                    id="group-description"
+                    placeholder="A brief description of this group"
+                    value={newGroup.description}
+                    onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="group-color">Color</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {['blue', 'green', 'red', 'yellow', 'purple', 'pink', 'indigo', 'gray'].map(color => (
+                      <div
+                        key={color}
+                        onClick={() => setNewGroup({ ...newGroup, color })}
+                        className={`w-8 h-8 rounded-full cursor-pointer ${getColorClass(color)} ${
+                          newGroup.color === color ? 'ring-2 ring-offset-2' : ''
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={handleCloseDialog}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleSubmit}>Create Group</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Group</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete the group "{groupToDelete?.name}"? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setGroupToDelete(null)}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDeleteGroup}
+                  className="bg-destructive text-destructive-foreground"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-
+        
         {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-2 text-sm text-muted-foreground">Loading groups...</p>
-          </div>
+          <div className="text-center py-12">Loading groups...</div>
         ) : groups.length === 0 ? (
-          <div className="text-center py-12 border border-dashed rounded-lg">
-            <Users className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-2 font-semibold">No contact groups</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Create your first contact group to organize your contacts.
+          <div className="text-center py-12 border rounded-lg">
+            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No Groups Yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Create your first contact group to start organizing your network
             </p>
-            <Button onClick={() => setIsCreateDialogOpen(true)} className="mt-4 gap-2">
-              <Plus className="h-4 w-4" />
+            <Button onClick={() => setIsOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
               Create Group
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {groups.map((group) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {groups.map(group => (
               <Card key={group.id} className="overflow-hidden">
+                <div className={`h-2 ${getColorClass(group.color)}`} />
                 <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: group.color || '#6366f1' }} 
-                      />
-                      <CardTitle>{group.name}</CardTitle>
-                    </div>
+                  <CardTitle className="flex justify-between">
+                    <span>{group.name}</span>
                     <div className="flex gap-1">
                       <Button 
                         variant="ghost" 
-                        size="icon" 
-                        onClick={() => setGroupToEdit(group)}
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          // Handle edit - not implementing full edit functionality yet
+                          toast({
+                            title: "Edit coming soon",
+                            description: "Edit functionality will be available in a future update."
+                          });
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 
-                        size="icon" 
-                        className="text-destructive hover:text-destructive" 
-                        onClick={() => setGroupToDelete(group.id)}
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setGroupToDelete(group);
+                          setIsDeleteDialogOpen(true);
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                  {group.description && (
-                    <CardDescription className="mt-1">{group.description}</CardDescription>
-                  )}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {group.description || "No description provided"}
+                  </p>
+                  
                   <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    onClick={() => handleViewContacts(group.id)}
-                    className="gap-2 w-full"
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/rel8t/groups/${group.id}`)}
                   >
-                    <Users className="h-4 w-4" />
                     View Contacts
                   </Button>
                 </CardContent>
@@ -208,165 +287,6 @@ const Groups = () => {
           </div>
         )}
       </div>
-
-      {/* Create Group Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create Contact Group</DialogTitle>
-            <DialogDescription>
-              Create a new group to organize your contacts.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateGroup}>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Group name"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="description">Description (optional)</Label>
-                <Input
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Brief description of this group"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label>Group Color</Label>
-                <div className="flex items-center gap-3">
-                  <Popover open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
-                    <PopoverTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        className="w-12 h-8 p-0 flex items-center justify-center"
-                        type="button"
-                      >
-                        <div 
-                          className="w-8 h-5 rounded" 
-                          style={{ backgroundColor: formData.color }} 
-                        />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-3" align="start">
-                      <HexColorPicker
-                        color={formData.color}
-                        onChange={(color) => setFormData({ ...formData, color })}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <Input
-                    value={formData.color}
-                    onChange={handleInputChange}
-                    name="color"
-                    className="font-mono"
-                  />
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsCreateDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={createMutation.isPending}
-              >
-                {createMutation.isPending ? 'Creating...' : 'Create Group'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!groupToDelete} onOpenChange={() => setGroupToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the group
-              and remove all contact associations to this group.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              className="bg-destructive text-destructive-foreground"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Edit Group Dialog */}
-      <Dialog open={!!groupToEdit} onOpenChange={() => setGroupToEdit(null)}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Contact Group</DialogTitle>
-            <DialogDescription>
-              Update the details of this contact group.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">Name</Label>
-              <Input
-                id="edit-name"
-                placeholder="Group name"
-                defaultValue={groupToEdit?.name}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-description">Description (optional)</Label>
-              <Input
-                id="edit-description"
-                placeholder="Brief description of this group"
-                defaultValue={groupToEdit?.description || ''}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Group Color</Label>
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-6 h-6 rounded border" 
-                  style={{ backgroundColor: groupToEdit?.color || '#6366f1' }} 
-                />
-                <Input
-                  defaultValue={groupToEdit?.color || '#6366f1'}
-                  className="font-mono"
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setGroupToEdit(null)}
-            >
-              Cancel
-            </Button>
-            <Button>
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
