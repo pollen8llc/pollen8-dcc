@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +12,7 @@ import { StatisticsChart } from '@/components/rel8t/StatisticsChart';
 import { Bell, CalendarClock, Users, UserPlus, Settings as SettingsIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getOutreach } from '@/services/rel8t/outreachService';
+import { Rel8Navigation } from '@/components/rel8t/Rel8TNavigation';
 
 // Placeholder data for analytics until we connect to real data
 const mockStats = {
@@ -57,7 +57,7 @@ const Notifications = () => {
   const completedCount = notifications.filter(n => n.status === 'completed').length;
 
   const handleCreateOutreach = () => {
-    navigate('/rel8t/wizard');
+    navigate('/rel8/wizard');
   };
 
   return (
@@ -75,14 +75,14 @@ const Notifications = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline" 
-              onClick={() => navigate('/rel8t/contacts')}
+              onClick={() => navigate('/rel8/contacts')}
             >
               <Users className="mr-2 h-4 w-4" />
               Contacts
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => navigate('/rel8t/settings')}
+              onClick={() => navigate('/rel8/settings')}
             >
               <SettingsIcon className="mr-2 h-4 w-4" />
               Settings
@@ -93,6 +93,8 @@ const Notifications = () => {
             </Button>
           </div>
         </div>
+
+        <Rel8Navigation />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <MetricCard

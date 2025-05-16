@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -111,7 +110,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t")}
+                  onClick={() => handleNavigation("/rel8")}
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
@@ -120,7 +119,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/contacts")}
+                  onClick={() => handleNavigation("/rel8/contacts")}
                 >
                   <ContactIcon className="mr-2 h-4 w-4" />
                   Contacts
@@ -129,7 +128,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/groups")}
+                  onClick={() => handleNavigation("/rel8/groups")}
                 >
                   <Grid3x3 className="mr-2 h-4 w-4" />
                   Groups
@@ -138,7 +137,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/import")}
+                  onClick={() => handleNavigation("/rel8/import")}
                 >
                   <Import className="mr-2 h-4 w-4" />
                   Import
@@ -147,7 +146,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/settings")}
+                  onClick={() => handleNavigation("/rel8/settings")}
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
