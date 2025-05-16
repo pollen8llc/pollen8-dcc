@@ -51,7 +51,7 @@ export function useTriggerManagement() {
     data: emailNotifications = [] 
   } = useQuery({
     queryKey: ["email-notifications"],
-    queryFn: () => getEmailNotifications(),
+    queryFn: getEmailNotifications,
   });
 
   // Filter triggers based on active tab
@@ -73,6 +73,10 @@ export function useTriggerManagement() {
       await updateTrigger(editingTrigger.id, editingTrigger);
       setIsEditDialogOpen(false);
       refetch();
+      toast({
+        title: "Trigger updated",
+        description: "The trigger has been successfully updated.",
+      });
     } catch (error) {
       console.error("Error updating trigger:", error);
       toast({
@@ -88,6 +92,10 @@ export function useTriggerManagement() {
       try {
         await deleteTrigger(id);
         refetch();
+        toast({
+          title: "Trigger deleted",
+          description: "The trigger has been successfully deleted.",
+        });
       } catch (error) {
         console.error("Error deleting trigger:", error);
         toast({
@@ -103,6 +111,10 @@ export function useTriggerManagement() {
     try {
       await updateTrigger(id, { is_active: !isActive });
       refetch();
+      toast({
+        title: `Trigger ${!isActive ? 'activated' : 'deactivated'}`,
+        description: `The trigger has been ${!isActive ? 'activated' : 'deactivated'}.`,
+      });
     } catch (error) {
       console.error("Error updating trigger status:", error);
       toast({

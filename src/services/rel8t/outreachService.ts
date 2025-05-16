@@ -4,7 +4,7 @@ import { toast } from "@/hooks/use-toast";
 
 export type OutreachStatus = "pending" | "overdue" | "completed";
 export type OutreachPriority = "low" | "medium" | "high";
-export type OutreachFilterTab = "today" | "upcoming" | "overdue" | "completed";
+export type OutreachFilterTab = "today" | "upcoming" | "overdue" | "completed" | "all";
 
 export interface OutreachStatusCounts {
   today: number;
@@ -86,7 +86,7 @@ export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> =
   }
 };
 
-export const getOutreach = async (tab: OutreachFilterTab): Promise<Outreach[]> => {
+export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outreach[]> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -133,6 +133,7 @@ export const getOutreach = async (tab: OutreachFilterTab): Promise<Outreach[]> =
       case "completed":
         query = query.eq("status", "completed");
         break;
+      // "all" tab doesn't need additional filters
     }
     
     // Execute query
@@ -142,11 +143,21 @@ export const getOutreach = async (tab: OutreachFilterTab): Promise<Outreach[]> =
     
     // Process data to format contacts
     const formattedData = data?.map(item => {
+      // Extract contacts from nested structure
       const contacts = item.contacts?.map(contactItem => contactItem.contact) || [];
+      
+      // Ensure priority is correctly typed
+      const priority = item.priority as OutreachPriority;
+      if (!['low', 'medium', 'high'].includes(priority)) {
+        // Default to 'medium' if invalid value
+        item.priority = 'medium';
+      }
+      
       return {
         ...item,
+        priority: item.priority as OutreachPriority,
         contacts
-      };
+      } as Outreach;
     });
     
     return formattedData || [];

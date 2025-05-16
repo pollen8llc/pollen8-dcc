@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,10 +40,10 @@ const Notifications = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState('all');
 
-  // Fetch notifications
+  // Fetch notifications - pass "all" as the default tab
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['outreach-notifications'],
-    queryFn: () => getOutreach(),
+    queryFn: () => getOutreach("all"),
   });
 
   // Filter notifications based on active tab
