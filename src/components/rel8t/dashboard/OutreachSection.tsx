@@ -13,10 +13,11 @@ import OutreachList from "@/components/rel8t/OutreachList";
 export const OutreachSection = () => {
   const [activeTab, setActiveTab] = useState("today");
 
-  // Get outreach data counts
+  // Get outreach data counts with shorter staleTime to refresh more frequently
   const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 }, isLoading: countsLoading } = useQuery({
     queryKey: ["outreach-counts"],
     queryFn: getOutreachStatusCounts,
+    staleTime: 1000 * 60, // 1 minute
   });
 
   return (

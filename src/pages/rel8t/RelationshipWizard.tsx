@@ -51,8 +51,8 @@ const RelationshipWizard = () => {
   };
 
   const handleReviewSubmit = () => {
-    // In a real scenario, we would submit the data to the server here
-    navigate("/rel8");
+    // Redirect to the relationships page after successful submission
+    navigate("/rel8/relationships");
   };
 
   const getStepTitle = () => {
@@ -78,7 +78,7 @@ const RelationshipWizard = () => {
             variant="ghost" 
             size="sm" 
             className="mr-2" 
-            onClick={() => navigate("/rel8")}
+            onClick={() => navigate("/rel8/dashboard")}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to Dashboard

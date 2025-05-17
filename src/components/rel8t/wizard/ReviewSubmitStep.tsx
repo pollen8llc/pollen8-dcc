@@ -23,6 +23,10 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { createOutreach } from "@/services/rel8t/outreachService";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { addDays } from "date-fns";
 
 interface ReviewSubmitStepProps {
   wizardData: {
@@ -34,11 +38,30 @@ interface ReviewSubmitStepProps {
   onPrevious?: () => void;
 }
 
+// Helper function to calculate due date based on trigger type
+const calculateDueDate = (triggerType: string) => {
+  const today = new Date();
+  const dueDateMap: Record<string, Date> = {
+    "Follow up in 1 week": addDays(today, 7),
+    "Schedule monthly check-in": addDays(today, 30),
+    "Quarterly review": addDays(today, 90),
+    "Send welcome message": addDays(today, 1),
+    "Introduce to team": addDays(today, 3),
+    "Share resources": addDays(today, 2),
+    "Reconnect soon": addDays(today, 14), 
+    "Birthday reminder": addDays(today, 7), // Default to 7 days unless actual date known
+  };
+  
+  return dueDateMap[triggerType] || addDays(today, 7); // Default to 1 week
+};
+
 export const ReviewSubmitStep = ({
   wizardData,
   onSubmit,
   onPrevious,
 }: ReviewSubmitStepProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -48,13 +71,53 @@ export const ReviewSubmitStep = ({
   const { contacts, triggers, priority } = wizardData;
 
   const handleSubmit = async () => {
+    if (contacts.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No contacts selected",
+        description: "Please select at least one contact to create a relationship plan."
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmissionStatus("submitting");
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create an outreach item for each trigger
+      const contactIds = contacts.map(contact => contact.id);
+      const outreachPromises = triggers.map(async (trigger) => {
+        const dueDate = calculateDueDate(trigger.name);
+        
+        const outreach = {
+          title: trigger.name,
+          description: trigger.description || `Reminder for ${contacts.map(c => c.name).join(', ')}`,
+          priority: priority,
+          status: 'pending',
+          due_date: dueDate.toISOString()
+        };
+        
+        return await createOutreach(outreach, contactIds);
+      });
+      
+      // Wait for all outreach items to be created
+      const results = await Promise.all(outreachPromises);
+      
+      // Check if any failed
+      if (results.some(id => id === null)) {
+        throw new Error("Some outreach items could not be created");
+      }
+      
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["outreach"] });
+      queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
+      
       setSubmissionStatus("success");
+      toast({
+        title: "Relationship plan created",
+        description: `Created ${triggers.length} outreach reminders for ${contacts.length} contacts.`
+      });
+      
       setTimeout(() => {
         onSubmit();
       }, 1500);
@@ -62,6 +125,11 @@ export const ReviewSubmitStep = ({
       console.error("Submission error:", error);
       setSubmissionStatus("error");
       setErrorMessage("Failed to create relationship plan. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to create relationship plan. Please try again."
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -184,7 +252,7 @@ export const ReviewSubmitStep = ({
                   </p>
                 )}
                 <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="outline">{trigger.condition}</Badge>
+                  <Badge variant="outline">Due {calculateDueDate(trigger.name).toLocaleDateString()}</Badge>
                   <Badge variant="secondary">{trigger.action}</Badge>
                 </div>
               </div>

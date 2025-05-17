@@ -1,5 +1,4 @@
 
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -24,10 +23,11 @@ const Relationships = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("outreach");
   
-  // Get outreach status counts
+  // Get outreach status counts with shorter staleTime
   const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 } } = useQuery({
     queryKey: ["outreach-counts"],
     queryFn: getOutreachStatusCounts,
+    staleTime: 1000 * 60, // 1 minute
   });
   
   // Get contact count
@@ -41,6 +41,11 @@ const Relationships = () => {
     queryKey: ["contact-categories"],
     queryFn: getCategories,
   });
+
+  // Handler for creating a new relationship
+  const handleCreateRelationship = () => {
+    navigate("/rel8/wizard");
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -70,11 +75,11 @@ const Relationships = () => {
           </div>
           
           <Button 
-            onClick={() => navigate("/rel8/wizard")}
+            onClick={handleCreateRelationship}
             className="flex items-center gap-2"
           >
             <PlusCircle className="h-4 w-4" />
-            Create Outreach
+            Create Relationship Plan
           </Button>
         </div>
         
@@ -144,6 +149,22 @@ const Relationships = () => {
             <OutreachList defaultTab="completed" showTabs={false} />
           </TabsContent>
         </Tabs>
+
+        {/* Add empty state with CTA if no outreach tasks exist */}
+        {outreachCounts.today + outreachCounts.upcoming + outreachCounts.overdue === 0 && 
+          activeTab === "outreach" && (
+          <div className="text-center py-8 mt-6 border border-dashed rounded-lg">
+            <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
+            <h3 className="text-lg font-medium">No outreach tasks</h3>
+            <p className="text-muted-foreground mt-2 mb-4">
+              Create a relationship plan to start nurturing your network
+            </p>
+            <Button onClick={handleCreateRelationship}>
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Create Relationship Plan
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
