@@ -1,4 +1,5 @@
 
+// Only updating the necessary parts to fix routing paths
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
@@ -121,7 +122,7 @@ const Groups = () => {
             variant="ghost" 
             size="sm" 
             className="mr-2" 
-            onClick={() => navigate("/rel8")}
+            onClick={() => navigate("/rel8/dashboard")}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to Dashboard

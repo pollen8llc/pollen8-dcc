@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getOutreach, getOutreachStatusCounts } from "@/services/rel8t/outreachService";
+import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import OutreachList from "@/components/rel8t/OutreachList";
 
 export const OutreachSection = () => {
@@ -155,7 +155,7 @@ export const OutreachSection = () => {
         className="mb-8"
         asChild
       >
-        <Link to="/rel8t/relationships">
+        <Link to="/rel8/relationships">
           View All Relationship Activities
         </Link>
       </Button>

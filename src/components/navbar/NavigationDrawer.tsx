@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import {
   Import,
   Grid3x3,
   LayoutDashboard,
+  CalendarClock,
 } from "lucide-react";
 
 interface NavigationDrawerProps {
@@ -110,7 +112,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8")}
+                  onClick={() => handleNavigation("/rel8/dashboard")}
                 >
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
@@ -123,6 +125,15 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 >
                   <ContactIcon className="mr-2 h-4 w-4" />
                   Contacts
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8/relationships")}
+                >
+                  <CalendarClock className="mr-2 h-4 w-4" />
+                  Relationships
                 </Button>
                 
                 <Button

@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
 import { Calendar, Users, PlusCircle } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
+import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,7 +47,9 @@ const Relationships = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Breadcrumb className="mb-6">
+        <Rel8Navigation />
+        
+        <Breadcrumb className="mb-6 mt-4">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>

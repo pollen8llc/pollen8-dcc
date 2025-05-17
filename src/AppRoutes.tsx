@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
@@ -34,6 +33,7 @@ import ImportContacts from "./pages/rel8t/ImportContacts";
 import Groups from "./pages/rel8t/Groups";
 import Dashboard from "./pages/rel8t/Dashboard";
 import RelationshipWizard from "./pages/rel8t/RelationshipWizard";
+import Relationships from "./pages/rel8t/Relationships";
 
 const AppRoutes = () => {
   const { currentUser, isLoading } = useUser();
@@ -68,7 +68,7 @@ const AppRoutes = () => {
         (currentUser.role === UserRole.ORGANIZER || (currentUser.managedCommunities && currentUser.managedCommunities.length > 0)) &&
         window.location.pathname === '/') {
       console.log("Organizer detected, redirecting to REL8 dashboard");
-      navigate('/rel8');
+      navigate('/rel8/dashboard');
     }
   }, [currentUser, navigate]);
 
@@ -93,6 +93,11 @@ const AppRoutes = () => {
           <Dashboard />
         </ProtectedRoute>
       } />
+      <Route path="/rel8/dashboard" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <Dashboard />
+        </ProtectedRoute>
+      } />
       <Route path="/rel8/notifications" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <Notifications />
@@ -108,8 +113,16 @@ const AppRoutes = () => {
           <Contacts />
         </ProtectedRoute>
       } />
-      <Route path="/rel8/contacts/new" element={<ContactCreate />} />
-      <Route path="/rel8/contacts/:id" element={<ContactEdit />} />
+      <Route path="/rel8/contacts/new" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <ContactCreate />
+        </ProtectedRoute>
+      } />
+      <Route path="/rel8/contacts/:id" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <ContactEdit />
+        </ProtectedRoute>
+      } />
       <Route path="/rel8/wizard" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <RelationshipWizard />
@@ -123,6 +136,11 @@ const AppRoutes = () => {
       <Route path="/rel8/groups" element={
         <ProtectedRoute requiredRole="ORGANIZER">
           <Groups />
+        </ProtectedRoute>
+      } />
+      <Route path="/rel8/relationships" element={
+        <ProtectedRoute requiredRole="ORGANIZER">
+          <Relationships />
         </ProtectedRoute>
       } />
       
