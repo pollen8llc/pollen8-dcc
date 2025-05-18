@@ -85,7 +85,7 @@ export function BasicInfoForm({ form }: BasicInfoFormProps) {
 
             <FormField
               control={form.control}
-              name="targetAudience"
+              name="target_audience"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-foreground/90 font-medium">Target Audience</FormLabel>

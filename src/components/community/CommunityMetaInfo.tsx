@@ -1,147 +1,177 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { 
-  User, Layers, MapPin, Calendar, Users, 
-  Link as LinkIcon, Mail, MessageSquare 
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import * as communityService from "@/services/communityService";
-import { format } from "date-fns";
-import { Separator } from "@/components/ui/separator";
+import React from "react";
 import { SocialMediaLinks } from "./SocialMediaLinks";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Community } from "@/models/types";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Globe, Map, Users, Tag } from "lucide-react";
+import { formatCommunityType } from "@/utils/communityUtils";
 
 interface CommunityMetaInfoProps {
-  communityId: string;
+  community: Community;
 }
 
-const CommunityMetaInfo = ({ communityId }: CommunityMetaInfoProps) => {
-  const { data: community, isLoading } = useQuery({
-    queryKey: ['community', communityId],
-    queryFn: () => communityService.getCommunityById(communityId),
-    enabled: !!communityId
-  });
-
-  if (isLoading) {
-    return <Skeleton className="w-full h-48" />;
-  }
-
-  if (!community) return null;
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Not specified";
-    try {
-      return format(new Date(dateString), "MMMM dd, yyyy");
-    } catch {
-      return dateString;
-    }
+export function CommunityMetaInfo({ community }: CommunityMetaInfoProps) {
+  // Helper functions to format data consistently
+  const formatDate = (date: string | undefined) => {
+    if (!date) return "Not specified";
+    return date;
   };
 
-  interface InfoItem {
-    icon: JSX.Element;
-    title: string;
-    value: string;
-  }
-
-  const basicInfo: InfoItem[] = [
-    {
-      icon: <User className="h-5 w-5" />,
-      title: "Founder",
-      value: community.founder_name || "Not specified"
-    },
-    {
-      icon: <Layers className="h-5 w-5" />,
-      title: "Community Type",
-      value: community.type || "Not specified"
-    },
-    {
-      icon: <MapPin className="h-5 w-5" />,
-      title: "Location",
-      value: community.location || "Remote"
-    },
-    {
-      icon: <Calendar className="h-5 w-5" />,
-      title: "Created",
-      value: formatDate(community.created_at)
-    },
-    {
-      icon: <Users className="h-5 w-5" />,
-      title: "Current Size",
-      value: `${community.member_count || 0} members`
-    },
-    {
-      icon: <MessageSquare className="h-5 w-5" />,
-      title: "Format",
-      value: community.format?.charAt(0).toUpperCase() + community.format?.slice(1) || "Not specified"
+  const getTargetAudience = () => {
+    // Handle both targetAudience and target_audience
+    const audience = community.target_audience || community.targetAudience || [];
+    
+    // Check if audience is already an array
+    if (Array.isArray(audience)) {
+      return audience;
     }
-  ];
+    
+    // If it's a string, split it by commas
+    if (typeof audience === 'string') {
+      return audience.split(',').map(item => item.trim()).filter(Boolean);
+    }
+    
+    return [];
+  };
+
+  const getSize = () => {
+    return community.community_size || community.communitySize || "Not specified";
+  };
+
+  const getType = () => {
+    const type = community.type || community.communityType;
+    return type ? formatCommunityType(type) : "Not specified";
+  };
+
+  // Format platforms
+  const getPlatforms = () => {
+    if (community.primaryPlatforms && Array.isArray(community.primaryPlatforms)) {
+      return community.primaryPlatforms;
+    }
+    
+    if (community.platforms && Array.isArray(community.platforms)) {
+      return community.platforms;
+    }
+    
+    return [];
+  };
+  
+  // Ensure social_media is properly formatted for SocialMediaLinks component
+  const getSocialMedia = () => {
+    // If it's already in the correct format
+    if (community.social_media && typeof community.social_media === 'object') {
+      return community.social_media;
+    }
+    
+    // If it's using the socialMedia alias
+    if (community.socialMedia && typeof community.socialMedia === 'object') {
+      return community.socialMedia;
+    }
+    
+    // Handle individual social media fields
+    const socialMedia: Record<string, string | { url?: string }> = {};
+    
+    if (community.twitter) socialMedia.twitter = community.twitter;
+    if (community.facebook) socialMedia.facebook = community.facebook;
+    if (community.instagram) socialMedia.instagram = community.instagram;
+    if (community.linkedin) socialMedia.linkedin = community.linkedin;
+    
+    return Object.keys(socialMedia).length > 0 ? socialMedia : null;
+  };
 
   return (
-    <div className="container mx-auto px-4 mb-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {basicInfo.map((info, index) => (
-          <Card key={index} className="glass dark:glass-dark">
-            <CardContent className="p-4 flex items-start gap-3">
-              <div className="bg-muted/50 rounded-full p-2 text-foreground mt-1 flex-shrink-0">
-                {info.icon}
-              </div>
-              <div>
-                <p className="font-medium text-sm">{info.title}</p>
-                <p className="text-base text-muted-foreground break-words">
-                  {info.value}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Additional Details */}
-      <Card className="glass dark:glass-dark">
-        <CardContent className="p-6 space-y-6">
-          {/* Target Audience */}
-          {community.target_audience && community.target_audience.length > 0 && (
-            <>
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Target Audience</h3>
-                <div className="flex flex-wrap gap-2">
-                  {community.target_audience.map((audience, index) => (
-                    <span key={index} className="px-3 py-1 bg-muted rounded-full text-sm">
-                      {audience}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <Separator className="my-4" />
-            </>
-          )}
-
-          {/* Newsletter */}
-          {community.newsletter_url && (
-            <>
-              <div>
-                <a 
-                  href={community.newsletter_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
-                >
-                  <Mail className="h-4 w-4" />
-                  Subscribe to Newsletter
-                </a>
-              </div>
-              <Separator className="my-4" />
-            </>
-          )}
+    <div className="space-y-6">
+      <Card className="bg-black/5 border-white/10">
+        <CardContent className="p-6">
+          <h3 className="text-xl font-semibold mb-4">Community Details</h3>
           
-          {/* Social Media */}
-          {community.social_media && Object.keys(community.social_media).length > 0 && (
-            <SocialMediaLinks socialMedia={community.social_media} />
-          )}
+          <div className="space-y-4">
+            <div className="flex gap-2 items-center">
+              <Tag className="h-5 w-5 text-primary/70" />
+              <div>
+                <p className="text-sm text-muted-foreground">Type</p>
+                <p className="font-medium">{getType()}</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 items-center">
+              <Globe className="h-5 w-5 text-primary/70" />
+              <div>
+                <p className="text-sm text-muted-foreground">Format</p>
+                <p className="font-medium">{community.format || "Not specified"}</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 items-center">
+              <Map className="h-5 w-5 text-primary/70" />
+              <div>
+                <p className="text-sm text-muted-foreground">Location</p>
+                <p className="font-medium">{community.location || "Not specified"}</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 items-center">
+              <Calendar className="h-5 w-5 text-primary/70" />
+              <div>
+                <p className="text-sm text-muted-foreground">Started</p>
+                <p className="font-medium">{formatDate(community.launchDate || community.createdAt || community.created_at)}</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 items-start">
+              <Users className="h-5 w-5 text-primary/70 mt-1" />
+              <div>
+                <p className="text-sm text-muted-foreground">Size</p>
+                <p className="font-medium">{getSize()}</p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
+      
+      {/* Target audience */}
+      <Card className="bg-black/5 border-white/10">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-3">Target Audience</h3>
+          <div className="flex flex-wrap gap-2">
+            {getTargetAudience().length > 0 ? (
+              getTargetAudience().map((tag, index) => (
+                <Badge key={index} variant="secondary" className="bg-primary/10">
+                  {tag}
+                </Badge>
+              ))
+            ) : (
+              <p className="text-muted-foreground">No target audience specified</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Platforms */}
+      {getPlatforms().length > 0 && (
+        <Card className="bg-black/5 border-white/10">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-3">Platforms</h3>
+            <div className="flex flex-wrap gap-2">
+              {getPlatforms().map((platform, index) => (
+                <Badge key={index} variant="outline" className="border-primary/30">
+                  {platform}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Social Media */}
+      {getSocialMedia() && (
+        <Card className="bg-black/5 border-white/10">
+          <CardContent className="p-6">
+            <SocialMediaLinks socialMedia={getSocialMedia()} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
-};
-
-export default CommunityMetaInfo;
+}

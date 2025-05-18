@@ -39,7 +39,7 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
       if (searchQuery && searchQuery.trim() !== '') {
         return communityService.searchCommunities(searchQuery);
       } else {
-        return communityService.getAllCommunities(page, pageSize);
+        return communityService.getAllCommunities(page);
       }
     },
     staleTime: 60 * 1000, // 1 minute
@@ -58,20 +58,28 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
   
   // Update the combined list when new data arrives
   useEffect(() => {
-    if (communities.length > 0) {
+    if (communities) {
+      const communityData = Array.isArray(communities) 
+        ? communities 
+        : communities.data || [];
+      
       if (page === 1) {
-        setAllCommunities(communities);
+        setAllCommunities(communityData as Community[]);
       } else {
-        setAllCommunities(prev => [...prev, ...communities]);
+        setAllCommunities(prev => [...prev, ...(communityData as Community[])]);
       }
-      setHasMore(communities.length === pageSize);
+      
+      const communityArray = Array.isArray(communities) 
+        ? communities 
+        : communities.data || [];
+      setHasMore(communityArray.length === pageSize);
     } else if (page === 1) {
       setAllCommunities([]);
       setHasMore(false);
     } else {
       setHasMore(false);
     }
-  }, [communities, page]);
+  }, [communities, page, pageSize]);
   
   // Load more when the load more element comes into view
   useEffect(() => {

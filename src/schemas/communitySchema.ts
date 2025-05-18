@@ -22,7 +22,7 @@ export const communitySchema = z.object({
   type: z.enum(Object.values(COMMUNITY_TYPES) as [string, ...string[]]),
   format: z.enum(Object.values(COMMUNITY_FORMATS) as [string, ...string[]]),
   location: z.string().optional(),
-  target_audience: z.array(z.string()).optional(),
+  target_audience: z.array(z.string()).optional().or(z.string().optional()),
   platforms: z.array(z.string()).optional(),
   website: z.string().url({ message: "Website must be a valid URL" }).optional().or(z.literal("")),
   newsletter_url: z.string().url({ message: "Newsletter URL must be a valid URL" }).optional().or(z.literal("")),

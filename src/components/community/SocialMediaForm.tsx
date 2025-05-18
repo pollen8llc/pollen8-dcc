@@ -14,11 +14,11 @@ export function SocialMediaForm({ form }: SocialMediaFormProps) {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField
           control={form.control}
-          name="socialMediaHandles.twitter"
+          name="social_media.twitter"
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="Twitter handle" {...field} />
+                <Input placeholder="Twitter handle" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -26,11 +26,11 @@ export function SocialMediaForm({ form }: SocialMediaFormProps) {
         />
         <FormField
           control={form.control}
-          name="socialMediaHandles.instagram"
+          name="social_media.instagram"
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="Instagram handle" {...field} />
+                <Input placeholder="Instagram handle" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -38,11 +38,11 @@ export function SocialMediaForm({ form }: SocialMediaFormProps) {
         />
         <FormField
           control={form.control}
-          name="socialMediaHandles.linkedin"
+          name="social_media.linkedin"
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="LinkedIn URL" {...field} />
+                <Input placeholder="LinkedIn URL" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -50,11 +50,11 @@ export function SocialMediaForm({ form }: SocialMediaFormProps) {
         />
         <FormField
           control={form.control}
-          name="socialMediaHandles.facebook"
+          name="social_media.facebook"
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="Facebook URL" {...field} />
+                <Input placeholder="Facebook URL" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
