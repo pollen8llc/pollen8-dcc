@@ -161,12 +161,32 @@ input:focus, textarea:focus, select:focus {
   to { transform: scale(1); opacity: 1; }
 }
 
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
 .animate-scale-in {
   animation: scaleIn 0.3s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: pulse 4s ease-in-out infinite;
 }
 
 /* Staggered animations */
@@ -208,4 +228,76 @@ input:focus, textarea:focus, select:focus {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-border;
+}
+
+/* New gradient styles */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#00eada] to-[#00eada]/70;
+}
+
+.gradient-border {
+  @apply border border-transparent bg-origin-border relative;
+  background-clip: padding-box, border-box;
+  background-image: 
+    linear-gradient(to bottom, hsl(215 25% 10%), hsl(215 25% 10%)), 
+    linear-gradient(to bottom, #00eada20, #00eada05);
+}
+
+/* Modern card styles for dashboard */
+.dashboard-card {
+  @apply rounded-2xl border border-border/30 bg-card shadow-lg transition-all duration-300;
+}
+
+.dashboard-card-hover {
+  @apply hover:border-[#00eada]/20 hover:shadow-[#00eada]/5;
+}
+
+/* Improved typography for headlines */
+h1, h2, h3, h4, h5, h6 {
+  @apply tracking-tight;
+}
+
+/* Modern feature card with hover effect */
+.feature-card {
+  @apply p-6 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300;
+  @apply hover:border-[#00eada]/20 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Grid patterns for consistent layout */
+.auto-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+/* Full-bleed section for edge-to-edge designs */
+.full-bleed {
+  @apply w-[100vw] relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw];
+}
+
+/* High-contrast on hover for interactive elements */
+.high-contrast-hover {
+  @apply transition-colors duration-200;
+  @apply hover:bg-white/10;
+}
+
+/* Gradient border animation */
+.gradient-border-animated {
+  position: relative;
+}
+
+.gradient-border-animated::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(90deg, #00eada, #0077ff, #00eada);
+  background-size: 200% 200%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: gradient-animation 6s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
 }
