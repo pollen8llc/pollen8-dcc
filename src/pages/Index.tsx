@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { Loader2 } from "lucide-react";
+import { Shell } from "@/components/layout/Shell";
 import LandingPage from "./LandingPage";
 
 const Index = () => {
@@ -24,8 +25,12 @@ const Index = () => {
     );
   }
 
-  // If not logged in, show the landing page
-  return <LandingPage />;
+  // If not logged in, show the landing page with heroMode=true for full-width layout
+  return (
+    <Shell heroMode={true}>
+      <LandingPage />
+    </Shell>
+  );
 };
 
 export default Index;
