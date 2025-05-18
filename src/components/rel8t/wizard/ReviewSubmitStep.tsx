@@ -23,7 +23,11 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { createOutreach } from "@/services/rel8t/outreachService";
+import { 
+  createOutreach, 
+  OutreachStatus,
+  OutreachPriority 
+} from "@/services/rel8t/outreachService";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { addDays } from "date-fns";
@@ -32,7 +36,7 @@ interface ReviewSubmitStepProps {
   wizardData: {
     contacts: Contact[];
     triggers: any[];
-    priority: 'low' | 'medium' | 'high';
+    priority: OutreachPriority;
   };
   onSubmit: () => void;
   onPrevious?: () => void;
@@ -93,7 +97,7 @@ export const ReviewSubmitStep = ({
           title: trigger.name,
           description: trigger.description || `Reminder for ${contacts.map(c => c.name).join(', ')}`,
           priority: priority,
-          status: 'pending',
+          status: 'pending' as OutreachStatus, // Explicitly cast to OutreachStatus type
           due_date: dueDate.toISOString()
         };
         
@@ -283,6 +287,20 @@ export const ReviewSubmitStep = ({
       </div>
     </div>
   );
+};
+
+// Function to get the style for priority badges
+const getPriorityStyle = (priority: string) => {
+  switch(priority) {
+    case 'high':
+      return 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800';
+    case 'medium':
+      return 'bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800';
+    case 'low':
+      return 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800';
+    default:
+      return '';
+  }
 };
 
 export default ReviewSubmitStep;
