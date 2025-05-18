@@ -1,47 +1,47 @@
 
-import * as z from "zod";
+import { z } from "zod";
+import { 
+  COMMUNITY_FORMATS, 
+  COMMUNITY_TYPES, 
+  EVENT_FREQUENCIES,
+  type CommunityFormat,
+  type CommunityType,
+  type EventFrequency
+} from "@/constants/communityConstants";
 
-export const communityFormSchema = z.object({
-  // Basic Info
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  type: z.enum(["tech", "creative", "wellness", "professional", "social-impact", "education", "social", "other"], {
-    required_error: "Please select a community type",
-  }),
-  format: z.enum(["online", "IRL", "hybrid"], {
-    required_error: "Please select a format",
-  }),
-  
-  // Location and Audience
-  location: z.string().min(2, "Location is required"),
-  targetAudience: z.union([
-    z.string().min(2, "Target audience is required"),
-    z.array(z.string())
-  ]),
-
-  // Platforms
-  platforms: z.array(z.string()).default([]),
-  
-  // Web Presence
-  website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-  newsletterUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-  
-  // Social Media
-  socialMediaHandles: z.object({
-    twitter: z.string().optional(),
-    instagram: z.string().optional(),
-    linkedin: z.string().optional(),
-    facebook: z.string().optional(),
-  }).optional(),
-
-  // Date fields (string-based format aligned with DB)
-  startDateMonth: z.string().optional(),
-  startDateDay: z.string().optional(), 
-  startDateYear: z.string().optional(),
-  
-  // Additional fields
-  communitySize: z.string().optional(),
-  eventFrequency: z.string().optional(),
+// Social Media Schema
+const socialMediaSchema = z.object({
+  twitter: z.string().optional(),
+  instagram: z.string().optional(),
+  linkedin: z.string().optional(),
+  facebook: z.string().optional(),
 });
 
+// Create the community form schema
+export const communityFormSchema = z.object({
+  name: z.string().min(3, { message: "Community name must be at least 3 characters" }),
+  description: z.string().min(10, { message: "Description must be at least 10 characters" }),
+  type: z.nativeEnum(COMMUNITY_TYPES as Record<string, CommunityType>)
+    .default(COMMUNITY_TYPES.TECH),
+  format: z.nativeEnum(COMMUNITY_FORMATS as Record<string, CommunityFormat>)
+    .default(COMMUNITY_FORMATS.HYBRID),
+  location: z.string().optional(),
+  targetAudience: z.union([
+    z.array(z.string()),
+    z.string().transform(val => 
+      val.split(',')
+         .map(tag => tag.trim())
+         .filter(tag => tag.length > 0)
+    )
+  ]).optional(),
+  platforms: z.array(z.string()).optional(),
+  website: z.string().url({ message: "Website must be a valid URL" }).optional().or(z.literal("")),
+  newsletterUrl: z.string().url({ message: "Newsletter URL must be a valid URL" }).optional().or(z.literal("")),
+  socialMediaHandles: socialMediaSchema.optional(),
+  eventFrequency: z.nativeEnum(EVENT_FREQUENCIES as Record<string, EventFrequency>).optional(),
+  size: z.string().optional(),
+  foundingDate: z.string().optional(),
+});
+
+// Export the inferred type
 export type CommunityFormData = z.infer<typeof communityFormSchema>;

@@ -8,6 +8,7 @@ import { submitCommunity } from "@/services/community/communitySubmissionService
 import { useSubmitCommunityStatus } from "@/hooks/community/useSubmitCommunityStatus";
 import CommunityCardPreview from "./CommunityCardPreview";
 import { useToast } from "@/hooks/use-toast";
+import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
 
 interface ReviewSubmitStepProps {
   form: UseFormReturn<CommunityFormData>;
@@ -49,11 +50,11 @@ export function ReviewSubmitStep({
       const formValues = form.getValues();
       
       // Validate format is one of the allowed values
-      if (!["online", "IRL", "hybrid"].includes(formValues.format)) {
+      if (!Object.values(COMMUNITY_FORMATS).includes(formValues.format as any)) {
         toast({
           variant: "destructive",
           title: "Validation Error",
-          description: "Format must be one of: online, IRL, hybrid",
+          description: `Format must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`,
         });
         setLocalIsSubmitting(false);
         return;
@@ -81,7 +82,7 @@ export function ReviewSubmitStep({
         toast({
           variant: "destructive",
           title: "Format Error",
-          description: "Invalid format. Must be one of: online, IRL, hybrid",
+          description: `Invalid format. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`,
         });
         return;
       }

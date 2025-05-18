@@ -1,10 +1,24 @@
 
 import React from "react";
-import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { UseFormReturn } from "react-hook-form";
 import { CommunityFormData } from "@/schemas/communitySchema";
+import { 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel,
+  FormDescription,
+  FormMessage 
+} from "@/components/ui/form";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
 
 interface FormatStepProps {
   form: UseFormReturn<CommunityFormData>;
@@ -12,48 +26,56 @@ interface FormatStepProps {
   onPrev: () => void;
 }
 
-export function FormatStep({ form, onPrev, onNext }: FormatStepProps) {
+export function FormatStep({ form, onNext, onPrev }: FormatStepProps) {
+  const handleNext = () => {
+    form.trigger("format").then((isValid) => {
+      if (isValid) onNext();
+    });
+  };
+
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-5">Meeting Format</h2>
-      <FormField
-        control={form.control}
-        name="format"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>How does your community meet?</FormLabel>
-            <ToggleGroup
-              type="single"
-              value={field.value}
-              onValueChange={field.onChange}
-              className="justify-start"
-            >
-              <ToggleGroupItem
-                value="online"
-                className="data-[state=on]:bg-aquamarine data-[state=on]:text-black"
+      <h2 className="text-xl font-semibold mb-5">Community Format</h2>
+      
+      <div className="space-y-4 mb-8">
+        <FormField
+          control={form.control}
+          name="format"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>How does your community meet?</FormLabel>
+              <FormDescription>
+                Choose how your community primarily gathers
+              </FormDescription>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
               >
-                Online
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="IRL"
-                className="data-[state=on]:bg-aquamarine data-[state=on]:text-black"
-              >
-                IRL
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="hybrid"
-                className="data-[state=on]:bg-aquamarine data-[state=on]:text-black"
-              >
-                Hybrid
-              </ToggleGroupItem>
-            </ToggleGroup>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <div className="mt-8 flex justify-between">
-        <Button variant="outline" onClick={onPrev}>Back</Button>
-        <Button onClick={onNext}>Next</Button>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value={COMMUNITY_FORMATS.ONLINE}>Online</SelectItem>
+                  <SelectItem value={COMMUNITY_FORMATS.IRL}>In-Person (IRL)</SelectItem>
+                  <SelectItem value={COMMUNITY_FORMATS.HYBRID}>Hybrid</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="flex justify-between">
+        <Button type="button" variant="outline" onClick={onPrev}>
+          Back
+        </Button>
+        <Button type="button" onClick={handleNext}>
+          Next
+        </Button>
       </div>
     </div>
   );

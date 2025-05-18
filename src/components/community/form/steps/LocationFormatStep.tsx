@@ -17,6 +17,10 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { 
+  COMMUNITY_FORMATS, 
+  COMMUNITY_TYPES 
+} from '@/constants/communityConstants';
 
 const LocationFormatStep = () => {
   const form = useFormContext();
@@ -63,9 +67,9 @@ const LocationFormatStep = () => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="online">Online</SelectItem>
-                <SelectItem value="IRL">In Person (IRL)</SelectItem>
-                <SelectItem value="hybrid">Hybrid</SelectItem>
+                <SelectItem value={COMMUNITY_FORMATS.ONLINE}>Online</SelectItem>
+                <SelectItem value={COMMUNITY_FORMATS.IRL}>In Person (IRL)</SelectItem>
+                <SelectItem value={COMMUNITY_FORMATS.HYBRID}>Hybrid</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -93,14 +97,14 @@ const LocationFormatStep = () => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="tech">Tech</SelectItem>
-                <SelectItem value="creative">Creative</SelectItem>
-                <SelectItem value="wellness">Wellness</SelectItem>
-                <SelectItem value="professional">Professional</SelectItem>
-                <SelectItem value="social-impact">Social Impact</SelectItem>
-                <SelectItem value="education">Education</SelectItem>
-                <SelectItem value="social">Social</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value={COMMUNITY_TYPES.TECH}>Tech</SelectItem>
+                <SelectItem value={COMMUNITY_TYPES.CREATIVE}>Creative</SelectItem>
+                <SelectItem value={COMMUNITY_TYPES.WELLNESS}>Wellness</SelectItem>
+                <SelectItem value={COMMUNITY_TYPES.PROFESSIONAL}>Professional</SelectItem>
+                <SelectItem value={COMMUNITY_TYPES.SOCIAL_IMPACT}>Social Impact</SelectItem>
+                <SelectItem value={COMMUNITY_TYPES.EDUCATION}>Education</SelectItem>
+                <SelectItem value={COMMUNITY_TYPES.SOCIAL}>Social</SelectItem>
+                <SelectItem value={COMMUNITY_TYPES.OTHER}>Other</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -109,7 +113,7 @@ const LocationFormatStep = () => {
       />
 
       <FormField
-        name="target_audience"
+        name="targetAudience"
         control={form.control}
         render={({ field }) => (
           <FormItem>
