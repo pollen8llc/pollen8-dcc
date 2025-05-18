@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Users, Calendar, BarChart3, MessageSquare, Database, Settings } from "lucide-react";
+import { Check, Users, Calendar, BarChart3 } from "lucide-react";
 
 // Feature data
 const features = [
