@@ -9,11 +9,15 @@ function extractTags(formValues: CommunityFormData): string[] {
   if (formValues.targetAudience) {
     // Handle both string and array types
     if (typeof formValues.targetAudience === 'string') {
-      return formValues.targetAudience
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean)
-        .slice(0, 3);
+      // Only attempt to split if it's a non-empty string
+      if (formValues.targetAudience.trim()) {
+        return formValues.targetAudience
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .slice(0, 3);
+      }
+      return [];
     } else if (Array.isArray(formValues.targetAudience)) {
       // If it's already an array, just slice the first 3 items
       return formValues.targetAudience.slice(0, 3);

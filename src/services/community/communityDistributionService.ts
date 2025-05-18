@@ -28,16 +28,23 @@ export async function submitCommunityDistribution(data: CommunityFormData) {
       }
     }
 
-    // Make sure targetAudience is an array
+    // Ensure targetAudience is properly handled
+    let targetAudienceArray: string[] = [];
+    
     if (typeof submissionData.targetAudience === 'string') {
-      // Convert string to array if it's a string
-      submissionData.targetAudience = submissionData.targetAudience 
-        ? submissionData.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
-        : [];
-    } else if (!Array.isArray(submissionData.targetAudience)) {
-      // Ensure it's an array in all other cases
-      submissionData.targetAudience = [];
+      // Only attempt to split if it's a non-empty string
+      if (submissionData.targetAudience.trim()) {
+        targetAudienceArray = submissionData.targetAudience
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(Boolean);
+      }
+    } else if (Array.isArray(submissionData.targetAudience)) {
+      targetAudienceArray = submissionData.targetAudience;
     }
+    
+    // Ensure targetAudience is always an array
+    submissionData.targetAudience = targetAudienceArray;
 
     const { data: distributionRecord, error } = await supabase
       .from('community_data_distribution')

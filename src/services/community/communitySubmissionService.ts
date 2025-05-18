@@ -25,13 +25,20 @@ export async function submitCommunity(
     // Process targetAudience
     let processedData = { ...data };
     
-    // Properly handle targetAudience to avoid the split error on never type
-    if (typeof processedData.targetAudience === 'string' && processedData.targetAudience) {
-      processedData.targetAudience = processedData.targetAudience
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(Boolean);
+    // Handle targetAudience safely
+    if (typeof processedData.targetAudience === 'string') {
+      // Convert string to array if it's a non-empty string
+      if (processedData.targetAudience.trim()) {
+        processedData.targetAudience = processedData.targetAudience
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(Boolean);
+      } else {
+        // Empty string becomes empty array
+        processedData.targetAudience = [];
+      }
     } else if (!Array.isArray(processedData.targetAudience)) {
+      // Ensure it's an array if it's not already
       processedData.targetAudience = [];
     }
     

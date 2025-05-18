@@ -60,13 +60,19 @@ export const useCreateCommunityForm = () => {
         throw new Error("You must be logged in to create a community");
       }
 
-      // Prepare the data for insertion
-      // Handle targetAudience properly to avoid the split error on never type
-      const targetAudienceArray = Array.isArray(data.targetAudience) 
-        ? data.targetAudience 
-        : (typeof data.targetAudience === 'string' && data.targetAudience
-            ? data.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
-            : []);
+      // Handle targetAudience safely
+      let targetAudienceArray: string[] = [];
+      
+      if (Array.isArray(data.targetAudience)) {
+        targetAudienceArray = data.targetAudience;
+      } else if (typeof data.targetAudience === 'string') {
+        if (data.targetAudience.trim()) {
+          targetAudienceArray = data.targetAudience
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(Boolean);
+        }
+      }
 
       const socialMediaObject = data.socialMediaHandles || {};
 

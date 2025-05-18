@@ -15,12 +15,17 @@ export async function createCommunity(communityData: CommunityFormData) {
       throw new Error(`Invalid format: ${communityData.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
     }
 
-    // Process targetAudience properly
-    const targetAudienceArray = Array.isArray(communityData.targetAudience) 
-      ? communityData.targetAudience 
-      : (typeof communityData.targetAudience === 'string' && communityData.targetAudience 
-          ? communityData.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
-          : []);
+    // Process targetAudience safely
+    let targetAudienceArray: string[] = [];
+    
+    if (Array.isArray(communityData.targetAudience)) {
+      targetAudienceArray = communityData.targetAudience;
+    } else if (typeof communityData.targetAudience === 'string' && communityData.targetAudience.trim()) {
+      targetAudienceArray = communityData.targetAudience
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(Boolean);
+    }
 
     const socialMediaObject = communityData.socialMediaHandles || {};
 
@@ -74,12 +79,21 @@ export async function updateCommunity(communityId: string, communityData: Partia
       throw new Error(`Invalid format: ${communityData.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
     }
 
-    // Process targetAudience properly
-    const targetAudienceArray = Array.isArray(communityData.targetAudience) 
-      ? communityData.targetAudience 
-      : (typeof communityData.targetAudience === 'string' && communityData.targetAudience
-          ? communityData.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
-          : undefined);
+    // Process targetAudience safely
+    let targetAudienceArray: string[] | undefined = undefined;
+    
+    if (Array.isArray(communityData.targetAudience)) {
+      targetAudienceArray = communityData.targetAudience;
+    } else if (typeof communityData.targetAudience === 'string') {
+      if (communityData.targetAudience.trim()) {
+        targetAudienceArray = communityData.targetAudience
+          .split(',')
+          .map(tag => tag.trim())
+          .filter(Boolean);
+      } else {
+        targetAudienceArray = [];
+      }
+    }
 
     // Update the community
     const { data, error } = await supabase
