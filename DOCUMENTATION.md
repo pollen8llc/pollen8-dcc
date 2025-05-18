@@ -76,181 +76,184 @@ erDiagram
     communities ||--o{ community_data : "has"
 ```
 
-#### Auth Schema
-This schema is managed by Supabase and contains essential authentication tables.
+## Community System Architecture
 
-##### `auth.users`
-Primary authentication table managed by Supabase:
-- `id` (UUID, PK): User identifier
-- `email` (text): User's email
-- `encrypted_password` (text): Password hash
-- `confirmed_at` (timestamp): Email confirmation time
-- `confirmation_sent_at` (timestamp): Confirmation email sent time
-- `recovery_sent_at` (timestamp): Recovery email sent time
-- `raw_user_meta_data` (JSONB): Custom user metadata
-- `created_at` (timestamp): Account creation time
-- `updated_at` (timestamp): Last update time
+### Database Tables for Communities
 
-#### Public Schema
-Custom tables in the public schema to store application data.
+#### `communities` Table
+Primary table for storing community information:
+- `id` (UUID, PK): Unique identifier
+- `name` (text): Community name
+- `description` (text): Community description
+- `logo_url` (text): Community logo image URL
+- `website` (text): Community website URL
+- `is_public` (boolean): Whether the community is publicly visible
+- `location` (text): Physical or virtual location
+- `member_count` (text): Current member count (stored as text)
+- `owner_id` (UUID): References the creator's profile ID
+- `target_audience` (text[]): Array of target audience tags
+- `type` (text): Community type (e.g., "tech", "creative")
+- `format` (text): Community format (e.g., "online", "IRL", "hybrid")
+- `social_media` (JSONB): Social media handles and links
+- `communication_platforms` (JSONB): Communication platform settings
+- `newsletter_url` (text): Newsletter subscription URL
+- `created_at` (timestamptz): Creation timestamp
+- `updated_at` (timestamptz): Last update timestamp
 
-##### `profiles`
-Stores user profile information linked to auth.users:
-```sql
-CREATE TABLE public.profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  first_name TEXT,
-  last_name TEXT,
-  email TEXT NOT NULL,
-  avatar_url TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now())
-);
+#### `community_data_distribution` Table
+Manages the community creation workflow:
+- `id` (UUID, PK): Unique identifier
+- `submission_data` (JSONB): Form data from community creation
+- `submitter_id` (UUID): User ID who submitted the form
+- `status` (text): Workflow status ('pending', 'processing', 'completed', 'failed')
+- `community_id` (UUID): ID of created community (once completed)
+- `processed_at` (timestamptz): When the submission was processed
+- `error_message` (text): Error message if submission failed
+- `created_at` (timestamptz): Submission timestamp
 
-CREATE TRIGGER set_profiles_updated_at
-BEFORE UPDATE ON public.profiles
-FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
-```
+#### `community_data` Table
+Stores additional community data:
+- `id` (UUID, PK): Unique identifier
+- `community_id` (UUID, FK): References communities.id
+- `data_type` (text): Type of data stored
+- `data` (JSONB): The actual data content
+- `metadata` (JSONB): Additional metadata
+- `imported_at` (timestamptz): When the data was imported
+- `imported_by` (UUID): User who imported the data
 
-##### `communities`
-Stores community information:
-```sql
-CREATE TABLE public.communities (
-  id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  name TEXT NOT NULL,
-  description TEXT,
-  logo_url TEXT,
-  website TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now())
-);
+### Community Files & Component Structure
 
-CREATE TRIGGER set_communities_updated_at
-BEFORE UPDATE ON public.communities
-FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
-```
+#### Core Community Components
 
-##### `community_members`
-Manages the relationship between users and communities:
-```sql
-CREATE TABLE public.community_members (
-  id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  community_id UUID NOT NULL REFERENCES public.communities(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL DEFAULT 'member',
-  joined_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
-  UNIQUE(community_id, user_id)
-);
-```
+1. **Community Header (`CommunityHeader.tsx`)**
+   - Displays the community banner, name, tagline, and key metrics
+   - Shows location, member count, tags, and primary action buttons
+   - Integrates with `PlexusBackground.tsx` for visual effects
 
-##### `knowledge_base`
-Stores knowledge base articles:
-```sql
-CREATE TABLE public.knowledge_base (
-  id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  community_id UUID NOT NULL REFERENCES public.communities(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  created_by UUID REFERENCES auth.users(id),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now())
-);
+2. **Community Card Preview (`CommunityCardPreview.tsx`)**
+   - Renders a preview of how a community will appear in listings
+   - Shows name, description, location, size, format, and tags
+   - Used in the community creation flow
 
-CREATE TRIGGER set_knowledge_base_updated_at
-BEFORE UPDATE ON public.knowledge_base
-FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
-```
+3. **Community Meta Info (`CommunityMetaInfo.tsx`)**
+   - Displays detailed community metadata in an organized layout
+   - Includes founder, type, location, creation date, size, and format
+   - Shows target audience and social media links
 
-##### `admin_roles`
-Manages platform-level admin roles:
-```sql
-CREATE TABLE public.admin_roles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(user_id, role)
-);
-```
+#### Community Form Components
 
-##### `community_data`
-Stores additional data for communities:
-```sql
-CREATE TABLE public.community_data (
-  id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  community_id UUID NOT NULL REFERENCES public.communities(id) ON DELETE CASCADE,
-  data_type TEXT NOT NULL,
-  data JSONB NOT NULL,
-  metadata JSONB,
-  imported_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc', now()),
-  imported_by UUID REFERENCES auth.users(id)
-);
-```
+1. **Unified Community Form (`UnifiedCommunityForm.tsx`)**
+   - Master form component with two modes: 'setup' and 'edit'
+   - Setup mode uses a step-based wizard interface
+   - Edit mode uses a tabbed interface for easier navigation
+   - Steps include:
+     - Basic Details
+     - Location & Format
+     - Online Presence
+     - Additional Details
 
-### Triggers and Functions
+2. **Form Steps Components**
+   - `BasicDetailsStep.tsx`: Name, description, type
+   - `LocationFormatStep.tsx`: Location, format, target audience
+   - `OnlinePresenceStep.tsx`: Website, social media
+   - `AdditionalDetailsStep.tsx`: Founding date, event frequency
 
-The platform uses PostgreSQL triggers and functions to automate certain operations:
+3. **Review & Submit (`ReviewSubmitStep.tsx`)**
+   - Final step in community creation workflow
+   - Shows preview of community card
+   - Handles submission and status tracking
+   - Provides feedback during processing
 
-#### `handle_updated_at()` Function
-Updates the timestamp automatically when records are modified:
+#### Repositories & Services
 
-```sql
-CREATE OR REPLACE FUNCTION public.handle_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-```
+1. **Community Query Repository (`communityQueryRepository.ts`)**
+   - Exports query functions from individual files:
+     - `getAllCommunities.ts`: Fetches paginated communities
+     - `getCommunityById.ts`: Gets a single community by ID
+     - `searchCommunities.ts`: Searches communities by text
+     - `getManagedCommunities.ts`: Gets user-managed communities
 
-#### `handle_new_user()` Function
-Creates a profile automatically when a new user signs up:
+2. **Community Mutation Repository (`communityMutationRepository.ts`)**
+   - `updateCommunity`: Updates existing community
+   - `createCommunity`: Creates a new community
+   - `deleteCommunity`: Safely deletes a community
 
-```sql
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, first_name, last_name)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    NEW.raw_user_meta_data->>'first_name',
-    NEW.raw_user_meta_data->>'last_name'
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+3. **Community Services**
+   - `communitySubmissionService.ts`: Handles form validation and submission
+   - `communityDistributionService.ts`: Processes submissions via distribution system
+   - `communityMutationService.ts`: Direct CRUD operations
+   - `communityQueryService.ts`: Query operations with logging
 
--- Trigger to create profile on user signup
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-```
+### Community Hooks
 
-### Relationships
+1. **Creation Hooks**
+   - `useCreateCommunityForm.ts`: Manages form state and submission
+   - `useSubmitCommunityStatus.ts`: Tracks submission status
 
-The database uses the following key relationships:
+2. **Query Hooks**
+   - `useCommunityForm.ts`: Form context provider
+   - `useSubmitCommunity.ts`: Handles community submission
 
-1. **User - Profile**: One-to-one relationship
-   - `profiles.id` references `auth.users.id`
-   - When an `auth.users` record is deleted, the associated `profiles` record is cascaded
+### User Flow and Experience
 
-2. **Profile - Community Membership**: One-to-many relationship
-   - A profile can have multiple community memberships
-   - `community_members.user_id` references `auth.users.id`
+#### Community Creation Flow
 
-3. **Community - Community Membership**: One-to-many relationship
-   - A community can have multiple members
-   - `community_members.community_id` references `communities.id`
+1. **User Journey**:
+   - User navigates to "Create Community" page
+   - Multi-step form guides through community setup:
+     1. Basic information (name, description, type)
+     2. Location, format, and audience targeting
+     3. Online presence (website, social media)
+     4. Additional details (founding date, event frequency)
+   - Preview card shows how community will appear
+   - Submission triggers workflow in `community_data_distribution`
+   - User receives confirmation and is redirected to new community
 
-4. **Community - Knowledge Base**: One-to-many relationship
-   - A community can have multiple knowledge base articles
-   - `knowledge_base.community_id` references `communities.id`
+2. **Error Handling**:
+   - Form validation occurs at each step
+   - Submission errors are tracked and displayed
+   - Distribution errors are logged for admin review
 
-5. **User - Admin Roles**: One-to-many relationship
-   - A user can have multiple admin roles
-   - `admin_roles.user_id` references `auth.users.id`
+#### Community Viewing Experience
+
+1. **Community Card**:
+   - Consistent card design across the platform
+   - Shows name, description, location, size, format, tags
+   - Visual indicators for active/recent communities
+   - Action buttons for joining or learning more
+
+2. **Community Profile Page**:
+   - Hero section with community banner
+   - Metadata section with key information
+   - Tabs for different sections (about, members, content)
+   - Action buttons for engagement (connect, follow)
+
+3. **Community Management**:
+   - Tab-based interface for owners to edit settings
+   - Metrics dashboard for tracking growth
+   - Member management tools
+
+### UI Components for Communities
+
+1. **Cards and Lists**:
+   - `CommunityCard.tsx`: Standard card for community listings
+   - `CommunityList.tsx`: Container for multiple community cards
+   - `CommunityCardPreview.tsx`: Preview during creation
+
+2. **Visual Elements**:
+   - `PlexusBackground.tsx`: Dynamic background for community headers
+   - `Badge.tsx`: Used for tags, types, and formats
+   - `SocialMediaLinks.tsx`: Icons for social media platforms
+
+3. **Form Components**:
+   - `Steps.tsx`: Progress indicator for multi-step forms
+   - `Tabs.tsx`: Navigation for form sections
+   - Various input components (text, select, tags)
+
+4. **Interactive Elements**:
+   - Connect/Join buttons
+   - Follow/Bookmark toggles
+   - Share functionality
 
 ## User Role System
 
@@ -472,18 +475,32 @@ export interface Community {
   id: string;
   name: string;
   description: string;
-  location: string;
-  imageUrl: string;
-  memberCount: number;
+  owner_id?: string;
+  type?: string;
+  format?: string;
+  location?: string;
+  target_audience?: string[];
+  social_media?: Record<string, string | { url?: string }>;
+  website?: string;
+  created_at: string;
+  updated_at: string;
+  member_count?: string;
+  is_public: boolean;
+  newsletter_url?: string;
+  logo_url?: string;
+  founder_name?: string;
+  communitySize: string; // For backward compatibility
   organizerIds: string[];
   memberIds: string[];
   tags: string[];
-  isPublic: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  statistics?: CommunityStatistics;
-  settings?: CommunitySettings;
-  website?: string;
+  // Added aliases for backward compatibility
+  imageUrl?: string; // Alias for logo_url
+  isPublic?: boolean; // Alias for is_public
+  createdAt?: string; // Alias for created_at
+  updatedAt?: string; // Alias for updated_at
+  targetAudience?: string[]; // Alias for target_audience
+  socialMedia?: Record<string, string | { url?: string }>; // Alias for social_media
+  newsletterUrl?: string; // Alias for newsletter_url
 }
 ```
 
@@ -492,24 +509,134 @@ export interface Community {
 For security, the platform implements Row-Level Security policies to control access to database tables:
 
 ```sql
--- Example RLS policy for community membership
-ALTER TABLE public.community_members ENABLE ROW LEVEL SECURITY;
+-- Example RLS policy for community access
+ALTER TABLE public.communities ENABLE ROW LEVEL SECURITY;
 
--- Allow users to see only their own memberships
-CREATE POLICY "Users can view their own memberships"
-  ON public.community_members
+-- Allow users to see public communities
+CREATE POLICY "Users can view public communities"
+  ON public.communities
   FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (is_public = true);
 
--- Allow community admins to view all memberships in their communities
-CREATE POLICY "Community admins can view all memberships"
-  ON public.community_members
-  FOR SELECT
+-- Allow owners to manage their communities
+CREATE POLICY "Owners can manage their communities"
+  ON public.communities
+  USING (owner_id = auth.uid());
+
+-- Allow admins to access all communities
+CREATE POLICY "Admins can access all communities"
+  ON public.communities
   USING (
-    auth.uid() IN (
-      SELECT user_id FROM public.community_members 
-      WHERE community_id = community_members.community_id 
-      AND role = 'admin'
+    EXISTS (
+      SELECT 1 FROM public.admin_roles 
+      WHERE user_id = auth.uid() AND role = 'ADMIN'
     )
   );
+```
+
+### Community Creation Workflow
+
+The platform implements a two-phase community creation process:
+
+1. **Submission Phase**:
+   - User submits community form data via `submitCommunity()`
+   - Data is validated and stored in `community_data_distribution`
+   - Function returns a distribution record with status
+
+2. **Processing Phase**:
+   - Database trigger or edge function processes the submission
+   - Creates the community record in `communities` table
+   - Updates distribution record with status and community ID
+   - Client polls for status using `checkCommunitySubmission()`
+
+3. **Completion Phase**:
+   - Once status is 'completed', client navigates to new community
+   - If status is 'failed', error is displayed to user
+
+This workflow provides:
+- Asynchronous processing of community creation
+- Error handling and logging
+- Ability to implement approval workflows
+- Scalability for high-volume applications
+
+### UI/UX Design System
+
+The platform uses a consistent design system for community UI elements:
+
+1. **Color Scheme**:
+   - Primary: For main actions and branding
+   - Accent (Aquamarine): For high-emphasis buttons and callouts
+   - Muted: For backgrounds and secondary elements
+   - Foreground: For text and icons
+
+2. **Component Styling**:
+   - Cards: Rounded corners, subtle shadows, border
+   - Buttons: Consistent padding, hover effects
+   - Typography: Hierarchical heading sizes, readable body text
+
+3. **Layout Patterns**:
+   - Grid system for card layouts
+   - Flexbox for component alignment
+   - Container constraints for readability
+
+4. **Animation & Transitions**:
+   - Subtle hover effects
+   - Loading states with spinners or skeletons
+   - Smooth page transitions
+
+5. **Responsive Design**:
+   - Mobile-first approach
+   - Breakpoints for different device sizes
+   - Layout adjustments for small screens
+
+### Design Tokens
+
+```css
+/* Example design tokens */
+:root {
+  --radius: 0.5rem;
+  --font-sans: "Inter", sans-serif;
+  
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 160 84% 39%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 5.9% 10%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 160 84% 39%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+}
 ```
