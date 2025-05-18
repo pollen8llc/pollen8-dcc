@@ -50,6 +50,11 @@ export const createCommunity = async (communityData: Partial<Community>): Promis
   }
   
   // Transform the database response to match our Community type
+  // Ensure proper type handling for social_media
+  const socialMediaData = typeof data.social_media === 'object' ? 
+    data.social_media as Record<string, string | { url?: string }> : 
+    {};
+  
   const community: Community = {
     id: data.id,
     name: data.name,
@@ -63,7 +68,7 @@ export const createCommunity = async (communityData: Partial<Community>): Promis
     isPublic: data.is_public,
     type: data.community_type,
     format: data.format,
-    social_media: data.social_media,
+    social_media: socialMediaData,
     website: data.website,
     target_audience: data.target_audience,
     created_at: data.created_at,
@@ -111,6 +116,11 @@ export const updateCommunity = async (communityId: string, communityData: Partia
   }
   
   // Transform the database response to match our Community type
+  // Ensure proper type handling for social_media
+  const socialMediaData = typeof data.social_media === 'object' ? 
+    data.social_media as Record<string, string | { url?: string }> : 
+    {};
+    
   const community: Community = {
     id: data.id,
     name: data.name,
@@ -124,7 +134,7 @@ export const updateCommunity = async (communityId: string, communityData: Partia
     isPublic: data.is_public,
     type: data.community_type,
     format: data.format,
-    social_media: data.social_media,
+    social_media: socialMediaData,
     website: data.website,
     target_audience: data.target_audience,
     created_at: data.created_at,
