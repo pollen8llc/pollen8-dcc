@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -133,6 +134,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute role={UserRole.MEMBER}>
             <CreateCommunity />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/community/:id/edit"
+        element={
+          <ProtectedRoute role={UserRole.ORGANIZER}>
+            <OrganizerDashboard />
           </ProtectedRoute>
         }
       />

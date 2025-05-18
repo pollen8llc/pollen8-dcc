@@ -175,7 +175,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/organizer/dot-connector")}
+                  onClick={() => handleNavigation("/dot-connector")}
                 >
                   <Network className="mr-2 h-4 w-4" />
                   Organizer Dashboard 

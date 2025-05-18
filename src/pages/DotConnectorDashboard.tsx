@@ -61,7 +61,7 @@ const DotConnectorDashboard = () => {
                 asChild
                 className="gap-2 h-10 rounded-lg px-4 shadow font-semibold text-base bg-primary hover:bg-primary/90 transition-colors"
               >
-                <Link to="/create-community">
+                <Link to="/community/create">
                   <Plus className="h-5 w-5" />
                   Onboard New Community
                 </Link>
@@ -138,7 +138,7 @@ const DotConnectorDashboard = () => {
                         </Link>
                         <Link
                           className="text-sm text-primary hover:underline font-medium"
-                          to={`/organizer/community/${community.id}`}
+                          to={`/community/${community.id}/edit`}
                         >
                           Edit Community
                         </Link>
