@@ -13,12 +13,8 @@ import { UserRole } from "./models/types";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import DebuggerDashboard from "./pages/admin/DebuggerDashboard";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
-import CommunityProfile from "./pages/CommunityProfile";
-import CreateCommunityPage from "./pages/CreateCommunityPage";
-import EditCommunityPage from "./pages/EditCommunityPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
-import JoinCommunities from "./pages/JoinCommunities";
 import Onboarding from "./pages/Onboarding";
 import ConnectionsPage from "./pages/ConnectionsPage";
 import ProfileSearchPage from "./pages/ProfileSearchPage";
@@ -26,7 +22,6 @@ import InvitePage from "./pages/InvitePage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
 import ProfilePage from "./pages/ProfilePage";
 import Documentation from "./pages/Documentation";
-import CreateCommunityProfile from "./pages/CreateCommunityProfile";
 
 // REL8T Pages
 import RelationshipWizard from "./pages/rel8t/RelationshipWizard";
@@ -39,6 +34,7 @@ import ImportContacts from "./pages/rel8t/ImportContacts";
 import Relationships from "./pages/rel8t/Relationships";
 import Settings from "./pages/rel8t/Settings";
 import Notifications from "./pages/rel8t/Notifications";
+import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -46,10 +42,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<LandingPage />} />  {/* Using our new landing page */}
-      <Route path="/communities" element={<Index />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/community/:id" element={<CommunityProfile />} />
       <Route path="/invite/:code" element={<InvitePage />} />
       <Route path="/documentation" element={<Documentation />} />
 
@@ -104,14 +98,6 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/join"
-        element={
-          <ProtectedRoute role={UserRole.MEMBER}>
-            <JoinCommunities />
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/onboarding"
         element={
           <ProtectedRoute role={UserRole.MEMBER}>
@@ -124,32 +110,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute role={UserRole.ORGANIZER}>
             <InvitesManagementPage />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Community Routes */}
-      <Route
-        path="/community/create"
-        element={
-          <ProtectedRoute role={UserRole.MEMBER}>
-            <CreateCommunityPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/community/:id/edit"
-        element={
-          <ProtectedRoute role={UserRole.ORGANIZER}>
-            <EditCommunityPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/community/:id/create-profile"
-        element={
-          <ProtectedRoute role={UserRole.MEMBER}>
-            <CreateCommunityProfile />
           </ProtectedRoute>
         }
       />
@@ -183,7 +143,7 @@ const AppRoutes = () => {
         path="/dot-connector"
         element={
           <ProtectedRoute role={UserRole.ORGANIZER}>
-            <OrganizerDashboard />
+            <DotConnectorDashboard />
           </ProtectedRoute>
         }
       />
@@ -269,6 +229,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      {/* Fallback route for /communities - redirect to profile search */}
+      <Route path="/communities" element={<Navigate to="/profiles/search" replace />} />
 
       {/* 404 Route */}
       <Route path="*" element={<NotFound />} />

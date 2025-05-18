@@ -1,123 +1,61 @@
 
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import Navbar from "@/components/Navbar";
-import CommunityList from "@/components/CommunityList";
-import { Separator } from "@/components/ui/separator";
-import CallToActionBanner from "@/components/CallToActionBanner";
-import * as communityService from "@/services/communityService";
-import { RefreshCw } from "lucide-react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Navbar from "@/components/Navbar";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showDebugger, setShowDebugger] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { currentUser, isLoading } = useUser();
+  const navigate = useNavigate();
   
-  // Pre-fetch communities for better UX with a shorter stale time to see updates sooner
-  const { refetch } = useQuery({
-    queryKey: ['communities'],
-    queryFn: async () => {
-      return communityService.getAllCommunities(1, 12);
-    },
-    staleTime: 60 * 1000, // 1 minute
-  });
-
-  const handleSearch = (query: string) => {
-    console.log("Search query changed in Index:", query);
-    setSearchQuery(query);
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await refetch();
-    } catch (error) {
-      console.error("Error refreshing communities:", error);
-    } finally {
-      // Add a small delay to prevent UI flicker
-      setTimeout(() => {
-        setIsRefreshing(false);
-      }, 500);
-    }
-  };
-
-  // Toggle debugger with Ctrl+Shift+D
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-      setShowDebugger(prev => !prev);
-      e.preventDefault();
-    }
-  };
-
-  // Add keyboard listener
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
+    if (!isLoading && currentUser) {
+      // If user is logged in, redirect to REL8T dashboard
+      navigate("/rel8/dashboard");
+    }
+  }, [currentUser, isLoading, navigate]);
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+  
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      
-      {/* Hero Section */}
-      <CallToActionBanner 
-        title="ECO8 Collective"
-        subtitle="ECO8 a directory of Resources and insights powered by community"
-        onSearch={handleSearch}
-      />
-      
-      {/* Communities Section */}
-      <section className="px-4 pb-20 transition-all duration-300">
-        <div className="container mx-auto">
-          <div className="flex justify-between items-center">
-            {searchQuery ? (
-              <h2 className="text-xl font-medium animate-fade-in">
-                Search Results for "{searchQuery}"
-              </h2>
-            ) : (
-              <h2 className="text-xl font-medium">All Communities</h2>
-            )}
+      <div className="container mx-auto px-4 py-12">
+        <Card className="max-w-2xl mx-auto">
+          <CardContent className="pt-6 text-center">
+            <h1 className="text-2xl font-bold mb-4">Welcome to ECO8</h1>
+            <p className="mb-6 text-muted-foreground">
+              Connect with professionals and manage your relationships with REL8.
+            </p>
             
-            <Button 
-              onClick={handleRefresh}
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-foreground"
-              disabled={isRefreshing}
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-          
-          <Separator className="my-4 bg-gray-300 dark:bg-gray-700 transition-all duration-300" />
-          
-          <CommunityList searchQuery={searchQuery} />
-        </div>
-      </section>
-      
-      {/* Footer */}
-      <footer className="py-8 border-t border-border/20 transition-all duration-300">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <div className="text-xl font-semibold flex items-center">
-                <img 
-                  src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans-300x52.png" 
-                  alt="Pollen8 Logo" 
-                  width={100} 
-                  height={30} 
-                  className="mr-2" 
-                />
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => navigate("/profiles/search")}
+                className="px-6"
+              >
+                Find People
+              </Button>
+              
+              <Button 
+                onClick={() => navigate("/auth")}
+                variant="outline"
+                className="px-6"
+              >
+                Sign In
+              </Button>
             </div>
-            
-            <div className="text-xs text-gray-500">
-              © Powered by pollen8 labs, all rights reserved 2024.
-            </div>
-          </div>
-        </div>
-      </footer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

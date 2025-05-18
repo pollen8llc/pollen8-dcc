@@ -110,12 +110,8 @@ const InvitePage: React.FC = () => {
           description: "You've successfully accepted the invite!",
         });
         
-        // If the invite is for a specific community, navigate there
-        if (invite.community_id) {
-          navigate(`/community/${invite.community_id}`);
-        } else {
-          navigate("/");
-        }
+        // Navigate to REL8T dashboard
+        navigate("/rel8/dashboard");
       } else {
         toast({
           title: "Error",
@@ -195,7 +191,7 @@ const InvitePage: React.FC = () => {
       <ErrorBoundary>
         <AuthLayout
           title="You've Been Invited!"
-          subtitle="Sign in or create an account to join the community"
+          subtitle="Sign in or create an account to join"
         >
           <Card>
             <CardHeader>
@@ -224,8 +220,7 @@ const InvitePage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
-                You've received an invitation to connect
-                {invite?.community_id ? " and join a community" : ""}.
+                You've received an invitation to connect.
               </p>
 
               {invite && (

@@ -11,16 +11,20 @@ export interface User {
   imageUrl: string;
   email: string;
   bio: string;
-  communities: string[];
+  connections?: string[];
 }
 
+/**
+ * @deprecated This interface is kept for backward compatibility only and
+ * should not be used in new code as community functionality has been removed.
+ */
 export interface Community {
   id: string;
   name: string;
   description: string;
   location: string;
   imageUrl: string;
-  communitySize: string; // Changed from number to string
+  communitySize: string; 
   organizerIds: string[];
   memberIds: string[];
   tags: string[];

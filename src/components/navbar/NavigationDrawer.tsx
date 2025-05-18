@@ -17,7 +17,6 @@ import {
   User as UserIcon,
   Settings,
   Users,
-  PlusCircle,
   FileText,
   UserSearch,
   Shield,
@@ -100,25 +99,23 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   Find People
                 </Button>
                 
-                {isOrganizer && (
-                  <Button
-                    variant="ghost"
-                    className="justify-start"
-                    onClick={() => handleNavigation("/community/create")}
-                  >
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create Community
-                  </Button>
-                )}
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/connections")}
+                >
+                  <Network className="mr-2 h-4 w-4" />
+                  My Connections
+                </Button>
               </>
             )}
 
-            {/* REL8 menu items (for organizers) */}
-            {isOrganizer && (
+            {/* REL8 menu items (for all users) */}
+            {currentUser && (
               <>
                 <Separator className="my-2" />
                 <p className="px-4 py-2 text-sm font-medium opacity-70">
-                  REL8T
+                  REL8
                 </p>
 
                 <Button

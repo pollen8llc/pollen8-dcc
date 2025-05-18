@@ -1,4 +1,9 @@
 
+/**
+ * @deprecated These constants are kept for backwards compatibility only.
+ * Community functionality has been removed from the platform.
+ */
+
 export const COMMUNITY_TYPES = {
   TECH: 'tech',
   CREATIVE: 'creative',

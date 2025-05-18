@@ -13,5 +13,3 @@ export const getCommunityById = async () => {
   console.warn("getCommunityById: Community functionality has been removed");
   return null;
 };
-
-export * from "./community";

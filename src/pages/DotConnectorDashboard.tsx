@@ -1,38 +1,18 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate, Link } from "react-router-dom";
-import { UserRole, Community } from "@/models/types";
-import { Plus, Folder, Trash2 } from "lucide-react";
-import { getManagedCommunities } from "@/services/community/communityQueryService";
+import { UserRole } from "@/models/types";
+import { Users, Bell, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DeleteCommunityDialog } from "@/components/community/DeleteCommunityDialog";
-import { useToast } from "@/hooks/use-toast";
 
 const DotConnectorDashboard = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [managedCommunities, setManagedCommunities] = useState<Community[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [communityToDelete, setCommunityToDelete] = useState<Community | null>(null);
-
-  const loadCommunities = () => {
-    if (currentUser && [UserRole.ORGANIZER, UserRole.ADMIN].includes(currentUser.role)) {
-      setLoading(true);
-      getManagedCommunities(currentUser.id)
-        .then((data) => setManagedCommunities(data))
-        .finally(() => setLoading(false));
-    }
-  };
-
-  useEffect(() => {
-    loadCommunities();
-  }, [currentUser]);
 
   // Only allow ORGANIZER or ADMIN
   if (!currentUser || ![UserRole.ORGANIZER, UserRole.ADMIN].includes(currentUser.role)) {
@@ -48,122 +28,71 @@ const DotConnectorDashboard = () => {
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
               <div className="flex-1">
-                <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                  <Folder className="w-7 h-7 text-primary" />
+                <CardTitle className="text-2xl font-bold">
                   Dot Connector Dashboard
                 </CardTitle>
                 <Separator className="my-2" />
                 <div className="text-muted-foreground mt-1 mb-2 text-base">
-                  Organize and manage communities – onboard new ones or edit those you've already added.
+                  Manage your invites and user connections
                 </div>
               </div>
-              <Button
-                asChild
-                className="gap-2 h-10 rounded-lg px-4 shadow font-semibold text-base bg-primary hover:bg-primary/90 transition-colors"
-              >
-                <Link to="/community/create">
-                  <Plus className="h-5 w-5" />
-                  Onboard New Community
-                </Link>
-              </Button>
             </div>
           </CardHeader>
 
-          <CardContent className="pt-2 pb-6">
-            <div className="mb-8">
-              <h3 className="font-medium text-lg mb-2 flex items-center gap-2">
-                <Folder className="h-5 w-5 text-primary" />
-                Your Managed Communities
-              </h3>
-              <Separator />
-              {loading ? (
-                <div className="py-8 flex justify-center text-primary animate-pulse">
-                  Loading communities...
-                </div>
-              ) : managedCommunities.length === 0 ? (
-                <div className="py-8 text-gray-400 text-center text-base">
-                  You have not onboarded any communities yet.<br />
-                  Use the <span className="inline-flex items-center gap-1 font-semibold text-primary"><Plus className="w-4 h-4" />Onboard New Community</span> button above to get started!
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                  {managedCommunities.map((community) => (
-                    <Card 
-                      key={community.id}
-                      className="hover:shadow-lg transition-shadow border border-muted-foreground/10 group flex flex-col h-full"
-                    >
-                      <CardHeader className="pt-4 pb-2 px-4 flex-row items-center gap-2">
-                        <div className="flex-1 flex items-center gap-2">
-                          <Folder className="text-primary h-6 w-6" />
-                          <span className="font-semibold text-base truncate max-w-[140px]" title={community.name}>
-                            {community.name}
-                          </span>
-                          <span className={cn(
-                            "text-xs px-1.5 py-0.5 rounded-full",
-                            community.is_public ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
-                                              : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-                          )}>
-                            {community.is_public ? "Public" : "Private"}
-                          </span>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="rounded-full p-2 h-8 w-8"
-                            title="Delete Community"
-                            onClick={() => setCommunityToDelete(community)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="flex-1 py-2 px-4 flex flex-col justify-between">
-                        <div className="text-sm text-muted-foreground">
-                          {community.description?.substring(0, 80) || "No description"}
-                          {community.description && community.description.length > 80 ? "..." : ""}
-                        </div>
-                        {community.location && (
-                          <div className="text-xs text-gray-400 mt-3">
-                            Location: <span className="text-gray-500">{community.location}</span>
-                          </div>
-                        )}
-                      </CardContent>
-                      <div className="flex justify-between pb-3 px-4">
-                        <Link
-                          className="text-sm text-primary hover:underline font-medium"
-                          to={`/community/${community.id}`}
-                        >
-                          View Community
-                        </Link>
-                        <Link
-                          className="text-sm text-primary hover:underline font-medium"
-                          to={`/community/${community.id}/edit`}
-                        >
-                          Edit Community
-                        </Link>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
+          <CardContent className="pt-2 pb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="shadow hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Users className="mr-2 h-5 w-5 text-primary" />
+                  Manage Invites
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create and manage invitation links for new users
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/invites">View Invites</Link>
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="shadow hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Bell className="mr-2 h-5 w-5 text-primary" />
+                  Notifications
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground mb-4">
+                  View system notifications and alerts
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/rel8/notifications">View Notifications</Link>
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="shadow hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Settings className="mr-2 h-5 w-5 text-primary" />
+                  Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Configure your organizer settings and preferences
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/rel8/settings">Go to Settings</Link>
+                </Button>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
       </div>
-      
-      {/* Delete Community Dialog */}
-      {communityToDelete && (
-        <DeleteCommunityDialog
-          communityId={communityToDelete.id}
-          communityName={communityToDelete.name}
-          isOpen={Boolean(communityToDelete)}
-          setIsOpen={(isOpen) => {
-            if (!isOpen) setCommunityToDelete(null);
-          }}
-          onDeleted={loadCommunities}
-        />
-      )}
     </div>
   );
 };

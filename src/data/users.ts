@@ -9,7 +9,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/1.jpg",
     email: "alex.morgan@example.com",
     bio: "Product leader with 8+ years of experience in SaaS",
-    communities: [],
   },
   {
     id: "2",
@@ -18,7 +17,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
     email: "jordan.lee@example.com",
     bio: "Engineering Director focused on scalable architecture",
-    communities: ["6"],
   },
   {
     id: "3",
@@ -27,7 +25,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/3.jpg",
     email: "taylor.kim@example.com",
     bio: "Marketing lead specializing in growth strategies",
-    communities: ["2"],
   },
   {
     id: "4",
@@ -36,7 +33,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
     email: "casey.rivera@example.com",
     bio: "Customer experience expert with focus on retention",
-    communities: ["3"],
   },
   {
     id: "5",
@@ -45,7 +41,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/5.jpg",
     email: "morgan.chen@example.com",
     bio: "Design Director with background in human-centered design",
-    communities: ["4"],
   },
   {
     id: "6",
@@ -54,7 +49,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/6.jpg",
     email: "avery.johnson@example.com",
     bio: "Sales leader driving enterprise partnerships",
-    communities: ["5"],
   },
   {
     id: "7",
@@ -63,7 +57,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/7.jpg",
     email: "riley.patel@example.com",
     bio: "Innovation strategist with background in R&D",
-    communities: ["6"],
   },
   {
     id: "8",
@@ -72,7 +65,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/8.jpg",
     email: "cameron.smith@example.com",
     bio: "Full-stack developer specializing in React and Node.js",
-    communities: ["6"],
   },
   {
     id: "9",
@@ -81,7 +73,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/9.jpg",
     email: "quinn.wilson@example.com",
     bio: "Content strategist and copywriter",
-    communities: ["2"],
   },
   {
     id: "10",
@@ -90,7 +81,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/10.jpg",
     email: "reese.garcia@example.com",
     bio: "Digital marketing specialist with focus on SEO/SEM",
-    communities: ["2"],
   },
   {
     id: "11",
@@ -99,7 +89,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/11.jpg",
     email: "dakota.martin@example.com",
     bio: "Social media manager and community builder",
-    communities: ["2"],
   },
   {
     id: "12",
@@ -108,7 +97,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/12.jpg",
     email: "skyler.adams@example.com",
     bio: "Customer support specialist with technical expertise",
-    communities: ["3"],
   },
   {
     id: "13",
@@ -117,7 +105,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/13.jpg",
     email: "hayden.lopez@example.com",
     bio: "Account manager focused on client success",
-    communities: ["3"],
   },
   {
     id: "14",
@@ -126,7 +113,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/14.jpg",
     email: "parker.taylor@example.com",
     bio: "Implementation specialist helping clients onboard",
-    communities: ["3"],
   },
   {
     id: "15",
@@ -135,7 +121,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/15.jpg",
     email: "finley.robinson@example.com",
     bio: "Customer advocate with passion for user experience",
-    communities: ["3"],
   },
   {
     id: "16",
@@ -144,7 +129,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/16.jpg",
     email: "sawyer.nguyen@example.com",
     bio: "UI designer specializing in design systems",
-    communities: ["4"],
   },
   {
     id: "17",
@@ -153,7 +137,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/17.jpg",
     email: "rowan.bailey@example.com",
     bio: "UX researcher conducting user studies and testing",
-    communities: ["4"],
   },
   {
     id: "18",
@@ -162,7 +145,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/18.jpg",
     email: "drew.foster@example.com",
     bio: "Brand designer with focus on identity and experience",
-    communities: ["4"],
   },
   {
     id: "19",
@@ -171,7 +153,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/19.jpg",
     email: "blake.carter@example.com",
     bio: "Sales executive for enterprise accounts",
-    communities: ["5"],
   },
   {
     id: "20",
@@ -180,7 +161,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/20.jpg",
     email: "jordan.scott@example.com",
     bio: "Business development manager exploring new markets",
-    communities: ["5"],
   },
   {
     id: "21",
@@ -189,7 +169,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/21.jpg",
     email: "elliott.hayes@example.com",
     bio: "Sales operations coordinating team efforts",
-    communities: ["5"],
   },
   {
     id: "22",
@@ -198,7 +177,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/22.jpg",
     email: "kai.mitchell@example.com",
     bio: "Account executive with focus on relationship building",
-    communities: ["5"],
   },
   {
     id: "23",
@@ -207,7 +185,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/women/23.jpg",
     email: "peyton.turner@example.com",
     bio: "Research scientist exploring emerging technologies",
-    communities: ["6"],
   },
   {
     id: "24",
@@ -216,7 +193,6 @@ export const users: User[] = [
     imageUrl: "https://randomuser.me/api/portraits/men/24.jpg",
     email: "emerson.clark@example.com",
     bio: "Prototyping specialist building proof of concepts",
-    communities: ["6"],
   },
   {
     id: "25",
@@ -225,6 +201,5 @@ export const users: User[] = [
     imageUrl: "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif",
     email: "toluwase@ninycommunity.com",
     bio: "Nigerian American from Brooklyn, NY with marketing background and MBA from Wharton (2023). Currently works as a Growth Manager at Nala, a fintech company facilitating money transfers to Africa and Asia. Has a natural aptitude for community building, having created multiple communities throughout her life. Views community building as a personal calling or 'ministry'.",
-    communities: ["7", "10"],
   },
 ];
