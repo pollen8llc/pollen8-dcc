@@ -9,7 +9,7 @@ interface ShellProps extends React.HTMLAttributes<HTMLDivElement> {
   fullWidth?: boolean;
   noPadding?: boolean;
   containerClassName?: string;
-  heroMode?: boolean; // New prop for hero sections
+  heroMode?: boolean; // For full-bleed hero sections
 }
 
 export function Shell({ 
