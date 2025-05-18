@@ -84,7 +84,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/profile")}
+                  onClick={() => handleNavigation(`/profile/${currentUser.id}`)}
                 >
                   <UserIcon className="mr-2 h-4 w-4" />
                   My Profile
@@ -148,7 +148,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/rel8/import")}
+                  onClick={() => handleNavigation("/rel8/contacts/import")}
                 >
                   <Import className="mr-2 h-4 w-4" />
                   Import
@@ -203,7 +203,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/admin/debug")}
+                  onClick={() => handleNavigation("/admin/debugger")}
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   Debug Tools

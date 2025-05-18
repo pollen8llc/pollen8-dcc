@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -58,7 +57,7 @@ const AppRoutes = () => {
         path="/profile"
         element={
           <ProtectedRoute role={UserRole.MEMBER}>
-            <Profile />
+            {currentUser ? <Navigate to={`/profile/${currentUser.id}`} replace /> : <Profile />}
           </ProtectedRoute>
         }
       />
@@ -180,7 +179,7 @@ const AppRoutes = () => {
         }
       />
 
-      {/* REL8T Routes - Changed from /rel8t/ to /rel8/ to match navigation */}
+      {/* REL8 Routes */}
       <Route
         path="/rel8/dashboard"
         element={

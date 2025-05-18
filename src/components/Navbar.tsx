@@ -76,7 +76,7 @@ const Navbar = () => {
             <div className="flex items-center mr-2">
               <Avatar 
                 className="h-8 w-8 cursor-pointer" 
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate(`/profile/${currentUser.id}`)}
               >
                 <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
                 <AvatarFallback>{getInitials()}</AvatarFallback>
