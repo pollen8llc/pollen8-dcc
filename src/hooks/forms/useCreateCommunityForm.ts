@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Community } from '@/models/types';
 import { useNavigate } from 'react-router-dom';
@@ -141,7 +142,7 @@ const useCreateCommunityForm = () => {
       setTimeout(() => {
         navigate(`/community/${response.id}`);
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating community:', error);
       setError(error instanceof Error ? error.message : 'Failed to create community');
       setSuccess(false);

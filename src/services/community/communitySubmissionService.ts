@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Community } from '@/models/types';
 import { processTargetAudience } from '@/utils/communityUtils';
@@ -37,8 +38,13 @@ export const checkDistributionStatus = async (submissionId: string): Promise<Com
 /**
  * Submit a community form for processing via the distribution system
  */
-export const submitCommunity = async (formData: Partial<Community>, userId: string) => {
+export const submitCommunity = async (formData: Partial<Community>, debugLogCallback: string | ((message: string) => void)) => {
   console.log('Submitting community:', formData);
+  
+  // Handle the debug logging function
+  const logMessage = typeof debugLogCallback === 'function' 
+    ? debugLogCallback 
+    : (message: string) => console.log(message);
   
   // Process target audience using the utility function
   const processedTargetAudience = processTargetAudience(formData.target_audience);
@@ -49,12 +55,15 @@ export const submitCommunity = async (formData: Partial<Community>, userId: stri
     target_audience: processedTargetAudience
   };
   
+  // Log the submission
+  logMessage(`Submitting data: ${JSON.stringify(submissionData)}`);
+  
   const { data, error } = await supabase
     .from('community_data_distribution')
     .insert({
       submission_data: submissionData,
       status: 'pending',
-      submitter_id: userId,
+      submitter_id: supabase.auth.getSession().then(res => res.data.session?.user.id || ''),
       created_at: new Date().toISOString()
     })
     .select()

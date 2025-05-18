@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Community } from '@/models/types';
 import { processTargetAudience } from '@/utils/communityUtils';
@@ -11,15 +12,35 @@ export const createCommunity = async (communityData: Partial<Community>): Promis
   // Process target audience using the utility function
   const processedTargetAudience = processTargetAudience(communityData.target_audience);
   
+  // Get current timestamp
+  const now = new Date().toISOString();
+  
+  // Prepare data with required fields
+  const insertData = {
+    name: communityData.name || "New Community", // Ensure name is provided (required field)
+    description: communityData.description || "",
+    logo_url: communityData.logo_url || communityData.imageUrl || "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?q=80&w=1742&auto=format&fit=crop&ixlib=rb-4.0.3",
+    website: communityData.website || "",
+    is_public: communityData.is_public !== undefined ? communityData.is_public : true,
+    location: communityData.location || "Remote",
+    member_count: communityData.member_count || communityData.communitySize || "0",
+    target_audience: processedTargetAudience,
+    community_type: communityData.type || null,
+    format: communityData.format || null,
+    social_media: communityData.social_media || {},
+    communication_platforms: communityData.communication_platforms || {},
+    newsletter_url: communityData.newsletter_url || communityData.newsletterUrl || null,
+    role_title: communityData.role_title || null,
+    community_structure: communityData.community_structure || null,
+    vision: communityData.vision || null,
+    created_at: now,
+    updated_at: now
+  };
+  
   // Create the community with processed data
   const { data, error } = await supabase
     .from('communities')
-    .insert({
-      ...communityData,
-      target_audience: processedTargetAudience,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    })
+    .insert(insertData)
     .select()
     .single();
   
@@ -40,14 +61,24 @@ export const updateCommunity = async (communityId: string, communityData: Partia
   // Process target audience using the utility function
   const processedTargetAudience = processTargetAudience(communityData.target_audience);
   
+  // Prepare update data with current timestamp
+  const updateData = {
+    ...communityData,
+    target_audience: processedTargetAudience,
+    updated_at: new Date().toISOString()
+  };
+  
+  // Remove undefined values to avoid type errors
+  Object.keys(updateData).forEach(key => {
+    if (updateData[key] === undefined) {
+      delete updateData[key];
+    }
+  });
+  
   // Update the community with processed data
   const { data, error } = await supabase
     .from('communities')
-    .update({
-      ...communityData,
-      target_audience: processedTargetAudience,
-      updated_at: new Date().toISOString()
-    })
+    .update(updateData)
     .eq('id', communityId)
     .select()
     .single();

@@ -5,7 +5,7 @@ import { UseFormReturn } from "react-hook-form";
 import { CommunityFormData } from "@/schemas/communitySchema";
 import { useNavigate } from "react-router-dom";
 import { submitCommunity } from "@/services/community/communitySubmissionService";
-import { useSubmitCommunityStatus } from "@/hooks/community/useSubmitCommunityStatus";
+import useSubmitCommunityStatus from "@/hooks/community/useSubmitCommunityStatus";
 import CommunityCardPreview from "./CommunityCardPreview";
 import { useToast } from "@/hooks/use-toast";
 import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
@@ -61,8 +61,8 @@ export function ReviewSubmitStep({
       }
       
       // Create logger function for internal tracking
-      const addDebugLog = (type: 'info' | 'error' | 'success', message: string) => {
-        console.log(`[${type}] ${message}`);
+      const addDebugLog = (message: string) => {
+        console.log(`[INFO] ${message}`);
       };
       
       // Submit the form - errors will be logged to submission_errors table
@@ -100,7 +100,7 @@ export function ReviewSubmitStep({
       <h2 className="text-xl font-semibold mb-5 text-center">Preview & Submit</h2>
       
       <div className="flex justify-center mb-4">
-        <CommunityCardPreview formValues={form.getValues()} />
+        <CommunityCardPreview communityData={form.getValues()} />
       </div>
       
       {status && status !== 'failed' && (

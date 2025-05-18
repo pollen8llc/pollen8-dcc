@@ -7,6 +7,7 @@ const useSubmitCommunityStatus = (submissionId: string | null) => {
   const [communityId, setCommunityId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     let intervalId: number;
@@ -16,6 +17,7 @@ const useSubmitCommunityStatus = (submissionId: string | null) => {
 
       try {
         setIsLoading(true);
+        setIsProcessing(true);
         const result = await checkDistributionStatus(submissionId);
         setStatus(result.status as DistributionStatus);
         setCommunityId(result.community_id);
@@ -26,6 +28,7 @@ const useSubmitCommunityStatus = (submissionId: string | null) => {
           result.status === DistributionStatus.FAILED
         ) {
           clearInterval(intervalId);
+          setIsProcessing(false);
           if (result.status === DistributionStatus.FAILED && result.error_message) {
             setError(result.error_message);
           }
@@ -34,6 +37,7 @@ const useSubmitCommunityStatus = (submissionId: string | null) => {
         console.error('Error checking submission status:', error);
         setError('Failed to check submission status');
         clearInterval(intervalId);
+        setIsProcessing(false);
       } finally {
         setIsLoading(false);
       }
@@ -48,7 +52,7 @@ const useSubmitCommunityStatus = (submissionId: string | null) => {
     return () => clearInterval(intervalId);
   }, [submissionId]);
 
-  return { status, communityId, error, isLoading };
+  return { status, communityId, error, isLoading, isProcessing };
 };
 
 export default useSubmitCommunityStatus;
