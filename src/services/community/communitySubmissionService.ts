@@ -1,108 +1,54 @@
 
-import { supabase } from "@/integrations/supabase/client";
 import { CommunityFormData } from "@/schemas/communitySchema";
+import { submitCommunityDistribution, checkDistributionStatus } from "./communityDistributionService";
 import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
 
-export type LoggerFunction = (type: 'info' | 'error' | 'success', message: string) => void;
+/**
+ * Submits community data via the distribution system
+ * @param data The community form data
+ * @param logger Optional logger function
+ * @returns The submission record
+ */
+export async function submitCommunity(
+  data: CommunityFormData,
+  logger?: (type: 'info' | 'error' | 'success', message: string) => void
+) {
+  try {
+    // Log submission
+    logger?.('info', 'Validating community data');
 
-// These types must match what's in the database
-export type SubmissionStatus = 'pending' | 'processing' | 'completed' | 'failed';
+    // Validate format is one of allowed values
+    if (data.format && !Object.values(COMMUNITY_FORMATS).includes(data.format)) {
+      throw new Error(`Invalid format: ${data.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
+    }
 
-export interface SubmissionResult {
-  id: string;
-  community_id?: string;
-  status: SubmissionStatus;
+    // Process targetAudience if needed
+    let processedData = { ...data };
+    
+    // If targetAudience is a string, convert it to an array
+    if (typeof processedData.targetAudience === 'string') {
+      processedData.targetAudience = processedData.targetAudience
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+    }
+
+    logger?.('info', 'Submitting community data to distribution service');
+    const result = await submitCommunityDistribution(processedData);
+    
+    logger?.('success', `Community data submitted successfully (ID: ${result.id})`);
+    return result;
+  } catch (error: any) {
+    logger?.('error', `Failed to submit community: ${error.message}`);
+    throw error;
+  }
 }
 
 /**
- * Submit community data to be processed by the database trigger
+ * Checks the status of a community submission
+ * @param distributionId The distribution ID
+ * @returns The distribution record
  */
-export const submitCommunity = async (
-  formData: CommunityFormData, 
-  logger: LoggerFunction
-): Promise<SubmissionResult> => {
-  try {
-    logger('info', 'Preparing community submission data');
-    
-    // Validate the format to match database constraints
-    if (formData.format && !Object.values(COMMUNITY_FORMATS).includes(formData.format as any)) {
-      throw new Error(`Invalid format: ${formData.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(', ')}`);
-    }
-    
-    // Process targetAudience to ensure it's an array
-    const targetAudience = typeof formData.targetAudience === 'string' 
-      ? formData.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
-      : formData.targetAudience || [];
-    
-    // Create communication platforms object from the platforms array
-    const communicationPlatforms = formData.platforms?.reduce((acc, platform) => {
-      acc[platform] = { enabled: true };
-      return acc;
-    }, {} as Record<string, any>) || {};
-    
-    // Create social media object
-    const socialMediaHandles = formData.socialMediaHandles || {};
-    
-    // Prepare the submission data - match the expected format in process_community_submission function
-    const submissionData = {
-      name: formData.name,
-      description: formData.description,
-      type: formData.type,
-      format: formData.format,
-      location: formData.location || "Remote",
-      targetAudience: targetAudience,
-      communicationPlatforms: communicationPlatforms,
-      website: formData.website || "",
-      newsletterUrl: formData.newsletterUrl || "",
-      socialMedia: socialMediaHandles,
-      isPublic: true,  // Default to public
-    };
-
-    logger('info', `Submitting community data for "${formData.name}"`);
-    
-    // Submit to the database
-    const { data, error } = await supabase
-      .from('community_data_distribution')
-      .insert({
-        submission_data: submissionData,
-        submitter_id: (await supabase.auth.getSession()).data.session?.user.id
-      })
-      .select('id, status, community_id')
-      .single();
-    
-    if (error) {
-      logger('error', `Submission error: ${error.message}`);
-      throw new Error(`Failed to submit community data: ${error.message}`);
-    }
-
-    logger('success', `Community submission successful! ID: ${data.id}`);
-    
-    return data as SubmissionResult;
-  } catch (error: any) {
-    logger('error', `Community submission failed: ${error.message}`);
-    throw error;
-  }
-};
-
-/**
- * Check the status of a community submission
- */
-export const getSubmissionStatus = async (distributionId: string): Promise<SubmissionResult | null> => {
-  try {
-    const { data, error } = await supabase
-      .from('community_data_distribution')
-      .select('id, status, community_id, error_message')
-      .eq('id', distributionId)
-      .single();
-    
-    if (error) {
-      console.error(`Error fetching submission status: ${error.message}`);
-      return null;
-    }
-    
-    return data as SubmissionResult;
-  } catch (error) {
-    console.error('Failed to get submission status:', error);
-    return null;
-  }
-};
+export async function checkCommunitySubmission(distributionId: string) {
+  return await checkDistributionStatus(distributionId);
+}

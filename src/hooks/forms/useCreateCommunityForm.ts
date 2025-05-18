@@ -6,6 +6,7 @@ import { communityFormSchema, type CommunityFormData } from "@/schemas/community
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
 
 export const useCreateCommunityForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,7 +23,7 @@ export const useCreateCommunityForm = () => {
       type: "tech",
       format: "hybrid",
       location: "",
-      targetAudience: "",
+      targetAudience: [],
       platforms: [],
       website: "",
       newsletterUrl: "",
@@ -60,23 +61,25 @@ export const useCreateCommunityForm = () => {
       }
 
       // Prepare the data for insertion
-      const targetAudienceArray = typeof data.targetAudience === 'string' 
-        ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
-        : data.targetAudience;
+      const targetAudienceArray = Array.isArray(data.targetAudience) 
+        ? data.targetAudience 
+        : (typeof data.targetAudience === 'string'
+            ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+            : []);
 
       const socialMediaObject = data.socialMediaHandles || {};
 
       const communicationPlatformsObject = data.platforms?.reduce((acc, platform) => {
         acc[platform] = { enabled: true };
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, any>) || {};
 
       // Ensure format is one of the allowed values
       const format = data.format;
       
       // Make sure it's exactly one of the allowed values
-      if (!["online", "IRL", "hybrid"].includes(format)) {
-        throw new Error(`Invalid format: ${format}. Must be one of: online, IRL, hybrid`);
+      if (!Object.values(COMMUNITY_FORMATS).includes(format)) {
+        throw new Error(`Invalid format: ${format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
       }
 
       // Create the community with the owner_id explicitly set

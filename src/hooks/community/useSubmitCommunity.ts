@@ -6,6 +6,7 @@ import * as communityService from "@/services/community/communityMutationService
 import { CommunityFormSchema } from "./schemas/communityFormSchema"
 import { useUser } from "@/contexts/UserContext"
 import { supabase } from "@/integrations/supabase/client"
+import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
 
 export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) => {
   const { toast } = useToast();
@@ -34,9 +35,11 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
       }
 
       // Process tags from targetAudience
-      const tags = values.targetAudience 
-        ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
-        : [];
+      const tags = Array.isArray(values.targetAudience) 
+        ? values.targetAudience 
+        : (typeof values.targetAudience === 'string' 
+            ? values.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+            : []);
       
       // Handle social media
       const socialMediaObject = {
@@ -54,8 +57,8 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
 
       // Validate format
       const format = values.format;
-      if (format && !["online", "IRL", "hybrid"].includes(format)) {
-        throw new Error(`Invalid format: ${format}. Must be one of: online, IRL, hybrid`);
+      if (format && !Object.values(COMMUNITY_FORMATS).includes(format as any)) {
+        throw new Error(`Invalid format: ${format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
       }
 
       console.log("Creating community with processed data:", {
@@ -75,19 +78,14 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
         name: values.name,
         description: values.description,
         location: values.location || "Remote",
-        communityType: values.communityType,
-        format: format,
-        tags,
-        communitySize: defaultSize, // Use default size
-        organizerIds: [session.session.user.id],
-        isPublic: true,
+        type: values.communityType,
+        format: format as any,
+        targetAudience: tags,
+        size: defaultSize, // Use default size
+        platforms: values.primaryPlatforms,
         website: values.website || "",
-        role_title: values.role_title || "",
-        community_structure: values.community_structure || "",
-        vision: values.vision || "",
-        socialMedia: socialMediaObject,
-        communication_platforms: communicationPlatformsObject,
         newsletterUrl: values.newsletterUrl || "",
+        socialMediaHandles: socialMediaObject,
       };
 
       const community = await communityService.createCommunity(communityData);
@@ -123,7 +121,7 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
       } else if (errorMessage.includes("not found")) {
         errorMessage = "The community could not be created due to a database configuration issue. Please contact an administrator.";
       } else if (errorMessage.includes("format")) {
-        errorMessage = "Invalid format. Must be one of: online, IRL, hybrid";
+        errorMessage = `Invalid format. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`;
       }
       
       setSubmissionError(errorMessage);

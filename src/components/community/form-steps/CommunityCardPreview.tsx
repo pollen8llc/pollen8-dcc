@@ -31,6 +31,7 @@ const CommunityCardPreview: React.FC<CommunityCardPreviewProps> = ({ formValues 
     name,
     description,
     location,
+    size,
     communitySize,
     // communityType,
     format,
@@ -45,7 +46,7 @@ const CommunityCardPreview: React.FC<CommunityCardPreviewProps> = ({ formValues 
   const displayLocation = location || "Remote";
   const displayName = name || "Community Name Example";
   const displayDesc = description || "A short description about your community. This is what others will see!";
-  const sizeText = communitySize || "1-25";
+  const sizeText = size || communitySize || "1-25";
   const cardFormat = format ? format.charAt(0).toUpperCase() + format.slice(1) : "Hybrid";
 
   // Fake "recently updated" for spinner

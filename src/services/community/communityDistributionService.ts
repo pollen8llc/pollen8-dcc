@@ -32,7 +32,15 @@ export const submitCommunityDistribution = async (
 
   // Create a processed copy of the data
   const processedData = { ...formData };
-  
+
+  // Process targetAudience consistently - convert to array if it's a string
+  if (typeof processedData.targetAudience === 'string') {
+    processedData.targetAudience = processedData.targetAudience
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(Boolean);
+  }
+
   // Handle date components
   if (processedData.startDateYear && processedData.startDateMonth && processedData.startDateDay) {
     const dateString = formatDateString(
@@ -40,17 +48,7 @@ export const submitCommunityDistribution = async (
       processedData.startDateMonth,
       processedData.startDateDay
     );
-    (processedData as any).start_date = dateString;
-  }
-
-  // Clean up date fields
-  delete (processedData as any).startDateYear;
-  delete (processedData as any).startDateMonth;
-  delete (processedData as any).startDateDay;
-
-  // Format targetAudience consistently
-  if (Array.isArray(processedData.targetAudience)) {
-    processedData.targetAudience = processedData.targetAudience.join(',');
+    processedData.foundingDate = dateString || undefined;
   }
 
   const { data, error } = await supabase

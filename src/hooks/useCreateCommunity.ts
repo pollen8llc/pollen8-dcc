@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { CommunityFormData } from "@/schemas/communitySchema";
 import { useNavigate } from "react-router-dom";
+import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
 
 export const useCreateCommunity = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,11 +40,11 @@ export const useCreateCommunity = () => {
     }
     
     // Validate format is one of the allowed values
-    if (data.format && !["online", "IRL", "hybrid"].includes(data.format)) {
+    if (data.format && !Object.values(COMMUNITY_FORMATS).includes(data.format)) {
       toast({
         variant: "destructive",
         title: "Validation Error",
-        description: "Format must be one of: online, IRL, hybrid",
+        description: `Format must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`,
       });
       return false;
     }
@@ -74,9 +75,11 @@ export const useCreateCommunity = () => {
       }
 
       // Prepare the data for insertion
-      const targetAudienceArray = typeof data.targetAudience === 'string' 
-        ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) 
-        : data.targetAudience;
+      const targetAudienceArray = Array.isArray(data.targetAudience) 
+        ? data.targetAudience 
+        : (typeof data.targetAudience === 'string'
+            ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+            : []);
 
       const socialMediaObject = data.socialMediaHandles || {};
 

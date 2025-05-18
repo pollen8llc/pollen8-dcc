@@ -41,6 +41,11 @@ export const communityFormSchema = z.object({
   eventFrequency: z.nativeEnum(EVENT_FREQUENCIES as Record<string, EventFrequency>).optional(),
   size: z.string().optional(),
   foundingDate: z.string().optional(),
+  // Add fields for date components
+  startDateMonth: z.string().optional(),
+  startDateDay: z.string().optional(),
+  startDateYear: z.string().optional(),
+  communitySize: z.string().optional(),
 });
 
 // Export the inferred type
