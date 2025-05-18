@@ -69,6 +69,7 @@
   
   html {
     @apply dark;
+    scroll-behavior: smooth;
   }
 }
 
@@ -300,4 +301,91 @@ h1, h2, h3, h4, h5, h6 {
   0% { background-position: 0% 50% }
   50% { background-position: 100% 50% }
   100% { background-position: 0% 50% }
+}
+
+/* New landing page styles */
+.landing-hero {
+  @apply relative min-h-screen flex items-center justify-center;
+}
+
+.hero-gradient {
+  @apply absolute inset-0 bg-gradient-to-br from-background via-background to-[#132731] z-0;
+}
+
+.mesh-backdrop {
+  @apply absolute inset-0 opacity-10 z-0;
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+}
+
+.gradient-orb {
+  @apply absolute rounded-full blur-[120px] animate-pulse;
+  background: radial-gradient(circle, rgba(0,234,218,0.1) 0%, rgba(0,234,218,0.05) 50%, rgba(0,234,218,0) 100%);
+}
+
+.sticky-header {
+  @apply fixed top-0 left-0 right-0 z-50 transition-all duration-300;
+}
+
+.sticky-header.scrolled {
+  @apply bg-background/95 backdrop-blur-sm shadow-md;
+}
+
+.nav-link {
+  @apply text-foreground/70 hover:text-foreground transition-colors;
+}
+
+.feature-icon-container {
+  @apply w-12 h-12 rounded-lg bg-[#00eada]/10 flex items-center justify-center mb-4;
+}
+
+.feature-icon {
+  @apply w-6 h-6 text-[#00eada];
+}
+
+.module-card {
+  @apply border-border/30 bg-card/80 backdrop-blur-sm hover:border-[#00eada]/30 hover:shadow-lg transition-all duration-300 overflow-hidden;
+}
+
+.module-stripe {
+  @apply h-2 w-full;
+}
+
+.testimonial-card {
+  @apply border-border/20 bg-card/60 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:border-[#00eada]/20;
+}
+
+.stat-card {
+  @apply text-center p-6 bg-card/60 backdrop-blur-sm rounded-2xl border border-border/40 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
+}
+
+.cta-container {
+  @apply max-w-4xl mx-auto bg-card/80 backdrop-blur-md p-8 md:p-12 rounded-3xl border border-border/40 shadow-2xl relative overflow-hidden;
+}
+
+.cta-gradient-orb {
+  @apply absolute rounded-full blur-3xl animate-pulse;
+  background: radial-gradient(circle, rgba(0,234,218,0.15) 0%, rgba(0,234,218,0.05) 70%, rgba(0,234,218,0) 100%);
+}
+
+.footer-heading {
+  @apply font-bold mb-4;
+}
+
+.footer-link {
+  @apply text-muted-foreground hover:text-foreground text-sm;
+}
+
+.footer-container {
+  @apply py-10 border-t border-border/20;
+}
+
+.footer-bottom {
+  @apply flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border/20;
+}
+
+.footer-copyright {
+  @apply text-sm text-muted-foreground mb-4 md:mb-0;
 }

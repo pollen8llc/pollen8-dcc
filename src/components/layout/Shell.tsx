@@ -9,6 +9,7 @@ interface ShellProps extends React.HTMLAttributes<HTMLDivElement> {
   fullWidth?: boolean;
   noPadding?: boolean;
   containerClassName?: string;
+  heroMode?: boolean; // New prop for hero sections
 }
 
 export function Shell({ 
@@ -17,16 +18,18 @@ export function Shell({
   fullWidth = false,
   noPadding = false,
   containerClassName,
+  heroMode = false, // For full-bleed hero sections
   ...props
 }: ShellProps) {
   return (
     <div className={cn("min-h-screen bg-background", className)} {...props}>
-      <Navbar />
+      {!heroMode && <Navbar />}
       <div className={cn(
         noPadding ? "" : "px-4 py-6",
-        fullWidth 
-          ? "w-full" 
-          : cn("container mx-auto", containerClassName || "max-w-6xl"),
+        heroMode ? "w-full" : // Hero mode gets full width with no container
+          fullWidth 
+            ? "w-full" 
+            : cn("container mx-auto", containerClassName || "max-w-6xl"),
       )}>
         {children}
       </div>
