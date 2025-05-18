@@ -48,11 +48,11 @@ export function StartDateStep({ form, onNext, onPrev }: StartDateStepProps) {
                       <FormControl>
                         <DateSelect
                           monthValue={monthField.value || ""}
-                          onMonthChange={monthField.onChange}
+                          onMonthChange={(value) => monthField.onChange(value)}
                           dayValue={dayField.value || ""}
-                          onDayChange={dayField.onChange}
+                          onDayChange={(value) => dayField.onChange(value)}
                           yearValue={yearField.value || ""}
-                          onYearChange={yearField.onChange}
+                          onYearChange={(value) => yearField.onChange(value)}
                         />
                       </FormControl>
                       <FormMessage />

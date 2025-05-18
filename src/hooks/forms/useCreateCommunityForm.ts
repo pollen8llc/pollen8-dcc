@@ -23,7 +23,7 @@ export const useCreateCommunityForm = () => {
       type: "tech",
       format: "hybrid",
       location: "",
-      targetAudience: [],
+      targetAudience: [], // Change from string to empty array for consistency
       platforms: [],
       website: "",
       newsletterUrl: "",

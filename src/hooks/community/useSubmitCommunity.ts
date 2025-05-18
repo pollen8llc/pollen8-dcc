@@ -6,7 +6,8 @@ import * as communityService from "@/services/community/communityMutationService
 import { CommunityFormSchema } from "./schemas/communityFormSchema"
 import { useUser } from "@/contexts/UserContext"
 import { supabase } from "@/integrations/supabase/client"
-import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
+import { COMMUNITY_FORMATS, CommunityType } from "@/constants/communityConstants";
+import { CommunityFormData } from "@/schemas/communitySchema";
 
 export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) => {
   const { toast } = useToast();
@@ -74,15 +75,16 @@ export const useSubmitCommunity = (onSuccess?: (communityId: string) => void) =>
       // Set a default size value since we removed the size field from the form
       const defaultSize = "1-100";
 
-      const communityData = {
+      // Convert the form data to match our schema
+      const communityData: CommunityFormData = {
         name: values.name,
         description: values.description,
         location: values.location || "Remote",
-        type: values.communityType,
-        format: format as any,
+        type: values.communityType as CommunityType, // Type casting to CommunityType
+        format: format as any, // Type casting to CommunityFormat
         targetAudience: tags,
         size: defaultSize, // Use default size
-        platforms: values.primaryPlatforms,
+        platforms: values.primaryPlatforms || [],
         website: values.website || "",
         newsletterUrl: values.newsletterUrl || "",
         socialMediaHandles: socialMediaObject,
