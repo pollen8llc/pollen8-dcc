@@ -14,7 +14,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import DebuggerDashboard from "./pages/admin/DebuggerDashboard";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
 import CommunityProfile from "./pages/CommunityProfile";
-import CreateCommunity from "./pages/CreateCommunity";
+import CreateCommunityPage from "./pages/CreateCommunityPage";
+import EditCommunityPage from "./pages/EditCommunityPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import JoinCommunities from "./pages/JoinCommunities";
@@ -26,7 +27,6 @@ import InvitesManagementPage from "./pages/InvitesManagementPage";
 import ProfilePage from "./pages/ProfilePage";
 import Documentation from "./pages/Documentation";
 import CreateCommunityProfile from "./pages/CreateCommunityProfile";
-import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 
 // REL8T Pages
 import RelationshipWizard from "./pages/rel8t/RelationshipWizard";
@@ -133,7 +133,7 @@ const AppRoutes = () => {
         path="/community/create"
         element={
           <ProtectedRoute role={UserRole.MEMBER}>
-            <CreateCommunity />
+            <CreateCommunityPage />
           </ProtectedRoute>
         }
       />
@@ -141,7 +141,7 @@ const AppRoutes = () => {
         path="/community/:id/edit"
         element={
           <ProtectedRoute role={UserRole.ORGANIZER}>
-            <OrganizerDashboard />
+            <EditCommunityPage />
           </ProtectedRoute>
         }
       />
@@ -183,7 +183,7 @@ const AppRoutes = () => {
         path="/dot-connector"
         element={
           <ProtectedRoute role={UserRole.ORGANIZER}>
-            <DotConnectorDashboard />
+            <OrganizerDashboard />
           </ProtectedRoute>
         }
       />

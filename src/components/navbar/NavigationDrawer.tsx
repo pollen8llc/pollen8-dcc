@@ -28,6 +28,7 @@ import {
   Grid3x3,
   LayoutDashboard,
   CalendarClock,
+  Folder
 } from "lucide-react";
 
 interface NavigationDrawerProps {
@@ -98,6 +99,17 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   <UserSearch className="mr-2 h-4 w-4" />
                   Find People
                 </Button>
+                
+                {isOrganizer && (
+                  <Button
+                    variant="ghost"
+                    className="justify-start"
+                    onClick={() => handleNavigation("/community/create")}
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create Community
+                  </Button>
+                )}
               </>
             )}
 
@@ -175,10 +187,19 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/dot-connector")}
+                  onClick={() => handleNavigation("/organizer")}
                 >
-                  <Network className="mr-2 h-4 w-4" />
+                  <Folder className="mr-2 h-4 w-4" />
                   Organizer Dashboard 
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/invites")}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Manage Invites
                 </Button>
               </>
             )}

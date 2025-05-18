@@ -1,18 +1,4 @@
 
-/**
- * Constants for community data
- */
-
-// Valid community format values
-export const COMMUNITY_FORMATS = {
-  ONLINE: 'online',
-  IRL: 'IRL',
-  HYBRID: 'hybrid'
-} as const;
-
-export type CommunityFormat = typeof COMMUNITY_FORMATS[keyof typeof COMMUNITY_FORMATS];
-
-// Valid community type values
 export const COMMUNITY_TYPES = {
   TECH: 'tech',
   CREATIVE: 'creative',
@@ -24,9 +10,16 @@ export const COMMUNITY_TYPES = {
   OTHER: 'other'
 } as const;
 
-export type CommunityType = typeof COMMUNITY_TYPES[keyof typeof COMMUNITY_TYPES];
+export type CommunityType = (typeof COMMUNITY_TYPES)[keyof typeof COMMUNITY_TYPES];
 
-// Valid event frequencies
+export const COMMUNITY_FORMATS = {
+  ONLINE: 'online',
+  IRL: 'IRL',
+  HYBRID: 'hybrid'
+} as const;
+
+export type CommunityFormat = (typeof COMMUNITY_FORMATS)[keyof typeof COMMUNITY_FORMATS];
+
 export const EVENT_FREQUENCIES = {
   DAILY: 'daily',
   WEEKLY: 'weekly',
@@ -36,4 +29,15 @@ export const EVENT_FREQUENCIES = {
   ADHOC: 'adhoc'
 } as const;
 
-export type EventFrequency = typeof EVENT_FREQUENCIES[keyof typeof EVENT_FREQUENCIES];
+export type EventFrequency = (typeof EVENT_FREQUENCIES)[keyof typeof EVENT_FREQUENCIES];
+
+export const COMMUNITY_SIZES = [
+  '1-10',
+  '11-50',
+  '51-100',
+  '101-500',
+  '501-1000',
+  '1000+'
+] as const;
+
+export type CommunitySize = (typeof COMMUNITY_SIZES)[number];

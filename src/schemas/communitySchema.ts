@@ -4,50 +4,37 @@ import {
   COMMUNITY_FORMATS, 
   COMMUNITY_TYPES, 
   EVENT_FREQUENCIES,
-  type CommunityFormat,
-  type CommunityType,
-  type EventFrequency
+  COMMUNITY_SIZES
 } from "@/constants/communityConstants";
 
 // Social Media Schema
-const socialMediaSchema = z.object({
+export const SocialMediaSchema = z.object({
   twitter: z.string().optional(),
   instagram: z.string().optional(),
   linkedin: z.string().optional(),
-  facebook: z.string().optional(),
+  facebook: z.string().optional()
 });
 
 // Create the community form schema
-export const communityFormSchema = z.object({
+export const communitySchema = z.object({
   name: z.string().min(3, { message: "Community name must be at least 3 characters" }),
   description: z.string().min(10, { message: "Description must be at least 10 characters" }),
-  type: z.nativeEnum(COMMUNITY_TYPES as Record<string, CommunityType>)
-    .default(COMMUNITY_TYPES.TECH),
-  format: z.nativeEnum(COMMUNITY_FORMATS as Record<string, CommunityFormat>)
-    .default(COMMUNITY_FORMATS.HYBRID),
+  type: z.enum(Object.values(COMMUNITY_TYPES) as [string, ...string[]]),
+  format: z.enum(Object.values(COMMUNITY_FORMATS) as [string, ...string[]]),
   location: z.string().optional(),
-  targetAudience: z.union([
-    z.array(z.string()),
-    z.string().optional()
-  ]).optional().transform(val => {
-    if (typeof val === 'string' && val !== "") {
-      return val.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-    }
-    return Array.isArray(val) ? val : [];
-  }),
+  target_audience: z.array(z.string()).optional(),
   platforms: z.array(z.string()).optional(),
   website: z.string().url({ message: "Website must be a valid URL" }).optional().or(z.literal("")),
-  newsletterUrl: z.string().url({ message: "Newsletter URL must be a valid URL" }).optional().or(z.literal("")),
-  socialMediaHandles: socialMediaSchema.optional(),
-  eventFrequency: z.nativeEnum(EVENT_FREQUENCIES as Record<string, EventFrequency>).optional(),
-  size: z.string().optional(),
-  foundingDate: z.string().optional(),
-  // Add fields for date components
-  startDateMonth: z.string().optional(),
-  startDateDay: z.string().optional(),
-  startDateYear: z.string().optional(),
-  communitySize: z.string().optional(),
+  newsletter_url: z.string().url({ message: "Newsletter URL must be a valid URL" }).optional().or(z.literal("")),
+  social_media: SocialMediaSchema.optional(),
+  event_frequency: z.enum(Object.values(EVENT_FREQUENCIES) as [string, ...string[]]).optional(),
+  community_size: z.enum(COMMUNITY_SIZES as [string, ...string[]]).optional(),
+  is_public: z.boolean().default(true),
+  founder_name: z.string().optional(),
+  role_title: z.string().optional(),
+  vision: z.string().optional(),
+  community_values: z.string().optional(),
+  community_structure: z.string().optional()
 });
 
-// Export the inferred type
-export type CommunityFormData = z.infer<typeof communityFormSchema>;
+export type CommunityFormData = z.infer<typeof communitySchema>;
