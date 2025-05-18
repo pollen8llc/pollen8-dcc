@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -56,7 +57,7 @@ const AppRoutes = () => {
       <Route
         path="/profile"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Profile />
           </ProtectedRoute>
         }
@@ -65,7 +66,7 @@ const AppRoutes = () => {
       <Route
         path="/profile/edit"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ProfileEditPage />
           </ProtectedRoute>
         }
@@ -73,7 +74,7 @@ const AppRoutes = () => {
       <Route
         path="/profile/setup"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ProfileSetupPage />
           </ProtectedRoute>
         }
@@ -81,15 +82,15 @@ const AppRoutes = () => {
       <Route
         path="/profile/:id"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ProfilePage />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/profiles"
+        path="/profiles/search"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ProfileSearchPage />
           </ProtectedRoute>
         }
@@ -97,7 +98,7 @@ const AppRoutes = () => {
       <Route
         path="/connections"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ConnectionsPage />
           </ProtectedRoute>
         }
@@ -105,7 +106,7 @@ const AppRoutes = () => {
       <Route
         path="/join"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <JoinCommunities />
           </ProtectedRoute>
         }
@@ -113,7 +114,7 @@ const AppRoutes = () => {
       <Route
         path="/onboarding"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Onboarding />
           </ProtectedRoute>
         }
@@ -121,7 +122,7 @@ const AppRoutes = () => {
       <Route
         path="/invites"
         element={
-          <ProtectedRoute roleEnum={UserRole.ORGANIZER}>
+          <ProtectedRoute role={UserRole.ORGANIZER}>
             <InvitesManagementPage />
           </ProtectedRoute>
         }
@@ -131,7 +132,7 @@ const AppRoutes = () => {
       <Route
         path="/community/create"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <CreateCommunity />
           </ProtectedRoute>
         }
@@ -139,7 +140,7 @@ const AppRoutes = () => {
       <Route
         path="/community/:id/create-profile"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <CreateCommunityProfile />
           </ProtectedRoute>
         }
@@ -149,7 +150,7 @@ const AppRoutes = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute roleEnum={UserRole.ORGANIZER}>
+          <ProtectedRoute role={UserRole.ORGANIZER}>
             <AdminDashboard />
           </ProtectedRoute>
         }
@@ -157,7 +158,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/debugger"
         element={
-          <ProtectedRoute roleEnum={UserRole.ADMIN}>
+          <ProtectedRoute role={UserRole.ADMIN}>
             <DebuggerDashboard />
           </ProtectedRoute>
         }
@@ -165,7 +166,7 @@ const AppRoutes = () => {
       <Route
         path="/organizer"
         element={
-          <ProtectedRoute roleEnum={UserRole.ORGANIZER}>
+          <ProtectedRoute role={UserRole.ORGANIZER}>
             <OrganizerDashboard />
           </ProtectedRoute>
         }
@@ -173,89 +174,89 @@ const AppRoutes = () => {
       <Route
         path="/dot-connector"
         element={
-          <ProtectedRoute roleEnum={UserRole.ORGANIZER}>
+          <ProtectedRoute role={UserRole.ORGANIZER}>
             <DotConnectorDashboard />
           </ProtectedRoute>
         }
       />
 
-      {/* REL8T Routes */}
+      {/* REL8T Routes - Changed from /rel8t/ to /rel8/ to match navigation */}
       <Route
-        path="/rel8t/dashboard"
+        path="/rel8/dashboard"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Dashboard />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/contacts"
+        path="/rel8/contacts"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Contacts />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/contacts/create"
+        path="/rel8/contacts/create"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ContactCreate />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/contacts/:id/edit"
+        path="/rel8/contacts/:id/edit"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ContactEdit />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/contacts/import"
+        path="/rel8/contacts/import"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ImportContacts />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/groups"
+        path="/rel8/groups"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Groups />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/relationships"
+        path="/rel8/relationships"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Relationships />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/wizard"
+        path="/rel8/wizard"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <RelationshipWizard />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/settings"
+        path="/rel8/settings"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Settings />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/rel8t/notifications"
+        path="/rel8/notifications"
         element={
-          <ProtectedRoute roleEnum={UserRole.MEMBER}>
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Notifications />
           </ProtectedRoute>
         }
