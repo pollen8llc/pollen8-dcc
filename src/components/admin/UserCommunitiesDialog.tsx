@@ -15,6 +15,9 @@ interface UserCommunitiesDialogProps {
   user: User | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // Added these props to match the usage in UserManagementTab
+  communities?: any[];
+  isLoading?: boolean;
 }
 
 // This is a stub component to maintain compatibility

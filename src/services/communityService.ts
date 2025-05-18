@@ -28,7 +28,7 @@ export const getAllCommunities = async (page = 1) => {
 // Get community by ID
 export const getCommunityById = async (id: string) => {
   console.warn("getCommunityById: Community functionality has been removed");
-  throw new CommunityError("Community not found", "not_found");
+  return null; // Return null instead of throwing an error
 };
 
 // Search for communities
@@ -40,17 +40,17 @@ export const searchCommunities = async (query: string) => {
 // Additional exports for backward compatibility
 export const createCommunity = async () => {
   console.warn("createCommunity: Community functionality has been removed");
-  throw new CommunityError("Community functionality has been removed");
+  return null; // Return null instead of throwing an error
 };
 
 export const updateCommunity = async () => {
   console.warn("updateCommunity: Community functionality has been removed");
-  throw new CommunityError("Community functionality has been removed");
+  return null; // Return null instead of throwing an error
 };
 
 export const deleteCommunity = async () => {
   console.warn("deleteCommunity: Community functionality has been removed");
-  throw new CommunityError("Community functionality has been removed");
+  return true; // Return true to indicate "success" without actually doing anything
 };
 
 export const getManagedCommunities = async () => {

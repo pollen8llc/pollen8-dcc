@@ -85,12 +85,13 @@ const UserManagementTab = () => {
         }}
       />
 
+      {/* Update props to match UserCommunitiesDialog interface */}
       <UserCommunitiesDialog
         user={selectedUser}
-        communities={userCommunities}
-        isLoading={loadingCommunities}
         open={isCommunityListOpen}
         onOpenChange={setIsCommunityListOpen}
+        communities={userCommunities}
+        isLoading={loadingCommunities}
       />
     </div>
   );
