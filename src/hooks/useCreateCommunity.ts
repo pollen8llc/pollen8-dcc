@@ -30,15 +30,6 @@ export const useCreateCommunity = () => {
       return false;
     }
     
-    if (!data.targetAudience) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error",
-        description: "Target audience is required.",
-      });
-      return false;
-    }
-    
     // Validate format is one of the allowed values
     if (data.format && !Object.values(COMMUNITY_FORMATS).includes(data.format)) {
       toast({
@@ -77,9 +68,7 @@ export const useCreateCommunity = () => {
       // Prepare the data for insertion
       const targetAudienceArray = Array.isArray(data.targetAudience) 
         ? data.targetAudience 
-        : (typeof data.targetAudience === 'string'
-            ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
-            : []);
+        : [];
 
       const socialMediaObject = data.socialMediaHandles || {};
 

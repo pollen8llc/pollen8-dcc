@@ -11,16 +11,14 @@ import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
 export async function createCommunity(communityData: CommunityFormData) {
   try {
     // Validate format is one of allowed values
-    if (communityData.format && !Object.values(COMMUNITY_FORMATS).includes(communityData.format as any)) {
+    if (communityData.format && !Object.values(COMMUNITY_FORMATS).includes(communityData.format)) {
       throw new Error(`Invalid format: ${communityData.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
     }
 
     // Process data for insertion
     const targetAudienceArray = Array.isArray(communityData.targetAudience) 
       ? communityData.targetAudience 
-      : (typeof communityData.targetAudience === 'string' 
-          ? communityData.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
-          : []);
+      : [];
 
     const socialMediaObject = communityData.socialMediaHandles || {};
 
@@ -70,16 +68,14 @@ export async function createCommunity(communityData: CommunityFormData) {
 export async function updateCommunity(communityId: string, communityData: Partial<CommunityFormData>) {
   try {
     // Validate format is one of allowed values
-    if (communityData.format && !Object.values(COMMUNITY_FORMATS).includes(communityData.format as any)) {
+    if (communityData.format && !Object.values(COMMUNITY_FORMATS).includes(communityData.format)) {
       throw new Error(`Invalid format: ${communityData.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
     }
 
     // Process data for update
     const targetAudienceArray = Array.isArray(communityData.targetAudience) 
       ? communityData.targetAudience 
-      : (typeof communityData.targetAudience === 'string' 
-          ? communityData.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
-          : undefined);
+      : [];
 
     // Update the community
     const { data, error } = await supabase
@@ -118,16 +114,27 @@ export async function updateCommunity(communityId: string, communityData: Partia
  */
 export async function deleteCommunity(communityId: string) {
   try {
-    const { error } = await supabase
-      .from('communities')
-      .delete()
-      .eq('id', communityId);
+    if (!communityId) {
+      throw new Error("Community ID is required to delete.");
+    }
 
+    // Use the safe_delete_community function instead of direct delete
+    // This ensures proper ownership validation and auditing
+    const { data, error } = await supabase.rpc('safe_delete_community', {
+      community_id: communityId,
+      user_id: (await supabase.auth.getUser()).data.user?.id
+    });
+    
     if (error) {
       console.error("Error deleting community:", error);
       throw new Error(`Failed to delete community: ${error.message}`);
     }
-
+    
+    if (!data) {
+      throw new Error("Failed to delete community - you may not be the owner");
+    }
+    
+    console.log("Community deleted successfully:", communityId);
     return true;
   } catch (error: any) {
     console.error("Error in deleteCommunity:", error);

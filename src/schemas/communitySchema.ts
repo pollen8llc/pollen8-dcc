@@ -28,12 +28,13 @@ export const communityFormSchema = z.object({
   location: z.string().optional(),
   targetAudience: z.union([
     z.array(z.string()),
-    z.string().transform(val => 
-      val.split(',')
-         .map(tag => tag.trim())
-         .filter(tag => tag.length > 0)
-    )
-  ]).optional(),
+    z.string().optional()
+  ]).optional().transform(val => {
+    if (typeof val === 'string' && val !== "") {
+      return val.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    }
+    return Array.isArray(val) ? val : [];
+  }),
   platforms: z.array(z.string()).optional(),
   website: z.string().url({ message: "Website must be a valid URL" }).optional().or(z.literal("")),
   newsletterUrl: z.string().url({ message: "Newsletter URL must be a valid URL" }).optional().or(z.literal("")),

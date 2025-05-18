@@ -25,7 +25,7 @@ export const useCreateCommunityForm = () => {
       type: "tech",
       format: "hybrid",
       location: "",
-      targetAudience: "",
+      targetAudience: [],
       platforms: [],
       website: "",
       newsletterUrl: "",

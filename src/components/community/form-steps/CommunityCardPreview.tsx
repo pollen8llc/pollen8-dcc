@@ -33,10 +33,8 @@ const CommunityCardPreview: React.FC<CommunityCardPreviewProps> = ({ formValues 
     location,
     size,
     communitySize,
-    // communityType,
     format,
     website,
-    // Only form fields; use fallback/mock for image.
   } = formValues;
 
   // Fallbacks for image, fields, tags, etc.

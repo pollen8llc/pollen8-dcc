@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -59,7 +60,26 @@ export default function OrganizerDashboard() {
           return;
         }
 
-        setCommunities(data);
+        // Map the Supabase data to Community type
+        const mappedData: Community[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          location: item.location || '',
+          owner_id: item.owner_id,
+          type: item.type,
+          imageUrl: item.logo_url,
+          communitySize: item.member_count || '0',
+          organizerIds: item.owner_id ? [item.owner_id] : [],
+          memberIds: [],
+          tags: item.target_audience || [],
+          isPublic: item.is_public,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          format: item.format
+        }));
+
+        setCommunities(mappedData);
       } catch (error: any) {
         console.error("Unexpected error fetching communities:", error);
         toast({
@@ -75,7 +95,7 @@ export default function OrganizerDashboard() {
     fetchCommunities();
   }, [currentUser?.id, toast]);
 
-  const deleteCommunity = async (communityId: string, options: any) => {
+  const deleteCommunity = async (communityId: string) => {
     try {
       if (!communityId) {
         throw new Error("Community ID is required to delete.");
@@ -190,7 +210,7 @@ export default function OrganizerDashboard() {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() => deleteCommunity(community.id, {})}
+                          onClick={() => deleteCommunity(community.id)}
                           className="text-destructive focus:bg-destructive/5"
                         >
                           Delete Community

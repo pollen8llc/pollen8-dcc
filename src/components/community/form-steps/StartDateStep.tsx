@@ -33,25 +33,25 @@ export function StartDateStep({ form, onNext, onPrev }: StartDateStepProps) {
         
         <FormField
           control={form.control}
-          name="startDateDay"
-          render={({ field: dayField }) => (
+          name="startDateMonth"
+          render={({ field: monthField }) => (
             <FormField
               control={form.control}
-              name="startDateYear"
-              render={({ field: yearField }) => (
+              name="startDateDay"
+              render={({ field: dayField }) => (
                 <FormField
                   control={form.control}
-                  name="startDateMonth"
-                  render={({ field: monthField }) => (
+                  name="startDateYear"
+                  render={({ field: yearField }) => (
                     <FormItem>
                       <FormLabel>Organization Start Date</FormLabel>
                       <FormControl>
                         <DateSelect
-                          monthValue={monthField.value || ""}
+                          monthValue={monthField.value?.toString() || ""}
                           onMonthChange={(value) => monthField.onChange(value)}
-                          dayValue={dayField.value || ""}
+                          dayValue={dayField.value?.toString() || ""}
                           onDayChange={(value) => dayField.onChange(value)}
-                          yearValue={yearField.value || ""}
+                          yearValue={yearField.value?.toString() || ""}
                           onYearChange={(value) => yearField.onChange(value)}
                         />
                       </FormControl>

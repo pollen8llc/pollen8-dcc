@@ -22,15 +22,12 @@ export async function submitCommunity(
       throw new Error(`Invalid format: ${data.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
     }
 
-    // Process targetAudience if needed
+    // Process targetAudience
     let processedData = { ...data };
     
-    // If targetAudience is a string, convert it to an array
-    if (typeof processedData.targetAudience === 'string') {
-      processedData.targetAudience = processedData.targetAudience
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
+    // Ensure targetAudience is an array
+    if (!Array.isArray(processedData.targetAudience)) {
+      processedData.targetAudience = [];
     }
 
     logger?.('info', 'Submitting community data to distribution service');
