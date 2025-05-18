@@ -47,7 +47,13 @@ export const useCreateCommunityForm = () => {
     
     try {
       addDebugLog('info', 'Submitting community creation form...');
-      const community = await submitCommunity(data, addDebugLog);
+      
+      // Create a simplified wrapper function that matches the expected signature
+      const logMessage = (message: string) => {
+        addDebugLog('info', message);
+      };
+      
+      const community = await submitCommunity(data, logMessage);
 
       toast({
         title: "Success!",

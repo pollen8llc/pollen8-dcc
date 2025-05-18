@@ -61,12 +61,12 @@ export function ReviewSubmitStep({
       }
       
       // Create logger function for internal tracking
-      const addDebugLog = (message: string) => {
+      const logMessage = (message: string) => {
         console.log(`[INFO] ${message}`);
       };
       
       // Submit the form - errors will be logged to submission_errors table
-      const result = await submitCommunity(formValues, addDebugLog);
+      const result = await submitCommunity(formValues, logMessage);
       setDistributionId(result.id);
       
       // If we get a community_id back immediately, navigate

@@ -58,12 +58,16 @@ export const submitCommunity = async (formData: Partial<Community>, debugLogCall
   // Log the submission
   logMessage(`Submitting data: ${JSON.stringify(submissionData)}`);
   
+  // Get the current user's ID from the session
+  const { data: sessionData } = await supabase.auth.getSession();
+  const submitterId = sessionData.session?.user.id || '';
+
   const { data, error } = await supabase
     .from('community_data_distribution')
     .insert({
       submission_data: submissionData,
       status: 'pending',
-      submitter_id: supabase.auth.getSession().then(res => res.data.session?.user.id || ''),
+      submitter_id: submitterId,
       created_at: new Date().toISOString()
     })
     .select()

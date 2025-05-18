@@ -49,7 +49,29 @@ export const createCommunity = async (communityData: Partial<Community>): Promis
     throw new Error(`Failed to create community: ${error.message}`);
   }
   
-  return data as Community;
+  // Transform the database response to match our Community type
+  const community: Community = {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    location: data.location,
+    imageUrl: data.logo_url,
+    communitySize: data.member_count || "0",
+    organizerIds: data.owner_id ? [data.owner_id] : [],
+    memberIds: [],
+    tags: data.target_audience || [],
+    isPublic: data.is_public,
+    type: data.community_type,
+    format: data.format,
+    social_media: data.social_media,
+    website: data.website,
+    target_audience: data.target_audience,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    is_public: data.is_public
+  };
+  
+  return community;
 };
 
 /**
@@ -88,7 +110,29 @@ export const updateCommunity = async (communityId: string, communityData: Partia
     throw new Error(`Failed to update community: ${error.message}`);
   }
   
-  return data as Community;
+  // Transform the database response to match our Community type
+  const community: Community = {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    location: data.location,
+    imageUrl: data.logo_url,
+    communitySize: data.member_count || "0",
+    organizerIds: data.owner_id ? [data.owner_id] : [],
+    memberIds: [],
+    tags: data.target_audience || [],
+    isPublic: data.is_public,
+    type: data.community_type,
+    format: data.format,
+    social_media: data.social_media,
+    website: data.website,
+    target_audience: data.target_audience,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    is_public: data.is_public
+  };
+  
+  return community;
 };
 
 /**
