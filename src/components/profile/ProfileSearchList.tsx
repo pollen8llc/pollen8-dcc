@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { UserSearch, MapPin } from "lucide-react";
+import { UserSearch, MapPin, ArrowRight } from "lucide-react";
 import { ExtendedProfile } from "@/services/profileService";
 import { 
   Alert, 
@@ -41,8 +41,21 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Card key={i} className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm h-44 animate-pulse">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="h-16 w-16 rounded-full bg-muted"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 bg-muted rounded"></div>
+                  <div className="h-3 w-1/2 bg-muted rounded"></div>
+                  <div className="h-3 w-5/6 bg-muted rounded"></div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
     );
   }
@@ -58,7 +71,7 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
   
   if (profiles.length === 0) {
     return (
-      <Card className="p-8 text-center">
+      <Card className="p-8 text-center border-border/30 bg-card/60 backdrop-blur-sm">
         <div className="mb-4 flex justify-center">
           <UserSearch className="h-12 w-12 text-muted-foreground" />
         </div>
@@ -71,14 +84,17 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {profiles.map((profile) => (
-        <Card key={profile.id} className="overflow-hidden">
-          <div className="p-4">
+        <Card 
+          key={profile.id} 
+          className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300"
+        >
+          <div className="p-6">
             <div className="flex items-start gap-4">
-              <Avatar className="h-16 w-16">
+              <Avatar className="h-16 w-16 ring-2 ring-[#00eada]/20">
                 <AvatarImage src={profile.avatar_url || ""} />
-                <AvatarFallback>
+                <AvatarFallback className="bg-[#00eada]/10 text-[#00eada] font-medium">
                   {getInitials(profile.first_name, profile.last_name)}
                 </AvatarFallback>
               </Avatar>
@@ -125,10 +141,11 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full"
+                className="w-full hover:bg-[#00eada]/10 hover:text-[#00eada] transition-colors"
                 onClick={() => navigate(`/profile/${profile.id}`)}
               >
                 View Profile
+                <ArrowRight className="ml-2 h-3 w-3" />
               </Button>
             </div>
           </div>

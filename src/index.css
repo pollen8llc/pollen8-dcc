@@ -149,3 +149,63 @@ input:focus, textarea:focus, select:focus {
 .recharts-default-tooltip {
   @apply bg-popover border border-border text-foreground rounded-xl !important;
 }
+
+/* New animation classes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* Staggered animations */
+.animate-fade-in:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.animate-fade-in:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.animate-fade-in:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* Modern container styles */
+.container-fluid {
+  @apply max-w-[1920px] mx-auto px-4;
+}
+
+/* Card hover effects */
+.card-hover-effect {
+  @apply transition-all duration-300 hover:shadow-lg hover:shadow-[#00eada]/5 hover:border-[#00eada]/20;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border/50 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-border;
+}

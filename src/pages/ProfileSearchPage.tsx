@@ -1,18 +1,20 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, UserSearch, MapPin } from "lucide-react";
 import { ExtendedProfile } from "@/services/profileService";
 import { useDebounce } from "@/hooks/useDebounce";
 import ProfileSearchList from "@/components/profile/ProfileSearchList";
+import { Shell } from "@/components/layout/Shell";
 
 const ProfileSearchPage: React.FC = () => {
   const { currentUser } = useUser();
@@ -161,29 +163,32 @@ const ProfileSearchPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold flex items-center justify-center gap-2 mb-2">
-              <UserSearch className="h-6 w-6" />
-              Find People
-            </h1>
-            <p className="text-muted-foreground">
-              Search for people by name, location, or interests
-            </p>
-          </div>
-          
-          <Card className="mb-8">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <Shell fullWidth className="bg-background/60 backdrop-blur-sm">
+      <div className="max-w-screen-2xl mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-2 mb-2">
+            <UserSearch className="h-6 w-6" />
+            Find People
+          </h1>
+          <p className="text-muted-foreground">
+            Search for people by name, location, or interests
+          </p>
+        </div>
+        
+        <div className="flex flex-col xl:flex-row gap-8">
+          {/* Search filters sidebar */}
+          <Card className="xl:w-80 w-full h-fit sticky top-20 border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-[#00eada]/20">
+            <CardContent className="p-6">
+              <h3 className="font-medium text-lg mb-4">Filters</h3>
+              
+              <div className="space-y-6">
                 {/* Search input */}
-                <div className="md:col-span-3">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Name or Bio</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
-                      placeholder="Search by name or bio..."
+                      placeholder="Search..."
                       className="pl-10"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -193,6 +198,7 @@ const ProfileSearchPage: React.FC = () => {
                 
                 {/* Location filter */}
                 <div>
+                  <label className="text-sm font-medium mb-2 block">Location</label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
@@ -205,35 +211,40 @@ const ProfileSearchPage: React.FC = () => {
                 </div>
                 
                 {/* Interest filter */}
-                <div className="md:col-span-2 flex gap-2">
-                  <Select
-                    value={selectedInterest}
-                    onValueChange={setSelectedInterest}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Filter by interest..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allInterests.map((interest) => (
-                        <SelectItem key={interest} value={interest}>
-                          {interest}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  <Button 
-                    variant="outline" 
-                    onClick={handleAddInterestFilter}
-                    disabled={!selectedInterest}
-                  >
-                    Add
-                  </Button>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Interests</label>
+                  <div className="flex gap-2">
+                    <Select
+                      value={selectedInterest}
+                      onValueChange={setSelectedInterest}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select interest..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allInterests.map((interest) => (
+                          <SelectItem key={interest} value={interest}>
+                            {interest}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button 
+                      variant="outline" 
+                      onClick={handleAddInterestFilter}
+                      disabled={!selectedInterest}
+                      size="icon"
+                    >
+                      +
+                    </Button>
+                  </div>
                 </div>
                 
                 {/* Active filters */}
                 {interestFilter.length > 0 && (
-                  <div className="md:col-span-3 mt-2">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Active Filters</label>
                     <div className="flex flex-wrap gap-2">
                       {interestFilter.map((interest) => (
                         <Badge key={interest} variant="secondary" className="px-3 py-1">
@@ -265,15 +276,29 @@ const ProfileSearchPage: React.FC = () => {
           </Card>
           
           {/* Search results */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">
-                {isLoading ? (
-                  "Searching..."
-                ) : (
-                  `Found ${profiles.length} ${profiles.length === 1 ? "person" : "people"}`
-                )}
-              </h2>
+          <div className="flex-1">
+            <div className="mb-6">
+              <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <h2 className="text-lg font-medium">
+                    {isLoading ? (
+                      "Searching..."
+                    ) : (
+                      `Found ${profiles.length} ${profiles.length === 1 ? "person" : "people"}`
+                    )}
+                  </h2>
+                  
+                  <div className="flex items-center">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-sm"
+                    >
+                      Sort by: Recent
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
             
             <ProfileSearchList 
@@ -285,7 +310,7 @@ const ProfileSearchPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </Shell>
   );
 };
 
