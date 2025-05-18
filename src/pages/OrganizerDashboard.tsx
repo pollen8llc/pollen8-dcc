@@ -73,7 +73,7 @@ export default function OrganizerDashboard() {
           organizerIds: item.owner_id ? [item.owner_id] : [],
           memberIds: [],
           tags: item.target_audience || [],
-          isPublic: item.is_public,
+          is_public: item.is_public, // Use is_public instead of isPublic to match Community type
           created_at: item.created_at,
           updated_at: item.updated_at,
           format: item.format

@@ -15,10 +15,12 @@ export async function createCommunity(communityData: CommunityFormData) {
       throw new Error(`Invalid format: ${communityData.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
     }
 
-    // Process data for insertion
+    // Process targetAudience properly
     const targetAudienceArray = Array.isArray(communityData.targetAudience) 
       ? communityData.targetAudience 
-      : [];
+      : (typeof communityData.targetAudience === 'string' && communityData.targetAudience 
+          ? communityData.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
+          : []);
 
     const socialMediaObject = communityData.socialMediaHandles || {};
 
@@ -72,10 +74,12 @@ export async function updateCommunity(communityId: string, communityData: Partia
       throw new Error(`Invalid format: ${communityData.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
     }
 
-    // Process data for update
+    // Process targetAudience properly
     const targetAudienceArray = Array.isArray(communityData.targetAudience) 
       ? communityData.targetAudience 
-      : [];
+      : (typeof communityData.targetAudience === 'string' && communityData.targetAudience
+          ? communityData.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
+          : undefined);
 
     // Update the community
     const { data, error } = await supabase

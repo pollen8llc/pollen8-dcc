@@ -1,3 +1,4 @@
+
 export enum UserRole {
   ADMIN = "ADMIN",        // System administrators
   ORGANIZER = "ORGANIZER", // Community organizers
@@ -16,7 +17,7 @@ export interface User {
   managedCommunities?: string[]; // Communities where user is organizer
   createdAt?: string;
   lastLoginAt?: string;
-  profile_complete?: boolean; // Added this property to fix the type error
+  profile_complete?: boolean;
 }
 
 export interface Community {

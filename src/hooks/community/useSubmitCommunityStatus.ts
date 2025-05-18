@@ -16,7 +16,7 @@ export const useSubmitCommunityStatus = (distributionId: string | null) => {
         
         if (!isSubscribed) return;
         
-        setStatus(record.status);
+        setStatus(record.status as DistributionStatus);
         if (record.community_id) {
           setCommunityId(record.community_id);
         }
@@ -44,4 +44,3 @@ export const useSubmitCommunityStatus = (distributionId: string | null) => {
     isProcessing: status === 'pending' || status === 'processing'
   };
 };
-

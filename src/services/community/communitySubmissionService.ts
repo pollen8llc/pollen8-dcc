@@ -25,11 +25,16 @@ export async function submitCommunity(
     // Process targetAudience
     let processedData = { ...data };
     
-    // Ensure targetAudience is an array
-    if (!Array.isArray(processedData.targetAudience)) {
+    // Properly handle targetAudience to avoid the split error on never type
+    if (typeof processedData.targetAudience === 'string' && processedData.targetAudience) {
+      processedData.targetAudience = processedData.targetAudience
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(Boolean);
+    } else if (!Array.isArray(processedData.targetAudience)) {
       processedData.targetAudience = [];
     }
-
+    
     logger?.('info', 'Submitting community data to distribution service');
     const result = await submitCommunityDistribution(processedData);
     

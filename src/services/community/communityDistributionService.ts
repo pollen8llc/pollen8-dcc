@@ -2,6 +2,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import { CommunityFormData } from "@/schemas/communitySchema";
 
+// Define the DistributionStatus type
+export type DistributionStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
 /**
  * Submits community data to the distribution service
  * @param data Community data
@@ -26,7 +29,13 @@ export async function submitCommunityDistribution(data: CommunityFormData) {
     }
 
     // Make sure targetAudience is an array
-    if (!Array.isArray(submissionData.targetAudience)) {
+    if (typeof submissionData.targetAudience === 'string') {
+      // Convert string to array if it's a string
+      submissionData.targetAudience = submissionData.targetAudience 
+        ? submissionData.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
+        : [];
+    } else if (!Array.isArray(submissionData.targetAudience)) {
+      // Ensure it's an array in all other cases
       submissionData.targetAudience = [];
     }
 

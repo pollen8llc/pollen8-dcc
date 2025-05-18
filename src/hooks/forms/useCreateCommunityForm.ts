@@ -23,7 +23,7 @@ export const useCreateCommunityForm = () => {
       type: "tech",
       format: "hybrid",
       location: "",
-      targetAudience: [], // Change from string to empty array for consistency
+      targetAudience: [], // Empty array for consistency
       platforms: [],
       website: "",
       newsletterUrl: "",
@@ -61,10 +61,11 @@ export const useCreateCommunityForm = () => {
       }
 
       // Prepare the data for insertion
+      // Handle targetAudience properly to avoid the split error on never type
       const targetAudienceArray = Array.isArray(data.targetAudience) 
         ? data.targetAudience 
-        : (typeof data.targetAudience === 'string'
-            ? data.targetAudience.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+        : (typeof data.targetAudience === 'string' && data.targetAudience
+            ? data.targetAudience.split(',').map(tag => tag.trim()).filter(Boolean)
             : []);
 
       const socialMediaObject = data.socialMediaHandles || {};
@@ -97,7 +98,8 @@ export const useCreateCommunityForm = () => {
           website: data.website || "",
           newsletter_url: data.newsletterUrl || "",
           social_media: socialMediaObject,
-          member_count: "1" // Initialize with 1 (the owner) as a string
+          member_count: "1", // Initialize with 1 (the owner) as a string
+          is_public: true // Ensure this field is set to match the Community interface
         })
         .select()
         .single();
