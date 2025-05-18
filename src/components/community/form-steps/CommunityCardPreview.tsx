@@ -1,118 +1,64 @@
 
-import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, FileText, Circle, Users } from "lucide-react";
-import { CommunityFormData } from "@/schemas/communitySchema";
-
-// Helper to get some tags from audience or fallback
-function extractTags(formValues: CommunityFormData): string[] {
-  if (formValues.targetAudience) {
-    // Handle both string and array types
-    if (typeof formValues.targetAudience === 'string') {
-      // Only attempt to split if it's a non-empty string
-      if (formValues.targetAudience.trim()) {
-        return formValues.targetAudience
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-          .slice(0, 3);
-      }
-      return [];
-    } else if (Array.isArray(formValues.targetAudience)) {
-      // If it's already an array, just slice the first 3 items
-      return formValues.targetAudience.slice(0, 3);
-    }
-  }
-  return ["Tech", "Online"];
-}
+import React from 'react';
+import { Community } from '@/models/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { processTargetAudience } from '@/utils/communityUtils';
 
 interface CommunityCardPreviewProps {
-  formValues: CommunityFormData;
+  communityData: Partial<Community>;
 }
 
-const CommunityCardPreview: React.FC<CommunityCardPreviewProps> = ({ formValues }) => {
-  const {
-    name,
-    description,
-    location,
-    size,
-    communitySize,
-    format,
-    website,
-  } = formValues;
-
-  // Fallbacks for image, fields, tags, etc.
-  const tags = extractTags(formValues);
-
-  const fakeImageUrl = "/placeholder.svg";
-  const displayLocation = location || "Remote";
-  const displayName = name || "Community Name Example";
-  const displayDesc = description || "A short description about your community. This is what others will see!";
-  const sizeText = size || communitySize || "1-25";
-  const cardFormat = format ? format.charAt(0).toUpperCase() + format.slice(1) : "Hybrid";
-
-  // Fake "recently updated" for spinner
-  const isActive = true;
+const CommunityCardPreview: React.FC<CommunityCardPreviewProps> = ({ communityData }) => {
+  // Process target audience safely
+  const targetAudienceTags = processTargetAudience(communityData.target_audience);
 
   return (
-    <div className="group relative w-full max-w-md mx-auto">
-      <div className="relative rounded-xl bg-card border border-border/40 transition-all duration-300 group-hover:shadow-md">
-        {/* Top section with fake image */}
-        <div className="h-28 w-full rounded-t-xl overflow-hidden bg-muted flex items-center justify-center">
-          <img
-            src={fakeImageUrl}
-            alt="Community Preview"
-            className="h-full object-contain opacity-60"
-            style={{ maxHeight: 56 }}
-          />
-        </div>
-        {/* Activity Indicator */}
-        <div className="absolute top-2 right-2 z-10">
-          <Circle 
-            className={`h-3 w-3 ${isActive ? "text-green-500" : "text-muted-foreground"}`}
-            fill={isActive ? "#10B981" : "transparent"}
-          />
-        </div>
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold truncate">{displayName}</h3>
-            <span className="text-xs bg-primary/10 rounded px-2 py-0.5 text-primary">{cardFormat}</span>
+    <Card className="w-full max-w-md mx-auto border border-border/50 rounded-xl overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex flex-col space-y-4">
+          <div>
+            <h3 className="text-xl font-semibold">{communityData.name || 'Community Name'}</h3>
+            <p className="text-muted-foreground line-clamp-2 text-sm mt-1">
+              {communityData.description || 'Community description will appear here...'}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-1 mb-2">
-            {tags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="bg-primary/5 text-primary text-xs font-medium px-2 py-0"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-          <div className="flex items-start space-x-1.5 text-muted-foreground mb-2">
-            <FileText className="h-4 w-4 shrink-0 mt-0.5" />
-            <p className="text-xs line-clamp-2">{displayDesc}</p>
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <MapPin className="h-4 w-4 shrink-0" />
-              <span className="text-xs truncate" title={displayLocation}>
-                {displayLocation}
-              </span>
+
+          {/* Location and Details */}
+          <div className="flex items-start gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center">
+              <span>{communityData.location || 'Location'}</span>
             </div>
-            <div className="flex items-center space-x-1.5 text-muted-foreground">
-              <Users className="h-4 w-4 shrink-0" />
-              <span className="text-xs">{sizeText} members</span>
+            <span>•</span>
+            <div>
+              <span>{communityData.member_count || '0'} members</span>
+            </div>
+            <span>•</span>
+            <div>
+              <span>{communityData.format || 'Format'}</span>
             </div>
           </div>
-          {website && (
-            <div className="mt-2 text-xs text-blue-700 truncate">
-              <a href={website} target="_blank" rel="noopener noreferrer">{website}</a>
+
+          {/* Tags */}
+          {targetAudienceTags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {targetAudienceTags.slice(0, 3).map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center rounded-full bg-secondary px-2 py-1 text-xs"
+                >
+                  {tag}
+                </span>
+              ))}
+              {targetAudienceTags.length > 3 && (
+                <span className="inline-flex items-center rounded-full bg-secondary px-2 py-1 text-xs">
+                  +{targetAudienceTags.length - 3}
+                </span>
+              )}
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,46 +1,54 @@
 
 import { useState, useEffect } from 'react';
-import { checkDistributionStatus, type DistributionStatus } from '@/services/community/communityDistributionService';
+import { checkDistributionStatus, DistributionStatus } from '@/services/community/communityDistributionService';
 
-export const useSubmitCommunityStatus = (distributionId: string | null) => {
+const useSubmitCommunityStatus = (submissionId: string | null) => {
   const [status, setStatus] = useState<DistributionStatus | null>(null);
   const [communityId, setCommunityId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!distributionId) return;
+    let intervalId: number;
 
-    let isSubscribed = true;
     const checkStatus = async () => {
-      try {
-        const record = await checkDistributionStatus(distributionId);
-        
-        if (!isSubscribed) return;
-        
-        setStatus(record.status as DistributionStatus);
-        if (record.community_id) {
-          setCommunityId(record.community_id);
-        }
+      if (!submissionId) return;
 
-        // Continue polling if still processing
-        if (record.status === 'pending' || record.status === 'processing') {
-          setTimeout(checkStatus, 1000);
+      try {
+        setIsLoading(true);
+        const result = await checkDistributionStatus(submissionId);
+        setStatus(result.status as DistributionStatus);
+        setCommunityId(result.community_id);
+        
+        // If we reached a terminal state, stop polling
+        if (
+          result.status === DistributionStatus.COMPLETED || 
+          result.status === DistributionStatus.FAILED
+        ) {
+          clearInterval(intervalId);
+          if (result.status === DistributionStatus.FAILED && result.error_message) {
+            setError(result.error_message);
+          }
         }
-      } catch (err: any) {
-        if (!isSubscribed) return;
-        console.error('Status check error:', err);
+      } catch (error) {
+        console.error('Error checking submission status:', error);
+        setError('Failed to check submission status');
+        clearInterval(intervalId);
+      } finally {
+        setIsLoading(false);
       }
     };
 
+    // Initial check
     checkStatus();
 
-    return () => {
-      isSubscribed = false;
-    };
-  }, [distributionId]);
+    // Poll every 3 seconds
+    intervalId = window.setInterval(checkStatus, 3000);
 
-  return {
-    status,
-    communityId,
-    isProcessing: status === 'pending' || status === 'processing'
-  };
+    return () => clearInterval(intervalId);
+  }, [submissionId]);
+
+  return { status, communityId, error, isLoading };
 };
+
+export default useSubmitCommunityStatus;

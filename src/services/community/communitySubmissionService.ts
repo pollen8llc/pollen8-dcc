@@ -1,63 +1,69 @@
-
-import { CommunityFormData } from "@/schemas/communitySchema";
-import { submitCommunityDistribution, checkDistributionStatus } from "./communityDistributionService";
-import { COMMUNITY_FORMATS } from "@/constants/communityConstants";
+import { supabase } from '@/integrations/supabase/client';
+import { Community } from '@/models/types';
+import { processTargetAudience } from '@/utils/communityUtils';
 
 /**
- * Submits community data via the distribution system
- * @param data The community form data
- * @param logger Optional logger function
- * @returns The submission record
+ * Types and interfaces for community submission and distribution
  */
-export async function submitCommunity(
-  data: CommunityFormData,
-  logger?: (type: 'info' | 'error' | 'success', message: string) => void
-) {
-  try {
-    // Log submission
-    logger?.('info', 'Validating community data');
+export interface CommunitySubmission {
+  id: string;
+  submission_data: any;
+  submitter_id: string;
+  status: string;
+  community_id: string | null;
+  processed_at: string | null;
+  error_message: string | null;
+  created_at: string;
+}
 
-    // Validate format is one of allowed values
-    if (data.format && !Object.values(COMMUNITY_FORMATS).includes(data.format)) {
-      throw new Error(`Invalid format: ${data.format}. Must be one of: ${Object.values(COMMUNITY_FORMATS).join(", ")}`);
-    }
-
-    // Process targetAudience
-    let processedData = { ...data };
-    
-    // Handle targetAudience safely
-    if (typeof processedData.targetAudience === 'string') {
-      // Convert string to array if it's a non-empty string
-      if (processedData.targetAudience.trim()) {
-        processedData.targetAudience = processedData.targetAudience
-          .split(',')
-          .map(tag => tag.trim())
-          .filter(Boolean);
-      } else {
-        // Empty string becomes empty array
-        processedData.targetAudience = [];
-      }
-    } else if (!Array.isArray(processedData.targetAudience)) {
-      // Ensure it's an array if it's not already
-      processedData.targetAudience = [];
-    }
-    
-    logger?.('info', 'Submitting community data to distribution service');
-    const result = await submitCommunityDistribution(processedData);
-    
-    logger?.('success', `Community data submitted successfully (ID: ${result.id})`);
-    return result;
-  } catch (error: any) {
-    logger?.('error', `Failed to submit community: ${error.message}`);
-    throw error;
+/**
+ * Check the status of a community submission
+ */
+export const checkDistributionStatus = async (submissionId: string): Promise<CommunitySubmission> => {
+  const { data, error } = await supabase
+    .from('community_data_distribution')
+    .select('*')
+    .eq('id', submissionId)
+    .single();
+  
+  if (error) {
+    console.error('Error checking submission status:', error);
+    throw new Error(`Failed to check submission status: ${error.message}`);
   }
-}
+  
+  return data;
+};
 
 /**
- * Checks the status of a community submission
- * @param distributionId The distribution ID
- * @returns The distribution record
+ * Submit a community form for processing via the distribution system
  */
-export async function checkCommunitySubmission(distributionId: string) {
-  return await checkDistributionStatus(distributionId);
-}
+export const submitCommunity = async (formData: Partial<Community>, userId: string) => {
+  console.log('Submitting community:', formData);
+  
+  // Process target audience using the utility function
+  const processedTargetAudience = processTargetAudience(formData.target_audience);
+  
+  // Create submission with processed data
+  const submissionData = {
+    ...formData,
+    target_audience: processedTargetAudience
+  };
+  
+  const { data, error } = await supabase
+    .from('community_data_distribution')
+    .insert({
+      submission_data: submissionData,
+      status: 'pending',
+      submitter_id: userId,
+      created_at: new Date().toISOString()
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error submitting community:', error);
+    throw new Error(`Failed to submit community: ${error.message}`);
+  }
+  
+  return data;
+};
