@@ -1,14 +1,13 @@
 
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function TriggerHeader() {
+  const navigate = useNavigate();
+
   const handleCreateTrigger = () => {
-    toast({
-      title: "Feature removed",
-      description: "The trigger creation wizard has been removed.",
-    });
+    navigate("/rel8/trigger-wizard");
   };
 
   return (
