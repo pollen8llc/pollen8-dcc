@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -145,7 +146,7 @@ const AppRoutes = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute role={UserRole.ORGANIZER}>
+          <ProtectedRoute role={UserRole.ADMIN}>
             <AdminDashboard />
           </ProtectedRoute>
         }

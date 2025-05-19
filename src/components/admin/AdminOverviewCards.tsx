@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bug } from "lucide-react";
+import { Bug, Users, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface AdminOverviewCardsProps {
@@ -15,7 +15,10 @@ const AdminOverviewCards = ({ onTabChange }: AdminOverviewCardsProps) => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => onTabChange("users")}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">User Management</CardTitle>
+          <CardTitle className="text-lg flex items-center">
+            <Users className="mr-2 h-5 w-5 text-primary" />
+            User Management
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
@@ -26,7 +29,10 @@ const AdminOverviewCards = ({ onTabChange }: AdminOverviewCardsProps) => {
       
       <Card className="hover:shadow-md cursor-pointer transition-all" onClick={() => onTabChange("settings")}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">System Settings</CardTitle>
+          <CardTitle className="text-lg flex items-center">
+            <Settings className="mr-2 h-5 w-5 text-primary" />
+            System Settings
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
@@ -37,18 +43,18 @@ const AdminOverviewCards = ({ onTabChange }: AdminOverviewCardsProps) => {
 
       <Card 
         className="hover:shadow-md cursor-pointer transition-all" 
-        onClick={() => navigate("/admin/debug")}
+        onClick={() => navigate("/admin/debugger")}
       >
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Component Debugger</CardTitle>
+          <CardTitle className="text-lg flex items-center">
+            <Bug className="mr-2 h-5 w-5 text-primary" />
+            Component Debugger
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2">
-            <Bug className="h-4 w-4" />
-            <p className="text-sm text-muted-foreground">
-              Debug and test components
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Debug and test components
+          </p>
         </CardContent>
       </Card>
     </div>

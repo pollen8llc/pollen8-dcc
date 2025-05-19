@@ -11,8 +11,6 @@ import * as adminService from "@/services/adminService";
 import { useToast } from "@/hooks/use-toast";
 import UserManagementTab from "@/components/admin/UserManagementTab";
 import AdminOverviewCards from "@/components/admin/AdminOverviewCards";
-import ManagedCommunitiesGrid from "@/components/admin/ManagedCommunitiesGrid";
-import CommunityManagementDashboard from "@/components/admin/CommunityManagementDashboard";
 import NotFoundState from "@/components/community/NotFoundState";
 import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
 
@@ -20,7 +18,7 @@ const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || "overview";
-  const { currentUser, isOrganizer } = useUser();
+  const { currentUser } = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
   const { toast } = useToast();
@@ -44,131 +42,37 @@ const AdminDashboard = () => {
     };
 
     ensureAdminInDatabase();
-  }, [currentUser?.id]);
+  }, [currentUser?.id, toast]);
 
-  // Fix error: Expected 0 arguments, but got 1
-  const { data: managedCommunities, isLoading: loadingCommunities } = useQuery({
-    queryKey: ['managed-communities', currentUser?.id],
-    queryFn: () => [], // Return empty array as communities functionality is removed
-    enabled: !id && !!currentUser?.id
-  });
+  // Check if user is admin or organizer
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
+  const isOrganizer = currentUser?.role === UserRole.ORGANIZER || 
+                     (currentUser?.managedCommunities && currentUser.managedCommunities.length > 0);
 
-  // We're not using community data anymore, so simplify this query
-  const { isLoading: loadingCommunity, error: communityError } = useQuery({
-    queryKey: ['community', id],
-    queryFn: () => null,
-    enabled: !!id
-  });
-
+  // Redirect if user doesn't have permission
   useEffect(() => {
-    if (id && !isOrganizer(id) && currentUser?.role !== UserRole.ADMIN) {
+    if (!isAdmin && !isOrganizer) {
       navigate("/", { replace: true });
     }
-  }, [id, isOrganizer, navigate, currentUser]);
+  }, [isAdmin, isOrganizer, navigate]);
 
   useEffect(() => {
-    if (activeTab !== "overview" && !id) {
+    if (activeTab !== "overview") {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('tab', activeTab);
       navigate({ search: newSearchParams.toString() }, { replace: true });
     }
-  }, [activeTab, navigate, searchParams, id]);
+  }, [activeTab, navigate, searchParams]);
 
-  const isAdmin = currentUser?.role === UserRole.ADMIN;
-
-  if (loadingCommunities || loadingCommunity) {
+  if (!isAdmin && !isOrganizer) {
     return (
       <div className="min-h-screen">
         <Navbar />
         <div className="container mx-auto py-20 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-aquamarine mx-auto"></div>
-          <h1 className="text-2xl font-bold mt-4">Loading dashboard...</h1>
-        </div>
-      </div>
-    );
-  }
-
-  if (id && communityError) {
-    return <NotFoundState />;
-  }
-
-  if (!id) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="container mx-auto py-10">
-          <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-          
-          {isAdmin && (
-            <div className="mb-10">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full mb-8 glass dark:glass-dark">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="users">User Management</TabsTrigger>
-                  <TabsTrigger value="settings">System Settings</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="overview">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>System Administration</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground mb-6">
-                        Welcome to the admin dashboard. Use the tabs above to manage users, roles, and system settings.
-                      </p>
-                      <AdminOverviewCards onTabChange={setActiveTab} />
-                      
-                      <div className="mt-8">
-                        <h2 className="text-xl font-semibold mb-4">Community Creation Audit Log</h2>
-                        <CommunityAuditTable />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="users">
-                  <UserManagementTab />
-                </TabsContent>
-                
-                <TabsContent value="settings">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>System Settings</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground">
-                        System settings will be implemented in a future update.
-                      </p>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </div>
-          )}
-          
-          {/* Fix error: Property 'communities' does not exist on type 'IntrinsicAttributes' */}
-          {(isOrganizer() || isAdmin) && managedCommunities && managedCommunities.length > 0 && (
-            <ManagedCommunitiesGrid />
-          )}
-          
-          {!isAdmin && !isOrganizer() && (
-            <div className="text-center py-12">
-              <h2 className="text-xl font-semibold mb-2">You don't have admin privileges</h2>
-              <p className="text-muted-foreground">
-                Contact an administrator if you believe you should have access to this page.
-              </p>
-            </div>
-          )}
-          
-          {(isOrganizer() || isAdmin) && (!managedCommunities || managedCommunities.length === 0) && (
-            <div className="text-center py-12">
-              <h2 className="text-xl font-semibold mb-2">You don't manage any communities yet</h2>
-              <p className="text-muted-foreground">
-                Create a community to start managing it.
-              </p>
-            </div>
-          )}
+          <h1 className="text-2xl font-bold">Access Denied</h1>
+          <p className="mt-4 text-muted-foreground">
+            You don't have permission to access this page.
+          </p>
         </div>
       </div>
     );
@@ -177,10 +81,67 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      {/* Fix error: Property 'community' does not exist on type 'IntrinsicAttributes & { filter?: string; }' */}
-      <CommunityManagementDashboard 
-        filter={activeTab}
-      />
+      <div className="container mx-auto py-10">
+        <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+        
+        {isAdmin && (
+          <div className="mb-10">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="w-full mb-8 glass dark:glass-dark">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="users">User Management</TabsTrigger>
+                <TabsTrigger value="settings">System Settings</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="overview">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>System Administration</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-6">
+                      Welcome to the admin dashboard. Use the tabs above to manage users, roles, and system settings.
+                    </p>
+                    <AdminOverviewCards onTabChange={setActiveTab} />
+                    
+                    <div className="mt-8">
+                      <h2 className="text-xl font-semibold mb-4">Community Creation Audit Log</h2>
+                      <CommunityAuditTable />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="users">
+                <UserManagementTab />
+              </TabsContent>
+              
+              <TabsContent value="settings">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>System Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      System settings will be implemented in a future update.
+                    </p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+        
+        {!isAdmin && isOrganizer && (
+          <div className="text-center py-12">
+            <h2 className="text-xl font-semibold mb-2">Organizer Dashboard</h2>
+            <p className="text-muted-foreground mb-6">
+              Manage your organization settings and users here.
+            </p>
+            <AdminOverviewCards onTabChange={() => navigate("/organizer")} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

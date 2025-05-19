@@ -22,7 +22,10 @@ const ProtectedRoute = ({
   
   // Show loading or redirect if user isn't authenticated
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="container mx-auto py-20 text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+      <h1 className="text-2xl font-bold mt-4">Loading...</h1>
+    </div>;
   }
 
   if (!currentUser) {
@@ -30,9 +33,24 @@ const ProtectedRoute = ({
   }
 
   // If a specific role is required, check if user has it
-  if (requiredRole && currentUser.role !== requiredRole) {
-    // If the required role is ORGANIZER or ADMIN and user isn't authorized, redirect to home
-    if ([UserRole.ORGANIZER, UserRole.ADMIN].includes(requiredRole)) {
+  if (requiredRole) {
+    // For ADMIN role, strictly check for ADMIN
+    if (requiredRole === UserRole.ADMIN && currentUser.role !== UserRole.ADMIN) {
+      return <Navigate to="/" replace />;
+    }
+    
+    // For ORGANIZER role, check for either ORGANIZER or ADMIN
+    if (requiredRole === UserRole.ORGANIZER && 
+        currentUser.role !== UserRole.ORGANIZER && 
+        currentUser.role !== UserRole.ADMIN) {
+      return <Navigate to="/" replace />;
+    }
+    
+    // For MEMBER role, check for MEMBER, ORGANIZER or ADMIN
+    if (requiredRole === UserRole.MEMBER && 
+        currentUser.role !== UserRole.MEMBER &&
+        currentUser.role !== UserRole.ORGANIZER && 
+        currentUser.role !== UserRole.ADMIN) {
       return <Navigate to="/" replace />;
     }
   }
