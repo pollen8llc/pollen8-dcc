@@ -15,18 +15,18 @@ import { ExtendedProfile } from "@/services/profileService";
 import { useDebounce } from "@/hooks/useDebounce";
 import ProfileSearchList from "@/components/profile/ProfileSearchList";
 import { Shell } from "@/components/layout/Shell";
+import { useProfiles } from "@/hooks/useProfiles";
 
 const ProfileSearchPage: React.FC = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { searchProfiles, isLoading, error } = useProfiles();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [interestFilter, setInterestFilter] = useState<string[]>([]);
   const [profiles, setProfiles] = useState<ExtendedProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [allInterests, setAllInterests] = useState<string[]>([]);
   const [selectedInterest, setSelectedInterest] = useState<string>("");
   
@@ -43,8 +43,6 @@ const ProfileSearchPage: React.FC = () => {
   useEffect(() => {
     const fetchInterests = async () => {
       try {
-        setError(null);
-        
         // Fetch all profiles to extract unique interests directly
         const { data, error } = await supabase
           .from('profiles')
@@ -74,77 +72,43 @@ const ProfileSearchPage: React.FC = () => {
         }
       } catch (error) {
         console.error("Error in fetchInterests:", error);
-        setError("Failed to load interests");
+        toast({
+          title: "Error",
+          description: "Failed to load interests",
+          variant: "destructive",
+        });
       }
     };
     
     fetchInterests();
-  }, []);
+  }, [toast]);
 
-  // Search profiles
+  // Search profiles using the useProfiles hook
   useEffect(() => {
-    const searchProfiles = async () => {
+    const fetchProfiles = async () => {
       if (!currentUser) return;
       
-      setIsLoading(true);
-      setError(null);
-      
       try {
-        let query = supabase
-          .from('profiles')
-          .select('*');
+        // Use the searchProfiles function from useProfiles hook
+        const result = await searchProfiles({
+          query: debouncedSearchQuery || undefined,
+          location: locationFilter || undefined,
+          interests: interestFilter.length > 0 ? interestFilter : undefined
+        });
         
-        // Add search filter if provided
-        if (debouncedSearchQuery) {
-          query = query.or(
-            `first_name.ilike.%${debouncedSearchQuery}%,last_name.ilike.%${debouncedSearchQuery}%,bio.ilike.%${debouncedSearchQuery}%`
-          );
-        }
-        
-        // Add location filter if provided
-        if (locationFilter) {
-          query = query.ilike('location', `%${locationFilter}%`);
-        }
-        
-        // Add interest filter if provided
-        if (interestFilter.length > 0) {
-          // We'll need overlap operator for array contains
-          query = query.overlaps('interests', interestFilter);
-        }
-        
-        // Execute the query
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error("Error searching profiles:", error);
-          setError("Search failed: " + error.message);
-          return;
-        }
-        
-        // Process the results
-        const searchResults = data.map(profile => ({
-          ...profile,
-          social_links: profile.social_links ? 
-            (typeof profile.social_links === 'string' ? 
-              JSON.parse(profile.social_links) : profile.social_links) : {},
-          privacy_settings: profile.privacy_settings ? 
-            (typeof profile.privacy_settings === 'string' ? 
-              JSON.parse(profile.privacy_settings) : profile.privacy_settings) : { 
-                profile_visibility: "connections" 
-              }
-        }));
-        
-        setProfiles(searchResults);
-      } catch (error) {
-        console.error("Error in searchProfiles:", error);
-        setError("An unexpected error occurred while searching profiles");
-      } finally {
-        setIsLoading(false);
+        setProfiles(result.profiles);
+      } catch (err) {
+        console.error("Error searching profiles:", err);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred while searching profiles",
+          variant: "destructive",
+        });
       }
     };
     
-    searchProfiles();
-  }, [currentUser, debouncedSearchQuery, locationFilter, interestFilter, toast]);
+    fetchProfiles();
+  }, [currentUser, debouncedSearchQuery, locationFilter, interestFilter, searchProfiles, toast]);
 
   // Handle adding an interest filter
   const handleAddInterestFilter = () => {

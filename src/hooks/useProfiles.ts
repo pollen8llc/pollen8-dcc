@@ -8,7 +8,8 @@ import {
   updateProfile,
   getConnectedProfiles,
   canViewProfile,
-  ExtendedProfile
+  ExtendedProfile,
+  getUserRoleFromProfile
 } from "@/services/profileService";
 
 export const useProfiles = () => {
@@ -17,6 +18,7 @@ export const useProfiles = () => {
   const [connectedProfiles, setConnectedProfiles] = useState<ExtendedProfile[]>([]);
   const { currentUser, refreshUser } = useUser();
   const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Get a user's profile by ID
@@ -169,14 +171,99 @@ export const useProfiles = () => {
     }
   };
 
+  /**
+   * Search for profiles with role information
+   */
+  const searchProfiles = async (params: {
+    query?: string;
+    interests?: string[];
+    location?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ profiles: ExtendedProfile[]; count: number }> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { query, interests, location, page = 0, limit = 10 } = params;
+      
+      // Query profiles with a join to user_roles and roles to get role information
+      let queryBuilder = supabase
+        .from('profiles')
+        .select(`
+          *,
+          user_roles!user_id(
+            role_id,
+            roles!role_id(name)
+          )
+        `, { count: 'exact' });
+      
+      // Apply filters if provided
+      if (query) {
+        queryBuilder = queryBuilder.or(
+          `first_name.ilike.%${query}%,last_name.ilike.%${query}%,bio.ilike.%${query}%`
+        );
+      }
+      
+      if (location) {
+        queryBuilder = queryBuilder.ilike('location', `%${location}%`);
+      }
+      
+      if (interests && interests.length > 0) {
+        // Filter profiles that have at least one matching interest
+        queryBuilder = queryBuilder.contains('interests', interests);
+      }
+      
+      // Apply pagination
+      queryBuilder = queryBuilder
+        .order('created_at', { ascending: false })
+        .range(page * limit, (page + 1) * limit - 1);
+      
+      const { data, error, count } = await queryBuilder;
+      
+      if (error) {
+        console.error("Error searching profiles:", error);
+        setError(error.message);
+        return { profiles: [], count: 0 };
+      }
+      
+      // Process the profiles to include role information
+      const processedProfiles = data.map(profile => {
+        // Extract role from the joined data
+        const userRole = getUserRoleFromProfile(profile);
+        
+        return {
+          ...profile,
+          // Ensure JSON fields are parsed properly
+          social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
+          privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
+            profile_visibility: "connections"
+          },
+          // Add role information
+          role: userRole
+        };
+      });
+      
+      return { profiles: processedProfiles as ExtendedProfile[], count: count || 0 };
+    } catch (err: any) {
+      console.error("Exception in searchProfiles:", err);
+      setError(err.message || "An unexpected error occurred");
+      return { profiles: [], count: 0 };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     isLoading,
     profile,
     connectedProfiles,
+    error,
     getProfileById: fetchProfile,
     updateProfile: handleUpdateProfile,
     isProfileComplete,
     canViewProfile: checkCanViewProfile,
     getConnectedProfiles: fetchConnectedProfiles,
+    searchProfiles,
   };
 };
