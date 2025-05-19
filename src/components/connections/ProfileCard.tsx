@@ -40,7 +40,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     if (connectionDepth === 0) {
       return null;
     } else if (connectionDepth === 1) {
-      return <Badge>1st Connection</Badge>;
+      return <Badge className="bg-royal-blue-500 text-white">1st Connection</Badge>;
     } else if (connectionDepth === 2) {
       return <Badge variant="secondary">2nd Connection</Badge>;
     } else if (connectionDepth === 3) {
@@ -54,9 +54,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     .join(" ") || "Anonymous User";
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-[220px] flex flex-col">
       <CardHeader className="flex-row gap-4 items-center">
-        <Avatar className="h-12 w-12">
+        <Avatar className="h-12 w-12 bg-royal-blue-100/20 text-royal-blue-500 ring-2 ring-royal-blue-200/20">
           <AvatarImage src={profile.avatar_url} alt={fullName} />
           <AvatarFallback>{getInitials()}</AvatarFallback>
         </Avatar>
@@ -82,7 +82,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <p className="text-xs text-muted-foreground mb-1">Interests</p>
             <div className="flex flex-wrap gap-1">
               {profile.interests.slice(0, 3).map((interest, i) => (
-                <Badge key={i} variant="outline" className="text-xs">
+                <Badge key={i} variant="outline" className="text-xs bg-royal-blue-100/20 text-royal-blue-300 border-royal-blue-200/20">
                   {interest}
                 </Badge>
               ))}

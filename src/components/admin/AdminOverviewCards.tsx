@@ -13,10 +13,13 @@ const AdminOverviewCards = ({ onTabChange }: AdminOverviewCardsProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <Card className="hover:shadow-md hover:shadow-[#00eada]/20 cursor-pointer transition-all" onClick={() => onTabChange("users")}>
+      <Card 
+        className="hover:shadow-md hover:shadow-royal-blue-400/20 cursor-pointer transition-all h-[180px]" 
+        onClick={() => onTabChange("users")}
+      >
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center">
-            <Users className="mr-2 h-5 w-5 text-[#00eada]" />
+            <Users className="mr-2 h-5 w-5 text-royal-blue-400" />
             User Management
           </CardTitle>
         </CardHeader>
@@ -27,10 +30,13 @@ const AdminOverviewCards = ({ onTabChange }: AdminOverviewCardsProps) => {
         </CardContent>
       </Card>
       
-      <Card className="hover:shadow-md hover:shadow-[#00eada]/20 cursor-pointer transition-all" onClick={() => onTabChange("settings")}>
+      <Card 
+        className="hover:shadow-md hover:shadow-royal-blue-400/20 cursor-pointer transition-all h-[180px]" 
+        onClick={() => onTabChange("settings")}
+      >
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center">
-            <Settings className="mr-2 h-5 w-5 text-[#00eada]" />
+            <Settings className="mr-2 h-5 w-5 text-royal-blue-400" />
             System Settings
           </CardTitle>
         </CardHeader>
@@ -42,12 +48,12 @@ const AdminOverviewCards = ({ onTabChange }: AdminOverviewCardsProps) => {
       </Card>
 
       <Card 
-        className="hover:shadow-md hover:shadow-[#00eada]/20 cursor-pointer transition-all" 
+        className="hover:shadow-md hover:shadow-royal-blue-400/20 cursor-pointer transition-all h-[180px]" 
         onClick={() => navigate("/admin/debugger")}
       >
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center">
-            <Bug className="mr-2 h-5 w-5 text-[#00eada]" />
+            <Bug className="mr-2 h-5 w-5 text-royal-blue-400" />
             Component Debugger
           </CardTitle>
         </CardHeader>

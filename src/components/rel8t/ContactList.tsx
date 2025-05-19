@@ -163,14 +163,15 @@ const ContactList = ({ onEdit, onRefresh }: ContactListProps) => {
           <ScrollArea className="h-[calc(100vh-320px)]">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {contacts.map((contact) => (
-                <ContactCard
-                  key={contact.id}
-                  contact={contact}
-                  onEdit={onEdit}
-                  onDelete={handleDeleteContact}
-                  onSelect={toggleSelectContact}
-                  isSelected={selectedContacts.includes(contact.id)}
-                />
+                <div key={contact.id} className="h-[220px]">
+                  <ContactCard
+                    contact={contact}
+                    onEdit={onEdit}
+                    onDelete={handleDeleteContact}
+                    onSelect={toggleSelectContact}
+                    isSelected={selectedContacts.includes(contact.id)}
+                  />
+                </div>
               ))}
             </div>
           </ScrollArea>

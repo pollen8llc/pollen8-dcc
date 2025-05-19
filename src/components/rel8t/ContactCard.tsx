@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Mail, Phone, Trash2, Edit, Building, MapPin } from "lucide-react";
+import { Mail, Phone, Trash2, Edit, Building, MapPin, Tag } from "lucide-react";
 import { Contact } from "@/services/rel8t/contactService";
 
 interface ContactCardProps {
@@ -36,75 +36,88 @@ const ContactCard = ({
     if (onSelect) onSelect(contact.id, !isSelected);
   };
 
-  // Format initials for avatar
-  const getInitials = () => {
-    if (!contact.name) return '?';
-    
-    const nameParts = contact.name.split(' ');
-    if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
-    }
-    return contact.name.substring(0, 2).toUpperCase();
+  const getCategoryColor = () => {
+    if (!contact.category) return "#1E88E5"; // Default blue
+    return contact.category.color || "#1E88E5";
   };
 
   return (
     <Card 
-      className={`overflow-hidden transition-all hover:shadow-md cursor-pointer bg-card/60 backdrop-blur-sm ${
+      className={`h-full overflow-hidden transition-all hover:shadow-md cursor-pointer bg-card/60 backdrop-blur-sm ${
         isSelected ? 'ring-2 ring-primary' : 'border-border/40'
       }`}
       onClick={isSelected ? handleSelect : handleEdit}
     >
-      {contact.category && (
-        <div 
-          className={`h-1.5 w-full ${
-            contact.category.color ? `bg-${contact.category.color}-500` : 'bg-primary'
-          }`}
-        ></div>
-      )}
+      <div 
+        className="h-2 w-full" 
+        style={{ backgroundColor: getCategoryColor() }}
+      />
       
-      <div className="p-4">
-        <div className="flex items-center space-x-3">
-          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-            {getInitials()}
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium truncate">{contact.name}</h3>
-            {contact.organization && (
-              <div className="flex items-center text-xs text-muted-foreground mt-0.5">
-                <Building className="h-3 w-3 mr-1 flex-shrink-0" />
-                <span className="truncate">{contact.organization}</span>
-              </div>
-            )}
-          </div>
+      <div className="p-4 h-full flex flex-col">
+        <div className="mb-3">
+          <h3 className="text-base font-medium mb-1 line-clamp-1">{contact.name}</h3>
+          {contact.organization && (
+            <div className="flex items-center text-xs text-muted-foreground">
+              <Building className="h-3 w-3 mr-1.5 flex-shrink-0" />
+              <span className="truncate">{contact.organization}</span>
+            </div>
+          )}
         </div>
 
-        <div className="mt-3 space-y-1.5">
+        <div className="space-y-1.5 flex-grow">
           {contact.email && (
-            <div className="flex items-center text-xs">
-              <Mail className="h-3 w-3 mr-1.5 text-muted-foreground flex-shrink-0" />
+            <div className="flex items-center text-xs text-muted-foreground">
+              <Mail className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.email}</span>
             </div>
           )}
           
           {contact.phone && (
-            <div className="flex items-center text-xs">
-              <Phone className="h-3 w-3 mr-1.5 text-muted-foreground flex-shrink-0" />
+            <div className="flex items-center text-xs text-muted-foreground">
+              <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.phone}</span>
             </div>
           )}
           
           {contact.location && (
-            <div className="flex items-center text-xs">
-              <MapPin className="h-3 w-3 mr-1.5 text-muted-foreground flex-shrink-0" />
+            <div className="flex items-center text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.location}</span>
             </div>
           )}
+          
+          {contact.tags && contact.tags.length > 0 && (
+            <div className="flex items-start text-xs mt-2">
+              <Tag className="h-3 w-3 mr-1.5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+              <div className="flex flex-wrap gap-1">
+                {contact.tags.slice(0, 2).map((tag) => (
+                  <span
+                    key={tag}
+                    className="bg-royal-blue-100/20 text-royal-blue-300 px-1.5 py-0.5 rounded-full text-xs"
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {contact.tags.length > 2 && (
+                  <span className="text-xs text-muted-foreground">
+                    +{contact.tags.length - 2} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-        
+
         {contact.category && (
           <div className="mt-3">
-            <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
+            <Badge 
+              variant="outline" 
+              className="text-xs px-1.5 py-0 h-5"
+              style={{
+                borderColor: `${getCategoryColor()}40`,
+                color: getCategoryColor()
+              }}
+            >
               {contact.category.name}
             </Badge>
           </div>
@@ -120,6 +133,10 @@ const ContactCard = ({
                   key={group.id} 
                   variant="secondary" 
                   className="text-xs px-1.5 py-0 h-5"
+                  style={{
+                    backgroundColor: group.color ? `${group.color}30` : undefined,
+                    color: group.color || undefined
+                  }}
                 >
                   {group.name}
                 </Badge>

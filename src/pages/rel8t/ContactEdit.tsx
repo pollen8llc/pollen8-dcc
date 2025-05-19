@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -47,11 +48,13 @@ const ContactEdit = () => {
   // Update contact mutation
   const updateMutation = useMutation({
     mutationFn: async (values: any) => {
+      if (!id) throw new Error("Contact ID is required");
+      
       // Extract selectedGroups from values before updating contact
       const { selectedGroups, ...contactData } = values;
       
       // Update basic contact data
-      const updatedContact = await updateContact(id as string, contactData);
+      const updatedContact = await updateContact(id, contactData);
       
       // Handle group membership changes
       if (selectedGroups && contact?.groups) {
@@ -63,14 +66,14 @@ const ContactEdit = () => {
         // Add contact to new groups
         await Promise.all(
           groupsToAdd.map((groupId: string) => 
-            addContactToGroup(id as string, groupId)
+            addContactToGroup(id, groupId)
           )
         );
         
         // Remove contact from old groups
         await Promise.all(
           groupsToRemove.map((groupId: string) => 
-            removeContactFromGroup(id as string, groupId)
+            removeContactFromGroup(id, groupId)
           )
         );
       }
@@ -86,7 +89,7 @@ const ContactEdit = () => {
       });
       navigate("/rel8/contacts");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Failed to update contact.",
@@ -97,7 +100,10 @@ const ContactEdit = () => {
 
   // Delete contact mutation
   const deleteMutation = useMutation({
-    mutationFn: () => deleteContact(id as string),
+    mutationFn: () => {
+      if (!id) throw new Error("Contact ID is required");
+      return deleteContact(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       toast({
@@ -106,7 +112,7 @@ const ContactEdit = () => {
       });
       navigate("/rel8/contacts");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Failed to delete contact.",
@@ -154,7 +160,7 @@ const ContactEdit = () => {
           
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
-              <Loader2 className="animate-spin h-8 w-8 mx-auto text-primary" />
+              <Loader2 className="animate-spin h-8 w-8 mx-auto text-royal-blue-500" />
               <p className="mt-4">Loading contact details...</p>
             </div>
           </div>
