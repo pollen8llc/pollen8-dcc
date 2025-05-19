@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, ChevronRight } from "lucide-react";
@@ -6,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Features } from "@/components/landing/Features";
+import PlexusBackground from "@/components/community/PlexusBackground";
+import { Separator } from "@/components/ui/separator";
 
 const PlatformModules = () => {
   return (
@@ -15,7 +16,7 @@ const PlatformModules = () => {
           <span className="bg-[#00eada]/10 text-[#00eada] text-xs tracking-wider font-semibold px-3 py-1.5 rounded-full">
             PLATFORM MODULES
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4 gradient-text">
             A Complete Ecosystem for Community Builders
           </h2>
           <p className="text-muted-foreground">
@@ -24,7 +25,7 @@ const PlatformModules = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="border-border/20 bg-card/60 backdrop-blur-sm hover:border-[#00eada]/20 hover:shadow-lg transition-all duration-300 feature-card">
+          <Card className="glass-card">
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold mb-3 text-[#00eada]">CORE</h3>
               <p className="text-muted-foreground">
@@ -33,7 +34,7 @@ const PlatformModules = () => {
             </CardContent>
           </Card>
           
-          <Card className="border-border/20 bg-card/60 backdrop-blur-sm hover:border-[#00eada]/20 hover:shadow-lg transition-all duration-300 feature-card">
+          <Card className="glass-card">
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold mb-3 text-[#00eada]">ECO8</h3>
               <p className="text-muted-foreground">
@@ -42,7 +43,7 @@ const PlatformModules = () => {
             </CardContent>
           </Card>
           
-          <Card className="border-border/20 bg-card/60 backdrop-blur-sm hover:border-[#00eada]/20 hover:shadow-lg transition-all duration-300 feature-card">
+          <Card className="glass-card">
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold mb-3 text-[#00eada]">REL8</h3>
               <p className="text-muted-foreground">
@@ -68,39 +69,22 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Hero Section with Plexus Background */}
       <section className="relative min-h-[80vh] flex items-center justify-center">
-        {/* CSS-Based Plexus Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background to-[#0c131a] z-0">
-          {/* Dots */}
-          <div className="absolute inset-0 opacity-30" 
-            style={{
-              backgroundImage: `radial-gradient(#00eada22 1px, transparent 1px), radial-gradient(#00eada15 1px, transparent 1px)`,
-              backgroundSize: '30px 30px, 60px 60px',
-              backgroundPosition: '0 0, 15px 15px'
-            }}
-          ></div>
-          
-          {/* Lines */}
-          <div className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: `linear-gradient(to bottom right, #00eada10 1px, transparent 1px), linear-gradient(to top right, #00eada10 1px, transparent 1px)`,
-              backgroundSize: '40px 40px'
-            }}
-          ></div>
-        </div>
+        {/* Plexus animated background */}
+        <PlexusBackground />
         
-        {/* Dark Overlay - more transparent */}
+        {/* Dark Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/50 to-background/30 z-10"></div>
         
         {/* Content */}
         <div className="container mx-auto px-4 relative z-20 flex flex-col items-center justify-center py-20">
-          {/* Pollen8 Logo - reduced size */}
+          {/* Pollen8 Logo */}
           <img 
             src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans.png" 
             alt="Pollen8" 
             className="max-w-full w-[400px] mb-6 animate-fade-in" 
           />
           
-          {/* Tagline - smaller text */}
+          {/* Tagline */}
           <h2 className="text-xl md:text-2xl text-white text-center font-light tracking-wider animate-fade-in mb-10">
             THE FUTURE OF CONNECTIONS
           </h2>
@@ -119,25 +103,37 @@ const LandingPage: React.FC = () => {
             </Button>
           </div>
         </div>
-
-        {/* Wave divider */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 overflow-hidden z-20">
-          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-full">
-            <path 
-              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" 
-              fill="currentColor" 
-              className="text-background"
-            ></path>
-          </svg>
-        </div>
       </section>
       
       {/* Platform Modules Section */}
       <PlatformModules />
       
       {/* Features Section */}
-      <section id="features" className="py-24 relative z-20 bg-background">
+      <section id="features" className="py-24 relative z-20 bg-gradient-to-b from-background to-background/90">
         <Features />
+      </section>
+      
+      {/* Extra Section with Separator */}
+      <section className="py-16 bg-background/95 relative z-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Community?</h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Join thousands of community organizers and relationship managers who are building stronger connections every day with our suite of tools.
+            </p>
+            <Separator className="my-8 bg-[#00eada]/20 h-px w-24 mx-auto" />
+            <Button 
+              asChild
+              size="lg" 
+              className="px-8 gap-2 shadow-lg bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+            >
+              <Link to="/auth">
+                Start for Free
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
       </section>
       
       {/* Footer */}

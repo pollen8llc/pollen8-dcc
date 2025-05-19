@@ -1,11 +1,10 @@
-
 // Only updating the necessary parts to fix routing paths
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Users, Plus, Trash2, Edit } from "lucide-react";
+import { Users, Plus, Trash2, Edit } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -117,18 +116,6 @@ const Groups = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mr-2" 
-            onClick={() => navigate("/rel8/dashboard")}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
-          </Button>
-        </div>
-        
         <Rel8Navigation />
         
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
@@ -144,6 +131,7 @@ const Groups = () => {
                 New Group
               </Button>
             </AlertDialogTrigger>
+            
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Create New Group</AlertDialogTitle>
