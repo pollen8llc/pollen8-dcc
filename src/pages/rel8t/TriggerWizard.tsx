@@ -25,6 +25,8 @@ const TriggerWizard = () => {
     saveTrigger,
     isScheduleRequired,
     isValid,
+    totalSteps,
+    isFinalStep,
   } = useTriggerWizard();
 
   const goBack = () => {
@@ -41,18 +43,16 @@ const TriggerWizard = () => {
   // Determine if the next button should be disabled
   const isNextDisabled = !isValid();
   
-  // Is this the final step?
-  const isFinalStep = currentStep === (isScheduleRequired ? 3 : 2);
-
   // Log component state on each render for debugging
   useEffect(() => {
     console.log("TriggerWizard render:", { 
       currentStep, 
+      totalSteps,
       isScheduleRequired, 
       isFinalStep, 
       isNextDisabled 
     });
-  }, [currentStep, isScheduleRequired, isFinalStep, isNextDisabled]);
+  }, [currentStep, totalSteps, isScheduleRequired, isFinalStep, isNextDisabled]);
 
   // Calculate the current content based on the step
   const renderContent = () => {

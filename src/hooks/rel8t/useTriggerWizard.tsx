@@ -31,10 +31,22 @@ export function useTriggerWizard() {
   const isScheduleRequired = triggerData.condition === "scheduled_time" || 
     Object.values(TIME_TRIGGER_TYPES).includes(triggerData.condition as string);
 
+  // Determine the total number of steps based on whether schedule is required
+  const totalSteps = isScheduleRequired ? 3 : 2;
+
   // Move to the next step
   const nextStep = () => {
     if (isValid()) {
-      setCurrentStep((prev) => prev + 1);
+      const nextStepNumber = currentStep + 1;
+      
+      // Skip the schedule step if not needed
+      if (nextStepNumber === 3 && !isScheduleRequired) {
+        saveTrigger();
+        return;
+      }
+      
+      setCurrentStep(nextStepNumber);
+      console.log(`Moving to step ${nextStepNumber} of ${totalSteps}`);
     } else {
       // Show feedback based on the current step
       if (currentStep === 1 && !triggerData.name) {
@@ -102,7 +114,9 @@ export function useTriggerWizard() {
     console.log("Current executionDate state:", executionDate);
     console.log("Current step:", currentStep);
     console.log("Is schedule required:", isScheduleRequired);
-  }, [executionDate, currentStep, isScheduleRequired]);
+    console.log("Total steps:", totalSteps);
+    console.log("Current triggerData:", triggerData);
+  }, [executionDate, currentStep, isScheduleRequired, totalSteps, triggerData]);
 
   // Create the trigger in the database
   const saveTrigger = async () => {
@@ -168,10 +182,18 @@ export function useTriggerWizard() {
     const result = (() => {
       switch (currentStep) {
         case 1: // Basic Info
-          return triggerData.name !== "";
+          const basicValid = triggerData.name !== "";
+          console.log("Basic info validation:", { name: triggerData.name, valid: basicValid });
+          return basicValid;
           
         case 2: // Behavior
-          return triggerData.condition !== "" && triggerData.action !== "";
+          const behaviorValid = triggerData.condition !== "" && triggerData.action !== "";
+          console.log("Behavior validation:", { 
+            condition: triggerData.condition, 
+            action: triggerData.action, 
+            valid: behaviorValid 
+          });
+          return behaviorValid;
           
         case 3: // Schedule
           if (isScheduleRequired) {
@@ -190,9 +212,13 @@ export function useTriggerWizard() {
     return result;
   };
 
+  // Is this the final step?
+  const isFinalStep = currentStep === totalSteps;
+
   // Pass all necessary state and functions
   return {
     currentStep,
+    totalSteps,
     nextStep,
     prevStep,
     triggerData,
@@ -205,5 +231,6 @@ export function useTriggerWizard() {
     updateScheduleData,
     isScheduleRequired,
     isValid,
+    isFinalStep,
   };
 }

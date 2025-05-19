@@ -29,9 +29,10 @@ export function DatePicker({ value, onChange, className, disabled = false }: Dat
 
   // Custom handler to ensure the date is properly propagated
   const handleDateSelect = (date?: Date) => {
+    console.log("DatePicker handleDateSelect called with:", date);
     if (onChange) {
       onChange(date);
-      console.log("DatePicker selected:", date); // Debug log
+      console.log("DatePicker onChange called with:", date);
     }
   };
 

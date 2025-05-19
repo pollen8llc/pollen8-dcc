@@ -88,7 +88,7 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
 
   // Handle date selection explicitly
   const handleDateChange = (date?: Date) => {
-    console.log("handleDateChange called with date:", date);
+    console.log("ScheduleStep handleDateChange called with date:", date);
     updateScheduleData(date);
   };
 
@@ -151,7 +151,7 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
               <SelectTrigger id="execution-time">
                 <SelectValue placeholder="Select a time" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50">
                 {timeOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -194,7 +194,7 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
                 <SelectTrigger id="recurrence-type">
                   <SelectValue placeholder="Select recurrence pattern" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-50">
                   <SelectItem value="daily">Daily</SelectItem>
                   <SelectItem value="weekly">Weekly</SelectItem>
                   <SelectItem value="monthly">Monthly</SelectItem>
