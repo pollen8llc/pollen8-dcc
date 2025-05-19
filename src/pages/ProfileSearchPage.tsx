@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -92,7 +91,7 @@ const ProfileSearchPage: React.FC = () => {
       try {
         let query = supabase
           .from('profiles')
-          .select('*');
+          .select('*, role');
         
         // Add search filter if provided
         if (debouncedSearchQuery) {

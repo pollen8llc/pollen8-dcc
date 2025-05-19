@@ -298,3 +298,33 @@ input:focus, textarea:focus, select:focus {
   color: #e11d48; /* text-red-600 */
   margin-left: 0.25rem;
 }
+
+/* Instagram-style animated gradient border for admin profile cards */
+.admin-gradient-border {
+  position: relative;
+  z-index: 1;
+}
+.admin-gradient-border::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 1.25rem; /* match card rounding */
+  padding: 0;
+  background: conic-gradient(
+    #f9ce34 0deg, #ee2a7b 90deg, #6228d7 180deg, #00eada 270deg, #f9ce34 360deg
+  );
+  animation: admin-gradient-rotate 2.5s linear infinite;
+  pointer-events: none;
+}
+.admin-gradient-border > * {
+  position: relative;
+  z-index: 3;
+}
+@keyframes admin-gradient-rotate {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
