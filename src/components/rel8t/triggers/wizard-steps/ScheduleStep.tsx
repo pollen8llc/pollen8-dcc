@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
@@ -134,12 +135,12 @@ export function ScheduleStep({ validateAndNext }: { validateAndNext: () => void 
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="one_time">One time only</SelectItem>
-              <SelectItem value={triggerTypes.HOURLY}>Hourly</SelectItem>
-              <SelectItem value={triggerTypes.DAILY}>Daily</SelectItem>
-              <SelectItem value={triggerTypes.WEEKLY}>Weekly</SelectItem>
-              <SelectItem value={triggerTypes.MONTHLY}>Monthly</SelectItem>
-              <SelectItem value={triggerTypes.QUARTERLY}>Quarterly</SelectItem>
-              <SelectItem value={triggerTypes.YEARLY}>Yearly</SelectItem>
+              <SelectItem value={triggerTypes.HOURLY || "hourly"}>Hourly</SelectItem>
+              <SelectItem value={triggerTypes.DAILY || "daily"}>Daily</SelectItem>
+              <SelectItem value={triggerTypes.WEEKLY || "weekly"}>Weekly</SelectItem>
+              <SelectItem value={triggerTypes.MONTHLY || "monthly"}>Monthly</SelectItem>
+              <SelectItem value={triggerTypes.QUARTERLY || "quarterly"}>Quarterly</SelectItem>
+              <SelectItem value={triggerTypes.YEARLY || "yearly"}>Yearly</SelectItem>
             </SelectContent>
           </Select>
         </FormItem>
