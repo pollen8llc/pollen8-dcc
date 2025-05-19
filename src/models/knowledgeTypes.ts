@@ -14,7 +14,7 @@ export interface KnowledgeArticle {
     avatar_url: string;
   };
   vote_count?: number;
-  user_vote?: number;
+  user_vote?: number | null;
 }
 
 export interface KnowledgeComment {
@@ -30,7 +30,7 @@ export interface KnowledgeComment {
     avatar_url: string;
   };
   vote_count?: number;
-  user_vote?: number;
+  user_vote?: number | null;
 }
 
 export interface KnowledgeTag {
@@ -38,7 +38,6 @@ export interface KnowledgeTag {
   name: string;
   description: string | null;
   created_at: string;
-  article_count?: number;
 }
 
 export interface KnowledgeVote {
@@ -46,7 +45,7 @@ export interface KnowledgeVote {
   user_id: string;
   article_id?: string;
   comment_id?: string;
-  vote_type: number; // 1 for upvote, -1 for downvote
+  vote_type: number;
   created_at: string;
 }
 

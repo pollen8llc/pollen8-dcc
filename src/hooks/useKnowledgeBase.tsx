@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,7 +29,7 @@ export const useKnowledgeBase = () => {
           .from('knowledge_articles')
           .select(`
             *,
-            profiles!knowledge_articles_user_id_fkey(
+            profiles:user_id(
               first_name, 
               last_name, 
               avatar_url
@@ -73,14 +74,17 @@ export const useKnowledgeBase = () => {
       queryFn: async () => {
         if (!id) throw new Error('Article ID is required');
         
-        // Increment view count
-        await supabase.rpc('increment_view_count', { article_id: id });
+        // Increment view count using a simpler approach
+        await supabase
+          .from('knowledge_articles')
+          .update({ view_count: supabase.rpc('get_article_view_count', { article_id: id }) + 1 })
+          .eq('id', id);
         
         const { data, error } = await supabase
           .from('knowledge_articles')
           .select(`
             *,
-            profiles!knowledge_articles_user_id_fkey(
+            profiles:user_id(
               first_name, 
               last_name, 
               avatar_url
@@ -160,7 +164,7 @@ export const useKnowledgeBase = () => {
           .from('knowledge_comments')
           .select(`
             *,
-            profiles!knowledge_comments_user_id_fkey(
+            profiles:user_id(
               first_name, 
               last_name, 
               avatar_url
