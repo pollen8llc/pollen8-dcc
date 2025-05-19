@@ -98,6 +98,11 @@ export function useTriggerWizard() {
   const updateFormData = (data: Partial<TriggerFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));
   };
+  
+  // Add a new function to navigate to a specific step
+  const navigateToStep = (step: number) => {
+    setCurrentStep(step);
+  };
 
   const handleSubmit = async () => {
     try {
@@ -141,6 +146,7 @@ export function useTriggerWizard() {
     handlePreviousStep,
     updateFormData,
     handleSubmit,
+    navigateToStep, // Export the new function
     triggerTypes: TIME_TRIGGER_TYPES,
     actionTypes: TRIGGER_ACTIONS
   };

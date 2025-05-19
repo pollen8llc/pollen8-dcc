@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { PostgrestResponse } from "@supabase/supabase-js";
@@ -21,16 +20,16 @@ export const TRIGGER_ACTIONS = {
   SEND_NOTIFICATION: 'send_notification'
 };
 
-// Update the RecurrencePattern interface to match what will be stored in the database
+// Update the RecurrencePattern interface to include all potential properties
 export interface RecurrencePattern {
   type: string;
   startDate: string;
   endDate?: string;
-  daysOfWeek?: number[];
-  dayOfMonth?: number;
-  monthOfYear?: number;
   frequency?: number;
-  [key: string]: any; // Add index signature to match Json type
+  daysOfWeek?: number[]; // Added for weekly recurrence
+  dayOfMonth?: number;   // Added for monthly recurrence
+  monthOfYear?: number;  // For yearly recurrence
+  [key: string]: any;    // Add index signature to match Json type
 }
 
 export interface Trigger {

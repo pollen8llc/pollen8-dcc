@@ -7,7 +7,7 @@ import { CalendarIcon, CheckCircle2, Clock, Edit, Mail, Bell, Clipboard } from "
 import { format } from "date-fns";
 
 export function ReviewStep() {
-  const { formData, handlePreviousStep, handleSubmit, currentStep, updateFormData } = useTriggerWizard();
+  const { formData, handlePreviousStep, handleSubmit, navigateToStep } = useTriggerWizard();
 
   // Helper function to format trigger conditions
   const formatCondition = (condition: string): string => {
@@ -73,7 +73,7 @@ export function ReviewStep() {
             variant="outline" 
             size="sm" 
             className="h-8 px-2"
-            onClick={() => updateFormData({ currentStep: 1 })}
+            onClick={() => navigateToStep(1)}
           >
             <Edit className="h-4 w-4 mr-1" /> Edit
           </Button>
@@ -94,7 +94,7 @@ export function ReviewStep() {
             variant="outline" 
             size="sm" 
             className="h-8 px-2"
-            onClick={() => updateFormData({ currentStep: 2 })}
+            onClick={() => navigateToStep(2)}
           >
             <Edit className="h-4 w-4 mr-1" /> Edit
           </Button>
@@ -130,7 +130,7 @@ export function ReviewStep() {
             variant="outline" 
             size="sm" 
             className="h-8 px-2"
-            onClick={() => updateFormData({ currentStep: 3 })}
+            onClick={() => navigateToStep(3)}
           >
             <Edit className="h-4 w-4 mr-1" /> Edit
           </Button>

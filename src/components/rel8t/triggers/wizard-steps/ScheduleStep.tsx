@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FormItem, FormLabel } from "@/components/ui/form";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
@@ -6,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { RecurrencePattern } from "@/services/rel8t/triggerService";
 
 export function ScheduleStep() {
   const { formData, updateFormData, handleNextStep, handlePreviousStep, errors, triggerTypes } = useTriggerWizard();
@@ -29,7 +29,7 @@ export function ScheduleStep() {
   // Handle recurrence type change
   const handleRecurrenceTypeChange = (type: string) => {
     // Create a basic recurrence pattern based on the selected type
-    let recurrencePattern = {
+    let recurrencePattern: RecurrencePattern = {
       type,
       startDate: formData.executionDate?.toISOString() || new Date().toISOString(),
       frequency: recurrenceFrequency
