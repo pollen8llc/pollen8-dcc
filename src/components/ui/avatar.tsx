@@ -1,16 +1,23 @@
+
 import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
+import { UserRole } from "@/models/types"
+
+interface ExtendedAvatarProps extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> {
+  isAdmin?: boolean;
+}
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => (
+  ExtendedAvatarProps
+>(({ className, isAdmin, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
     className={cn(
       "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
+      isAdmin ? "admin-avatar-border" : "",
       className
     )}
     {...props}

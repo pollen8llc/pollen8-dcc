@@ -160,3 +160,65 @@
 .text-with-shadow {
   text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
+
+/* Admin gradient border animation */
+.admin-profile-border {
+  position: relative;
+  padding: 3px; /* Creates space for the gradient border */
+}
+
+.admin-profile-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px; /* Border thickness */
+  background: linear-gradient(
+    45deg, 
+    #00eada, 
+    #33C3F0, 
+    #62E1FB, 
+    #00eada
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  background-size: 300% 300%;
+  animation: gradient-rotate 3s linear infinite;
+}
+
+@keyframes gradient-rotate {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+/* For larger avatars with more pronounced effect */
+.admin-avatar-border {
+  position: relative;
+  padding: 3px;
+}
+
+.admin-avatar-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    45deg,
+    #00eada,
+    #33C3F0,
+    #62E1FB,
+    #00eada
+  );
+  background-size: 300% 300%;
+  animation: gradient-rotate 3s linear infinite;
+  z-index: -1;
+}
+

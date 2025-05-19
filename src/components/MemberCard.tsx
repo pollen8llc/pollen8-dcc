@@ -31,12 +31,15 @@ const MemberCard = ({ member, role, communityId, onClick }: MemberCardProps) => 
   
   // Safely check if tags exist and have items
   const hasTags = member && 'tags' in member && Array.isArray((member as any).tags) && (member as any).tags.length > 0;
+  
+  // Check if the user is an admin
+  const isAdmin = member.role === UserRole.ADMIN;
 
   return (
     <div 
-      className="rounded-xl overflow-hidden backdrop-blur-md bg-white/5 border border-white/10 
+      className={`rounded-xl overflow-hidden backdrop-blur-md bg-white/5 border border-white/10 
                 shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20 
-                cursor-pointer transition-all duration-300 h-[180px]"
+                cursor-pointer transition-all duration-300 h-[180px] ${isAdmin ? 'admin-profile-border' : ''}`}
       onClick={handleCardClick}
     >
       <div className="w-full h-1 bg-[#00eada]"></div>

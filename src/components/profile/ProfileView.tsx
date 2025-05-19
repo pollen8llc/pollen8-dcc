@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Edit, MapPin, Globe, User, Users, AlertCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Community } from "@/models/types";
+import { Community, UserRole } from "@/models/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ProfileViewProps {
@@ -21,6 +20,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
   const [communities, setCommunities] = useState<Community[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Check if the user is an admin
+  const isAdmin = profile?.role === UserRole.ADMIN;
 
   useEffect(() => {
     const fetchUserCommunities = async () => {
@@ -151,10 +153,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
     <Card className="max-w-3xl mx-auto">
       <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4">
         <div className="flex items-center gap-4">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={profile?.avatar_url || ""} alt={getFullName()} />
-            <AvatarFallback>{getInitials()}</AvatarFallback>
-          </Avatar>
+          <div className={isAdmin ? 'admin-avatar-border rounded-full' : ''}>
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={profile?.avatar_url || ""} alt={getFullName()} />
+              <AvatarFallback>{getInitials()}</AvatarFallback>
+            </Avatar>
+          </div>
           <div>
             <CardTitle className="text-2xl">{getFullName()}</CardTitle>
             {profile?.location && (
