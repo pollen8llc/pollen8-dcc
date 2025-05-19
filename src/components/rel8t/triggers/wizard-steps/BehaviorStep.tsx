@@ -11,6 +11,16 @@ export function BehaviorStep() {
   const { watch, setValue, formState: { errors } } = useFormContext();
   const selectedCondition = watch("condition");
   const selectedAction = watch("action");
+  
+  const onNextClick = () => {
+    console.log("Next button clicked in BehaviorStep");
+    handleNextStep();
+  };
+  
+  const onPreviousClick = () => {
+    console.log("Previous button clicked in BehaviorStep");
+    handlePreviousStep();
+  };
 
   return (
     <div className="space-y-6">
@@ -145,10 +155,10 @@ export function BehaviorStep() {
       </div>
       
       <div className="flex justify-between pt-6">
-        <Button variant="outline" onClick={handlePreviousStep}>
+        <Button type="button" variant="outline" onClick={onPreviousClick}>
           Previous
         </Button>
-        <Button onClick={handleNextStep}>Next Step</Button>
+        <Button type="button" onClick={onNextClick}>Next Step</Button>
       </div>
     </div>
   );

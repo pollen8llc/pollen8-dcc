@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { createTrigger, RecurrencePattern } from "@/services/rel8t/triggerService";
@@ -30,82 +30,35 @@ export function useTriggerWizard() {
     recurrencePattern: null
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const validateBasicInfo = () => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.name.trim()) {
-      newErrors.name = "Trigger name is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateBehavior = () => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.condition) {
-      newErrors.condition = "Trigger condition is required";
-    }
-    
-    if (!formData.action) {
-      newErrors.action = "Trigger action is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateSchedule = () => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.executionDate) {
-      newErrors.executionDate = "Execution date is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNextStep = () => {
-    let isValid = false;
-    
-    switch (currentStep) {
-      case 1:
-        isValid = validateBasicInfo();
-        break;
-      case 2:
-        isValid = validateBehavior();
-        break;
-      case 3:
-        isValid = validateSchedule();
-        break;
-      default:
-        isValid = true;
-    }
-    
-    if (isValid) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePreviousStep = () => {
-    setCurrentStep(currentStep - 1);
-  };
-
-  const updateFormData = (data: Partial<TriggerFormData>) => {
+  // Update form data with partial updates
+  const updateFormData = useCallback((data: Partial<TriggerFormData>) => {
+    console.log("Updating form data:", data);
     setFormData(prev => ({ ...prev, ...data }));
-  };
-  
-  // Add a new function to navigate to a specific step
-  const navigateToStep = (step: number) => {
-    setCurrentStep(step);
-  };
+  }, []);
 
-  const handleSubmit = async () => {
+  // Move to next step
+  const handleNextStep = useCallback(() => {
+    console.log(`Moving from step ${currentStep} to ${currentStep + 1}`);
+    setCurrentStep(currentStep + 1);
+  }, [currentStep]);
+
+  // Move to previous step
+  const handlePreviousStep = useCallback(() => {
+    console.log(`Moving from step ${currentStep} to ${currentStep - 1}`);
+    setCurrentStep(Math.max(1, currentStep - 1));
+  }, [currentStep]);
+  
+  // Navigate to a specific step
+  const navigateToStep = useCallback((step: number) => {
+    console.log(`Directly navigating to step ${step} from ${currentStep}`);
+    setCurrentStep(step);
+  }, [currentStep]);
+
+  // Submit the form data
+  const handleSubmit = useCallback(async () => {
     try {
+      console.log("Submitting trigger with data:", formData);
+      
       // Transform form data to the format expected by the API
       const triggerData = {
         name: formData.name,
@@ -136,17 +89,16 @@ export function useTriggerWizard() {
         variant: "destructive"
       });
     }
-  };
+  }, [formData, navigate]);
 
   return {
     currentStep,
     formData,
-    errors,
     handleNextStep,
     handlePreviousStep,
     updateFormData,
     handleSubmit,
-    navigateToStep, // Export the new function
+    navigateToStep,
     triggerTypes: TIME_TRIGGER_TYPES,
     actionTypes: TRIGGER_ACTIONS
   };

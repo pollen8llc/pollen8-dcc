@@ -10,6 +10,7 @@ import { ScheduleStep } from "@/components/rel8t/triggers/wizard-steps/ScheduleS
 import { ReviewStep } from "@/components/rel8t/triggers/wizard-steps/ReviewStep";
 import { FormProvider, useForm } from "react-hook-form";
 import { Shell } from "@/components/layout/Shell";
+import { useEffect } from "react";
 
 const TriggerWizard = () => {
   // Get trigger wizard state and functions
@@ -24,15 +25,23 @@ const TriggerWizard = () => {
   // Initialize react-hook-form with our existing form data
   const methods = useForm<TriggerFormData>({
     defaultValues: formData,
+    mode: "onBlur" // Validate on blur instead of onChange to prevent rapid validations
   });
 
   // Update our custom state when form values change
-  const onFormValueChange = (values: Partial<TriggerFormData>) => {
-    updateFormData(values);
-  };
+  useEffect(() => {
+    const subscription = methods.watch((values) => {
+      if (values) {
+        updateFormData(values as Partial<TriggerFormData>);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [methods, updateFormData]);
 
   // Handle form submission
   const onSubmit = (data: TriggerFormData) => {
+    console.log("Form submitted with data:", data);
     // Update our form data first
     updateFormData(data);
     // Then trigger the submission
@@ -62,7 +71,7 @@ const TriggerWizard = () => {
 
             {/* Wrap everything in FormProvider */}
             <FormProvider {...methods}>
-              <form onChange={methods.handleSubmit(onFormValueChange)} onSubmit={methods.handleSubmit(onSubmit)}>
+              <form onSubmit={methods.handleSubmit(onSubmit)}>
                 {currentStep === 1 && <BasicInfoStep />}
                 {currentStep === 2 && <BehaviorStep />}
                 {currentStep === 3 && <ScheduleStep />}

@@ -5,7 +5,7 @@ import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RecurrencePattern } from "@/services/rel8t/triggerService";
 import { useFormContext } from "react-hook-form";
 
@@ -15,6 +15,13 @@ export function ScheduleStep() {
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<number>(1);
   
   const formData = watch();
+  
+  useEffect(() => {
+    // Ensure executionDate is set to a default if null
+    if (!formData.executionDate) {
+      setValue('executionDate', new Date());
+    }
+  }, [formData.executionDate, setValue]);
 
   // Helper to format time string
   const formatTimeString = (date: Date | null): string => {
@@ -33,6 +40,7 @@ export function ScheduleStep() {
 
   // Handle recurrence type change
   const handleRecurrenceTypeChange = (type: string) => {
+    console.log("Recurrence type changed to:", type);
     // Create a basic recurrence pattern based on the selected type
     let recurrencePattern: RecurrencePattern = {
       type,
@@ -59,6 +67,7 @@ export function ScheduleStep() {
 
   // Update frequency in recurrence pattern
   const updateFrequency = (frequency: number) => {
+    console.log("Frequency updated to:", frequency);
     setRecurrenceFrequency(frequency);
     if (formData.recurrencePattern) {
       const updatedPattern = {
@@ -68,6 +77,21 @@ export function ScheduleStep() {
       setValue('recurrencePattern', updatedPattern);
     }
   };
+  
+  const onNextClick = () => {
+    console.log("Next button clicked in ScheduleStep with date:", formData.executionDate);
+    handleNextStep();
+  };
+  
+  const onPreviousClick = () => {
+    console.log("Previous button clicked in ScheduleStep");
+    handlePreviousStep();
+  };
+  
+  const handleDateChange = (date: Date | undefined) => {
+    console.log("Date changed to:", date);
+    setValue('executionDate', date || null);
+  };
 
   return (
     <div className="space-y-6">
@@ -76,7 +100,7 @@ export function ScheduleStep() {
           <FormLabel className="text-base">Start Date</FormLabel>
           <DatePicker
             value={formData.executionDate || undefined}
-            onChange={(date) => setValue('executionDate', date || null)}
+            onChange={handleDateChange}
             className={errors.executionDate ? "border-destructive" : ""}
           />
           {errors.executionDate && (
@@ -93,6 +117,7 @@ export function ScheduleStep() {
               if (formData.executionDate) {
                 const newDateTime = parseTimeString(e.target.value, formData.executionDate);
                 setValue('executionDate', newDateTime);
+                console.log("Time updated to:", newDateTime);
               }
             }}
             className="w-40"
@@ -144,10 +169,10 @@ export function ScheduleStep() {
       </div>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={handlePreviousStep}>
+        <Button type="button" variant="outline" onClick={onPreviousClick}>
           Previous
         </Button>
-        <Button onClick={handleNextStep}>Next Step</Button>
+        <Button type="button" onClick={onNextClick}>Next Step</Button>
       </div>
     </div>
   );

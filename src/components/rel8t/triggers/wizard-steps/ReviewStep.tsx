@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,8 +8,11 @@ import { useFormContext } from "react-hook-form";
 
 export function ReviewStep() {
   const { handlePreviousStep, handleSubmit, navigateToStep } = useTriggerWizard();
-  const { watch } = useFormContext();
+  const { watch, formState } = useFormContext();
   const formData = watch();
+  
+  console.log("Review step form data:", formData);
+  console.log("Form validation state:", formState);
 
   // Helper function to format trigger conditions
   const formatCondition = (condition: string): string => {
@@ -52,6 +54,16 @@ export function ReviewStep() {
     
     return `Every ${freqText}${formatCondition(type).toLowerCase()}`;
   };
+  
+  const onPreviousClick = () => {
+    console.log("Previous button clicked in ReviewStep");
+    handlePreviousStep();
+  };
+  
+  const onEditClick = (step: number) => {
+    console.log(`Navigating to step ${step} from review`);
+    navigateToStep(step);
+  };
 
   return (
     <div className="space-y-6">
@@ -73,10 +85,11 @@ export function ReviewStep() {
             </CardDescription>
           </div>
           <Button 
+            type="button"
             variant="outline" 
             size="sm" 
             className="h-8 px-2"
-            onClick={() => navigateToStep(1)}
+            onClick={() => onEditClick(1)}
           >
             <Edit className="h-4 w-4 mr-1" /> Edit
           </Button>
@@ -94,10 +107,11 @@ export function ReviewStep() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Behavior</CardTitle>
           <Button 
+            type="button"
             variant="outline" 
             size="sm" 
             className="h-8 px-2"
-            onClick={() => navigateToStep(2)}
+            onClick={() => onEditClick(2)}
           >
             <Edit className="h-4 w-4 mr-1" /> Edit
           </Button>
@@ -130,10 +144,11 @@ export function ReviewStep() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle>Schedule</CardTitle>
           <Button 
+            type="button"
             variant="outline" 
             size="sm" 
             className="h-8 px-2"
-            onClick={() => navigateToStep(3)}
+            onClick={() => onEditClick(3)}
           >
             <Edit className="h-4 w-4 mr-1" /> Edit
           </Button>
@@ -160,7 +175,7 @@ export function ReviewStep() {
       </Card>
 
       <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={handlePreviousStep}>
+        <Button type="button" variant="outline" onClick={onPreviousClick}>
           Previous
         </Button>
         <Button type="submit">

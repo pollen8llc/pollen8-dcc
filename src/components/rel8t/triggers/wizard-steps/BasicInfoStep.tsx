@@ -12,6 +12,11 @@ export function BasicInfoStep() {
   const { register, formState: { errors }, watch, setValue } = useFormContext();
   const isActive = watch("isActive");
   
+  const onNextClick = () => {
+    console.log("Next button clicked in BasicInfoStep");
+    handleNextStep();
+  };
+  
   return (
     <div className="space-y-6">
       <FormItem>
@@ -49,7 +54,7 @@ export function BasicInfoStep() {
       </FormItem>
 
       <div className="flex justify-end">
-        <Button onClick={handleNextStep}>
+        <Button type="button" onClick={onNextClick}>
           Next Step
         </Button>
       </div>
