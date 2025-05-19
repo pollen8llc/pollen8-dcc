@@ -271,7 +271,7 @@ export const getAllProfiles = async (): Promise<ExtendedProfile[]> => {
 /**
  * Helper function to extract user role from profile data
  */
-function getUserRoleFromProfile(profile: any): UserRole {
+export function getUserRoleFromProfile(profile: any): UserRole {
   // Check if the profile has user_roles with role information
   if (profile.user_roles && Array.isArray(profile.user_roles) && profile.user_roles.length > 0) {
     // Find the highest role (ADMIN > ORGANIZER > MEMBER)
