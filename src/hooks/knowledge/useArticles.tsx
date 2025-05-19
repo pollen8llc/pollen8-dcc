@@ -16,7 +16,7 @@ export const useArticles = (filters?: { tag?: string, searchQuery?: string, limi
         .from('knowledge_articles')
         .select(`
           *,
-          profiles:user_id(
+          profiles:user_id (
             first_name,
             last_name,
             avatar_url
@@ -42,14 +42,22 @@ export const useArticles = (filters?: { tag?: string, searchQuery?: string, limi
         throw error;
       }
       
-      // Format author information
-      return data.map(article => ({
-        ...article,
-        author: article.profiles ? {
-          name: `${article.profiles.first_name || ''} ${article.profiles.last_name || ''}`.trim(),
-          avatar_url: article.profiles.avatar_url || ''
-        } : undefined
-      })) as KnowledgeArticle[];
+      // Format author information with proper type safety
+      return data.map(article => {
+        const profileData = article.profiles as { 
+          first_name?: string; 
+          last_name?: string; 
+          avatar_url?: string 
+        } | null;
+        
+        return {
+          ...article,
+          author: profileData ? {
+            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
+            avatar_url: profileData.avatar_url || ''
+          } : undefined
+        };
+      }) as KnowledgeArticle[];
     }
   });
 };
@@ -69,7 +77,7 @@ export const useArticle = (id: string | undefined) => {
         .from('knowledge_articles')
         .select(`
           *,
-          profiles:user_id(
+          profiles:user_id (
             first_name, 
             last_name, 
             avatar_url
@@ -105,11 +113,18 @@ export const useArticle = (id: string | undefined) => {
         }
       }
       
+      // Format author information with proper type safety
+      const profileData = data.profiles as {
+        first_name?: string;
+        last_name?: string;
+        avatar_url?: string;
+      } | null;
+      
       return {
         ...data,
-        author: data.profiles ? {
-          name: `${data.profiles.first_name || ''} ${data.profiles.last_name || ''}`.trim(),
-          avatar_url: data.profiles.avatar_url || ''
+        author: profileData ? {
+          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
+          avatar_url: profileData.avatar_url || ''
         } : undefined,
         vote_count: voteData || 0,
         user_vote: userVote

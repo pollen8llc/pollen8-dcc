@@ -57,11 +57,18 @@ export const useComments = (articleId: string | undefined) => {
           }
         }
         
+        // Handle profile data with proper type safety
+        const profileData = comment.profiles as {
+          first_name?: string;
+          last_name?: string;
+          avatar_url?: string;
+        } | null;
+        
         return {
           ...comment,
-          author: comment.profiles ? {
-            name: `${comment.profiles.first_name || ''} ${comment.profiles.last_name || ''}`.trim(),
-            avatar_url: comment.profiles.avatar_url || ''
+          author: profileData ? {
+            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
+            avatar_url: profileData.avatar_url || ''
           } : undefined,
           vote_count: voteData || 0,
           user_vote: userVote
