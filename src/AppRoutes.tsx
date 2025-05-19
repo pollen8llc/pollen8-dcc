@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -36,16 +35,44 @@ import Settings from "./pages/rel8t/Settings";
 import Notifications from "./pages/rel8t/Notifications";
 import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 
+// CORE Knowledge Base Pages
+import CoreLandingPage from "./pages/core/CoreLandingPage";
+import ArticleView from "./pages/core/ArticleView";
+import ArticleCreate from "./pages/core/ArticleCreate";
+import ArticleEdit from "./pages/core/ArticleEdit";
+import TagView from "./pages/core/TagView";
+
 const AppRoutes = () => {
   const { currentUser } = useUser();
 
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/invite/:code" element={<InvitePage />} />
       <Route path="/documentation" element={<Documentation />} />
+
+      {/* CORE Knowledge Base Routes */}
+      <Route path="/core" element={<CoreLandingPage />} />
+      <Route path="/core/articles/:id" element={<ArticleView />} />
+      <Route path="/core/tags/:tag" element={<TagView />} />
+      <Route 
+        path="/core/articles/new" 
+        element={
+          <ProtectedRoute role={UserRole.ORGANIZER}>
+            <ArticleCreate />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/core/articles/:id/edit" 
+        element={
+          <ProtectedRoute role={UserRole.ORGANIZER}>
+            <ArticleEdit />
+          </ProtectedRoute>
+        } 
+      />
 
       {/* Protected Routes */}
       <Route

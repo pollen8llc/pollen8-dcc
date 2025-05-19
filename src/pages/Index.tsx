@@ -12,8 +12,8 @@ const Index = () => {
   
   useEffect(() => {
     if (!isLoading && currentUser) {
-      // If user is logged in, redirect to REL8 dashboard
-      navigate("/rel8/dashboard");
+      // If user is logged in, redirect to CORE dashboard
+      navigate("/core");
     }
   }, [currentUser, isLoading, navigate]);
   

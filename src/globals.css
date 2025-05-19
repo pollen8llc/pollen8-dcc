@@ -1,0 +1,133 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+    
+    /* Royal Blue Colors */
+    --royal-blue-50: 223 100% 97%;
+    --royal-blue-100: 224 100% 93%;
+    --royal-blue-200: 223 100% 86%;
+    --royal-blue-300: 223 96% 78%;
+    --royal-blue-400: 223 94% 67%;
+    --royal-blue-500: 224 89% 60%;
+    --royal-blue-600: 224 76% 48%;
+    --royal-blue-700: 226 71% 40%;
+    --royal-blue-800: 226 67% 33%;
+    --royal-blue-900: 224 64% 28%;
+    --royal-blue-950: 226 67% 18%;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    /* Royal Blue Colors - Dark Mode Adjusted */
+    --royal-blue-50: 226 67% 10%;
+    --royal-blue-100: 226 67% 15%;
+    --royal-blue-200: 226 64% 20%;
+    --royal-blue-300: 224 64% 25%;
+    --royal-blue-400: 224 62% 30%;
+    --royal-blue-500: 224 65% 40%;
+    --royal-blue-600: 224 75% 50%;
+    --royal-blue-700: 224 80% 60%;
+    --royal-blue-800: 224 90% 70%;
+    --royal-blue-900: 223 95% 85%;
+    --royal-blue-950: 223 100% 95%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* TinyMCE Editor Dark Mode styles */
+.tox-tinymce {
+  border-radius: 0.5rem;
+}
+
+.dark .tox .tox-toolbar__group,
+.dark .tox .tox-toolbar,
+.dark .tox .tox-edit-area__iframe,
+.dark .tox .tox-statusbar,
+.dark .tox .tox-menubar,
+.dark .tox .tox-toolbar-overlord {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .tox .tox-tbtn svg,
+.dark .tox .tox-tbtn,
+.dark .tox .tox-mbtn,
+.dark .tox .tox-statusbar a,
+.dark .tox .tox-statusbar__path-item,
+.dark .tox .tox-statusbar__wordcount,
+.dark .tox .tox-statusbar__text-container {
+  color: #e5e7eb !important;
+}
+
+.dark .tox .tox-tbtn:hover svg,
+.dark .tox .tox-mbtn:hover {
+  color: #ffffff !important;
+}
