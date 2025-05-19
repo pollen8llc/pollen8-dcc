@@ -110,13 +110,6 @@ export function TriggersList({
               </Button>
               <Button 
                 variant="outline" 
-                size="sm" 
-                onClick={() => onEdit(trigger)}
-              >
-                Edit
-              </Button>
-              <Button 
-                variant="outline" 
                 size="sm"
                 onClick={() => onDelete(trigger.id)}
               >
