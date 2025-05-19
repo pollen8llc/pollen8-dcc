@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -34,6 +33,7 @@ import ImportContacts from "./pages/rel8t/ImportContacts";
 import Relationships from "./pages/rel8t/Relationships";
 import Settings from "./pages/rel8t/Settings";
 import Notifications from "./pages/rel8t/Notifications";
+import TriggerWizard from "./pages/rel8t/TriggerWizard";
 import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 
 // CORE Knowledge Base Pages
@@ -254,6 +254,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute role={UserRole.MEMBER}>
             <Notifications />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/triggers/create"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <TriggerWizard />
           </ProtectedRoute>
         }
       />

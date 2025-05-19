@@ -58,7 +58,7 @@ export const Steps: React.FC<StepsProps> = ({
             {currentStep > index + 1 ? "✓" : index + 1}
           </div>
           
-          <div className="text-xs mt-2 text-center">{step.title}</div>
+          <div className="text-xs mt-2 text-center max-w-[120px] truncate px-2">{step.title}</div>
           
           {index !== stepsData.length - 1 && (
             <div

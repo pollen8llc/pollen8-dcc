@@ -2,9 +2,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -12,34 +11,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { 
   Trigger, 
-  createTrigger, 
+  deleteTrigger, 
   getTriggers,
-  TIME_TRIGGER_TYPES,
-  TRIGGER_ACTIONS 
 } from "@/services/rel8t/triggerService";
 import { TriggerStatsCards } from "./triggers/TriggerStatsCards";
 import { TriggersList } from "./triggers/TriggersList";
 import { EmailNotificationsList } from "./triggers/EmailNotificationsList";
 import { EditTriggerDialog } from "./triggers/EditTriggerDialog";
 import { useTriggerManagement } from "@/hooks/rel8t/useTriggerManagement";
-import { Calendar as CalendarIcon, Mail, Bell, AlertCircle } from "lucide-react";
-import { DatePicker } from "@/components/ui/date-picker";
-import { format } from "date-fns";
+import { Calendar as CalendarIcon, Mail, Bell, AlertCircle, Plus } from "lucide-react";
 
 export function TriggerManagement() {
+  const navigate = useNavigate();
   const {
     activeTab,
     setActiveTab,
@@ -59,59 +45,9 @@ export function TriggerManagement() {
     handleToggleActive,
   } = useTriggerManagement();
 
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newTrigger, setNewTrigger] = useState<Partial<Trigger>>({
-    name: "",
-    description: "",
-    condition: "contact_added",
-    action: "send_email",
-    is_active: true
-  });
-  
-  const [executionDate, setExecutionDate] = useState<Date | undefined>(undefined);
-  const [executionTime, setExecutionTime] = useState<string>("12:00");
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrenceType, setRecurrenceType] = useState("daily");
-  
-  const handleCreateTrigger = async () => {
-    try {
-      // Process date and time information if provided
-      if (executionDate) {
-        const [hours, minutes] = executionTime.split(":").map(Number);
-        const execDate = new Date(executionDate);
-        execDate.setHours(hours, minutes);
-        
-        // Set the execution time
-        newTrigger.execution_time = execDate.toISOString();
-        
-        // Set the recurrence pattern if recurring is enabled
-        if (isRecurring) {
-          newTrigger.recurrence_pattern = {
-            type: recurrenceType,
-            startDate: execDate.toISOString(),
-          };
-        }
-        
-        // Set the next execution time to be the same as the execution time initially
-        newTrigger.next_execution = execDate.toISOString();
-      }
-
-      await createTrigger(newTrigger as Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at">);
-      setIsCreateDialogOpen(false);
-      setNewTrigger({
-        name: "",
-        description: "",
-        condition: "contact_added",
-        action: "send_email",
-        is_active: true
-      });
-      setExecutionDate(undefined);
-      setExecutionTime("12:00");
-      setIsRecurring(false);
-      setRecurrenceType("daily");
-    } catch (error) {
-      console.error("Error creating trigger:", error);
-    }
+  // Navigation to the wizard
+  const handleCreateTrigger = () => {
+    navigate('/rel8/triggers/create');
   };
 
   // Function to render icons based on action type
@@ -139,151 +75,10 @@ export function TriggerManagement() {
             Create automated actions based on specific events
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>Create Trigger</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Create Automation Trigger</DialogTitle>
-              <DialogDescription>
-                Set up a new automation that will run when specific conditions are met.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="trigger-name">Trigger Name</Label>
-                <Input
-                  id="trigger-name"
-                  placeholder="Follow-up after meeting"
-                  value={newTrigger.name}
-                  onChange={(e) => setNewTrigger({ ...newTrigger, name: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="trigger-description">Description (Optional)</Label>
-                <Textarea
-                  id="trigger-description"
-                  placeholder="Send a follow-up email after meeting with a contact"
-                  value={newTrigger.description || ""}
-                  onChange={(e) => setNewTrigger({ ...newTrigger, description: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="trigger-condition">When this happens</Label>
-                  <Select
-                    value={newTrigger.condition}
-                    onValueChange={(value) => setNewTrigger({ ...newTrigger, condition: value })}
-                  >
-                    <SelectTrigger id="trigger-condition">
-                      <SelectValue placeholder="Select condition" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="contact_added">New contact added</SelectItem>
-                      <SelectItem value="birthday_upcoming">Birthday approaching</SelectItem>
-                      <SelectItem value="anniversary_upcoming">Anniversary approaching</SelectItem>
-                      <SelectItem value="no_contact_30days">No contact for 30 days</SelectItem>
-                      <SelectItem value="meeting_scheduled">Meeting scheduled</SelectItem>
-                      <SelectItem value="scheduled_time">At scheduled time</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.HOURLY}>Hourly</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.DAILY}>Daily</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.WEEKLY}>Weekly</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.MONTHLY}>Monthly</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.QUARTERLY}>Quarterly</SelectItem>
-                      <SelectItem value={TIME_TRIGGER_TYPES.YEARLY}>Yearly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="trigger-action">Do this</Label>
-                  <Select
-                    value={newTrigger.action}
-                    onValueChange={(value) => setNewTrigger({ ...newTrigger, action: value })}
-                  >
-                    <SelectTrigger id="trigger-action">
-                      <SelectValue placeholder="Select action" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={TRIGGER_ACTIONS.SEND_EMAIL}>Send email</SelectItem>
-                      <SelectItem value={TRIGGER_ACTIONS.CREATE_TASK}>Create task</SelectItem>
-                      <SelectItem value={TRIGGER_ACTIONS.ADD_REMINDER}>Add reminder</SelectItem>
-                      <SelectItem value={TRIGGER_ACTIONS.SEND_NOTIFICATION}>Send notification</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              {/* Date and Time selection for scheduled triggers */}
-              {newTrigger.condition === "scheduled_time" && (
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="execution-date">Execution Date</Label>
-                    <DatePicker
-                      value={executionDate}
-                      onChange={setExecutionDate}
-                    />
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <Label htmlFor="execution-time">Execution Time</Label>
-                    <Input
-                      id="execution-time"
-                      type="time"
-                      value={executionTime}
-                      onChange={(e) => setExecutionTime(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="recurring"
-                      checked={isRecurring}
-                      onCheckedChange={setIsRecurring}
-                    />
-                    <Label htmlFor="recurring">Recurring</Label>
-                  </div>
-                  
-                  {isRecurring && (
-                    <div className="grid gap-2">
-                      <Label htmlFor="recurrence-type">Recurrence Pattern</Label>
-                      <Select
-                        value={recurrenceType}
-                        onValueChange={setRecurrenceType}
-                      >
-                        <SelectTrigger id="recurrence-type">
-                          <SelectValue placeholder="Select recurrence pattern" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="daily">Daily</SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="quarterly">Quarterly</SelectItem>
-                          <SelectItem value="yearly">Yearly</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="trigger-active"
-                  checked={newTrigger.is_active}
-                  onCheckedChange={(checked) => setNewTrigger({ ...newTrigger, is_active: checked })}
-                />
-                <Label htmlFor="trigger-active">Activate trigger immediately</Label>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleCreateTrigger}>Create Trigger</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={handleCreateTrigger}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Trigger
+        </Button>
       </div>
 
       <TriggerStatsCards 
