@@ -34,14 +34,16 @@ const MemberCard = ({ member, role, communityId, onClick }: MemberCardProps) => 
 
   return (
     <div 
-      className="rounded-xl overflow-hidden border border-border/40 bg-card cursor-pointer transition-all duration-300 hover:shadow-md hover:border-[#00eada]/20 h-[180px]"
+      className="rounded-xl overflow-hidden backdrop-blur-md bg-white/5 border border-white/10 
+                shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20 
+                cursor-pointer transition-all duration-300 h-[180px]"
       onClick={handleCardClick}
     >
       <div className="w-full h-1 bg-[#00eada]"></div>
       <div className="flex flex-col p-4 h-full">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-medium text-lg">{member.name}</h3>
+            <h3 className="font-medium text-lg text-white">{member.name}</h3>
             <Badge className={`mt-1 ${getBadgeColorClass(member.role)}`}>
               {role || UserRole[member.role]}
             </Badge>
@@ -60,12 +62,12 @@ const MemberCard = ({ member, role, communityId, onClick }: MemberCardProps) => 
           </Button>
         </div>
         
-        <p className="mt-3 text-sm text-muted-foreground line-clamp-3 flex-grow">
+        <p className="mt-3 text-sm text-white/70 line-clamp-3 flex-grow">
           {member.bio || "No bio available"}
         </p>
         
         {hasTags && (
-          <div className="mt-auto pt-2">
+          <div className="mt-auto pt-2 border-t border-white/5">
             <div className="flex flex-wrap gap-1">
               {(member as any).tags.slice(0, 2).map((tag: string, i: number) => (
                 <Badge key={i} variant="outline" className="text-xs bg-[#00eada]/10 text-[#00eada] border-[#00eada]/30">
@@ -73,7 +75,7 @@ const MemberCard = ({ member, role, communityId, onClick }: MemberCardProps) => 
                 </Badge>
               ))}
               {(member as any).tags.length > 2 && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs border-white/20 text-white/70">
                   +{(member as any).tags.length - 2}
                 </Badge>
               )}

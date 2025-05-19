@@ -42,65 +42,59 @@ const ContactCard = ({
   };
 
   return (
-    <Card 
-      className={`h-full overflow-hidden transition-all hover:shadow-md cursor-pointer ${
-        isSelected ? 'ring-2 ring-[#00eada]' : 'border-border/40'
-      }`}
+    <div 
+      className={`h-full transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
+        bg-white/5 border border-white/10 shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20
+        ${isSelected ? 'ring-2 ring-[#00eada]' : ''}`}
       onClick={isSelected ? handleSelect : handleEdit}
     >
-      {/* Section 1: Header with color stripe, name and category */}
-      <div>
-        <div 
-          className="h-2 w-full" 
-          style={{ backgroundColor: getCategoryColor() }}
-        />
-        
-        <div className="p-4 pb-2">
-          <div className="flex justify-between items-start">
-            <h3 className="text-base font-medium mb-1 line-clamp-1">{contact.name}</h3>
-            
-            {contact.category && (
-              <Badge 
-                variant="outline" 
-                className="text-xs px-1.5 py-0"
-                style={{
-                  borderColor: `${getCategoryColor()}40`,
-                  color: getCategoryColor()
-                }}
-              >
-                {contact.category.name}
-              </Badge>
-            )}
-          </div>
+      {/* Section 1: Header with name and category */}
+      <div className="p-4 pb-2 relative">
+        <div className="flex justify-between items-start">
+          <h3 className="text-base font-medium mb-1 line-clamp-1 text-white">{contact.name}</h3>
           
-          {contact.organization && (
-            <div className="flex items-center text-xs text-muted-foreground">
-              <Building className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              <span className="truncate">{contact.organization}</span>
-            </div>
+          {contact.category && (
+            <Badge 
+              variant="outline" 
+              className="text-xs px-1.5 py-0"
+              style={{
+                backgroundColor: `${getCategoryColor()}20`,
+                borderColor: `${getCategoryColor()}40`,
+                color: getCategoryColor()
+              }}
+            >
+              {contact.category.name}
+            </Badge>
           )}
         </div>
+        
+        {contact.organization && (
+          <div className="flex items-center text-xs text-white/70">
+            <Building className="h-3 w-3 mr-1.5 flex-shrink-0" />
+            <span className="truncate">{contact.organization}</span>
+          </div>
+        )}
       </div>
       
       {/* Section 2: Contact information */}
-      <div className="px-4 py-2 flex-grow">
+      <div className="px-4 py-2 border-t border-white/5 flex-grow">
         <div className="space-y-1.5">
           {contact.email && (
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="flex items-center text-xs text-white/70">
               <Mail className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.email}</span>
             </div>
           )}
           
           {contact.phone && (
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="flex items-center text-xs text-white/70">
               <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.phone}</span>
             </div>
           )}
           
           {contact.location && (
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="flex items-center text-xs text-white/70">
               <MapPin className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.location}</span>
             </div>
@@ -109,21 +103,21 @@ const ContactCard = ({
       </div>
       
       {/* Section 3: Tags and action buttons */}
-      <div className="px-4 pt-1 pb-3">
+      <div className="px-4 pt-2 pb-3 border-t border-white/5">
         {contact.tags && contact.tags.length > 0 && (
           <div className="flex items-start text-xs mb-3">
-            <Tag className="h-3 w-3 mr-1.5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+            <Tag className="h-3 w-3 mr-1.5 flex-shrink-0 mt-0.5 text-white/70" />
             <div className="flex flex-wrap gap-1">
               {contact.tags.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className="bg-[#00eada]/10 text-[#00eada] px-1.5 py-0.5 rounded-full text-xs"
+                  className="bg-[#00eada]/20 text-[#00eada] px-1.5 py-0.5 rounded-full text-xs"
                 >
                   {tag}
                 </span>
               ))}
               {contact.tags.length > 2 && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-white/70">
                   +{contact.tags.length - 2} more
                 </span>
               )}
@@ -141,15 +135,15 @@ const ContactCard = ({
                     variant="secondary" 
                     className="text-xs px-1.5 py-0 h-5"
                     style={{
-                      backgroundColor: group.color ? `${group.color}30` : undefined,
-                      color: group.color || undefined
+                      backgroundColor: group.color ? `${group.color}30` : 'rgba(255, 255, 255, 0.1)',
+                      color: group.color || '#ffffff'
                     }}
                   >
                     {group.name}
                   </Badge>
                 ))}
                 {contact.groups.length > 1 && (
-                  <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
+                  <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-white/20 text-white/70">
                     +{contact.groups.length - 1}
                   </Badge>
                 )}
@@ -181,7 +175,7 @@ const ContactCard = ({
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 

@@ -145,5 +145,18 @@
 
 /* Glassmorphism effect for cards */
 .glass-card {
-  @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl;
+  @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20 transition-all duration-300;
+}
+
+/* New utilities for glassmorphism */
+.glass-morphism {
+  @apply backdrop-blur-md bg-white/5 border border-white/10 shadow-lg;
+}
+
+.glass-morphism-hover {
+  @apply hover:shadow-[#00eada]/10 hover:border-[#00eada]/20 transition-all duration-300;
+}
+
+.text-with-shadow {
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
