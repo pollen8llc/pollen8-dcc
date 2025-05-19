@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -26,11 +26,19 @@ const TriggerWizard = () => {
     saveTrigger,
     isScheduleRequired,
     isValid,
+    executionDate,
   } = useTriggerWizard();
 
   const goBack = () => {
     navigate("/rel8/settings");
   };
+
+  // For debugging
+  useEffect(() => {
+    console.log("TriggerWizard - Current step:", currentStep);
+    console.log("TriggerWizard - isScheduleRequired:", isScheduleRequired);
+    console.log("TriggerWizard - executionDate:", executionDate);
+  }, [currentStep, isScheduleRequired, executionDate]);
 
   // Define wizard steps
   const steps = [
@@ -39,6 +47,9 @@ const TriggerWizard = () => {
     isScheduleRequired ? "Schedule" : null,
     "Review",
   ].filter(Boolean) as string[];
+
+  // Determine if the next button should be disabled
+  const isNextDisabled = !isValid();
 
   return (
     <div className="min-h-screen bg-background">
@@ -100,11 +111,18 @@ const TriggerWizard = () => {
                 </Button>
 
                 {(currentStep < (isScheduleRequired ? 4 : 3)) ? (
-                  <Button onClick={nextStep} disabled={!isValid()}>
+                  <Button 
+                    onClick={nextStep} 
+                    disabled={isNextDisabled}
+                  >
                     Next
                   </Button>
                 ) : (
-                  <Button variant="default" onClick={saveTrigger} disabled={!isValid()}>
+                  <Button 
+                    variant="default" 
+                    onClick={saveTrigger} 
+                    disabled={isNextDisabled}
+                  >
                     Create Trigger
                   </Button>
                 )}

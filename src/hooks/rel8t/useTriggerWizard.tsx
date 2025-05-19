@@ -28,6 +28,12 @@ export function useTriggerWizard() {
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceType, setRecurrenceType] = useState("daily");
 
+  // Debug logging to track state changes
+  useEffect(() => {
+    console.log("useTriggerWizard - executionDate:", executionDate);
+    console.log("useTriggerWizard - triggerData:", triggerData);
+  }, [executionDate, triggerData]);
+
   // Check if the schedule step is required based on condition
   const isScheduleRequired = triggerData.condition === "scheduled_time" || 
     Object.values(TIME_TRIGGER_TYPES).includes(triggerData.condition as string);
@@ -37,6 +43,15 @@ export function useTriggerWizard() {
     if (isValid()) {
       if (isScheduleRequired || currentStep < 3) {
         setCurrentStep((prev) => prev + 1);
+      }
+    } else {
+      // Show feedback to user about what's missing
+      if (currentStep === 3 && isScheduleRequired && !executionDate) {
+        toast({
+          title: "Date required",
+          description: "Please select an execution date to continue.",
+          variant: "destructive",
+        });
       }
     }
   };
@@ -58,6 +73,7 @@ export function useTriggerWizard() {
     recurring?: boolean, 
     recurrence?: string
   ) => {
+    console.log("updateScheduleData called with date:", date);
     if (date !== undefined) setExecutionDate(date);
     if (time !== undefined) setExecutionTime(time);
     if (recurring !== undefined) setIsRecurring(recurring);
@@ -113,15 +129,26 @@ export function useTriggerWizard() {
 
   // Validate the current step
   const isValid = () => {
+    console.log(`Validating step ${currentStep}:`);
+    console.log(`- executionDate: ${executionDate ? 'set' : 'undefined'}`);
+    console.log(`- triggerName: ${triggerData.name}`);
+    console.log(`- condition: ${triggerData.condition}`);
+    
     switch (currentStep) {
       case 1: // Basic Info
-        return triggerData.name !== "";
+        const basicInfoValid = triggerData.name !== "";
+        console.log("Basic info validation:", basicInfoValid);
+        return basicInfoValid;
       case 2: // Behavior
-        return triggerData.condition !== "" && triggerData.action !== "";
+        const behaviorValid = triggerData.condition !== "" && triggerData.action !== "";
+        console.log("Behavior validation:", behaviorValid);
+        return behaviorValid;
       case 3: // Schedule
         if (isScheduleRequired) {
-          // Fixed validation logic: only check if a date is selected
-          return executionDate !== undefined;
+          // Fixed validation logic: only check if a date is selected and defined
+          const scheduleValid = executionDate !== undefined;
+          console.log("Schedule validation:", scheduleValid);
+          return scheduleValid;
         }
         return true;
       case 4: // Review

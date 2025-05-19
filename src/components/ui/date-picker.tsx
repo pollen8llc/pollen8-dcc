@@ -25,6 +25,14 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
     Object.keys(formFieldContext).length > 0 &&
     'name' in formFieldContext
 
+  // Custom handler to ensure the date is properly propagated
+  const handleDateSelect = (date?: Date) => {
+    console.log("DatePicker handleDateSelect called with:", date);
+    if (onChange) {
+      onChange(date);
+    }
+  };
+
   // Create the button element
   const buttonElement = (
     <Button
@@ -56,7 +64,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
         <Calendar
           mode="single"
           selected={value}
-          onSelect={onChange}
+          onSelect={handleDateSelect}
           initialFocus
           fromYear={2000}
           toYear={2030}

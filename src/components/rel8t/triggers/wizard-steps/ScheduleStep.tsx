@@ -27,8 +27,13 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
     isRecurring,
     recurrenceType,
     updateScheduleData,
-    updateTriggerData: updateTriggerHookData
   } = useTriggerWizard();
+
+  // Debug the execution date to see what we're getting
+  useEffect(() => {
+    console.log("ScheduleStep - executionDate:", executionDate);
+    console.log("ScheduleStep - executionTime:", executionTime);
+  }, [executionDate, executionTime]);
 
   // Sync the executed date and time to triggerData when they change
   useEffect(() => {
@@ -37,6 +42,8 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
       const [hours, minutes] = executionTime.split(":").map(Number);
       const execDate = new Date(executionDate);
       execDate.setHours(hours, minutes);
+      
+      console.log("Updating triggerData with execution_time:", execDate.toISOString());
       
       // Update the trigger data with the new execution time
       updateTriggerData({ execution_time: execDate.toISOString() });
@@ -69,9 +76,15 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
             <div id="execution-date">
               <DatePicker
                 value={executionDate}
-                onChange={(date) => updateScheduleData(date)}
+                onChange={(date) => {
+                  console.log("DatePicker onChange:", date);
+                  updateScheduleData(date);
+                }}
               />
             </div>
+            {!executionDate && (
+              <p className="text-sm text-red-500">Please select a date</p>
+            )}
           </div>
           
           <div className="grid gap-2">
