@@ -13,7 +13,7 @@ const Contacts = () => {
   const queryClient = useQueryClient();
 
   const handleEditContact = (contact: any) => {
-    navigate(`/rel8/contacts/${contact.id}`);
+    navigate(`/rel8/contacts/${contact.id}/edit`);
   };
 
   const handleRefresh = () => {
