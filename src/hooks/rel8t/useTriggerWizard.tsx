@@ -66,25 +66,57 @@ export function useTriggerWizard() {
 
   // Update trigger data
   const updateTriggerData = (newData: Partial<Trigger>) => {
+    console.log("Updating trigger data:", newData);
     setTriggerData((prev) => ({ ...prev, ...newData }));
   };
 
-  // Update schedule-related data
+  // Update schedule-related data with better debug logging
   const updateScheduleData = (
     date?: Date, 
     time?: string, 
     recurring?: boolean, 
     recurrence?: string
   ) => {
-    if (date !== undefined) setExecutionDate(date);
-    if (time !== undefined) setExecutionTime(time);
-    if (recurring !== undefined) setIsRecurring(recurring);
-    if (recurrence !== undefined) setRecurrenceType(recurrence);
+    console.log("updateScheduleData called with:", { date, time, recurring, recurrence });
+    
+    if (date !== undefined) {
+      console.log("Setting execution date:", date);
+      setExecutionDate(date);
+    }
+    
+    if (time !== undefined) {
+      setExecutionTime(time);
+    }
+    
+    if (recurring !== undefined) {
+      setIsRecurring(recurring);
+    }
+    
+    if (recurrence !== undefined) {
+      setRecurrenceType(recurrence);
+    }
   };
+
+  // Add an effect to log state changes for debugging
+  useEffect(() => {
+    console.log("Current executionDate state:", executionDate);
+    console.log("Current step:", currentStep);
+    console.log("Is schedule required:", isScheduleRequired);
+  }, [executionDate, currentStep, isScheduleRequired]);
 
   // Create the trigger in the database
   const saveTrigger = async () => {
     try {
+      // Check if we have all required data before saving
+      if (isScheduleRequired && !executionDate) {
+        toast({
+          title: "Date required",
+          description: "Please select an execution date before creating the trigger.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const completeData = { ...triggerData };
 
       // Process date and time information if provided
@@ -108,6 +140,8 @@ export function useTriggerWizard() {
         completeData.next_execution = execDate.toISOString();
       }
       
+      console.log("Saving trigger with data:", completeData);
+      
       // Create the trigger
       await createTrigger(completeData as Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at">);
       
@@ -129,24 +163,31 @@ export function useTriggerWizard() {
     }
   };
 
-  // Validate the current step
+  // Validate the current step with enhanced logging
   const isValid = () => {
-    switch (currentStep) {
-      case 1: // Basic Info
-        return triggerData.name !== "";
-        
-      case 2: // Behavior
-        return triggerData.condition !== "" && triggerData.action !== "";
-        
-      case 3: // Schedule
-        if (isScheduleRequired) {
-          return executionDate !== undefined;
-        }
-        return true;
-        
-      default:
-        return false;
-    }
+    const result = (() => {
+      switch (currentStep) {
+        case 1: // Basic Info
+          return triggerData.name !== "";
+          
+        case 2: // Behavior
+          return triggerData.condition !== "" && triggerData.action !== "";
+          
+        case 3: // Schedule
+          if (isScheduleRequired) {
+            const valid = executionDate !== undefined;
+            console.log("Schedule step validation:", { executionDate, valid });
+            return valid;
+          }
+          return true;
+          
+        default:
+          return false;
+      }
+    })();
+    
+    console.log(`Validation for step ${currentStep}: ${result}`);
+    return result;
   };
 
   // Pass all necessary state and functions

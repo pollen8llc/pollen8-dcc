@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,16 @@ const TriggerWizard = () => {
   
   // Is this the final step?
   const isFinalStep = currentStep === (isScheduleRequired ? 3 : 2);
+
+  // Log component state on each render for debugging
+  useEffect(() => {
+    console.log("TriggerWizard render:", { 
+      currentStep, 
+      isScheduleRequired, 
+      isFinalStep, 
+      isNextDisabled 
+    });
+  }, [currentStep, isScheduleRequired, isFinalStep, isNextDisabled]);
 
   // Calculate the current content based on the step
   const renderContent = () => {
@@ -116,6 +126,7 @@ const TriggerWizard = () => {
                     variant="default" 
                     onClick={saveTrigger} 
                     disabled={isNextDisabled}
+                    className={isNextDisabled ? "opacity-50" : ""}
                   >
                     Create Trigger
                   </Button>

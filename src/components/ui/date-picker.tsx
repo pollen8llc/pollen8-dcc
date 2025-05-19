@@ -31,6 +31,7 @@ export function DatePicker({ value, onChange, className, disabled = false }: Dat
   const handleDateSelect = (date?: Date) => {
     if (onChange) {
       onChange(date);
+      console.log("DatePicker selected:", date); // Debug log
     }
   };
 
@@ -63,7 +64,7 @@ export function DatePicker({ value, onChange, className, disabled = false }: Dat
           buttonElement
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0 z-50" align="start">
         <Calendar
           mode="single"
           selected={value}

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -55,9 +55,17 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
   // Determine if there's an error
   const isDateMissing = executionDate === undefined;
 
+  // Use effect to log status for debugging
+  useEffect(() => {
+    console.log("ScheduleStep rendered with executionDate:", executionDate);
+    console.log("isDateMissing:", isDateMissing);
+  }, [executionDate, isDateMissing]);
+
   // When date/time changes, sync with the trigger data
   React.useEffect(() => {
     if (executionDate) {
+      console.log("Setting execution time in triggerData with date:", executionDate);
+      
       // Create a combined date object with the execution time
       const [hours, minutes] = executionTime.split(":").map(Number);
       const execDate = new Date(executionDate);
@@ -77,6 +85,12 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
       }
     }
   }, [executionDate, executionTime, isRecurring, recurrenceType, updateTriggerData]);
+
+  // Handle date selection explicitly
+  const handleDateChange = (date?: Date) => {
+    console.log("handleDateChange called with date:", date);
+    updateScheduleData(date);
+  };
 
   return (
     <div className="space-y-6">
@@ -103,7 +117,7 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
             <Label htmlFor="execution-date" className="required">Execution Date</Label>
             <DatePicker
               value={executionDate}
-              onChange={(date) => updateScheduleData(date)}
+              onChange={handleDateChange}
               className={isDateMissing ? "border-red-300 focus-visible:ring-red-300" : ""}
             />
             {isDateMissing && (
