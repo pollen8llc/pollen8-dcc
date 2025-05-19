@@ -40,12 +40,15 @@ const ContactCard = ({
     if (!contact.category) return "#00eada"; // Default teal
     return contact.category.color || "#00eada";
   };
+  
+  // Get the primary group if available
+  const primaryGroup = contact.groups && contact.groups.length > 0 ? contact.groups[0] : null;
 
   return (
     <div 
-      className={`h-full transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
+      className={`h-full overflow-hidden transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
         bg-white/5 border border-white/10 shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20
-        ${isSelected ? 'ring-2 ring-[#00eada]' : ''}`}
+        ${isSelected ? 'ring-1 ring-[#00eada] ring-inset' : ''}`}
       onClick={isSelected ? handleSelect : handleEdit}
     >
       {/* Section 1: Header with name and category */}
@@ -72,6 +75,20 @@ const ContactCard = ({
           <div className="flex items-center text-xs text-white/70">
             <Building className="h-3 w-3 mr-1.5 flex-shrink-0" />
             <span className="truncate">{contact.organization}</span>
+          </div>
+        )}
+        
+        {/* Group tag display at top */}
+        {primaryGroup && (
+          <div 
+            className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 rotate-12 w-24 z-10"
+            style={{
+              backgroundColor: primaryGroup.color || '#9b87f5'
+            }}
+          >
+            <div className="text-[10px] font-semibold py-0.5 text-center text-black">
+              {primaryGroup.name}
+            </div>
           </div>
         )}
       </div>
@@ -127,9 +144,9 @@ const ContactCard = ({
         
         <div className="flex justify-between items-center">
           <div className="flex-1">
-            {contact.groups && contact.groups.length > 0 && (
+            {contact.groups && contact.groups.length > 1 && (
               <div className="flex gap-1 flex-wrap">
-                {contact.groups.slice(0, 1).map((group) => (
+                {contact.groups.slice(1, 2).map((group) => (
                   <Badge 
                     key={group.id} 
                     variant="secondary" 
@@ -142,9 +159,9 @@ const ContactCard = ({
                     {group.name}
                   </Badge>
                 ))}
-                {contact.groups.length > 1 && (
+                {contact.groups.length > 2 && (
                   <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-white/20 text-white/70">
-                    +{contact.groups.length - 1}
+                    +{contact.groups.length - 2}
                   </Badge>
                 )}
               </div>
