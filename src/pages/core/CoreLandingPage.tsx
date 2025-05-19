@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -71,7 +70,7 @@ const CoreLandingPage = () => {
           </div>
           
           {(isOrganizer || isAdmin) && (
-            <Button className="mt-4 md:mt-0 bg-royal-blue-600 hover:bg-royal-blue-700" asChild>
+            <Button className="mt-4 md:mt-0 bg-royal-blue-600 hover:bg-royal-blue-700 text-white" asChild>
               <Link to="/core/articles/new">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Article
