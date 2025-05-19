@@ -6,13 +6,14 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { UserSearch, MapPin, ArrowRight } from "lucide-react";
+import { UserSearch, MapPin, ArrowRight, BadgeCheck } from "lucide-react";
 import { ExtendedProfile } from "@/services/profileService";
 import { 
   Alert, 
   AlertDescription, 
   AlertTitle 
 } from "@/components/ui/alert";
+import { UserRole } from "@/models/types";
 
 interface ProfileSearchListProps {
   profiles: ExtendedProfile[];
@@ -37,6 +38,20 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
     const lastInitial = lastName ? lastName[0].toUpperCase() : "";
     
     return `${firstInitial}${lastInitial}`.trim() || "?";
+  };
+  
+  // Get the appropriate badge style based on user role
+  const getRoleBadgeStyle = (role?: UserRole) => {
+    switch (role) {
+      case UserRole.ADMIN:
+        return "bg-[#9b87f5] text-white";
+      case UserRole.ORGANIZER:
+        return "bg-[#0EA5E9] text-white";
+      case UserRole.MEMBER:
+        return "bg-[#00eada]/80 text-black";
+      default:
+        return "bg-secondary text-secondary-foreground";
+    }
   };
 
   if (isLoading) {
@@ -100,9 +115,18 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
               </Avatar>
               
               <div className="flex-1">
-                <h3 className="font-medium text-lg">
-                  {[profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Anonymous User"}
-                </h3>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-medium text-lg">
+                    {[profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Anonymous User"}
+                  </h3>
+                  
+                  {profile.role && (
+                    <Badge className={`flex items-center gap-1 ${getRoleBadgeStyle(profile.role)}`}>
+                      <BadgeCheck className="h-3 w-3" />
+                      <span>{UserRole[profile.role]}</span>
+                    </Badge>
+                  )}
+                </div>
                 
                 {profile.location && (
                   <div className="flex items-center text-muted-foreground mt-1">
