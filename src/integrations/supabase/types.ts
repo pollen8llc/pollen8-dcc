@@ -1121,6 +1121,10 @@ export type Database = {
         Args: { user_id: string; role_name: string }
         Returns: boolean
       }
+      increment_view_count: {
+        Args: { article_id: string }
+        Returns: undefined
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean

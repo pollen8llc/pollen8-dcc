@@ -28,7 +28,7 @@ export const useKnowledgeBase = () => {
           .from('knowledge_articles')
           .select(`
             *,
-            profiles(
+            profiles!knowledge_articles.user_id(
               first_name, 
               last_name, 
               avatar_url
@@ -80,7 +80,7 @@ export const useKnowledgeBase = () => {
           .from('knowledge_articles')
           .select(`
             *,
-            profiles(
+            profiles!knowledge_articles.user_id(
               first_name, 
               last_name, 
               avatar_url
@@ -160,7 +160,7 @@ export const useKnowledgeBase = () => {
           .from('knowledge_comments')
           .select(`
             *,
-            profiles(
+            profiles!knowledge_comments.user_id(
               first_name, 
               last_name, 
               avatar_url
