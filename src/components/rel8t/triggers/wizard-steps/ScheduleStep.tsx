@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
@@ -9,8 +8,8 @@ import { useState, useEffect } from "react";
 import { RecurrencePattern } from "@/services/rel8t/triggerService";
 import { useFormContext } from "react-hook-form";
 
-export function ScheduleStep() {
-  const { handleNextStep, handlePreviousStep, triggerTypes } = useTriggerWizard();
+export function ScheduleStep({ validateAndNext }: { validateAndNext: () => void }) {
+  const { handlePreviousStep, triggerTypes } = useTriggerWizard();
   const { control, watch, setValue, formState: { errors } } = useFormContext();
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<number>(1);
   
@@ -76,11 +75,6 @@ export function ScheduleStep() {
       };
       setValue('recurrencePattern', updatedPattern);
     }
-  };
-  
-  const onNextClick = () => {
-    console.log("Next button clicked in ScheduleStep with date:", formData.executionDate);
-    handleNextStep();
   };
   
   const onPreviousClick = () => {
@@ -172,7 +166,7 @@ export function ScheduleStep() {
         <Button type="button" variant="outline" onClick={onPreviousClick}>
           Previous
         </Button>
-        <Button type="button" onClick={onNextClick}>Next Step</Button>
+        <Button type="button" onClick={validateAndNext}>Next Step</Button>
       </div>
     </div>
   );

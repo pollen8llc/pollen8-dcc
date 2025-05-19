@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -7,15 +6,9 @@ import { Switch } from "@/components/ui/switch";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { useFormContext } from "react-hook-form";
 
-export function BasicInfoStep() {
-  const { handleNextStep } = useTriggerWizard();
+export function BasicInfoStep({ validateAndNext }: { validateAndNext: () => void }) {
   const { register, formState: { errors }, watch, setValue } = useFormContext();
   const isActive = watch("isActive");
-  
-  const onNextClick = () => {
-    console.log("Next button clicked in BasicInfoStep");
-    handleNextStep();
-  };
   
   return (
     <div className="space-y-6">
@@ -54,7 +47,7 @@ export function BasicInfoStep() {
       </FormItem>
 
       <div className="flex justify-end">
-        <Button type="button" onClick={onNextClick}>
+        <Button type="button" onClick={validateAndNext}>
           Next Step
         </Button>
       </div>

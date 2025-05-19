@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +18,8 @@ const TriggerWizard = () => {
     formData, 
     updateFormData, 
     navigateToStep, 
-    handleSubmit: submitTrigger 
+    handleSubmit: submitTrigger,
+    handleNextStep
   } = useTriggerWizard();
 
   // Initialize react-hook-form with our existing form data
@@ -72,9 +72,30 @@ const TriggerWizard = () => {
             {/* Wrap everything in FormProvider */}
             <FormProvider {...methods}>
               <form onSubmit={methods.handleSubmit(onSubmit)}>
-                {currentStep === 1 && <BasicInfoStep />}
-                {currentStep === 2 && <BehaviorStep />}
-                {currentStep === 3 && <ScheduleStep />}
+                {currentStep === 1 && (
+                  <BasicInfoStep
+                    validateAndNext={async () => {
+                      const valid = await methods.trigger(['name']);
+                      if (valid) handleNextStep();
+                    }}
+                  />
+                )}
+                {currentStep === 2 && (
+                  <BehaviorStep
+                    validateAndNext={async () => {
+                      const valid = await methods.trigger(['condition', 'action']);
+                      if (valid) handleNextStep();
+                    }}
+                  />
+                )}
+                {currentStep === 3 && (
+                  <ScheduleStep
+                    validateAndNext={async () => {
+                      const valid = await methods.trigger(['executionDate']);
+                      if (valid) handleNextStep();
+                    }}
+                  />
+                )}
                 {currentStep === 4 && <ReviewStep />}
               </form>
             </FormProvider>

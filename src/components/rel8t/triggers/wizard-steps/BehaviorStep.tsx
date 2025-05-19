@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FormItem, FormLabel } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -6,16 +5,11 @@ import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { Bell, Clock, Mail, ClipboardList } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
-export function BehaviorStep() {
-  const { handleNextStep, handlePreviousStep, triggerTypes, actionTypes } = useTriggerWizard();
+export function BehaviorStep({ validateAndNext }: { validateAndNext: () => void }) {
+  const { handlePreviousStep, triggerTypes, actionTypes } = useTriggerWizard();
   const { watch, setValue, formState: { errors } } = useFormContext();
   const selectedCondition = watch("condition");
   const selectedAction = watch("action");
-  
-  const onNextClick = () => {
-    console.log("Next button clicked in BehaviorStep");
-    handleNextStep();
-  };
   
   const onPreviousClick = () => {
     console.log("Previous button clicked in BehaviorStep");
@@ -158,7 +152,7 @@ export function BehaviorStep() {
         <Button type="button" variant="outline" onClick={onPreviousClick}>
           Previous
         </Button>
-        <Button type="button" onClick={onNextClick}>Next Step</Button>
+        <Button type="button" onClick={validateAndNext}>Next Step</Button>
       </div>
     </div>
   );
