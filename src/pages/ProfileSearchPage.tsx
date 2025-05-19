@@ -1,3 +1,7 @@
+<think>
+
+</think>
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -14,18 +18,18 @@ import { ExtendedProfile } from "@/services/profileService";
 import { useDebounce } from "@/hooks/useDebounce";
 import ProfileSearchList from "@/components/profile/ProfileSearchList";
 import { Shell } from "@/components/layout/Shell";
+import { useProfiles } from "@/hooks/useProfiles"; // Import the useProfiles hook
 
 const ProfileSearchPage: React.FC = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { searchProfiles, isLoading, error } = useProfiles(); // Use the hook
   
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [interestFilter, setInterestFilter] = useState<string[]>([]);
   const [profiles, setProfiles] = useState<ExtendedProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [allInterests, setAllInterests] = useState<string[]>([]);
   const [selectedInterest, setSelectedInterest] = useState<string>("");
   
@@ -42,8 +46,6 @@ const ProfileSearchPage: React.FC = () => {
   useEffect(() => {
     const fetchInterests = async () => {
       try {
-        setError(null);
-        
         // Fetch all profiles to extract unique interests directly
         const { data, error } = await supabase
           .from('profiles')
@@ -73,77 +75,40 @@ const ProfileSearchPage: React.FC = () => {
         }
       } catch (error) {
         console.error("Error in fetchInterests:", error);
-        setError("Failed to load interests");
       }
     };
     
     fetchInterests();
   }, []);
 
-  // Search profiles
+  // Search profiles using the hook's searchProfiles function
   useEffect(() => {
-    const searchProfiles = async () => {
+    const performSearch = async () => {
       if (!currentUser) return;
       
-      setIsLoading(true);
-      setError(null);
-      
       try {
-        let query = supabase
-          .from('profiles')
-          .select('*, role');
+        // Create search params object using our filter state
+        const searchParams = {
+          query: debouncedSearchQuery,
+          location: locationFilter,
+          interests: interestFilter.length > 0 ? interestFilter : undefined
+        };
         
-        // Add search filter if provided
-        if (debouncedSearchQuery) {
-          query = query.or(
-            `first_name.ilike.%${debouncedSearchQuery}%,last_name.ilike.%${debouncedSearchQuery}%,bio.ilike.%${debouncedSearchQuery}%`
-          );
-        }
-        
-        // Add location filter if provided
-        if (locationFilter) {
-          query = query.ilike('location', `%${locationFilter}%`);
-        }
-        
-        // Add interest filter if provided
-        if (interestFilter.length > 0) {
-          // We'll need overlap operator for array contains
-          query = query.overlaps('interests', interestFilter);
-        }
-        
-        // Execute the query
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error("Error searching profiles:", error);
-          setError("Search failed: " + error.message);
-          return;
-        }
-        
-        // Process the results
-        const searchResults = data.map(profile => ({
-          ...profile,
-          social_links: profile.social_links ? 
-            (typeof profile.social_links === 'string' ? 
-              JSON.parse(profile.social_links) : profile.social_links) : {},
-          privacy_settings: profile.privacy_settings ? 
-            (typeof profile.privacy_settings === 'string' ? 
-              JSON.parse(profile.privacy_settings) : profile.privacy_settings) : { 
-                profile_visibility: "connections" 
-              }
-        }));
-        
-        setProfiles(searchResults);
+        // Use the hook's searchProfiles function
+        const result = await searchProfiles(searchParams);
+        setProfiles(result.profiles);
       } catch (error) {
-        console.error("Error in searchProfiles:", error);
-        setError("An unexpected error occurred while searching profiles");
-      } finally {
-        setIsLoading(false);
+        console.error("Error in performSearch:", error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred while searching profiles",
+          variant: "destructive",
+        });
       }
     };
     
-    searchProfiles();
-  }, [currentUser, debouncedSearchQuery, locationFilter, interestFilter, toast]);
+    performSearch();
+  }, [currentUser, debouncedSearchQuery, locationFilter, interestFilter, searchProfiles, toast]);
 
   // Handle adding an interest filter
   const handleAddInterestFilter = () => {
