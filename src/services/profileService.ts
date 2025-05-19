@@ -19,6 +19,7 @@ export interface ExtendedProfile {
   };
   created_at?: string;
   updated_at?: string;
+  role?: UserRole; // Added the role property that matches the UserRole enum
 }
 
 /**
@@ -168,7 +169,9 @@ export const getConnectedProfiles = async (
       social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
       privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
         profile_visibility: "connections"
-      }
+      },
+      // Ensure role is included in processed profiles
+      role: profile.role || UserRole.MEMBER
     }));
     
     // Apply filters
@@ -245,7 +248,9 @@ export const getAllProfiles = async (): Promise<ExtendedProfile[]> => {
       social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
       privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
         profile_visibility: "connections"
-      }
+      },
+      // Ensure role is included in mapped profiles
+      role: profile.role || UserRole.MEMBER
     }));
   } catch (error) {
     console.error("Exception in getAllProfiles:", error);
