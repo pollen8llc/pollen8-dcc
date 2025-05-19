@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { FormControl } from "@/components/ui/form"
+import { FormControl, FormItem, useFormField } from "@/components/ui/form"
 
 interface DatePickerProps {
   value?: Date
@@ -14,25 +14,41 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ value, onChange }: DatePickerProps) {
+  // Try to access form context - if it exists, we're in a form
+  const formField = React.useContext(
+    // @ts-ignore - This context might not exist, which is fine
+    React.createContext("FormFieldContext", undefined)
+  )
+  
+  // Determine if we're inside a form context
+  const isInsideForm = formField !== undefined
+
+  // Create the button element
+  const buttonElement = (
+    <Button
+      variant={"outline"}
+      className={cn(
+        "w-full pl-3 text-left font-normal",
+        !value && "text-muted-foreground"
+      )}
+    >
+      {value ? (
+        format(value, "PPP")
+      ) : (
+        <span>Pick a date</span>
+      )}
+      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+    </Button>
+  )
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <FormControl>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-full pl-3 text-left font-normal",
-              !value && "text-muted-foreground"
-            )}
-          >
-            {value ? (
-              format(value, "PPP")
-            ) : (
-              <span>Pick a date</span>
-            )}
-            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-          </Button>
-        </FormControl>
+        {isInsideForm ? (
+          <FormControl>{buttonElement}</FormControl>
+        ) : (
+          buttonElement
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
