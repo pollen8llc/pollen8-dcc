@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -64,18 +64,14 @@ const ContactEdit = () => {
         const groupsToRemove = currentGroupIds.filter(g => !selectedGroups.includes(g));
         
         // Add contact to new groups
-        await Promise.all(
-          groupsToAdd.map((groupId: string) => 
-            addContactToGroup(id, groupId)
-          )
-        );
+        for (const groupId of groupsToAdd) {
+          await addContactToGroup(id, groupId);
+        }
         
         // Remove contact from old groups
-        await Promise.all(
-          groupsToRemove.map((groupId: string) => 
-            removeContactFromGroup(id, groupId)
-          )
-        );
+        for (const groupId of groupsToRemove) {
+          await removeContactFromGroup(id, groupId);
+        }
       }
       
       return updatedContact;
@@ -160,7 +156,7 @@ const ContactEdit = () => {
           
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
-              <Loader2 className="animate-spin h-8 w-8 mx-auto text-royal-blue-500" />
+              <Loader2 className="animate-spin h-8 w-8 mx-auto text-[#00eada]" />
               <p className="mt-4">Loading contact details...</p>
             </div>
           </div>
