@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
 
@@ -18,7 +19,7 @@ export interface ExtendedProfile {
   };
   created_at?: string;
   updated_at?: string;
-  role?: UserRole;
+  role?: UserRole; // Added the role property that matches the UserRole enum
 }
 
 /**
