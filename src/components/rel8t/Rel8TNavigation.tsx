@@ -37,7 +37,7 @@ export const Rel8Navigation = () => {
       <div className="flex flex-col space-y-4">
         <div>
           <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">REL8</p>
-          <div className="flex space-x-1 border-b pb-1">
+          <div className="flex space-x-1 border-b border-border/30 pb-1">
             {navigationItems.map((item) => {
               const isActive = location.pathname === item.href || 
                               location.pathname.startsWith(item.href + '/');
@@ -63,7 +63,7 @@ export const Rel8Navigation = () => {
 
         <div>
           <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">CORE</p>
-          <div className="flex space-x-1 border-b pb-1">
+          <div className="flex space-x-1 border-b border-border/30 pb-1">
             {coreItems.map((item) => {
               const isActive = location.pathname === item.href || 
                               location.pathname.startsWith(item.href + '/');

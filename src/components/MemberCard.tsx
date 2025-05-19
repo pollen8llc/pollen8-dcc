@@ -15,9 +15,9 @@ const MemberCard = ({ member, role, communityId, onClick }: MemberCardProps) => 
   const getBadgeColorClass = (role: UserRole): string => {
     switch (role) {
       case UserRole.ADMIN:
-        return "bg-purple-500 text-white";
+        return "bg-[#00eada] text-black";
       case UserRole.ORGANIZER:
-        return "bg-blue-500 text-white";
+        return "bg-royal-blue-600 text-white";
       case UserRole.MEMBER:
         return "bg-green-500 text-white";
       default:
@@ -31,39 +31,52 @@ const MemberCard = ({ member, role, communityId, onClick }: MemberCardProps) => 
 
   return (
     <div 
-      className="glass dark:glass-dark rounded-xl overflow-hidden border border-border/40 cursor-pointer transition-all duration-300 hover:shadow-md transform hover:translate-y-[-2px]"
+      className="rounded-xl overflow-hidden border border-border/40 bg-card cursor-pointer transition-all duration-300 hover:shadow-md hover:border-[#00eada]/20 h-[180px]"
       onClick={handleCardClick}
     >
-      <div className="flex flex-col sm:flex-row items-center p-4">
-        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-aquamarine/30 flex-shrink-0 mb-3 sm:mb-0">
-          <img
-            src={member.imageUrl}
-            alt={member.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+      <div className="w-full h-1 bg-royal-blue-600"></div>
+      <div className="flex flex-col p-4 h-full">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-medium text-lg">{member.name}</h3>
+            <Badge className={`mt-1 ${getBadgeColorClass(member.role)}`}>
+              {role || UserRole[member.role]}
+            </Badge>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            aria-label={`Email ${member.name}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `mailto:${member.email}`;
+            }}
+          >
+            <Mail className="h-4 w-4" />
+          </Button>
         </div>
-        <div className="sm:ml-4 text-center sm:text-left flex-grow">
-          <h3 className="font-medium">{member.name}</h3>
-          <Badge className={`mt-1 ${getBadgeColorClass(member.role)}`}>
-            {role || UserRole[member.role]}
-          </Badge>
-          <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-            {member.bio}
-          </p>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="mt-2 sm:mt-0 ml-0 sm:ml-2"
-          aria-label={`Email ${member.name}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            window.location.href = `mailto:${member.email}`;
-          }}
-        >
-          <Mail className="h-4 w-4" />
-        </Button>
+        
+        <p className="mt-3 text-sm text-muted-foreground line-clamp-3 flex-grow">
+          {member.bio || "No bio available"}
+        </p>
+        
+        {member.tags && member.tags.length > 0 && (
+          <div className="mt-auto pt-2">
+            <div className="flex flex-wrap gap-1">
+              {member.tags.slice(0, 2).map((tag, i) => (
+                <Badge key={i} variant="outline" className="text-xs bg-[#00eada]/10 text-[#00eada] border-[#00eada]/30">
+                  {tag}
+                </Badge>
+              ))}
+              {member.tags.length > 2 && (
+                <Badge variant="outline" className="text-xs">
+                  +{member.tags.length - 2}
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

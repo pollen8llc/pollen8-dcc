@@ -25,24 +25,25 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   isLoading = false,
   onActionClick
 }) => {
+  // Updated color classes for the dark theme
   const colorClasses = {
-    default: "from-blue-100 to-blue-50 border-blue-200 dark:from-blue-950/50 dark:to-blue-900/20 dark:border-blue-900",
-    success: "from-green-100 to-green-50 border-green-200 dark:from-green-950/50 dark:to-green-900/20 dark:border-green-900",
-    warning: "from-amber-100 to-amber-50 border-amber-200 dark:from-amber-950/50 dark:to-amber-900/20 dark:border-amber-900",
-    danger: "from-red-100 to-red-50 border-red-200 dark:from-red-950/50 dark:to-red-900/20 dark:border-red-900",
+    default: "border-l-4 border-l-[#00eada]",
+    success: "border-l-4 border-l-green-500",
+    warning: "border-l-4 border-l-amber-500",
+    danger: "border-l-4 border-l-red-500",
   };
 
   const iconColorClasses = {
-    default: "text-blue-600 dark:text-blue-400",
-    success: "text-green-600 dark:text-green-400",
-    warning: "text-amber-600 dark:text-amber-400",
-    danger: "text-red-600 dark:text-red-400",
+    default: "text-[#00eada]",
+    success: "text-green-500",
+    warning: "text-amber-500",
+    danger: "text-red-500",
   };
 
   return (
     <Card 
       className={cn(
-        "bg-gradient-to-br border overflow-hidden cursor-default transition-all",
+        "overflow-hidden cursor-default transition-all h-[160px]",
         colorClasses[color],
         onActionClick && "hover:shadow-md cursor-pointer"
       )}
@@ -57,7 +58,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             <div className="flex items-baseline">
               <h2 className="text-3xl font-bold">
                 {isLoading ? 
-                  <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" /> : 
+                  <div className="h-8 w-8 rounded-full border-2 border-[#00eada]/30 border-t-[#00eada] animate-spin" /> : 
                   value
                 }
               </h2>
@@ -69,7 +70,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             </div>
           </div>
           {icon && (
-            <div className={cn("p-2 rounded-full bg-background/80", iconColorClasses[color])}>
+            <div className={cn("p-2 rounded-full bg-card/80", iconColorClasses[color])}>
               {icon}
             </div>
           )}

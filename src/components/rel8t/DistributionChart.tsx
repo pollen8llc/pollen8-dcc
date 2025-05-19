@@ -88,7 +88,7 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.color}
-                    stroke={activeIndex === index ? "#fff" : "transparent"}
+                    stroke={activeIndex === index ? "white" : "transparent"}
                     strokeWidth={activeIndex === index ? 2 : 0}
                     style={{
                       filter: activeIndex === index ? "brightness(110%)" : "none",
@@ -99,17 +99,19 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
               <Legend
                 verticalAlign="bottom"
                 height={36}
-                formatter={(value, entry, index) => (
+                formatter={(value) => (
                   <span style={{ color: 'var(--foreground)' }}>{value}</span>
                 )}
               />
               <Tooltip
                 formatter={(value, name) => [value, name]}
                 contentStyle={{ 
-                  backgroundColor: 'var(--background)',
-                  borderColor: 'var(--border)',
-                  borderRadius: '0.375rem'
+                  backgroundColor: 'hsl(215 25% 10%)',
+                  borderColor: 'hsl(215 25% 18%)',
+                  borderRadius: '0.75rem',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)'
                 }}
+                itemStyle={{ color: 'var(--foreground)' }}
               />
             </PieChart>
           </ResponsiveContainer>

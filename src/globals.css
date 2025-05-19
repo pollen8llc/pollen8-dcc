@@ -5,35 +5,36 @@
  
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Overriding with the new dark theme palette by default */
+    --background: 215 25% 8%;
+    --foreground: 0 0% 100%;
     
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 215 25% 10%;
+    --card-foreground: 0 0% 100%;
  
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 215 25% 10%;
+    --popover-foreground: 0 0% 100%;
  
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 174 100% 46%;
+    --primary-foreground: 0 0% 0%;
  
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 215 25% 16%;
+    --secondary-foreground: 0 0% 100%;
  
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 215 25% 12%;
+    --muted-foreground: 0 0% 70%;
  
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 174 100% 46%;
+    --accent-foreground: 0 0% 0%;
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
  
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 215 25% 18%;
+    --input: 215 25% 18%;
+    --ring: 174 100% 46%;
  
-    --radius: 0.5rem;
+    --radius: 1rem;
     
     /* Royal Blue Colors */
     --royal-blue-50: 223 100% 97%;
@@ -50,42 +51,43 @@
   }
  
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Same values as root to ensure dark mode consistently applies */
+    --background: 215 25% 8%;
+    --foreground: 0 0% 100%;
  
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 215 25% 10%;
+    --card-foreground: 0 0% 100%;
  
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 215 25% 10%;
+    --popover-foreground: 0 0% 100%;
  
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 174 100% 46%;
+    --primary-foreground: 0 0% 0%;
  
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 25% 16%;
+    --secondary-foreground: 0 0% 100%;
  
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 25% 12%;
+    --muted-foreground: 0 0% 70%;
  
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 174 100% 46%;
+    --accent-foreground: 0 0% 0%;
  
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
  
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-
-    /* Royal Blue Colors - Dark Mode Adjusted */
+    --border: 215 25% 18%;
+    --input: 215 25% 18%;
+    --ring: 174 100% 46%;
+    
+    /* Royal Blue Colors - Dark Mode */
     --royal-blue-50: 226 67% 10%;
     --royal-blue-100: 226 67% 15%;
     --royal-blue-200: 226 64% 20%;
     --royal-blue-300: 224 64% 25%;
     --royal-blue-400: 224 62% 30%;
     --royal-blue-500: 224 65% 40%;
-    --royal-blue-600: 224 75% 50%;
+    --royal-blue-600: 224 76% 48%;
     --royal-blue-700: 224 80% 60%;
     --royal-blue-800: 224 90% 70%;
     --royal-blue-900: 223 95% 85%;
@@ -104,7 +106,7 @@
 
 /* TinyMCE Editor Dark Mode styles */
 .tox-tinymce {
-  border-radius: 0.5rem;
+  border-radius: 1rem;
 }
 
 .dark .tox .tox-toolbar__group,
@@ -113,8 +115,8 @@
 .dark .tox .tox-statusbar,
 .dark .tox .tox-menubar,
 .dark .tox .tox-toolbar-overlord {
-  background-color: #1f2937 !important;
-  border-color: #374151 !important;
+  background-color: hsl(215 25% 10%) !important;
+  border-color: hsl(215 25% 18%) !important;
 }
 
 .dark .tox .tox-tbtn svg,
@@ -124,10 +126,24 @@
 .dark .tox .tox-statusbar__path-item,
 .dark .tox .tox-statusbar__wordcount,
 .dark .tox .tox-statusbar__text-container {
-  color: #e5e7eb !important;
+  color: hsl(0 0% 100%) !important;
 }
 
 .dark .tox .tox-tbtn:hover svg,
 .dark .tox .tox-mbtn:hover {
-  color: #ffffff !important;
+  color: #00eada !important;
+}
+
+/* Card Styles */
+.dashboard-card {
+  @apply rounded-2xl border border-border/30 bg-card shadow-lg transition-all duration-300 h-full flex flex-col;
+}
+
+.dashboard-card-hover {
+  @apply hover:border-[#00eada]/20 hover:shadow-[#00eada]/5;
+}
+
+/* Glassmorphism effect for cards */
+.glass-card {
+  @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl;
 }

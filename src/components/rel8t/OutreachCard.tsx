@@ -23,24 +23,28 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     }
   };
 
+  // Updated color classes for the dark theme
   const priorityColor = {
-    low: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-    medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-    high: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+    low: "bg-blue-900/30 text-blue-400 border-blue-400/30",
+    medium: "bg-yellow-900/30 text-yellow-400 border-yellow-400/30",
+    high: "bg-red-900/30 text-red-400 border-red-400/30",
   };
 
   const isOverdue = new Date(outreach.due_date) < new Date() && outreach.status === "pending";
 
   return (
-    <Card className={cn("mb-4", isOverdue && "border-red-300 dark:border-red-800")}>
-      <CardHeader className="px-4 py-3 border-b bg-muted/50">
+    <Card className={cn(
+      "mb-4 h-[180px] flex flex-col", 
+      isOverdue ? "border-red-500/30" : "border-border/20"
+    )}>
+      <CardHeader className="px-4 py-3 border-b border-border/20 bg-card">
         <div className="flex justify-between items-center">
           <Badge variant="outline" className={cn(priorityColor[outreach.priority])}>
             {outreach.priority} priority
           </Badge>
           
           {isOverdue && (
-            <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+            <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-500/30">
               <AlertCircle className="h-3 w-3 mr-1" />
               Overdue
             </Badge>
@@ -48,24 +52,24 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
         </div>
       </CardHeader>
       
-      <CardContent className="p-4">
+      <CardContent className="p-4 flex flex-col flex-grow">
         <h3 className="text-lg font-medium mb-1">{outreach.title}</h3>
         {outreach.description && (
-          <p className="text-muted-foreground text-sm mb-3">{outreach.description}</p>
+          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{outreach.description}</p>
         )}
         
         <div className="mb-3">
           <h4 className="text-sm font-medium mb-1">Contacts</h4>
           <div className="flex flex-wrap gap-1">
             {outreach.contacts?.map((contact) => (
-              <Badge key={contact.id} variant="secondary" className="font-normal">
+              <Badge key={contact.id} variant="outline" className="font-normal border-[#00eada]/30 bg-[#00eada]/10 text-[#00eada]">
                 {contact.name}
               </Badge>
             ))}
           </div>
         </div>
         
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center text-sm text-muted-foreground">
             <Calendar className="h-4 w-4 mr-1" />
             <span>
@@ -75,7 +79,7 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
           
           {outreach.status === "pending" && (
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
               className="gap-1"
               onClick={handleMarkComplete}

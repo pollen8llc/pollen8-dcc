@@ -21,7 +21,7 @@ interface StatisticsChartProps {
 export const StatisticsChart: React.FC<StatisticsChartProps> = ({
   data,
   title,
-  color = "var(--primary)",
+  color = "#00eada",
   xAxisLabel,
   yAxisLabel,
   dataKey = "value",
@@ -50,7 +50,7 @@ export const StatisticsChart: React.FC<StatisticsChartProps> = ({
                 dataKey="name" 
                 axisLine={false} 
                 tickLine={false}
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
                 label={
                   xAxisLabel ? { 
                     value: xAxisLabel, 
@@ -64,7 +64,7 @@ export const StatisticsChart: React.FC<StatisticsChartProps> = ({
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
                 label={
                   yAxisLabel ? { 
                     value: yAxisLabel, 
@@ -76,11 +76,12 @@ export const StatisticsChart: React.FC<StatisticsChartProps> = ({
                 }
               />
               <Tooltip
-                cursor={{ fill: 'var(--muted)' }}
+                cursor={{ fill: 'rgba(0, 234, 218, 0.1)' }}
                 contentStyle={{ 
-                  backgroundColor: 'var(--background)',
-                  borderColor: 'var(--border)',
-                  borderRadius: '0.375rem' 
+                  backgroundColor: 'hsl(215 25% 10%)',
+                  borderColor: 'hsl(215 25% 18%)',
+                  borderRadius: '0.75rem',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)'
                 }}
               />
               <Bar 

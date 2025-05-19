@@ -2,7 +2,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
@@ -21,21 +20,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onConnect,
   isConnected = false,
 }) => {
-  const getInitials = () => {
-    const firstName = profile.first_name || '';
-    const lastName = profile.last_name || '';
-    
-    if (firstName && lastName) {
-      return `${firstName[0]}${lastName[0]}`.toUpperCase();
-    } else if (firstName) {
-      return firstName[0].toUpperCase();
-    } else if (lastName) {
-      return lastName[0].toUpperCase();
-    }
-    
-    return '?';
-  };
-
   const getConnectionBadge = () => {
     if (connectionDepth === 0) {
       return null;
@@ -55,23 +39,27 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   return (
     <Card className="h-[220px] flex flex-col">
-      <CardHeader className="flex-row gap-4 items-center">
-        <Avatar className="h-12 w-12 bg-royal-blue-100/20 text-royal-blue-500 ring-2 ring-royal-blue-200/20">
-          <AvatarImage src={profile.avatar_url} alt={fullName} />
-          <AvatarFallback>{getInitials()}</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col">
-          <Link to={`/profile/${profile.id}`} className="font-medium hover:underline">
+      <CardHeader className="flex-col gap-1 items-start">
+        <div className="flex justify-between w-full">
+          <Link to={`/profile/${profile.id}`} className="font-medium text-lg hover:underline">
             {fullName}
           </Link>
-          {profile.location && (
-            <div className="flex items-center text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span>{profile.location}</span>
-            </div>
+          
+          {profile.category && (
+            <Badge variant="outline" className="bg-[#00eada]/10 text-[#00eada] border-[#00eada]/30">
+              {profile.category}
+            </Badge>
           )}
         </div>
+        
+        {profile.location && (
+          <div className="flex items-center text-xs text-muted-foreground">
+            <MapPin className="h-3 w-3 mr-1" />
+            <span>{profile.location}</span>
+          </div>
+        )}
       </CardHeader>
+      
       <CardContent className="flex-grow">
         {profile.bio && (
           <p className="text-sm text-muted-foreground line-clamp-3">{profile.bio}</p>
@@ -82,7 +70,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <p className="text-xs text-muted-foreground mb-1">Interests</p>
             <div className="flex flex-wrap gap-1">
               {profile.interests.slice(0, 3).map((interest, i) => (
-                <Badge key={i} variant="outline" className="text-xs bg-royal-blue-100/20 text-royal-blue-300 border-royal-blue-200/20">
+                <Badge key={i} variant="outline" className="text-xs bg-[#00eada]/10 text-[#00eada] border-[#00eada]/30">
                   {interest}
                 </Badge>
               ))}
@@ -95,6 +83,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           </div>
         )}
       </CardContent>
+      
       <CardFooter className="flex justify-between items-center">
         {getConnectionBadge()}
         
