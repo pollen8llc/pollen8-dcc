@@ -164,15 +164,20 @@ export const getConnectedProfiles = async (
     let profiles = data || [];
     
     // Process the returned data to ensure types match
-    const processedProfiles: ExtendedProfile[] = profiles.map(profile => ({
-      ...profile,
-      social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
-      privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
-        profile_visibility: "connections"
-      },
-      // Ensure role is included in processed profiles
-      role: profile.role || UserRole.MEMBER
-    }));
+    const processedProfiles: ExtendedProfile[] = profiles.map(profile => {
+      // Get the user's role from the database if available, or default to MEMBER
+      const userRole = getUserRoleFromProfile(profile);
+      
+      return {
+        ...profile,
+        social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
+        privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
+          profile_visibility: "connections"
+        },
+        // Ensure role is included in processed profiles
+        role: userRole
+      };
+    });
     
     // Apply filters
     let filteredProfiles = [...processedProfiles];
@@ -234,7 +239,7 @@ export const getAllProfiles = async (): Promise<ExtendedProfile[]> => {
     
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, user_roles(role_id, roles:role_id(name))')
       .order('created_at', { ascending: false });
       
     if (error) {
@@ -243,17 +248,47 @@ export const getAllProfiles = async (): Promise<ExtendedProfile[]> => {
     }
     
     // Process the returned data to ensure types match
-    return data.map(profile => ({
-      ...profile,
-      social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
-      privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
-        profile_visibility: "connections"
-      },
-      // Ensure role is included in mapped profiles
-      role: profile.role || UserRole.MEMBER
-    }));
+    return data.map(profile => {
+      // Get the user's role from the user_roles relationship if available, or default to MEMBER
+      const userRole = getUserRoleFromProfile(profile);
+      
+      return {
+        ...profile,
+        social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
+        privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
+          profile_visibility: "connections"
+        },
+        // Ensure role is included in mapped profiles
+        role: userRole
+      };
+    });
   } catch (error) {
     console.error("Exception in getAllProfiles:", error);
     return [];
   }
 };
+
+/**
+ * Helper function to extract user role from profile data
+ */
+function getUserRoleFromProfile(profile: any): UserRole {
+  // Check if the profile has user_roles with role information
+  if (profile.user_roles && Array.isArray(profile.user_roles) && profile.user_roles.length > 0) {
+    // Find the highest role (ADMIN > ORGANIZER > MEMBER)
+    for (const role of [UserRole.ADMIN, UserRole.ORGANIZER, UserRole.MEMBER]) {
+      if (profile.user_roles.some((ur: any) => 
+        ur.roles && ur.roles.name === role
+      )) {
+        return role as UserRole;
+      }
+    }
+  }
+  
+  // If there's an explicit role property already, use it
+  if (profile.role) {
+    return profile.role as UserRole;
+  }
+  
+  // Default to MEMBER if no role information is available
+  return UserRole.MEMBER;
+}
