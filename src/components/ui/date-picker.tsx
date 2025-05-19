@@ -14,14 +14,16 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ value, onChange }: DatePickerProps) {
-  // Try to access form context - if it exists, we're in a form
-  const formField = React.useContext(
+  // Use a safer approach to detect if we're inside a form context
+  const formFieldContext = React.useContext(
     // @ts-ignore - This context might not exist, which is fine
-    React.createContext("FormFieldContext", undefined)
+    React.createContext({}, undefined)
   )
   
   // Determine if we're inside a form context
-  const isInsideForm = formField !== undefined
+  const isInsideForm = formFieldContext !== undefined && 
+    Object.keys(formFieldContext).length > 0 &&
+    'name' in formFieldContext
 
   // Create the button element
   const buttonElement = (

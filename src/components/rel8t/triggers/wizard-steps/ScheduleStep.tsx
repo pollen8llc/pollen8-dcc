@@ -42,10 +42,12 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="execution-date" className="required">Execution Date</Label>
-            <DatePicker
-              value={executionDate}
-              onChange={(date) => updateScheduleData(date)}
-            />
+            <div id="execution-date">
+              <DatePicker
+                value={executionDate}
+                onChange={(date) => updateScheduleData(date)}
+              />
+            </div>
           </div>
           
           <div className="grid gap-2">
