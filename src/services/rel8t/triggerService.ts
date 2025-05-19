@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { PostgrestResponse } from "@supabase/supabase-js";
 
 // Time trigger types (for time-based automations)
 export const TIME_TRIGGER_TYPES = {
@@ -20,6 +21,7 @@ export const TRIGGER_ACTIONS = {
   SEND_NOTIFICATION: 'send_notification'
 };
 
+// Update the RecurrencePattern interface to match what will be stored in the database
 export interface RecurrencePattern {
   type: string;
   startDate: string;
@@ -28,6 +30,7 @@ export interface RecurrencePattern {
   dayOfMonth?: number;
   monthOfYear?: number;
   frequency?: number;
+  [key: string]: any; // Add index signature to match Json type
 }
 
 export interface Trigger {
@@ -62,7 +65,14 @@ export const getTriggers = async (): Promise<Trigger[]> => {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Transform database recurrence_pattern format to our RecurrencePattern type
+    const transformedData = data?.map(trigger => ({
+      ...trigger,
+      recurrence_pattern: trigger.recurrence_pattern as RecurrencePattern
+    })) || [];
+    
+    return transformedData;
   } catch (error: any) {
     console.error("Error fetching triggers:", error);
     toast({
@@ -83,7 +93,16 @@ export const getTrigger = async (id: string): Promise<Trigger | null> => {
       .single();
 
     if (error) throw error;
-    return data;
+    
+    // Transform the recurrence_pattern
+    if (data) {
+      return {
+        ...data,
+        recurrence_pattern: data.recurrence_pattern as RecurrencePattern
+      };
+    }
+    
+    return null;
   } catch (error: any) {
     console.error(`Error fetching trigger ${id}:`, error);
     toast({
@@ -104,7 +123,9 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
 
     const triggerToInsert = {
       ...trigger,
-      user_id: user.id
+      user_id: user.id,
+      // Convert RecurrencePattern to Json compatible object if it exists
+      recurrence_pattern: trigger.recurrence_pattern
     };
 
     const { data, error } = await supabase
@@ -120,7 +141,15 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
       description: "Automation trigger has been successfully created.",
     });
     
-    return data;
+    // Transform the returned data
+    if (data) {
+      return {
+        ...data,
+        recurrence_pattern: data.recurrence_pattern as RecurrencePattern
+      };
+    }
+    
+    return null;
   } catch (error: any) {
     console.error("Error creating trigger:", error);
     toast({
@@ -134,9 +163,16 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
 
 export const updateTrigger = async (id: string, trigger: Partial<Trigger>): Promise<Trigger | null> => {
   try {
+    // Prepare the update object with any type conversions needed
+    const updateData = {
+      ...trigger,
+      // Ensure recurrence_pattern is handled properly
+      recurrence_pattern: trigger.recurrence_pattern
+    };
+
     const { data, error } = await supabase
       .from("rms_triggers")
-      .update(trigger)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
@@ -148,7 +184,15 @@ export const updateTrigger = async (id: string, trigger: Partial<Trigger>): Prom
       description: "Automation trigger has been successfully updated.",
     });
     
-    return data;
+    // Transform the returned data
+    if (data) {
+      return {
+        ...data,
+        recurrence_pattern: data.recurrence_pattern as RecurrencePattern
+      };
+    }
+    
+    return null;
   } catch (error: any) {
     console.error(`Error updating trigger ${id}:`, error);
     toast({
