@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { DatePicker } from "@/components/ui/date-picker";
-import { DateSelect } from "@/components/ui/date-select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -16,10 +15,9 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardContent,
-  CardFooter
+  CardContent
 } from "@/components/ui/card";
-import { Clock } from "lucide-react";
+import { Clock, Calendar, AlertCircle, RefreshCcw } from "lucide-react";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 
@@ -54,15 +52,16 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   };
 
+  // Determine if there's an error
+  const isDateMissing = executionDate === undefined;
+
   // When date/time changes, sync with the trigger data
-  useEffect(() => {
+  React.useEffect(() => {
     if (executionDate) {
       // Create a combined date object with the execution time
       const [hours, minutes] = executionTime.split(":").map(Number);
       const execDate = new Date(executionDate);
       execDate.setHours(hours, minutes);
-      
-      console.log("ScheduleStep - Updating triggerData with execution_time:", execDate.toISOString());
       
       // Update the trigger data with the new execution time
       updateTriggerData({ execution_time: execDate.toISOString() });
@@ -79,12 +78,6 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
     }
   }, [executionDate, executionTime, isRecurring, recurrenceType, updateTriggerData]);
 
-  // Debug information
-  console.log("ScheduleStep rendering with executionDate:", executionDate);
-  console.log("ScheduleStep rendering with executionTime:", executionTime);
-  console.log("ScheduleStep rendering with timeOptions:", timeOptions);
-  console.log("ScheduleStep rendering with selected option:", findTimeOption(executionTime));
-
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -94,59 +87,72 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
         </p>
       </div>
 
-      <Card className="border-border/40">
+      <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Date and Time
+            <Calendar className="h-5 w-5 text-primary" />
+            Date Selection
           </CardTitle>
           <CardDescription>
-            When should this trigger be executed?
+            Choose when this automation should first run
           </CardDescription>
         </CardHeader>
         
         <CardContent className="space-y-4">
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="execution-date" className="required">Execution Date</Label>
-              <DatePicker
-                value={executionDate}
-                onChange={(date) => {
-                  console.log("DatePicker onChange:", date);
-                  updateScheduleData(date);
-                }}
-                className="w-full"
-              />
-              {!executionDate && (
-                <p className="text-sm text-red-500">Please select a date</p>
-              )}
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="execution-time" className="required">Execution Time</Label>
-              <Select
-                value={findTimeOption(executionTime)}
-                onValueChange={(value) => updateScheduleData(undefined, value)}
-              >
-                <SelectTrigger id="execution-time" className="w-full">
-                  <SelectValue placeholder="Select a time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="execution-date" className="required">Execution Date</Label>
+            <DatePicker
+              value={executionDate}
+              onChange={(date) => updateScheduleData(date)}
+              className={isDateMissing ? "border-red-300 focus-visible:ring-red-300" : ""}
+            />
+            {isDateMissing && (
+              <div className="flex items-center text-red-500 text-sm mt-1">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                <span>A date is required</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
       
-      <Card className="border-border/40">
+      <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            Time Selection
+          </CardTitle>
+          <CardDescription>
+            Set the time when this automation should run
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="execution-time">Execution Time</Label>
+            <Select
+              value={findTimeOption(executionTime)}
+              onValueChange={(value) => updateScheduleData(undefined, value)}
+            >
+              <SelectTrigger id="execution-time">
+                <SelectValue placeholder="Select a time" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
+            <RefreshCcw className="h-5 w-5 text-primary" />
             Recurrence
           </CardTitle>
           <CardDescription>
@@ -171,7 +177,7 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
                 value={recurrenceType}
                 onValueChange={(value) => updateScheduleData(undefined, undefined, undefined, value)}
               >
-                <SelectTrigger id="recurrence-type" className="w-full sm:w-[200px]">
+                <SelectTrigger id="recurrence-type">
                   <SelectValue placeholder="Select recurrence pattern" />
                 </SelectTrigger>
                 <SelectContent>

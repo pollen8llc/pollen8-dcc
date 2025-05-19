@@ -16,7 +16,7 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ value, onChange, className, disabled = false }: DatePickerProps) {
-  // Use a safer approach to detect if we're inside a form context
+  // Detect if we're inside a form context
   const formFieldContext = React.useContext(
     // @ts-ignore - This context might not exist, which is fine
     React.createContext({}, undefined)
@@ -29,7 +29,6 @@ export function DatePicker({ value, onChange, className, disabled = false }: Dat
 
   // Custom handler to ensure the date is properly propagated
   const handleDateSelect = (date?: Date) => {
-    console.log("DatePicker handleDateSelect called with:", date);
     if (onChange) {
       onChange(date);
     }
@@ -49,7 +48,7 @@ export function DatePicker({ value, onChange, className, disabled = false }: Dat
       {value ? (
         format(value, "PPP")
       ) : (
-        <span>Pick a date</span>
+        <span>Select a date</span>
       )}
       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
     </Button>
@@ -70,8 +69,6 @@ export function DatePicker({ value, onChange, className, disabled = false }: Dat
           selected={value}
           onSelect={handleDateSelect}
           initialFocus
-          fromYear={2000}
-          toYear={2030}
           className={cn("p-3 pointer-events-auto")}
           disabled={disabled}
         />

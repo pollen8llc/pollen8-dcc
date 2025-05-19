@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -26,19 +26,11 @@ const TriggerWizard = () => {
     saveTrigger,
     isScheduleRequired,
     isValid,
-    executionDate,
   } = useTriggerWizard();
 
   const goBack = () => {
     navigate("/rel8/settings");
   };
-
-  // For debugging
-  useEffect(() => {
-    console.log("TriggerWizard - Current step:", currentStep);
-    console.log("TriggerWizard - isScheduleRequired:", isScheduleRequired);
-    console.log("TriggerWizard - executionDate:", executionDate);
-  }, [currentStep, isScheduleRequired, executionDate]);
 
   // Define wizard steps
   const steps = [
@@ -50,6 +42,53 @@ const TriggerWizard = () => {
 
   // Determine if the next button should be disabled
   const isNextDisabled = !isValid();
+
+  // Calculate the current content based on the step
+  const renderContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <BasicInfoStep 
+            triggerData={triggerData} 
+            updateTriggerData={updateTriggerData} 
+          />
+        );
+      case 2:
+        return (
+          <BehaviorStep 
+            triggerData={triggerData} 
+            updateTriggerData={updateTriggerData} 
+          />
+        );
+      case 3:
+        if (isScheduleRequired) {
+          return (
+            <ScheduleStep 
+              triggerData={triggerData} 
+              updateTriggerData={updateTriggerData} 
+            />
+          );
+        } else {
+          return (
+            <ReviewStep 
+              triggerData={triggerData} 
+              updateTriggerData={updateTriggerData} 
+              onSave={saveTrigger}
+            />
+          );
+        }
+      case 4:
+        return (
+          <ReviewStep 
+            triggerData={triggerData} 
+            updateTriggerData={updateTriggerData} 
+            onSave={saveTrigger}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,36 +110,12 @@ const TriggerWizard = () => {
           </div>
         </div>
 
-        <Card className="mb-8 border-border/20">
+        <Card className="mb-8">
           <CardContent className="pt-6">
             <Steps currentStep={currentStep} steps={steps} className="mb-8" />
 
             <div className="mt-8">
-              {currentStep === 1 && (
-                <BasicInfoStep 
-                  triggerData={triggerData} 
-                  updateTriggerData={updateTriggerData} 
-                />
-              )}
-              {currentStep === 2 && (
-                <BehaviorStep 
-                  triggerData={triggerData} 
-                  updateTriggerData={updateTriggerData} 
-                />
-              )}
-              {currentStep === 3 && isScheduleRequired && (
-                <ScheduleStep 
-                  triggerData={triggerData} 
-                  updateTriggerData={updateTriggerData} 
-                />
-              )}
-              {((currentStep === 3 && !isScheduleRequired) || (currentStep === 4 && isScheduleRequired)) && (
-                <ReviewStep 
-                  triggerData={triggerData} 
-                  updateTriggerData={updateTriggerData} 
-                  onSave={saveTrigger}
-                />
-              )}
+              {renderContent()}
 
               <div className="flex justify-between mt-8">
                 <Button

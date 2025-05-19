@@ -28,34 +28,32 @@ export function useTriggerWizard() {
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceType, setRecurrenceType] = useState("daily");
 
-  // Debug logging to track state changes
-  useEffect(() => {
-    console.log("useTriggerWizard - executionDate:", executionDate);
-    console.log("useTriggerWizard - executionTime:", executionTime);
-    console.log("useTriggerWizard - triggerData:", triggerData);
-  }, [executionDate, executionTime, triggerData]);
-
   // Check if the schedule step is required based on condition
   const isScheduleRequired = triggerData.condition === "scheduled_time" || 
     Object.values(TIME_TRIGGER_TYPES).includes(triggerData.condition as string);
 
   // Move to the next step
   const nextStep = () => {
-    console.log("Attempting to move to next step from step:", currentStep);
-    console.log("isScheduleRequired:", isScheduleRequired);
-    console.log("isValid():", isValid());
-    
     if (isValid()) {
-      if (isScheduleRequired || currentStep < 3) {
-        setCurrentStep((prev) => prev + 1);
-        console.log("Moving to next step");
-      }
+      setCurrentStep((prev) => prev + 1);
     } else {
-      // Show feedback to user about what's missing
-      if (currentStep === 3 && isScheduleRequired && !executionDate) {
+      // Show feedback based on the current step
+      if (currentStep === 1 && !triggerData.name) {
+        toast({
+          title: "Name required",
+          description: "Please enter a name for your trigger.",
+          variant: "destructive",
+        });
+      } else if (currentStep === 2 && !triggerData.condition) {
+        toast({
+          title: "Condition required",
+          description: "Please select a trigger condition.",
+          variant: "destructive",
+        });
+      } else if (currentStep === 3 && isScheduleRequired && !executionDate) {
         toast({
           title: "Date required",
-          description: "Please select an execution date to continue.",
+          description: "Please select an execution date.",
           variant: "destructive",
         });
       }
@@ -79,11 +77,7 @@ export function useTriggerWizard() {
     recurring?: boolean, 
     recurrence?: string
   ) => {
-    console.log("updateScheduleData called with date:", date);
-    if (date !== undefined) {
-      console.log("Setting execution date to:", date);
-      setExecutionDate(date);
-    }
+    if (date !== undefined) setExecutionDate(date);
     if (time !== undefined) setExecutionTime(time);
     if (recurring !== undefined) setIsRecurring(recurring);
     if (recurrence !== undefined) setRecurrenceType(recurrence);
@@ -115,8 +109,6 @@ export function useTriggerWizard() {
         completeData.next_execution = execDate.toISOString();
       }
       
-      console.log("Saving trigger with data:", completeData);
-      
       // Create the trigger
       await createTrigger(completeData as Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at">);
       
@@ -138,30 +130,18 @@ export function useTriggerWizard() {
     }
   };
 
-  // Validate the current step with improved logic
+  // Validate the current step
   const isValid = () => {
-    console.log(`Validating step ${currentStep}:`);
-    console.log(`- executionDate:`, executionDate);
-    console.log(`- triggerName:`, triggerData.name);
-    console.log(`- condition:`, triggerData.condition);
-    
     switch (currentStep) {
       case 1: // Basic Info
-        const basicInfoValid = triggerData.name !== "";
-        console.log("Basic info validation:", basicInfoValid);
-        return basicInfoValid;
+        return triggerData.name !== "";
         
       case 2: // Behavior
-        const behaviorValid = triggerData.condition !== "" && triggerData.action !== "";
-        console.log("Behavior validation:", behaviorValid);
-        return behaviorValid;
+        return triggerData.condition !== "" && triggerData.action !== "";
         
       case 3: // Schedule
         if (isScheduleRequired) {
-          // Fixed validation logic: only check if a date is selected
-          const scheduleValid = executionDate !== undefined;
-          console.log("Schedule validation:", scheduleValid);
-          return scheduleValid;
+          return executionDate !== undefined;
         }
         return true;
         
