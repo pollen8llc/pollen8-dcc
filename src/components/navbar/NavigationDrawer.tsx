@@ -49,7 +49,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
         
         {currentUser ? (
           <>
-            <UserBadge user={currentUser} />
+            <UserBadge currentUser={currentUser} />
             
             <Button 
               variant="destructive" 

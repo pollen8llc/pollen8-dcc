@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -218,7 +217,7 @@ export const useKnowledgeBase = () => {
   };
   
   // Mutation for creating an article
-  const createArticle = async (article: Partial<KnowledgeArticle>) => {
+  const createArticle = async (article: { title: string, content: string, tags?: string[] }) => {
     try {
       setIsSubmitting(true);
       
@@ -226,12 +225,16 @@ export const useKnowledgeBase = () => {
         throw new Error('You must be logged in to create an article');
       }
       
+      const newArticle = {
+        title: article.title,
+        content: article.content,
+        user_id: currentUser.id,
+        tags: article.tags || []
+      };
+      
       const { data, error } = await supabase
         .from('knowledge_articles')
-        .insert({
-          ...article,
-          user_id: currentUser.id
-        })
+        .insert(newArticle)
         .select()
         .single();
       
@@ -241,14 +244,13 @@ export const useKnowledgeBase = () => {
       
       // Ensure tags exist
       if (article.tags && article.tags.length > 0) {
-        await Promise.all(article.tags.map(async (tag) => {
-          // Insert tag if it doesn't exist (ignore conflicts)
+        for (const tag of article.tags) {
+          // Insert tag if it doesn't exist
           await supabase
             .from('knowledge_tags')
             .insert({ name: tag.toLowerCase(), description: null })
-            .onConflict('name')
-            .ignore();
-        }));
+            .select();
+        }
       }
       
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
@@ -271,7 +273,7 @@ export const useKnowledgeBase = () => {
   };
   
   // Mutation for updating an article
-  const updateArticle = async (id: string, updates: Partial<KnowledgeArticle>) => {
+  const updateArticle = async (id: string, updates: { title?: string, content?: string, tags?: string[] }) => {
     try {
       setIsSubmitting(true);
       
@@ -279,9 +281,15 @@ export const useKnowledgeBase = () => {
         throw new Error('You must be logged in to update an article');
       }
       
+      const articleUpdates = {
+        ...(updates.title && { title: updates.title }),
+        ...(updates.content && { content: updates.content }),
+        ...(updates.tags && { tags: updates.tags })
+      };
+      
       const { data, error } = await supabase
         .from('knowledge_articles')
-        .update(updates)
+        .update(articleUpdates)
         .eq('id', id)
         .select()
         .single();
@@ -292,14 +300,13 @@ export const useKnowledgeBase = () => {
       
       // Ensure tags exist
       if (updates.tags && updates.tags.length > 0) {
-        await Promise.all(updates.tags.map(async (tag) => {
-          // Insert tag if it doesn't exist (ignore conflicts)
+        for (const tag of updates.tags) {
+          // Insert tag if it doesn't exist
           await supabase
             .from('knowledge_tags')
             .insert({ name: tag.toLowerCase(), description: null })
-            .onConflict('name')
-            .ignore();
-        }));
+            .select();
+        }
       }
       
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', id] });
