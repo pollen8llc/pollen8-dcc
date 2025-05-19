@@ -11,9 +11,11 @@ import { FormControl, FormItem, useFormField } from "@/components/ui/form"
 interface DatePickerProps {
   value?: Date
   onChange?: (date?: Date) => void
+  className?: string
+  disabled?: boolean
 }
 
-export function DatePicker({ value, onChange }: DatePickerProps) {
+export function DatePicker({ value, onChange, className, disabled = false }: DatePickerProps) {
   // Use a safer approach to detect if we're inside a form context
   const formFieldContext = React.useContext(
     // @ts-ignore - This context might not exist, which is fine
@@ -33,13 +35,15 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
     }
   };
 
-  // Create the button element
+  // Create the button element with disabled state
   const buttonElement = (
     <Button
       variant={"outline"}
+      disabled={disabled}
       className={cn(
         "w-full pl-3 text-left font-normal",
-        !value && "text-muted-foreground"
+        !value && "text-muted-foreground",
+        className
       )}
     >
       {value ? (
@@ -53,7 +57,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild disabled={disabled}>
         {isInsideForm ? (
           <FormControl>{buttonElement}</FormControl>
         ) : (
@@ -69,6 +73,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           fromYear={2000}
           toYear={2030}
           className={cn("p-3 pointer-events-auto")}
+          disabled={disabled}
         />
       </PopoverContent>
     </Popover>

@@ -22,7 +22,7 @@ export function useTriggerWizard() {
     is_active: true,
   });
 
-  // Schedule-related state
+  // Schedule-related state with defaults
   const [executionDate, setExecutionDate] = useState<Date | undefined>(undefined);
   const [executionTime, setExecutionTime] = useState<string>("12:00");
   const [isRecurring, setIsRecurring] = useState(false);
@@ -31,8 +31,9 @@ export function useTriggerWizard() {
   // Debug logging to track state changes
   useEffect(() => {
     console.log("useTriggerWizard - executionDate:", executionDate);
+    console.log("useTriggerWizard - executionTime:", executionTime);
     console.log("useTriggerWizard - triggerData:", triggerData);
-  }, [executionDate, triggerData]);
+  }, [executionDate, executionTime, triggerData]);
 
   // Check if the schedule step is required based on condition
   const isScheduleRequired = triggerData.condition === "scheduled_time" || 
@@ -40,9 +41,14 @@ export function useTriggerWizard() {
 
   // Move to the next step
   const nextStep = () => {
+    console.log("Attempting to move to next step from step:", currentStep);
+    console.log("isScheduleRequired:", isScheduleRequired);
+    console.log("isValid():", isValid());
+    
     if (isValid()) {
       if (isScheduleRequired || currentStep < 3) {
         setCurrentStep((prev) => prev + 1);
+        console.log("Moving to next step");
       }
     } else {
       // Show feedback to user about what's missing
@@ -74,7 +80,10 @@ export function useTriggerWizard() {
     recurrence?: string
   ) => {
     console.log("updateScheduleData called with date:", date);
-    if (date !== undefined) setExecutionDate(date);
+    if (date !== undefined) {
+      console.log("Setting execution date to:", date);
+      setExecutionDate(date);
+    }
     if (time !== undefined) setExecutionTime(time);
     if (recurring !== undefined) setIsRecurring(recurring);
     if (recurrence !== undefined) setRecurrenceType(recurrence);
@@ -106,6 +115,8 @@ export function useTriggerWizard() {
         completeData.next_execution = execDate.toISOString();
       }
       
+      console.log("Saving trigger with data:", completeData);
+      
       // Create the trigger
       await createTrigger(completeData as Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at">);
       
@@ -127,32 +138,36 @@ export function useTriggerWizard() {
     }
   };
 
-  // Validate the current step
+  // Validate the current step with improved logic
   const isValid = () => {
     console.log(`Validating step ${currentStep}:`);
-    console.log(`- executionDate: ${executionDate ? 'set' : 'undefined'}`);
-    console.log(`- triggerName: ${triggerData.name}`);
-    console.log(`- condition: ${triggerData.condition}`);
+    console.log(`- executionDate:`, executionDate);
+    console.log(`- triggerName:`, triggerData.name);
+    console.log(`- condition:`, triggerData.condition);
     
     switch (currentStep) {
       case 1: // Basic Info
         const basicInfoValid = triggerData.name !== "";
         console.log("Basic info validation:", basicInfoValid);
         return basicInfoValid;
+        
       case 2: // Behavior
         const behaviorValid = triggerData.condition !== "" && triggerData.action !== "";
         console.log("Behavior validation:", behaviorValid);
         return behaviorValid;
+        
       case 3: // Schedule
         if (isScheduleRequired) {
-          // Fixed validation logic: only check if a date is selected and defined
+          // Fixed validation logic: only check if a date is selected
           const scheduleValid = executionDate !== undefined;
           console.log("Schedule validation:", scheduleValid);
           return scheduleValid;
         }
         return true;
+        
       case 4: // Review
         return true;
+        
       default:
         return false;
     }

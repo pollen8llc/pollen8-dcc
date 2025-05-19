@@ -71,7 +71,7 @@ const TriggerWizard = () => {
           </div>
         </div>
 
-        <Card className="mb-8">
+        <Card className="mb-8 border-border/20">
           <CardContent className="pt-6">
             <Steps currentStep={currentStep} steps={steps} className="mb-8" />
 
@@ -114,6 +114,7 @@ const TriggerWizard = () => {
                   <Button 
                     onClick={nextStep} 
                     disabled={isNextDisabled}
+                    variant={isNextDisabled ? "outline" : "default"}
                   >
                     Next
                   </Button>
