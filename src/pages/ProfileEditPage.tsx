@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useProfiles } from "@/hooks/useProfiles";
 import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import UnifiedProfileForm from "@/components/profile/UnifiedProfileForm";
 
 const ProfileEditPage: React.FC = () => {
@@ -56,17 +54,6 @@ const ProfileEditPage: React.FC = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center mb-6">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="mr-4"
-              onClick={() => navigate(`/profile/${currentUser.id}`)}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Profile
-            </Button>
-          </div>
-          
           <UnifiedProfileForm 
             mode="edit" 
             existingData={profileData}

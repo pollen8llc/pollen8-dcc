@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import ContactList from "@/components/rel8t/ContactList";
-import { ChevronLeft, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 
@@ -25,18 +25,6 @@ const Contacts = () => {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mr-2" 
-            onClick={() => navigate("/rel8/dashboard")}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
-          </Button>
-        </div>
-
         <Rel8Navigation />
 
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
