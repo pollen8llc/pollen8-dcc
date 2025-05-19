@@ -13,7 +13,6 @@ import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import BasicInfoStep from "@/components/rel8t/triggers/wizard-steps/BasicInfoStep";
 import BehaviorStep from "@/components/rel8t/triggers/wizard-steps/BehaviorStep";
 import ScheduleStep from "@/components/rel8t/triggers/wizard-steps/ScheduleStep";
-import ReviewStep from "@/components/rel8t/triggers/wizard-steps/ReviewStep";
 
 const TriggerWizard = () => {
   const navigate = useNavigate();
@@ -32,16 +31,18 @@ const TriggerWizard = () => {
     navigate("/rel8/settings");
   };
 
-  // Define wizard steps
+  // Define wizard steps - removed Review step
   const steps = [
     "Basic Info",
     "Behavior",
     isScheduleRequired ? "Schedule" : null,
-    "Review",
   ].filter(Boolean) as string[];
 
   // Determine if the next button should be disabled
   const isNextDisabled = !isValid();
+  
+  // Is this the final step?
+  const isFinalStep = currentStep === (isScheduleRequired ? 3 : 2);
 
   // Calculate the current content based on the step
   const renderContent = () => {
@@ -68,23 +69,8 @@ const TriggerWizard = () => {
               updateTriggerData={updateTriggerData} 
             />
           );
-        } else {
-          return (
-            <ReviewStep 
-              triggerData={triggerData} 
-              updateTriggerData={updateTriggerData} 
-              onSave={saveTrigger}
-            />
-          );
         }
-      case 4:
-        return (
-          <ReviewStep 
-            triggerData={triggerData} 
-            updateTriggerData={updateTriggerData} 
-            onSave={saveTrigger}
-          />
-        );
+        return null;
       default:
         return null;
     }
@@ -125,21 +111,21 @@ const TriggerWizard = () => {
                   {currentStep === 1 ? "Cancel" : "Previous"}
                 </Button>
 
-                {(currentStep < (isScheduleRequired ? 4 : 3)) ? (
-                  <Button 
-                    onClick={nextStep} 
-                    disabled={isNextDisabled}
-                    variant={isNextDisabled ? "outline" : "default"}
-                  >
-                    Next
-                  </Button>
-                ) : (
+                {isFinalStep ? (
                   <Button 
                     variant="default" 
                     onClick={saveTrigger} 
                     disabled={isNextDisabled}
                   >
                     Create Trigger
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={nextStep} 
+                    disabled={isNextDisabled}
+                    variant={isNextDisabled ? "outline" : "default"}
+                  >
+                    Next
                   </Button>
                 )}
               </div>

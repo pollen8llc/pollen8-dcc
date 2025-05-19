@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { 
   Trigger, 
-  RecurrencePattern,
   createTrigger, 
   TIME_TRIGGER_TYPES 
 } from "@/services/rel8t/triggerService";
@@ -143,9 +142,6 @@ export function useTriggerWizard() {
         if (isScheduleRequired) {
           return executionDate !== undefined;
         }
-        return true;
-        
-      case 4: // Review
         return true;
         
       default:
