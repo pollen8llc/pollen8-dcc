@@ -20,6 +20,16 @@ export const TRIGGER_ACTIONS = {
   SEND_NOTIFICATION: 'send_notification'
 };
 
+export interface RecurrencePattern {
+  type: string;
+  startDate: string;
+  endDate?: string;
+  daysOfWeek?: number[];
+  dayOfMonth?: number;
+  monthOfYear?: number;
+  frequency?: number;
+}
+
 export interface Trigger {
   id: string;
   user_id: string;
@@ -30,6 +40,10 @@ export interface Trigger {
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
+  execution_time?: string;
+  next_execution?: string;
+  last_executed_at?: string;
+  recurrence_pattern?: RecurrencePattern | null;
 }
 
 export interface TriggerStats {

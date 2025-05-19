@@ -837,9 +837,13 @@ export type Database = {
           condition: string
           created_at: string | null
           description: string | null
+          execution_time: string | null
           id: string
           is_active: boolean | null
+          last_executed_at: string | null
           name: string
+          next_execution: string | null
+          recurrence_pattern: Json | null
           updated_at: string | null
           user_id: string
         }
@@ -848,9 +852,13 @@ export type Database = {
           condition: string
           created_at?: string | null
           description?: string | null
+          execution_time?: string | null
           id?: string
           is_active?: boolean | null
+          last_executed_at?: string | null
           name: string
+          next_execution?: string | null
+          recurrence_pattern?: Json | null
           updated_at?: string | null
           user_id: string
         }
@@ -859,9 +867,13 @@ export type Database = {
           condition?: string
           created_at?: string | null
           description?: string | null
+          execution_time?: string | null
           id?: string
           is_active?: boolean | null
+          last_executed_at?: string | null
           name?: string
+          next_execution?: string | null
+          recurrence_pattern?: Json | null
           updated_at?: string | null
           user_id?: string
         }

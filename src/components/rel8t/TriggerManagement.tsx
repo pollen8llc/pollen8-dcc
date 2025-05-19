@@ -35,7 +35,9 @@ import { TriggersList } from "./triggers/TriggersList";
 import { EmailNotificationsList } from "./triggers/EmailNotificationsList";
 import { EditTriggerDialog } from "./triggers/EditTriggerDialog";
 import { useTriggerManagement } from "@/hooks/rel8t/useTriggerManagement";
-import { Calendar, Mail, Bell, AlertCircle } from "lucide-react";
+import { Calendar as CalendarIcon, Mail, Bell, AlertCircle } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
 
 export function TriggerManagement() {
   const {
@@ -66,8 +68,34 @@ export function TriggerManagement() {
     is_active: true
   });
   
+  const [executionDate, setExecutionDate] = useState<Date | undefined>(undefined);
+  const [executionTime, setExecutionTime] = useState<string>("12:00");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState("daily");
+  
   const handleCreateTrigger = async () => {
     try {
+      // Process date and time information if provided
+      if (executionDate) {
+        const [hours, minutes] = executionTime.split(":").map(Number);
+        const execDate = new Date(executionDate);
+        execDate.setHours(hours, minutes);
+        
+        // Set the execution time
+        newTrigger.execution_time = execDate.toISOString();
+        
+        // Set the recurrence pattern if recurring is enabled
+        if (isRecurring) {
+          newTrigger.recurrence_pattern = {
+            type: recurrenceType,
+            startDate: execDate.toISOString(),
+          };
+        }
+        
+        // Set the next execution time to be the same as the execution time initially
+        newTrigger.next_execution = execDate.toISOString();
+      }
+
       await createTrigger(newTrigger as Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at">);
       setIsCreateDialogOpen(false);
       setNewTrigger({
@@ -77,6 +105,10 @@ export function TriggerManagement() {
         action: "send_email",
         is_active: true
       });
+      setExecutionDate(undefined);
+      setExecutionTime("12:00");
+      setIsRecurring(false);
+      setRecurrenceType("daily");
     } catch (error) {
       console.error("Error creating trigger:", error);
     }
@@ -88,7 +120,7 @@ export function TriggerManagement() {
       case "send_email":
         return <Mail className="h-5 w-5 text-blue-500" />;
       case "create_task":
-        return <Calendar className="h-5 w-5 text-green-500" />;
+        return <CalendarIcon className="h-5 w-5 text-green-500" />;
       case "add_reminder":
         return <Bell className="h-5 w-5 text-amber-500" />;
       case "send_notification":
@@ -153,6 +185,7 @@ export function TriggerManagement() {
                       <SelectItem value="anniversary_upcoming">Anniversary approaching</SelectItem>
                       <SelectItem value="no_contact_30days">No contact for 30 days</SelectItem>
                       <SelectItem value="meeting_scheduled">Meeting scheduled</SelectItem>
+                      <SelectItem value="scheduled_time">At scheduled time</SelectItem>
                       <SelectItem value={TIME_TRIGGER_TYPES.HOURLY}>Hourly</SelectItem>
                       <SelectItem value={TIME_TRIGGER_TYPES.DAILY}>Daily</SelectItem>
                       <SelectItem value={TIME_TRIGGER_TYPES.WEEKLY}>Weekly</SelectItem>
@@ -180,6 +213,60 @@ export function TriggerManagement() {
                   </Select>
                 </div>
               </div>
+              
+              {/* Date and Time selection for scheduled triggers */}
+              {newTrigger.condition === "scheduled_time" && (
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="execution-date">Execution Date</Label>
+                    <DatePicker
+                      value={executionDate}
+                      onChange={setExecutionDate}
+                    />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="execution-time">Execution Time</Label>
+                    <Input
+                      id="execution-time"
+                      type="time"
+                      value={executionTime}
+                      onChange={(e) => setExecutionTime(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="recurring"
+                      checked={isRecurring}
+                      onCheckedChange={setIsRecurring}
+                    />
+                    <Label htmlFor="recurring">Recurring</Label>
+                  </div>
+                  
+                  {isRecurring && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="recurrence-type">Recurrence Pattern</Label>
+                      <Select
+                        value={recurrenceType}
+                        onValueChange={setRecurrenceType}
+                      >
+                        <SelectTrigger id="recurrence-type">
+                          <SelectValue placeholder="Select recurrence pattern" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="quarterly">Quarterly</SelectItem>
+                          <SelectItem value="yearly">Yearly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="flex items-center space-x-2">
                 <Switch
                   id="trigger-active"

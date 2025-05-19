@@ -1,8 +1,9 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Plus, Trash2 } from "lucide-react";
+import { Calendar, Plus, Trash2, Clock } from "lucide-react";
 import { Trigger } from "@/services/rel8t/triggerService";
+import { format } from "date-fns";
 
 interface TriggersListProps {
   triggers: Trigger[];
@@ -40,6 +41,22 @@ export function TriggersList({
     );
   }
   
+  const formatDateTime = (dateTimeStr?: string) => {
+    if (!dateTimeStr) return null;
+    try {
+      return format(new Date(dateTimeStr), "MMM d, yyyy 'at' h:mm a");
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const getRecurrenceText = (trigger: Trigger) => {
+    if (!trigger.recurrence_pattern) return null;
+    
+    const { type } = trigger.recurrence_pattern;
+    return `Repeats ${type}`;
+  };
+  
   return (
     <div className="space-y-4">
       {triggers.map((trigger) => (
@@ -66,6 +83,21 @@ export function TriggersList({
                 <div className="text-xs text-muted-foreground">
                   <span className="font-medium">Action:</span> {trigger.action}
                 </div>
+                
+                {/* Display scheduled time if applicable */}
+                {trigger.next_execution && (
+                  <div className="flex items-center text-xs text-muted-foreground mt-1">
+                    <Clock className="h-3 w-3 mr-1" />
+                    <span>Next execution: {formatDateTime(trigger.next_execution)}</span>
+                  </div>
+                )}
+                
+                {/* Display recurrence info if applicable */}
+                {trigger.recurrence_pattern && (
+                  <div className="text-xs text-blue-500 mt-1">
+                    {getRecurrenceText(trigger)}
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex space-x-2">
