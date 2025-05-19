@@ -24,7 +24,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     if (connectionDepth === 0) {
       return null;
     } else if (connectionDepth === 1) {
-      return <Badge className="bg-royal-blue-500 text-white">1st Connection</Badge>;
+      return <Badge className="bg-[#00eada] text-black">1st Connection</Badge>;
     } else if (connectionDepth === 2) {
       return <Badge variant="secondary">2nd Connection</Badge>;
     } else if (connectionDepth === 3) {
@@ -37,6 +37,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     .filter(Boolean)
     .join(" ") || "Anonymous User";
 
+  // Safely check if category exists
+  const hasCategory = profile && 'category' in profile && (profile as any).category;
+
   return (
     <Card className="h-[220px] flex flex-col">
       <CardHeader className="flex-col gap-1 items-start">
@@ -45,9 +48,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             {fullName}
           </Link>
           
-          {profile.category && (
+          {hasCategory && (
             <Badge variant="outline" className="bg-[#00eada]/10 text-[#00eada] border-[#00eada]/30">
-              {profile.category}
+              {(profile as any).category}
             </Badge>
           )}
         </div>
