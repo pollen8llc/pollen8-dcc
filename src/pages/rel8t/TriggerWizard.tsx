@@ -3,19 +3,44 @@ import Navbar from "@/components/Navbar";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Step, Steps } from "@/components/ui/steps";
-import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
+import { useTriggerWizard, TriggerFormData } from "@/hooks/rel8t/useTriggerWizard";
 import { BasicInfoStep } from "@/components/rel8t/triggers/wizard-steps/BasicInfoStep";
 import { BehaviorStep } from "@/components/rel8t/triggers/wizard-steps/BehaviorStep";
 import { ScheduleStep } from "@/components/rel8t/triggers/wizard-steps/ScheduleStep";
 import { ReviewStep } from "@/components/rel8t/triggers/wizard-steps/ReviewStep";
+import { FormProvider, useForm } from "react-hook-form";
+import { Shell } from "@/components/layout/Shell";
 
 const TriggerWizard = () => {
-  const { currentStep } = useTriggerWizard();
+  // Get trigger wizard state and functions
+  const { 
+    currentStep, 
+    formData, 
+    updateFormData, 
+    navigateToStep, 
+    handleSubmit: submitTrigger 
+  } = useTriggerWizard();
+
+  // Initialize react-hook-form with our existing form data
+  const methods = useForm<TriggerFormData>({
+    defaultValues: formData,
+  });
+
+  // Update our custom state when form values change
+  const onFormValueChange = (values: Partial<TriggerFormData>) => {
+    updateFormData(values);
+  };
+
+  // Handle form submission
+  const onSubmit = (data: TriggerFormData) => {
+    // Update our form data first
+    updateFormData(data);
+    // Then trigger the submission
+    submitTrigger();
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
+    <Shell>
       <div className="container mx-auto px-4 py-8">
         <Rel8Navigation />
         
@@ -35,14 +60,19 @@ const TriggerWizard = () => {
               <Step title="Review" />
             </Steps>
 
-            {currentStep === 1 && <BasicInfoStep />}
-            {currentStep === 2 && <BehaviorStep />}
-            {currentStep === 3 && <ScheduleStep />}
-            {currentStep === 4 && <ReviewStep />}
+            {/* Wrap everything in FormProvider */}
+            <FormProvider {...methods}>
+              <form onChange={methods.handleSubmit(onFormValueChange)} onSubmit={methods.handleSubmit(onSubmit)}>
+                {currentStep === 1 && <BasicInfoStep />}
+                {currentStep === 2 && <BehaviorStep />}
+                {currentStep === 3 && <ScheduleStep />}
+                {currentStep === 4 && <ReviewStep />}
+              </form>
+            </FormProvider>
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Shell>
   );
 };
 

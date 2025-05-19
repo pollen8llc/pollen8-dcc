@@ -1,56 +1,57 @@
 
 import { Button } from "@/components/ui/button";
-import { FormItem, FormLabel } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
+import { useFormContext } from "react-hook-form";
 
 export function BasicInfoStep() {
-  const { formData, updateFormData, handleNextStep, errors } = useTriggerWizard();
-
+  const { handleNextStep } = useTriggerWizard();
+  const { register, formState: { errors }, watch, setValue } = useFormContext();
+  const isActive = watch("isActive");
+  
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <FormItem>
-          <FormLabel className="text-base">Trigger Name</FormLabel>
-          <Input 
-            value={formData.name} 
-            onChange={(e) => updateFormData({ name: e.target.value })}
-            placeholder="Enter a name for this trigger"
-            className={errors.name ? "border-destructive" : ""}
-          />
-          {errors.name && (
-            <p className="text-sm text-destructive mt-1">{errors.name}</p>
-          )}
-        </FormItem>
+      <FormItem>
+        <FormLabel className="text-base">Name</FormLabel>
+        <Input
+          placeholder="Enter trigger name"
+          {...register("name", { required: "Trigger name is required" })}
+          className={errors.name ? "border-destructive" : ""}
+        />
+        {errors.name && (
+          <FormMessage>{errors.name.message as string}</FormMessage>
+        )}
+      </FormItem>
 
-        <FormItem>
-          <FormLabel className="text-base">Description</FormLabel>
-          <Textarea 
-            value={formData.description} 
-            onChange={(e) => updateFormData({ description: e.target.value })}
-            placeholder="Optional description for this trigger"
-            rows={3}
-          />
-        </FormItem>
+      <FormItem>
+        <FormLabel className="text-base">Description</FormLabel>
+        <Textarea
+          placeholder="Enter a brief description of this trigger (optional)"
+          className="resize-none min-h-[100px]"
+          {...register("description")}
+        />
+      </FormItem>
 
-        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-          <div className="space-y-0.5">
-            <FormLabel className="text-base">Active</FormLabel>
-            <p className="text-sm text-muted-foreground">
-              Enable or disable this trigger
-            </p>
-          </div>
-          <Switch
-            checked={formData.isActive}
-            onCheckedChange={(checked) => updateFormData({ isActive: checked })}
-          />
-        </FormItem>
-      </div>
+      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+        <div className="space-y-0.5">
+          <FormLabel className="text-base">Active</FormLabel>
+          <p className="text-sm text-muted-foreground">
+            Determines if this trigger will execute when conditions are met
+          </p>
+        </div>
+        <Switch 
+          checked={isActive} 
+          onCheckedChange={(checked) => setValue("isActive", checked)}
+        />
+      </FormItem>
 
       <div className="flex justify-end">
-        <Button onClick={handleNextStep}>Next Step</Button>
+        <Button onClick={handleNextStep}>
+          Next Step
+        </Button>
       </div>
     </div>
   );

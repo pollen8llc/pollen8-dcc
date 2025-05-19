@@ -5,9 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { CalendarIcon, CheckCircle2, Clock, Edit, Mail, Bell, Clipboard } from "lucide-react";
 import { format } from "date-fns";
+import { useFormContext } from "react-hook-form";
 
 export function ReviewStep() {
-  const { formData, handlePreviousStep, handleSubmit, navigateToStep } = useTriggerWizard();
+  const { handlePreviousStep, handleSubmit, navigateToStep } = useTriggerWizard();
+  const { watch } = useFormContext();
+  const formData = watch();
 
   // Helper function to format trigger conditions
   const formatCondition = (condition: string): string => {
@@ -160,7 +163,7 @@ export function ReviewStep() {
         <Button variant="outline" onClick={handlePreviousStep}>
           Previous
         </Button>
-        <Button onClick={handleSubmit}>
+        <Button type="submit">
           Create Trigger
         </Button>
       </div>

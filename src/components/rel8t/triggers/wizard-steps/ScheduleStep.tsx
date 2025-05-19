@@ -1,15 +1,20 @@
+
 import { Button } from "@/components/ui/button";
-import { FormItem, FormLabel } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { RecurrencePattern } from "@/services/rel8t/triggerService";
+import { useFormContext } from "react-hook-form";
 
 export function ScheduleStep() {
-  const { formData, updateFormData, handleNextStep, handlePreviousStep, errors, triggerTypes } = useTriggerWizard();
+  const { handleNextStep, handlePreviousStep, triggerTypes } = useTriggerWizard();
+  const { control, watch, setValue, formState: { errors } } = useFormContext();
   const [recurrenceFrequency, setRecurrenceFrequency] = useState<number>(1);
+  
+  const formData = watch();
 
   // Helper to format time string
   const formatTimeString = (date: Date | null): string => {
@@ -48,22 +53,19 @@ export function ScheduleStep() {
       };
     }
     
-    updateFormData({
-      recurrenceType: type,
-      recurrencePattern
-    });
+    setValue('recurrenceType', type);
+    setValue('recurrencePattern', recurrencePattern);
   };
 
   // Update frequency in recurrence pattern
   const updateFrequency = (frequency: number) => {
     setRecurrenceFrequency(frequency);
     if (formData.recurrencePattern) {
-      updateFormData({
-        recurrencePattern: {
-          ...formData.recurrencePattern,
-          frequency
-        }
-      });
+      const updatedPattern = {
+        ...formData.recurrencePattern,
+        frequency
+      };
+      setValue('recurrencePattern', updatedPattern);
     }
   };
 
@@ -74,11 +76,11 @@ export function ScheduleStep() {
           <FormLabel className="text-base">Start Date</FormLabel>
           <DatePicker
             value={formData.executionDate || undefined}
-            onChange={(date) => updateFormData({ executionDate: date || null })}
+            onChange={(date) => setValue('executionDate', date || null)}
             className={errors.executionDate ? "border-destructive" : ""}
           />
           {errors.executionDate && (
-            <p className="text-sm text-destructive mt-1">{errors.executionDate}</p>
+            <p className="text-sm text-destructive mt-1">{errors.executionDate.message as string}</p>
           )}
         </FormItem>
 
@@ -90,7 +92,7 @@ export function ScheduleStep() {
             onChange={(e) => {
               if (formData.executionDate) {
                 const newDateTime = parseTimeString(e.target.value, formData.executionDate);
-                updateFormData({ executionDate: newDateTime });
+                setValue('executionDate', newDateTime);
               }
             }}
             className="w-40"
