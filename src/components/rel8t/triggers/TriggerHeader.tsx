@@ -1,14 +1,15 @@
 
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export function TriggerHeader() {
-  const navigate = useNavigate();
-  
-  // Navigation to the wizard
-  const handleCreateTrigger = () => {
-    navigate('/rel8/triggers/create');
+  // Handle showing a message when the button is clicked
+  const handleButtonClick = () => {
+    toast({
+      title: "Feature removed",
+      description: "The trigger wizard functionality has been removed.",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -19,8 +20,7 @@ export function TriggerHeader() {
           Create automated actions based on specific events
         </p>
       </div>
-      <Button onClick={handleCreateTrigger}>
-        <Plus className="mr-2 h-4 w-4" />
+      <Button onClick={handleButtonClick}>
         Create Trigger
       </Button>
     </div>
