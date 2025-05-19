@@ -40,6 +40,11 @@ export function ScheduleStep({ validateAndNext }: { validateAndNext: () => void 
   // Handle recurrence type change
   const handleRecurrenceTypeChange = (type: string) => {
     console.log("Recurrence type changed to:", type);
+    if (type === "one_time") {
+      setValue('recurrenceType', 'one_time');
+      setValue('recurrencePattern', null);
+      return;
+    }
     // Create a basic recurrence pattern based on the selected type
     let recurrencePattern: RecurrencePattern = {
       type,
@@ -121,14 +126,14 @@ export function ScheduleStep({ validateAndNext }: { validateAndNext: () => void 
         <FormItem>
           <FormLabel className="text-base">Recurrence</FormLabel>
           <Select
-            value={formData.recurrenceType || ""}
+            value={formData.recurrenceType || "one_time"}
             onValueChange={handleRecurrenceTypeChange}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select recurrence pattern" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">One time only</SelectItem>
+              <SelectItem value="one_time">One time only</SelectItem>
               <SelectItem value={triggerTypes.HOURLY}>Hourly</SelectItem>
               <SelectItem value={triggerTypes.DAILY}>Daily</SelectItem>
               <SelectItem value={triggerTypes.WEEKLY}>Weekly</SelectItem>
@@ -139,7 +144,7 @@ export function ScheduleStep({ validateAndNext }: { validateAndNext: () => void 
           </Select>
         </FormItem>
 
-        {formData.recurrenceType && (
+        {formData.recurrenceType && formData.recurrenceType !== 'one_time' && (
           <FormItem>
             <FormLabel className="text-base">Frequency</FormLabel>
             <div className="flex items-center space-x-2">
