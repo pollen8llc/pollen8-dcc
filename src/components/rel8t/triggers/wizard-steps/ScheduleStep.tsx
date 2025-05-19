@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -26,8 +26,32 @@ const ScheduleStep = ({ triggerData, updateTriggerData }: ScheduleStepProps) => 
     executionTime,
     isRecurring,
     recurrenceType,
-    updateScheduleData
+    updateScheduleData,
+    updateTriggerData: updateTriggerHookData
   } = useTriggerWizard();
+
+  // Sync the executed date and time to triggerData when they change
+  useEffect(() => {
+    if (executionDate) {
+      // Create a combined date object with the execution time
+      const [hours, minutes] = executionTime.split(":").map(Number);
+      const execDate = new Date(executionDate);
+      execDate.setHours(hours, minutes);
+      
+      // Update the trigger data with the new execution time
+      updateTriggerData({ execution_time: execDate.toISOString() });
+      
+      // If recurring is enabled, also update the recurrence pattern
+      if (isRecurring) {
+        updateTriggerData({ 
+          recurrence_pattern: {
+            type: recurrenceType,
+            startDate: execDate.toISOString(),
+          }
+        });
+      }
+    }
+  }, [executionDate, executionTime, isRecurring, recurrenceType, updateTriggerData]);
 
   return (
     <div className="space-y-6">

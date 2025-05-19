@@ -120,6 +120,7 @@ export function useTriggerWizard() {
         return triggerData.condition !== "" && triggerData.action !== "";
       case 3: // Schedule
         if (isScheduleRequired) {
+          // Fixed validation logic: only check if a date is selected
           return executionDate !== undefined;
         }
         return true;
