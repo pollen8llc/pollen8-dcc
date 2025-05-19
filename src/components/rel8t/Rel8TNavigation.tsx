@@ -37,8 +37,8 @@ export const Rel8Navigation = () => {
               className={cn(
                 "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",
                 isActive 
-                  ? "bg-primary text-primary-foreground" 
-                  : "text-muted-foreground hover:bg-muted"
+                  ? "bg-[#00eada] text-black" 
+                  : "text-muted-foreground hover:bg-[#00eada]/10"
               )}
             >
               <item.icon className="mr-2 h-4 w-4" />

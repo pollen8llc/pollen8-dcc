@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,10 @@ import {
   Grid3x3,
   LayoutDashboard,
   CalendarClock,
-  Folder
+  Folder,
+  BookOpen,
+  Book,
+  FileTextIcon
 } from "lucide-react";
 
 interface NavigationDrawerProps {
@@ -109,6 +113,39 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                     Create Community
                   </Button>
                 )}
+
+                {/* CORE section */}
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  CORE
+                </p>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/core")}
+                >
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Knowledge Base
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/core/articles")}
+                >
+                  <FileTextIcon className="mr-2 h-4 w-4" />
+                  Browse Articles
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/core/latest")}
+                >
+                  <Book className="mr-2 h-4 w-4" />
+                  Latest Articles
+                </Button>
               </>
             )}
 
