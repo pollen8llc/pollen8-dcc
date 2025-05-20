@@ -16,7 +16,6 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import Onboarding from "./pages/Onboarding";
-import ConnectionsPage from "./pages/ConnectionsPage";
 import ProfileSearchPage from "./pages/ProfileSearchPage";
 import InvitePage from "./pages/InvitePage";
 import InvitesManagementPage from "./pages/InvitesManagementPage";
@@ -115,14 +114,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute role={UserRole.MEMBER}>
             <ProfileSearchPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/connections"
-        element={
-          <ProtectedRoute role={UserRole.MEMBER}>
-            <ConnectionsPage />
           </ProtectedRoute>
         }
       />

@@ -41,8 +41,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   // Safely check if category exists
   const hasCategory = profile && 'category' in profile && (profile as any).category;
   
-  // Check if the user is an admin
-  const isAdmin = profile.role === UserRole.ADMIN;
+  // Check if the user is an admin - use optional chaining to safely access role
+  const isAdmin = profile.role_name === UserRole.ADMIN;
 
   return (
     <Card className={`h-[220px] flex flex-col ${isAdmin ? 'admin-profile-border' : ''}`}>
