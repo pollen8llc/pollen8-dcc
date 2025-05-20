@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -116,7 +115,7 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
       {profiles.map((profile) => (
         <Card 
           key={profile.id} 
-          className={`overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300 ${isAdmin(profile.role) ? 'admin-rainbow-border' : ''}`}
+          className={`overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300 ${isAdmin(profile.role) ? 'admin-premium-border' : ''}`}
         >
           <div className="p-6">
             <div className="flex items-start gap-4">
