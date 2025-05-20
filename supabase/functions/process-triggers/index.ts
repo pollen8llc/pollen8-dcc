@@ -1,15 +1,14 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.36.0'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
 // SMTP configuration
-const smtpHost = Deno.env.get('SMTP_HOST') || ''
+const smtpHost = Deno.env.get('SMTP_HOST') || 'mail.pollen8.app'
 const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587')
-const smtpUser = Deno.env.get('SMTP_USER') || ''
-const smtpPassword = Deno.env.get('SMTP_PASSWORD') || ''
-const smtpFromEmail = Deno.env.get('SMTP_FROM_EMAIL') || ''
+const smtpUser = Deno.env.get('SMTP_USER') || 'notifications@pollen8.app'
+const smtpPassword = Deno.env.get('SMTP_PASS') || ''
+const smtpFromEmail = Deno.env.get('FROM_EMAIL') || 'notifications@pollen8.app'
 const smtpFromName = Deno.env.get('SMTP_FROM_NAME') || 'Rel8t Automation'
 
 // Initialize the Supabase client
@@ -20,26 +19,29 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Helper function to send email using SMTP
+// Helper function to send email using our send-email edge function
 async function sendEmail(recipient: string, recipientName: string, subject: string, body: string) {
-  if (!smtpHost || !smtpUser || !smtpPassword) {
-    console.log('SMTP configuration not set up, skipping actual email sending')
-    return true // Return success in development without actual sending
-  }
-  
   try {
-    // For now, we'll just log the email details
-    console.log(`Would send email to ${recipient} (${recipientName}) with subject: ${subject}`)
-    console.log(`Email body: ${body}`)
-    console.log('SMTP would be configured with:', { smtpHost, smtpPort, smtpUser })
-    
-    // In a real implementation, we would use an SMTP library to send the email
-    // For example with nodemailer, but that requires a proper SMTP setup
-    
-    return true
+    // Call our send-email function using Supabase Edge Functions client
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: {
+        to: recipient,
+        toName: recipientName, 
+        subject: subject,
+        html: body
+      }
+    });
+
+    if (error) {
+      console.error("Error calling send-email function:", error);
+      return false;
+    }
+
+    console.log("Email sent successfully:", data);
+    return true;
   } catch (error) {
-    console.error('Error sending email:', error)
-    return false
+    console.error('Error sending email:', error);
+    return false;
   }
 }
 
@@ -175,7 +177,7 @@ Deno.serve(async (req) => {
             continue
           }
           
-          // Try to send the email
+          // Try to send the email using our new send-email function
           const emailSent = await sendEmail(
             user.email,
             `${user.first_name || ''} ${user.last_name || ''}`.trim(),

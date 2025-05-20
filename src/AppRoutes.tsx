@@ -35,6 +35,7 @@ import Settings from "./pages/rel8t/Settings";
 import Notifications from "./pages/rel8t/Notifications";
 import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 import TriggerWizard from "./pages/rel8t/TriggerWizard";
+import EmailTest from "./pages/rel8t/EmailTest";
 
 // CORE Knowledge Base Pages
 import CoreLandingPage from "./pages/core/CoreLandingPage";
@@ -254,6 +255,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute role={UserRole.MEMBER}>
             <Notifications />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/email-test"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <EmailTest />
           </ProtectedRoute>
         }
       />
