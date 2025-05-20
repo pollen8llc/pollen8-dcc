@@ -82,7 +82,7 @@ const ProfileSearchPage: React.FC = () => {
     fetchInterests();
   }, []);
 
-  // Search profiles with role information
+  // Search profiles with role information - using an approach similar to the admin panel
   useEffect(() => {
     const searchProfiles = async () => {
       if (!currentUser) return;
@@ -115,16 +115,16 @@ const ProfileSearchPage: React.FC = () => {
         }
         
         // Execute the query
-        const { data, error } = await query;
+        const { data: profilesData, error: profilesError } = await query;
         
-        if (error) {
-          console.error("Error searching profiles:", error);
-          setError("Search failed: " + error.message);
+        if (profilesError) {
+          console.error("Error searching profiles:", profilesError);
+          setError("Search failed: " + profilesError.message);
           return;
         }
-        
+
         // Process the profile results
-        const profilesWithProcessedData = data.map(profile => ({
+        const profilesWithProcessedData = profilesData.map(profile => ({
           ...profile,
           social_links: profile.social_links ? 
             (typeof profile.social_links === 'string' ? 
@@ -136,60 +136,72 @@ const ProfileSearchPage: React.FC = () => {
               }
         }));
         
-        // Now fetch roles for each user individually using the get_highest_role function
-        const rolePromises = profilesWithProcessedData.map(async (profile) => {
-          try {
-            const { data: roleData, error: roleError } = await supabase
-              .rpc('get_highest_role', { user_id: profile.id });
-              
-            if (roleError) {
-              console.error(`Error fetching role for user ${profile.id}:`, roleError);
-              return { profile, role: null };
-            }
-            
-            console.log(`Got role for ${profile.id}: ${roleData}`);
-            
-            return { 
-              profile, 
-              role: roleData 
-            };
-          } catch (e) {
-            console.error(`Error fetching role for user ${profile.id}:`, e);
-            return { profile, role: null };
-          }
-        });
+        // Efficiently fetch roles in a single query (similar to admin panel approach)
+        // Get all user IDs from profiles
+        const userIds = profilesWithProcessedData.map(profile => profile.id);
         
-        // Wait for all role queries to complete
-        const roleResults = await Promise.all(rolePromises);
+        // Get all roles for these users in a single query
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('user_roles')
+          .select(`
+            user_id,
+            roles:role_id (
+              name
+            )
+          `)
+          .in('user_id', userIds);
+          
+        if (rolesError) {
+          console.error("Error fetching user roles:", rolesError);
+          // Continue with profiles but without roles
+        }
+        
+        // Create a map of user_id to role name (taking the highest role for each user)
+        const userRoleMap = new Map<string, UserRole>();
+        
+        if (rolesData) {
+          // Process all roles
+          rolesData.forEach(roleItem => {
+            const userId = roleItem.user_id;
+            const roleName = roleItem.roles?.name;
+            
+            if (userId && roleName) {
+              // Determine the highest role (ADMIN > ORGANIZER > MEMBER > GUEST)
+              let role: UserRole | undefined;
+              
+              // Map the role string to UserRole enum
+              if (roleName === 'ADMIN') {
+                role = UserRole.ADMIN;
+              } else if (roleName === 'ORGANIZER') {
+                role = UserRole.ORGANIZER;
+              } else if (roleName === 'MEMBER') {
+                role = UserRole.MEMBER;
+              } else if (roleName === 'GUEST') {
+                role = UserRole.GUEST;
+              }
+              
+              // If this role is defined and higher than any existing role for this user
+              if (role !== undefined) {
+                const existingRole = userRoleMap.get(userId);
+                if (existingRole === undefined || role < existingRole) {
+                  // In the enum, lower values = higher roles (ADMIN = 0, GUEST = 3)
+                  userRoleMap.set(userId, role);
+                }
+              }
+            }
+          });
+        }
         
         // Merge role data with profile data
-        const profilesWithRoles = roleResults.map(result => {
-          const roleString = result.role;
-          let role: UserRole | null = null;
-          
-          // Convert role string to UserRole enum if available
-          if (roleString) {
-            // Use exact string comparison to ensure correct mapping
-            if (roleString === 'ADMIN') {
-              role = UserRole.ADMIN;
-            } else if (roleString === 'ORGANIZER') {
-              role = UserRole.ORGANIZER;
-            } else if (roleString === 'MEMBER') {
-              role = UserRole.MEMBER;
-            } else if (roleString === 'GUEST') {
-              role = UserRole.GUEST;
-            } else {
-              console.warn(`Unknown role string: ${roleString} for user ${result.profile.id}`);
-              role = UserRole.MEMBER; // Default to MEMBER if unknown
-            }
-          } else {
-            // Default to MEMBER if no role data
-            role = UserRole.MEMBER;
-          }
+        const profilesWithRoles = profilesWithProcessedData.map(profile => {
+          // Get the role from the map or default to MEMBER
+          const role = userRoleMap.get(profile.id) ?? UserRole.MEMBER;
           
           return {
-            ...result.profile,
-            role
+            ...profile,
+            role,
+            // Get the string representation for logging
+            roleString: UserRole[role]
           };
         });
         
@@ -197,7 +209,7 @@ const ProfileSearchPage: React.FC = () => {
           id: p.id, 
           name: `${p.first_name} ${p.last_name}`, 
           role: p.role,
-          roleString: p.role !== null ? UserRole[p.role] : 'Unknown'
+          roleString: p.roleString
         })));
         
         setProfiles(profilesWithRoles);
