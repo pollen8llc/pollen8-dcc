@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,6 +41,8 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
 
   // Get badge style based on role
   const getRoleBadgeStyles = (role?: UserRole) => {
+    if (role === undefined) return "bg-gray-500 text-white";
+    
     switch(role) {
       case UserRole.ADMIN:
         return "bg-purple-500 text-white";
@@ -49,9 +50,17 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
         return "bg-blue-500 text-white";
       case UserRole.MEMBER:
         return "bg-green-500 text-white";
+      case UserRole.GUEST:
+        return "bg-gray-500 text-white";
       default:
         return "bg-gray-500 text-white";
     }
+  };
+  
+  // Get role display name
+  const getRoleDisplayName = (role?: UserRole) => {
+    if (role === undefined) return "GUEST";
+    return UserRole[role] || "GUEST";
   };
 
   if (isLoading) {
@@ -120,9 +129,9 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
                     {[profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Anonymous User"}
                   </h3>
                   
-                  {profile.role && (
+                  {profile.role !== undefined && (
                     <Badge className={`${getRoleBadgeStyles(profile.role)}`}>
-                      {UserRole[profile.role]}
+                      {getRoleDisplayName(profile.role)}
                     </Badge>
                   )}
                 </div>

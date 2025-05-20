@@ -146,6 +146,8 @@ const ProfileSearchPage: React.FC = () => {
               return { profile, role: null };
             }
             
+            console.log(`Got role for ${profile.id}: ${roleData}`);
+            
             return { 
               profile, 
               role: roleData 
@@ -162,24 +164,26 @@ const ProfileSearchPage: React.FC = () => {
         // Merge role data with profile data
         const profilesWithRoles = roleResults.map(result => {
           const roleString = result.role;
-          let role: UserRole | undefined = undefined;
+          let role: UserRole | null = null;
           
           // Convert role string to UserRole enum if available
           if (roleString) {
-            switch (roleString) {
-              case 'ADMIN':
-                role = UserRole.ADMIN;
-                break;
-              case 'ORGANIZER':
-                role = UserRole.ORGANIZER;
-                break;
-              case 'MEMBER':
-                role = UserRole.MEMBER;
-                break;
-              case 'GUEST':
-                role = UserRole.GUEST;
-                break;
+            // Use exact string comparison to ensure correct mapping
+            if (roleString === 'ADMIN') {
+              role = UserRole.ADMIN;
+            } else if (roleString === 'ORGANIZER') {
+              role = UserRole.ORGANIZER;
+            } else if (roleString === 'MEMBER') {
+              role = UserRole.MEMBER;
+            } else if (roleString === 'GUEST') {
+              role = UserRole.GUEST;
+            } else {
+              console.warn(`Unknown role string: ${roleString} for user ${result.profile.id}`);
+              role = UserRole.MEMBER; // Default to MEMBER if unknown
             }
+          } else {
+            // Default to MEMBER if no role data
+            role = UserRole.MEMBER;
           }
           
           return {
@@ -191,7 +195,8 @@ const ProfileSearchPage: React.FC = () => {
         console.log('Profiles with roles:', profilesWithRoles.map(p => ({ 
           id: p.id, 
           name: `${p.first_name} ${p.last_name}`, 
-          role: p.role 
+          role: p.role,
+          roleString: result.role,
         })));
         
         setProfiles(profilesWithRoles);
