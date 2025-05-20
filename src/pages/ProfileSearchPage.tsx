@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -136,49 +135,33 @@ const ProfileSearchPage: React.FC = () => {
               }
         }));
         
-        // Get user IDs to fetch roles
-        const userIds = profilesWithProcessedData.map(profile => profile.id);
-        
-        // Fetch roles for these users
-        const { data: roleData, error: roleError } = await supabase
-          .rpc('get_highest_role', { user_id: currentUser.id })
-          .in('user_id', userIds);
-          
-        if (roleError) {
-          console.error("Error fetching user roles:", roleError);
-          // Continue without roles rather than failing the whole request
-        }
-        
-        // Now fetch roles for each user using the get_highest_role function
+        // Now fetch roles for each user individually using the get_highest_role function
         const rolePromises = profilesWithProcessedData.map(async (profile) => {
           try {
-            const { data: role } = await supabase
+            const { data: roleData, error: roleError } = await supabase
               .rpc('get_highest_role', { user_id: profile.id });
+              
+            if (roleError) {
+              console.error(`Error fetching role for user ${profile.id}:`, roleError);
+              return { profile, role: null };
+            }
             
-            return {
-              userId: profile.id,
-              role: role as string
+            return { 
+              profile, 
+              role: roleData 
             };
           } catch (e) {
             console.error(`Error fetching role for user ${profile.id}:`, e);
-            return { userId: profile.id, role: null };
+            return { profile, role: null };
           }
         });
         
         // Wait for all role queries to complete
         const roleResults = await Promise.all(rolePromises);
         
-        // Create a map of userId -> role
-        const roleMap = new Map();
-        roleResults.forEach(result => {
-          if (result.role) {
-            roleMap.set(result.userId, result.role);
-          }
-        });
-        
         // Merge role data with profile data
-        const profilesWithRoles = profilesWithProcessedData.map(profile => {
-          const roleString = roleMap.get(profile.id);
+        const profilesWithRoles = roleResults.map(result => {
+          const roleString = result.role;
           let role: UserRole | undefined = undefined;
           
           // Convert role string to UserRole enum if available
@@ -200,10 +183,16 @@ const ProfileSearchPage: React.FC = () => {
           }
           
           return {
-            ...profile,
+            ...result.profile,
             role
           };
         });
+        
+        console.log('Profiles with roles:', profilesWithRoles.map(p => ({ 
+          id: p.id, 
+          name: `${p.first_name} ${p.last_name}`, 
+          role: p.role 
+        })));
         
         setProfiles(profilesWithRoles);
       } catch (error) {
