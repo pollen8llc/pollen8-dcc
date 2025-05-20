@@ -15,6 +15,7 @@ import { ExtendedProfile } from "@/services/profileService";
 import { useDebounce } from "@/hooks/useDebounce";
 import ProfileSearchList from "@/components/profile/ProfileSearchList";
 import { Shell } from "@/components/layout/Shell";
+import { UserRole } from "@/models/types";
 
 const ProfileSearchPage: React.FC = () => {
   const { currentUser } = useUser();
@@ -81,7 +82,7 @@ const ProfileSearchPage: React.FC = () => {
     fetchInterests();
   }, []);
 
-  // Search profiles
+  // Search profiles with role information
   useEffect(() => {
     const searchProfiles = async () => {
       if (!currentUser) return;
@@ -90,6 +91,7 @@ const ProfileSearchPage: React.FC = () => {
       setError(null);
       
       try {
+        // First, get profiles based on search criteria
         let query = supabase
           .from('profiles')
           .select('*');
@@ -121,8 +123,8 @@ const ProfileSearchPage: React.FC = () => {
           return;
         }
         
-        // Process the results
-        const searchResults = data.map(profile => ({
+        // Process the profile results
+        const profilesWithProcessedData = data.map(profile => ({
           ...profile,
           social_links: profile.social_links ? 
             (typeof profile.social_links === 'string' ? 
@@ -134,7 +136,76 @@ const ProfileSearchPage: React.FC = () => {
               }
         }));
         
-        setProfiles(searchResults);
+        // Get user IDs to fetch roles
+        const userIds = profilesWithProcessedData.map(profile => profile.id);
+        
+        // Fetch roles for these users
+        const { data: roleData, error: roleError } = await supabase
+          .rpc('get_highest_role', { user_id: currentUser.id })
+          .in('user_id', userIds);
+          
+        if (roleError) {
+          console.error("Error fetching user roles:", roleError);
+          // Continue without roles rather than failing the whole request
+        }
+        
+        // Now fetch roles for each user using the get_highest_role function
+        const rolePromises = profilesWithProcessedData.map(async (profile) => {
+          try {
+            const { data: role } = await supabase
+              .rpc('get_highest_role', { user_id: profile.id });
+            
+            return {
+              userId: profile.id,
+              role: role as string
+            };
+          } catch (e) {
+            console.error(`Error fetching role for user ${profile.id}:`, e);
+            return { userId: profile.id, role: null };
+          }
+        });
+        
+        // Wait for all role queries to complete
+        const roleResults = await Promise.all(rolePromises);
+        
+        // Create a map of userId -> role
+        const roleMap = new Map();
+        roleResults.forEach(result => {
+          if (result.role) {
+            roleMap.set(result.userId, result.role);
+          }
+        });
+        
+        // Merge role data with profile data
+        const profilesWithRoles = profilesWithProcessedData.map(profile => {
+          const roleString = roleMap.get(profile.id);
+          let role: UserRole | undefined = undefined;
+          
+          // Convert role string to UserRole enum if available
+          if (roleString) {
+            switch (roleString) {
+              case 'ADMIN':
+                role = UserRole.ADMIN;
+                break;
+              case 'ORGANIZER':
+                role = UserRole.ORGANIZER;
+                break;
+              case 'MEMBER':
+                role = UserRole.MEMBER;
+                break;
+              case 'GUEST':
+                role = UserRole.GUEST;
+                break;
+            }
+          }
+          
+          return {
+            ...profile,
+            role
+          };
+        });
+        
+        setProfiles(profilesWithRoles);
       } catch (error) {
         console.error("Error in searchProfiles:", error);
         setError("An unexpected error occurred while searching profiles");

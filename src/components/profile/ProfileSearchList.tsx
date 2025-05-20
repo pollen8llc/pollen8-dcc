@@ -13,6 +13,7 @@ import {
   AlertDescription, 
   AlertTitle 
 } from "@/components/ui/alert";
+import { UserRole } from "@/models/types";
 
 interface ProfileSearchListProps {
   profiles: ExtendedProfile[];
@@ -37,6 +38,20 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
     const lastInitial = lastName ? lastName[0].toUpperCase() : "";
     
     return `${firstInitial}${lastInitial}`.trim() || "?";
+  };
+
+  // Get badge style based on role
+  const getRoleBadgeStyles = (role?: UserRole) => {
+    switch(role) {
+      case UserRole.ADMIN:
+        return "bg-purple-500 text-white";
+      case UserRole.ORGANIZER:
+        return "bg-blue-500 text-white";
+      case UserRole.MEMBER:
+        return "bg-green-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
   };
 
   if (isLoading) {
@@ -100,9 +115,17 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
               </Avatar>
               
               <div className="flex-1">
-                <h3 className="font-medium text-lg">
-                  {[profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Anonymous User"}
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-lg">
+                    {[profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Anonymous User"}
+                  </h3>
+                  
+                  {profile.role && (
+                    <Badge className={`${getRoleBadgeStyles(profile.role)}`}>
+                      {UserRole[profile.role]}
+                    </Badge>
+                  )}
+                </div>
                 
                 {profile.location && (
                   <div className="flex items-center text-muted-foreground mt-1">
