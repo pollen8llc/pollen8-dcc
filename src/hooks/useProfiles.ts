@@ -8,23 +8,23 @@ import {
   updateProfile,
   getConnectedProfiles,
   canViewProfile,
-  ExtendedProfile,
-  getUserRoleFromProfile
+  ExtendedProfile
 } from "@/services/profileService";
 
 export const useProfiles = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<ExtendedProfile | null>(null);
   const [connectedProfiles, setConnectedProfiles] = useState<ExtendedProfile[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const { currentUser, refreshUser } = useUser();
   const { toast } = useToast();
-  const [error, setError] = useState<string | null>(null);
 
   /**
    * Get a user's profile by ID
    */
   const fetchProfile = async (profileId: string): Promise<ExtendedProfile | null> => {
     setIsLoading(true);
+    setError(null);
     try {
       const fetchedProfile = await getProfileById(profileId);
       setProfile(fetchedProfile);
@@ -56,6 +56,7 @@ export const useProfiles = () => {
     }
 
     setIsLoading(true);
+    setError(null);
     try {
       // Ensure we're updating the current user's profile
       const dataToUpdate = {
@@ -154,6 +155,7 @@ export const useProfiles = () => {
     }
 
     setIsLoading(true);
+    setError(null);
     try {
       const profiles = await getConnectedProfiles(currentUser.id, maxDepth, filters);
       setConnectedProfiles(profiles);
@@ -172,7 +174,7 @@ export const useProfiles = () => {
   };
 
   /**
-   * Search for profiles with role information
+   * Search for profiles
    */
   const searchProfiles = async (params: {
     query?: string;
@@ -187,16 +189,9 @@ export const useProfiles = () => {
     try {
       const { query, interests, location, page = 0, limit = 10 } = params;
       
-      // Query profiles with a join to user_roles and roles to get role information
       let queryBuilder = supabase
         .from('profiles')
-        .select(`
-          *,
-          user_roles!user_id(
-            role_id,
-            roles!role_id(name)
-          )
-        `, { count: 'exact' });
+        .select('*, user_roles(role_id, roles:role_id(name))', { count: 'exact' });
       
       // Apply filters if provided
       if (query) {
@@ -227,24 +222,43 @@ export const useProfiles = () => {
         return { profiles: [], count: 0 };
       }
       
-      // Process the profiles to include role information
-      const processedProfiles = data.map(profile => {
-        // Extract role from the joined data
-        const userRole = getUserRoleFromProfile(profile);
+      // Process the profiles to extract roles and format data
+      const profiles = data.map(profile => {
+        // Extract role information from the joins
+        let roleValue = "MEMBER"; // Default role
         
+        if (profile.user_roles && Array.isArray(profile.user_roles)) {
+          // Check for admin role first
+          const isAdmin = profile.user_roles.some(ur => 
+            ur.roles && ur.roles.name === "ADMIN"
+          );
+          
+          if (isAdmin) {
+            roleValue = "ADMIN";
+          } else {
+            // Check for organizer role
+            const isOrganizer = profile.user_roles.some(ur => 
+              ur.roles && ur.roles.name === "ORGANIZER"
+            );
+            
+            if (isOrganizer) {
+              roleValue = "ORGANIZER";
+            }
+          }
+        }
+        
+        // Return formatted profile with role
         return {
           ...profile,
-          // Ensure JSON fields are parsed properly
+          role: roleValue,
           social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
           privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
             profile_visibility: "connections"
-          },
-          // Add role information
-          role: userRole
-        };
+          }
+        } as ExtendedProfile;
       });
       
-      return { profiles: processedProfiles as ExtendedProfile[], count: count || 0 };
+      return { profiles, count: count || 0 };
     } catch (err: any) {
       console.error("Exception in searchProfiles:", err);
       setError(err.message || "An unexpected error occurred");
@@ -256,9 +270,9 @@ export const useProfiles = () => {
 
   return {
     isLoading,
+    error,
     profile,
     connectedProfiles,
-    error,
     getProfileById: fetchProfile,
     updateProfile: handleUpdateProfile,
     isProfileComplete,

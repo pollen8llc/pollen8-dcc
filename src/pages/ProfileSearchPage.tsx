@@ -1,3 +1,6 @@
+<think>
+
+</think>
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,13 +18,13 @@ import { ExtendedProfile } from "@/services/profileService";
 import { useDebounce } from "@/hooks/useDebounce";
 import ProfileSearchList from "@/components/profile/ProfileSearchList";
 import { Shell } from "@/components/layout/Shell";
-import { useProfiles } from "@/hooks/useProfiles";
+import { useProfiles } from "@/hooks/useProfiles"; // Import the useProfiles hook
 
 const ProfileSearchPage: React.FC = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { searchProfiles, isLoading, error } = useProfiles();
+  const { searchProfiles, isLoading, error } = useProfiles(); // Use the hook
   
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
@@ -72,33 +75,30 @@ const ProfileSearchPage: React.FC = () => {
         }
       } catch (error) {
         console.error("Error in fetchInterests:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load interests",
-          variant: "destructive",
-        });
       }
     };
     
     fetchInterests();
-  }, [toast]);
+  }, []);
 
-  // Search profiles using the useProfiles hook
+  // Search profiles using the hook's searchProfiles function
   useEffect(() => {
-    const fetchProfiles = async () => {
+    const performSearch = async () => {
       if (!currentUser) return;
       
       try {
-        // Use the searchProfiles function from useProfiles hook
-        const result = await searchProfiles({
-          query: debouncedSearchQuery || undefined,
-          location: locationFilter || undefined,
+        // Create search params object using our filter state
+        const searchParams = {
+          query: debouncedSearchQuery,
+          location: locationFilter,
           interests: interestFilter.length > 0 ? interestFilter : undefined
-        });
+        };
         
+        // Use the hook's searchProfiles function
+        const result = await searchProfiles(searchParams);
         setProfiles(result.profiles);
-      } catch (err) {
-        console.error("Error searching profiles:", err);
+      } catch (error) {
+        console.error("Error in performSearch:", error);
         toast({
           title: "Error",
           description: "An unexpected error occurred while searching profiles",
@@ -107,7 +107,7 @@ const ProfileSearchPage: React.FC = () => {
       }
     };
     
-    fetchProfiles();
+    performSearch();
   }, [currentUser, debouncedSearchQuery, locationFilter, interestFilter, searchProfiles, toast]);
 
   // Handle adding an interest filter
