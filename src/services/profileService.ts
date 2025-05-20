@@ -19,6 +19,7 @@ export interface ExtendedProfile {
   };
   created_at?: string;
   updated_at?: string;
+  role_name?: UserRole; // Added role_name property
 }
 
 /**
