@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -196,7 +197,7 @@ const ProfileSearchPage: React.FC = () => {
           id: p.id, 
           name: `${p.first_name} ${p.last_name}`, 
           role: p.role,
-          roleString: result.role,
+          roleString: p.role !== null ? UserRole[p.role] : 'Unknown'
         })));
         
         setProfiles(profilesWithRoles);
