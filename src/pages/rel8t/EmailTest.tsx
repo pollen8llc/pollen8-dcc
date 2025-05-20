@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Shell } from "@/components/layout/Shell";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
+import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface EmailFormData {
   to: string;
@@ -18,6 +19,7 @@ interface EmailFormData {
 
 const EmailTest = () => {
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{success?: boolean; message?: string; error?: string} | null>(null);
   const { register, handleSubmit, formState: { errors } } = useForm<EmailFormData>({
     defaultValues: {
       to: "",
@@ -28,6 +30,8 @@ const EmailTest = () => {
 
   const onSubmit = async (data: EmailFormData) => {
     setLoading(true);
+    setResult(null);
+    
     try {
       const { data: response, error } = await supabase.functions.invoke("send-email", {
         body: {
@@ -41,12 +45,23 @@ const EmailTest = () => {
         throw error;
       }
 
+      setResult({
+        success: true,
+        message: `Email processed successfully to ${data.to}`
+      });
+      
       toast({
-        title: "Email sent successfully",
+        title: "Email processed successfully",
         description: `Email was sent to ${data.to}`,
       });
     } catch (error: any) {
       console.error("Error sending email:", error);
+      
+      setResult({
+        success: false,
+        error: error.message || "An error occurred while sending the email"
+      });
+      
       toast({
         title: "Error sending email",
         description: error.message || "An error occurred while sending the email",
@@ -108,6 +123,21 @@ const EmailTest = () => {
                 />
                 {errors.message && <p className="text-sm text-red-500">{errors.message.message}</p>}
               </div>
+              
+              {result && (
+                <div className={`p-4 rounded-md ${result.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                  <div className="flex items-center">
+                    {result.success ? (
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                    )}
+                    <p className={result.success ? 'text-green-700' : 'text-red-700'}>
+                      {result.success ? result.message : `Error: ${result.error}`}
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
             
             <CardFooter>
