@@ -30,20 +30,32 @@ import {
 } from "@/services/rel8t/outreachService";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
+import { Trigger } from "@/services/rel8t/triggerService";
 
 interface ReviewSubmitStepProps {
   wizardData: {
     contacts: Contact[];
-    triggers: any[];
+    triggers: Trigger[];
     priority: OutreachPriority;
   };
   onSubmit: () => void;
   onPrevious?: () => void;
 }
 
-// Helper function to calculate due date based on trigger type
-const calculateDueDate = (triggerType: string) => {
+// Helper function to get due date from trigger
+const getDueDateFromTrigger = (trigger: Trigger) => {
+  // Use execution_time if available
+  if (trigger.execution_time) {
+    return new Date(trigger.execution_time);
+  }
+  
+  // Else use next_execution
+  if (trigger.next_execution) {
+    return new Date(trigger.next_execution);
+  }
+  
+  // Fallback: calculate based on trigger name
   const today = new Date();
   const dueDateMap: Record<string, Date> = {
     "Follow up in 1 week": addDays(today, 7),
@@ -53,10 +65,13 @@ const calculateDueDate = (triggerType: string) => {
     "Introduce to team": addDays(today, 3),
     "Share resources": addDays(today, 2),
     "Reconnect soon": addDays(today, 14), 
-    "Birthday reminder": addDays(today, 7), // Default to 7 days unless actual date known
+    "Birthday reminder": addDays(today, 7),
+    "Monthly Check-in": addDays(today, 30),
+    "Quarterly Review": addDays(today, 90),
+    "Birthday Reminder": addDays(today, 7),
   };
   
-  return dueDateMap[triggerType] || addDays(today, 7); // Default to 1 week
+  return dueDateMap[trigger.name] || addDays(today, 7); // Default to 1 week
 };
 
 export const ReviewSubmitStep = ({
@@ -91,13 +106,14 @@ export const ReviewSubmitStep = ({
       // Create an outreach item for each trigger
       const contactIds = contacts.map(contact => contact.id);
       const outreachPromises = triggers.map(async (trigger) => {
-        const dueDate = calculateDueDate(trigger.name);
+        // Get the due date from the trigger with proper fallbacks
+        const dueDate = getDueDateFromTrigger(trigger);
         
         const outreach = {
           title: trigger.name,
           description: trigger.description || `Reminder for ${contacts.map(c => c.name).join(', ')}`,
           priority: priority,
-          status: 'pending' as OutreachStatus, // Explicitly cast to OutreachStatus type
+          status: 'pending' as OutreachStatus,
           due_date: dueDate.toISOString()
         };
         
@@ -181,6 +197,16 @@ export const ReviewSubmitStep = ({
     );
   }
 
+  // Format date for display
+  const formatDate = (date: Date) => {
+    try {
+      return format(date, "MMM d, yyyy");
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Invalid date";
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -244,23 +270,26 @@ export const ReviewSubmitStep = ({
               <p className="text-muted-foreground">No reminders selected</p>
             </div>
           ) : (
-            triggers.map((trigger) => (
-              <div 
-                key={trigger.id} 
-                className="border rounded-md p-4 border-border/30"
-              >
-                <h5 className="font-medium">{trigger.name}</h5>
-                {trigger.description && (
-                  <p className="text-sm text-muted-foreground mt-1 mb-2">
-                    {trigger.description}
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="outline">Due {calculateDueDate(trigger.name).toLocaleDateString()}</Badge>
-                  <Badge variant="secondary">{trigger.action}</Badge>
+            triggers.map((trigger) => {
+              const dueDate = getDueDateFromTrigger(trigger);
+              return (
+                <div 
+                  key={trigger.id} 
+                  className="border rounded-md p-4 border-border/30"
+                >
+                  <h5 className="font-medium">{trigger.name}</h5>
+                  {trigger.description && (
+                    <p className="text-sm text-muted-foreground mt-1 mb-2">
+                      {trigger.description}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Badge variant="outline">Due {formatDate(dueDate)}</Badge>
+                    <Badge variant="secondary">{trigger.action.replace(/_/g, ' ')}</Badge>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
@@ -287,20 +316,6 @@ export const ReviewSubmitStep = ({
       </div>
     </div>
   );
-};
-
-// Function to get the style for priority badges
-const getPriorityStyle = (priority: string) => {
-  switch(priority) {
-    case 'high':
-      return 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800';
-    case 'medium':
-      return 'bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800';
-    case 'low':
-      return 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800';
-    default:
-      return '';
-  }
 };
 
 export default ReviewSubmitStep;

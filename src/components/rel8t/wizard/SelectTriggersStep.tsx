@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -18,23 +19,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Contact } from "@/services/rel8t/contactService";
 import { Label } from "@/components/ui/label";
-import { Check, AlertCircle, Flag } from "lucide-react";
+import { Check, AlertCircle, Flag, CalendarIcon } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-interface TriggerData {
-  id: string;
-  name: string;
-  description?: string;
-  action: string;
-  condition: string;
-  is_active: boolean;
-  user_id: string;
-  // Other fields...
-}
+import { getTriggers, Trigger } from "@/services/rel8t/triggerService";
+import { format } from "date-fns";
 
 interface SelectTriggersStepProps {
   selectedContacts: Contact[];
-  onNext: (data: { triggers: TriggerData[], priority: 'low' | 'medium' | 'high' }) => void;
+  onNext: (data: { triggers: Trigger[], priority: 'low' | 'medium' | 'high' }) => void;
   onPrevious?: () => void;
 }
 
@@ -43,48 +35,16 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
   onNext,
   onPrevious,
 }) => {
-  const [selectedTriggers, setSelectedTriggers] = useState<TriggerData[]>([]);
+  const [selectedTriggers, setSelectedTriggers] = useState<Trigger[]>([]);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
 
-  // Demo triggers - in a real app, these would come from the database
-  const demoTriggers: TriggerData[] = [
-    {
-      id: "1",
-      name: "Monthly Check-in",
-      description: "Send a reminder to check in with this contact every month",
-      action: "Send email reminder",
-      condition: "Monthly",
-      is_active: true,
-      user_id: "current-user",
-    },
-    {
-      id: "2",
-      name: "Quarterly Review",
-      description: "Review relationship status every quarter",
-      action: "Create calendar reminder",
-      condition: "Quarterly",
-      is_active: true,
-      user_id: "current-user",
-    },
-    {
-      id: "3",
-      name: "Birthday Reminder",
-      description: "Get notified about contact's birthday",
-      action: "Send notification",
-      condition: "Annual",
-      is_active: true,
-      user_id: "current-user",
-    },
-  ];
-
-  const { data: triggers = demoTriggers, isLoading } = useQuery({
+  // Fetch actual triggers from database
+  const { data: triggers = [], isLoading } = useQuery({
     queryKey: ["triggers"],
-    queryFn: () => Promise.resolve(demoTriggers),
-    // In a real app, you'd fetch from API using:
-    // queryFn: () => getTriggers(),
+    queryFn: getTriggers,
   });
 
-  const toggleTrigger = (trigger: TriggerData) => {
+  const toggleTrigger = (trigger: Trigger) => {
     setSelectedTriggers((prev) => {
       const isSelected = prev.some((t) => t.id === trigger.id);
       if (isSelected) {
@@ -97,6 +57,28 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
 
   const handleSubmit = () => {
     onNext({ triggers: selectedTriggers, priority });
+  };
+
+  // Format the execution date display
+  const formatExecutionDate = (trigger: Trigger) => {
+    if (!trigger.execution_time) {
+      return "No date set";
+    }
+    
+    const executionDate = new Date(trigger.execution_time);
+    
+    try {
+      if (trigger.recurrence_pattern) {
+        const pattern = trigger.recurrence_pattern;
+        const frequency = pattern.frequency ? `every ${pattern.frequency} ` : "every ";
+        return `${format(executionDate, "MMM d, yyyy")} (${frequency}${pattern.type})`;
+      } else {
+        return format(executionDate, "MMM d, yyyy 'at' h:mm a");
+      }
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return "Invalid date";
+    }
   };
 
   return (
@@ -171,40 +153,51 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {triggers.map((trigger) => {
-            const isSelected = selectedTriggers.some((t) => t.id === trigger.id);
-            return (
-              <Card
-                key={trigger.id}
-                className={`cursor-pointer transition-colors ${
-                  isSelected
-                    ? "border-primary bg-primary/5"
-                    : "hover:bg-muted/50 border-border/30"
-                }`}
-                onClick={() => toggleTrigger(trigger)}
-              >
-                <CardHeader className="p-4 pb-2">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-base">{trigger.name}</CardTitle>
-                    {isSelected ? (
-                      <Check className="h-5 w-5 text-primary" />
-                    ) : null}
-                  </div>
-                  <CardDescription>{trigger.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 pt-2">
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="outline">
-                      {trigger.condition}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {trigger.action}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {triggers.length === 0 ? (
+            <div className="col-span-full text-center py-8">
+              <AlertCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-muted-foreground">No reminders available</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Create triggers in Settings to use here
+              </p>
+            </div>
+          ) : (
+            triggers.map((trigger) => {
+              const isSelected = selectedTriggers.some((t) => t.id === trigger.id);
+              return (
+                <Card
+                  key={trigger.id}
+                  className={`cursor-pointer transition-colors ${
+                    isSelected
+                      ? "border-primary bg-primary/5"
+                      : "hover:bg-muted/50 border-border/30"
+                  }`}
+                  onClick={() => toggleTrigger(trigger)}
+                >
+                  <CardHeader className="p-4 pb-2">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-base">{trigger.name}</CardTitle>
+                      {isSelected ? (
+                        <Check className="h-5 w-5 text-primary" />
+                      ) : null}
+                    </div>
+                    <CardDescription>{trigger.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-2">
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        <CalendarIcon className="h-3 w-3" />
+                        {formatExecutionDate(trigger)}
+                      </Badge>
+                      <Badge variant="secondary">
+                        {trigger.action.replace(/_/g, ' ')}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
       )}
 

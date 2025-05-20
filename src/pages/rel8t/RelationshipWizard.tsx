@@ -11,6 +11,7 @@ import { Contact } from "@/services/rel8t/contactService";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
+import { Trigger } from "@/services/rel8t/triggerService";
 
 type WizardStep = 
   | "select-contacts" 
@@ -19,7 +20,7 @@ type WizardStep =
 
 type WizardData = {
   contacts: Contact[];
-  triggers: any[];
+  triggers: Trigger[];
   importedContacts: any[];
   priority: 'low' | 'medium' | 'high';
 };
@@ -41,7 +42,7 @@ const RelationshipWizard = () => {
     setStep("select-triggers");
   };
 
-  const handleSelectTriggersNext = (stepData: { triggers: any[], priority: 'low' | 'medium' | 'high' }) => {
+  const handleSelectTriggersNext = (stepData: { triggers: Trigger[], priority: 'low' | 'medium' | 'high' }) => {
     setData(prev => ({ 
       ...prev, 
       triggers: stepData.triggers,
