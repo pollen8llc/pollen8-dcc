@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -63,6 +64,9 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
     return UserRole[role] || "GUEST";
   };
 
+  // Check if user is admin
+  const isAdmin = (role?: UserRole) => role === UserRole.ADMIN;
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -112,11 +116,11 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
       {profiles.map((profile) => (
         <Card 
           key={profile.id} 
-          className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300"
+          className={`overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300 ${isAdmin(profile.role) ? 'admin-rainbow-border' : ''}`}
         >
           <div className="p-6">
             <div className="flex items-start gap-4">
-              <Avatar className="h-16 w-16 ring-2 ring-[#00eada]/20">
+              <Avatar className={`h-16 w-16 ${isAdmin(profile.role) ? 'ring-2 ring-[#00eada]/50' : 'ring-2 ring-[#00eada]/20'}`}>
                 <AvatarImage src={profile.avatar_url || ""} />
                 <AvatarFallback className="bg-[#00eada]/10 text-[#00eada] font-medium">
                   {getInitials(profile.first_name, profile.last_name)}
