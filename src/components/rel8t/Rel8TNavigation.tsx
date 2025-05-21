@@ -31,7 +31,7 @@ export const Rel8Navigation = () => {
   const coreItems = [
     { name: "Knowledge Base", href: "/knowledge", icon: Book },
     { name: "Browse Articles", href: "/knowledge", icon: FileText },
-    { name: "Latest", href: "/knowledge", icon: Clock }
+    { name: "Browse Tags", href: "/knowledge", icon: Tag }
   ];
 
   return (

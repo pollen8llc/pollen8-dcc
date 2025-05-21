@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { 
   PlusCircle, 
   Search,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Tag
 } from 'lucide-react';
 import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
 import { TagsList } from '@/components/knowledge/TagsList';
@@ -33,6 +34,7 @@ import {
 } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const KnowledgeBase = () => {
   const navigate = useNavigate();
@@ -52,19 +54,94 @@ const KnowledgeBase = () => {
   const [sortOption, setSortOption] = useState(
     searchParams.get('sort') || 'newest'
   );
+  const [articles, setArticles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Hooks
-  const { useArticles, useTags } = useKnowledgeBase();
-  
-  // Fetch articles with filters
-  const { data: articles, isLoading: isArticlesLoading, refetch: refetchArticles } = useArticles({
-    tag: selectedTag,
-    searchQuery: searchQuery.length > 2 ? searchQuery : undefined,
-    type: selectedType,
-  });
+  const { useTags } = useKnowledgeBase();
   
   // Fetch tags for the filter sidebar
   const { data: tags, isLoading: isTagsLoading } = useTags();
+  
+  // Function to directly fetch articles
+  const fetchArticles = async () => {
+    setIsLoading(true);
+    try {
+      console.log('Directly fetching articles with filters:', { selectedTag, searchQuery, selectedType });
+      
+      let query = supabase
+        .from('knowledge_articles')
+        .select(`
+          *,
+          profiles:user_id (
+            first_name,
+            last_name,
+            avatar_url,
+            is_admin
+          )
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (selectedTag) {
+        query = query.contains('tags', [selectedTag]);
+      }
+      
+      if (searchQuery && searchQuery.length > 2) {
+        query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+      }
+      
+      // Only filter by type if it's not null/undefined and not 'all'
+      if (selectedType && selectedType !== 'all') {
+        query = query.eq('content_type', selectedType);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('Error fetching articles directly:', error);
+        toast({
+          title: "Failed to load content",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      console.log('Articles fetched successfully:', data?.length || 0);
+      
+      // Format author information
+      const formattedData = data?.map(article => {
+        const profileData = article.profiles as { 
+          first_name?: string; 
+          last_name?: string; 
+          avatar_url?: string;
+          is_admin?: boolean;
+        } | null;
+        
+        return {
+          ...article,
+          content_type: article.content_type || ContentType.ARTICLE,
+          author: profileData ? {
+            id: article.user_id,
+            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
+            avatar_url: profileData.avatar_url || '',
+            is_admin: !!profileData.is_admin
+          } : undefined
+        };
+      });
+      
+      setArticles(formattedData || []);
+    } catch (error: any) {
+      console.error('Error fetching articles:', error);
+      toast({
+        title: "Failed to load content",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Update URL when filters change
   useEffect(() => {
@@ -75,14 +152,30 @@ const KnowledgeBase = () => {
     setSearchParams(params, { replace: true });
   }, [selectedTag, selectedType, sortOption, setSearchParams]);
 
+  // Fetch articles when filters change
+  useEffect(() => {
+    fetchArticles();
+  }, [selectedTag, selectedType, searchQuery]);
+
   // Debug articles data
   useEffect(() => {
-    if (articles) {
+    if (articles && articles.length > 0) {
       console.log(`Displaying ${articles.length} articles:`, 
         articles.map(a => ({ id: a.id, title: a.title, type: a.content_type }))
       );
     }
   }, [articles]);
+
+  // Handle search input debouncing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.length > 2 || searchQuery === '') {
+        fetchArticles();
+      }
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   
   // Handle tag selection
   const handleTagSelect = (tagName: string) => {
@@ -162,6 +255,14 @@ const KnowledgeBase = () => {
           </div>
           
           <div className="flex gap-2 items-start">
+            <Button 
+              onClick={() => navigate("/knowledge/topics")}
+              variant="outline"
+            >
+              <Tag className="mr-2 h-4 w-4" />
+              Browse Tags
+            </Button>
+            
             <Button 
               onClick={() => setIsCreateModalOpen(true)}
               className="shrink-0"
@@ -295,7 +396,7 @@ const KnowledgeBase = () => {
               )}
             </div>
             
-            {isArticlesLoading ? (
+            {isLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
                   <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
@@ -307,7 +408,7 @@ const KnowledgeBase = () => {
                   <ArticleCard
                     key={article.id}
                     article={article}
-                    onClick={() => navigate(`/knowledge/article/${article.id}`)}
+                    onClick={() => navigate(`/knowledge/${article.id}`)}
                   />
                 ))}
               </div>
@@ -325,10 +426,7 @@ const KnowledgeBase = () => {
                   }
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-3">
-                  <Button onClick={() => {
-                    queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
-                    refetchArticles();
-                  }}>
+                  <Button onClick={() => fetchArticles()}>
                     Reload Content
                   </Button>
                   <Button onClick={() => setIsCreateModalOpen(true)}>
