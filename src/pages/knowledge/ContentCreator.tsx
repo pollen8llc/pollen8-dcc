@@ -5,7 +5,8 @@ import { Shell } from '@/components/layout/Shell';
 import { useToast } from '@/hooks/use-toast';
 import {
   ChevronLeft,
-  PlusCircle
+  PlusCircle,
+  BookOpen
 } from 'lucide-react';
 
 // UI Components
@@ -21,7 +22,7 @@ import { ContentType } from '@/models/knowledgeTypes';
 const ContentCreator = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedType, setSelectedType] = useState('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
   
   const handleTypeChange = (type: string) => {
     setSelectedType(type);
@@ -36,6 +37,10 @@ const ContentCreator = () => {
         description: "Please select a specific content type to proceed",
       });
     }
+  };
+  
+  const handleBrowseTopics = () => {
+    navigate('/knowledge/topics');
   };
 
   return (
@@ -70,7 +75,16 @@ const ContentCreator = () => {
               <ContentTypeSelector selected={selectedType} onChange={handleTypeChange} />
             </CardContent>
             
-            <CardFooter className="flex justify-end">
+            <CardFooter className="flex justify-between">
+              <Button 
+                variant="outline"
+                onClick={handleBrowseTopics}
+                className="flex items-center gap-2"
+              >
+                <BookOpen className="h-4 w-4" />
+                Browse Topics
+              </Button>
+              
               <Button 
                 onClick={handleCreateContent} 
                 className="flex items-center gap-2"

@@ -53,6 +53,13 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
     }
   }, [typeFromUrl]);
   
+  // Set post type based on initialType prop
+  useEffect(() => {
+    if (initialType) {
+      setPostType(initialType);
+    }
+  }, [initialType]);
+  
   const getPostTypeTitle = () => {
     switch (postType) {
       case 'question': return 'Ask a Question';
@@ -99,8 +106,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
       setCurrentStep(currentStep - 1);
     } else {
       // Back to type selection
-      setPostType(null);
-      setIsTypeModalOpen(true);
+      navigate('/knowledge/create');
     }
   };
   
@@ -115,7 +121,8 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
 
       // On final step, submit the form data
       const finalData = {
-        ...data,
+        ...formData, // Use stored data from first step
+        ...data, // Merge with any data from current step
         content_type: getContentType()
       };
       
