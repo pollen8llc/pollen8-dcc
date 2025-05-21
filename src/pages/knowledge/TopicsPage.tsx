@@ -75,18 +75,18 @@ const TopicsPage = () => {
                 onClick={() => navigate(`/knowledge/tags/${tag.name}`)}
                 className={cn(
                   "cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm",
-                  popularTags.has(tag.id) && "admin-premium-border" // Apply pulsing border to popular topics
+                  popularTags.has(tag.id) && "knowledge-tag-border" // Apply teal border to popular topics
                 )}
               >
                 <CardContent className="p-5">
                   <div className="flex items-center">
                     <div className={cn(
                       "bg-primary/10 rounded-full p-2 mr-3",
-                      popularTags.has(tag.id) && "bg-[#33C3F0]/20" // Teal background for popular topics
+                      popularTags.has(tag.id) && "bg-[#00eada]/20" // Teal background for popular topics
                     )}>
                       <TagIcon className={cn(
                         "h-4 w-4",
-                        popularTags.has(tag.id) ? "text-[#33C3F0]" : "text-primary"
+                        popularTags.has(tag.id) ? "text-[#00eada]" : "text-primary"
                       )} />
                     </div>
                     <div>

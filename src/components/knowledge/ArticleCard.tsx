@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 // Types
 import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
+import { cn } from '@/lib/utils';
 
 interface ArticleCardProps {
   article: KnowledgeArticle;
@@ -68,7 +69,10 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
   };
 
   return (
-    <Card className="transition-all duration-300 hover:shadow-md">
+    <Card className={cn(
+      "transition-all duration-300 hover:shadow-md",
+      article.author?.is_admin && "admin-gradient-premium-border" // Apply gradient border for admin content
+    )}>
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2 mb-2">
           {getContentTypeIcon()}
@@ -79,6 +83,12 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
           {article.is_featured && (
             <Badge className="bg-amber-500 text-xs">
               Featured
+            </Badge>
+          )}
+          
+          {article.author?.is_admin && (
+            <Badge className="bg-[#9b87f5] text-xs">
+              Admin
             </Badge>
           )}
         </div>
@@ -93,7 +103,10 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
         </Link>
         
         <div className="flex items-center gap-2 mt-2">
-          <Avatar className="h-6 w-6">
+          <Avatar className={cn(
+            "h-6 w-6",
+            article.author?.is_admin && "ring-2 ring-[#9b87f5]"
+          )}>
             <AvatarImage src={article.author?.avatar_url} />
             <AvatarFallback>
               {article.author?.name.substring(0, 2).toUpperCase()}
@@ -116,7 +129,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
               <Badge 
                 key={tag} 
                 variant="outline" 
-                className="text-xs cursor-pointer hover:bg-muted"
+                className="text-xs cursor-pointer hover:bg-muted knowledge-tag-border"
                 onClick={() => navigate(`/knowledge/tags/${tag}`)}
               >
                 <TagIcon className="h-3 w-3 mr-1" />

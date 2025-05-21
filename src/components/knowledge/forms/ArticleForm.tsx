@@ -107,65 +107,6 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
     onSubmit(data);
   };
   
-  // Setup rich text editor
-  useEffect(() => {
-    // @ts-ignore - TinyMCE is loaded from CDN
-    if (window.tinymce) return;
-    
-    const script = document.createElement('script');
-    script.src = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js';
-    script.referrerPolicy = 'origin';
-    
-    script.onload = () => {
-      // @ts-ignore
-      window.tinymce?.init({
-        selector: '#article-content',
-        plugins: 'link image lists table code help wordcount',
-        toolbar: 'undo redo | blocks | bold italic underline strikethrough | link image | numlist bullist | table | code',
-        menubar: 'file edit view insert format tools table help',
-        setup: (editor: any) => {
-          // Update content in state when editor content changes
-          editor.on('change', () => {
-            form.setValue('content', editor.getContent());
-          });
-        },
-        height: 400,
-        content_style: `
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            font-size: 16px;
-            color: #374151;
-            margin: 1rem;
-          }
-          .dark body {
-            color: #e5e7eb;
-            background-color: #1f2937;
-          }
-          .dark a { color: #60a5fa; }
-          .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 { color: #f3f4f6; }
-          .dark code { 
-            background-color: #374151; 
-            color: #e5e7eb; 
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-          }
-        `,
-        skin: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oxide-dark' : 'oxide',
-        content_css: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
-      });
-    };
-    
-    document.head.appendChild(script);
-    
-    return () => {
-      // @ts-ignore
-      if (window.tinymce) {
-        // @ts-ignore
-        window.tinymce.remove('#article-content');
-      }
-    };
-  }, []);
-
   // Content to render based on step
   if (step === 2) {
     const formData = form.getValues();
@@ -185,8 +126,8 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
         
         <div>
           <h3 className="text-lg font-medium mb-2">Article Content</h3>
-          <div className="p-3 bg-muted rounded-md max-h-60 overflow-y-auto">
-            <div dangerouslySetInnerHTML={{ __html: formData.content }} />
+          <div className="p-3 bg-muted rounded-md max-h-60 overflow-y-auto whitespace-pre-wrap">
+            {formData.content}
           </div>
         </div>
         
@@ -251,9 +192,11 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
             <FormItem>
               <FormLabel>Article Content</FormLabel>
               <FormControl>
-                <Card>
-                  <textarea id="article-content" {...field} />
-                </Card>
+                <Textarea 
+                  placeholder="Write your article content here..." 
+                  className="min-h-[300px] font-mono" 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
