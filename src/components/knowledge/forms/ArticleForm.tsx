@@ -31,19 +31,30 @@ type ArticleFormValues = z.infer<typeof articleFormSchema>;
 interface ArticleFormProps {
   onSubmit: (data: ArticleFormValues) => void;
   isSubmitting: boolean;
+  step?: number; // Added step prop
 }
 
-export const ArticleForm: React.FC<ArticleFormProps> = ({ onSubmit, isSubmitting }) => {
+export const ArticleForm: React.FC<ArticleFormProps> = ({
+  onSubmit,
+  isSubmitting,
+  step = 1 // Default value for step
+}) => {
   const [tagInput, setTagInput] = useState('');
+  const [localData, setLocalData] = useState<Partial<ArticleFormValues>>({
+    title: "",
+    subtitle: "",
+    content: "",
+    tags: [],
+  });
   
   // Form setup
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
     defaultValues: {
-      title: "",
-      subtitle: "",
-      content: "",
-      tags: [],
+      title: localData.title || "",
+      subtitle: localData.subtitle || "",
+      content: localData.content || "",
+      tags: localData.tags || [],
     },
   });
   
@@ -81,6 +92,15 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({ onSubmit, isSubmitting
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddTag();
+    }
+  };
+  
+  // Handle form submission based on step
+  const handleSubmit = (data: ArticleFormValues) => {
+    if (step === 1) {
+      setLocalData(data);
+    } else {
+      onSubmit(data);
     }
   };
   
@@ -142,15 +162,48 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({ onSubmit, isSubmitting
       }
     };
   }, []);
-  
-  // Submit handler
-  const onFormSubmit = (data: ArticleFormValues) => {
-    onSubmit(data);
-  };
 
+  // Content to render based on step
+  if (step === 2) {
+    const formData = form.getValues();
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Article Title</h3>
+          <p className="p-3 bg-muted rounded-md">{formData.title}</p>
+        </div>
+        
+        {formData.subtitle && (
+          <div>
+            <h3 className="text-lg font-medium mb-2">Subtitle</h3>
+            <p className="p-3 bg-muted rounded-md">{formData.subtitle}</p>
+          </div>
+        )}
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">Article Content</h3>
+          <div className="p-3 bg-muted rounded-md max-h-60 overflow-y-auto">
+            <div dangerouslySetInnerHTML={{ __html: formData.content }} />
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">Tags</h3>
+          <div className="flex flex-wrap gap-2">
+            {formData.tags.map(tag => (
+              <div key={tag} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+                {tag}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-6">
+      <form id="content-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* Title field */}
         <FormField
           control={form.control}
@@ -254,11 +307,6 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({ onSubmit, isSubmitting
             </FormItem>
           )}
         />
-        
-        {/* Submit button */}
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Publish Article"}
-        </Button>
       </form>
     </Form>
   );

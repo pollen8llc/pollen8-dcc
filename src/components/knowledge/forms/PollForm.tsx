@@ -42,20 +42,32 @@ type PollFormValues = z.infer<typeof pollFormSchema>;
 interface PollFormProps {
   onSubmit: (data: PollFormValues) => void;
   isSubmitting: boolean;
+  step?: number; // Added step prop
 }
 
-export const PollForm: React.FC<PollFormProps> = ({ onSubmit, isSubmitting }) => {
+export const PollForm: React.FC<PollFormProps> = ({ 
+  onSubmit, 
+  isSubmitting,
+  step = 1 // Default value for step
+}) => {
   const [tagInput, setTagInput] = useState('');
+  const [localData, setLocalData] = useState<Partial<PollFormValues>>({
+    question: "",
+    options: [{ text: "" }, { text: "" }],
+    allowMultipleSelections: false,
+    duration: "7",
+    tags: [],
+  });
   
   // Form setup
   const form = useForm<PollFormValues>({
     resolver: zodResolver(pollFormSchema),
     defaultValues: {
-      question: "",
-      options: [{ text: "" }, { text: "" }],
-      allowMultipleSelections: false,
-      duration: "7",
-      tags: [],
+      question: localData.question || "",
+      options: localData.options || [{ text: "" }, { text: "" }],
+      allowMultipleSelections: localData.allowMultipleSelections || false,
+      duration: localData.duration || "7",
+      tags: localData.tags || [],
     },
   });
   
@@ -107,14 +119,61 @@ export const PollForm: React.FC<PollFormProps> = ({ onSubmit, isSubmitting }) =>
     append({ text: "" });
   };
   
-  // Submit handler
-  const onFormSubmit = (data: PollFormValues) => {
-    onSubmit(data);
+  // Handle form submission based on step
+  const handleSubmit = (data: PollFormValues) => {
+    if (step === 1) {
+      setLocalData(data);
+    } else {
+      onSubmit(data);
+    }
   };
 
+  // Content to render based on step
+  if (step === 2) {
+    const formData = form.getValues();
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Poll Question</h3>
+          <p className="p-3 bg-muted rounded-md">{formData.question}</p>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">Poll Options</h3>
+          <div className="space-y-2">
+            {formData.options.map((option, index) => (
+              <div key={index} className="p-3 bg-muted rounded-md">
+                {option.text || `Option ${index + 1}`}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">Settings</h3>
+          <div className="p-3 bg-muted rounded-md space-y-2">
+            <p>Allow multiple selections: {formData.allowMultipleSelections ? "Yes" : "No"}</p>
+            <p>Duration: {formData.duration} days</p>
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">Tags</h3>
+          <div className="flex flex-wrap gap-2">
+            {formData.tags.map(tag => (
+              <div key={tag} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+                {tag}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-6">
+      <form id="content-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* Poll question field */}
         <FormField
           control={form.control}
@@ -292,11 +351,6 @@ export const PollForm: React.FC<PollFormProps> = ({ onSubmit, isSubmitting }) =>
             </FormItem>
           )}
         />
-        
-        {/* Submit button */}
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Create Poll"}
-        </Button>
       </form>
     </Form>
   );

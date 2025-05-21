@@ -30,19 +30,30 @@ type QuoteFormValues = z.infer<typeof quoteFormSchema>;
 interface QuoteFormProps {
   onSubmit: (data: QuoteFormValues) => void;
   isSubmitting: boolean;
+  step?: number; // Add step prop
 }
 
-export const QuoteForm: React.FC<QuoteFormProps> = ({ onSubmit, isSubmitting }) => {
+export const QuoteForm: React.FC<QuoteFormProps> = ({ 
+  onSubmit, 
+  isSubmitting,
+  step = 1 // Default value for step
+}) => {
   const [tagInput, setTagInput] = useState('');
+  const [localData, setLocalData] = useState<Partial<QuoteFormValues>>({
+    quote: "",
+    author: "",
+    context: "",
+    tags: [],
+  });
   
   // Form setup
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(quoteFormSchema),
     defaultValues: {
-      quote: "",
-      author: "",
-      context: "",
-      tags: [],
+      quote: localData.quote || "",
+      author: localData.author || "",
+      context: localData.context || "",
+      tags: localData.tags || [],
     },
   });
   
@@ -82,15 +93,58 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({ onSubmit, isSubmitting }) 
       handleAddTag();
     }
   };
-  
-  // Submit handler
-  const onFormSubmit = (data: QuoteFormValues) => {
-    onSubmit(data);
+
+  // Handle form submission based on step
+  const handleSubmit = (data: QuoteFormValues) => {
+    if (step === 1) {
+      setLocalData(data);
+    } else {
+      onSubmit(data);
+    }
   };
+  
+  // Content to render based on step
+  if (step === 2) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Quote</h3>
+          <div className="p-3 bg-muted rounded-md whitespace-pre-wrap">
+            {form.getValues("quote")}
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">Author</h3>
+          <p className="p-3 bg-muted rounded-md">{form.getValues("author")}</p>
+        </div>
+        
+        {form.getValues("context") && (
+          <div>
+            <h3 className="text-lg font-medium mb-2">Context</h3>
+            <div className="p-3 bg-muted rounded-md whitespace-pre-wrap">
+              {form.getValues("context")}
+            </div>
+          </div>
+        )}
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">Tags</h3>
+          <div className="flex flex-wrap gap-2">
+            {form.getValues("tags").map(tag => (
+              <div key={tag} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+                {tag}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} id="content-form" className="space-y-6">
         {/* Quote text field */}
         <FormField
           control={form.control}
@@ -200,11 +254,6 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({ onSubmit, isSubmitting }) 
             </FormItem>
           )}
         />
-        
-        {/* Submit button */}
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Share Quote"}
-        </Button>
       </form>
     </Form>
   );
