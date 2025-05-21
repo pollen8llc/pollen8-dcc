@@ -37,14 +37,15 @@ import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 import TriggerWizard from "./pages/rel8t/TriggerWizard";
 import EmailTest from "./pages/rel8t/EmailTest";
 
-// CORE Knowledge Base Pages (Legacy)
+// CORE Knowledge Base Pages
+import CoreLandingPage from "./pages/core/CoreLandingPage";
 import ArticleView from "./pages/core/ArticleView";
 import ArticleCreate from "./pages/core/ArticleCreate";
 import ArticleEdit from "./pages/core/ArticleEdit";
 import TagView from "./pages/core/TagView";
 
 // Knowledge Base Pages
-import UnifiedKnowledgeBase from "./pages/knowledge/UnifiedKnowledgeBase";
+import KnowledgeBase from "./pages/knowledge/KnowledgeBase";
 import { default as KnowledgeArticleView } from "./pages/knowledge/ArticleView";
 import ContentCreator from "./pages/knowledge/ContentCreator";
 import PostWizard from "./pages/knowledge/PostWizard";
@@ -61,27 +62,15 @@ const AppRoutes = () => {
       <Route path="/invite/:code" element={<InvitePage />} />
       <Route path="/documentation" element={<Documentation />} />
 
-      {/* Unified Knowledge Base Routes */}
-      <Route path="/knowledge" element={<UnifiedKnowledgeBase />} />
-      <Route path="/knowledge/:id" element={<KnowledgeArticleView />} />
-      <Route path="/knowledge/create" element={<ContentCreator />} />
-      <Route path="/knowledge/post/new" element={<PostWizard />} />
-      <Route path="/knowledge/create/question" element={<PostWizard initialType="question" />} />
-      <Route path="/knowledge/create/article" element={<PostWizard initialType="article" />} />
-      <Route path="/knowledge/create/quote" element={<PostWizard initialType="quote" />} />
-      <Route path="/knowledge/create/poll" element={<PostWizard initialType="poll" />} />
-      <Route path="/knowledge/topics" element={<TopicsPage />} />
-      <Route path="/knowledge/tags/:tag" element={<TagView />} />
-      
-      {/* Legacy CORE routes - redirect to new unified knowledge base */}
-      <Route path="/core" element={<Navigate to="/knowledge" replace />} />
-      <Route path="/core/articles/:id" element={<Navigate to="/knowledge/:id" replace />} />
-      <Route path="/core/tags/:tag" element={<Navigate to="/knowledge/tags/:tag" replace />} />
+      {/* CORE Knowledge Base Routes */}
+      <Route path="/core" element={<CoreLandingPage />} />
+      <Route path="/core/articles/:id" element={<ArticleView />} />
+      <Route path="/core/tags/:tag" element={<TagView />} />
       <Route 
         path="/core/articles/new" 
         element={
           <ProtectedRoute role={UserRole.ORGANIZER}>
-            <Navigate to="/knowledge/create" replace />
+            <ArticleCreate />
           </ProtectedRoute>
         } 
       />
@@ -94,6 +83,17 @@ const AppRoutes = () => {
         } 
       />
       
+      {/* New Knowledge Base Routes */}
+      <Route path="/knowledge" element={<KnowledgeBase />} />
+      <Route path="/knowledge/:id" element={<KnowledgeArticleView />} />
+      <Route path="/knowledge/create" element={<PostWizard />} />
+      <Route path="/knowledge/create/question" element={<PostWizard initialType="question" />} />
+      <Route path="/knowledge/create/article" element={<PostWizard initialType="article" />} />
+      <Route path="/knowledge/create/quote" element={<PostWizard initialType="quote" />} />
+      <Route path="/knowledge/create/poll" element={<PostWizard initialType="poll" />} />
+      <Route path="/knowledge/topics" element={<TopicsPage />} />
+      <Route path="/knowledge/tags/:tag" element={<TagView />} />
+
       {/* Protected Routes */}
       <Route
         path="/profile"

@@ -27,9 +27,9 @@ export const Rel8Navigation = () => {
   ];
   
   const coreItems = [
-    { name: "Knowledge Base", href: "/knowledge", icon: Book },
-    { name: "Browse Topics", href: "/knowledge/topics", icon: FileText },
-    { name: "Create Content", href: "/knowledge/create", icon: Clock }
+    { name: "Knowledge Base", href: "/core", icon: Book },
+    { name: "Browse Articles", href: "/core/articles", icon: FileText },
+    { name: "Latest", href: "/core/latest", icon: Clock }
   ];
 
   return (
@@ -62,7 +62,7 @@ export const Rel8Navigation = () => {
         </div>
 
         <div>
-          <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">Knowledge</p>
+          <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">CORE</p>
           <div className="flex space-x-1 border-b border-border/30 pb-1">
             {coreItems.map((item) => {
               const isActive = location.pathname === item.href || 
