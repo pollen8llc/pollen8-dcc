@@ -67,6 +67,7 @@ export const useComments = (articleId: string | undefined) => {
         return {
           ...comment,
           author: profileData ? {
+            id: comment.user_id,
             name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
             avatar_url: profileData.avatar_url || ''
           } : undefined,

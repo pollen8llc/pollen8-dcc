@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -40,15 +39,7 @@ const ArticleView = () => {
   const navigate = useNavigate();
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
-  const { 
-    useArticle, 
-    useComments, 
-    vote, 
-    createComment, 
-    deleteArticle,
-    acceptAnswer,
-    deleteComment 
-  } = useKnowledgeBase();
+  const knowledgeBase = useKnowledgeBase();
 
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,32 +47,32 @@ const ArticleView = () => {
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
 
   // Fetch article data
-  const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id);
+  const { data: article, isLoading: articleLoading, error: articleError } = knowledgeBase.useArticle(id);
   
   // Fetch comments
-  const { data: comments, isLoading: commentsLoading } = useComments(id);
+  const { data: comments, isLoading: commentsLoading } = knowledgeBase.useComments(id);
 
   // Handle voting on article
   const handleArticleVote = (voteType: 'upvote' | 'downvote') => {
     if (article) {
       if (article.user_vote === 1 && voteType === 'upvote') {
-        vote('article', article.id, 'none');
+        knowledgeBase.vote('article', article.id, 'none');
       } else if (article.user_vote === -1 && voteType === 'downvote') {
-        vote('article', article.id, 'none');
+        knowledgeBase.vote('article', article.id, 'none');
       } else {
-        vote('article', article.id, voteType);
+        knowledgeBase.vote('article', article.id, voteType);
       }
     }
   };
 
   // Handle voting on comment
-  const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number) => {
+  const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
     if (currentVote === 1 && voteType === 'upvote') {
-      vote('comment', commentId, 'none');
+      knowledgeBase.vote('comment', commentId, 'none');
     } else if (currentVote === -1 && voteType === 'downvote') {
-      vote('comment', commentId, 'none');
+      knowledgeBase.vote('comment', commentId, 'none');
     } else {
-      vote('comment', commentId, voteType);
+      knowledgeBase.vote('comment', commentId, voteType);
     }
   };
 
@@ -92,7 +83,7 @@ const ArticleView = () => {
     
     try {
       setIsSubmitting(true);
-      await createComment(id!, newComment);
+      await knowledgeBase.createComment(id!, newComment);
       setNewComment('');
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -104,7 +95,7 @@ const ArticleView = () => {
   // Handle delete article confirmation
   const confirmDeleteArticle = async () => {
     try {
-      await deleteArticle(id!);
+      await knowledgeBase.deleteArticle(id!);
       navigate('/core');
     } catch (error) {
       console.error('Error deleting article:', error);
@@ -116,7 +107,7 @@ const ArticleView = () => {
     if (!deleteCommentId) return;
     
     try {
-      await deleteComment(deleteCommentId, id!);
+      await knowledgeBase.deleteComment(deleteCommentId, id!);
       setDeleteCommentId(null);
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -125,7 +116,7 @@ const ArticleView = () => {
 
   // Handle accepting a comment as answer
   const handleAcceptAnswer = (commentId: string, isAccepted: boolean) => {
-    acceptAnswer(commentId, id!, !isAccepted);
+    knowledgeBase.acceptAnswer(commentId, id!, !isAccepted);
   };
 
   // Generate initials for avatar

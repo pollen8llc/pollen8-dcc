@@ -4,6 +4,9 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Shell } from '@/components/layout/Shell';
 import { useQuery } from '@tanstack/react-query';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { useUser } from '@/contexts/UserContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   ChevronLeft,
   Edit,
@@ -30,57 +33,80 @@ import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 
 // Mocks and types
-import { getMockArticles } from '@/data/mockKnowledgeData';
 import { ContentType } from '@/models/knowledgeTypes';
-import { usePermissions } from '@/hooks/usePermissions';
-import { useUser } from '@/contexts/UserContext';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
+  const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer } = useKnowledgeBase();
   
   // State
   const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
   
   // Fetch article
-  const { data: article, isLoading, error } = useQuery({
-    queryKey: ['knowledgeArticle', id],
+  const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id);
+  
+  // Fetch comments
+  const { data: comments, isLoading: commentsLoading } = useComments(id);
+  
+  // Fetch related articles based on tags
+  const { data: allArticles } = useQuery({
+    queryKey: ['knowledgeArticles'],
     queryFn: async () => {
-      const articles = await getMockArticles();
-      const article = articles.find(a => a.id === id);
-      if (!article) {
-        throw new Error('Article not found');
-      }
-      return article;
+      // This would be replaced with a real API call in production
+      return [];
     },
-    enabled: !!id
+    enabled: !!article?.tags && article.tags.length > 0
   });
   
-  // Fetch related articles
-  const { data: relatedArticles } = useQuery({
-    queryKey: ['relatedArticles', article?.tags],
-    queryFn: async () => {
-      if (!article?.tags || article.tags.length === 0) return [];
-      const allArticles = await getMockArticles();
-      return allArticles
-        .filter(a => 
-          a.id !== article.id && 
-          a.tags && 
-          a.tags.some(tag => article.tags?.includes(tag))
-        )
-        .slice(0, 3);
-    },
-    enabled: !!article?.tags
-  });
+  // Related articles
+  const relatedArticles = React.useMemo(() => {
+    if (!article?.tags || !allArticles) return [];
+    
+    return allArticles
+      .filter(a => 
+        a.id !== article.id && 
+        a.tags && 
+        a.tags.some(tag => article.tags?.includes(tag))
+      )
+      .slice(0, 3);
+  }, [article, allArticles]);
   
   // Handle voting
-  const handleVote = (vote: 'up' | 'down') => {
+  const handleVote = (vote: 'upvote' | 'downvote') => {
+    if (!article) return;
     setUserVote(userVote === vote ? null : vote);
+    
+    // In real application, this would call the API
+    console.log(`Voting ${vote} on article ${article.id}`);
+  };
+  
+  // Handle comment voting
+  const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
+    vote('comment', commentId, voteType);
+  };
+  
+  // Handle adding a comment
+  const handleAddComment = async (content: string) => {
+    if (!id) return;
+    await createComment(id, content);
+  };
+  
+  // Handle accepting an answer
+  const handleAcceptAnswer = (commentId: string, isAccepted: boolean) => {
+    if (!id) return;
+    acceptAnswer(commentId, id, !isAccepted);
+  };
+  
+  // Handle deleting a comment
+  const handleDeleteComment = (commentId: string) => {
+    if (!id) return;
+    deleteComment(commentId, id);
   };
 
-  if (isLoading) {
+  if (articleLoading) {
     return (
       <Shell>
         <div className="container mx-auto px-4 py-6">
@@ -95,7 +121,7 @@ const ArticleView = () => {
     );
   }
   
-  if (error || !article) {
+  if (articleError || !article) {
     return (
       <Shell>
         <div className="container mx-auto px-4 py-6">
@@ -103,7 +129,7 @@ const ArticleView = () => {
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>
-              {error instanceof Error ? error.message : 'Failed to load article'}
+              {articleError instanceof Error ? articleError.message : 'Failed to load article'}
             </AlertDescription>
           </Alert>
           
@@ -151,7 +177,7 @@ const ArticleView = () => {
               <Avatar className="h-10 w-10">
                 <AvatarImage src={article.author?.avatar_url} />
                 <AvatarFallback>
-                  {article.author?.name.substring(0, 2).toUpperCase()}
+                  {article.author?.name?.substring(0, 2).toUpperCase() || 'UN'}
                 </AvatarFallback>
               </Avatar>
               
@@ -199,8 +225,8 @@ const ArticleView = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => handleVote('up')} 
-                  className={userVote === 'up' ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800' : ''}
+                  onClick={() => vote('article', article.id, 'upvote')} 
+                  className={article.user_vote === 1 ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800' : ''}
                 >
                   <ThumbsUp className="h-4 w-4 mr-1" />
                   {article.vote_count || 0}
@@ -209,8 +235,8 @@ const ArticleView = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => handleVote('down')}
-                  className={userVote === 'down' ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800' : ''}
+                  onClick={() => vote('article', article.id, 'downvote')}
+                  className={article.user_vote === -1 ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800' : ''}
                 >
                   <ThumbsDown className="h-4 w-4" />
                 </Button>
@@ -258,14 +284,17 @@ const ArticleView = () => {
             
             <Separator className="my-8" />
             
-            {/* Comments section - for demonstration only, would be fully implemented */}
-            <div className="mt-8">
-              <h2 className="text-lg font-medium mb-4">Comments</h2>
-              
-              <p className="text-muted-foreground text-center py-8">
-                Comment functionality would be implemented here
-              </p>
-            </div>
+            {/* Comments section */}
+            <CommentSection 
+              articleId={id!}
+              comments={comments}
+              isArticleAuthor={currentUser?.id === article.user_id}
+              isLoading={commentsLoading}
+              onVote={handleCommentVote}
+              onAccept={handleAcceptAnswer}
+              onDelete={handleDeleteComment}
+              onAddComment={handleAddComment}
+            />
           </div>
           
           {/* Sidebar */}
@@ -278,7 +307,7 @@ const ArticleView = () => {
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={article.author?.avatar_url} />
                     <AvatarFallback>
-                      {article.author?.name.substring(0, 2).toUpperCase()}
+                      {article.author?.name?.substring(0, 2).toUpperCase() || 'UN'}
                     </AvatarFallback>
                   </Avatar>
                   
@@ -295,27 +324,10 @@ const ArticleView = () => {
             </Card>
             
             {/* Related content */}
-            {relatedArticles && relatedArticles.length > 0 && (
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-lg font-medium mb-3">Related Content</h3>
-                  <div className="space-y-4">
-                    {relatedArticles.map(related => (
-                      <Link 
-                        key={related.id} 
-                        to={`/knowledge/${related.id}`}
-                        className="block hover:underline text-sm"
-                      >
-                        {related.title}
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {related.comment_count || 0} comments • {formatDistanceToNow(new Date(related.created_at), { addSuffix: true })}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <RelatedArticles 
+              articles={relatedArticles} 
+              isLoading={!!article.tags && articleLoading} 
+            />
             
             {/* Popular tags */}
             {article.tags && article.tags.length > 0 && (

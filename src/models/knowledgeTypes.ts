@@ -23,7 +23,7 @@ export interface KnowledgeArticle {
   updated_at: string;
   tags?: string[];
   vote_count?: number;
-  user_vote?: 'up' | 'down' | null;
+  user_vote?: number | null;
   view_count: number;
   comment_count?: number;
   is_answered?: boolean;
@@ -40,7 +40,7 @@ export interface KnowledgeComment {
   updated_at: string;
   is_accepted?: boolean;
   vote_count?: number;
-  user_vote?: 'up' | 'down' | null;
+  user_vote?: number | null;
   author?: KnowledgeAuthor;
 }
 
@@ -56,9 +56,11 @@ export interface KnowledgeVote {
   user_id: string;
   article_id?: string;
   comment_id?: string;
-  vote_type: 'up' | 'down';
+  vote_type: number;
   created_at: string;
 }
+
+export type VoteType = 'upvote' | 'downvote' | 'none';
 
 export interface PollOption {
   id: string;
@@ -70,6 +72,7 @@ export interface PollOption {
 
 export interface KnowledgeQueryOptions {
   query?: string;
+  searchQuery?: string; // Added this field
   tag?: string | null;
   type?: string;
   sort?: string;
