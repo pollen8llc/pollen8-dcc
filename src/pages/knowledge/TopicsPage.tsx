@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { Search } from 'lucide-react';
+import { Search, Tag as TagIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const TopicsPage = () => {
   const navigate = useNavigate();
@@ -14,9 +16,22 @@ const TopicsPage = () => {
   const { data: tags, isLoading: tagsLoading } = useTags();
 
   // Filter tags based on search term
-  const filteredTags = tags?.filter(tag => 
-    !searchTerm || tag.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTags = useMemo(() => {
+    if (!tags) return [];
+    return tags
+      .filter(tag => !searchTerm || tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .sort((a, b) => (b.count || 0) - (a.count || 0)); // Sort by count in descending order
+  }, [tags, searchTerm]);
+
+  // Determine popular tags (top 25%)
+  const popularTags = useMemo(() => {
+    if (!filteredTags.length) return new Set<string>();
+    
+    const sortedByCounts = [...filteredTags].sort((a, b) => (b.count || 0) - (a.count || 0));
+    const topCount = sortedByCounts.length > 0 ? Math.ceil(sortedByCounts.length / 4) : 0;
+    
+    return new Set(sortedByCounts.slice(0, topCount).map(tag => tag.id));
+  }, [filteredTags]);
 
   return (
     <Shell>
@@ -53,21 +68,32 @@ const TopicsPage = () => {
             ))}
           </div>
         ) : filteredTags && filteredTags.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredTags.map((tag) => (
               <Card 
                 key={tag.id}
                 onClick={() => navigate(`/knowledge/tags/${tag.name}`)}
-                className="cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm"
+                className={cn(
+                  "cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm",
+                  popularTags.has(tag.id) && "admin-premium-border" // Apply pulsing border to popular topics
+                )}
               >
-                <CardContent className="p-6">
+                <CardContent className="p-5">
                   <div className="flex items-center">
-                    <div className="bg-primary/10 rounded-full p-2 mr-3">
-                      <span className="text-primary text-sm">{tag.name.slice(0, 2)}</span>
+                    <div className={cn(
+                      "bg-primary/10 rounded-full p-2 mr-3",
+                      popularTags.has(tag.id) && "bg-[#33C3F0]/20" // Teal background for popular topics
+                    )}>
+                      <TagIcon className={cn(
+                        "h-4 w-4",
+                        popularTags.has(tag.id) ? "text-[#33C3F0]" : "text-primary"
+                      )} />
                     </div>
                     <div>
                       <h3 className="font-medium text-lg">{tag.name}</h3>
-                      <p className="text-muted-foreground text-sm">{tag.count || 0} questions</p>
+                      <p className="text-muted-foreground text-sm">
+                        {tag.count || 0} {(tag.count === 1) ? 'post' : 'posts'}
+                      </p>
                     </div>
                   </div>
                 </CardContent>

@@ -59,10 +59,16 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
   useEffect(() => {
     if (initialData) {
       Object.entries(initialData).forEach(([key, value]) => {
-        form.setValue(key as keyof QuoteFormValues, value);
+        if (value !== undefined) {
+          form.setValue(key as keyof QuoteFormValues, value);
+        }
       });
     }
   }, [initialData, form]);
+  
+  const handleStepSubmit = (values: QuoteFormValues) => {
+    onSubmit(values);
+  };
   
   // Content to render based on step
   if (step === 2) {
@@ -105,7 +111,7 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} id="content-form" className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleStepSubmit)} id="content-form" className="space-y-6">
         {/* Quote text field */}
         <FormField
           control={form.control}

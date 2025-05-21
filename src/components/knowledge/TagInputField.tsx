@@ -1,6 +1,6 @@
 
 import React, { useState, KeyboardEvent, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Tag as TagIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -101,10 +101,15 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
       {/* Tags display */}
       <div className="flex flex-wrap gap-2 mb-2">
         {value.map(tag => (
-          <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+          <Badge 
+            key={tag} 
+            variant="secondary" 
+            className="flex items-center gap-1 py-1.5 px-3 text-sm transition-all hover:bg-secondary/80"
+          >
+            <TagIcon className="h-3.5 w-3.5 mr-1 opacity-70" />
             {tag}
             <X 
-              className="h-3 w-3 cursor-pointer hover:text-destructive" 
+              className="h-3.5 w-3.5 ml-1 cursor-pointer hover:text-destructive" 
               onClick={() => removeTag(tag)}
             />
           </Badge>
@@ -130,9 +135,10 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
             {suggestions.map(suggestion => (
               <div
                 key={suggestion}
-                className="px-3 py-1.5 cursor-pointer hover:bg-muted text-sm"
+                className="flex items-center px-3 py-1.5 cursor-pointer hover:bg-muted text-sm"
                 onClick={() => addSuggestion(suggestion)}
               >
+                <TagIcon className="h-3.5 w-3.5 mr-2 opacity-70" />
                 {suggestion}
               </div>
             ))}

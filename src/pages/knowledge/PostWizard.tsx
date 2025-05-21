@@ -224,6 +224,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting} 
                   step={currentStep}
+                  initialData={formData}
                 />
               )}
               
@@ -232,6 +233,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting}
                   step={currentStep}
+                  initialData={formData}
                 />
               )}
               
@@ -240,6 +242,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting}
                   step={currentStep}
+                  initialData={formData}
                 />
               )}
             </CardContent>
@@ -250,13 +253,14 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
               </Button>
               
               <div className="flex gap-3">
-                {currentStep < getSteps().length && currentStep !== 1 ? (
-                  <Button onClick={handleNext}>Next Step</Button>
-                ) : currentStep === getSteps().length ? (
+                {currentStep < getSteps().length && currentStep === 1 && (
+                  <Button type="submit" form="content-form">Next Step</Button>
+                )}
+                {currentStep === getSteps().length && (
                   <Button type="submit" form="content-form" disabled={isSubmitting}>
                     {isSubmitting ? 'Publishing...' : 'Publish'}
                   </Button>
-                ) : null}
+                )}
               </div>
             </CardFooter>
           </Card>
