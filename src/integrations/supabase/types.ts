@@ -289,6 +289,7 @@ export type Database = {
       knowledge_articles: {
         Row: {
           content: string
+          content_type: string | null
           created_at: string
           id: string
           is_answered: boolean | null
@@ -300,6 +301,7 @@ export type Database = {
         }
         Insert: {
           content: string
+          content_type?: string | null
           created_at?: string
           id?: string
           is_answered?: boolean | null
@@ -311,6 +313,7 @@ export type Database = {
         }
         Update: {
           content?: string
+          content_type?: string | null
           created_at?: string
           id?: string
           is_answered?: boolean | null

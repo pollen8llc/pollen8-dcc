@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/contexts/UserContext';
 import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
 
-export const useArticles = (filters?: { tag?: string | null, searchQuery?: string, limit?: number }) => {
+export const useArticles = (filters?: { tag?: string | null, searchQuery?: string, limit?: number, type?: string }) => {
   const queryKey = ['knowledgeArticles', filters];
   
   return useQuery({
@@ -32,6 +31,10 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
         query = query.or(`title.ilike.%${filters.searchQuery}%,content.ilike.%${filters.searchQuery}%`);
       }
       
+      if (filters?.type) {
+        query = query.eq('content_type', filters.type);
+      }
+      
       if (filters?.limit) {
         query = query.limit(filters.limit);
       }
@@ -52,7 +55,7 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
         
         return {
           ...article,
-          content_type: ContentType.ARTICLE, // Default to ARTICLE type
+          content_type: article.content_type || ContentType.ARTICLE,
           author: profileData ? {
             id: article.user_id,
             name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
@@ -145,19 +148,26 @@ export const useArticleMutations = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Mutation for creating an article
-  const createArticle = async (article: { title: string, content: string, tags?: string[] }) => {
+  const createArticle = async (article: { 
+    title: string, 
+    content: string, 
+    tags?: string[], 
+    content_type?: ContentType,
+    subtitle?: string
+  }) => {
     try {
       setIsSubmitting(true);
       
       if (!currentUser) {
-        throw new Error('You must be logged in to create an article');
+        throw new Error('You must be logged in to create content');
       }
       
       const newArticle = {
         title: article.title,
         content: article.content,
         user_id: currentUser.id,
-        tags: article.tags || []
+        tags: article.tags || [],
+        content_type: article.content_type || ContentType.ARTICLE
       };
       
       const { data, error } = await supabase
@@ -184,13 +194,13 @@ export const useArticleMutations = () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
       toast({
         title: "Success",
-        description: "Article created successfully",
+        description: "Content created successfully",
       });
       
       return data as KnowledgeArticle;
     } catch (error: any) {
       toast({
-        title: "Error creating article",
+        title: "Error creating content",
         description: error.message,
         variant: "destructive"
       });

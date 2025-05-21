@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useToast } from '@/hooks/use-toast';
@@ -27,6 +27,7 @@ import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
 import { QuoteForm } from '@/components/knowledge/forms/QuoteForm';
 import { PollForm } from '@/components/knowledge/forms/PollForm';
 import { CreatePostModal } from '@/components/knowledge/CreatePostModal';
+import { ContentType } from '@/models/knowledgeTypes';
 
 type PostType = 'question' | 'quote' | 'poll' | 'article';
 
@@ -36,11 +37,21 @@ interface PostWizardProps {
 
 const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
-  const [postType, setPostType] = useState<PostType | null>(initialType || null);
-  const [isTypeModalOpen, setIsTypeModalOpen] = useState(!initialType);
-  const { isSubmitting } = useKnowledgeBase();
+  const typeFromUrl = searchParams.get('type') as PostType | null;
+  const [postType, setPostType] = useState<PostType | null>(initialType || typeFromUrl || null);
+  const [isTypeModalOpen, setIsTypeModalOpen] = useState(!initialType && !typeFromUrl);
+  const { isSubmitting, createArticle } = useKnowledgeBase();
+  const [formData, setFormData] = useState<any>(null);
+  
+  // Set post type based on URL parameter if available
+  useEffect(() => {
+    if (typeFromUrl) {
+      setPostType(typeFromUrl);
+    }
+  }, [typeFromUrl]);
   
   const getPostTypeTitle = () => {
     switch (postType) {
@@ -75,6 +86,16 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
     }
   };
   
+  const getContentType = (): ContentType => {
+    switch (postType) {
+      case 'question': return ContentType.QUESTION;
+      case 'quote': return ContentType.QUOTE;
+      case 'poll': return ContentType.POLL;
+      case 'article': return ContentType.ARTICLE;
+      default: return ContentType.ARTICLE;
+    }
+  };
+  
   const handleNext = () => {
     if (currentStep < getSteps().length) {
       setCurrentStep(currentStep + 1);
@@ -91,9 +112,25 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
     }
   };
   
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (data: any) => {
     try {
-      console.log('Submitting form data:', { type: postType, data: formData });
+      if (currentStep < getSteps().length) {
+        // Store form data and advance to next step if not on final step
+        setFormData(data);
+        handleNext();
+        return;
+      }
+
+      // On final step, submit the form data
+      const finalData = {
+        ...data,
+        content_type: getContentType()
+      };
+      
+      console.log('Submitting form data:', { type: postType, data: finalData });
+      
+      // Submit to backend based on the post type
+      await createArticle(finalData);
       
       toast({
         title: "Success!",
@@ -178,6 +215,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting}
                   step={currentStep}
+                  initialData={formData}
                 />
               )}
               
@@ -212,13 +250,13 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
               </Button>
               
               <div className="flex gap-3">
-                {currentStep < getSteps().length ? (
+                {currentStep < getSteps().length && currentStep !== 1 ? (
                   <Button onClick={handleNext}>Next Step</Button>
-                ) : (
+                ) : currentStep === getSteps().length ? (
                   <Button type="submit" form="content-form" disabled={isSubmitting}>
                     {isSubmitting ? 'Publishing...' : 'Publish'}
                   </Button>
-                )}
+                ) : null}
               </div>
             </CardFooter>
           </Card>

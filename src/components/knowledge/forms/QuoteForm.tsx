@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { TagInputField } from '@/components/knowledge/TagInputField';
 
 // Validation schema
 const quoteFormSchema = z.object({
@@ -30,78 +31,38 @@ type QuoteFormValues = z.infer<typeof quoteFormSchema>;
 interface QuoteFormProps {
   onSubmit: (data: QuoteFormValues) => void;
   isSubmitting: boolean;
-  step?: number; // Add step prop
+  step?: number;
+  initialData?: Partial<QuoteFormValues>;
 }
 
 export const QuoteForm: React.FC<QuoteFormProps> = ({ 
   onSubmit, 
   isSubmitting,
-  step = 1 // Default value for step
+  step = 1,
+  initialData
 }) => {
-  const [tagInput, setTagInput] = useState('');
-  const [localData, setLocalData] = useState<Partial<QuoteFormValues>>({
-    quote: "",
-    author: "",
-    context: "",
-    tags: [],
-  });
+  // Merge provided initial data with defaults
+  const defaultValues = {
+    quote: initialData?.quote || "",
+    author: initialData?.author || "",
+    context: initialData?.context || "",
+    tags: initialData?.tags || [],
+  };
   
   // Form setup
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(quoteFormSchema),
-    defaultValues: {
-      quote: localData.quote || "",
-      author: localData.author || "",
-      context: localData.context || "",
-      tags: localData.tags || [],
-    },
+    defaultValues
   });
   
-  // Handle tag addition
-  const handleAddTag = () => {
-    const tag = tagInput.trim().toLowerCase();
-    if (!tag) return;
-    
-    const currentTags = form.getValues("tags");
-    
-    if (currentTags.includes(tag)) {
-      setTagInput('');
-      return;
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      Object.entries(initialData).forEach(([key, value]) => {
+        form.setValue(key as keyof QuoteFormValues, value);
+      });
     }
-    
-    if (currentTags.length >= 5) {
-      form.setError("tags", { message: "You cannot add more than 5 tags" });
-      return;
-    }
-    
-    form.setValue("tags", [...currentTags, tag]);
-    form.clearErrors("tags");
-    setTagInput('');
-  };
-  
-  // Handle tag removal
-  const handleRemoveTag = (tagToRemove: string) => {
-    const currentTags = form.getValues("tags");
-    form.setValue("tags", currentTags.filter(tag => tag !== tagToRemove));
-    form.clearErrors("tags");
-  };
-  
-  // Handle tag input keydown
-  const handleTagKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
-  // Handle form submission based on step
-  const handleSubmit = (data: QuoteFormValues) => {
-    if (step === 1) {
-      setLocalData(data);
-    } else {
-      onSubmit(data);
-    }
-  };
+  }, [initialData, form]);
   
   // Content to render based on step
   if (step === 2) {
@@ -144,7 +105,7 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} id="content-form" className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} id="content-form" className="space-y-6">
         {/* Quote text field */}
         <FormField
           control={form.control}
@@ -211,45 +172,13 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tags</FormLabel>
-              
-              {/* Display selected tags */}
-              <div className="flex flex-wrap gap-2 mb-2">
-                {field.value.map(tag => (
-                  <Badge key={tag} variant="outline" className="flex items-center gap-1">
-                    {tag}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto p-0 ml-1"
-                      onClick={() => handleRemoveTag(tag)}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Remove {tag}</span>
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-              
-              {/* Tag input */}
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add a tag (e.g. inspiration, leadership)"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  className="flex-1"
+              <FormControl>
+                <TagInputField
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Add a tag (e.g. leadership, community-building)"
                 />
-                <Button 
-                  type="button" 
-                  onClick={handleAddTag} 
-                  variant="outline"
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
-              </div>
-              
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

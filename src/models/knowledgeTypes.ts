@@ -31,6 +31,7 @@ export interface KnowledgeArticle {
   is_answered?: boolean;
   is_featured?: boolean;
   author?: KnowledgeAuthor;
+  subtitle?: string; // Optional subtitle field for articles
 }
 
 export interface KnowledgeComment {

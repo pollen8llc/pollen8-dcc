@@ -1,8 +1,9 @@
 
-import React, { useState, KeyboardEvent, useRef } from 'react';
+import React, { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TagInputFieldProps {
   value: string[];
@@ -21,7 +22,25 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
 }) => {
   const [input, setInput] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [dbTags, setDbTags] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Fetch tags from database
+  useEffect(() => {
+    const fetchTags = async () => {
+      const { data } = await supabase
+        .from('knowledge_tags')
+        .select('name')
+        .order('name');
+        
+      if (data) {
+        const tagNames = data.map(tag => tag.name);
+        setDbTags(tagNames);
+      }
+    };
+    
+    fetchTags();
+  }, []);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     const trimmedInput = input.trim();
@@ -53,7 +72,10 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
     
     // Show suggestions only if input is not empty
     if (newInput.trim()) {
-      const filtered = availableTags.filter(
+      // Prioritize database tags, then fallback to props tags
+      const availableTagsToUse = dbTags.length > 0 ? dbTags : availableTags;
+      
+      const filtered = availableTagsToUse.filter(
         tag => tag.toLowerCase().includes(newInput.toLowerCase()) && !value.includes(tag)
       );
       setSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
