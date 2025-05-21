@@ -1,125 +1,172 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/hooks/useDebounce';
+import { 
+  MessageSquare, 
+  Eye, 
+  Calendar,
+  ThumbsUp,
+  Bookmark,
+  Plus,
+  Search
+} from 'lucide-react';
+import { 
+  Card,
+  CardContent, 
+  CardFooter,
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { formatDistanceToNow } from 'date-fns';
 
 const CoreLandingPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const debouncedSearch = useDebounce(searchTerm, 500);
   
-  const { useTags, useArticles } = useKnowledgeBase();
+  const { useArticles } = useKnowledgeBase();
   
-  const { data: tags, isLoading: tagsLoading } = useTags();
   const { data: articles, isLoading: articlesLoading } = useArticles({ 
-    tag: selectedTag, 
-    searchQuery: debouncedSearch // Using searchQuery which is the correct property name
+    searchQuery: debouncedSearch
   });
+
+  const filterTabs = ['Newest', 'Active', 'Unanswered', 'Bounty'];
+  const [activeTab, setActiveTab] = useState('Newest');
 
   return (
     <Shell>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+      <div className="container mx-auto px-4 py-6">
+        {/* Header with title and action buttons */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Knowledge Base</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Top Questions</h1>
             <p className="text-muted-foreground mt-1">
-              Find answers to your questions and share your knowledge
+              Find solutions, share knowledge, build your reputation
             </p>
           </div>
           
-          <div className="flex gap-2">
-            <Button asChild>
-              <Link to="/core/articles/new">Create Article</Link>
+          <div className="flex gap-3 mt-4 md:mt-0">
+            <Button variant="outline" className="flex items-center gap-2" onClick={() => navigate('/knowledge/topics')}>
+              <Search className="h-4 w-4" />
+              Browse Topics
+            </Button>
+            <Button className="flex items-center gap-2" onClick={() => navigate('/knowledge/create')}>
+              <Plus className="h-4 w-4" />
+              Ask Question
             </Button>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <Input
-                  placeholder="Search articles..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-            
-            {/* Articles list would go here */}
-            <div className="space-y-6">
-              {articlesLoading ? (
-                <p>Loading articles...</p>
-              ) : articles && articles.length > 0 ? (
-                articles.map(article => (
-                  <div key={article.id} className="border rounded-md p-4">
-                    <Link to={`/core/articles/${article.id}`} className="text-xl font-medium hover:underline">
-                      {article.title}
-                    </Link>
-                    <p className="mt-2 text-muted-foreground line-clamp-2">
-                      {/* Strip HTML tags for content preview */}
-                      {article.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
-                    </p>
-                    <div className="flex gap-2 mt-4">
-                      {article.tags?.map(tag => (
-                        <button
-                          key={tag}
-                          onClick={() => setSelectedTag(tag)}
-                          className="px-2 py-1 text-xs rounded-full bg-muted hover:bg-muted/80"
-                        >
-                          {tag}
-                        </button>
+        {/* Filter tabs */}
+        <div className="flex overflow-x-auto mb-6 bg-muted/30 rounded-lg p-1">
+          {filterTabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-md whitespace-nowrap ${
+                activeTab === tab ? 'bg-background text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        
+        {/* Questions list */}
+        <div className="space-y-4">
+          {articlesLoading ? (
+            Array(3).fill(null).map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-7 bg-muted rounded w-3/4 mb-2"></div>
+                  <div className="h-5 bg-muted rounded w-1/2"></div>
+                </CardHeader>
+                <CardFooter className="flex justify-between">
+                  <div className="flex gap-3">
+                    <div className="h-5 bg-muted rounded w-16"></div>
+                    <div className="h-5 bg-muted rounded w-16"></div>
+                  </div>
+                  <div className="h-5 bg-muted rounded w-24"></div>
+                </CardFooter>
+              </Card>
+            ))
+          ) : articles && articles.length > 0 ? (
+            articles.map(article => (
+              <Card key={article.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between">
+                    <div>
+                      <Link to={`/knowledge/${article.id}`} className="hover:underline">
+                        <CardTitle className="text-xl">{article.title}</CardTitle>
+                      </Link>
+                      <p className="text-muted-foreground line-clamp-2 mt-1">
+                        {article.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <Bookmark className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Tags */}
+                  {article.tags && article.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {article.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
                       ))}
                     </div>
+                  )}
+                </CardHeader>
+                
+                <CardFooter className="flex justify-between pt-2">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <MessageSquare className="h-4 w-4" /> 
+                      {article.comment_count || 0} responses
+                    </span>
+                    
+                    <span className="flex items-center gap-1">
+                      <Eye className="h-4 w-4" />
+                      {article.view_count || 0} views
+                    </span>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No articles found</p>
-                  <Button asChild className="mt-4">
-                    <Link to="/core/articles/new">Create the first article</Link>
-                  </Button>
+                  
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={article.author?.avatar_url} />
+                      <AvatarFallback>{article.author?.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">
+                      {article.author?.name} • {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))
+          ) : (
+            <Card className="p-8 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <div className="bg-muted rounded-full p-3 mb-4">
+                  <MessageSquare className="h-6 w-6 text-primary" />
                 </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="border rounded-md p-4">
-              <h2 className="font-medium mb-4">Popular Tags</h2>
-              {tagsLoading ? (
-                <div className="animate-pulse space-y-2">
-                  {Array(5).fill(0).map((_, i) => (
-                    <div key={i} className="h-6 bg-muted rounded w-24"></div>
-                  ))}
-                </div>
-              ) : tags && tags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {tags.map(tag => (
-                    <button
-                      key={tag.id}
-                      onClick={() => setSelectedTag(selectedTag === tag.name ? null : tag.name)}
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        selectedTag === tag.name
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80'
-                      }`}
-                    >
-                      {tag.name} ({tag.count || 0})
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">No tags found</p>
-              )}
-            </div>
-          </div>
+                <h3 className="text-lg font-medium mb-2">No questions found</h3>
+                <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                  Be the first to ask a question and start a discussion!
+                </p>
+                <Button onClick={() => navigate('/knowledge/create')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ask a Question
+                </Button>
+              </div>
+            </Card>
+          )}
         </div>
       </div>
     </Shell>

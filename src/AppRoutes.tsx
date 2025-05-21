@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -48,6 +47,8 @@ import TagView from "./pages/core/TagView";
 import KnowledgeBase from "./pages/knowledge/KnowledgeBase";
 import { default as KnowledgeArticleView } from "./pages/knowledge/ArticleView";
 import ContentCreator from "./pages/knowledge/ContentCreator";
+import PostWizard from "./pages/knowledge/PostWizard";
+import TopicsPage from "./pages/knowledge/TopicsPage";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -83,16 +84,10 @@ const AppRoutes = () => {
       
       {/* New Knowledge Base Routes */}
       <Route path="/knowledge" element={<KnowledgeBase />} />
-      <Route path="/knowledge/:id" element={<KnowledgeArticleView />} />
-      <Route 
-        path="/knowledge/create" 
-        element={
-          <ProtectedRoute role={UserRole.MEMBER}>
-            <ContentCreator />
-          </ProtectedRoute>
-        } 
-      />
-      <Route path="/knowledge/tags/:tag" element={<KnowledgeBase />} />
+      <Route path="/knowledge/:id" element={<ArticleView />} />
+      <Route path="/knowledge/create" element={<PostWizard initialType="article" />} />
+      <Route path="/knowledge/topics" element={<TopicsPage />} />
+      <Route path="/knowledge/tags/:tag" element={<TagView />} />
 
       {/* Protected Routes */}
       <Route

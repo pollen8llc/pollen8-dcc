@@ -1,0 +1,126 @@
+
+import React, { useState, KeyboardEvent, useRef } from 'react';
+import { X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+
+interface TagInputFieldProps {
+  value: string[];
+  onChange: (value: string[]) => void;
+  availableTags?: string[];
+  placeholder?: string;
+  maxTags?: number;
+}
+
+export const TagInputField: React.FC<TagInputFieldProps> = ({ 
+  value, 
+  onChange, 
+  availableTags = [],
+  placeholder = "Add tags...",
+  maxTags = 5
+}) => {
+  const [input, setInput] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const trimmedInput = input.trim();
+    
+    // If Enter or comma is pressed
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      
+      // Check if there's valid input and we haven't reached max tags
+      if (trimmedInput && value.length < maxTags) {
+        // Check if tag doesn't already exist
+        if (!value.includes(trimmedInput)) {
+          onChange([...value, trimmedInput]);
+          setInput('');
+          setSuggestions([]);
+        }
+      }
+    }
+    
+    // If Backspace is pressed and input is empty, remove the last tag
+    if (e.key === 'Backspace' && input === '' && value.length > 0) {
+      onChange(value.slice(0, -1));
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newInput = e.target.value;
+    setInput(newInput);
+    
+    // Show suggestions only if input is not empty
+    if (newInput.trim()) {
+      const filtered = availableTags.filter(
+        tag => tag.toLowerCase().includes(newInput.toLowerCase()) && !value.includes(tag)
+      );
+      setSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    onChange(value.filter(tag => tag !== tagToRemove));
+  };
+
+  const addSuggestion = (suggestion: string) => {
+    if (!value.includes(suggestion) && value.length < maxTags) {
+      onChange([...value, suggestion]);
+      setInput('');
+      setSuggestions([]);
+    }
+  };
+
+  return (
+    <div className="w-full space-y-2">
+      {/* Tags display */}
+      <div className="flex flex-wrap gap-2 mb-2">
+        {value.map(tag => (
+          <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+            {tag}
+            <X 
+              className="h-3 w-3 cursor-pointer hover:text-destructive" 
+              onClick={() => removeTag(tag)}
+            />
+          </Badge>
+        ))}
+      </div>
+      
+      {/* Input */}
+      <div className="relative">
+        <Input
+          ref={inputRef}
+          type="text"
+          placeholder={value.length === 0 ? placeholder : value.length >= maxTags ? "Max tags reached" : placeholder}
+          value={input}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          disabled={value.length >= maxTags}
+          className="w-full"
+        />
+        
+        {/* Suggestions dropdown */}
+        {suggestions.length > 0 && (
+          <div className="absolute z-10 mt-1 w-full bg-popover border rounded-md shadow-md py-1">
+            {suggestions.map(suggestion => (
+              <div
+                key={suggestion}
+                className="px-3 py-1.5 cursor-pointer hover:bg-muted text-sm"
+                onClick={() => addSuggestion(suggestion)}
+              >
+                {suggestion}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      <p className="text-xs text-muted-foreground">
+        Press Enter or comma to add a tag. {maxTags - value.length} tags remaining.
+      </p>
+    </div>
+  );
+};
