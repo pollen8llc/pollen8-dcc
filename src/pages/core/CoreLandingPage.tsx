@@ -17,7 +17,7 @@ const CoreLandingPage = () => {
   const { data: tags, isLoading: tagsLoading } = useTags();
   const { data: articles, isLoading: articlesLoading } = useArticles({ 
     tag: selectedTag, 
-    query: debouncedSearch // Changed from searchQuery to query
+    searchQuery: debouncedSearch // Using searchQuery which is the correct property name
   });
 
   return (

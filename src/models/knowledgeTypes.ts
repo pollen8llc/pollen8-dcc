@@ -1,3 +1,4 @@
+
 export enum ContentType {
   QUESTION = "QUESTION",
   ARTICLE = "ARTICLE",
@@ -70,8 +71,7 @@ export interface PollOption {
 }
 
 export interface KnowledgeQueryOptions {
-  query?: string;
-  searchQuery?: string; // Added this field
+  searchQuery?: string;
   tag?: string | null;
   type?: string;
   sort?: string;

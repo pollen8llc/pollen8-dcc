@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/contexts/UserContext';
 import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
 
-export const useArticles = (filters?: { tag?: string, searchQuery?: string, limit?: number }) => {
+export const useArticles = (filters?: { tag?: string | null, searchQuery?: string, limit?: number }) => {
   const queryKey = ['knowledgeArticles', filters];
   
   return useQuery({
