@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { useToast } from '@/hooks/use-toast';
@@ -21,9 +21,21 @@ import { ContentType } from '@/models/knowledgeTypes';
 const ContentCreator = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedType, setSelectedType] = useState('all');
   
-  const handleCreateContent = (type: string) => {
-    navigate(`/knowledge/post/new?type=${type.toLowerCase()}`);
+  const handleTypeChange = (type: string) => {
+    setSelectedType(type);
+  };
+  
+  const handleCreateContent = () => {
+    if (selectedType && selectedType !== 'all') {
+      navigate(`/knowledge/post/new?type=${selectedType.toLowerCase()}`);
+    } else {
+      toast({
+        title: "Select a content type",
+        description: "Please select a specific content type to proceed",
+      });
+    }
   };
 
   return (
@@ -55,16 +67,17 @@ const ContentCreator = () => {
             </CardHeader>
             
             <CardContent>
-              <ContentTypeSelector onSelectType={handleCreateContent} />
+              <ContentTypeSelector selected={selectedType} onChange={handleTypeChange} />
             </CardContent>
             
             <CardFooter className="flex justify-end">
               <Button 
-                onClick={() => navigate('/knowledge/post/new')} 
+                onClick={handleCreateContent} 
                 className="flex items-center gap-2"
+                disabled={selectedType === 'all'}
               >
                 <PlusCircle className="h-4 w-4" />
-                Create Custom Content
+                {selectedType === 'all' ? 'Select a content type' : `Create ${selectedType}`}
               </Button>
             </CardFooter>
           </Card>
