@@ -67,30 +67,13 @@ const UnifiedKnowledgeBase = () => {
   
   const { useArticles, useTags } = useKnowledgeBase();
   
-  // Fetch articles with query parameters - Fix: remove 'sort' property and handle sorting in the component
+  // Fetch articles with query parameters
   const { data: articles, isLoading: articlesLoading } = useArticles({ 
     searchQuery: debouncedSearch,
     tag: selectedTag,
-    type: contentType !== 'all' ? contentType : undefined
+    type: contentType !== 'all' ? contentType : undefined,
+    sort: sortOption
   });
-  
-  // Apply sorting to articles after fetching
-  const sortedArticles = React.useMemo(() => {
-    if (!articles) return [];
-    
-    const articlesCopy = [...articles];
-    
-    switch (sortOption) {
-      case 'newest':
-        return articlesCopy.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      case 'popular':
-        return articlesCopy.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
-      case 'votes':
-        return articlesCopy.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
-      default:
-        return articlesCopy.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    }
-  }, [articles, sortOption]);
   
   // Fetch tags
   const { data: tags, isLoading: tagsLoading } = useTags();
@@ -212,8 +195,8 @@ const UnifiedKnowledgeBase = () => {
                     </CardFooter>
                   </Card>
                 ))
-              ) : sortedArticles && sortedArticles.length > 0 ? (
-                sortedArticles.map(article => (
+              ) : articles && articles.length > 0 ? (
+                articles.map(article => (
                   <Card key={article.id} className="hover:shadow-md transition-shadow">
                     <CardHeader className="pb-2">
                       <div className="flex justify-between">
@@ -388,9 +371,9 @@ const UnifiedKnowledgeBase = () => {
                           </Card>
                         ))}
                       </div>
-                    ) : sortedArticles && sortedArticles.length > 0 ? (
+                    ) : articles && articles.length > 0 ? (
                       <div className="space-y-4">
-                        {sortedArticles.map((article) => (
+                        {articles.map((article) => (
                           <ArticleCard key={article.id} article={article} />
                         ))}
                       </div>
