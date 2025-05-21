@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,12 +18,20 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
       let query = supabase
         .from('knowledge_articles')
         .select(`
-          *,
+          id, 
+          title,
+          content,
+          created_at,
+          updated_at,
+          view_count,
+          is_answered,
+          tags,
+          content_type,
+          user_id,
           profiles:user_id (
             first_name,
             last_name,
-            avatar_url,
-            is_admin
+            avatar_url
           )
         `)
         .order('created_at', { ascending: false });
@@ -36,7 +45,7 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
       }
       
       // Only filter by type if it's not null/undefined and not 'all'
-      if (filters?.type && filters.type !== 'all') {
+      if (filters?.type && filters?.type !== 'all') {
         query = query.eq('content_type', filters.type);
       }
       
@@ -59,7 +68,6 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
           first_name?: string; 
           last_name?: string; 
           avatar_url?: string;
-          is_admin?: boolean;
         } | null;
         
         return {
@@ -69,7 +77,6 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
             id: article.user_id,
             name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
             avatar_url: profileData.avatar_url || '',
-            is_admin: !!profileData.is_admin
           } : undefined
         };
       }) as KnowledgeArticle[];

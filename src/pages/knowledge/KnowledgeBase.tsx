@@ -72,12 +72,19 @@ const KnowledgeBase = () => {
       let query = supabase
         .from('knowledge_articles')
         .select(`
-          *,
+          id, 
+          title,
+          content,
+          created_at,
+          updated_at,
+          view_count,
+          tags,
+          content_type,
+          user_id,
           profiles:user_id (
             first_name,
             last_name,
-            avatar_url,
-            is_admin
+            avatar_url
           )
         `)
         .order('created_at', { ascending: false });
@@ -115,7 +122,6 @@ const KnowledgeBase = () => {
           first_name?: string; 
           last_name?: string; 
           avatar_url?: string;
-          is_admin?: boolean;
         } | null;
         
         return {
@@ -124,8 +130,7 @@ const KnowledgeBase = () => {
           author: profileData ? {
             id: article.user_id,
             name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-            avatar_url: profileData.avatar_url || '',
-            is_admin: !!profileData.is_admin
+            avatar_url: profileData.avatar_url || ''
           } : undefined
         };
       });
