@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -42,34 +42,40 @@ type PollFormValues = z.infer<typeof pollFormSchema>;
 interface PollFormProps {
   onSubmit: (data: PollFormValues) => void;
   isSubmitting: boolean;
-  step?: number; // Added step prop
+  step?: number;
+  initialData?: Partial<PollFormValues>;
 }
 
 export const PollForm: React.FC<PollFormProps> = ({ 
   onSubmit, 
   isSubmitting,
-  step = 1 // Default value for step
+  step = 1,
+  initialData
 }) => {
   const [tagInput, setTagInput] = useState('');
-  const [localData, setLocalData] = useState<Partial<PollFormValues>>({
-    question: "",
-    options: [{ text: "" }, { text: "" }],
-    allowMultipleSelections: false,
-    duration: "7",
-    tags: [],
-  });
   
   // Form setup
   const form = useForm<PollFormValues>({
     resolver: zodResolver(pollFormSchema),
     defaultValues: {
-      question: localData.question || "",
-      options: localData.options || [{ text: "" }, { text: "" }],
-      allowMultipleSelections: localData.allowMultipleSelections || false,
-      duration: localData.duration || "7",
-      tags: localData.tags || [],
+      question: initialData?.question || "",
+      options: initialData?.options || [{ text: "" }, { text: "" }],
+      allowMultipleSelections: initialData?.allowMultipleSelections || false,
+      duration: initialData?.duration || "7",
+      tags: initialData?.tags || [],
     },
   });
+  
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      Object.entries(initialData).forEach(([key, value]) => {
+        if (value !== undefined) {
+          form.setValue(key as keyof PollFormValues, value);
+        }
+      });
+    }
+  }, [initialData, form]);
   
   // Field array for options
   const { fields, append, remove } = useFieldArray({
@@ -121,11 +127,7 @@ export const PollForm: React.FC<PollFormProps> = ({
   
   // Handle form submission based on step
   const handleSubmit = (data: PollFormValues) => {
-    if (step === 1) {
-      setLocalData(data);
-    } else {
-      onSubmit(data);
-    }
+    onSubmit(data);
   };
 
   // Content to render based on step

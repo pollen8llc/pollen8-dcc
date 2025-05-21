@@ -31,32 +31,39 @@ type ArticleFormValues = z.infer<typeof articleFormSchema>;
 interface ArticleFormProps {
   onSubmit: (data: ArticleFormValues) => void;
   isSubmitting: boolean;
-  step?: number; // Added step prop
+  step?: number;
+  initialData?: Partial<ArticleFormValues>;
 }
 
 export const ArticleForm: React.FC<ArticleFormProps> = ({
   onSubmit,
   isSubmitting,
-  step = 1 // Default value for step
+  step = 1,
+  initialData
 }) => {
   const [tagInput, setTagInput] = useState('');
-  const [localData, setLocalData] = useState<Partial<ArticleFormValues>>({
-    title: "",
-    subtitle: "",
-    content: "",
-    tags: [],
-  });
   
   // Form setup
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
     defaultValues: {
-      title: localData.title || "",
-      subtitle: localData.subtitle || "",
-      content: localData.content || "",
-      tags: localData.tags || [],
+      title: initialData?.title || "",
+      subtitle: initialData?.subtitle || "",
+      content: initialData?.content || "",
+      tags: initialData?.tags || [],
     },
   });
+  
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      Object.entries(initialData).forEach(([key, value]) => {
+        if (value !== undefined) {
+          form.setValue(key as keyof ArticleFormValues, value);
+        }
+      });
+    }
+  }, [initialData, form]);
   
   // Handle tag addition
   const handleAddTag = () => {
@@ -97,11 +104,7 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
   
   // Handle form submission based on step
   const handleSubmit = (data: ArticleFormValues) => {
-    if (step === 1) {
-      setLocalData(data);
-    } else {
-      onSubmit(data);
-    }
+    onSubmit(data);
   };
   
   // Setup rich text editor
