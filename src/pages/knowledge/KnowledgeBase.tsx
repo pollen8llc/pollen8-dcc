@@ -61,7 +61,7 @@ const KnowledgeBase = () => {
   const { data: articles, isLoading: articlesLoading } = useQuery({
     queryKey: ['knowledgeArticles', searchQuery, selectedTag, contentType, sortOption],
     queryFn: () => getMockArticles({ 
-      query: searchQuery, 
+      searchQuery: searchQuery, 
       tag: selectedTag, 
       type: contentType !== 'all' ? contentType : undefined,
       sort: sortOption

@@ -144,14 +144,14 @@ const mockTags: KnowledgeTag[] = [
 
 // Function to filter and sort articles based on query parameters
 export const getMockArticles = (options: KnowledgeQueryOptions = {}): Promise<KnowledgeArticle[]> => {
-  const { query, tag, type, sort } = options;
+  const { searchQuery, tag, type, sort } = options;
   
   // Apply filters
   let filteredArticles = [...mockArticles];
   
   // Filter by search query
-  if (query) {
-    const searchLower = query.toLowerCase();
+  if (searchQuery) {
+    const searchLower = searchQuery.toLowerCase();
     filteredArticles = filteredArticles.filter(article => 
       article.title.toLowerCase().includes(searchLower) || 
       article.content.toLowerCase().includes(searchLower)
