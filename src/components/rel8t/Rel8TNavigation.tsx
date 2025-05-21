@@ -27,9 +27,9 @@ export const Rel8Navigation = () => {
   ];
   
   const coreItems = [
-    { name: "Knowledge Base", href: "/core", icon: Book },
-    { name: "Browse Articles", href: "/core/articles", icon: FileText },
-    { name: "Latest", href: "/core/latest", icon: Clock }
+    { name: "Knowledge Base", href: "/knowledge", icon: Book },
+    { name: "Browse Articles", href: "/knowledge", icon: FileText },
+    { name: "Latest", href: "/knowledge", icon: Clock }
   ];
 
   return (

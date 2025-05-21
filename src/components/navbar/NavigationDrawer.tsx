@@ -114,16 +114,16 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   </Button>
                 )}
 
-                {/* CORE section */}
+                {/* CORE section - now redirects to Knowledge */}
                 <Separator className="my-2" />
                 <p className="px-4 py-2 text-sm font-medium opacity-70">
-                  CORE
+                  Knowledge
                 </p>
 
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/core")}
+                  onClick={() => handleNavigation("/knowledge")}
                 >
                   <BookOpen className="mr-2 h-4 w-4" />
                   Knowledge Base
@@ -132,7 +132,7 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/core/articles")}
+                  onClick={() => handleNavigation("/knowledge")}
                 >
                   <FileTextIcon className="mr-2 h-4 w-4" />
                   Browse Articles
@@ -141,10 +141,10 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/core/latest")}
+                  onClick={() => handleNavigation("/knowledge/topics")}
                 >
                   <Book className="mr-2 h-4 w-4" />
-                  Latest Articles
+                  Browse Topics
                 </Button>
               </>
             )}

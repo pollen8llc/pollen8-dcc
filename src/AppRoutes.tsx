@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -37,8 +36,7 @@ import DotConnectorDashboard from "./pages/DotConnectorDashboard";
 import TriggerWizard from "./pages/rel8t/TriggerWizard";
 import EmailTest from "./pages/rel8t/EmailTest";
 
-// CORE Knowledge Base Pages
-import CoreLandingPage from "./pages/core/CoreLandingPage";
+// CORE Knowledge Base Pages - now redirecting to Knowledge pages
 import ArticleView from "./pages/core/ArticleView";
 import ArticleCreate from "./pages/core/ArticleCreate";
 import ArticleEdit from "./pages/core/ArticleEdit";
@@ -62,15 +60,15 @@ const AppRoutes = () => {
       <Route path="/invite/:code" element={<InvitePage />} />
       <Route path="/documentation" element={<Documentation />} />
 
-      {/* CORE Knowledge Base Routes */}
-      <Route path="/core" element={<CoreLandingPage />} />
+      {/* CORE Knowledge Base Routes - Redirects to Knowledge */}
+      <Route path="/core" element={<Navigate to="/knowledge" replace />} />
       <Route path="/core/articles/:id" element={<ArticleView />} />
       <Route path="/core/tags/:tag" element={<TagView />} />
       <Route 
         path="/core/articles/new" 
         element={
           <ProtectedRoute role={UserRole.ORGANIZER}>
-            <ArticleCreate />
+            <Navigate to="/knowledge/create" replace />
           </ProtectedRoute>
         } 
       />
@@ -83,10 +81,10 @@ const AppRoutes = () => {
         } 
       />
       
-      {/* New Knowledge Base Routes */}
+      {/* Knowledge Base Routes */}
       <Route path="/knowledge" element={<KnowledgeBase />} />
       <Route path="/knowledge/:id" element={<KnowledgeArticleView />} />
-      <Route path="/knowledge/create" element={<PostWizard />} />
+      <Route path="/knowledge/create" element={<ContentCreator />} />
       <Route path="/knowledge/create/question" element={<PostWizard initialType="question" />} />
       <Route path="/knowledge/create/article" element={<PostWizard initialType="article" />} />
       <Route path="/knowledge/create/quote" element={<PostWizard initialType="quote" />} />

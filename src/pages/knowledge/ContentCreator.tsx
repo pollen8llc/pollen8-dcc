@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Content Type Selector (Add this import)
+// Content Type Selector
 import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
 
 // Types
@@ -29,7 +29,7 @@ const ContentCreator = () => {
   
   const handleCreateContent = () => {
     if (selectedType && selectedType !== 'all') {
-      navigate(`/knowledge/post/new?type=${selectedType.toLowerCase()}`);
+      navigate(`/knowledge/create/${selectedType.toLowerCase()}`);
     } else {
       toast({
         title: "Select a content type",

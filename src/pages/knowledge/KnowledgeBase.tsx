@@ -103,12 +103,19 @@ const KnowledgeBase = () => {
             </p>
           </div>
           
-          {(isOrganizer || isAdmin) && (
-            <Button onClick={() => navigate('/knowledge/create')} className="shrink-0">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create Content
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex items-center gap-2" onClick={() => navigate('/knowledge/topics')}>
+              <Tag className="h-4 w-4" />
+              Browse Topics
             </Button>
-          )}
+            
+            {(isOrganizer || isAdmin) && (
+              <Button onClick={() => navigate('/knowledge/create')} className="shrink-0">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create Content
+              </Button>
+            )}
+          </div>
         </div>
         
         {/* Main content grid */}
