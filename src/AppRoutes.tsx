@@ -44,6 +44,11 @@ import ArticleCreate from "./pages/core/ArticleCreate";
 import ArticleEdit from "./pages/core/ArticleEdit";
 import TagView from "./pages/core/TagView";
 
+// Knowledge Base Pages
+import KnowledgeBase from "./pages/knowledge/KnowledgeBase";
+import ArticleView as KnowledgeArticleView from "./pages/knowledge/ArticleView";
+import ContentCreator from "./pages/knowledge/ContentCreator";
+
 const AppRoutes = () => {
   const { currentUser } = useUser();
 
@@ -75,6 +80,19 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
+      
+      {/* New Knowledge Base Routes */}
+      <Route path="/knowledge" element={<KnowledgeBase />} />
+      <Route path="/knowledge/:id" element={<KnowledgeArticleView />} />
+      <Route 
+        path="/knowledge/create" 
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <ContentCreator />
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="/knowledge/tags/:tag" element={<KnowledgeBase />} />
 
       {/* Protected Routes */}
       <Route
