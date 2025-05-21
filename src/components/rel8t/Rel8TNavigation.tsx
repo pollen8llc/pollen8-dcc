@@ -11,7 +11,8 @@ import {
   CalendarClock,
   Book,
   FileText,
-  Clock
+  Clock,
+  Tag
 } from "lucide-react";
 
 export const Rel8Navigation = () => {
@@ -21,8 +22,9 @@ export const Rel8Navigation = () => {
     { name: "Dashboard", href: "/rel8/dashboard", icon: LayoutDashboard },
     { name: "Contacts", href: "/rel8/contacts", icon: ContactIcon },
     { name: "Relationships", href: "/rel8/relationships", icon: CalendarClock },
-    { name: "Import", href: "/rel8/contacts/import", icon: Import },
     { name: "Groups", href: "/rel8/groups", icon: Grid3x3 },
+    { name: "Categories", href: "/rel8/categories", icon: Tag },
+    { name: "Import", href: "/rel8/contacts/import", icon: Import },
     { name: "Settings", href: "/rel8/settings", icon: Settings }
   ];
   

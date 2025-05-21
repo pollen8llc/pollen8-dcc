@@ -5,12 +5,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/contexts/UserContext';
 import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
 
-export const useArticles = (filters?: { tag?: string | null, searchQuery?: string, limit?: number, type?: string }) => {
+export const useArticles = (filters?: { tag?: string | null, searchQuery?: string, limit?: number, type?: string | null }) => {
   const queryKey = ['knowledgeArticles', filters];
+  const queryClient = useQueryClient();
   
   return useQuery({
     queryKey,
     queryFn: async () => {
+      console.log('Fetching articles with filters:', filters);
+      
       let query = supabase
         .from('knowledge_articles')
         .select(`
@@ -18,7 +21,8 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
           profiles:user_id (
             first_name,
             last_name,
-            avatar_url
+            avatar_url,
+            is_admin
           )
         `)
         .order('created_at', { ascending: false });
@@ -31,7 +35,8 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
         query = query.or(`title.ilike.%${filters.searchQuery}%,content.ilike.%${filters.searchQuery}%`);
       }
       
-      if (filters?.type) {
+      // Only filter by type if it's not null/undefined and not 'all'
+      if (filters?.type && filters.type !== 'all') {
         query = query.eq('content_type', filters.type);
       }
       
@@ -42,15 +47,19 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
       const { data, error } = await query;
       
       if (error) {
+        console.error('Error fetching articles:', error);
         throw error;
       }
+      
+      console.log('Articles fetched successfully:', data?.length || 0);
       
       // Format author information with proper type safety
       return data.map(article => {
         const profileData = article.profiles as { 
           first_name?: string; 
           last_name?: string; 
-          avatar_url?: string 
+          avatar_url?: string;
+          is_admin?: boolean;
         } | null;
         
         return {
@@ -59,11 +68,15 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
           author: profileData ? {
             id: article.user_id,
             name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-            avatar_url: profileData.avatar_url || ''
+            avatar_url: profileData.avatar_url || '',
+            is_admin: !!profileData.is_admin
           } : undefined
         };
       }) as KnowledgeArticle[];
-    }
+    },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -211,9 +224,12 @@ export const useArticleMutations = () => {
         }
       }
       
-      // Invalidate relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
-      queryClient.invalidateQueries({ queryKey: ['knowledgeTags'] });
+      // Immediately invalidate relevant queries to force a refetch
+      await queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+      await queryClient.invalidateQueries({ queryKey: ['knowledgeTags'] });
+      
+      // Force refetch all article queries
+      await queryClient.refetchQueries({ queryKey: ['knowledgeArticles'] });
       
       toast({
         title: "Success",

@@ -8,11 +8,8 @@ import {
   PlusCircle, 
   Search,
   LoaderCircle,
-  BookOpen,
-  MessageSquare,
-  Quote,
-  BarChart2,
-  SlidersHorizontal
+  SlidersHorizontal,
+  RefreshCcw
 } from 'lucide-react';
 import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
 import { TagsList } from '@/components/knowledge/TagsList';
@@ -36,10 +33,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 const KnowledgeBase = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // States
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -48,7 +49,7 @@ const KnowledgeBase = () => {
     searchParams.get('tag')
   );
   const [selectedType, setSelectedType] = useState<string | null>(
-    searchParams.get('type')
+    searchParams.get('type') || 'all'
   );
   const [sortOption, setSortOption] = useState(
     searchParams.get('sort') || 'newest'
@@ -58,7 +59,7 @@ const KnowledgeBase = () => {
   const { useArticles, useTags } = useKnowledgeBase();
   
   // Fetch articles with filters
-  const { data: articles, isLoading: isArticlesLoading } = useArticles({
+  const { data: articles, isLoading: isArticlesLoading, refetch: refetchArticles } = useArticles({
     tag: selectedTag,
     searchQuery: searchQuery.length > 2 ? searchQuery : undefined,
     type: selectedType,
@@ -67,14 +68,35 @@ const KnowledgeBase = () => {
   // Fetch tags for the filter sidebar
   const { data: tags, isLoading: isTagsLoading } = useTags();
   
+  // Manually refetch data
+  const handleRefresh = async () => {
+    toast({
+      title: "Refreshing content",
+      description: "Fetching the latest articles..."
+    });
+    
+    // Force a refetch of all related queries
+    await queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+    await refetchArticles();
+  };
+  
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedTag) params.set('tag', selectedTag);
-    if (selectedType) params.set('type', selectedType);
+    if (selectedType && selectedType !== 'all') params.set('type', selectedType);
     if (sortOption) params.set('sort', sortOption);
     setSearchParams(params, { replace: true });
   }, [selectedTag, selectedType, sortOption, setSearchParams]);
+
+  // Debug articles data
+  useEffect(() => {
+    if (articles) {
+      console.log(`Displaying ${articles.length} articles:`, 
+        articles.map(a => ({ id: a.id, title: a.title, type: a.content_type }))
+      );
+    }
+  }, [articles]);
   
   // Handle tag selection
   const handleTagSelect = (tagName: string) => {
@@ -86,8 +108,8 @@ const KnowledgeBase = () => {
   };
 
   // Handle content type selection
-  const handleTypeSelect = (type: string | null) => {
-    setSelectedType(type);
+  const handleTypeSelect = (type: string) => {
+    setSelectedType(type === 'all' ? null : type);
   };
   
   // Sort function for articles
@@ -160,6 +182,15 @@ const KnowledgeBase = () => {
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Post
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="shrink-0"
+              onClick={handleRefresh}
+            >
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              Refresh
             </Button>
             
             <Sheet>
@@ -273,13 +304,13 @@ const KnowledgeBase = () => {
                 {getFilteredContentText()}
               </h2>
               
-              {(selectedTag || selectedType) && (
+              {(selectedTag || selectedType !== 'all' && selectedType !== null) && (
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => {
                     setSelectedTag(null);
-                    setSelectedType(null);
+                    setSelectedType('all');
                   }}
                 >
                   Clear filters
@@ -293,7 +324,7 @@ const KnowledgeBase = () => {
                   <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
                 ))}
               </div>
-            ) : sortedArticles.length > 0 ? (
+            ) : sortedArticles && sortedArticles.length > 0 ? (
               <div className="space-y-4">
                 {sortedArticles.map((article) => (
                   <ArticleCard
@@ -316,10 +347,16 @@ const KnowledgeBase = () => {
                         : "No content has been created yet"
                   }
                 </p>
-                <Button onClick={() => setIsCreateModalOpen(true)}>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Create the first post
-                </Button>
+                <div className="flex flex-col sm:flex-row justify-center gap-3">
+                  <Button onClick={handleRefresh}>
+                    <RefreshCcw className="mr-2 h-4 w-4" />
+                    Refresh Content
+                  </Button>
+                  <Button onClick={() => setIsCreateModalOpen(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create New Post
+                  </Button>
+                </div>
               </div>
             )}
           </div>

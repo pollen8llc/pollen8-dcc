@@ -31,7 +31,8 @@ import {
   Folder,
   BookOpen,
   Book,
-  FileTextIcon
+  FileTextIcon,
+  Tag
 } from "lucide-react";
 
 interface NavigationDrawerProps {
@@ -191,6 +192,15 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 >
                   <Grid3x3 className="mr-2 h-4 w-4" />
                   Groups
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8/categories")}
+                >
+                  <Tag className="mr-2 h-4 w-4" />
+                  Categories
                 </Button>
                 
                 <Button
