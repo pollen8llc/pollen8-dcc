@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -115,11 +116,11 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
       {profiles.map((profile) => (
         <Card 
           key={profile.id} 
-          className={`overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300 ${isAdmin(profile.role) ? 'admin-premium-border' : ''}`}
+          className={`overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300 ${isAdmin(profile.role) ? 'admin-gradient-premium-border' : ''}`}
         >
           <div className="p-6">
             <div className="flex items-start gap-4">
-              <Avatar className={`h-16 w-16 ${isAdmin(profile.role) ? 'ring-2 ring-[#00eada]/50' : 'ring-2 ring-[#00eada]/20'}`}>
+              <Avatar className={`h-16 w-16 ${isAdmin(profile.role) ? 'ring-2 ring-[#9b87f5]/50' : 'ring-2 ring-[#00eada]/20'}`}>
                 <AvatarImage src={profile.avatar_url || ""} />
                 <AvatarFallback className="bg-[#00eada]/10 text-[#00eada] font-medium">
                   {getInitials(profile.first_name, profile.last_name)}
