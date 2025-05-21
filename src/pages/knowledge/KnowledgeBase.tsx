@@ -1,28 +1,25 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
-import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { 
-  Search, 
   PlusCircle, 
-  Tag, 
-  Filter, 
+  Search,
+  LoaderCircle,
   BookOpen,
   MessageSquare,
+  Quote,
   BarChart2,
-  Quote
+  SlidersHorizontal
 } from 'lucide-react';
-
-// UI Components
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
+import { TagsList } from '@/components/knowledge/TagsList';
+import { ArticleCard } from '@/components/knowledge/ArticleCard';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { ContentType } from '@/models/knowledgeTypes';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Select,
   SelectContent,
@@ -30,272 +27,314 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-// Custom Components
-import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { TagsList } from '@/components/knowledge/TagsList';
-import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
-
-// Services and hooks
-import { usePermissions } from '@/hooks/usePermissions';
-import { useUser } from '@/contexts/UserContext';
-import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { ContentType } from '@/models/knowledgeTypes';
+import { CreatePostModal } from '@/components/knowledge/CreatePostModal';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 const KnowledgeBase = () => {
   const navigate = useNavigate();
-  const { currentUser } = useUser();
-  const { isOrganizer, isAdmin } = usePermissions(currentUser);
+  const [searchParams, setSearchParams] = useSearchParams();
   
-  // State variables
+  // States
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [contentType, setContentType] = useState<string>('all');
-  const [sortOption, setSortOption] = useState<string>('newest');
+  const [selectedTag, setSelectedTag] = useState<string | null>(
+    searchParams.get('tag')
+  );
+  const [selectedType, setSelectedType] = useState<string | null>(
+    searchParams.get('type')
+  );
+  const [sortOption, setSortOption] = useState(
+    searchParams.get('sort') || 'newest'
+  );
   
-  // Get hooks from knowledge base
-  const { useTags, useArticles } = useKnowledgeBase();
+  // Hooks
+  const { useArticles, useTags } = useKnowledgeBase();
   
-  // Fetch articles with query parameters
-  // For the content type, we need to map from our UI values to the actual ContentType enum
-  const contentTypeFilter = contentType !== 'all' ? contentType.toUpperCase() : undefined;
-  
-  // Only some sort options are supported directly by the API
-  // We'll fetch data and then sort client-side for other options
-  const { data: articles, isLoading: articlesLoading } = useArticles({
-    searchQuery,
+  // Fetch articles with filters
+  const { data: articles, isLoading: isArticlesLoading } = useArticles({
     tag: selectedTag,
-    type: contentTypeFilter
+    searchQuery: searchQuery.length > 2 ? searchQuery : undefined,
+    type: selectedType,
   });
   
-  // Fetch tags
-  const { data: tags, isLoading: tagsLoading } = useTags();
+  // Fetch tags for the filter sidebar
+  const { data: tags, isLoading: isTagsLoading } = useTags();
+  
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (selectedTag) params.set('tag', selectedTag);
+    if (selectedType) params.set('type', selectedType);
+    if (sortOption) params.set('sort', sortOption);
+    setSearchParams(params, { replace: true });
+  }, [selectedTag, selectedType, sortOption, setSearchParams]);
+  
+  // Handle tag selection
+  const handleTagSelect = (tagName: string) => {
+    if (selectedTag === tagName) {
+      setSelectedTag(null);
+    } else {
+      setSelectedTag(tagName);
+    }
+  };
 
-  // Handle client-side sorting
-  const sortedArticles = useMemo(() => {
+  // Handle content type selection
+  const handleTypeSelect = (type: string | null) => {
+    setSelectedType(type);
+  };
+  
+  // Sort function for articles
+  const sortedArticles = React.useMemo(() => {
     if (!articles) return [];
     
-    let result = [...articles];
+    let sorted = [...articles];
     
     switch (sortOption) {
       case 'newest':
-        return result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      case 'popular':
-        return result.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
-      case 'votes':
-        return result.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
-      case 'views':
-        return result.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'oldest':
+        sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'mostViewed':
+        sorted.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+        break;
+      case 'mostVoted':
+        sorted.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
+        break;
       default:
-        return result;
+        // Default to newest
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
+    
+    return sorted;
   }, [articles, sortOption]);
   
-  // Handle tag selection
-  const handleTagSelect = (tag: string) => {
-    if (selectedTag === tag) {
-      setSelectedTag(null);
-    } else {
-      setSelectedTag(tag);
+  // Get content type label
+  const getContentTypeLabel = (type: string | null) => {
+    switch (type) {
+      case ContentType.ARTICLE:
+        return 'Articles';
+      case ContentType.QUESTION:
+        return 'Questions';
+      case ContentType.QUOTE:
+        return 'Quotes';
+      case ContentType.POLL:
+        return 'Polls';
+      default:
+        return 'All Content';
     }
   };
   
-  // Clear all filters
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedTag(null);
-    setContentType('all');
-    setSortOption('newest');
+  // Filtered content text
+  const getFilteredContentText = () => {
+    const typeText = selectedType ? getContentTypeLabel(selectedType) : 'All content';
+    const tagText = selectedTag ? `tagged with "${selectedTag}"` : '';
+    return `${typeText} ${tagText}`;
   };
   
+  // Main JSX
   return (
     <Shell>
-      <div className="container mx-auto px-4 py-6">
-        {/* Header section with title and create button */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+      <div className="container mx-auto px-4 py-6 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Knowledge Base</h1>
-            <p className="text-muted-foreground mt-1">
-              Discover, learn, and share knowledge with the community
+            <p className="text-muted-foreground">
+              Browse and find useful resources, articles, and community knowledge
             </p>
           </div>
           
-          <div className="flex gap-3">
-            <Button variant="outline" className="flex items-center gap-2" onClick={() => navigate('/knowledge/topics')}>
-              <Tag className="h-4 w-4" />
-              Browse Topics
+          <div className="flex gap-2 items-start">
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="shrink-0"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Post
             </Button>
             
-            {(isOrganizer || isAdmin) && (
-              <Button onClick={() => navigate('/knowledge/create')} className="shrink-0">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Create Content
-              </Button>
-            )}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="md:hidden">
+                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <SheetHeader>
+                  <SheetTitle>Filters</SheetTitle>
+                  <SheetDescription>
+                    Narrow down the results based on specific criteria
+                  </SheetDescription>
+                </SheetHeader>
+                
+                <div className="space-y-6 mt-6">
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Content Type</h3>
+                    <ContentTypeSelector
+                      selectedType={selectedType}
+                      onSelectType={handleTypeSelect}
+                    />
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Tags</h3>
+                    <TagsList 
+                      tags={tags || []} 
+                      selectedTag={selectedTag}
+                      isLoading={isTagsLoading}
+                      onSelectTag={handleTagSelect}
+                    />
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Sort By</h3>
+                    <Select value={sortOption} onValueChange={setSortOption}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Newest First</SelectItem>
+                        <SelectItem value="oldest">Oldest First</SelectItem>
+                        <SelectItem value="mostViewed">Most Viewed</SelectItem>
+                        <SelectItem value="mostVoted">Most Upvoted</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
         
-        {/* Main content grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Left sidebar with filters */}
-          <div className="md:col-span-1 space-y-6">
-            {/* Search box */}
+        {/* Search and Filters */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="w-full lg:w-3/4 relative">
+            <Search className="absolute top-1/2 transform -translate-y-1/2 left-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search the knowledge base..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="w-full lg:w-1/4 flex gap-2">
+            <Select value={sortOption} onValueChange={setSortOption} className="w-full">
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="mostViewed">Most Viewed</SelectItem>
+                <SelectItem value="mostVoted">Most Upvoted</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        {/* Main content area */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Filter sidebar - desktop */}
+          <div className="hidden md:block w-full lg:w-1/4 space-y-6">
             <div>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search knowledge base..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            {/* Content type filter */}
-            <div>
-              <h3 className="text-sm font-medium mb-2">Content type</h3>
-              <ContentTypeSelector 
-                selected={contentType}
-                onChange={setContentType}
+              <h3 className="text-lg font-medium mb-3">Content Type</h3>
+              <ContentTypeSelector
+                selectedType={selectedType}
+                onSelectType={handleTypeSelect}
               />
             </div>
             
-            {/* Sort options */}
             <div>
-              <h3 className="text-sm font-medium mb-2">Sort by</h3>
-              <Select
-                value={sortOption}
-                onValueChange={setSortOption}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest</SelectItem>
-                  <SelectItem value="popular">Most Popular</SelectItem>
-                  <SelectItem value="votes">Highest Votes</SelectItem>
-                  <SelectItem value="views">Most Viewed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Tags filter */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium">Filter by tags</h3>
-                {selectedTag && (
-                  <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => setSelectedTag(null)}>
-                    Clear
-                  </Button>
-                )}
-              </div>
-              
+              <h3 className="text-lg font-medium mb-3">Tags</h3>
               <TagsList 
-                tags={tags || []}
+                tags={tags || []} 
                 selectedTag={selectedTag}
-                isLoading={tagsLoading}
+                isLoading={isTagsLoading}
                 onSelectTag={handleTagSelect}
               />
             </div>
-            
-            {/* Clear filters button */}
-            {(searchQuery || selectedTag || contentType !== 'all' || sortOption !== 'newest') && (
-              <Button variant="outline" className="w-full" onClick={clearFilters}>
-                <Filter className="mr-2 h-4 w-4" />
-                Clear all filters
-              </Button>
-            )}
           </div>
           
-          {/* Main content area */}
-          <div className="md:col-span-3">
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="mb-4">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="questions">Questions</TabsTrigger>
-                <TabsTrigger value="articles">Articles</TabsTrigger>
-                <TabsTrigger value="quotes">Quotes</TabsTrigger>
-                <TabsTrigger value="polls">Polls</TabsTrigger>
-              </TabsList>
+          {/* Article list */}
+          <div className="w-full lg:w-3/4 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                {getFilteredContentText()}
+              </h2>
               
-              <TabsContent value="all" className="space-y-4">
-                {articlesLoading ? (
-                  <div className="space-y-4">
-                    {Array(3).fill(0).map((_, i) => (
-                      <Card key={i} className="animate-pulse">
-                        <CardHeader>
-                          <div className="h-4 bg-muted rounded w-3/4"></div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <div className="h-3 bg-muted rounded"></div>
-                            <div className="h-3 bg-muted rounded w-5/6"></div>
-                          </div>
-                        </CardContent>
-                        <CardFooter>
-                          <div className="h-3 bg-muted rounded w-1/4"></div>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                ) : sortedArticles && sortedArticles.length > 0 ? (
-                  <div className="space-y-4">
-                    {sortedArticles.map((article) => (
-                      <ArticleCard key={article.id} article={article} />
-                    ))}
-                  </div>
-                ) : (
-                  <Card className="p-8 text-center bg-card/60 backdrop-blur-sm">
-                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                      <BookOpen className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-medium mb-2">No content found</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      {searchQuery || selectedTag
-                        ? "Try adjusting your search terms or filters to find what you're looking for."
-                        : "Be the first to contribute to our knowledge base by sharing your insights."}
-                    </p>
-                    
-                    {(isOrganizer || isAdmin) && !searchQuery && !selectedTag && (
-                      <Button onClick={() => navigate('/knowledge/create')}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Create Content
-                      </Button>
-                    )}
-                  </Card>
-                )}
-              </TabsContent>
-              
-              {/* Similar structure for other tabs - omitted for brevity */}
-              <TabsContent value="questions">
-                <div className="p-8 text-center">
-                  <p className="text-muted-foreground">Content filtered to show Questions only</p>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="articles">
-                <div className="p-8 text-center">
-                  <p className="text-muted-foreground">Content filtered to show Articles only</p>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="quotes">
-                <div className="p-8 text-center">
-                  <p className="text-muted-foreground">Content filtered to show Quotes only</p>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="polls">
-                <div className="p-8 text-center">
-                  <p className="text-muted-foreground">Content filtered to show Polls only</p>
-                </div>
-              </TabsContent>
-            </Tabs>
+              {(selectedTag || selectedType) && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setSelectedTag(null);
+                    setSelectedType(null);
+                  }}
+                >
+                  Clear filters
+                </Button>
+              )}
+            </div>
+            
+            {isArticlesLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
+                ))}
+              </div>
+            ) : sortedArticles.length > 0 ? (
+              <div className="space-y-4">
+                {sortedArticles.map((article) => (
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    onClick={() => navigate(`/knowledge/article/${article.id}`)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-muted/50 rounded-lg">
+                <h3 className="font-medium text-xl mb-2">No content found</h3>
+                <p className="text-muted-foreground mb-6">
+                  {searchQuery.length > 0 
+                    ? `No results found for "${searchQuery}"` 
+                    : selectedTag 
+                      ? `No content tagged with "${selectedTag}"`
+                      : selectedType
+                        ? `No ${getContentTypeLabel(selectedType).toLowerCase()} found`
+                        : "No content has been created yet"
+                  }
+                </p>
+                <Button onClick={() => setIsCreateModalOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create the first post
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      
+      {/* Create Post Modal */}
+      <CreatePostModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onSelectType={(type) => {
+          setIsCreateModalOpen(false);
+          navigate(`/knowledge/create?type=${type}`);
+        }}
+      />
     </Shell>
   );
 };

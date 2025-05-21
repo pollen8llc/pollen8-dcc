@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form';
 import { TagInputField } from '@/components/knowledge/TagInputField';
 import { Badge } from '@/components/ui/badge';
+import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 // Define the form schema
 const formSchema = z.object({

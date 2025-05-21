@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from '@/components/ui/badge';
 import { TagInputField } from '@/components/knowledge/TagInputField';
+import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 // Validation schema
 const articleFormSchema = z.object({

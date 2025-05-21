@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";

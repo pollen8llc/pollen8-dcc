@@ -8,6 +8,7 @@ import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { Search, Tag as TagIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 const TopicsPage = () => {
   const navigate = useNavigate();

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";

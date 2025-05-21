@@ -4,6 +4,7 @@ import { X, Tag as TagIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 interface TagInputFieldProps {
   value: string[];
