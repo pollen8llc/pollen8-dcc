@@ -10,7 +10,7 @@ import {
   Newspaper,
 } from 'lucide-react';
 
-interface ContentTypeSelectorProps {
+export interface ContentTypeSelectorProps {
   selected: string;
   onChange: (type: string) => void;
 }

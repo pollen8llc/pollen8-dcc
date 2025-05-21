@@ -181,8 +181,8 @@ const KnowledgeBase = () => {
                   <div>
                     <h3 className="text-sm font-medium mb-2">Content Type</h3>
                     <ContentTypeSelector
-                      selectedType={selectedType}
-                      onSelectType={handleTypeSelect}
+                      selected={selectedType || 'all'}
+                      onChange={handleTypeSelect}
                     />
                   </div>
                   
@@ -229,7 +229,7 @@ const KnowledgeBase = () => {
           </div>
           
           <div className="w-full lg:w-1/4 flex gap-2">
-            <Select value={sortOption} onValueChange={setSortOption} className="w-full">
+            <Select value={sortOption} onValueChange={setSortOption}>
               <SelectTrigger>
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -250,8 +250,8 @@ const KnowledgeBase = () => {
             <div>
               <h3 className="text-lg font-medium mb-3">Content Type</h3>
               <ContentTypeSelector
-                selectedType={selectedType}
-                onSelectType={handleTypeSelect}
+                selected={selectedType || 'all'}
+                onChange={handleTypeSelect}
               />
             </div>
             

@@ -25,9 +25,10 @@ import { cn } from '@/lib/utils';
 
 interface ArticleCardProps {
   article: KnowledgeArticle;
+  onClick?: () => void;
 }
 
-export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
+export const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) => {
   const navigate = useNavigate();
   
   // Get the icon based on content type
@@ -69,10 +70,13 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
   };
 
   return (
-    <Card className={cn(
-      "transition-all duration-300 hover:shadow-md",
-      article.author?.is_admin && "admin-gradient-premium-border" // Apply gradient border for admin content
-    )}>
+    <Card 
+      className={cn(
+        "transition-all duration-300 hover:shadow-md cursor-pointer",
+        article.author?.is_admin && "admin-gradient-premium-border" // Apply gradient border for admin content
+      )}
+      onClick={onClick}
+    >
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2 mb-2">
           {getContentTypeIcon()}
@@ -93,14 +97,11 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
           )}
         </div>
         
-        <Link 
-          to={`/knowledge/${article.id}`} 
-          className={`group transition-colors ${getContentTypeClass()}`}
-        >
+        <div className={`group transition-colors ${getContentTypeClass()}`}>
           <CardTitle className="text-xl transition-colors">
             {article.title}
           </CardTitle>
-        </Link>
+        </div>
         
         <div className="flex items-center gap-2 mt-2">
           <Avatar className={cn(
@@ -130,7 +131,10 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
                 key={tag} 
                 variant="outline" 
                 className="text-xs cursor-pointer hover:bg-muted knowledge-tag-border"
-                onClick={() => navigate(`/knowledge/tags/${tag}`)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card click
+                  navigate(`/knowledge/tags/${tag}`);
+                }}
               >
                 <TagIcon className="h-3 w-3 mr-1" />
                 {tag}
