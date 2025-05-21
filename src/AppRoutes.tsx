@@ -46,7 +46,7 @@ import TagView from "./pages/core/TagView";
 
 // Knowledge Base Pages
 import KnowledgeBase from "./pages/knowledge/KnowledgeBase";
-import ArticleView as KnowledgeArticleView from "./pages/knowledge/ArticleView";
+import { default as KnowledgeArticleView } from "./pages/knowledge/ArticleView";
 import ContentCreator from "./pages/knowledge/ContentCreator";
 
 const AppRoutes = () => {
