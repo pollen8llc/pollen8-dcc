@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Shell } from '@/components/layout/Shell';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { 
   Search, 
   PlusCircle, 
@@ -24,7 +23,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { 
   Select,
   SelectContent,
@@ -32,7 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 
 // Custom Components
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
@@ -42,9 +39,8 @@ import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector'
 // Services and hooks
 import { usePermissions } from '@/hooks/usePermissions';
 import { useUser } from '@/contexts/UserContext';
-
-// Mock data for demonstration
-import { getMockArticles, getMockTags } from '@/data/mockKnowledgeData';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { ContentType } from '@/models/knowledgeTypes';
 
 const KnowledgeBase = () => {
   const navigate = useNavigate();
@@ -57,22 +53,43 @@ const KnowledgeBase = () => {
   const [contentType, setContentType] = useState<string>('all');
   const [sortOption, setSortOption] = useState<string>('newest');
   
+  // Get hooks from knowledge base
+  const { useTags, useArticles } = useKnowledgeBase();
+  
   // Fetch articles with query parameters
-  const { data: articles, isLoading: articlesLoading } = useQuery({
-    queryKey: ['knowledgeArticles', searchQuery, selectedTag, contentType, sortOption],
-    queryFn: () => getMockArticles({ 
-      searchQuery: searchQuery, 
-      tag: selectedTag, 
-      type: contentType !== 'all' ? contentType : undefined,
-      sort: sortOption
-    })
+  // For the content type, we need to map from our UI values to the actual ContentType enum
+  const contentTypeFilter = contentType !== 'all' ? contentType.toUpperCase() : undefined;
+  
+  // Only some sort options are supported directly by the API
+  // We'll fetch data and then sort client-side for other options
+  const { data: articles, isLoading: articlesLoading } = useArticles({
+    searchQuery,
+    tag: selectedTag,
+    type: contentTypeFilter
   });
   
   // Fetch tags
-  const { data: tags, isLoading: tagsLoading } = useQuery({
-    queryKey: ['knowledgeTags'],
-    queryFn: () => getMockTags()
-  });
+  const { data: tags, isLoading: tagsLoading } = useTags();
+
+  // Handle client-side sorting
+  const sortedArticles = useMemo(() => {
+    if (!articles) return [];
+    
+    let result = [...articles];
+    
+    switch (sortOption) {
+      case 'newest':
+        return result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      case 'popular':
+        return result.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+      case 'votes':
+        return result.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
+      case 'views':
+        return result.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+      default:
+        return result;
+    }
+  }, [articles, sortOption]);
   
   // Handle tag selection
   const handleTagSelect = (tag: string) => {
@@ -223,9 +240,9 @@ const KnowledgeBase = () => {
                       </Card>
                     ))}
                   </div>
-                ) : articles && articles.length > 0 ? (
+                ) : sortedArticles && sortedArticles.length > 0 ? (
                   <div className="space-y-4">
-                    {articles.map((article) => (
+                    {sortedArticles.map((article) => (
                       <ArticleCard key={article.id} article={article} />
                     ))}
                   </div>
