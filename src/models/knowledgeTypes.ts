@@ -13,6 +13,7 @@ export interface KnowledgeAuthor {
   name: string;
   avatar_url?: string;
   role?: string;
+  is_admin?: boolean; // Added this property
 }
 
 export interface KnowledgeArticle {
