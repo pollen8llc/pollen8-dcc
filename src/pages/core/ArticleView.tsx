@@ -33,6 +33,7 @@ import {
   Eye
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
+import { VoteType } from '@/models/knowledgeTypes';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,7 +54,7 @@ const ArticleView = () => {
   const { data: comments, isLoading: commentsLoading } = knowledgeBase.useComments(id);
 
   // Handle voting on article
-  const handleArticleVote = (voteType: 'upvote' | 'downvote') => {
+  const handleArticleVote = (voteType: VoteType) => {
     if (article) {
       if (article.user_vote === 1 && voteType === 'upvote') {
         knowledgeBase.vote('article', article.id, 'none');
@@ -66,7 +67,7 @@ const ArticleView = () => {
   };
 
   // Handle voting on comment
-  const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
+  const handleCommentVote = (commentId: string, voteType: VoteType, currentVote?: number | null) => {
     if (currentVote === 1 && voteType === 'upvote') {
       knowledgeBase.vote('comment', commentId, 'none');
     } else if (currentVote === -1 && voteType === 'downvote') {

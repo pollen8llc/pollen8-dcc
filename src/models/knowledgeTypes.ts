@@ -1,10 +1,11 @@
-
 export enum ContentType {
   QUESTION = "QUESTION",
   ARTICLE = "ARTICLE",
   QUOTE = "QUOTE",
   POLL = "POLL"
 }
+
+export type VoteType = 'upvote' | 'downvote' | 'none';
 
 export interface KnowledgeAuthor {
   id: string;
@@ -59,8 +60,6 @@ export interface KnowledgeVote {
   vote_type: number;
   created_at: string;
 }
-
-export type VoteType = 'upvote' | 'downvote' | 'none';
 
 export interface PollOption {
   id: string;

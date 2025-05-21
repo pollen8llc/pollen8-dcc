@@ -1,15 +1,15 @@
-
 import React, { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { KnowledgeComment } from '@/models/knowledgeTypes';
 import { formatDistanceToNow } from 'date-fns';
-import { ThumbsUp, ThumbsDown, Check, Trash2 } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Check, Trash2, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Link } from 'react-router-dom';
 
 interface CommentSectionProps {
   articleId: string;

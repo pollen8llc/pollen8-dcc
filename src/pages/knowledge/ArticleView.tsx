@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -33,7 +32,7 @@ import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 
 // Mocks and types
-import { ContentType } from '@/models/knowledgeTypes';
+import { ContentType, VoteType } from '@/models/knowledgeTypes';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,7 +42,7 @@ const ArticleView = () => {
   const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer } = useKnowledgeBase();
   
   // State
-  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
+  const [userVote, setUserVote] = useState<VoteType | null>(null);
   
   // Fetch article
   const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id);
@@ -75,7 +74,7 @@ const ArticleView = () => {
   }, [article, allArticles]);
   
   // Handle voting
-  const handleVote = (vote: 'upvote' | 'downvote') => {
+  const handleVote = (vote: VoteType) => {
     if (!article) return;
     setUserVote(userVote === vote ? null : vote);
     
