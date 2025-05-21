@@ -15,6 +15,7 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
     queryFn: async () => {
       console.log('Fetching articles with filters:', filters);
       
+      // First fetch the articles without trying to join with profiles
       let query = supabase
         .from('knowledge_articles')
         .select(`
@@ -27,12 +28,7 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
           is_answered,
           tags,
           content_type,
-          user_id,
-          profiles:user_id (
-            first_name,
-            last_name,
-            avatar_url
-          )
+          user_id
         `)
         .order('created_at', { ascending: false });
       
@@ -53,22 +49,43 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
         query = query.limit(filters.limit);
       }
       
-      const { data, error } = await query;
+      const { data: articles, error } = await query;
       
       if (error) {
         console.error('Error fetching articles:', error);
         throw error;
       }
       
-      console.log('Articles fetched successfully:', data?.length || 0);
+      console.log('Articles fetched successfully:', articles?.length || 0);
       
-      // Format author information with proper type safety
-      return data.map(article => {
-        const profileData = article.profiles as { 
-          first_name?: string; 
-          last_name?: string; 
-          avatar_url?: string;
-        } | null;
+      // If no articles, return empty array
+      if (!articles || articles.length === 0) {
+        return [] as KnowledgeArticle[];
+      }
+      
+      // Extract all unique user_ids to fetch their profiles
+      const userIds = [...new Set(articles.map(article => article.user_id))];
+      
+      // Fetch profiles for all authors in a single query
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url')
+        .in('id', userIds);
+      
+      if (profilesError) {
+        console.error('Error fetching author profiles:', profilesError);
+        // Continue with articles even if profiles fetch fails
+      }
+      
+      // Create a map of user_id to profile for easy lookup
+      const profilesMap = (profiles || []).reduce((map, profile) => {
+        map[profile.id] = profile;
+        return map;
+      }, {} as Record<string, any>);
+      
+      // Format the articles with author information
+      return articles.map(article => {
+        const profileData = profilesMap[article.user_id];
         
         return {
           ...article,
@@ -98,21 +115,27 @@ export const useArticle = (id: string | undefined) => {
       // Increment view count using the dedicated RPC function
       await supabase.rpc('increment_view_count', { article_id: id });
       
-      const { data, error } = await supabase
+      // Fetch the article without joining with profiles
+      const { data: article, error } = await supabase
         .from('knowledge_articles')
-        .select(`
-          *,
-          profiles:user_id (
-            first_name, 
-            last_name, 
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
       
       if (error) {
         throw error;
+      }
+      
+      // Now fetch the profile data separately
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url')
+        .eq('id', article.user_id)
+        .maybeSingle();
+      
+      if (profileError) {
+        console.error('Error fetching author profile:', profileError);
+        // Continue with article even if profile fetch fails
       }
       
       // Get vote count for article
@@ -138,18 +161,14 @@ export const useArticle = (id: string | undefined) => {
         }
       }
       
-      // Format author information with proper type safety
-      const profileData = data.profiles as {
-        first_name?: string;
-        last_name?: string;
-        avatar_url?: string;
-      } | null;
+      // Format author information
+      const profileData = profile;
       
       return {
-        ...data,
-        content_type: ContentType.ARTICLE, // Default to ARTICLE type
+        ...article,
+        content_type: article.content_type || ContentType.ARTICLE,
         author: profileData ? {
-          id: data.user_id,
+          id: article.user_id,
           name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
           avatar_url: profileData.avatar_url || ''
         } : undefined,

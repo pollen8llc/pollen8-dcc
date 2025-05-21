@@ -69,6 +69,7 @@ const KnowledgeBase = () => {
     try {
       console.log('Directly fetching articles with filters:', { selectedTag, searchQuery, selectedType });
       
+      // First fetch articles without trying to join with profiles
       let query = supabase
         .from('knowledge_articles')
         .select(`
@@ -80,12 +81,7 @@ const KnowledgeBase = () => {
           view_count,
           tags,
           content_type,
-          user_id,
-          profiles:user_id (
-            first_name,
-            last_name,
-            avatar_url
-          )
+          user_id
         `)
         .order('created_at', { ascending: false });
       
@@ -102,7 +98,7 @@ const KnowledgeBase = () => {
         query = query.eq('content_type', selectedType);
       }
       
-      const { data, error } = await query;
+      const { data: articles, error } = await query;
       
       if (error) {
         console.error('Error fetching articles directly:', error);
@@ -114,15 +110,38 @@ const KnowledgeBase = () => {
         return;
       }
       
-      console.log('Articles fetched successfully:', data?.length || 0);
+      console.log('Articles fetched successfully:', articles?.length || 0);
       
-      // Format author information
-      const formattedData = data?.map(article => {
-        const profileData = article.profiles as { 
-          first_name?: string; 
-          last_name?: string; 
-          avatar_url?: string;
-        } | null;
+      // If no articles, set empty array and return
+      if (!articles || articles.length === 0) {
+        setArticles([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Extract all unique user_ids to fetch their profiles
+      const userIds = [...new Set(articles.map(article => article.user_id))];
+      
+      // Fetch profiles for all authors in a single query
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url')
+        .in('id', userIds);
+      
+      if (profilesError) {
+        console.error('Error fetching author profiles:', profilesError);
+        // Continue with articles even if profiles fetch fails
+      }
+      
+      // Create a map of user_id to profile for easy lookup
+      const profilesMap = (profiles || []).reduce((map, profile) => {
+        map[profile.id] = profile;
+        return map;
+      }, {} as Record<string, any>);
+      
+      // Format the articles with author information
+      const formattedData = articles.map(article => {
+        const profileData = profilesMap[article.user_id];
         
         return {
           ...article,
