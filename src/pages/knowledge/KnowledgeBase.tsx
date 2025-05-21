@@ -7,9 +7,7 @@ import { Input } from '@/components/ui/input';
 import { 
   PlusCircle, 
   Search,
-  LoaderCircle,
-  SlidersHorizontal,
-  RefreshCcw
+  SlidersHorizontal
 } from 'lucide-react';
 import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
 import { TagsList } from '@/components/knowledge/TagsList';
@@ -67,18 +65,6 @@ const KnowledgeBase = () => {
   
   // Fetch tags for the filter sidebar
   const { data: tags, isLoading: isTagsLoading } = useTags();
-  
-  // Manually refetch data
-  const handleRefresh = async () => {
-    toast({
-      title: "Refreshing content",
-      description: "Fetching the latest articles..."
-    });
-    
-    // Force a refetch of all related queries
-    await queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
-    await refetchArticles();
-  };
   
   // Update URL when filters change
   useEffect(() => {
@@ -182,15 +168,6 @@ const KnowledgeBase = () => {
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Post
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="shrink-0"
-              onClick={handleRefresh}
-            >
-              <RefreshCcw className="mr-2 h-4 w-4" />
-              Refresh
             </Button>
             
             <Sheet>
@@ -348,9 +325,11 @@ const KnowledgeBase = () => {
                   }
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-3">
-                  <Button onClick={handleRefresh}>
-                    <RefreshCcw className="mr-2 h-4 w-4" />
-                    Refresh Content
+                  <Button onClick={() => {
+                    queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+                    refetchArticles();
+                  }}>
+                    Reload Content
                   </Button>
                   <Button onClick={() => setIsCreateModalOpen(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />

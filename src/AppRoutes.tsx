@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -27,6 +28,7 @@ import Contacts from "./pages/rel8t/Contacts";
 import ContactCreate from "./pages/rel8t/ContactCreate";
 import ContactEdit from "./pages/rel8t/ContactEdit";
 import Groups from "./pages/rel8t/Groups";
+import Categories from "./pages/rel8t/Categories";
 import Dashboard from "./pages/rel8t/Dashboard";
 import ImportContacts from "./pages/rel8t/ImportContacts";
 import Relationships from "./pages/rel8t/Relationships";
@@ -231,6 +233,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute role={UserRole.MEMBER}>
             <Groups />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/categories"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <Categories />
           </ProtectedRoute>
         }
       />
