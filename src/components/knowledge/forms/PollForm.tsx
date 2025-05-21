@@ -3,15 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
-import { X, PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from '@/components/ui/badge';
 import { 
   Select,
   SelectContent,
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TagInputField } from '@/components/knowledge/TagInputField';
 
 // Validation schema
 const pollFormSchema = z.object({
@@ -52,7 +53,9 @@ export const PollForm: React.FC<PollFormProps> = ({
   step = 1,
   initialData
 }) => {
-  const [tagInput, setTagInput] = useState('');
+  const { useTags } = useKnowledgeBase();
+  const { data: availableTags } = useTags();
+  const [popularTags, setPopularTags] = useState<Set<string>>(new Set());
   
   // Form setup
   const form = useForm<PollFormValues>({
@@ -82,43 +85,16 @@ export const PollForm: React.FC<PollFormProps> = ({
     name: "options",
     control: form.control
   });
-  
-  // Handle tag addition
-  const handleAddTag = () => {
-    const tag = tagInput.trim().toLowerCase();
-    if (!tag) return;
-    
-    const currentTags = form.getValues("tags");
-    
-    if (currentTags.includes(tag)) {
-      setTagInput('');
-      return;
+
+  // Identify popular tags
+  useEffect(() => {
+    if (availableTags) {
+      const sortedTags = [...availableTags].sort((a, b) => (b.count || 0) - (a.count || 0));
+      const popularThreshold = Math.ceil(sortedTags.length / 4);
+      const popular = new Set(sortedTags.slice(0, popularThreshold).map(tag => tag.name));
+      setPopularTags(popular);
     }
-    
-    if (currentTags.length >= 5) {
-      form.setError("tags", { message: "You cannot add more than 5 tags" });
-      return;
-    }
-    
-    form.setValue("tags", [...currentTags, tag]);
-    form.clearErrors("tags");
-    setTagInput('');
-  };
-  
-  // Handle tag removal
-  const handleRemoveTag = (tagToRemove: string) => {
-    const currentTags = form.getValues("tags");
-    form.setValue("tags", currentTags.filter(tag => tag !== tagToRemove));
-    form.clearErrors("tags");
-  };
-  
-  // Handle tag input keydown
-  const handleTagKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
+  }, [availableTags]);
   
   // Add a new option
   const addOption = () => {
@@ -134,18 +110,18 @@ export const PollForm: React.FC<PollFormProps> = ({
   if (step === 2) {
     const formData = form.getValues();
     return (
-      <div className="space-y-6">
+      <div className="bg-card/50 border rounded-md p-6 space-y-6">
         <div>
           <h3 className="text-lg font-medium mb-2">Poll Question</h3>
-          <p className="p-3 bg-muted rounded-md">{formData.question}</p>
+          <p className="p-4 bg-muted/50 rounded-md">{formData.question}</p>
         </div>
         
         <div>
           <h3 className="text-lg font-medium mb-2">Poll Options</h3>
           <div className="space-y-2">
             {formData.options.map((option, index) => (
-              <div key={index} className="p-3 bg-muted rounded-md">
-                {option.text || `Option ${index + 1}`}
+              <div key={index} className="p-4 bg-muted/50 rounded-md">
+                {index + 1}. {option.text}
               </div>
             ))}
           </div>
@@ -153,7 +129,7 @@ export const PollForm: React.FC<PollFormProps> = ({
         
         <div>
           <h3 className="text-lg font-medium mb-2">Settings</h3>
-          <div className="p-3 bg-muted rounded-md space-y-2">
+          <div className="p-4 bg-muted/50 rounded-md space-y-2">
             <p>Allow multiple selections: {formData.allowMultipleSelections ? "Yes" : "No"}</p>
             <p>Duration: {formData.duration} days</p>
           </div>
@@ -163,9 +139,13 @@ export const PollForm: React.FC<PollFormProps> = ({
           <h3 className="text-lg font-medium mb-2">Tags</h3>
           <div className="flex flex-wrap gap-2">
             {formData.tags.map(tag => (
-              <div key={tag} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+              <Badge 
+                key={tag} 
+                variant={popularTags.has(tag) ? "popularTag" : "tag"}
+                className="flex items-center gap-1 py-1.5 px-3 text-sm"
+              >
                 {tag}
-              </div>
+              </Badge>
             ))}
           </div>
         </div>
@@ -310,45 +290,14 @@ export const PollForm: React.FC<PollFormProps> = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tags</FormLabel>
-              
-              {/* Display selected tags */}
-              <div className="flex flex-wrap gap-2 mb-2">
-                {field.value.map(tag => (
-                  <Badge key={tag} variant="outline" className="flex items-center gap-1">
-                    {tag}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-auto p-0 ml-1"
-                      onClick={() => handleRemoveTag(tag)}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Remove {tag}</span>
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-              
-              {/* Tag input */}
-              <div className="flex gap-2">
-                <Input
+              <FormControl>
+                <TagInputField
+                  value={field.value}
+                  onChange={field.onChange}
+                  availableTags={availableTags?.map(tag => tag.name) || []}
                   placeholder="Add a tag (e.g. poll, opinion)"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  className="flex-1"
                 />
-                <Button 
-                  type="button" 
-                  onClick={handleAddTag} 
-                  variant="outline"
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
-              </div>
-              
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

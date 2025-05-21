@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { TagInputField } from '@/components/knowledge/TagInputField';
+import { Badge } from '@/components/ui/badge';
 
 // Define the form schema
 const formSchema = z.object({
@@ -41,19 +42,15 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
 }) => {
   const { useTags } = useKnowledgeBase();
   const { data: availableTags } = useTags();
-  const [localData, setLocalData] = useState<Partial<FormValues>>({
-    title: initialData?.title || '',
-    content: initialData?.content || '',
-    tags: initialData?.tags || []
-  });
+  const [popularTags, setPopularTags] = useState<Set<string>>(new Set());
   
   // Create form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: localData.title || '',
-      content: localData.content || '',
-      tags: localData.tags || []
+      title: initialData?.title || '',
+      content: initialData?.content || '',
+      tags: initialData?.tags || []
     }
   });
   
@@ -65,30 +62,29 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
           form.setValue(key as keyof FormValues, value);
         }
       });
-      setLocalData({
-        title: initialData.title || '',
-        content: initialData.content || '',
-        tags: initialData.tags || []
-      });
     }
   }, [initialData, form]);
   
+  // Identify popular tags
+  useEffect(() => {
+    if (availableTags) {
+      const sortedTags = [...availableTags].sort((a, b) => (b.count || 0) - (a.count || 0));
+      const popularThreshold = Math.ceil(sortedTags.length / 4);
+      const popular = new Set(sortedTags.slice(0, popularThreshold).map(tag => tag.name));
+      setPopularTags(popular);
+    }
+  }, [availableTags]);
+  
   // Handle submission
   const handleSubmit = (values: FormValues) => {
-    setLocalData(values);
     onSubmit(values);
   };
   
-  // Handle step navigation
-  const handleStepSubmit = (values: FormValues) => {
-    setLocalData(values);
-  };
-
   return (
     <Form {...form}>
       <form 
         id="content-form" 
-        onSubmit={step === 2 ? form.handleSubmit(handleSubmit) : form.handleSubmit(handleStepSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-6"
       >
         {step === 1 && (
@@ -150,26 +146,31 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
         
         {step === 2 && (
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium mb-2">Question Title</h3>
-              <p className="p-3 bg-muted rounded-md">{localData.title}</p>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-2">Question Details</h3>
-              <div className="p-3 bg-muted rounded-md whitespace-pre-wrap">
-                {localData.content}
+            <div className="bg-card/50 border rounded-md p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-medium mb-2">Question Title</h3>
+                <p className="p-4 bg-muted/50 rounded-md">{form.getValues().title}</p>
               </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-2">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {localData.tags?.map(tag => (
-                  <div key={tag} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
-                    {tag}
-                  </div>
-                ))}
+              
+              <div>
+                <h3 className="text-lg font-medium mb-2">Question Details</h3>
+                <div className="p-4 bg-muted/50 rounded-md whitespace-pre-wrap">
+                  {form.getValues().content}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-medium mb-2">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {form.getValues().tags.map(tag => (
+                    <Badge key={tag} 
+                      variant={popularTags.has(tag) ? "popularTag" : "tag"}
+                      className="flex items-center gap-1 py-1.5 px-3 text-sm"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -3,15 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { X, PlusCircle } from 'lucide-react';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { TagInputField } from '@/components/knowledge/TagInputField';
+import { Badge } from '@/components/ui/badge';
 
 // Validation schema
 const quoteFormSchema = z.object({
@@ -41,6 +40,10 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
   step = 1,
   initialData
 }) => {
+  const { useTags } = useKnowledgeBase();
+  const { data: availableTags } = useTags();
+  const [popularTags, setPopularTags] = useState<Set<string>>(new Set());
+  
   // Merge provided initial data with defaults
   const defaultValues = {
     quote: initialData?.quote || "",
@@ -65,32 +68,43 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
       });
     }
   }, [initialData, form]);
+
+  // Identify popular tags
+  useEffect(() => {
+    if (availableTags) {
+      const sortedTags = [...availableTags].sort((a, b) => (b.count || 0) - (a.count || 0));
+      const popularThreshold = Math.ceil(sortedTags.length / 4);
+      const popular = new Set(sortedTags.slice(0, popularThreshold).map(tag => tag.name));
+      setPopularTags(popular);
+    }
+  }, [availableTags]);
   
-  const handleStepSubmit = (values: QuoteFormValues) => {
+  const handleSubmit = (values: QuoteFormValues) => {
     onSubmit(values);
   };
   
   // Content to render based on step
   if (step === 2) {
+    const formData = form.getValues();
     return (
-      <div className="space-y-6">
+      <div className="bg-card/50 border rounded-md p-6 space-y-6">
         <div>
           <h3 className="text-lg font-medium mb-2">Quote</h3>
-          <div className="p-3 bg-muted rounded-md whitespace-pre-wrap">
-            {form.getValues("quote")}
+          <div className="p-4 bg-muted/50 rounded-md whitespace-pre-wrap italic">
+            "{formData.quote}"
           </div>
         </div>
         
         <div>
           <h3 className="text-lg font-medium mb-2">Author</h3>
-          <p className="p-3 bg-muted rounded-md">{form.getValues("author")}</p>
+          <p className="p-4 bg-muted/50 rounded-md">{formData.author}</p>
         </div>
         
-        {form.getValues("context") && (
+        {formData.context && (
           <div>
             <h3 className="text-lg font-medium mb-2">Context</h3>
-            <div className="p-3 bg-muted rounded-md whitespace-pre-wrap">
-              {form.getValues("context")}
+            <div className="p-4 bg-muted/50 rounded-md whitespace-pre-wrap">
+              {formData.context}
             </div>
           </div>
         )}
@@ -98,10 +112,14 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
         <div>
           <h3 className="text-lg font-medium mb-2">Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {form.getValues("tags").map(tag => (
-              <div key={tag} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+            {formData.tags.map(tag => (
+              <Badge 
+                key={tag} 
+                variant={popularTags.has(tag) ? "popularTag" : "tag"}
+                className="flex items-center gap-1 py-1.5 px-3 text-sm"
+              >
                 {tag}
-              </div>
+              </Badge>
             ))}
           </div>
         </div>
@@ -111,7 +129,7 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleStepSubmit)} id="content-form" className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} id="content-form" className="space-y-6">
         {/* Quote text field */}
         <FormField
           control={form.control}
@@ -182,6 +200,7 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({
                 <TagInputField
                   value={field.value}
                   onChange={field.onChange}
+                  availableTags={availableTags?.map(tag => tag.name) || []}
                   placeholder="Add a tag (e.g. leadership, community-building)"
                 />
               </FormControl>

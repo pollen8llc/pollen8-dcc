@@ -23,6 +23,7 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
   const [input, setInput] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [dbTags, setDbTags] = useState<string[]>([]);
+  const [popularTags, setPopularTags] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
   
   // Fetch tags from database
@@ -30,12 +31,19 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
     const fetchTags = async () => {
       const { data } = await supabase
         .from('knowledge_tags')
-        .select('name')
-        .order('name');
+        .select('name, count')
+        .order('count', { ascending: false });
         
       if (data) {
         const tagNames = data.map(tag => tag.name);
         setDbTags(tagNames);
+        
+        // Determine popular tags (top 25%)
+        const popularThreshold = Math.ceil(data.length / 4);
+        const popularTagSet = new Set(
+          data.slice(0, popularThreshold).map(tag => tag.name)
+        );
+        setPopularTags(popularTagSet);
       }
     };
     
@@ -103,8 +111,8 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
         {value.map(tag => (
           <Badge 
             key={tag} 
-            variant="secondary" 
-            className="flex items-center gap-1 py-1.5 px-3 text-sm transition-all hover:bg-secondary/80"
+            variant={popularTags.has(tag) ? "popularTag" : "tag"}
+            className="flex items-center gap-1 py-1.5 px-3 text-sm transition-all"
           >
             <TagIcon className="h-3.5 w-3.5 mr-1 opacity-70" />
             {tag}
@@ -139,7 +147,9 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
                 onClick={() => addSuggestion(suggestion)}
               >
                 <TagIcon className="h-3.5 w-3.5 mr-2 opacity-70" />
-                {suggestion}
+                <span className={popularTags.has(suggestion) ? "text-[#00eada]" : ""}>
+                  {suggestion}
+                </span>
               </div>
             ))}
           </div>

@@ -1,31 +1,19 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/contexts/UserContext';
 import {
   ChevronLeft,
-  BookOpen,
-  MessageSquare,
-  Quote,
-  BarChart2,
-  Check,
-  X,
   PlusCircle
 } from 'lucide-react';
 
 // UI Components
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Form Components
-import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
-import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
-import { QuoteForm } from '@/components/knowledge/forms/QuoteForm';
-import { PollForm } from '@/components/knowledge/forms/PollForm';
+// Content Type Selector (Add this import)
+import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
 
 // Types
 import { ContentType } from '@/models/knowledgeTypes';
@@ -33,36 +21,9 @@ import { ContentType } from '@/models/knowledgeTypes';
 const ContentCreator = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser } = useUser();
   
-  // State
-  const [contentType, setContentType] = useState<string>(ContentType.QUESTION);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Handle form submission
-  const handleSubmit = async (formData: any) => {
-    setIsSubmitting(true);
-    
-    try {
-      // In a real app, this would send data to an API
-      console.log('Submitting content:', { type: contentType, data: formData });
-      
-      toast({
-        title: "Content created successfully",
-        description: "Your content has been published to the knowledge base.",
-      });
-      
-      navigate('/knowledge');
-    } catch (error) {
-      console.error('Error creating content:', error);
-      toast({
-        title: "Error creating content",
-        description: "There was a problem publishing your content. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleCreateContent = (type: string) => {
+    navigate(`/knowledge/post/new?type=${type.toLowerCase()}`);
   };
 
   return (
@@ -87,99 +48,26 @@ const ContentCreator = () => {
             </p>
           </div>
           
-          {/* Content type selector */}
-          <Tabs 
-            defaultValue={ContentType.QUESTION} 
-            value={contentType}
-            onValueChange={setContentType}
-            className="w-full"
-          >
-            <TabsList className="grid grid-cols-4 mb-8">
-              <TabsTrigger value={ContentType.QUESTION}>
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Question
-              </TabsTrigger>
-              
-              <TabsTrigger value={ContentType.ARTICLE}>
-                <BookOpen className="h-4 w-4 mr-2" />
-                Article
-              </TabsTrigger>
-              
-              <TabsTrigger value={ContentType.QUOTE}>
-                <Quote className="h-4 w-4 mr-2" />
-                Quote
-              </TabsTrigger>
-              
-              <TabsTrigger value={ContentType.POLL}>
-                <BarChart2 className="h-4 w-4 mr-2" />
-                Poll
-              </TabsTrigger>
-            </TabsList>
+          {/* Content type selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>What type of content would you like to create?</CardTitle>
+            </CardHeader>
             
-            {/* Question form */}
-            <TabsContent value={ContentType.QUESTION}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ask a Question</CardTitle>
-                  <CardDescription>
-                    Share a question with the community to get answers and insights
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <QuestionForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-                </CardContent>
-              </Card>
-            </TabsContent>
+            <CardContent>
+              <ContentTypeSelector onSelectType={handleCreateContent} />
+            </CardContent>
             
-            {/* Article form */}
-            <TabsContent value={ContentType.ARTICLE}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Write an Article</CardTitle>
-                  <CardDescription>
-                    Share your knowledge and insights with the community
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <ArticleForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            {/* Quote form */}
-            <TabsContent value={ContentType.QUOTE}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Share a Quote</CardTitle>
-                  <CardDescription>
-                    Share an inspiring quote with the community
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <QuoteForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            {/* Poll form */}
-            <TabsContent value={ContentType.POLL}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create a Poll</CardTitle>
-                  <CardDescription>
-                    Get opinions from the community on a topic
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <PollForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+            <CardFooter className="flex justify-end">
+              <Button 
+                onClick={() => navigate('/knowledge/post/new')} 
+                className="flex items-center gap-2"
+              >
+                <PlusCircle className="h-4 w-4" />
+                Create Custom Content
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </Shell>

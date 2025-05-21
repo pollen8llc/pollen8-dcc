@@ -73,17 +73,9 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
     }
   };
   
+  // Standardized to always use exactly 2 steps
   const getSteps = () => {
-    const commonSteps = ['Content', 'Review & Submit'];
-    
-    switch (postType) {
-      case 'poll':
-        return ['Basic Information', 'Poll Options', ...commonSteps];
-      case 'article':
-        return ['Basic Information', 'Content Editor', ...commonSteps];
-      default:
-        return ['Content Details', ...commonSteps];
-    }
+    return ['Content & Tags', 'Review & Submit'];
   };
   
   const getContentType = (): ContentType => {
@@ -97,7 +89,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
   };
   
   const handleNext = () => {
-    if (currentStep < getSteps().length) {
+    if (currentStep < 2) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -114,7 +106,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
   
   const handleSubmit = async (data: any) => {
     try {
-      if (currentStep < getSteps().length) {
+      if (currentStep === 1) {
         // Store form data and advance to next step if not on final step
         setFormData(data);
         handleNext();
@@ -202,7 +194,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
             <CardHeader>
               <CardTitle>{getSteps()[currentStep - 1]}</CardTitle>
               <CardDescription>
-                {currentStep === getSteps().length 
+                {currentStep === 2
                   ? "Review your content before publishing"
                   : "Complete the information below"}
               </CardDescription>
@@ -253,10 +245,10 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
               </Button>
               
               <div className="flex gap-3">
-                {currentStep < getSteps().length && currentStep === 1 && (
+                {currentStep === 1 && (
                   <Button type="submit" form="content-form">Next Step</Button>
                 )}
-                {currentStep === getSteps().length && (
+                {currentStep === 2 && (
                   <Button type="submit" form="content-form" disabled={isSubmitting}>
                     {isSubmitting ? 'Publishing...' : 'Publish'}
                   </Button>

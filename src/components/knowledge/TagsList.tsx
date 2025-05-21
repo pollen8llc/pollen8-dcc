@@ -51,14 +51,12 @@ export const TagsList: React.FC<TagsListProps> = ({
           return (
             <Badge
               key={tag.id}
-              variant={selectedTag === tag.name ? "default" : "outline"}
-              className={cn(
-                "cursor-pointer",
-                selectedTag === tag.name 
-                  ? "bg-royal-blue-500 hover:bg-royal-blue-600"
-                  : "hover:bg-muted",
-                isPopular && "knowledge-tag-border"
-              )}
+              variant={selectedTag === tag.name 
+                ? "default" 
+                : isPopular 
+                  ? "popularTag" 
+                  : "tag"}
+              className="cursor-pointer"
               onClick={() => onSelectTag(tag.name)}
             >
               <Tag className="h-3 w-3 mr-1" />
