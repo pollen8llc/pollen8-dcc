@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -30,15 +30,21 @@ interface QuestionFormProps {
   onSubmit: (data: FormValues) => void;
   isSubmitting: boolean;
   step?: number;
+  initialData?: Partial<FormValues>;
 }
 
-export const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, isSubmitting, step = 1 }) => {
+export const QuestionForm: React.FC<QuestionFormProps> = ({ 
+  onSubmit, 
+  isSubmitting, 
+  step = 1,
+  initialData 
+}) => {
   const { useTags } = useKnowledgeBase();
   const { data: availableTags } = useTags();
   const [localData, setLocalData] = useState<Partial<FormValues>>({
-    title: '',
-    content: '',
-    tags: []
+    title: initialData?.title || '',
+    content: initialData?.content || '',
+    tags: initialData?.tags || []
   });
   
   // Create form
@@ -50,6 +56,22 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, isSubmitti
       tags: localData.tags || []
     }
   });
+  
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      Object.entries(initialData).forEach(([key, value]) => {
+        if (value !== undefined) {
+          form.setValue(key as keyof FormValues, value);
+        }
+      });
+      setLocalData({
+        title: initialData.title || '',
+        content: initialData.content || '',
+        tags: initialData.tags || []
+      });
+    }
+  }, [initialData, form]);
   
   // Handle submission
   const handleSubmit = (values: FormValues) => {
