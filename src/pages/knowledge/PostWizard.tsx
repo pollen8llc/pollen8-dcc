@@ -28,6 +28,7 @@ import { QuoteForm } from '@/components/knowledge/forms/QuoteForm';
 import { PollForm } from '@/components/knowledge/forms/PollForm';
 import { CreatePostModal } from '@/components/knowledge/CreatePostModal';
 import { ContentType } from '@/models/knowledgeTypes';
+import { ReviewContent } from '@/components/knowledge/ReviewContent';
 
 type PostType = 'question' | 'quote' | 'poll' | 'article';
 
@@ -45,6 +46,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
   const [isTypeModalOpen, setIsTypeModalOpen] = useState(!initialType && !typeFromUrl);
   const { isSubmitting, createArticle } = useKnowledgeBase();
   const [formData, setFormData] = useState<any>(null);
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   
   // Set post type based on URL parameter if available
   useEffect(() => {
@@ -119,6 +121,10 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
         return;
       }
 
+      // Prevent double submissions
+      if (isSubmittingForm) return;
+      setIsSubmittingForm(true);
+
       // On final step, submit the form data
       const finalData = {
         ...formData, // Use stored data from first step
@@ -136,7 +142,11 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
         description: "Your post has been published",
       });
       
-      navigate('/knowledge');
+      // Add a slight delay before redirecting to ensure the data is saved
+      // and to give the user time to see the success message
+      setTimeout(() => {
+        navigate('/knowledge');
+      }, 1000);
     } catch (error) {
       console.error('Error submitting post:', error);
       toast({
@@ -144,6 +154,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
         description: "There was a problem publishing your post",
         variant: "destructive"
       });
+      setIsSubmittingForm(false);
     }
   };
   
@@ -209,7 +220,16 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
             
             <CardContent>
               {/* Show appropriate form based on post type and step */}
-              {postType === 'question' && (
+              {currentStep === 2 && (
+                <ReviewContent 
+                  formData={formData} 
+                  contentType={getContentType()} 
+                  onSubmit={handleSubmit}
+                  isSubmitting={isSubmitting || isSubmittingForm}
+                />
+              )}
+              
+              {currentStep === 1 && postType === 'question' && (
                 <QuestionForm 
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting}
@@ -218,7 +238,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                 />
               )}
               
-              {postType === 'quote' && (
+              {currentStep === 1 && postType === 'quote' && (
                 <QuoteForm 
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting} 
@@ -227,7 +247,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                 />
               )}
               
-              {postType === 'poll' && (
+              {currentStep === 1 && postType === 'poll' && (
                 <PollForm 
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting}
@@ -236,7 +256,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                 />
               )}
               
-              {postType === 'article' && (
+              {currentStep === 1 && postType === 'article' && (
                 <ArticleForm 
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting}
@@ -251,16 +271,9 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                 {currentStep === 1 ? 'Change Type' : 'Back'}
               </Button>
               
-              <div className="flex gap-3">
-                {currentStep === 1 && (
-                  <Button type="submit" form="content-form">Next Step</Button>
-                )}
-                {currentStep === 2 && (
-                  <Button type="submit" form="content-form" disabled={isSubmitting}>
-                    {isSubmitting ? 'Publishing...' : 'Publish'}
-                  </Button>
-                )}
-              </div>
+              {currentStep === 1 && (
+                <Button type="submit" form="content-form">Next Step</Button>
+              )}
             </CardFooter>
           </Card>
         </div>

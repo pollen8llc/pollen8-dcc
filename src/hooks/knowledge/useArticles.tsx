@@ -153,7 +153,9 @@ export const useArticleMutations = () => {
     content: string, 
     tags?: string[], 
     content_type?: ContentType,
-    subtitle?: string
+    subtitle?: string,
+    source?: string,
+    options?: string[] 
   }) => {
     try {
       setIsSubmitting(true);
@@ -162,13 +164,20 @@ export const useArticleMutations = () => {
         throw new Error('You must be logged in to create content');
       }
       
+      // Build the article object with all required fields
       const newArticle = {
         title: article.title,
         content: article.content,
         user_id: currentUser.id,
         tags: article.tags || [],
-        content_type: article.content_type || ContentType.ARTICLE
+        content_type: article.content_type || ContentType.ARTICLE,
+        // Additional fields for specific content types
+        ...(article.subtitle && { subtitle: article.subtitle }),
+        ...(article.source && { source: article.source }),
+        ...(article.options && { options: article.options })
       };
+      
+      console.log('Creating new article:', newArticle);
       
       const { data, error } = await supabase
         .from('knowledge_articles')
@@ -177,21 +186,35 @@ export const useArticleMutations = () => {
         .single();
       
       if (error) {
+        console.error('Error inserting article:', error);
         throw error;
       }
       
       // Ensure tags exist
       if (article.tags && article.tags.length > 0) {
-        for (const tag of article.tags) {
-          // Insert tag if it doesn't exist
-          await supabase
+        const uniqueTags = [...new Set(article.tags)];
+        for (const tag of uniqueTags) {
+          // Skip empty tags
+          if (!tag.trim()) continue;
+          
+          // Insert tag if it doesn't exist (using upsert with on_conflict: nothing)
+          const { error: tagError } = await supabase
             .from('knowledge_tags')
-            .insert({ name: tag.toLowerCase(), description: null })
-            .select();
+            .upsert(
+              { name: tag.toLowerCase().trim(), description: null },
+              { onConflict: 'name', ignoreDuplicates: true }
+            );
+            
+          if (tagError) {
+            console.warn('Error upserting tag:', tagError);
+          }
         }
       }
       
+      // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+      queryClient.invalidateQueries({ queryKey: ['knowledgeTags'] });
+      
       toast({
         title: "Success",
         description: "Content created successfully",

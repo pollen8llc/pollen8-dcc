@@ -1,7 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 export const useTags = () => {
   return useQuery({
@@ -16,7 +15,7 @@ export const useTags = () => {
         throw error;
       }
       
-      return data as KnowledgeTag[];
+      return data.map(tag => tag.name);
     }
   });
 };
