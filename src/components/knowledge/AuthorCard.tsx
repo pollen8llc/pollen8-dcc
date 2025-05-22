@@ -41,12 +41,13 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
   const formatRole = (role?: UserRole | string): string => {
     if (role === undefined) return 'member';
     
-    // If it's a string, just return it
-    if (typeof role === 'string') return role.toLowerCase();
+    // If it's a string, just return it with lowercase conversion
+    if (typeof role === 'string') {
+      return role.toLowerCase();
+    }
     
-    // If it's a UserRole enum, convert to string
-    const roleKey = UserRole[role];
-    return typeof roleKey === 'string' ? roleKey.toLowerCase() : 'member';
+    // If it's a UserRole enum value, convert to string
+    return UserRole[role]?.toLowerCase() || 'member';
   };
 
   // Check if user is admin
