@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -120,6 +121,7 @@ export const useArticlesByType = (type: ContentType | undefined) => {
         console.error('Error fetching articles:', error);
         throw error;
       }
+      
       return data ? data.map(article => castToKnowledgeArticle(article)) : [];
     },
     enabled: !!type, // The query will not execute until a type exists
@@ -203,9 +205,18 @@ export const useCreateArticle = () => {
   
   return useMutation({
     mutationFn: async (newArticle: Omit<KnowledgeArticle, 'id'>) => {
+      // Extract only the fields that are needed for creating an article
+      const { title, content, tags, content_type } = newArticle;
+      
       const { data, error } = await supabase
         .from('knowledge_articles')
-        .insert([newArticle])
+        .insert([{ 
+          title,
+          content,
+          tags,
+          content_type: content_type || ContentType.ARTICLE,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        }])
         .select('*')
         .single();
       
@@ -228,10 +239,18 @@ export const useUpdateArticle = () => {
   
   return useMutation({
     mutationFn: async (updatedArticle: KnowledgeArticle) => {
+      // Extract only the fields that should be updated
+      const { id, title, content, tags } = updatedArticle;
+      
       const { data, error } = await supabase
         .from('knowledge_articles')
-        .update(updatedArticle)
-        .eq('id', updatedArticle.id)
+        .update({
+          title,
+          content,
+          tags,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
         .select('*')
         .single();
       
@@ -242,8 +261,9 @@ export const useUpdateArticle = () => {
       
       return castToKnowledgeArticle(data);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+      queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', data.id] });
     },
   });
 };

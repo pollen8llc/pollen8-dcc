@@ -67,26 +67,16 @@ export const useKnowledgeResources = (userId: string | undefined) => {
     enabled: !!userId
   });
 
-  // Fetch user saved articles (bookmarks)
+  // Fetch user saved articles (bookmarks) - Note: We'll implement this properly when the table exists
   const { data: savedArticles = [], isLoading: isLoadingSaved } = useQuery({
     queryKey: ['knowledgeSaved', userId],
     queryFn: async () => {
       if (!userId) return [];
       
+      // Since knowledge_bookmarks table doesn't exist yet, return an empty array
+      // When the table is created later, we can uncomment and use this code
+      /*
       try {
-        // Check if the knowledge_bookmarks table exists
-        const { error: checkError } = await supabase
-          .from('knowledge_bookmarks')
-          .select('id')
-          .limit(1);
-        
-        // If there's an error, the table likely doesn't exist
-        if (checkError) {
-          console.warn('knowledge_bookmarks table may not exist yet:', checkError.message);
-          return [];
-        }
-        
-        // If we get here, the table exists so we can query it
         const { data, error } = await supabase
           .from('knowledge_bookmarks')
           .select(`
@@ -108,6 +98,9 @@ export const useKnowledgeResources = (userId: string | undefined) => {
         console.error('Error in saved articles query:', err);
         return [];
       }
+      */
+      
+      return [];
     },
     enabled: !!userId
   });

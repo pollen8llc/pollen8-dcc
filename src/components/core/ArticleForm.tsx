@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { KnowledgeArticle } from '@/models/knowledgeTypes';
+import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,20 +62,27 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
       // Sanitize HTML content before submission
       const sanitizedContent = DOMPurify.sanitize(content);
       
-      const articleData = {
-        title: title.trim(),
-        content: sanitizedContent,
-        tags
-      };
-      
       if (mode === 'create') {
-        await createArticle(articleData);
+        await createArticle({
+          title: title.trim(),
+          content: sanitizedContent,
+          tags,
+          content_type: ContentType.ARTICLE,
+          user_id: '', // This will be set by the backend
+          created_at: '', // This will be set by the backend 
+          updated_at: '', // This will be set by the backend
+          view_count: 0,
+          like_count: 0,
+          is_pinned: false,
+          is_answered: false,
+        });
         navigate('/core');
       } else if (mode === 'edit' && article) {
-        // Fix: Pass article and new data as one object
         await updateArticle({
           ...article,
-          ...articleData
+          title: title.trim(),
+          content: sanitizedContent,
+          tags
         });
         navigate(`/core/articles/${article.id}`);
       }

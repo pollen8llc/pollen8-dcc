@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -17,7 +18,7 @@ const TagView = () => {
   const { useTagArticles } = useKnowledgeBase();
   
   // Get the articles using the hook
-  const { articles, isLoading } = useTagArticles(tag);
+  const { data: articles = [], isLoading } = useTagArticles(tag);
   
   return (
     <Shell>

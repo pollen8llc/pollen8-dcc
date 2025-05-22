@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -12,7 +13,7 @@ const CoreLandingPage = () => {
   const { useArticles } = useKnowledgeBase();
   
   // Get the articles using the hook
-  const { articles, isLoading, error } = useArticles();
+  const { articles, isLoading, error, refetch } = useArticles();
   
   return (
     <Shell>
@@ -40,7 +41,7 @@ const CoreLandingPage = () => {
             <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-2" />
             <h3 className="text-lg font-medium mb-1">Failed to load articles</h3>
             <p className="text-muted-foreground">{error.message}</p>
-            <Button onClick={() => window.location.reload()} className="mt-4">
+            <Button onClick={() => refetch()} className="mt-4">
               <RefreshCcw className="mr-2 h-4 w-4" />
               Try Again
             </Button>
