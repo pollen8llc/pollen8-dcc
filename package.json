@@ -50,6 +50,7 @@
     "framer-motion": "^12.7.4",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
+    "markdown-to-jsx": "^7.7.6",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
     "react-colorful": "^5.6.1",

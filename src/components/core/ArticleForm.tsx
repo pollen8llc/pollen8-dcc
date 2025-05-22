@@ -20,7 +20,9 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { X, PlusCircle, Save, ArrowLeft } from 'lucide-react';
+import { X, PlusCircle, Save, ArrowLeft, Eye } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MarkdownPreview } from '@/components/ui/markdown-preview';
 
 // Add TailwindCSS dark mode styles for TinyMCE
 import { useEffect as useEffectTinyMCE } from 'react';
@@ -40,6 +42,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
   const [tags, setTags] = useState<string[]>(article?.tags || []);
   const [tagInput, setTagInput] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [activeTab, setActiveTab] = useState<string>("editor");
   
   // Fetch existing tags for suggestions
   const { data: existingTags } = useTags();
@@ -272,17 +275,45 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
         {/* Content */}
         <div>
           <Label htmlFor="article-editor" className="text-base">Article Content</Label>
-          <Card>
-            <CardContent className="p-0">
-              <textarea 
-                id="article-editor" 
-                className={`min-h-40 w-full ${errors.content ? 'border-red-500' : ''}`}
-              />
-              {errors.content && (
-                <p className="mt-1 text-sm text-red-500">{errors.content}</p>
-              )}
-            </CardContent>
-          </Card>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="flex justify-between items-center mb-2">
+              <TabsList>
+                <TabsTrigger value="editor">Editor</TabsTrigger>
+                <TabsTrigger value="preview">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="editor">
+              <Card>
+                <CardContent className="p-0">
+                  <textarea 
+                    id="article-editor" 
+                    className={`min-h-40 w-full ${errors.content ? 'border-red-500' : ''}`}
+                  />
+                  {errors.content && (
+                    <p className="mt-1 text-sm text-red-500">{errors.content}</p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="preview">
+              <Card>
+                <CardContent className="py-4">
+                  {content ? (
+                    <MarkdownPreview content={content} />
+                  ) : (
+                    <div className="text-muted-foreground italic p-4 text-center">
+                      No content to preview
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
         
         {/* Actions */}
