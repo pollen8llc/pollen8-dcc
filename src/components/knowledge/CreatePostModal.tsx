@@ -9,12 +9,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { MessageSquare, Quote, BarChart2, BookOpen, X } from 'lucide-react';
+import { MessageSquare, BarChart2, BookOpen } from 'lucide-react';
 
 interface CreatePostModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelectType: (type: 'question' | 'quote' | 'poll' | 'article') => void;
+  onSelectType: (type: 'question' | 'poll' | 'article') => void;
 }
 
 export const CreatePostModal: React.FC<CreatePostModalProps> = ({
@@ -28,13 +28,6 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       title: 'Question',
       description: 'Ask a specific question to get help from the community',
       icon: MessageSquare,
-      color: 'text-cyan-400'
-    },
-    {
-      id: 'quote',
-      title: 'Quote',
-      description: 'Share an insightful quote and start a discussion',
-      icon: Quote,
       color: 'text-cyan-400'
     },
     {

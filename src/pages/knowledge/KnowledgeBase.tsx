@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -63,7 +62,7 @@ const KnowledgeBase = () => {
   // Fetch tags for the filter sidebar
   const { data: tags, isLoading: isTagsLoading } = useTags();
   
-  // Function to directly fetch articles
+  // Function to directly fetch articles - updated to limit to top 100
   const fetchArticles = async () => {
     setIsLoading(true);
     try {
@@ -83,7 +82,8 @@ const KnowledgeBase = () => {
           content_type,
           user_id
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100); // Limit to top 100 posts
       
       if (selectedTag) {
         query = query.contains('tags', [selectedTag]);
@@ -288,7 +288,7 @@ const KnowledgeBase = () => {
             </Button>
             
             <Button 
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => navigate("/knowledge/create")}
               className="shrink-0"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -464,7 +464,7 @@ const KnowledgeBase = () => {
         </div>
       </div>
       
-      {/* Create Post Modal */}
+      {/* Create Post Modal - updated to handle new redirect approach */}
       <CreatePostModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}

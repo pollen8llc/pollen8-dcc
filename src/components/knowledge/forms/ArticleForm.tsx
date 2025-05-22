@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -11,12 +10,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Badge } from '@/components/ui/badge';
 import { TagInputField } from '@/components/knowledge/TagInputField';
-import { KnowledgeTag } from '@/models/knowledgeTypes';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Edit } from "lucide-react";
 
-// Validation schema
+// Validation schema - updated to make subtitle optional
 const articleFormSchema = z.object({
   title: z.string()
     .min(5, { message: "Title must be at least 5 characters" })
@@ -157,7 +155,7 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
           )}
         />
         
-        {/* Subtitle field */}
+        {/* Subtitle field - kept optional */}
         <FormField
           control={form.control}
           name="subtitle"
@@ -186,28 +184,24 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <div className="flex justify-between items-center mb-2">
                     <TabsList>
-                      <TabsTrigger value="editor" className="flex items-center">
-                        <Edit className="h-4 w-4 mr-2" />
+                      <TabsTrigger value="editor" className="flex items-center gap-1">
+                        <Edit className="h-4 w-4" />
                         Editor
                       </TabsTrigger>
-                      <TabsTrigger value="preview" className="flex items-center">
-                        <Eye className="h-4 w-4 mr-2" />
+                      <TabsTrigger value="preview" className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
                         Preview
                       </TabsTrigger>
                     </TabsList>
                   </div>
                   
-                  <TabsContent value="editor">
-                    <TiptapEditor 
-                      content={field.value} 
-                      onChange={field.onChange}
-                      placeholder="Write your article content here..."
-                    />
+                  <TabsContent value="editor" className="mt-2">
+                    <TiptapEditor content={field.value} onChange={field.onChange} />
                   </TabsContent>
                   
-                  <TabsContent value="preview">
+                  <TabsContent value="preview" className="mt-2">
                     <div 
-                      className="border rounded-md p-4 min-h-[300px] prose dark:prose-invert max-w-none"
+                      className="prose dark:prose-invert w-full max-w-none bg-muted/30 rounded-md p-4 min-h-[250px] border"
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(field.value) }}
                     />
                   </TabsContent>
@@ -224,13 +218,14 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tags</FormLabel>
+              <FormLabel>Tags (1-5)</FormLabel>
               <FormControl>
-                <TagInputField
+                <TagInputField 
                   value={field.value}
                   onChange={field.onChange}
+                  placeholder="Add tags..."
+                  maxTags={5}
                   availableTags={availableTags?.map(tag => tag.name) || []}
-                  placeholder="Add tags relevant to your article"
                 />
               </FormControl>
               <FormMessage />

@@ -47,7 +47,9 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
     }
     
     // If it's a UserRole enum value, convert to string
-    return UserRole[role]?.toLowerCase() || 'member';
+    // Access the enum by index to avoid the "toLowerCase does not exist on type never" error
+    const roleStr = UserRole[role];
+    return typeof roleStr === 'string' ? roleStr.toLowerCase() : 'member';
   };
 
   // Check if user is admin
