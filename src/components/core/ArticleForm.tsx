@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
@@ -46,7 +47,6 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ initialArticle, onSuccess }) 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsSubmitting(true);
     
     try {
       if (initialArticle) {
@@ -68,9 +68,9 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ initialArticle, onSuccess }) 
           content,
           tags,
           content_type: ContentType.ARTICLE,
-          user_id: '', // Will be set by the backend based on the authenticated user
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          user_id: '', // Will be set by the backend based on the authenticated user
           view_count: 0,
           like_count: 0,
           is_pinned: false,
@@ -100,8 +100,6 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ initialArticle, onSuccess }) 
         description: error.message || "An unknown error occurred",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
   

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,13 +44,29 @@ export const useArticles = () => {
         .from('knowledge_articles')
         .select(`
           *,
-          author:user_profiles(id, name, avatar_url, is_admin)
+          author:profiles(id, first_name, last_name, avatar_url)
         `);
       if (error) {
         console.error('Error fetching articles:', error);
         setError(error);
       } else {
-        setArticles(data ? data.map(article => castToKnowledgeArticle(article)) : []);
+        setArticles(data ? data.map(article => {
+          // Handle author data safely
+          let processedArticle = {...article};
+          if (article.author) {
+            // Check if author is an object and has the expected properties
+            if (typeof article.author === 'object' && article.author !== null) {
+              const authorData = article.author as any;
+              // Process author data safely
+              processedArticle.author = {
+                id: authorData.id || '',
+                name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
+                avatar_url: authorData.avatar_url || ''
+              };
+            }
+          }
+          return castToKnowledgeArticle(processedArticle);
+        }) : []);
       }
     } catch (err: any) {
       console.error('Error in useArticles hook:', err);
@@ -95,11 +112,16 @@ export const useArticle = (id: string | undefined) => {
           return null;
         }
         
+        // Process article data safely
+        let processedArticle = {...data};
+        
         // Format author name from first_name and last_name
-        if (data.author) {
-          data.author = {
-            ...data.author,
-            name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim()
+        if (data.author && typeof data.author === 'object') {
+          const authorData = data.author as any;
+          processedArticle.author = {
+            id: authorData.id || '',
+            name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
+            avatar_url: authorData.avatar_url || ''
           };
         }
         
@@ -112,7 +134,7 @@ export const useArticle = (id: string | undefined) => {
           }
         }
         
-        return castToKnowledgeArticle(data);
+        return castToKnowledgeArticle(processedArticle);
       } catch (err) {
         console.error('Error in useArticle hook:', err);
         throw err;
@@ -151,7 +173,7 @@ export const useSearchArticles = (options: KnowledgeQueryOptions) => {
         .from('knowledge_articles')
         .select(`
           *,
-          author:user_profiles(id, name, avatar_url, is_admin),
+          author:profiles(id, first_name, last_name, avatar_url),
           comments:knowledge_comments(count)
         `);
       
@@ -189,7 +211,19 @@ export const useSearchArticles = (options: KnowledgeQueryOptions) => {
         throw error;
       }
       
-      return data.map(article => castToKnowledgeArticle(article));
+      return data.map(article => {
+        // Process author data safely
+        let processedArticle = {...article};
+        if (article.author && typeof article.author === 'object') {
+          const authorData = article.author as any;
+          processedArticle.author = {
+            id: authorData.id || '',
+            name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
+            avatar_url: authorData.avatar_url || ''
+          };
+        }
+        return castToKnowledgeArticle(processedArticle);
+      });
     },
   });
 };
@@ -213,15 +247,18 @@ export const useTagArticles = (tag: string | undefined) => {
           throw error;
         }
         
-        // Format authors
+        // Format authors safely
         const formattedData = data?.map(article => {
-          if (article.author) {
-            article.author = {
-              ...article.author,
-              name: `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
+          let processedArticle = {...article};
+          if (article.author && typeof article.author === 'object') {
+            const authorData = article.author as any;
+            processedArticle.author = {
+              id: authorData.id || '',
+              name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
+              avatar_url: authorData.avatar_url || ''
             };
           }
-          return castToKnowledgeArticle(article);
+          return castToKnowledgeArticle(processedArticle);
         }) || [];
         
         return formattedData;

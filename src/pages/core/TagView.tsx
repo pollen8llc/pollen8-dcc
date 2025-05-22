@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import {
   PlusCircle,
   ChevronLeft,
-  AlertCircle
+  AlertCircle,
+  RefreshCcw
 } from 'lucide-react';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
