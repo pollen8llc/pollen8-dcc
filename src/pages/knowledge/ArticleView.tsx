@@ -35,6 +35,7 @@ import AuthorCard from '@/components/knowledge/AuthorCard';
 
 // Mocks and types
 import { ContentType, VoteType } from '@/models/knowledgeTypes';
+import { UserRole } from '@/models/types';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -181,7 +182,7 @@ const ArticleView = () => {
                   name: article.author?.name,
                   avatar_url: article.author?.avatar_url,
                   is_admin: article.author?.is_admin,
-                  role: article.author?.role as unknown as UserRole
+                  role: article.author?.role
                 }} 
                 minimal={true} 
               />
@@ -307,7 +308,7 @@ const ArticleView = () => {
                 name: article.author?.name,
                 avatar_url: article.author?.avatar_url,
                 is_admin: article.author?.is_admin,
-                role: article.author?.role as unknown as UserRole
+                role: article.author?.role
               }} 
             />
             

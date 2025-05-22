@@ -12,7 +12,7 @@ interface AuthorCardProps {
   author: {
     id?: string;
     name?: string;
-    role?: UserRole;
+    role?: UserRole | string;
     avatar_url?: string;
     is_admin?: boolean;
   };
@@ -40,6 +40,13 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
   // Check if user is admin
   const isAdmin = author.is_admin || author.role === UserRole.ADMIN;
   
+  // Helper to format role as a string
+  const formatRole = (role?: UserRole | string): string => {
+    if (role === undefined) return 'member';
+    if (typeof role === 'string') return role.toLowerCase();
+    return UserRole[role]?.toLowerCase() || 'member';
+  };
+  
   if (minimal) {
     return (
       <div className="flex items-center">
@@ -54,7 +61,7 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
           <p className="font-medium text-sm">{author.name || 'Anonymous'}</p>
           {author.role !== undefined && (
             <Badge variant="outline" className="text-xs mt-0.5 capitalize">
-              {typeof author.role === 'string' ? author.role.toLowerCase() : UserRole[author.role]?.toLowerCase() || 'member'}
+              {formatRole(author.role)}
             </Badge>
           )}
           {isAdmin && !author.role && (
@@ -83,7 +90,7 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
             <p className="font-medium text-sm">{author.name || 'Anonymous'}</p>
             {author.role !== undefined && (
               <Badge variant="outline" className="text-xs mt-0.5 capitalize">
-                {typeof author.role === 'string' ? author.role.toLowerCase() : UserRole[author.role]?.toLowerCase() || 'member'}
+                {formatRole(author.role)}
               </Badge>
             )}
             {isAdmin && !author.role && (
