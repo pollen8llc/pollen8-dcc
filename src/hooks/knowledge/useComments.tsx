@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { KnowledgeComment } from '@/models/knowledgeTypes';
 import { useUser } from '@/contexts/UserContext';
+import { useState } from 'react';
 
 export const useComments = (articleId: string | undefined) => {
   return useQuery({
@@ -82,6 +83,10 @@ export const useComments = (articleId: string | undefined) => {
         });
       }
       
+      // Get current user id for user votes
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id;
+      
       // Enhance comments with author and vote data
       return comments.map(comment => {
         const profile = profileMap[comment.user_id];
@@ -94,7 +99,7 @@ export const useComments = (articleId: string | undefined) => {
             avatar_url: profile.avatar_url
           } : undefined,
           vote_count: voteMap.get(comment.id) || 0,
-          user_vote: userVoteMap.get(`${comment.id}_${supabase.auth.getUser()?.data?.user?.id}`) || null
+          user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
         } as KnowledgeComment;
       });
     },
@@ -266,5 +271,3 @@ export const useCommentMutations = () => {
     isSubmitting
   };
 };
-
-import { useState } from 'react';
