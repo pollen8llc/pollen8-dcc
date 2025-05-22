@@ -31,6 +31,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 // Custom Components
 import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
+import AuthorCard from '@/components/knowledge/AuthorCard';
 
 // Mocks and types
 import { ContentType, VoteType } from '@/models/knowledgeTypes';
@@ -174,19 +175,7 @@ const ArticleView = () => {
             
             {/* Author and metadata */}
             <div className="flex items-center mb-6">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={article.author?.avatar_url} />
-                <AvatarFallback>
-                  {article.author?.name?.substring(0, 2).toUpperCase() || 'UN'}
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="ml-3">
-                <p className="text-sm font-medium">{article.author?.name || 'Anonymous'}</p>
-                <p className="text-xs text-muted-foreground">
-                  Posted {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
-                </p>
-              </div>
+              <AuthorCard author={article.author} minimal={true} />
             </div>
             
             {/* Article content */}
@@ -303,28 +292,7 @@ const ArticleView = () => {
           {/* Sidebar */}
           <div className="md:col-span-1 space-y-6">
             {/* Author card */}
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-lg font-medium mb-3">About the Author</h3>
-                <div className="flex items-center">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={article.author?.avatar_url} />
-                    <AvatarFallback>
-                      {article.author?.name?.substring(0, 2).toUpperCase() || 'UN'}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="ml-3">
-                    <p className="font-medium">{article.author?.name || 'Anonymous'}</p>
-                    {article.author?.role && (
-                      <Badge variant="outline" className="text-xs mt-1 capitalize">
-                        {article.author.role.toLowerCase()}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <AuthorCard author={article.author} />
             
             {/* Related content */}
             <RelatedArticles 

@@ -35,6 +35,7 @@ import {
 import { format, formatDistanceToNow } from 'date-fns';
 import { VoteType } from '@/models/knowledgeTypes';
 import DOMPurify from 'dompurify';
+import AuthorCard from '@/components/knowledge/AuthorCard';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -223,14 +224,15 @@ const ArticleView = () => {
           
           {/* Article Meta */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center text-sm text-muted-foreground">
-            <div className="flex items-center">
-              <Avatar className="h-6 w-6 mr-2">
-                <AvatarImage src={article.author?.avatar_url} alt={article.author?.name} />
-                <AvatarFallback>{getInitials(article.author?.name)}</AvatarFallback>
-              </Avatar>
-              <span className="mr-2">{article.author?.name || 'Unknown User'}</span>
-              <span>posted {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}</span>
-            </div>
+            <AuthorCard 
+              author={{
+                id: article.user_id,
+                name: article.author?.name,
+                avatar_url: article.author?.avatar_url,
+                is_admin: article.author?.is_admin
+              }} 
+              minimal={true} 
+            />
             
             <div className="flex items-center gap-4 mt-2 md:mt-0">
               <div className="flex items-center">
