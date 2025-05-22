@@ -19,10 +19,12 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from '@/components/ui/textarea';
 import { X, PlusCircle, Save, ArrowLeft, Eye, Edit } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MarkdownPreview } from '@/components/ui/markdown-preview';
-import { WysiwygEditor } from '@/components/ui/wysiwyg-editor';
+import { MarkdownToolbar } from '@/components/ui/markdown-toolbar';
+import { useMarkdownEditor } from '@/hooks/useMarkdownEditor';
 
 interface ArticleFormProps {
   article?: KnowledgeArticle;
@@ -40,6 +42,12 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
   const [tagInput, setTagInput] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [activeTab, setActiveTab] = useState<string>("editor");
+  
+  // Markdown editor functionality
+  const { textareaRef, insertText, insertHeading, insertLink, insertList } = useMarkdownEditor({
+    value: content,
+    setValue: setContent
+  });
   
   // Fetch existing tags for suggestions
   const { data: existingTags } = useTags();
@@ -219,22 +227,29 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
             <TabsContent value="editor">
               <Card>
                 <CardContent className="p-4">
-                  <WysiwygEditor
+                  <MarkdownToolbar
+                    onInsert={insertText}
+                    onHeading={insertHeading}
+                    onLink={insertLink}
+                    onList={insertList}
+                  />
+                  <Textarea 
+                    id="content-editor" 
+                    ref={textareaRef}
+                    placeholder="Write your article content in Markdown format..."
                     value={content}
-                    onChange={(value) => {
-                      setContent(value);
+                    onChange={(e) => {
+                      setContent(e.target.value);
                       if (errors.content) setErrors({ ...errors, content: '' });
                     }}
-                    placeholder="Write your article content here..."
-                    minHeight="400px"
-                    className={errors.content ? 'border-red-500' : ''}
+                    className={`min-h-[400px] font-mono ${errors.content ? 'border-red-500' : ''}`}
                   />
                   {errors.content && (
                     <p className="mt-1 text-sm text-red-500">{errors.content}</p>
                   )}
                 </CardContent>
                 <CardFooter className="text-xs text-muted-foreground bg-muted/40 rounded-b-lg py-2 px-4">
-                  <p>Format your content using the toolbar above</p>
+                  <p>You can use Markdown syntax to format your content</p>
                 </CardFooter>
               </Card>
             </TabsContent>

@@ -8,10 +8,10 @@ import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from '@/components/ui/badge';
 import { TagInputField } from '@/components/knowledge/TagInputField';
 import { KnowledgeTag } from '@/models/knowledgeTypes';
-import { WysiwygEditor } from '@/components/ui/wysiwyg-editor';
 
 // Validation schema
 const articleFormSchema = z.object({
@@ -171,12 +171,10 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
             <FormItem>
               <FormLabel>Article Content</FormLabel>
               <FormControl>
-                <WysiwygEditor
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Write your article content here..."
-                  minHeight="300px"
-                  className="border rounded-md"
+                <Textarea 
+                  placeholder="Write your article content here..." 
+                  className="min-h-[300px] font-mono" 
+                  {...field} 
                 />
               </FormControl>
               <FormMessage />
