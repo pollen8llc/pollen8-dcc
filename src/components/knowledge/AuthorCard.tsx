@@ -47,7 +47,8 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
     
     // For UserRole enum, convert the numeric value to its string representation
     const roleKey = UserRole[role];
-    return roleKey ? roleKey.toLowerCase() : 'member';
+    // Ensure roleKey is a string before calling toLowerCase()
+    return typeof roleKey === 'string' ? roleKey.toLowerCase() : 'member';
   };
   
   if (minimal) {
