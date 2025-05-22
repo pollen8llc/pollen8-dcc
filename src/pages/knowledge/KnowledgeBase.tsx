@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -179,7 +180,7 @@ const KnowledgeBase = () => {
   // Fetch articles when filters change
   useEffect(() => {
     fetchArticles();
-  }, [selectedTag, selectedType, searchQuery]);
+  }, [selectedTag, selectedType]);
 
   // Debug articles data
   useEffect(() => {
@@ -212,7 +213,7 @@ const KnowledgeBase = () => {
 
   // Handle content type selection
   const handleTypeSelect = (type: string) => {
-    setSelectedType(type === 'all' ? null : type);
+    setSelectedType(type);
   };
   
   // Sort function for articles
@@ -453,7 +454,7 @@ const KnowledgeBase = () => {
                   <Button onClick={() => fetchArticles()}>
                     Reload Content
                   </Button>
-                  <Button onClick={() => setIsCreateModalOpen(true)}>
+                  <Button onClick={() => navigate("/knowledge/create")}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create New Post
                   </Button>
