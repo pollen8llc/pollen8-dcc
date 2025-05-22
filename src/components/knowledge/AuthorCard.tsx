@@ -44,7 +44,9 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
   const formatRole = (role?: UserRole | string): string => {
     if (role === undefined) return 'member';
     if (typeof role === 'string') return role.toLowerCase();
-    return UserRole[role]?.toLowerCase() || 'member';
+    
+    // Since enum values are numbers when used as keys, we need to handle this differently
+    return UserRole[role] ? UserRole[role].toLowerCase() : 'member';
   };
   
   if (minimal) {
