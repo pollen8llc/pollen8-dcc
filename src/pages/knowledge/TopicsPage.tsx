@@ -16,12 +16,12 @@ const TopicsPage = () => {
   const { useTags } = useKnowledgeBase();
   const { data: tags, isLoading: tagsLoading } = useTags();
 
-  // Filter tags based on search term
+  // Filter tags based on search term and sort alphabetically
   const filteredTags = useMemo(() => {
     if (!tags) return [];
     return tags
       .filter(tag => !searchTerm || tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
-      .sort((a, b) => (b.count || 0) - (a.count || 0)); // Sort by count in descending order
+      .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
   }, [tags, searchTerm]);
 
   // Determine popular tags (top 25%)

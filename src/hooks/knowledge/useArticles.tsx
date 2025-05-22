@@ -42,7 +42,9 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
       
       // Only filter by type if it's not null/undefined and not 'all'
       if (filters?.type && filters?.type !== 'all') {
-        query = query.eq('content_type', filters.type);
+        // Convert from lowercase filter values to uppercase ContentType enum values
+        let contentType = filters.type.toUpperCase();
+        query = query.eq('content_type', contentType);
       }
       
       if (filters?.limit) {
