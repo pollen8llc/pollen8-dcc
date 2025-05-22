@@ -92,6 +92,9 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ initialArticle, onSuccess }) 
       
       if (onSuccess) {
         onSuccess();
+      } else {
+        // Navigate to the knowledge base landing page
+        navigate('/core');
       }
     } catch (error: any) {
       console.error('Error saving article:', error);

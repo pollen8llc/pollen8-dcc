@@ -22,7 +22,11 @@ const castToKnowledgeArticle = (articleData: any): KnowledgeArticle => {
     vote_count: articleData.vote_count || 0,
     user_vote: articleData.user_vote || null,
     comment_count: articleData.comment_count || 0,
-    author: articleData.author || undefined,
+    author: articleData.author ? {
+      id: articleData.author.id || '',
+      name: `${articleData.author.first_name || ''} ${articleData.author.last_name || ''}`.trim() || 'Anonymous',
+      avatar_url: articleData.author.avatar_url || ''
+    } : undefined,
     options: articleData.options || [],
     subtitle: articleData.subtitle || '',
     source: articleData.source || '',
@@ -63,6 +67,9 @@ export const useArticles = () => {
                 name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
                 avatar_url: authorData.avatar_url || ''
               };
+            } else {
+              // If author is not as expected, set it as undefined
+              processedArticle.author = undefined;
             }
           }
           return castToKnowledgeArticle(processedArticle);
@@ -118,11 +125,15 @@ export const useArticle = (id: string | undefined) => {
         // Format author name from first_name and last_name
         if (data.author && typeof data.author === 'object') {
           const authorData = data.author as any;
-          processedArticle.author = {
-            id: authorData.id || '',
-            name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
-            avatar_url: authorData.avatar_url || ''
-          };
+          if (authorData && typeof authorData === 'object') {
+            processedArticle.author = {
+              id: authorData.id || '',
+              name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
+              avatar_url: authorData.avatar_url || ''
+            };
+          } else {
+            processedArticle.author = undefined;
+          }
         }
         
         // Increment view count via separate call
@@ -216,11 +227,15 @@ export const useSearchArticles = (options: KnowledgeQueryOptions) => {
         let processedArticle = {...article};
         if (article.author && typeof article.author === 'object') {
           const authorData = article.author as any;
-          processedArticle.author = {
-            id: authorData.id || '',
-            name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
-            avatar_url: authorData.avatar_url || ''
-          };
+          if (authorData && typeof authorData === 'object') {
+            processedArticle.author = {
+              id: authorData.id || '',
+              name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
+              avatar_url: authorData.avatar_url || ''
+            };
+          } else {
+            processedArticle.author = undefined;
+          }
         }
         return castToKnowledgeArticle(processedArticle);
       });
@@ -252,11 +267,15 @@ export const useTagArticles = (tag: string | undefined) => {
           let processedArticle = {...article};
           if (article.author && typeof article.author === 'object') {
             const authorData = article.author as any;
-            processedArticle.author = {
-              id: authorData.id || '',
-              name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
-              avatar_url: authorData.avatar_url || ''
-            };
+            if (authorData && typeof authorData === 'object') {
+              processedArticle.author = {
+                id: authorData.id || '',
+                name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Anonymous',
+                avatar_url: authorData.avatar_url || ''
+              };
+            } else {
+              processedArticle.author = undefined;
+            }
           }
           return castToKnowledgeArticle(processedArticle);
         }) || [];
