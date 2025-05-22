@@ -18,7 +18,6 @@ export const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({
   selected, 
   onChange 
 }) => {
-  // Updated to match ContentType enum values in the database (removed quote type)
   const contentTypes = [
     { id: 'all', name: 'All Types', icon: Newspaper },
     { id: 'question', name: 'Questions', icon: MessageSquare },

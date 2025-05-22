@@ -17,7 +17,10 @@ import {
   MessageSquare,
   Eye,
   Tag as TagIcon,
-  AlertTriangle
+  AlertTriangle,
+  BookOpen,
+  MessageSquare as MessageSquareIcon,
+  BarChart2
 } from 'lucide-react';
 
 // UI Components
@@ -35,6 +38,36 @@ import AuthorCard from '@/components/knowledge/AuthorCard';
 
 // Mocks and types
 import { ContentType, VoteType } from '@/models/knowledgeTypes';
+
+// Function to get content type specific UI elements 
+const getContentTypeDisplay = (article: KnowledgeArticle) => {
+  switch (article.content_type) {
+    case ContentType.ARTICLE:
+      return {
+        icon: <BookOpen className="h-5 w-5 text-emerald-500" />,
+        label: 'Article',
+        className: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+      };
+    case ContentType.QUESTION:
+      return {
+        icon: <MessageSquareIcon className="h-5 w-5 text-royal-blue-500" />,
+        label: 'Question',
+        className: 'bg-royal-blue-500/10 text-royal-blue-700 dark:text-royal-blue-400'
+      };
+    case ContentType.POLL:
+      return {
+        icon: <BarChart2 className="h-5 w-5 text-purple-500" />,
+        label: 'Poll',
+        className: 'bg-purple-500/10 text-purple-700 dark:text-purple-400'
+      };
+    default:
+      return {
+        icon: <BookOpen className="h-5 w-5" />,
+        label: 'Article',
+        className: 'bg-muted text-muted-foreground'
+      };
+  }
+};
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();

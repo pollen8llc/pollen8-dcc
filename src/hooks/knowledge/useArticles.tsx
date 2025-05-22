@@ -13,12 +13,11 @@ const castToKnowledgeArticle = (articleData: any): KnowledgeArticle => {
     content_type: articleData.content_type as ContentType,
     user_id: articleData.user_id,
     view_count: articleData.view_count || 0,
-    like_count: articleData.like_count || 0, // Default value
-    is_pinned: articleData.is_pinned || false, // Default value
+    like_count: articleData.like_count || 0, 
+    is_pinned: articleData.is_pinned || false,
     is_answered: articleData.is_answered || false,
     tags: articleData.tags || [],
-    updated_at: articleData.updated_at || articleData.created_at, // Default to created_at if missing
-    // Add other optional fields as needed
+    updated_at: articleData.updated_at || articleData.created_at,
     vote_count: articleData.vote_count || 0,
     user_vote: articleData.user_vote || null,
     comment_count: articleData.comment_count || 0,
@@ -198,11 +197,12 @@ export const useTagArticles = (tag: string | undefined) => {
   });
 };
 
+// Create Article Mutation
 export const useCreateArticle = () => {
   const queryClient = useQueryClient();
   
-  return useMutation(
-    async (newArticle: Omit<KnowledgeArticle, 'id'>) => {
+  return useMutation({
+    mutationFn: async (newArticle: Omit<KnowledgeArticle, 'id'>) => {
       const { data, error } = await supabase
         .from('knowledge_articles')
         .insert([newArticle])
@@ -216,19 +216,18 @@ export const useCreateArticle = () => {
       
       return castToKnowledgeArticle(data);
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+    },
+  });
 };
 
+// Update Article Mutation
 export const useUpdateArticle = () => {
   const queryClient = useQueryClient();
   
-  return useMutation(
-    async (updatedArticle: KnowledgeArticle) => {
+  return useMutation({
+    mutationFn: async (updatedArticle: KnowledgeArticle) => {
       const { data, error } = await supabase
         .from('knowledge_articles')
         .update(updatedArticle)
@@ -243,19 +242,18 @@ export const useUpdateArticle = () => {
       
       return castToKnowledgeArticle(data);
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+    },
+  });
 };
 
+// Delete Article Mutation
 export const useDeleteArticle = () => {
   const queryClient = useQueryClient();
   
-  return useMutation(
-    async (id: string) => {
+  return useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('knowledge_articles')
         .delete()
@@ -266,10 +264,49 @@ export const useDeleteArticle = () => {
         throw error;
       }
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
-      },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+    },
+  });
+};
+
+export const useArticleMutations = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const createArticleMutation = useCreateArticle();
+  const updateArticleMutation = useUpdateArticle();
+  const deleteArticleMutation = useDeleteArticle();
+
+  const createArticle = async (article: Omit<KnowledgeArticle, 'id'>) => {
+    try {
+      setIsSubmitting(true);
+      return await createArticleMutation.mutateAsync(article);
+    } finally {
+      setIsSubmitting(false);
     }
-  );
+  };
+
+  const updateArticle = async (article: KnowledgeArticle) => {
+    try {
+      setIsSubmitting(true);
+      return await updateArticleMutation.mutateAsync(article);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const deleteArticle = async (id: string) => {
+    try {
+      setIsSubmitting(true);
+      return await deleteArticleMutation.mutateAsync(id);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return {
+    createArticle,
+    updateArticle,
+    deleteArticle,
+    isSubmitting
+  };
 };

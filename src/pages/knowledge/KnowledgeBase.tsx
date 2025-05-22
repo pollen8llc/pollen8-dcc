@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -35,6 +34,21 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+
+const filterContentByType = (articles: KnowledgeArticle[], type: string): KnowledgeArticle[] => {
+  if (type === 'all') return articles;
+  
+  const contentTypeMap: Record<string, ContentType> = {
+    'article': ContentType.ARTICLE,
+    'question': ContentType.QUESTION,
+    'poll': ContentType.POLL
+  };
+  
+  const contentType = contentTypeMap[type];
+  if (!contentType) return articles;
+  
+  return articles.filter(article => article.content_type === contentType);
+};
 
 const KnowledgeBase = () => {
   const navigate = useNavigate();
