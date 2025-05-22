@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -89,7 +88,6 @@ const AppRoutes = () => {
       <Route path="/knowledge/create" element={<ContentCreator />} />
       <Route path="/knowledge/create/question" element={<PostWizard initialType="question" />} />
       <Route path="/knowledge/create/article" element={<PostWizard initialType="article" />} />
-      <Route path="/knowledge/create/quote" element={<PostWizard initialType="quote" />} />
       <Route path="/knowledge/create/poll" element={<PostWizard initialType="poll" />} />
       <Route path="/knowledge/topics" element={<TopicsPage />} />
       <Route path="/knowledge/tags/:tag" element={<TagView />} />
