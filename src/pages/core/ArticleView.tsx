@@ -229,7 +229,8 @@ const ArticleView = () => {
                 id: article.user_id,
                 name: article.author?.name,
                 avatar_url: article.author?.avatar_url,
-                is_admin: article.author?.is_admin
+                is_admin: article.author?.is_admin,
+                role: article.author?.role as unknown as UserRole
               }} 
               minimal={true} 
             />

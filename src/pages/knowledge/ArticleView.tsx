@@ -175,7 +175,16 @@ const ArticleView = () => {
             
             {/* Author and metadata */}
             <div className="flex items-center mb-6">
-              <AuthorCard author={article.author} minimal={true} />
+              <AuthorCard 
+                author={{
+                  id: article.author?.id,
+                  name: article.author?.name,
+                  avatar_url: article.author?.avatar_url,
+                  is_admin: article.author?.is_admin,
+                  role: article.author?.role as unknown as UserRole
+                }} 
+                minimal={true} 
+              />
             </div>
             
             {/* Article content */}
@@ -292,7 +301,15 @@ const ArticleView = () => {
           {/* Sidebar */}
           <div className="md:col-span-1 space-y-6">
             {/* Author card */}
-            <AuthorCard author={article.author} />
+            <AuthorCard 
+              author={{
+                id: article.author?.id,
+                name: article.author?.name,
+                avatar_url: article.author?.avatar_url,
+                is_admin: article.author?.is_admin,
+                role: article.author?.role as unknown as UserRole
+              }} 
+            />
             
             {/* Related content */}
             <RelatedArticles 
