@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
+import DOMPurify from 'dompurify';
 import {
   ChevronLeft,
   Edit,
@@ -193,10 +194,13 @@ const ArticleView = () => {
               <CardContent className="pt-6">
                 {article.content_type === ContentType.QUOTE ? (
                   <blockquote className="border-l-4 border-primary pl-4 italic">
-                    <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                   </blockquote>
                 ) : (
-                  <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                  <div 
+                    className="prose dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
+                  />
                 )}
                 
                 {/* Tags */}

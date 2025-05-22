@@ -4,14 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import DOMPurify from 'dompurify';
 
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from '@/components/ui/badge';
 import { TagInputField } from '@/components/knowledge/TagInputField';
 import { KnowledgeTag } from '@/models/knowledgeTypes';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eye, Edit } from "lucide-react";
 
 // Validation schema
 const articleFormSchema = z.object({
@@ -44,6 +47,7 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
   const { useTags } = useKnowledgeBase();
   const { data: availableTags } = useTags();
   const [popularTags, setPopularTags] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<string>("editor");
   
   // Form setup
   const form = useForm<ArticleFormValues>({
@@ -79,12 +83,19 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
   
   // Handle form submission
   const handleSubmit = (data: ArticleFormValues) => {
-    onSubmit(data);
+    // Sanitize HTML content before submission
+    const sanitizedData = {
+      ...data,
+      content: DOMPurify.sanitize(data.content)
+    };
+    onSubmit(sanitizedData);
   };
   
   // Content to render based on step
   if (step === 2) {
     const formData = form.getValues();
+    const sanitizedContent = DOMPurify.sanitize(formData.content);
+    
     return (
       <div className="bg-card/50 border rounded-md p-6 space-y-6">
         <div>
@@ -101,9 +112,10 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
         
         <div>
           <h3 className="text-lg font-medium mb-2">Article Content</h3>
-          <div className="p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto whitespace-pre-wrap">
-            {formData.content}
-          </div>
+          <div 
+            className="p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto"
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+          />
         </div>
         
         <div>
@@ -171,11 +183,35 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
             <FormItem>
               <FormLabel>Article Content</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Write your article content here..." 
-                  className="min-h-[300px] font-mono" 
-                  {...field} 
-                />
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <div className="flex justify-between items-center mb-2">
+                    <TabsList>
+                      <TabsTrigger value="editor" className="flex items-center">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editor
+                      </TabsTrigger>
+                      <TabsTrigger value="preview" className="flex items-center">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                  
+                  <TabsContent value="editor">
+                    <TiptapEditor 
+                      content={field.value} 
+                      onChange={field.onChange}
+                      placeholder="Write your article content here..."
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="preview">
+                    <div 
+                      className="border rounded-md p-4 min-h-[300px] prose dark:prose-invert max-w-none"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(field.value) }}
+                    />
+                  </TabsContent>
+                </Tabs>
               </FormControl>
               <FormMessage />
             </FormItem>

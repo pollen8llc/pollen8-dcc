@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { VoteType } from '@/models/knowledgeTypes';
+import DOMPurify from 'dompurify';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -248,7 +249,10 @@ const ArticleView = () => {
         {/* Article Content */}
         <Card className="mb-8">
           <CardContent className="pt-6">
-            <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: article.content }} />
+            <div 
+              className="prose dark:prose-invert max-w-none" 
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
+            />
           </CardContent>
           
           <CardFooter className="flex flex-col md:flex-row justify-between border-t pt-4 gap-4">
