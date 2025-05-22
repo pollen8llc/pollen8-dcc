@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./contexts/UserContext";
 
@@ -49,6 +50,7 @@ import { default as KnowledgeArticleView } from "./pages/knowledge/ArticleView";
 import ContentCreator from "./pages/knowledge/ContentCreator";
 import PostWizard from "./pages/knowledge/PostWizard";
 import TopicsPage from "./pages/knowledge/TopicsPage";
+import ResourcesPage from "./pages/knowledge/ResourcesPage";
 
 const AppRoutes = () => {
   const { currentUser } = useUser();
@@ -91,6 +93,14 @@ const AppRoutes = () => {
       <Route path="/knowledge/create/poll" element={<PostWizard initialType="poll" />} />
       <Route path="/knowledge/topics" element={<TopicsPage />} />
       <Route path="/knowledge/tags/:tag" element={<TagView />} />
+      <Route 
+        path="/knowledge/resources" 
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <ResourcesPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Protected Routes */}
       <Route
