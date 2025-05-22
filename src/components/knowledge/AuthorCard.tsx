@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,7 +11,7 @@ interface AuthorCardProps {
   author: {
     id?: string;
     name?: string;
-    role?: UserRole | string;  // Updated to accept either UserRole enum or string
+    role?: UserRole | string;  // Accept either UserRole enum or string
     avatar_url?: string;
     is_admin?: boolean;
   };
@@ -46,10 +45,19 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
       return role.toLowerCase();
     }
     
-    // If it's a UserRole enum value, convert to string
-    // Access the enum by index to avoid the "toLowerCase does not exist on type never" error
-    const roleStr = UserRole[role];
-    return typeof roleStr === 'string' ? roleStr.toLowerCase() : 'member';
+    // If it's a UserRole enum value, handle each case explicitly
+    switch(role) {
+      case UserRole.ADMIN:
+        return 'admin';
+      case UserRole.ORGANIZER:
+        return 'organizer';
+      case UserRole.MEMBER:
+        return 'member';
+      case UserRole.GUEST:
+        return 'guest';
+      default:
+        return 'member';
+    }
   };
 
   // Check if user is admin
