@@ -94,9 +94,11 @@ const KnowledgeBase = () => {
         query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
       }
       
-      // Only filter by type if it's not null/undefined and not 'all'
+      // Fix content type filtering to match uppercase values in database
       if (selectedType && selectedType !== 'all') {
-        query = query.eq('content_type', selectedType);
+        // Convert to uppercase to match ContentType enum values in the database
+        const formattedType = selectedType.toUpperCase();
+        query = query.eq('content_type', formattedType);
       }
       
       const { data: articles, error } = await query;

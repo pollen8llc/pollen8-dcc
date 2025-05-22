@@ -19,6 +19,7 @@ export const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({
   selected, 
   onChange 
 }) => {
+  // Updated to match ContentType enum values in the database
   const contentTypes = [
     { id: 'all', name: 'All Types', icon: Newspaper },
     { id: 'question', name: 'Questions', icon: MessageSquare },
