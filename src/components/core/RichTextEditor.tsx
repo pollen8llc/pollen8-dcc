@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { MarkdownPreview } from '@/components/ui/markdown-preview';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Bold, Italic, Code, TextQuote, ListOrdered, ListUnordered, Underline, Strikethrough } from 'lucide-react';
+import { Bold, Italic, Code, TextQuote, ListOrdered, List, Underline, Strikethrough } from 'lucide-react';
 
 interface RichTextEditorProps {
   value: string;
@@ -116,7 +115,7 @@ const RichTextEditor = ({
               <TextQuote className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => insertPrefixedLine('-', 'list item')} title="Unordered List">
-              <ListUnordered className="h-4 w-4" />
+              <List className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => insertPrefixedLine('1.', 'list item')} title="Ordered List">
               <ListOrdered className="h-4 w-4" />
