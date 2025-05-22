@@ -13,7 +13,7 @@ import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector'
 import { TagsList } from '@/components/knowledge/TagsList';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { ContentType } from '@/models/knowledgeTypes';
+import { ContentType, KnowledgeArticle } from '@/models/knowledgeTypes';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Select,
@@ -266,8 +266,6 @@ const KnowledgeBase = () => {
         return 'Articles';
       case ContentType.QUESTION:
         return 'Questions';
-      case ContentType.QUOTE:
-        return 'Quotes';
       case ContentType.POLL:
         return 'Polls';
       default:

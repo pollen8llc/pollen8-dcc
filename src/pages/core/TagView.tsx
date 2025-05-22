@@ -1,161 +1,75 @@
-
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
-import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { usePermissions } from '@/hooks/usePermissions';
-import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  ChevronLeft, 
+import {
   PlusCircle,
-  ThumbsUp,
-  MessageSquare,
-  Eye,
-  Calendar,
-  Tag
+  ChevronLeft
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { ArticleCard } from '@/components/knowledge/ArticleCard';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 const TagView = () => {
   const { tag } = useParams<{ tag: string }>();
-  const { currentUser } = useUser();
-  const { isOrganizer, isAdmin } = usePermissions(currentUser);
-  const { useArticles } = useKnowledgeBase();
+  const navigate = useNavigate();
+  const { useTagArticles } = useKnowledgeBase();
   
-  // Get articles with this tag
-  const { data: articles, isLoading } = useArticles({ tag });
-  
-  const decodedTag = tag ? decodeURIComponent(tag) : '';
+  // Get the articles using the hook
+  const { articles, isLoading } = useTagArticles(tag);
   
   return (
     <Shell>
       <div className="container mx-auto px-4 py-6">
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <Button variant="ghost" asChild className="pl-0">
-            <Link to="/core">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Knowledge Base
-            </Link>
-          </Button>
-        </div>
-        
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
           <div>
-            <div className="flex items-center mb-2">
-              <Tag className="mr-2 h-5 w-5 text-royal-blue-600 dark:text-royal-blue-400" />
-              <h1 className="text-3xl font-bold tracking-tight">{decodedTag}</h1>
-            </div>
-            <p className="text-muted-foreground">
-              Showing all articles tagged with "{decodedTag}"
-            </p>
-          </div>
-          
-          {(isOrganizer || isAdmin) && (
-            <Button className="mt-4 md:mt-0 bg-royal-blue-600 hover:bg-royal-blue-700" asChild>
-              <Link to="/core/articles/new">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                New Article
-              </Link>
+            <Button 
+              variant="ghost" 
+              className="p-0 mb-2" 
+              onClick={() => navigate("/core")}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              <span>Back to Knowledge Base</span>
             </Button>
-          )}
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold">Tag: {tag}</h1>
+              <Badge className="ml-2">
+                {articles?.length || 0} {articles?.length === 1 ? 'article' : 'articles'}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">Articles related to this tag</p>
+          </div>
         </div>
         
-        {/* Articles List */}
-        <div className="space-y-4">
-          {isLoading ? (
-            <>
-              {[1, 2, 3].map(i => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-muted rounded w-1/4"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-4 bg-muted rounded w-full mb-2"></div>
-                    <div className="h-4 bg-muted rounded w-5/6"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </>
-          ) : articles && articles.length > 0 ? (
-            <>
-              {articles.map(article => (
-                <Card key={article.id} className="transition-shadow hover:shadow-md">
-                  <CardHeader>
-                    <Link to={`/core/articles/${article.id}`} className="group">
-                      <CardTitle className="text-xl group-hover:text-royal-blue-600 dark:group-hover:text-royal-blue-400 transition-colors">
-                        {article.title}
-                      </CardTitle>
-                    </Link>
-                    <div className="flex flex-wrap gap-2">
-                      {article.tags?.map(t => (
-                        <Badge 
-                          key={t} 
-                          variant={t === decodedTag ? "default" : "outline"}
-                          className={t === decodedTag ? "bg-royal-blue-500" : ""}
-                        >
-                          <Tag className="h-3 w-3 mr-1" />
-                          {t}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <p className="text-muted-foreground line-clamp-2">
-                      {article.content?.replace(/<[^>]*>?/gm, '').substring(0, 150)}...
-                    </p>
-                  </CardContent>
-                  
-                  <CardFooter className="flex justify-between text-sm text-muted-foreground">
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center">
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        <span>{article.vote_count || 0}</span>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <MessageSquare className="h-4 w-4 mr-1" />
-                        <span>0</span>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <Eye className="h-4 w-4 mr-1" />
-                        <span>{article.view_count}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      <span>{formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}</span>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
-            </>
-          ) : (
-            <div className="text-center p-8">
-              <h3 className="text-lg font-medium mb-2">No articles found</h3>
-              <p className="text-muted-foreground mb-4">
-                There are no articles with the tag "{decodedTag}"
-              </p>
-              
-              {(isOrganizer || isAdmin) && (
-                <Button asChild className="bg-royal-blue-600 hover:bg-royal-blue-700">
-                  <Link to="/core/articles/new">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create New Article
-                  </Link>
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
+            ))}
+          </div>
+        ) : articles && articles.length > 0 ? (
+          <div className="space-y-4">
+            {articles.map((article) => (
+              <ArticleCard
+                key={article.id}
+                article={article}
+                onClick={() => navigate(`/core/articles/${article.id}`)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-muted/50 rounded-lg">
+            <h3 className="font-medium text-xl mb-2">No articles found</h3>
+            <p className="text-muted-foreground mb-6">
+              No articles with this tag were found
+            </p>
+            <Button onClick={() => navigate("/core/create")}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create New Article
+            </Button>
+          </div>
+        )}
       </div>
     </Shell>
   );

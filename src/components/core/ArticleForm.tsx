@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { KnowledgeArticle, KnowledgeTag } from '@/models/knowledgeTypes';
+import { KnowledgeArticle } from '@/models/knowledgeTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -71,7 +72,11 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
         await createArticle(articleData);
         navigate('/core');
       } else if (mode === 'edit' && article) {
-        await updateArticle(article.id, articleData);
+        // Fix: Pass article and new data as one object
+        await updateArticle({
+          ...article,
+          ...articleData
+        });
         navigate(`/core/articles/${article.id}`);
       }
     } catch (error) {

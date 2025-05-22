@@ -36,8 +36,8 @@ import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
 
-// Mocks and types
-import { ContentType, VoteType } from '@/models/knowledgeTypes';
+// Types
+import { ContentType, KnowledgeArticle, VoteType } from '@/models/knowledgeTypes';
 
 // Function to get content type specific UI elements 
 const getContentTypeDisplay = (article: KnowledgeArticle) => {
@@ -214,16 +214,11 @@ const ArticleView = () => {
             {/* Article content */}
             <Card>
               <CardContent className="pt-6">
-                {article.content_type === ContentType.QUOTE ? (
-                  <blockquote className="border-l-4 border-primary pl-4 italic">
-                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
-                  </blockquote>
-                ) : (
-                  <div 
-                    className="prose dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
-                  />
-                )}
+                {/* Normal article content rendering */}
+                <div 
+                  className="prose dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
+                />
                 
                 {/* Tags */}
                 {article.tags && article.tags.length > 0 && (
