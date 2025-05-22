@@ -67,40 +67,12 @@ export const useKnowledgeResources = (userId: string | undefined) => {
     enabled: !!userId
   });
 
-  // Fetch user saved articles (bookmarks) - Note: We'll implement this properly when the table exists
+  // Placeholder for user saved articles (bookmarks)
+  // We don't have the actual table yet, but we need this to maintain the structure
   const { data: savedArticles = [], isLoading: isLoadingSaved } = useQuery({
     queryKey: ['knowledgeSaved', userId],
     queryFn: async () => {
-      if (!userId) return [];
-      
-      // Since knowledge_bookmarks table doesn't exist yet, return an empty array
-      // When the table is created later, we can uncomment and use this code
-      /*
-      try {
-        const { data, error } = await supabase
-          .from('knowledge_bookmarks')
-          .select(`
-            id,
-            article_id,
-            saved_at,
-            article:knowledge_articles(*)
-          `)
-          .eq('user_id', userId)
-          .order('saved_at', { ascending: false });
-          
-        if (error) {
-          console.error('Error fetching saved articles:', error);
-          throw error;
-        }
-        
-        return data || [];
-      } catch (err) {
-        console.error('Error in saved articles query:', err);
-        return [];
-      }
-      */
-      
-      return [];
+      return []; // Return empty array as placeholder
     },
     enabled: !!userId
   });

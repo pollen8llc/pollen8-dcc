@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,13 +41,18 @@ export const useArticles = () => {
     try {
       const { data, error } = await supabase
         .from('knowledge_articles')
-        .select('*');
+        .select(`
+          *,
+          author:user_profiles(id, name, avatar_url, is_admin)
+        `);
       if (error) {
+        console.error('Error fetching articles:', error);
         setError(error);
       } else {
         setArticles(data ? data.map(article => castToKnowledgeArticle(article)) : []);
       }
     } catch (err: any) {
+      console.error('Error in useArticles hook:', err);
       setError(err);
     } finally {
       setIsLoading(false);
@@ -72,36 +76,47 @@ export const useArticle = (id: string | undefined) => {
     queryKey: ['knowledgeArticle', id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
-        .from('knowledge_articles')
-        .select(`
-          *,
-          author:user_profiles(id, name, avatar_url, is_admin),
-          comments:knowledge_comments(
-            id,
-            created_at,
-            user_id,
-            content,
-            is_accepted,
-            author:user_profiles(id, name, avatar_url),
-            vote_count,
-            user_vote:knowledge_votes(vote_type)
-          ),
-          knowledge_votes(vote_type)
-        `)
-        .eq('id', id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('knowledge_articles')
+          .select(`
+            *,
+            author:profiles(id, first_name, last_name, avatar_url)
+          `)
+          .eq('id', id)
+          .single();
 
-      if (error) {
-        console.error('Error fetching article:', error);
-        throw error;
+        if (error) {
+          console.error('Error fetching article:', error);
+          throw error;
+        }
+        
+        if (!data) {
+          return null;
+        }
+        
+        // Format author name from first_name and last_name
+        if (data.author) {
+          data.author = {
+            ...data.author,
+            name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim()
+          };
+        }
+        
+        // Increment view count via separate call
+        if (id) {
+          try {
+            await supabase.rpc('increment_view_count', { article_id: id });
+          } catch (viewCountError) {
+            console.error('Error incrementing view count:', viewCountError);
+          }
+        }
+        
+        return castToKnowledgeArticle(data);
+      } catch (err) {
+        console.error('Error in useArticle hook:', err);
+        throw err;
       }
-      
-      if (!data) {
-        return null;
-      }
-      
-      return castToKnowledgeArticle(data);
     },
     enabled: !!id, // The query will not execute until an id exists
   });
@@ -181,19 +196,39 @@ export const useSearchArticles = (options: KnowledgeQueryOptions) => {
 
 export const useTagArticles = (tag: string | undefined) => {
   return useQuery({
-    queryKey: ['knowledgeArticles', tag],
+    queryKey: ['knowledgeArticles', 'tag', tag],
     queryFn: async () => {
       if (!tag) return [];
-      const { data, error } = await supabase
-        .from('knowledge_articles')
-        .select('*')
-        .contains('tags', [tag]);
+      try {
+        const { data, error } = await supabase
+          .from('knowledge_articles')
+          .select(`
+            *,
+            author:profiles(id, first_name, last_name, avatar_url)
+          `)
+          .contains('tags', [tag]);
 
-      if (error) {
-        console.error('Error fetching articles:', error);
-        throw error;
+        if (error) {
+          console.error('Error fetching tag articles:', error);
+          throw error;
+        }
+        
+        // Format authors
+        const formattedData = data?.map(article => {
+          if (article.author) {
+            article.author = {
+              ...article.author,
+              name: `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
+            };
+          }
+          return castToKnowledgeArticle(article);
+        }) || [];
+        
+        return formattedData;
+      } catch (err) {
+        console.error('Error in useTagArticles hook:', err);
+        throw err;
       }
-      return data ? data.map(article => castToKnowledgeArticle(article)) : [];
     },
     enabled: !!tag, // The query will not execute until a tag exists
   });

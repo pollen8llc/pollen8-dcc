@@ -5,7 +5,8 @@ import { Shell } from '@/components/layout/Shell';
 import { Button } from '@/components/ui/button';
 import {
   PlusCircle,
-  ChevronLeft
+  ChevronLeft,
+  AlertCircle
 } from 'lucide-react';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
@@ -18,7 +19,7 @@ const TagView = () => {
   const { useTagArticles } = useKnowledgeBase();
   
   // Get the articles using the hook
-  const { data: articles = [], isLoading } = useTagArticles(tag);
+  const { data: articles = [], isLoading, error, refetch } = useTagArticles(tag);
   
   return (
     <Shell>
@@ -48,6 +49,16 @@ const TagView = () => {
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
             ))}
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-2" />
+            <h3 className="text-lg font-medium mb-1">Failed to load articles</h3>
+            <p className="text-muted-foreground">{error.message}</p>
+            <Button onClick={() => refetch()} className="mt-4">
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
           </div>
         ) : articles && articles.length > 0 ? (
           <div className="space-y-4">
