@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { KnowledgeArticle, KnowledgeTag } from '@/models/knowledgeTypes';
+import { KnowledgeArticle } from '@/models/knowledgeTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,17 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
 import { X, PlusCircle, Save, ArrowLeft } from 'lucide-react';
-
-// Add TailwindCSS dark mode styles for TinyMCE
-import { useEffect as useEffectTinyMCE } from 'react';
+import RichTextEditor from './RichTextEditor';
 
 interface ArticleFormProps {
   article?: KnowledgeArticle;
@@ -43,76 +35,6 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
   
   // Fetch existing tags for suggestions
   const { data: existingTags } = useTags();
-  
-  // Add Tiny MCE editor
-  useEffectTinyMCE(() => {
-    const loadEditor = async () => {
-      // @ts-ignore
-      if (window.tinymce) return;
-      
-      const script = document.createElement('script');
-      script.src = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js';
-      script.referrerPolicy = 'origin';
-      
-      script.onload = () => {
-        // @ts-ignore
-        window.tinymce.init({
-          selector: '#article-editor',
-          plugins: 'link image lists table code help wordcount',
-          toolbar: 'undo redo | blocks | bold italic underline strikethrough | link image | numlist bullist | table | code',
-          menubar: 'file edit view insert format tools table help',
-          setup: (editor: any) => {
-            // Update content in state when editor content changes
-            editor.on('change', () => {
-              setContent(editor.getContent());
-            });
-            
-            // Set initial content if available
-            if (article?.content) {
-              editor.on('init', () => {
-                editor.setContent(article.content);
-              });
-            }
-          },
-          height: 500,
-          content_style: `
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-              font-size: 16px;
-              color: #374151;
-              margin: 1rem;
-            }
-            .dark body {
-              color: #e5e7eb;
-              background-color: #1f2937;
-            }
-            .dark a { color: #60a5fa; }
-            .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 { color: #f3f4f6; }
-            .dark code { 
-              background-color: #374151; 
-              color: #e5e7eb; 
-              padding: 0.2em 0.4em;
-              border-radius: 3px;
-            }
-          `,
-          skin: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oxide-dark' : 'oxide',
-          content_css: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
-        });
-      };
-      
-      document.head.appendChild(script);
-    };
-    
-    loadEditor();
-    
-    return () => {
-      // @ts-ignore
-      if (window.tinymce) {
-        // @ts-ignore
-        window.tinymce.remove('#article-editor');
-      }
-    };
-  }, [article]);
   
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,7 +96,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
   };
   
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} id="article-form">
       <div className="mb-6">
         <Button 
           type="button" 
@@ -271,18 +193,16 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
         
         {/* Content */}
         <div>
-          <Label htmlFor="article-editor" className="text-base">Article Content</Label>
-          <Card>
-            <CardContent className="p-0">
-              <textarea 
-                id="article-editor" 
-                className={`min-h-40 w-full ${errors.content ? 'border-red-500' : ''}`}
-              />
-              {errors.content && (
-                <p className="mt-1 text-sm text-red-500">{errors.content}</p>
-              )}
-            </CardContent>
-          </Card>
+          <Label htmlFor="article-content" className="text-base">Article Content</Label>
+          <RichTextEditor 
+            value={content}
+            onChange={setContent}
+            minHeight="400px"
+            placeholder="Write your article content here... Markdown is supported!"
+          />
+          {errors.content && (
+            <p className="mt-1 text-sm text-red-500">{errors.content}</p>
+          )}
         </div>
         
         {/* Actions */}
