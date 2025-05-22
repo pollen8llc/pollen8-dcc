@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/contexts/UserContext';
-import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
+import { KnowledgeArticle, ContentType, KnowledgeAuthor } from '@/models/knowledgeTypes';
 
 export const useArticles = (filters?: { tag?: string | null, searchQuery?: string, limit?: number, type?: string | null }) => {
   const queryKey = ['knowledgeArticles', filters];
@@ -93,8 +93,8 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
           author: profileData ? {
             id: article.user_id,
             name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-            avatar_url: profileData.avatar_url || '',
-          } : undefined
+            avatar_url: profileData.avatar_url || ''
+          } as KnowledgeAuthor : undefined
         };
       }) as KnowledgeArticle[];
     },
@@ -171,7 +171,7 @@ export const useArticle = (id: string | undefined) => {
           id: article.user_id,
           name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
           avatar_url: profileData.avatar_url || ''
-        } : undefined,
+        } as KnowledgeAuthor : undefined,
         vote_count: voteData || 0,
         user_vote: userVote
       } as KnowledgeArticle;

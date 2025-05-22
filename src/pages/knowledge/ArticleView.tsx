@@ -1,8 +1,8 @@
+
 import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Shell } from '@/components/layout/Shell';
-import { useQuery } from '@tanstack/react-query';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -41,10 +41,14 @@ const ArticleView = () => {
   const navigate = useNavigate();
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
-  const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer } = useKnowledgeBase();
-  
-  // State
-  const [userVote, setUserVote] = useState<VoteType | null>(null);
+  const { 
+    useArticle, 
+    vote, 
+    useComments, 
+    createComment, 
+    deleteComment, 
+    acceptAnswer 
+  } = useKnowledgeBase();
   
   // Fetch article
   const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id);
@@ -52,36 +56,12 @@ const ArticleView = () => {
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = useComments(id);
   
-  // Fetch related articles based on tags
-  const { data: allArticles } = useQuery({
-    queryKey: ['knowledgeArticles'],
-    queryFn: async () => {
-      // This would be replaced with a real API call in production
-      return [];
-    },
-    enabled: !!article?.tags && article.tags.length > 0
-  });
-  
-  // Related articles
-  const relatedArticles = React.useMemo(() => {
-    if (!article?.tags || !allArticles) return [];
-    
-    return allArticles
-      .filter(a => 
-        a.id !== article.id && 
-        a.tags && 
-        a.tags.some(tag => article.tags?.includes(tag))
-      )
-      .slice(0, 3);
-  }, [article, allArticles]);
-  
   // Handle voting
-  const handleVote = (vote: VoteType) => {
+  const handleVote = (voteType: VoteType) => {
     if (!article) return;
-    setUserVote(userVote === vote ? null : vote);
+    if (!id) return;
     
-    // In real application, this would call the API
-    console.log(`Voting ${vote} on article ${article.id}`);
+    vote('article', id, voteType);
   };
   
   // Handle comment voting
@@ -217,7 +197,7 @@ const ArticleView = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => vote('article', article.id, 'upvote')} 
+                  onClick={() => handleVote('upvote')} 
                   className={article.user_vote === 1 ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800' : ''}
                 >
                   <ThumbsUp className="h-4 w-4 mr-1" />
@@ -227,7 +207,7 @@ const ArticleView = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => vote('article', article.id, 'downvote')}
+                  onClick={() => handleVote('downvote')}
                   className={article.user_vote === -1 ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800' : ''}
                 >
                   <ThumbsDown className="h-4 w-4" />
@@ -296,7 +276,7 @@ const ArticleView = () => {
             
             {/* Related content */}
             <RelatedArticles 
-              articles={relatedArticles} 
+              articles={[]} 
               isLoading={!!article.tags && articleLoading} 
             />
             

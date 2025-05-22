@@ -1,23 +1,16 @@
-
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { usePermissions } from '@/hooks/usePermissions';
 import { useUser } from '@/contexts/UserContext';
+import { KnowledgeArticle } from '@/models/knowledgeTypes';
+import { ArticleCard } from '@/components/knowledge/ArticleCard';
+import { Tag, ChevronLeft, X, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  ChevronLeft, 
-  PlusCircle,
-  ThumbsUp,
-  MessageSquare,
-  Eye,
-  Calendar,
-  Tag
-} from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
 
 const TagView = () => {
   const { tag } = useParams<{ tag: string }>();
