@@ -60,7 +60,8 @@ export const useArticles = () => {
           if (article.author) {
             // Check if author is an object and has the expected properties
             if (typeof article.author === 'object' && article.author !== null) {
-              const authorData = article.author as any;
+              // Type assertion to avoid TypeScript error
+              const authorData = article.author as Record<string, any>;
               // Process author data safely
               processedArticle.author = {
                 id: authorData.id || '',
@@ -124,7 +125,8 @@ export const useArticle = (id: string | undefined) => {
         
         // Format author name from first_name and last_name
         if (data.author && typeof data.author === 'object') {
-          const authorData = data.author as any;
+          // Type assertion to avoid TypeScript error
+          const authorData = data.author as Record<string, any>;
           if (authorData && typeof authorData === 'object') {
             processedArticle.author = {
               id: authorData.id || '',
@@ -226,7 +228,8 @@ export const useSearchArticles = (options: KnowledgeQueryOptions) => {
         // Process author data safely
         let processedArticle = {...article};
         if (article.author && typeof article.author === 'object') {
-          const authorData = article.author as any;
+          // Type assertion to avoid TypeScript error
+          const authorData = article.author as Record<string, any>;
           if (authorData && typeof authorData === 'object') {
             processedArticle.author = {
               id: authorData.id || '',
@@ -266,7 +269,8 @@ export const useTagArticles = (tag: string | undefined) => {
         const formattedData = data?.map(article => {
           let processedArticle = {...article};
           if (article.author && typeof article.author === 'object') {
-            const authorData = article.author as any;
+            // Type assertion to avoid TypeScript error
+            const authorData = article.author as Record<string, any>;
             if (authorData && typeof authorData === 'object') {
               processedArticle.author = {
                 id: authorData.id || '',
