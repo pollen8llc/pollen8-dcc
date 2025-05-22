@@ -1,16 +1,36 @@
+
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useUser } from '@/contexts/UserContext';
+import { usePermissions } from '@/hooks/usePermissions'; 
 import { KnowledgeArticle } from '@/models/knowledgeTypes';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { Tag, ChevronLeft, X, RefreshCcw } from 'lucide-react';
+import { 
+  Tag, 
+  ChevronLeft, 
+  X, 
+  RefreshCcw, 
+  PlusCircle, 
+  ThumbsUp, 
+  MessageSquare, 
+  Eye, 
+  Calendar 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
+import { formatDistanceToNow } from 'date-fns';
+import { 
+  Card, 
+  CardHeader, 
+  CardContent, 
+  CardFooter, 
+  CardTitle 
+} from '@/components/ui/card';
 
 const TagView = () => {
   const { tag } = useParams<{ tag: string }>();
