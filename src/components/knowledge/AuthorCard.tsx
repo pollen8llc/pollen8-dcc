@@ -43,11 +43,14 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
   // Helper to format role as a string
   const formatRole = (role?: UserRole | string): string => {
     if (role === undefined) return 'member';
+    
+    // If role is a string, just return it lowercase
     if (typeof role === 'string') return role.toLowerCase();
     
     // For UserRole enum, convert the numeric value to its string representation
+    // Check if we can get the string key from the enum
     const roleKey = UserRole[role];
-    // Ensure roleKey is a string before calling toLowerCase()
+    // Only call toLowerCase if roleKey is a string
     return typeof roleKey === 'string' ? roleKey.toLowerCase() : 'member';
   };
   
