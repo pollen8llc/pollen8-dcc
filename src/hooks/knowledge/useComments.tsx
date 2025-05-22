@@ -1,103 +1,129 @@
 
-import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/contexts/UserContext';
 import { KnowledgeComment } from '@/models/knowledgeTypes';
+import { useUser } from '@/contexts/UserContext';
 
 export const useComments = (articleId: string | undefined) => {
-  const { currentUser } = useUser();
-  
   return useQuery({
-    queryKey: ['knowledgeComments', articleId],
+    queryKey: ['articleComments', articleId],
     queryFn: async () => {
-      if (!articleId) throw new Error('Article ID is required');
+      if (!articleId) return [];
       
-      const { data, error } = await supabase
+      console.log('Fetching comments for article:', articleId);
+      
+      // First fetch the comments
+      const { data: comments, error } = await supabase
         .from('knowledge_comments')
-        .select(`
-          *,
-          profiles:user_id(
-            first_name, 
-            last_name, 
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('article_id', articleId)
-        .order('is_accepted', { ascending: false })
-        .order('created_at');
-      
+        .order('created_at', { ascending: true });
+        
       if (error) {
+        console.error('Error fetching comments:', error);
         throw error;
       }
       
-      // Get vote counts for comments
-      const commentsWithVotes = await Promise.all(data.map(async (comment) => {
-        // Get vote count for comment
-        const { data: voteData, error: voteError } = await supabase
-          .rpc('get_comment_vote_count', { comment_id: comment.id });
-          
-        if (voteError) {
-          console.error('Error fetching vote count:', voteError);
-        }
+      if (!comments || comments.length === 0) {
+        return [] as KnowledgeComment[];
+      }
+      
+      // Extract all unique user IDs
+      const userIds = [...new Set(comments.map(comment => comment.user_id))];
+      
+      // Fetch all author profiles in a single query
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url')
+        .in('id', userIds);
         
-        // Get user's vote if authenticated
-        let userVote = null;
-        if (currentUser) {
-          const { data: userVoteData, error: userVoteError } = await supabase
-            .from('knowledge_votes')
-            .select('vote_type')
-            .eq('comment_id', comment.id)
-            .eq('user_id', currentUser.id)
-            .maybeSingle();
-            
-          if (!userVoteError && userVoteData) {
-            userVote = userVoteData.vote_type;
+      if (profileError) {
+        console.error('Error fetching comment author profiles:', profileError);
+        // Continue even if profile fetch fails
+      }
+      
+      // Create a map of user_id to profile for easy lookup
+      const profileMap = (profiles || []).reduce((map, profile) => {
+        map[profile.id] = profile;
+        return map;
+      }, {} as Record<string, any>);
+      
+      // Get vote counts for all comments in a single call
+      const commentIds = comments.map(comment => comment.id);
+      
+      // Fetch all votes in one query
+      const { data: votes, error: votesError } = await supabase
+        .from('knowledge_votes')
+        .select('comment_id, vote_type, user_id')
+        .in('comment_id', commentIds);
+        
+      if (votesError) {
+        console.error('Error fetching comment votes:', votesError);
+        // Continue even if vote fetch fails
+      }
+      
+      // Calculate vote totals and user votes
+      const voteMap = new Map();
+      const userVoteMap = new Map();
+      
+      if (votes) {
+        // Calculate total votes per comment
+        votes.forEach(vote => {
+          const commentId = vote.comment_id;
+          if (!voteMap.has(commentId)) {
+            voteMap.set(commentId, 0);
           }
-        }
-        
-        // Handle profile data with proper type safety
-        const profileData = comment.profiles as {
-          first_name?: string;
-          last_name?: string;
-          avatar_url?: string;
-        } | null;
+          voteMap.set(commentId, voteMap.get(commentId) + vote.vote_type);
+          
+          // Also track each user's vote for each comment
+          const key = `${vote.comment_id}_${vote.user_id}`;
+          userVoteMap.set(key, vote.vote_type);
+        });
+      }
+      
+      // Enhance comments with author and vote data
+      return comments.map(comment => {
+        const profile = profileMap[comment.user_id];
         
         return {
           ...comment,
-          author: profileData ? {
+          author: profile ? {
             id: comment.user_id,
-            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-            avatar_url: profileData.avatar_url || ''
+            name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+            avatar_url: profile.avatar_url
           } : undefined,
-          vote_count: voteData || 0,
-          user_vote: userVote
-        };
-      }));
-      
-      return commentsWithVotes as KnowledgeComment[];
+          vote_count: voteMap.get(comment.id) || 0,
+          user_vote: userVoteMap.get(`${comment.id}_${supabase.auth.getUser()?.data?.user?.id}`) || null
+        } as KnowledgeComment;
+      });
     },
-    enabled: !!articleId
+    enabled: !!articleId,
+    staleTime: 1000 * 60 // 1 minute
   });
 };
 
 export const useCommentMutations = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentUser } = useUser();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Mutation for creating a comment
   const createComment = async (articleId: string, content: string) => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to comment",
+        variant: "destructive"
+      });
+      throw new Error('Authentication required');
+    }
+    
     try {
       setIsSubmitting(true);
+      console.log('Creating comment for article:', articleId);
       
-      if (!currentUser) {
-        throw new Error('You must be logged in to comment');
-      }
-      
-      const { data, error } = await supabase
+      const { data: comment, error } = await supabase
         .from('knowledge_comments')
         .insert({
           article_id: articleId,
@@ -106,21 +132,24 @@ export const useCommentMutations = () => {
         })
         .select()
         .single();
-      
+        
       if (error) {
+        console.error('Error creating comment:', error);
         throw error;
       }
       
-      queryClient.invalidateQueries({ queryKey: ['knowledgeComments', articleId] });
+      // Invalidate related queries
+      await queryClient.invalidateQueries({ queryKey: ['articleComments', articleId] });
+      
       toast({
-        title: "Success",
-        description: "Comment added successfully",
+        title: "Comment posted",
+        description: "Your comment has been posted successfully"
       });
       
-      return data as KnowledgeComment;
+      return comment;
     } catch (error: any) {
       toast({
-        title: "Error adding comment",
+        title: "Failed to post comment",
         description: error.message,
         variant: "destructive"
       });
@@ -130,71 +159,41 @@ export const useCommentMutations = () => {
     }
   };
   
-  // Mutation for updating a comment
-  const updateComment = async (id: string, articleId: string, updates: Partial<KnowledgeComment>) => {
-    try {
-      setIsSubmitting(true);
-      
-      if (!currentUser) {
-        throw new Error('You must be logged in to update a comment');
-      }
-      
-      const { data, error } = await supabase
-        .from('knowledge_comments')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      queryClient.invalidateQueries({ queryKey: ['knowledgeComments', articleId] });
+  const deleteComment = async (commentId: string, articleId: string) => {
+    if (!currentUser) {
       toast({
-        title: "Success",
-        description: "Comment updated successfully",
-      });
-      
-      return data as KnowledgeComment;
-    } catch (error: any) {
-      toast({
-        title: "Error updating comment",
-        description: error.message,
+        title: "Authentication required",
+        description: "You must be logged in to delete a comment",
         variant: "destructive"
       });
-      throw error;
-    } finally {
-      setIsSubmitting(false);
+      throw new Error('Authentication required');
     }
-  };
-  
-  // Mutation for deleting a comment
-  const deleteComment = async (id: string, articleId: string) => {
+    
     try {
       setIsSubmitting(true);
       
-      if (!currentUser) {
-        throw new Error('You must be logged in to delete a comment');
-      }
-      
+      // Delete the comment
       const { error } = await supabase
         .from('knowledge_comments')
         .delete()
-        .eq('id', id);
-      
+        .eq('id', commentId)
+        .eq('user_id', currentUser.id); // Add user_id check for security
+        
       if (error) {
+        console.error('Error deleting comment:', error);
         throw error;
       }
       
-      queryClient.invalidateQueries({ queryKey: ['knowledgeComments', articleId] });
+      // Invalidate related queries
+      await queryClient.invalidateQueries({ queryKey: ['articleComments', articleId] });
+      
       toast({
-        title: "Success",
-        description: "Comment deleted successfully",
+        title: "Comment deleted",
+        description: "Your comment has been deleted successfully"
       });
     } catch (error: any) {
       toast({
-        title: "Error deleting comment",
+        title: "Failed to delete comment",
         description: error.message,
         variant: "destructive"
       });
@@ -204,58 +203,68 @@ export const useCommentMutations = () => {
     }
   };
   
-  // Function for accepting a comment as the answer
-  const acceptAnswer = async (commentId: string, articleId: string, accepted: boolean) => {
+  const acceptAnswer = async (commentId: string, articleId: string, isAccepted: boolean) => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to accept an answer",
+        variant: "destructive"
+      });
+      throw new Error('Authentication required');
+    }
+    
     try {
-      if (!currentUser) {
-        throw new Error('You must be logged in to accept an answer');
-      }
+      setIsSubmitting(true);
       
       // Update the comment
-      const { error: commentError } = await supabase
+      const { error } = await supabase
         .from('knowledge_comments')
-        .update({ is_accepted: accepted })
+        .update({ is_accepted: isAccepted })
         .eq('id', commentId);
-      
-      if (commentError) {
-        throw commentError;
+        
+      if (error) {
+        console.error('Error accepting answer:', error);
+        throw error;
       }
       
-      // Update the article
-      const { error: articleError } = await supabase
-        .from('knowledge_articles')
-        .update({ is_answered: accepted })
-        .eq('id', articleId);
-      
-      if (articleError) {
-        throw articleError;
+      // If accepting an answer, also update the article to mark it as answered
+      if (isAccepted) {
+        const { error: articleError } = await supabase
+          .from('knowledge_articles')
+          .update({ is_answered: true })
+          .eq('id', articleId);
+          
+        if (articleError) {
+          console.error('Error updating article answered status:', articleError);
+        }
       }
       
-      // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', articleId] });
-      queryClient.invalidateQueries({ queryKey: ['knowledgeComments', articleId] });
+      // Invalidate related queries
+      await queryClient.invalidateQueries({ queryKey: ['articleComments', articleId] });
+      await queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', articleId] });
       
       toast({
-        title: "Success",
-        description: accepted 
-          ? "Answer marked as accepted" 
-          : "Answer unmarked as accepted",
+        title: isAccepted ? "Answer accepted" : "Answer unaccepted",
+        description: isAccepted ? "You've marked this as the accepted answer" : "You've removed this as the accepted answer"
       });
     } catch (error: any) {
       toast({
-        title: "Error accepting answer",
+        title: "Action failed",
         description: error.message,
         variant: "destructive"
       });
       throw error;
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
+  
   return {
     createComment,
-    updateComment,
     deleteComment,
     acceptAnswer,
     isSubmitting
   };
 };
+
+import { useState } from 'react';

@@ -21,10 +21,10 @@ export const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({
 }) => {
   const contentTypes = [
     { id: 'all', name: 'All Types', icon: Newspaper },
-    { id: 'question', name: 'Questions', icon: MessageSquare },
-    { id: 'article', name: 'Articles', icon: BookOpen },
-    { id: 'quote', name: 'Quotes', icon: Quote },
-    { id: 'poll', name: 'Polls', icon: BarChart2 },
+    { id: 'QUESTION', name: 'Questions', icon: MessageSquare },
+    { id: 'ARTICLE', name: 'Articles', icon: BookOpen },
+    { id: 'QUOTE', name: 'Quotes', icon: Quote },
+    { id: 'POLL', name: 'Polls', icon: BarChart2 },
   ];
 
   return (

@@ -96,7 +96,9 @@ const KnowledgeBase = () => {
       
       // Only filter by type if it's not null/undefined and not 'all'
       if (selectedType && selectedType !== 'all') {
-        query = query.eq('content_type', selectedType);
+        // Convert from lowercase filter values to uppercase ContentType enum values
+        let contentType = selectedType.toUpperCase();
+        query = query.eq('content_type', contentType);
       }
       
       const { data: articles, error } = await query;

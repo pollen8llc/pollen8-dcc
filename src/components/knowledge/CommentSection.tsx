@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -10,6 +11,7 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface CommentSectionProps {
   articleId: string;
@@ -38,6 +40,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const { toast } = useToast();
   
   // Handle comment submission
   const handleCommentSubmit = async (e: React.FormEvent) => {
@@ -46,10 +49,26 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
     
     try {
       setIsSubmitting(true);
+      console.log('Submitting comment for article:', articleId);
+      
+      if (!currentUser) {
+        toast({
+          title: "Authentication required",
+          description: "You need to be logged in to comment",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       await onAddComment(newComment);
       setNewComment('');
     } catch (error) {
       console.error('Error submitting comment:', error);
+      toast({
+        title: "Failed to add comment",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -74,6 +93,13 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
     }
     return name.substring(0, 2).toUpperCase();
   };
+  
+  // Debug user authentication status
+  React.useEffect(() => {
+    console.log('CommentSection: User authenticated:', !!currentUser, currentUser?.id);
+    console.log('CommentSection: Article author check:', isArticleAuthor);
+    console.log('CommentSection: Comments count:', comments?.length);
+  }, [currentUser, isArticleAuthor, comments]);
   
   return (
     <div>
