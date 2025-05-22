@@ -12,7 +12,7 @@ interface AuthorCardProps {
   author: {
     id?: string;
     name?: string;
-    role?: UserRole;
+    role?: UserRole | string;  // Updated to accept either UserRole enum or string
     avatar_url?: string;
     is_admin?: boolean;
   };
@@ -37,16 +37,20 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
     return name.substring(0, 2).toUpperCase();
   };
 
-  // Format role name for display
-  const formatRole = (role?: UserRole): string => {
+  // Format role name for display - handles both string and UserRole enum
+  const formatRole = (role?: UserRole | string): string => {
     if (role === undefined) return 'member';
     
+    // If it's a string, just return it
+    if (typeof role === 'string') return role.toLowerCase();
+    
+    // If it's a UserRole enum, convert to string
     const roleKey = UserRole[role];
     return typeof roleKey === 'string' ? roleKey.toLowerCase() : 'member';
   };
 
   // Check if user is admin
-  const isAdmin = author.is_admin || author.role === UserRole.ADMIN;
+  const isAdmin = author.is_admin || author.role === UserRole.ADMIN || author.role === 'ADMIN';
   
   if (minimal) {
     return (
