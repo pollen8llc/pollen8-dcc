@@ -10,8 +10,7 @@ import {
   Tag as TagIcon,
   BookOpen, 
   MessageSquare as QuestionIcon,
-  BarChart2 as PollIcon,
-  Quote as QuoteIcon
+  BarChart2 as PollIcon
 } from 'lucide-react';
 
 // UI Components
@@ -38,8 +37,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) =>
         return <QuestionIcon className="h-4 w-4 text-royal-blue-500" />;
       case ContentType.ARTICLE:
         return <BookOpen className="h-4 w-4 text-emerald-500" />;
-      case ContentType.QUOTE:
-        return <QuoteIcon className="h-4 w-4 text-amber-500" />;
       case ContentType.POLL:
         return <PollIcon className="h-4 w-4 text-purple-500" />;
       default:
@@ -54,8 +51,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) =>
         return "text-royal-blue-500 hover:text-royal-blue-600 dark:hover:text-royal-blue-400";
       case ContentType.ARTICLE:
         return "text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400";
-      case ContentType.QUOTE:
-        return "text-amber-500 hover:text-amber-600 dark:hover:text-amber-400";
       case ContentType.POLL:
         return "text-purple-500 hover:text-purple-600 dark:hover:text-purple-400";
       default:
@@ -110,7 +105,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) =>
           )}>
             <AvatarImage src={article.author?.avatar_url} />
             <AvatarFallback>
-              {article.author?.name.substring(0, 2).toUpperCase()}
+              {article.author?.name?.substring(0, 2).toUpperCase() || 'NA'}
             </AvatarFallback>
           </Avatar>
           <span className="text-sm text-muted-foreground">

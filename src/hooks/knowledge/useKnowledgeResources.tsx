@@ -67,12 +67,16 @@ export const useKnowledgeResources = (userId: string | undefined) => {
     enabled: !!userId
   });
 
-  // Fetch user saved articles
+  // Fetch user saved articles - temporarily mock this until we have the table
   const { data: savedArticles = [], isLoading: isLoadingSaved } = useQuery({
     queryKey: ['knowledgeSaved', userId],
     queryFn: async () => {
       if (!userId) return [];
       
+      // Temporary solution: return an empty array since we don't have the knowledge_bookmarks table yet
+      return [];
+      
+      /* Uncomment this when the knowledge_bookmarks table exists
       const { data, error } = await supabase
         .from('knowledge_bookmarks')
         .select(`
@@ -98,6 +102,7 @@ export const useKnowledgeResources = (userId: string | undefined) => {
         ...item.articles,
         saved_at: item.saved_at
       })) || [];
+      */
     },
     enabled: !!userId
   });

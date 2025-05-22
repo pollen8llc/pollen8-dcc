@@ -1,39 +1,25 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { PlusCircle, Trash2 } from 'lucide-react';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from '@/components/ui/badge';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { TagInputField } from '@/components/knowledge/TagInputField';
+import { Badge } from '@/components/ui/badge';
 
 // Validation schema
 const pollFormSchema = z.object({
   question: z.string()
-    .min(5, { message: "Poll question must be at least 5 characters" })
-    .max(200, { message: "Poll question cannot be longer than 200 characters" }),
-  options: z.array(
-    z.object({
-      text: z.string().min(1, { message: "Option text cannot be empty" })
-    })
-  ).min(2, { message: "You must add at least 2 options" }),
-  allowMultipleSelections: z.boolean().default(false),
-  duration: z.string().default("7"),
+    .min(5, { message: "Question must be at least 5 characters" })
+    .max(300, { message: "Question cannot be longer than 300 characters" }),
+  options: z.array(z.string())
+    .min(2, { message: "You must provide at least 2 options" })
+    .max(5, { message: "You cannot provide more than 5 options" }),
   tags: z.array(z.string())
     .min(1, { message: "Please add at least 1 tag" })
     .max(5, { message: "You cannot add more than 5 tags" })
@@ -56,18 +42,20 @@ export const PollForm: React.FC<PollFormProps> = ({
 }) => {
   const { useTags } = useKnowledgeBase();
   const { data: availableTags } = useTags();
+  const [newOption, setNewOption] = useState("");
   const [popularTags, setPopularTags] = useState<Set<string>>(new Set());
+  
+  // Merge provided initial data with defaults
+  const defaultValues = {
+    question: initialData?.question || "",
+    options: initialData?.options || ["", ""],
+    tags: initialData?.tags || [],
+  };
   
   // Form setup
   const form = useForm<PollFormValues>({
     resolver: zodResolver(pollFormSchema),
-    defaultValues: {
-      question: initialData?.question || "",
-      options: initialData?.options || [{ text: "" }, { text: "" }],
-      allowMultipleSelections: initialData?.allowMultipleSelections || false,
-      duration: initialData?.duration || "7",
-      tags: initialData?.tags || [],
-    },
+    defaultValues
   });
   
   // Update form when initialData changes
@@ -80,12 +68,6 @@ export const PollForm: React.FC<PollFormProps> = ({
       });
     }
   }, [initialData, form]);
-  
-  // Field array for options
-  const { fields, append, remove } = useFieldArray({
-    name: "options",
-    control: form.control
-  });
 
   // Identify popular tags
   useEffect(() => {
@@ -97,43 +79,46 @@ export const PollForm: React.FC<PollFormProps> = ({
     }
   }, [availableTags]);
   
-  // Add a new option
-  const addOption = () => {
-    append({ text: "" });
+  const handleSubmit = (values: PollFormValues) => {
+    onSubmit(values);
   };
   
-  // Handle form submission based on step
-  const handleSubmit = (data: PollFormValues) => {
-    onSubmit(data);
+  // Handle adding a new option
+  const handleAddOption = () => {
+    if (newOption.trim() && form.getValues().options.length < 5) {
+      form.setValue("options", [...form.getValues().options, newOption.trim()]);
+      setNewOption("");
+    }
   };
-
+  
+  // Handle removing an option
+  const handleRemoveOption = (index: number) => {
+    const updatedOptions = [...form.getValues().options];
+    updatedOptions.splice(index, 1);
+    form.setValue("options", updatedOptions);
+  };
+  
   // Content to render based on step
   if (step === 2) {
     const formData = form.getValues();
     return (
       <div className="bg-card/50 border rounded-md p-6 space-y-6">
         <div>
-          <h3 className="text-lg font-medium mb-2">Poll Question</h3>
-          <p className="p-4 bg-muted/50 rounded-md">{formData.question}</p>
+          <h3 className="text-lg font-medium mb-2">Question</h3>
+          <div className="p-4 bg-muted/50 rounded-md whitespace-pre-wrap">
+            {formData.question}
+          </div>
         </div>
         
         <div>
-          <h3 className="text-lg font-medium mb-2">Poll Options</h3>
-          <div className="space-y-2">
+          <h3 className="text-lg font-medium mb-2">Options</h3>
+          <ul className="list-disc pl-5 space-y-2">
             {formData.options.map((option, index) => (
-              <div key={index} className="p-4 bg-muted/50 rounded-md">
-                {index + 1}. {option.text}
-              </div>
+              <li key={index} className="p-4 bg-muted/50 rounded-md">
+                {option}
+              </li>
             ))}
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="text-lg font-medium mb-2">Settings</h3>
-          <div className="p-4 bg-muted/50 rounded-md space-y-2">
-            <p>Allow multiple selections: {formData.allowMultipleSelections ? "Yes" : "No"}</p>
-            <p>Duration: {formData.duration} days</p>
-          </div>
+          </ul>
         </div>
         
         <div>
@@ -153,20 +138,21 @@ export const PollForm: React.FC<PollFormProps> = ({
       </div>
     );
   }
-  
+
   return (
     <Form {...form}>
-      <form id="content-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Poll question field */}
+      <form onSubmit={form.handleSubmit(handleSubmit)} id="content-form" className="space-y-6">
+        {/* Question text field */}
         <FormField
           control={form.control}
           name="question"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Poll Question</FormLabel>
+              <FormLabel>Question</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="What would you like to ask the community?" 
+                <Textarea 
+                  placeholder="Enter the question for the poll..." 
+                  className="min-h-[100px]"
                   {...field} 
                 />
               </FormControl>
@@ -175,114 +161,61 @@ export const PollForm: React.FC<PollFormProps> = ({
           )}
         />
         
-        {/* Poll options */}
-        <div className="space-y-4">
-          <FormLabel>Poll Options</FormLabel>
+        {/* Options field */}
+        <div>
+          <FormLabel>Options</FormLabel>
+          <FormDescription>
+            Provide options for the poll. You must provide at least 2 options.
+          </FormDescription>
           
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
-              <FormField
-                control={form.control}
-                name={`options.${index}.text`}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input 
-                        placeholder={`Option ${index + 1}`} 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              {index > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => remove(index)}
-                  className="shrink-0"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Remove option</span>
-                </Button>
+          {form.watch("options").map((option, index) => (
+            <FormField
+              key={index}
+              control={form.control}
+              name={`options.${index}`}
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2">
+                  <FormLabel>{`Option ${index + 1}`}</FormLabel>
+                  <FormControl className="flex-1">
+                    <Input 
+                      placeholder="Enter an option" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <Button 
+                    type="button" 
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleRemoveOption(index)}
+                  >
+                    Remove
+                  </Button>
+                </FormItem>
               )}
-            </div>
+            />
           ))}
           
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addOption}
-            className="mt-2"
-          >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Option
-          </Button>
-          
-          {form.formState.errors.options?.root && (
-            <p className="text-sm font-medium text-destructive">
-              {form.formState.errors.options.root.message}
-            </p>
-          )}
-        </div>
-        
-        {/* Allow multiple selections */}
-        <FormField
-          control={form.control}
-          name="allowMultipleSelections"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-              <div className="space-y-0.5">
-                <FormLabel>Allow Multiple Selections</FormLabel>
-                <FormDescription>
-                  Let users select more than one option
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        
-        {/* Poll duration */}
-        <FormField
-          control={form.control}
-          name="duration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Poll Duration</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
+          {/* Add new option input */}
+          {form.getValues().options.length < 5 && (
+            <div className="flex items-center space-x-2">
+              <Input
+                type="text"
+                placeholder="Add a new option"
+                value={newOption}
+                onChange={(e) => setNewOption(e.target.value)}
+              />
+              <Button 
+                type="button" 
+                onClick={handleAddOption}
+                disabled={!newOption.trim()}
               >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="1">1 day</SelectItem>
-                  <SelectItem value="3">3 days</SelectItem>
-                  <SelectItem value="7">7 days</SelectItem>
-                  <SelectItem value="14">14 days</SelectItem>
-                  <SelectItem value="30">30 days</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                How long the poll will remain active
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
+                Add Option
+              </Button>
+            </div>
           )}
-        />
+          
+          <FormMessage />
+        </div>
         
         {/* Tags field */}
         <FormField
@@ -296,7 +229,7 @@ export const PollForm: React.FC<PollFormProps> = ({
                   value={field.value}
                   onChange={field.onChange}
                   availableTags={availableTags?.map(tag => tag.name) || []}
-                  placeholder="Add a tag (e.g. poll, opinion)"
+                  placeholder="Add a tag (e.g. community, feedback)"
                 />
               </FormControl>
               <FormMessage />

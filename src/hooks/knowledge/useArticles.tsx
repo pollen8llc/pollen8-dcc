@@ -83,20 +83,23 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
         return map;
       }, {} as Record<string, any>);
       
-      // Format the articles with author information
+      // Format the articles with author information and add missing fields
       return articles.map(article => {
         const profileData = profilesMap[article.user_id];
         
         return {
           ...article,
           content_type: article.content_type || ContentType.ARTICLE,
+          like_count: 0, // Add missing fields required by KnowledgeArticle type
+          is_pinned: false, // Add missing fields required by KnowledgeArticle type
           author: profileData ? {
             id: article.user_id,
             name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
             avatar_url: profileData.avatar_url || '',
+            is_admin: false // Add missing field
           } : undefined
-        };
-      }) as KnowledgeArticle[];
+        } as KnowledgeArticle;
+      });
     },
     refetchOnMount: true,
     refetchOnWindowFocus: true,
@@ -164,16 +167,21 @@ export const useArticle = (id: string | undefined) => {
       // Format author information
       const profileData = profile;
       
+      // Add missing fields required by KnowledgeArticle type
       return {
         ...article,
         content_type: article.content_type || ContentType.ARTICLE,
+        like_count: 0,
+        is_pinned: false,
         author: profileData ? {
           id: article.user_id,
           name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-          avatar_url: profileData.avatar_url || ''
+          avatar_url: profileData.avatar_url || '',
+          is_admin: false
         } : undefined,
         vote_count: voteData || 0,
-        user_vote: userVote
+        user_vote: userVote,
+        is_featured: false
       } as KnowledgeArticle;
     },
     enabled: !!id
@@ -368,7 +376,7 @@ export const useArticleMutations = () => {
   };
 
   return {
-    createArticle,
+    createArticle, 
     updateArticle,
     deleteArticle,
     isSubmitting

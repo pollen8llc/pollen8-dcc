@@ -1,9 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import React from 'react';
 import { KnowledgeTag } from '@/models/knowledgeTypes';
 
 // UI Components
