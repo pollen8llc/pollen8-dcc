@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -101,6 +102,11 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Override Tailwind's h-full utility */
+.h-full {
+  height: auto !important;
 }
 
 /* TinyMCE Editor Dark Mode styles */
