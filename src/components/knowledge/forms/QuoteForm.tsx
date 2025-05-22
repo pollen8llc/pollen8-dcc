@@ -1,5 +1,9 @@
-import React from 'react';
-import { KnowledgeTag } from '@/models/knowledgeTypes';
+
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";

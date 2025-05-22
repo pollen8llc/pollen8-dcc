@@ -2,6 +2,7 @@
 export interface KnowledgeArticle {
   id: string;
   created_at: string;
+  updated_at: string;
   title: string;
   content: string;
   content_type: ContentType;
@@ -67,6 +68,7 @@ export interface KnowledgeQueryOptions {
   searchQuery?: string;
   limit?: number;
   userId?: string;
+  sort?: string;
 }
 
 export interface KnowledgeBookmark {
@@ -76,3 +78,5 @@ export interface KnowledgeBookmark {
   saved_at: string;
   article?: KnowledgeArticle;
 }
+
+export type VoteType = 'upvote' | 'downvote' | 'none';

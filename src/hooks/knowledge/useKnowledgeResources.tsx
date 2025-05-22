@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ContentType } from '@/models/knowledgeTypes';
+import { ContentType, KnowledgeArticle } from '@/models/knowledgeTypes';
 
 export const useKnowledgeResources = (userId: string | undefined) => {
   const [userStats, setUserStats] = useState<{
@@ -67,42 +67,51 @@ export const useKnowledgeResources = (userId: string | undefined) => {
     enabled: !!userId
   });
 
-  // Fetch user saved articles - temporarily mock this until we have the table
+  // Fetch user saved articles
   const { data: savedArticles = [], isLoading: isLoadingSaved } = useQuery({
     queryKey: ['knowledgeSaved', userId],
     queryFn: async () => {
       if (!userId) return [];
       
-      // Temporary solution: return an empty array since we don't have the knowledge_bookmarks table yet
-      return [];
-      
-      /* Uncomment this when the knowledge_bookmarks table exists
-      const { data, error } = await supabase
+      // Check if the knowledge_bookmarks table exists first
+      const { error: tableCheckError } = await supabase
         .from('knowledge_bookmarks')
-        .select(`
-          saved_at,
-          articles:article_id(
-            id,
-            title,
-            content_type,
-            created_at,
-            view_count
-          )
-        `)
-        .eq('user_id', userId)
-        .order('saved_at', { ascending: false });
-        
-      if (error) {
-        console.error('Error fetching saved articles:', error);
-        throw error;
+        .select('id')
+        .limit(1)
+        .throwOnError();
+      
+      if (tableCheckError) {
+        console.warn('knowledge_bookmarks table may not exist yet:', tableCheckError);
+        return [];
       }
       
-      // Transform the data to a more usable format
-      return data?.map(item => ({
-        ...item.articles,
-        saved_at: item.saved_at
-      })) || [];
-      */
+      try {
+        // Once we know the table exists, we can safely query it
+        const { data, error } = await supabase
+          .from('knowledge_bookmarks')
+          .select(`
+            id,
+            article_id,
+            saved_at,
+            article:knowledge_articles(*)
+          `)
+          .eq('user_id', userId)
+          .order('saved_at', { ascending: false });
+          
+        if (error) {
+          console.error('Error fetching saved articles:', error);
+          throw error;
+        }
+        
+        // Transform the data to a more usable format
+        return data?.map(item => ({
+          ...item,
+          article: item.article as KnowledgeArticle
+        })) || [];
+      } catch (err) {
+        console.error('Error in saved articles query:', err);
+        return [];
+      }
     },
     enabled: !!userId
   });
