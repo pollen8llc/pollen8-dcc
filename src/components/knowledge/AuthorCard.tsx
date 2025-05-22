@@ -12,7 +12,7 @@ interface AuthorCardProps {
   author: {
     id?: string;
     name?: string;
-    role?: UserRole | string;
+    role?: UserRole;
     avatar_url?: string;
     is_admin?: boolean;
   };
@@ -40,39 +40,25 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
   // Check if user is admin
   const isAdmin = author.is_admin || author.role === UserRole.ADMIN;
   
-  // Helper to format role as a string
-  const formatRole = (role?: UserRole | string): string => {
-    if (role === undefined) return 'member';
-    
-    // If role is a string, just return it lowercase
-    if (typeof role === 'string') return role.toLowerCase();
-    
-    // For UserRole enum, convert the numeric value to its string representation
-    // Check if we can get the string key from the enum
-    const roleKey = UserRole[role];
-    // Only call toLowerCase if roleKey is a string
-    return typeof roleKey === 'string' ? roleKey.toLowerCase() : 'member';
-  };
-  
   if (minimal) {
     return (
       <div className="flex items-center">
-        <Avatar className={`h-8 w-8 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : ''}`}>
+        <Avatar className={`h-10 w-10 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : ''}`}>
           <AvatarImage src={author.avatar_url} />
           <AvatarFallback className={isAdmin ? "bg-[#9b87f5]/10 text-[#9b87f5]" : "bg-[#00eada]/10 text-[#00eada]"}>
             {getInitials(author.name)}
           </AvatarFallback>
         </Avatar>
         
-        <div className="ml-2">
-          <p className="font-medium text-sm">{author.name || 'Anonymous'}</p>
+        <div className="ml-3">
+          <p className="font-medium">{author.name || 'Anonymous'}</p>
           {author.role !== undefined && (
-            <Badge variant="outline" className="text-xs mt-0.5 capitalize">
-              {formatRole(author.role)}
+            <Badge variant="outline" className="text-xs mt-1 capitalize">
+              {UserRole[author.role]?.toLowerCase() || 'member'}
             </Badge>
           )}
           {isAdmin && !author.role && (
-            <Badge className="bg-[#9b87f5] text-xs mt-0.5">
+            <Badge className="bg-[#9b87f5] text-xs mt-1">
               Admin
             </Badge>
           )}
@@ -83,10 +69,10 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
 
   return (
     <Card className={`overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm ${isAdmin ? 'admin-gradient-premium-border' : ''}`}>
-      <CardContent className="pt-4 pb-3 px-4">
-        <h3 className="text-sm font-medium mb-2">About the Author</h3>
+      <CardContent className="pt-6">
+        <h3 className="text-lg font-medium mb-3">About the Author</h3>
         <div className="flex items-center">
-          <Avatar className={`h-10 w-10 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : 'ring-2 ring-[#00eada]/20'}`}>
+          <Avatar className={`h-12 w-12 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : 'ring-2 ring-[#00eada]/20'}`}>
             <AvatarImage src={author.avatar_url} />
             <AvatarFallback className={isAdmin ? "bg-[#9b87f5]/10 text-[#9b87f5]" : "bg-[#00eada]/10 text-[#00eada]"}>
               {getInitials(author.name)}
@@ -94,14 +80,14 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
           </Avatar>
           
           <div className="ml-3">
-            <p className="font-medium text-sm">{author.name || 'Anonymous'}</p>
+            <p className="font-medium">{author.name || 'Anonymous'}</p>
             {author.role !== undefined && (
-              <Badge variant="outline" className="text-xs mt-0.5 capitalize">
-                {formatRole(author.role)}
+              <Badge variant="outline" className="text-xs mt-1 capitalize">
+                {UserRole[author.role]?.toLowerCase() || 'member'}
               </Badge>
             )}
             {isAdmin && !author.role && (
-              <Badge className="bg-[#9b87f5] text-xs mt-0.5">
+              <Badge className="bg-[#9b87f5] text-xs mt-1">
                 Admin
               </Badge>
             )}
@@ -112,11 +98,11 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
           <Button
             variant="outline"
             size="sm"
-            className="w-full mt-3 hover:bg-[#00eada]/10 hover:text-[#00eada] transition-colors text-xs py-1 h-auto"
+            className="w-full mt-4 hover:bg-[#00eada]/10 hover:text-[#00eada] transition-colors"
             onClick={() => navigate(`/profile/${author.id}`)}
           >
             View Profile
-            <ArrowRight className="ml-1 h-3 w-3" />
+            <ArrowRight className="ml-2 h-3 w-3" />
           </Button>
         )}
       </CardContent>

@@ -35,7 +35,6 @@ import AuthorCard from '@/components/knowledge/AuthorCard';
 
 // Mocks and types
 import { ContentType, VoteType } from '@/models/knowledgeTypes';
-import { UserRole } from '@/models/types';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -176,16 +175,7 @@ const ArticleView = () => {
             
             {/* Author and metadata */}
             <div className="flex items-center mb-6">
-              <AuthorCard 
-                author={{
-                  id: article.author?.id,
-                  name: article.author?.name,
-                  avatar_url: article.author?.avatar_url,
-                  is_admin: article.author?.is_admin,
-                  role: article.author?.role
-                }} 
-                minimal={true} 
-              />
+              <AuthorCard author={article.author} minimal={true} />
             </div>
             
             {/* Article content */}
@@ -302,15 +292,7 @@ const ArticleView = () => {
           {/* Sidebar */}
           <div className="md:col-span-1 space-y-6">
             {/* Author card */}
-            <AuthorCard 
-              author={{
-                id: article.author?.id,
-                name: article.author?.name,
-                avatar_url: article.author?.avatar_url,
-                is_admin: article.author?.is_admin,
-                role: article.author?.role
-              }} 
-            />
+            <AuthorCard author={article.author} />
             
             {/* Related content */}
             <RelatedArticles 
