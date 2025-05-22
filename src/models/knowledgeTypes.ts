@@ -1,58 +1,51 @@
 
+export enum ContentType {
+  QUESTION = "QUESTION",
+  ARTICLE = "ARTICLE",
+  QUOTE = "QUOTE",
+  POLL = "POLL"
+}
+
+export type VoteType = 'upvote' | 'downvote' | 'none';
+
+export interface KnowledgeAuthor {
+  id: string;
+  name: string;
+  avatar_url?: string;
+  role?: string;
+  is_admin?: boolean; // Added this property
+}
+
 export interface KnowledgeArticle {
   id: string;
-  created_at: string;
-  updated_at: string;
   title: string;
   content: string;
   content_type: ContentType;
   user_id: string;
-  view_count: number;
-  like_count: number;
-  is_pinned: boolean;
-  is_answered: boolean;
-  tags: string[];
-  comment_count?: number;
-  author?: {
-    id: string;
-    name: string;
-    avatar_url: string;
-    is_admin?: boolean;
-  };
-  comments?: KnowledgeComment[];
+  created_at: string;
+  updated_at: string;
+  tags?: string[];
   vote_count?: number;
   user_vote?: number | null;
+  view_count: number;
+  comment_count?: number;
+  is_answered?: boolean;
   is_featured?: boolean;
-  subtitle?: string;
-  source?: string;
-  options?: string[];
+  author?: KnowledgeAuthor;
+  subtitle?: string; // Optional subtitle field for articles
 }
 
 export interface KnowledgeComment {
   id: string;
-  created_at: string;
   article_id: string;
   user_id: string;
   content: string;
-  is_accepted: boolean;
-  author?: {
-    id: string;
-    name: string;
-    avatar_url: string;
-  };
+  created_at: string;
+  updated_at: string;
+  is_accepted?: boolean;
   vote_count?: number;
   user_vote?: number | null;
-  article?: {
-    id: string;
-    title: string;
-    content_type: ContentType;
-  };
-}
-
-export enum ContentType {
-  ARTICLE = 'ARTICLE',
-  QUESTION = 'QUESTION',
-  POLL = 'POLL'
+  author?: KnowledgeAuthor;
 }
 
 export interface KnowledgeTag {
@@ -62,21 +55,27 @@ export interface KnowledgeTag {
   count?: number;
 }
 
-export interface KnowledgeQueryOptions {
-  tag?: string;
-  type?: string;
-  searchQuery?: string;
-  limit?: number;
-  userId?: string;
-  sort?: string;
-}
-
-export interface KnowledgeBookmark {
+export interface KnowledgeVote {
   id: string;
   user_id: string;
-  article_id: string;
-  saved_at: string;
-  article?: KnowledgeArticle;
+  article_id?: string;
+  comment_id?: string;
+  vote_type: number;
+  created_at: string;
 }
 
-export type VoteType = 'upvote' | 'downvote' | 'none';
+export interface PollOption {
+  id: string;
+  poll_id: string;
+  option_text: string;
+  vote_count: number;
+  user_voted?: boolean;
+}
+
+export interface KnowledgeQueryOptions {
+  searchQuery?: string;
+  tag?: string | null;
+  type?: string;
+  sort?: string;
+  limit?: number;
+}

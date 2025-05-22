@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   BookOpen,
   MessageSquare,
+  Quote,
   BarChart2,
 } from 'lucide-react';
 import { 
@@ -23,12 +24,13 @@ import { Steps, Step } from '@/components/ui/steps';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
 import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
+import { QuoteForm } from '@/components/knowledge/forms/QuoteForm';
 import { PollForm } from '@/components/knowledge/forms/PollForm';
 import { CreatePostModal } from '@/components/knowledge/CreatePostModal';
 import { ContentType } from '@/models/knowledgeTypes';
 import { ReviewContent } from '@/components/knowledge/ReviewContent';
 
-type PostType = 'question' | 'poll' | 'article';
+type PostType = 'question' | 'quote' | 'poll' | 'article';
 
 interface PostWizardProps {
   initialType?: PostType;
@@ -63,6 +65,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
   const getPostTypeTitle = () => {
     switch (postType) {
       case 'question': return 'Ask a Question';
+      case 'quote': return 'Share a Quote';
       case 'poll': return 'Create a Poll';
       case 'article': return 'Write an Article';
       default: return 'Create Content';
@@ -72,6 +75,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
   const getPostTypeIcon = () => {
     switch (postType) {
       case 'question': return <MessageSquare className="h-5 w-5 text-cyan-400" />;
+      case 'quote': return <Quote className="h-5 w-5 text-cyan-400" />;
       case 'poll': return <BarChart2 className="h-5 w-5 text-cyan-400" />;
       case 'article': return <BookOpen className="h-5 w-5 text-cyan-400" />;
       default: return null;
@@ -86,6 +90,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
   const getContentType = (): ContentType => {
     switch (postType) {
       case 'question': return ContentType.QUESTION;
+      case 'quote': return ContentType.QUOTE;
       case 'poll': return ContentType.POLL;
       case 'article': return ContentType.ARTICLE;
       default: return ContentType.ARTICLE;
@@ -228,6 +233,15 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
                 <QuestionForm 
                   onSubmit={handleSubmit} 
                   isSubmitting={isSubmitting}
+                  step={currentStep}
+                  initialData={formData}
+                />
+              )}
+              
+              {currentStep === 1 && postType === 'quote' && (
+                <QuoteForm 
+                  onSubmit={handleSubmit} 
+                  isSubmitting={isSubmitting} 
                   step={currentStep}
                   initialData={formData}
                 />

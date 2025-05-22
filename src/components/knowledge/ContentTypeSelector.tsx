@@ -6,6 +6,7 @@ import {
   BookOpen, 
   MessageSquare, 
   BarChart2, 
+  Quote, 
   Newspaper,
 } from 'lucide-react';
 
@@ -22,6 +23,7 @@ export const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({
     { id: 'all', name: 'All Types', icon: Newspaper },
     { id: 'question', name: 'Questions', icon: MessageSquare },
     { id: 'article', name: 'Articles', icon: BookOpen },
+    { id: 'quote', name: 'Quotes', icon: Quote },
     { id: 'poll', name: 'Polls', icon: BarChart2 },
   ];
 

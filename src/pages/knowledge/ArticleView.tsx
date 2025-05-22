@@ -17,10 +17,7 @@ import {
   MessageSquare,
   Eye,
   Tag as TagIcon,
-  AlertTriangle,
-  BookOpen,
-  MessageSquare as MessageSquareIcon,
-  BarChart2
+  AlertTriangle
 } from 'lucide-react';
 
 // UI Components
@@ -36,38 +33,8 @@ import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
 
-// Types
-import { ContentType, KnowledgeArticle, VoteType } from '@/models/knowledgeTypes';
-
-// Function to get content type specific UI elements 
-const getContentTypeDisplay = (article: KnowledgeArticle) => {
-  switch (article.content_type) {
-    case ContentType.ARTICLE:
-      return {
-        icon: <BookOpen className="h-5 w-5 text-emerald-500" />,
-        label: 'Article',
-        className: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-      };
-    case ContentType.QUESTION:
-      return {
-        icon: <MessageSquareIcon className="h-5 w-5 text-royal-blue-500" />,
-        label: 'Question',
-        className: 'bg-royal-blue-500/10 text-royal-blue-700 dark:text-royal-blue-400'
-      };
-    case ContentType.POLL:
-      return {
-        icon: <BarChart2 className="h-5 w-5 text-purple-500" />,
-        label: 'Poll',
-        className: 'bg-purple-500/10 text-purple-700 dark:text-purple-400'
-      };
-    default:
-      return {
-        icon: <BookOpen className="h-5 w-5" />,
-        label: 'Article',
-        className: 'bg-muted text-muted-foreground'
-      };
-  }
-};
+// Mocks and types
+import { ContentType, VoteType } from '@/models/knowledgeTypes';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -214,11 +181,16 @@ const ArticleView = () => {
             {/* Article content */}
             <Card>
               <CardContent className="pt-6">
-                {/* Normal article content rendering */}
-                <div 
-                  className="prose dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
-                />
+                {article.content_type === ContentType.QUOTE ? (
+                  <blockquote className="border-l-4 border-primary pl-4 italic">
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
+                  </blockquote>
+                ) : (
+                  <div 
+                    className="prose dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
+                  />
+                )}
                 
                 {/* Tags */}
                 {article.tags && article.tags.length > 0 && (

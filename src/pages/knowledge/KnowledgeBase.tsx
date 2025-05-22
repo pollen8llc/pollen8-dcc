@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -13,7 +14,7 @@ import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector'
 import { TagsList } from '@/components/knowledge/TagsList';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { ContentType, KnowledgeArticle } from '@/models/knowledgeTypes';
+import { ContentType } from '@/models/knowledgeTypes';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Select,
@@ -34,21 +35,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
-const filterContentByType = (articles: KnowledgeArticle[], type: string): KnowledgeArticle[] => {
-  if (type === 'all') return articles;
-  
-  const contentTypeMap: Record<string, ContentType> = {
-    'article': ContentType.ARTICLE,
-    'question': ContentType.QUESTION,
-    'poll': ContentType.POLL
-  };
-  
-  const contentType = contentTypeMap[type];
-  if (!contentType) return articles;
-  
-  return articles.filter(article => article.content_type === contentType);
-};
 
 const KnowledgeBase = () => {
   const navigate = useNavigate();
@@ -108,11 +94,9 @@ const KnowledgeBase = () => {
         query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
       }
       
-      // Fix content type filtering to match uppercase values in database
+      // Only filter by type if it's not null/undefined and not 'all'
       if (selectedType && selectedType !== 'all') {
-        // Convert to uppercase to match ContentType enum values in the database
-        const formattedType = selectedType.toUpperCase();
-        query = query.eq('content_type', formattedType);
+        query = query.eq('content_type', selectedType);
       }
       
       const { data: articles, error } = await query;
@@ -266,6 +250,8 @@ const KnowledgeBase = () => {
         return 'Articles';
       case ContentType.QUESTION:
         return 'Questions';
+      case ContentType.QUOTE:
+        return 'Quotes';
       case ContentType.POLL:
         return 'Polls';
       default:

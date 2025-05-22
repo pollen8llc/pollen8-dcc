@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useArticles, useArticle, useArticleMutations, useTagArticles } from './knowledge/useArticles';
+import { useArticles, useArticle, useArticleMutations } from './knowledge/useArticles';
 import { useComments, useCommentMutations } from './knowledge/useComments';
 import { useTags } from './knowledge/useTags';
 import { useVote } from './knowledge/useVote';
@@ -15,7 +15,6 @@ export const useKnowledgeBase = () => {
     // Queries
     useArticles,
     useArticle,
-    useTagArticles,
     useTags,
     useComments,
     

@@ -30,6 +30,8 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
         return 'Article';
       case ContentType.QUESTION:
         return 'Question';
+      case ContentType.QUOTE:
+        return 'Quote';
       case ContentType.POLL:
         return 'Poll';
       default:
@@ -73,6 +75,17 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
           
           {contentType === ContentType.QUESTION && (
             <p className="whitespace-pre-wrap">{formData.content}</p>
+          )}
+          
+          {contentType === ContentType.QUOTE && (
+            <blockquote className="italic border-l-4 border-muted-foreground/20 pl-4">
+              "{formData.content}"
+              {formData.source && (
+                <footer className="text-sm text-muted-foreground mt-2">
+                  — {formData.source}
+                </footer>
+              )}
+            </blockquote>
           )}
           
           {contentType === ContentType.POLL && (
