@@ -19,9 +19,9 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/welcome" className="mr-auto flex items-center space-x-2">
           <img 
-            src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans-300x52.png" 
+            src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans.png" 
             alt="Pollen8" 
-            className="h-6 p-1.5" 
+            className="max-w-full w-[100px]" 
           />
         </Link>
         
