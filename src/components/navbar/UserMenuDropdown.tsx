@@ -1,18 +1,15 @@
 
-import { User } from "@/models/types";
-import { UserRole } from "@/models/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { useUser } from '@/contexts/UserContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
-interface UserMenuDropdownProps {
-  currentUser: User;
-  isAdmin: boolean;
-}
+const UserMenuDropdown = () => {
+  const { currentUser } = useUser();
 
-const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
+  if (!currentUser) return null;
+
   const getUserInitials = () => {
-    if (!currentUser) return "?";
-    
     const nameParts = currentUser.name.split(" ");
     if (nameParts.length >= 2) {
       return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();

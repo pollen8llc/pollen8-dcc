@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Authentication
 import Auth from '@/pages/Auth';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 // Main Pages
 import Index from '@/pages/Index';

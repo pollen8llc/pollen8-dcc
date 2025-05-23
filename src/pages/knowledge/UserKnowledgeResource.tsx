@@ -208,13 +208,30 @@ const UserKnowledgeResource = () => {
               </div>
             ) : (stats?.articles?.length || 0) > 0 ? (
               <div className="space-y-4">
-                {stats?.articles?.map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={article}
-                    onClick={() => navigate(`/knowledge/${article.id}`)}
-                  />
-                ))}
+                {stats?.articles?.map((article) => {
+                  // Create a properly typed article object for ArticleCard
+                  const articleForCard = {
+                    id: article.id,
+                    title: article.title,
+                    content: '', // ArticleCard may not need full content for list view
+                    content_type: article.content_type,
+                    created_at: article.created_at,
+                    updated_at: article.created_at, // Use created_at as fallback
+                    view_count: article.view_count || 0,
+                    comment_count: article.comment_count,
+                    vote_count: article.vote_count,
+                    user_id: currentUser.id,
+                    tags: []
+                  };
+                  
+                  return (
+                    <ArticleCard
+                      key={article.id}
+                      article={articleForCard}
+                      onClick={() => navigate(`/knowledge/${article.id}`)}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <Card className="p-8 text-center">
