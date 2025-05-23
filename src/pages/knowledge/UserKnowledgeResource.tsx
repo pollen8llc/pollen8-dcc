@@ -7,6 +7,7 @@ import { useUserKnowledgeStats } from '@/hooks/knowledge/useUserKnowledgeStats';
 import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { formatDistanceToNow } from 'date-fns';
+import { KnowledgeArticle } from '@/models/knowledgeTypes';
 import {
   User,
   BarChart3,
@@ -65,6 +66,26 @@ const UserKnowledgeResource = () => {
       </CardContent>
     </Card>
   );
+
+  // Helper function to convert article data to KnowledgeArticle type
+  const convertToKnowledgeArticle = (article: any): KnowledgeArticle => ({
+    id: article.id,
+    title: article.title,
+    content: article.content || '',
+    content_type: article.content_type,
+    user_id: article.user_id || currentUser.id,
+    created_at: article.created_at,
+    updated_at: article.updated_at || article.created_at,
+    tags: article.tags || [],
+    vote_count: article.vote_count || 0,
+    user_vote: article.user_vote || null,
+    view_count: article.view_count || 0,
+    comment_count: article.comment_count || 0,
+    is_answered: article.is_answered,
+    is_featured: article.is_featured,
+    author: article.author,
+    subtitle: article.subtitle
+  });
 
   return (
     <Shell>
@@ -211,7 +232,7 @@ const UserKnowledgeResource = () => {
                 {stats?.articles?.map((article) => (
                   <ArticleCard
                     key={article.id}
-                    article={article}
+                    article={convertToKnowledgeArticle(article)}
                     onClick={() => navigate(`/knowledge/${article.id}`)}
                   />
                 ))}

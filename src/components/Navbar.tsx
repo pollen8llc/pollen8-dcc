@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { UserMenuDropdown } from '@/components/navbar/UserMenuDropdown';
+import ThemeToggle from '@/components/ThemeToggle';
+import UserMenuDropdown from '@/components/navbar/UserMenuDropdown';
 import { NavigationDrawer } from '@/components/navbar/NavigationDrawer';
 import { 
   Home, 
@@ -19,9 +19,10 @@ import {
 } from 'lucide-react';
 
 const Navbar = () => {
-  const { currentUser } = useUser();
+  const { currentUser, logout } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -58,7 +59,21 @@ const Navbar = () => {
         </div>
         
         {/* Mobile Navigation */}
-        <NavigationDrawer />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setDrawerOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        
+        <NavigationDrawer 
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          currentUser={currentUser}
+          logout={logout}
+        />
         
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <div className="w-full flex-1 md:w-auto md:flex-none">
@@ -69,7 +84,7 @@ const Navbar = () => {
             <ThemeToggle />
             
             {currentUser ? (
-              <UserMenuDropdown />
+              <UserMenuDropdown currentUser={currentUser} isAdmin={currentUser.role === 'ADMIN'} />
             ) : (
               <Button onClick={() => navigate('/auth')} variant="ghost" size="sm">
                 Sign In
