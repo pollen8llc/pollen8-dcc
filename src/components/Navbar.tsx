@@ -16,19 +16,13 @@ const Navbar = () => {
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="flex h-14 items-center px-4">
-        {/* Menu button for drawer */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setDrawerOpen(true)}
-          className="mr-3"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-        
         {/* Logo */}
         <Link to="/welcome" className="mr-auto flex items-center space-x-2">
-          <span className="font-bold text-xl">Lovable</span>
+          <img 
+            src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans-300x52.png" 
+            alt="Pollen8" 
+            className="h-8" 
+          />
         </Link>
         
         <NavigationDrawer 
@@ -48,6 +42,15 @@ const Navbar = () => {
               Sign In
             </Button>
           )}
+          
+          {/* Menu button for drawer - moved to the right */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setDrawerOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </nav>
