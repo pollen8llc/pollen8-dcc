@@ -177,12 +177,12 @@ export const useCommentMutations = () => {
     try {
       setIsSubmitting(true);
       
-      // Delete the comment
+      // Delete the comment - we no longer need to check for user_id
+      // as the RLS policy will handle access control
       const { error } = await supabase
         .from('knowledge_comments')
         .delete()
-        .eq('id', commentId)
-        .eq('user_id', currentUser.id); // Add user_id check for security
+        .eq('id', commentId);
         
       if (error) {
         console.error('Error deleting comment:', error);
@@ -194,7 +194,7 @@ export const useCommentMutations = () => {
       
       toast({
         title: "Comment deleted",
-        description: "Your comment has been deleted successfully"
+        description: "The comment has been deleted successfully"
       });
     } catch (error: any) {
       toast({

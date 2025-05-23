@@ -101,6 +101,14 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
     console.log('CommentSection: Comments count:', comments?.length);
   }, [currentUser, isArticleAuthor, comments]);
   
+  const canDeleteComment = (comment: KnowledgeComment) => {
+    // User can delete if they are:
+    // 1. The comment author
+    // 2. The article author
+    // 3. An admin
+    return currentUser?.id === comment.user_id || isArticleAuthor || isAdmin;
+  };
+  
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -155,8 +163,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                       </Button>
                     )}
                     
-                    {/* Delete Comment Button */}
-                    {(currentUser?.id === comment.user_id || isAdmin) && (
+                    {/* Delete Comment Button - now using the canDeleteComment helper */}
+                    {canDeleteComment(comment) && (
                       <Button 
                         size="sm" 
                         variant="outline"
