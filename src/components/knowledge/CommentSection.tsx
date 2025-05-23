@@ -1,14 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { KnowledgeComment } from '@/models/knowledgeTypes';
 import { formatDistanceToNow } from 'date-fns';
-import { ThumbsUp, ThumbsDown, Check, Trash2, MessageSquare } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Check, Trash2, MessageSquare, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -40,15 +41,29 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [commentError, setCommentError] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Reset error when comment text changes
+  useEffect(() => {
+    if (commentError && newComment) {
+      setCommentError(null);
+    }
+  }, [newComment, commentError]);
   
   // Handle comment submission
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || isSubmitting) return;
     
+    if (!newComment.trim()) {
+      setCommentError('Comment cannot be empty');
+      return;
+    }
+    
     try {
       setIsSubmitting(true);
+      setCommentError(null);
       console.log('Submitting comment for article:', articleId);
       
       if (!currentUser) {
@@ -71,11 +86,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       setNewComment('');
     } catch (error) {
       console.error('Error submitting comment:', error);
-      toast({
-        title: "Failed to add comment",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive"
-      });
+      // Set error message to show in the form
+      setCommentError(error instanceof Error ? error.message : "Failed to post comment");
     } finally {
       setIsSubmitting(false);
     }
@@ -102,7 +114,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   };
   
   // Debug user authentication status
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('CommentSection: User authenticated:', !!currentUser, currentUser?.id);
     console.log('CommentSection: Article author check:', isArticleAuthor);
     console.log('CommentSection: Comments count:', comments?.length);
@@ -233,10 +245,18 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
           <form onSubmit={handleCommentSubmit}>
             <Textarea
               placeholder="Write your comment here..."
-              className="min-h-32 mb-4"
+              className={`min-h-32 mb-4 ${commentError ? 'border-red-500' : ''}`}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
             />
+            
+            {commentError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{commentError}</AlertDescription>
+              </Alert>
+            )}
+            
             <Button 
               type="submit" 
               disabled={!newComment.trim() || isSubmitting}

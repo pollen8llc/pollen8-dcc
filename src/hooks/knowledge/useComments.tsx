@@ -14,97 +14,107 @@ export const useComments = (articleId: string | undefined) => {
       
       console.log('Fetching comments for article:', articleId);
       
-      // First fetch the comments
-      const { data: comments, error } = await supabase
-        .from('knowledge_comments')
-        .select('*')
-        .eq('article_id', articleId)
-        .order('created_at', { ascending: true });
+      try {
+        // First fetch the comments
+        const { data: comments, error } = await supabase
+          .from('knowledge_comments')
+          .select('*')
+          .eq('article_id', articleId)
+          .order('created_at', { ascending: true });
+          
+        if (error) {
+          console.error('Error fetching comments:', error);
+          throw error;
+        }
         
-      if (error) {
-        console.error('Error fetching comments:', error);
+        if (!comments || comments.length === 0) {
+          return [] as KnowledgeComment[];
+        }
+        
+        // Extract all unique user IDs
+        const userIds = [...new Set(comments.map(comment => comment.user_id))];
+        
+        // Fetch all author profiles in a single query
+        const { data: profiles, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, avatar_url')
+          .in('id', userIds);
+          
+        if (profileError) {
+          console.error('Error fetching comment author profiles:', profileError);
+          // Continue even if profile fetch fails
+        }
+        
+        // Create a map of user_id to profile for easy lookup
+        const profileMap = (profiles || []).reduce((map, profile) => {
+          map[profile.id] = profile;
+          return map;
+        }, {} as Record<string, any>);
+        
+        // Get vote counts for all comments in a single call
+        const commentIds = comments.map(comment => comment.id);
+        
+        // Fetch all votes in one query
+        const { data: votes, error: votesError } = await supabase
+          .from('knowledge_votes')
+          .select('comment_id, vote_type, user_id')
+          .in('comment_id', commentIds);
+          
+        if (votesError) {
+          console.error('Error fetching comment votes:', votesError);
+          // Continue even if vote fetch fails
+        }
+        
+        // Calculate vote totals and user votes
+        const voteMap = new Map();
+        const userVoteMap = new Map();
+        
+        if (votes) {
+          // Calculate total votes per comment
+          votes.forEach(vote => {
+            const commentId = vote.comment_id;
+            if (!voteMap.has(commentId)) {
+              voteMap.set(commentId, 0);
+            }
+            voteMap.set(commentId, voteMap.get(commentId) + vote.vote_type);
+            
+            // Also track each user's vote for each comment
+            const key = `${vote.comment_id}_${vote.user_id}`;
+            userVoteMap.set(key, vote.vote_type);
+          });
+        }
+        
+        // Get current user id for user votes
+        const { data: { user } } = await supabase.auth.getUser();
+        const currentUserId = user?.id;
+        
+        // Enhance comments with author and vote data
+        return comments.map(comment => {
+          const profile = profileMap[comment.user_id];
+          
+          return {
+            ...comment,
+            author: profile ? {
+              id: comment.user_id,
+              name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+              avatar_url: profile.avatar_url
+            } : {
+              id: comment.user_id,
+              name: 'Unknown User',
+              avatar_url: null
+            },
+            vote_count: voteMap.get(comment.id) || 0,
+            user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
+          } as KnowledgeComment;
+        });
+      } catch (error) {
+        console.error('Error processing comments:', error);
         throw error;
       }
-      
-      if (!comments || comments.length === 0) {
-        return [] as KnowledgeComment[];
-      }
-      
-      // Extract all unique user IDs
-      const userIds = [...new Set(comments.map(comment => comment.user_id))];
-      
-      // Fetch all author profiles in a single query
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, avatar_url')
-        .in('id', userIds);
-        
-      if (profileError) {
-        console.error('Error fetching comment author profiles:', profileError);
-        // Continue even if profile fetch fails
-      }
-      
-      // Create a map of user_id to profile for easy lookup
-      const profileMap = (profiles || []).reduce((map, profile) => {
-        map[profile.id] = profile;
-        return map;
-      }, {} as Record<string, any>);
-      
-      // Get vote counts for all comments in a single call
-      const commentIds = comments.map(comment => comment.id);
-      
-      // Fetch all votes in one query
-      const { data: votes, error: votesError } = await supabase
-        .from('knowledge_votes')
-        .select('comment_id, vote_type, user_id')
-        .in('comment_id', commentIds);
-        
-      if (votesError) {
-        console.error('Error fetching comment votes:', votesError);
-        // Continue even if vote fetch fails
-      }
-      
-      // Calculate vote totals and user votes
-      const voteMap = new Map();
-      const userVoteMap = new Map();
-      
-      if (votes) {
-        // Calculate total votes per comment
-        votes.forEach(vote => {
-          const commentId = vote.comment_id;
-          if (!voteMap.has(commentId)) {
-            voteMap.set(commentId, 0);
-          }
-          voteMap.set(commentId, voteMap.get(commentId) + vote.vote_type);
-          
-          // Also track each user's vote for each comment
-          const key = `${vote.comment_id}_${vote.user_id}`;
-          userVoteMap.set(key, vote.vote_type);
-        });
-      }
-      
-      // Get current user id for user votes
-      const { data: { user } } = await supabase.auth.getUser();
-      const currentUserId = user?.id;
-      
-      // Enhance comments with author and vote data
-      return comments.map(comment => {
-        const profile = profileMap[comment.user_id];
-        
-        return {
-          ...comment,
-          author: profile ? {
-            id: comment.user_id,
-            name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
-            avatar_url: profile.avatar_url
-          } : undefined,
-          vote_count: voteMap.get(comment.id) || 0,
-          user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
-        } as KnowledgeComment;
-      });
     },
     enabled: !!articleId,
-    staleTime: 1000 * 60 // 1 minute
+    staleTime: 1000 * 60, // 1 minute
+    retry: 2
   });
 };
 
