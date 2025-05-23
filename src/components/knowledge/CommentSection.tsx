@@ -120,12 +120,11 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
     console.log('CommentSection: Comments count:', comments?.length);
   }, [currentUser, isArticleAuthor, comments]);
   
+  // Modified to only allow the comment author to delete their own comment
   const canDeleteComment = (comment: KnowledgeComment) => {
     // User can delete if they are:
     // 1. The comment author
-    // 2. The article author
-    // 3. An admin
-    return currentUser?.id === comment.user_id || isArticleAuthor || isAdmin;
+    return currentUser?.id === comment.user_id;
   };
   
   return (
