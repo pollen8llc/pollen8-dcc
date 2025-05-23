@@ -23,7 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CreatePostModal } from '@/components/knowledge/CreatePostModal';
 import {
   Sheet,
   SheetContent,
@@ -43,7 +42,6 @@ const KnowledgeBase = () => {
   const queryClient = useQueryClient();
   
   // States
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(
     searchParams.get('tag')
@@ -303,7 +301,7 @@ const KnowledgeBase = () => {
             </Button>
             
             <Button 
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => navigate("/knowledge/wizard")}
               className="shrink-0 hidden sm:flex"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -311,7 +309,7 @@ const KnowledgeBase = () => {
             </Button>
             
             <Button 
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => navigate("/knowledge/wizard")}
               size="icon"
               className="sm:hidden"
             >
@@ -481,7 +479,7 @@ const KnowledgeBase = () => {
                   <Button onClick={() => fetchArticles()}>
                     Reload Content
                   </Button>
-                  <Button onClick={() => navigate("/knowledge/create")}>
+                  <Button onClick={() => navigate("/knowledge/wizard")}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create New Post
                   </Button>
@@ -491,16 +489,6 @@ const KnowledgeBase = () => {
           </div>
         </div>
       </div>
-      
-      {/* Create Post Modal */}
-      <CreatePostModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        onSelectType={(type) => {
-          setIsCreateModalOpen(false);
-          navigate(`/knowledge/create?type=${type}`);
-        }}
-      />
     </Shell>
   );
 };
