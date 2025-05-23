@@ -138,6 +138,15 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   Browse Topics
                 </Button>
 
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/knowledge/create")}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create Article
+                </Button>
+
                 {/* Organizer Section */}
                 {isOrganizer && (
                   <>

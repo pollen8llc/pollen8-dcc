@@ -20,7 +20,7 @@ import InvitePage from '@/pages/InvitePage';
 import InvitesManagementPage from '@/pages/InvitesManagementPage';
 import Documentation from '@/pages/Documentation';
 
-// Knowledge Base
+// Knowledge Base (includes former core functionality)
 import KnowledgeBase from '@/pages/knowledge/KnowledgeBase';
 import ArticleView from '@/pages/knowledge/ArticleView';
 import ContentCreator from '@/pages/knowledge/ContentCreator';
@@ -28,8 +28,7 @@ import PostWizard from '@/pages/knowledge/PostWizard';
 import TopicsPage from '@/pages/knowledge/TopicsPage';
 import UserKnowledgeResource from '@/pages/knowledge/UserKnowledgeResource';
 
-// Core Content (moved from community)
-import CoreLandingPage from '@/pages/core/CoreLandingPage';
+// Core Content (now integrated into knowledge)
 import TagView from '@/pages/core/TagView';
 import ArticleCreate from '@/pages/core/ArticleCreate';
 import ArticleEdit from '@/pages/core/ArticleEdit';
@@ -103,7 +102,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Knowledge Base Routes */}
+        {/* Knowledge Base Routes (includes former core functionality) */}
         <Route path="/knowledge" element={
           <ProtectedRoute>
             <KnowledgeBase />
@@ -124,7 +123,7 @@ const AppRoutes = () => {
         
         <Route path="/knowledge/create" element={
           <ProtectedRoute>
-            <ContentCreator />
+            <ArticleCreate />
           </ProtectedRoute>
         } />
         
@@ -139,27 +138,14 @@ const AppRoutes = () => {
             <TopicsPage />
           </ProtectedRoute>
         } />
-
-        {/* Core Content Routes */}
-        <Route path="/core" element={
-          <ProtectedRoute>
-            <CoreLandingPage />
-          </ProtectedRoute>
-        } />
         
-        <Route path="/core/tags/:tag" element={
+        <Route path="/knowledge/tags/:tag" element={
           <ProtectedRoute>
             <TagView />
           </ProtectedRoute>
         } />
         
-        <Route path="/core/create" element={
-          <ProtectedRoute>
-            <ArticleCreate />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/core/:id/edit" element={
+        <Route path="/knowledge/:id/edit" element={
           <ProtectedRoute>
             <ArticleEdit />
           </ProtectedRoute>

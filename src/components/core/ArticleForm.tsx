@@ -70,10 +70,10 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
       
       if (mode === 'create') {
         await createArticle(articleData);
-        navigate('/core');
+        navigate('/knowledge');
       } else if (mode === 'edit' && article) {
         await updateArticle(article.id, articleData);
-        navigate(`/core/articles/${article.id}`);
+        navigate(`/knowledge/${article.id}`);
       }
     } catch (error) {
       console.error('Error submitting article:', error);

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -99,7 +100,7 @@ const ArticleView = () => {
   const confirmDeleteArticle = async () => {
     try {
       await knowledgeBase.deleteArticle(id!);
-      navigate('/core');
+      navigate('/knowledge');
     } catch (error) {
       console.error('Error deleting article:', error);
     }
@@ -159,7 +160,7 @@ const ArticleView = () => {
             <h2 className="text-2xl font-bold mb-4">Article Not Found</h2>
             <p className="mb-4">The article you're looking for might have been removed or doesn't exist.</p>
             <Button asChild>
-              <Link to="/core"><ChevronLeft className="mr-2 h-4 w-4" /> Back to Knowledge Base</Link>
+              <Link to="/knowledge"><ChevronLeft className="mr-2 h-4 w-4" /> Back to Knowledge Base</Link>
             </Button>
           </div>
         </div>
@@ -178,7 +179,7 @@ const ArticleView = () => {
         {/* Breadcrumb */}
         <div className="mb-6">
           <Button variant="ghost" asChild className="pl-0">
-            <Link to="/core">
+            <Link to="/knowledge">
               <ChevronLeft className="mr-2 h-4 w-4" />
               Back to Knowledge Base
             </Link>
@@ -193,7 +194,7 @@ const ArticleView = () => {
             <div className="flex gap-2 mt-4 md:mt-0">
               {canEdit && (
                 <Button variant="outline" asChild>
-                  <Link to={`/core/articles/${article.id}/edit`}>
+                  <Link to={`/knowledge/${article.id}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </Link>

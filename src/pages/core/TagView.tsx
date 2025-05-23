@@ -49,7 +49,7 @@ const TagView = () => {
         {/* Breadcrumb */}
         <div className="mb-6">
           <Button variant="ghost" asChild className="pl-0">
-            <Link to="/core">
+            <Link to="/knowledge">
               <ChevronLeft className="mr-2 h-4 w-4" />
               Back to Knowledge Base
             </Link>
@@ -70,7 +70,7 @@ const TagView = () => {
           
           {(isOrganizer || isAdmin) && (
             <Button className="mt-4 md:mt-0 bg-royal-blue-600 hover:bg-royal-blue-700" asChild>
-              <Link to="/core/articles/new">
+              <Link to="/knowledge/create">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Article
               </Link>
@@ -100,7 +100,7 @@ const TagView = () => {
               {articles.map(article => (
                 <Card key={article.id} className="transition-shadow hover:shadow-md">
                   <CardHeader>
-                    <Link to={`/core/articles/${article.id}`} className="group">
+                    <Link to={`/knowledge/${article.id}`} className="group">
                       <CardTitle className="text-xl group-hover:text-royal-blue-600 dark:group-hover:text-royal-blue-400 transition-colors">
                         {article.title}
                       </CardTitle>
@@ -160,7 +160,7 @@ const TagView = () => {
               
               {(isOrganizer || isAdmin) && (
                 <Button asChild className="bg-royal-blue-600 hover:bg-royal-blue-700">
-                  <Link to="/core/articles/new">
+                  <Link to="/knowledge/create">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create New Article
                   </Link>
