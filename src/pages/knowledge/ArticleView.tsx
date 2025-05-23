@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -5,12 +6,14 @@ import { Shell } from '@/components/layout/Shell';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
 import DOMPurify from 'dompurify';
 import {
   ChevronLeft,
   Edit,
   Share2,
   Bookmark,
+  BookmarkCheck,
   ThumbsUp,
   ThumbsDown,
   MessageSquare,
@@ -40,6 +43,7 @@ const ArticleView = () => {
   const navigate = useNavigate();
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
+  const { isArticleSaved, toggleSaveArticle } = useSavedArticles();
   const { 
     useArticle, 
     vote, 
@@ -88,6 +92,14 @@ const ArticleView = () => {
   
   // Use article's comment_count as the source of truth, but fall back to comments.length if needed
   const commentCount = article?.comment_count || comments?.length || 0;
+
+  // Handle save/unsave
+  const handleToggleSave = () => {
+    if (!id) return;
+    toggleSaveArticle(id);
+  };
+
+  const isSaved = id ? isArticleSaved(id) : false;
 
   if (articleLoading) {
     return (
@@ -203,7 +215,7 @@ const ArticleView = () => {
                   className={article.user_vote === 1 ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800' : ''}
                 >
                   <ThumbsUp className="h-4 w-4 mr-1" />
-                  {article.vote_count || 0}
+                  {article.vote_count}
                 </Button>
                 
                 <Button 
@@ -217,9 +229,23 @@ const ArticleView = () => {
               </div>
               
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                  <Bookmark className="h-4 w-4 mr-1" />
-                  Save
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleToggleSave}
+                  className={isSaved ? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-800' : ''}
+                >
+                  {isSaved ? (
+                    <>
+                      <BookmarkCheck className="h-4 w-4 mr-1" />
+                      Saved
+                    </>
+                  ) : (
+                    <>
+                      <Bookmark className="h-4 w-4 mr-1" />
+                      Save
+                    </>
+                  )}
                 </Button>
                 
                 <Button variant="outline" size="sm">

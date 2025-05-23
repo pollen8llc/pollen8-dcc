@@ -1,109 +1,84 @@
 
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import ThemeToggle from "@/components/ThemeToggle";
-import { useUser } from "@/contexts/UserContext";
-import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import NavigationDrawer from "./navbar/NavigationDrawer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useUser } from '@/contexts/UserContext';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { UserMenuDropdown } from '@/components/navbar/UserMenuDropdown';
+import { NavigationDrawer } from '@/components/navbar/NavigationDrawer';
+import { 
+  Home, 
+  User, 
+  BookOpen, 
+  BarChart3,
+  Settings,
+  Menu,
+  Users,
+  Zap,
+  Database
+} from 'lucide-react';
 
 const Navbar = () => {
+  const { currentUser } = useUser();
+  const location = useLocation();
   const navigate = useNavigate();
-  const { currentUser, logout, isLoading, recoverUserSession } = useUser();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [authCheckComplete, setAuthCheckComplete] = useState(false);
 
-  // Add effect to handle authentication state tracking for UI
-  useEffect(() => {
-    // Once loading is complete, mark the auth check as done
-    if (!isLoading) {
-      setAuthCheckComplete(true);
-      
-      // Log the auth state for debugging
-      console.log("Navbar auth state resolved:", {
-        hasUser: !!currentUser,
-        userRole: currentUser?.role || "none"
-      });
-    }
-  }, [isLoading, currentUser]);
-
-  // Add auto-recovery mechanism if we have unusual auth state
-  useEffect(() => {
-    if (authCheckComplete && !isLoading) {
-      // Check if we might have a stale auth state in localStorage but no user
-      const checkForStaleAuth = async () => {
-        try {
-          // Look for localStorage auth data
-          const hasLocalAuth = 
-            localStorage.getItem('sb-oltcuwvgdzszxshpfnre-auth') !== null;
-            
-          if (hasLocalAuth && !currentUser && !sessionStorage.getItem('navbar_recovery_attempted')) {
-            console.log("Navbar detected potential auth mismatch - attempting recovery");
-            sessionStorage.setItem('navbar_recovery_attempted', 'true');
-            
-            // Try to recover the session
-            await recoverUserSession();
-          }
-        } catch (err) {
-          console.error("Error in navbar auth check:", err);
-        }
-      };
-      
-      checkForStaleAuth();
-    }
-  }, [authCheckComplete, isLoading, currentUser, recoverUserSession]);
-
-  const getInitials = () => {
-    if (!currentUser) return "??";
-    
-    const nameParts = currentUser.name.split(' ');
-    if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
-    }
-    return currentUser.name.substring(0, 2).toUpperCase();
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
+  const navigationItems = [
+    { path: '/welcome', label: 'Dashboard', icon: Home },
+    { path: '/knowledge', label: 'Knowledge Base', icon: BookOpen },
+    { path: '/knowledge/my-resources', label: 'My Resources', icon: BarChart3 },
+    { path: '/profile', label: 'Profile', icon: User },
+    { path: '/rel8t', label: 'Rel8t CRM', icon: Database }
+  ];
+
   return (
-    <header className="border-b border-border/40 sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center space-x-2">
-          <span className="font-bold text-xl">ECO8</span>
-        </Link>
-        
-        <div className="flex items-center gap-3">
-          {authCheckComplete && !isLoading && currentUser && (
-            <div className="flex items-center mr-2">
-              <Avatar 
-                className="h-8 w-8 cursor-pointer" 
-                onClick={() => navigate(`/profile/${currentUser.id}`)}
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <div className="flex h-14 items-center px-4">
+        <div className="mr-4 hidden md:flex">
+          <Link to="/welcome" className="mr-6 flex items-center space-x-2">
+            <span className="font-bold text-xl">Lovable</span>
+          </Link>
+          <nav className="flex items-center space-x-6 text-sm font-medium">
+            {navigationItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`transition-colors hover:text-foreground/80 ${
+                  isActive(item.path) ? 'text-foreground' : 'text-foreground/60'
+                }`}
               >
-                <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
-                <AvatarFallback>{getInitials()}</AvatarFallback>
-              </Avatar>
-            </div>
-          )}
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        
+        {/* Mobile Navigation */}
+        <NavigationDrawer />
+        
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <div className="w-full flex-1 md:w-auto md:flex-none">
+            {/* Search could go here */}
+          </div>
           
-          <ThemeToggle />
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setIsDrawerOpen(true)}
-            aria-label="Open menu"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          <nav className="flex items-center space-x-2">
+            <ThemeToggle />
+            
+            {currentUser ? (
+              <UserMenuDropdown />
+            ) : (
+              <Button onClick={() => navigate('/auth')} variant="ghost" size="sm">
+                Sign In
+              </Button>
+            )}
+          </nav>
         </div>
       </div>
-
-      <NavigationDrawer 
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        currentUser={currentUser} 
-        logout={logout}
-      />
-    </header>
+    </nav>
   );
 };
 
