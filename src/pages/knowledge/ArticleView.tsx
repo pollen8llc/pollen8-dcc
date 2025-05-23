@@ -86,6 +86,9 @@ const ArticleView = () => {
     if (!id) return;
     deleteComment(commentId, id);
   };
+  
+  // Calculate the actual comment count from the loaded comments
+  const commentCount = comments?.length || 0;
 
   if (articleLoading) {
     return (
@@ -245,7 +248,7 @@ const ArticleView = () => {
               
               <div className="flex items-center">
                 <MessageSquare className="h-4 w-4 mr-1" />
-                <span>{article.comment_count || 0} comments</span>
+                <span>{commentCount} comments</span>
               </div>
               
               <div className="flex items-center">
