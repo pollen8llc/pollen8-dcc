@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -255,7 +254,7 @@ const ProfileSearchPage: React.FC = () => {
         
         <div className="flex flex-col xl:flex-row gap-8">
           {/* Search filters sidebar */}
-          <Card className="xl:w-80 w-full h-fit sticky top-20 border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-[#00eada]/20">
+          <Card className="xl:w-80 w-full h-fit xl:sticky xl:top-20 border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-[#00eada]/20">
             <CardContent className="p-6">
               <h3 className="font-medium text-lg mb-4">Filters</h3>
               
