@@ -23,7 +23,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <App />
         <Toaster />
-      </QueryClientProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );
