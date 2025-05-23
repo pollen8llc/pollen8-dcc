@@ -26,41 +26,33 @@ import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
 import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
 import { QuoteForm } from '@/components/knowledge/forms/QuoteForm';
 import { PollForm } from '@/components/knowledge/forms/PollForm';
-import { CreatePostModal } from '@/components/knowledge/CreatePostModal';
-import { ContentType } from '@/models/knowledgeTypes';
 import { ReviewContent } from '@/components/knowledge/ReviewContent';
+import { ContentType } from '@/models/knowledgeTypes';
 
 type PostType = 'question' | 'quote' | 'poll' | 'article';
 
-interface PostWizardProps {
-  initialType?: PostType;
-}
-
-const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
+const PostWizard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // Get type from URL parameters
   const typeFromUrl = searchParams.get('type') as PostType | null;
-  const [postType, setPostType] = useState<PostType | null>(initialType || typeFromUrl || null);
-  const [isTypeModalOpen, setIsTypeModalOpen] = useState(!initialType && !typeFromUrl);
+  const [postType, setPostType] = useState<PostType | null>(typeFromUrl);
+  
   const { isSubmitting, createArticle } = useKnowledgeBase();
   const [formData, setFormData] = useState<any>(null);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   
-  // Set post type based on URL parameter if available
+  // Redirect to type selector if no type is provided
   useEffect(() => {
-    if (typeFromUrl) {
+    if (!typeFromUrl) {
+      navigate('/knowledge/create');
+    } else {
       setPostType(typeFromUrl);
     }
-  }, [typeFromUrl]);
-  
-  // Set post type based on initialType prop
-  useEffect(() => {
-    if (initialType) {
-      setPostType(initialType);
-    }
-  }, [initialType]);
+  }, [typeFromUrl, navigate]);
   
   const getPostTypeTitle = () => {
     switch (postType) {
@@ -158,27 +150,14 @@ const PostWizard: React.FC<PostWizardProps> = ({ initialType }) => {
     }
   };
   
-  // If no post type is selected yet, show only the modal
+  // If still loading or no post type, show loading state
   if (!postType) {
     return (
       <Shell>
-        <CreatePostModal 
-          open={isTypeModalOpen} 
-          onOpenChange={setIsTypeModalOpen} 
-          onSelectType={(type) => {
-            setPostType(type);
-            setIsTypeModalOpen(false);
-          }}
-        />
-        
         <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh]">
-          <Button
-            variant="outline"
-            onClick={() => setIsTypeModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            Select Post Type
-          </Button>
+          <div className="text-center">
+            <p>Redirecting to post type selector...</p>
+          </div>
         </div>
       </Shell>
     );

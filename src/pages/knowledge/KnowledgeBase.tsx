@@ -61,7 +61,7 @@ const KnowledgeBase = () => {
   // Fetch tags for the filter sidebar
   const { data: tags, isLoading: isTagsLoading } = useTags();
   
-  // Function to directly fetch articles - updated to limit to top 100
+  // Function to directly fetch articles
   const fetchArticles = async () => {
     setIsLoading(true);
     try {
@@ -301,7 +301,7 @@ const KnowledgeBase = () => {
             </Button>
             
             <Button 
-              onClick={() => navigate("/knowledge/wizard")}
+              onClick={() => navigate("/knowledge/create")}
               className="shrink-0 hidden sm:flex"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -309,7 +309,7 @@ const KnowledgeBase = () => {
             </Button>
             
             <Button 
-              onClick={() => navigate("/knowledge/wizard")}
+              onClick={() => navigate("/knowledge/create")}
               size="icon"
               className="sm:hidden"
             >
@@ -479,7 +479,7 @@ const KnowledgeBase = () => {
                   <Button onClick={() => fetchArticles()}>
                     Reload Content
                   </Button>
-                  <Button onClick={() => navigate("/knowledge/wizard")}>
+                  <Button onClick={() => navigate("/knowledge/create")}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create New Post
                   </Button>

@@ -25,6 +25,7 @@ import KnowledgeBase from '@/pages/knowledge/KnowledgeBase';
 import ArticleView from '@/pages/knowledge/ArticleView';
 import ContentCreator from '@/pages/knowledge/ContentCreator';
 import PostWizard from '@/pages/knowledge/PostWizard';
+import PostTypeSelector from '@/pages/knowledge/PostTypeSelector';
 import TopicsPage from '@/pages/knowledge/TopicsPage';
 import UserKnowledgeResource from '@/pages/knowledge/UserKnowledgeResource';
 
@@ -129,7 +130,7 @@ const AppRoutes = () => {
         
         <Route path="/knowledge/create" element={
           <ProtectedRoute>
-            <ArticleCreate />
+            <PostTypeSelector />
           </ProtectedRoute>
         } />
         
