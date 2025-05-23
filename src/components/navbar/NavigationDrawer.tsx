@@ -316,4 +316,4 @@ const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   );
 };
 
-export default NavigationDrawer;
+export { NavigationDrawer };
