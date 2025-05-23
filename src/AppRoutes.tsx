@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -109,7 +110,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         
-        <Route path="/knowledge/my-resources" element={
+        <Route path="/knowledge/resources" element={
           <ProtectedRoute>
             <UserKnowledgeResource />
           </ProtectedRoute>

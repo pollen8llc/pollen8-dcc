@@ -31,7 +31,7 @@ const Navbar = () => {
   const navigationItems = [
     { path: '/welcome', label: 'Dashboard', icon: Home },
     { path: '/knowledge', label: 'Knowledge Base', icon: BookOpen },
-    { path: '/knowledge/my-resources', label: 'My Resources', icon: BarChart3 },
+    { path: '/knowledge/resources', label: 'My Resources', icon: BarChart3 },
     { path: '/profile', label: 'Profile', icon: User },
     { path: '/rel8t', label: 'Rel8t CRM', icon: Database }
   ];
