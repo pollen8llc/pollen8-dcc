@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -128,6 +129,15 @@ export const useCommentMutations = () => {
       console.log('Creating comment for article:', articleId);
       console.log('Current user:', currentUser);
       
+      // Verify we have all the required data
+      if (!content.trim()) {
+        throw new Error('Comment content cannot be empty');
+      }
+      
+      if (!articleId) {
+        throw new Error('Article ID is required');
+      }
+      
       const { data: comment, error } = await supabase
         .from('knowledge_comments')
         .insert({
@@ -140,6 +150,24 @@ export const useCommentMutations = () => {
         
       if (error) {
         console.error('Error creating comment:', error);
+        
+        // Log more detailed information to help troubleshoot
+        console.error('Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        
+        // Handle specific error types
+        if (error.code === '42501') {
+          throw new Error('Permission denied: you do not have the right permissions to add comments');
+        }
+        
+        if (error.code === '23503') {
+          throw new Error('Invalid article reference: the article may have been deleted');
+        }
+        
         throw error;
       }
       

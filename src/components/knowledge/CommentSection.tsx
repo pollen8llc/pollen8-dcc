@@ -60,6 +60,13 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         return;
       }
       
+      // Log user authentication status
+      console.log('User authentication status:', {
+        isAuthenticated: !!currentUser,
+        userId: currentUser?.id,
+        commentContent: newComment.substring(0, 20) + '...' // Log truncated for privacy
+      });
+      
       await onAddComment(newComment);
       setNewComment('');
     } catch (error) {
