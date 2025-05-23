@@ -25,10 +25,10 @@ export interface KnowledgeArticle {
   created_at: string;
   updated_at: string;
   tags?: string[];
-  vote_count?: number;
+  vote_count: number;
   user_vote?: number | null;
   view_count: number;
-  comment_count?: number;
+  comment_count: number;
   is_answered?: boolean;
   is_featured?: boolean;
   author?: KnowledgeAuthor;

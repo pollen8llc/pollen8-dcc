@@ -288,6 +288,7 @@ export type Database = {
       }
       knowledge_articles: {
         Row: {
+          comment_count: number
           content: string
           content_type: string | null
           created_at: string
@@ -298,8 +299,10 @@ export type Database = {
           updated_at: string
           user_id: string
           view_count: number | null
+          vote_count: number
         }
         Insert: {
+          comment_count?: number
           content: string
           content_type?: string | null
           created_at?: string
@@ -310,8 +313,10 @@ export type Database = {
           updated_at?: string
           user_id: string
           view_count?: number | null
+          vote_count?: number
         }
         Update: {
+          comment_count?: number
           content?: string
           content_type?: string | null
           created_at?: string
@@ -322,6 +327,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           view_count?: number | null
+          vote_count?: number
         }
         Relationships: []
       }

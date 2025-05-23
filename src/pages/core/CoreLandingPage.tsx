@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -129,7 +128,7 @@ const CoreLandingPage = () => {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <MessageSquare className="h-4 w-4" /> 
-                      {article.comment_count || 0} responses
+                      {article.comment_count} responses
                     </span>
                     
                     <span className="flex items-center gap-1">

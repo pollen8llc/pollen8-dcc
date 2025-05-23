@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -79,6 +78,8 @@ const KnowledgeBase = () => {
           created_at,
           updated_at,
           view_count,
+          comment_count,
+          vote_count,
           tags,
           content_type,
           user_id

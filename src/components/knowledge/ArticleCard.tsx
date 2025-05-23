@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -148,12 +147,12 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) =>
         <div className="flex items-center text-sm text-muted-foreground gap-4">
           <div className="flex items-center">
             <ThumbsUp className="h-3 w-3 mr-1" />
-            <span>{article.vote_count || 0}</span>
+            <span>{article.vote_count}</span>
           </div>
           
           <div className="flex items-center">
             <MessageSquare className="h-3 w-3 mr-1" />
-            <span>{article.comment_count || 0}</span>
+            <span>{article.comment_count}</span>
           </div>
           
           <div className="flex items-center">

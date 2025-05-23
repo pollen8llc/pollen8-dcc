@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -87,8 +86,8 @@ const ArticleView = () => {
     deleteComment(commentId, id);
   };
   
-  // Calculate the actual comment count from the loaded comments
-  const commentCount = comments?.length || 0;
+  // Use article's comment_count as the source of truth, but fall back to comments.length if needed
+  const commentCount = article?.comment_count || comments?.length || 0;
 
   if (articleLoading) {
     return (
@@ -253,7 +252,7 @@ const ArticleView = () => {
               
               <div className="flex items-center">
                 <ThumbsUp className="h-4 w-4 mr-1" />
-                <span>{article.vote_count || 0} votes</span>
+                <span>{article.vote_count} votes</span>
               </div>
             </div>
             

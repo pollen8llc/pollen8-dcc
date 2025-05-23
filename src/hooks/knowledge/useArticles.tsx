@@ -25,6 +25,8 @@ export const useArticles = (filters?: { tag?: string | null, searchQuery?: strin
           created_at,
           updated_at,
           view_count,
+          comment_count,
+          vote_count,
           is_answered,
           tags,
           content_type,
