@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -127,6 +126,7 @@ export const useCommentMutations = () => {
     try {
       setIsSubmitting(true);
       console.log('Creating comment for article:', articleId);
+      console.log('Current user:', currentUser);
       
       const { data: comment, error } = await supabase
         .from('knowledge_comments')
@@ -153,9 +153,10 @@ export const useCommentMutations = () => {
       
       return comment;
     } catch (error: any) {
+      console.error('Comment creation error details:', error);
       toast({
         title: "Failed to post comment",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive"
       });
       throw error;
