@@ -12,8 +12,8 @@ const Index = () => {
   
   useEffect(() => {
     if (!isLoading && currentUser) {
-      // If user is logged in, redirect to CORE dashboard
-      navigate("/core");
+      // If user is logged in, redirect to knowledge base
+      navigate("/knowledge");
     }
   }, [currentUser, isLoading, navigate]);
   
