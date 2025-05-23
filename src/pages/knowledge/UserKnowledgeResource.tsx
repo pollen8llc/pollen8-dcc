@@ -7,7 +7,6 @@ import { useUserKnowledgeStats } from '@/hooks/knowledge/useUserKnowledgeStats';
 import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { formatDistanceToNow } from 'date-fns';
-import { ContentType } from '@/models/knowledgeTypes';
 import {
   User,
   BarChart3,
@@ -215,7 +214,7 @@ const UserKnowledgeResource = () => {
                     id: article.id,
                     title: article.title,
                     content: '', // ArticleCard may not need full content for list view
-                    content_type: article.content_type as ContentType,
+                    content_type: article.content_type,
                     created_at: article.created_at,
                     updated_at: article.created_at, // Use created_at as fallback
                     view_count: article.view_count || 0,
