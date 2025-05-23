@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -7,7 +8,8 @@ import {
   PlusCircle, 
   Search,
   SlidersHorizontal,
-  Tag
+  Tag,
+  Filter
 } from 'lucide-react';
 import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
 import { TagsList } from '@/components/knowledge/TagsList';
@@ -286,24 +288,47 @@ const KnowledgeBase = () => {
             <Button 
               onClick={() => navigate("/knowledge/topics")}
               variant="outline"
+              className="hidden sm:flex"
             >
               <Tag className="mr-2 h-4 w-4" />
               Browse Tags
             </Button>
             
             <Button 
+              onClick={() => navigate("/knowledge/topics")}
+              variant="outline"
+              size="icon"
+              className="sm:hidden"
+            >
+              <Tag className="h-4 w-4" />
+            </Button>
+            
+            <Button 
               onClick={() => navigate("/knowledge/create")}
-              className="shrink-0"
+              className="shrink-0 hidden sm:flex"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Post
             </Button>
             
+            <Button 
+              onClick={() => navigate("/knowledge/create")}
+              size="icon"
+              className="sm:hidden"
+            >
+              <PlusCircle className="h-4 w-4" />
+            </Button>
+            
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" className="md:hidden">
+                <Button variant="outline" className="md:hidden hidden sm:flex">
                   <SlidersHorizontal className="h-4 w-4 mr-2" />
                   Filters
+                </Button>
+              </SheetTrigger>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="md:hidden sm:hidden">
+                  <Filter className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">

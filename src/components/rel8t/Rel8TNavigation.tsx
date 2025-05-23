@@ -19,13 +19,13 @@ export const Rel8Navigation = () => {
   const location = useLocation();
   
   const navigationItems = [
-    { name: "Dashboard", href: "/rel8/dashboard", icon: LayoutDashboard },
-    { name: "Contacts", href: "/rel8/contacts", icon: ContactIcon },
-    { name: "Relationships", href: "/rel8/relationships", icon: CalendarClock },
-    { name: "Groups", href: "/rel8/groups", icon: Grid3x3 },
-    { name: "Categories", href: "/rel8/categories", icon: Tag },
-    { name: "Import", href: "/rel8/contacts/import", icon: Import },
-    { name: "Settings", href: "/rel8/settings", icon: Settings }
+    { name: "Dashboard", href: "/rel8t", icon: LayoutDashboard },
+    { name: "Contacts", href: "/rel8t/contacts", icon: ContactIcon },
+    { name: "Relationships", href: "/rel8t/relationships", icon: CalendarClock },
+    { name: "Groups", href: "/rel8t/groups", icon: Grid3x3 },
+    { name: "Categories", href: "/rel8t/categories", icon: Tag },
+    { name: "Import", href: "/rel8t/contacts/import", icon: Import },
+    { name: "Settings", href: "/rel8t/settings", icon: Settings }
   ];
   
   const coreItems = [
@@ -38,7 +38,7 @@ export const Rel8Navigation = () => {
     <nav className="mb-4 overflow-x-auto">
       <div className="flex flex-col space-y-4">
         <div>
-          <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">REL8</p>
+          <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">REL8T</p>
           <div className="flex space-x-1 border-b border-border/30 pb-1">
             {navigationItems.map((item) => {
               const isActive = location.pathname === item.href || 

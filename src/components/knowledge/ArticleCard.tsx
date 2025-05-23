@@ -1,166 +1,229 @@
+
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
-import { 
-  MessageSquare, 
-  ThumbsUp, 
-  Eye, 
-  Calendar, 
-  Tag as TagIcon,
-  BookOpen, 
-  MessageSquare as QuestionIcon,
-  BarChart2 as PollIcon,
-  Quote as QuoteIcon
-} from 'lucide-react';
-
-// UI Components
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-// Types
-import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
+import {
+  MessageSquare,
+  ThumbsUp,
+  Eye,
+  Calendar,
+  Share2,
+  BookOpen,
+  BarChart3,
+  Quote,
+  HelpCircle
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ContentType } from '@/models/knowledgeTypes';
 import { cn } from '@/lib/utils';
 
-interface ArticleCardProps {
-  article: KnowledgeArticle;
-  onClick?: () => void;
+interface Article {
+  id: string;
+  title: string;
+  content: string;
+  content_type: ContentType;
+  tags?: string[];
+  created_at: string;
+  updated_at?: string;
+  view_count?: number;
+  comment_count?: number;
+  vote_count?: number;
+  author?: {
+    id: string;
+    name: string;
+    avatar_url?: string;
+  };
 }
 
-export const ArticleCard: React.FC<ArticleCardProps> = ({ article, onClick }) => {
-  const navigate = useNavigate();
-  
-  // Get the icon based on content type
-  const getContentTypeIcon = () => {
-    switch (article.content_type) {
-      case ContentType.QUESTION:
-        return <QuestionIcon className="h-4 w-4 text-royal-blue-500" />;
+interface ArticleCardProps {
+  article: Article;
+  onClick?: () => void;
+  className?: string;
+}
+
+export const ArticleCard: React.FC<ArticleCardProps> = ({
+  article,
+  onClick,
+  className
+}) => {
+  const getContentTypeIcon = (type: ContentType) => {
+    switch (type) {
       case ContentType.ARTICLE:
-        return <BookOpen className="h-4 w-4 text-emerald-500" />;
-      case ContentType.QUOTE:
-        return <QuoteIcon className="h-4 w-4 text-amber-500" />;
+        return <BookOpen className="h-4 w-4" />;
+      case ContentType.QUESTION:
+        return <HelpCircle className="h-4 w-4" />;
       case ContentType.POLL:
-        return <PollIcon className="h-4 w-4 text-purple-500" />;
+        return <BarChart3 className="h-4 w-4" />;
+      case ContentType.QUOTE:
+        return <Quote className="h-4 w-4" />;
       default:
         return <BookOpen className="h-4 w-4" />;
     }
   };
-  
-  // Get color class based on content type
-  const getContentTypeClass = () => {
-    switch (article.content_type) {
-      case ContentType.QUESTION:
-        return "text-royal-blue-500 hover:text-royal-blue-600 dark:hover:text-royal-blue-400";
+
+  const getContentTypeColor = (type: ContentType) => {
+    switch (type) {
       case ContentType.ARTICLE:
-        return "text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400";
-      case ContentType.QUOTE:
-        return "text-amber-500 hover:text-amber-600 dark:hover:text-amber-400";
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case ContentType.QUESTION:
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case ContentType.POLL:
-        return "text-purple-500 hover:text-purple-600 dark:hover:text-purple-400";
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case ContentType.QUOTE:
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       default:
-        return "text-primary hover:text-primary/90";
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
-  
-  // Format content snippet by removing HTML tags
-  const formatSnippet = (content: string) => {
-    const plainText = content.replace(/<[^>]*>?/gm, '');
-    return plainText.length > 160 ? plainText.substring(0, 160) + '...' : plainText;
+
+  const truncateContent = (content: string, maxLength: number = 200) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength).trim() + '...';
+  };
+
+  const getAuthorInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({
+        title: article.title,
+        text: truncateContent(article.content, 100),
+        url: window.location.origin + `/knowledge/${article.id}`
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(
+        window.location.origin + `/knowledge/${article.id}`
+      );
+    }
   };
 
   return (
     <Card 
       className={cn(
-        "transition-all duration-300 hover:shadow-md cursor-pointer",
-        article.author?.is_admin && "admin-gradient-premium-border" // Apply gradient border for admin content
+        "cursor-pointer hover:shadow-md transition-all duration-200 border-border/50",
+        className
       )}
       onClick={onClick}
     >
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2 mb-2">
-          {getContentTypeIcon()}
-          <Badge variant="outline" className="text-xs capitalize">
-            {article.content_type.toLowerCase()}
-          </Badge>
-          
-          {article.is_featured && (
-            <Badge className="bg-amber-500 text-xs">
-              Featured
-            </Badge>
-          )}
-          
-          {article.author?.is_admin && (
-            <Badge className="bg-[#9b87f5] text-xs">
-              Admin
-            </Badge>
-          )}
-        </div>
-        
-        <div className={`group transition-colors ${getContentTypeClass()}`}>
-          <CardTitle className="text-xl transition-colors">
-            {article.title}
-          </CardTitle>
-        </div>
-        
-        <div className="flex items-center gap-2 mt-2">
-          <Avatar className={cn(
-            "h-6 w-6",
-            article.author?.is_admin && "ring-2 ring-[#9b87f5]"
-          )}>
-            <AvatarImage src={article.author?.avatar_url} />
-            <AvatarFallback>
-              {article.author?.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-sm text-muted-foreground">
-            {article.author?.name} • {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
-          </span>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <Badge 
+                variant="secondary" 
+                className={cn("text-xs", getContentTypeColor(article.content_type))}
+              >
+                {getContentTypeIcon(article.content_type)}
+                <span className="ml-1 capitalize">
+                  {article.content_type?.toLowerCase() || 'article'}
+                </span>
+              </Badge>
+            </div>
+            
+            <h3 className="text-lg font-semibold line-clamp-2 mb-2">
+              {article.title}
+            </h3>
+            
+            <p className="text-muted-foreground text-sm line-clamp-3">
+              {truncateContent(article.content)}
+            </p>
+          </div>
         </div>
       </CardHeader>
-      
-      <CardContent>
-        <p className="text-muted-foreground text-sm line-clamp-2">
-          {formatSnippet(article.content)}
-        </p>
-        
+
+      <CardContent className="pt-0">
+        {/* Tags */}
         {article.tags && article.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {article.tags.map(tag => (
-              <Badge 
-                key={tag} 
-                variant="outline" 
-                className="text-xs cursor-pointer hover:bg-muted knowledge-tag-border"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent card click
-                  navigate(`/knowledge/tags/${tag}`);
-                }}
-              >
-                <TagIcon className="h-3 w-3 mr-1" />
+          <div className="flex flex-wrap gap-1 mb-3">
+            {article.tags.slice(0, 3).map((tag, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
                 {tag}
               </Badge>
             ))}
+            {article.tags.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{article.tags.length - 3} more
+              </Badge>
+            )}
           </div>
         )}
-      </CardContent>
-      
-      <CardFooter className="pt-0">
-        <div className="flex items-center text-sm text-muted-foreground gap-4">
-          <div className="flex items-center">
-            <ThumbsUp className="h-3 w-3 mr-1" />
-            <span>{article.vote_count}</span>
+
+        <Separator className="mb-3" />
+
+        {/* Bottom section */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center gap-4">
+            {/* Author */}
+            {article.author && (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={article.author.avatar_url} />
+                  <AvatarFallback className="text-xs">
+                    {getAuthorInitials(article.author.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs">{article.author.name}</span>
+              </div>
+            )}
+
+            {/* Date */}
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span className="text-xs">
+                {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
+              </span>
+            </div>
           </div>
-          
-          <div className="flex items-center">
-            <MessageSquare className="h-3 w-3 mr-1" />
-            <span>{article.comment_count}</span>
-          </div>
-          
-          <div className="flex items-center">
-            <Eye className="h-3 w-3 mr-1" />
-            <span>{article.view_count || 0}</span>
+
+          <div className="flex items-center gap-3">
+            {/* Stats */}
+            <div className="flex items-center gap-3 text-xs">
+              {article.view_count !== undefined && (
+                <div className="flex items-center gap-1">
+                  <Eye className="h-3 w-3" />
+                  <span>{article.view_count}</span>
+                </div>
+              )}
+              
+              {article.comment_count !== undefined && (
+                <div className="flex items-center gap-1">
+                  <MessageSquare className="h-3 w-3" />
+                  <span>{article.comment_count}</span>
+                </div>
+              )}
+              
+              {article.vote_count !== undefined && (
+                <div className="flex items-center gap-1">
+                  <ThumbsUp className="h-3 w-3" />
+                  <span>{article.vote_count}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Share button - hidden on mobile */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hidden sm:flex"
+              onClick={handleShare}
+            >
+              <Share2 className="h-3 w-3" />
+            </Button>
           </div>
         </div>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 };
