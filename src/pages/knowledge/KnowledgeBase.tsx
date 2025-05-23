@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -304,7 +303,7 @@ const KnowledgeBase = () => {
             </Button>
             
             <Button 
-              onClick={() => navigate("/knowledge/create")}
+              onClick={() => setIsCreateModalOpen(true)}
               className="shrink-0 hidden sm:flex"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -312,7 +311,7 @@ const KnowledgeBase = () => {
             </Button>
             
             <Button 
-              onClick={() => navigate("/knowledge/create")}
+              onClick={() => setIsCreateModalOpen(true)}
               size="icon"
               className="sm:hidden"
             >
@@ -493,7 +492,7 @@ const KnowledgeBase = () => {
         </div>
       </div>
       
-      {/* Create Post Modal - updated to handle new redirect approach */}
+      {/* Create Post Modal */}
       <CreatePostModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
