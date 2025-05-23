@@ -39,7 +39,7 @@ import DebuggerDashboard from '@/pages/admin/DebuggerDashboard';
 import OrganizerDashboard from '@/pages/OrganizerDashboard';
 import DotConnectorDashboard from '@/pages/DotConnectorDashboard';
 
-// Rel8t CRM
+// Rel8 CRM
 import Dashboard from '@/pages/rel8t/Dashboard';
 import Contacts from '@/pages/rel8t/Contacts';
 import ContactCreate from '@/pages/rel8t/ContactCreate';
@@ -189,80 +189,80 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Rel8t CRM Routes */}
-        <Route path="/rel8t" element={
+        {/* Rel8 CRM Routes */}
+        <Route path="/rel8" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/contacts" element={
+        <Route path="/rel8/contacts" element={
           <ProtectedRoute>
             <Contacts />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/contacts/create" element={
+        <Route path="/rel8/contacts/create" element={
           <ProtectedRoute>
             <ContactCreate />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/contacts/:id/edit" element={
+        <Route path="/rel8/contacts/:id/edit" element={
           <ProtectedRoute>
             <ContactEdit />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/contacts/import" element={
+        <Route path="/rel8/contacts/import" element={
           <ProtectedRoute>
             <ImportContacts />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/groups" element={
+        <Route path="/rel8/groups" element={
           <ProtectedRoute>
             <Groups />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/categories" element={
+        <Route path="/rel8/categories" element={
           <ProtectedRoute>
             <Categories />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/relationships" element={
+        <Route path="/rel8/relationships" element={
           <ProtectedRoute>
             <Relationships />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/relationships/wizard" element={
+        <Route path="/rel8/wizard" element={
           <ProtectedRoute>
             <RelationshipWizard />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/triggers/wizard" element={
+        <Route path="/rel8/triggers/wizard" element={
           <ProtectedRoute>
             <TriggerWizard />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/notifications" element={
+        <Route path="/rel8/notifications" element={
           <ProtectedRoute>
             <Notifications />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/settings" element={
+        <Route path="/rel8/settings" element={
           <ProtectedRoute>
             <Settings />
           </ProtectedRoute>
         } />
         
-        <Route path="/rel8t/email-test" element={
+        <Route path="/rel8/email-test" element={
           <ProtectedRoute>
             <EmailTest />
           </ProtectedRoute>

@@ -162,13 +162,13 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   <>
                     <Separator className="my-2" />
                     <p className="px-4 py-2 text-sm font-medium opacity-70">
-                      REL8T CRM
+                      REL8
                     </p>
 
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => handleNavigation("/rel8t")}
+                      onClick={() => handleNavigation("/rel8")}
                     >
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       Dashboard
@@ -177,7 +177,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => handleNavigation("/rel8t/contacts")}
+                      onClick={() => handleNavigation("/rel8/contacts")}
                     >
                       <ContactIcon className="mr-2 h-4 w-4" />
                       Contacts
@@ -186,7 +186,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => handleNavigation("/rel8t/relationships")}
+                      onClick={() => handleNavigation("/rel8/relationships")}
                     >
                       <CalendarClock className="mr-2 h-4 w-4" />
                       Relationships
@@ -195,7 +195,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => handleNavigation("/rel8t/groups")}
+                      onClick={() => handleNavigation("/rel8/groups")}
                     >
                       <Grid3x3 className="mr-2 h-4 w-4" />
                       Groups
@@ -204,7 +204,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => handleNavigation("/rel8t/categories")}
+                      onClick={() => handleNavigation("/rel8/categories")}
                     >
                       <Tag className="mr-2 h-4 w-4" />
                       Categories
@@ -213,7 +213,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => handleNavigation("/rel8t/settings")}
+                      onClick={() => handleNavigation("/rel8/settings")}
                     >
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
