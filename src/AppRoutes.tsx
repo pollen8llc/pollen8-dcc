@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Authentication
 import Auth from '@/pages/Auth';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Main Pages
 import Index from '@/pages/Index';
@@ -59,10 +59,8 @@ const AppRoutes = () => {
   return (
     <ErrorBoundary>
       <Routes>
-        {/* Root Route - Landing page or redirect based on auth */}
-        <Route path="/" element={<Index />} />
-        
         {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/invite/:code" element={<InvitePage />} />
         <Route path="/docs" element={<Documentation />} />
@@ -70,7 +68,7 @@ const AppRoutes = () => {
         {/* Protected Routes */}
         <Route path="/welcome" element={
           <ProtectedRoute>
-            <KnowledgeBase />
+            <Index />
           </ProtectedRoute>
         } />
         

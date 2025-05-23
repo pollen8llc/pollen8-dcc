@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -8,9 +8,8 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
-import { useUser } from "@/contexts/UserContext";
+import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
 import {
   Home,
@@ -33,23 +32,32 @@ import {
   BookOpen,
   Book,
   FileTextIcon,
-  Tag,
-  Menu
+  Tag
 } from "lucide-react";
 
-const NavigationDrawer: React.FC = () => {
+interface NavigationDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  currentUser: User | null;
+  logout: () => Promise<void>;
+}
+
+const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
+  open,
+  onOpenChange,
+  currentUser,
+  logout,
+}) => {
   const navigate = useNavigate();
-  const { currentUser, logout } = useUser();
-  const [open, setOpen] = useState(false);
 
   const handleNavigation = (route: string) => {
     navigate(route);
-    setOpen(false);
+    onOpenChange(false);
   };
 
   const handleLogout = async () => {
     await logout();
-    setOpen(false);
+    onOpenChange(false);
     navigate("/");
   };
 
@@ -58,12 +66,7 @@ const NavigationDrawer: React.FC = () => {
                       (currentUser?.managedCommunities && currentUser.managedCommunities.length > 0);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
-        </Button>
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[300px] sm:w-[350px] flex flex-col">
         <SheetHeader className="mb-4">
           <SheetTitle className="text-xl">ECO8</SheetTitle>

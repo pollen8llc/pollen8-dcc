@@ -3,9 +3,9 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
-import ThemeToggle from '@/components/ThemeToggle';
-import UserMenuDropdown from '@/components/navbar/UserMenuDropdown';
-import NavigationDrawer from '@/components/navbar/NavigationDrawer';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { UserMenuDropdown } from '@/components/navbar/UserMenuDropdown';
+import { NavigationDrawer } from '@/components/navbar/NavigationDrawer';
 import { 
   Home, 
   User, 

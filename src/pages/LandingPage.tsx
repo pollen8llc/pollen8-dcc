@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, ChevronRight } from "lucide-react";
@@ -160,10 +159,10 @@ const LandingPage: React.FC = () => {
             <div>
               <h3 className="font-bold mb-4">Platform</h3>
               <ul className="space-y-2">
-                <li><Link to="/rel8t" className="text-muted-foreground hover:text-foreground text-sm">REL8</Link></li>
-                <li><Link to="/knowledge" className="text-muted-foreground hover:text-foreground text-sm">Knowledge Base</Link></li>
-                <li><Link to="/docs" className="text-muted-foreground hover:text-foreground text-sm">Documentation</Link></li>
-                <li><Link to="/profile/search" className="text-muted-foreground hover:text-foreground text-sm">Search Profiles</Link></li>
+                <li><Link to="/rel8/dashboard" className="text-muted-foreground hover:text-foreground text-sm">REL8</Link></li>
+                <li><Link to="/communities" className="text-muted-foreground hover:text-foreground text-sm">ECO8</Link></li>
+                <li><Link to="/documentation" className="text-muted-foreground hover:text-foreground text-sm">Documentation</Link></li>
+                <li><Link to="/profiles/search" className="text-muted-foreground hover:text-foreground text-sm">Search Profiles</Link></li>
               </ul>
             </div>
             
