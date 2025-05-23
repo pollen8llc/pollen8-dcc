@@ -21,7 +21,7 @@ const Navbar = () => {
           <img 
             src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans-300x52.png" 
             alt="Pollen8" 
-            className="h-8" 
+            className="h-6 p-1.5" 
           />
         </Link>
         
@@ -43,7 +43,7 @@ const Navbar = () => {
             </Button>
           )}
           
-          {/* Menu button for drawer - moved to the right */}
+          {/* Menu button for drawer */}
           <Button
             variant="ghost"
             size="icon"
