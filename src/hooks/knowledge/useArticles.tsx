@@ -1,8 +1,27 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
+import { KnowledgeArticle, ContentType, KnowledgeAuthor } from '@/models/knowledgeTypes';
 import { useToast } from '@/hooks/use-toast';
+
+// Helper function to transform author data with proper typing
+const transformAuthor = (authorData: any, userId: string): KnowledgeAuthor => {
+  // If author data exists and has the expected structure
+  if (authorData && typeof authorData === 'object' && 'id' in authorData) {
+    return {
+      id: authorData.id,
+      name: `${authorData.first_name || ''} ${authorData.last_name || ''}`.trim() || 'Unknown User',
+      first_name: authorData.first_name || undefined,
+      last_name: authorData.last_name || undefined,
+      avatar_url: authorData.avatar_url || undefined
+    };
+  }
+  
+  // Fallback author object
+  return {
+    id: userId,
+    name: 'Unknown User'
+  };
+};
 
 export const useArticles = (options?: { searchQuery?: string; tag?: string; type?: string; sort?: string; limit?: number }) => {
   return useQuery({
@@ -51,16 +70,7 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
       // Transform the data to match our interface
       const transformedData = data?.map(item => ({
         ...item,
-        author: item.author && typeof item.author === 'object' && !Array.isArray(item.author) && 'id' in item.author ? {
-          id: item.author.id,
-          name: `${item.author.first_name || ''} ${item.author.last_name || ''}`.trim() || 'Unknown User',
-          first_name: item.author.first_name || undefined,
-          last_name: item.author.last_name || undefined,
-          avatar_url: item.author.avatar_url || undefined
-        } : {
-          id: item.user_id,
-          name: 'Unknown User'
-        }
+        author: transformAuthor(item.author, item.user_id)
       })) as KnowledgeArticle[];
 
       return transformedData;
@@ -86,16 +96,7 @@ export const useArticle = (id: string) => {
       // Transform the data to match our interface
       const transformedData = {
         ...data,
-        author: data.author && typeof data.author === 'object' && !Array.isArray(data.author) && 'id' in data.author ? {
-          id: data.author.id,
-          name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim() || 'Unknown User',
-          first_name: data.author.first_name || undefined,
-          last_name: data.author.last_name || undefined,
-          avatar_url: data.author.avatar_url || undefined
-        } : {
-          id: data.user_id,
-          name: 'Unknown User'
-        }
+        author: transformAuthor(data.author, data.user_id)
       } as KnowledgeArticle;
 
       return transformedData;
