@@ -27,6 +27,8 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
   return useQuery({
     queryKey: ['articles', options],
     queryFn: async () => {
+      console.log("Fetching articles with options:", options);
+      
       let query = supabase
         .from('knowledge_articles')
         .select(`
@@ -65,7 +67,12 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching articles:", error);
+        throw error;
+      }
+      
+      console.log("Articles fetched successfully:", data?.length || 0, "articles");
       
       // Transform the data to match our interface
       const transformedData = data?.map(item => ({
@@ -82,6 +89,13 @@ export const useArticle = (id: string) => {
   return useQuery({
     queryKey: ['article', id],
     queryFn: async () => {
+      console.log("Fetching single article with ID:", id);
+      
+      if (!id) {
+        console.error("No article ID provided");
+        throw new Error("Article ID is required");
+      }
+
       const { data, error } = await supabase
         .from('knowledge_articles')
         .select(`
@@ -89,9 +103,19 @@ export const useArticle = (id: string) => {
           author:profiles!knowledge_articles_user_id_fkey(id, first_name, last_name, avatar_url)
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle(); // Use maybeSingle() instead of single() to handle missing articles
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching article:", error);
+        throw error;
+      }
+
+      if (!data) {
+        console.log("Article not found for ID:", id);
+        throw new Error("Article not found");
+      }
+      
+      console.log("Article fetched successfully:", data.title);
       
       // Transform the data to match our interface
       const transformedData = {
@@ -101,6 +125,14 @@ export const useArticle = (id: string) => {
 
       return transformedData;
     },
+    retry: (failureCount, error) => {
+      // Don't retry if article is not found
+      if (error?.message === "Article not found") {
+        return false;
+      }
+      // Retry other errors up to 2 times
+      return failureCount < 2;
+    }
   });
 };
 

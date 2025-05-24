@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useAuth = () => {
-  const { session, isLoading: sessionLoading, logout, refreshSession } = useSession();
+  const { session, isLoading: sessionLoading, logout, refreshSession, recoverUserSession } = useSession();
   const { currentUser, isLoading: profileLoading, refreshUser, createProfileIfNotExists } = useProfile(session);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -57,12 +57,15 @@ export const useAuth = () => {
         try {
           const created = await createProfileIfNotExists();
           if (created) {
-            console.log("Profile created successfully");
+            console.log("Profile created successfully - this was a new profile");
             await refreshUser();
+            // Only show toast for actually new profiles, not existing ones
             toast({
               title: "Profile setup complete",
               description: "Your profile has been initialized",
             });
+          } else {
+            console.log("Profile already existed, no creation needed");
           }
         } catch (error) {
           console.error("Error creating profile:", error);
@@ -129,39 +132,6 @@ export const useAuth = () => {
     
     checkProfileCompletion();
   }, [currentUser, sessionLoading, profileLoading, navigate, toast]);
-  
-  // Recovery function for manual use
-  const recoverUserSession = useCallback(async () => {
-    try {
-      console.log("Attempting to recover user session");
-      
-      // Reset all flags
-      profileCreationAttempted.current = false;
-      profileCompletionChecked.current = false;
-      retryCount.current = 0;
-      
-      const refreshSuccess = await refreshSession();
-      
-      if (refreshSuccess) {
-        await refreshUser();
-        toast({
-          title: "Session recovered",
-          description: "Your session has been successfully restored",
-        });
-        return true;
-      } else {
-        throw new Error("Failed to refresh session");
-      }
-    } catch (error) {
-      console.error("Failed to recover session:", error);
-      toast({
-        title: "Recovery failed",
-        description: "Please try logging out and back in to resolve the issue",
-        variant: "destructive",
-      });
-      return false;
-    }
-  }, [refreshUser, refreshSession, toast]);
 
   return { 
     currentUser, 

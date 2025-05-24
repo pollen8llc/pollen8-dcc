@@ -89,6 +89,33 @@ export const useSession = () => {
     }
   }, []);
 
+  // Recovery function for manual use
+  const recoverUserSession = useCallback(async (): Promise<boolean> => {
+    try {
+      console.log("Attempting to recover user session");
+      
+      const refreshSuccess = await refreshSession();
+      
+      if (refreshSuccess) {
+        toast({
+          title: "Session recovered",
+          description: "Your session has been successfully restored",
+        });
+        return true;
+      } else {
+        throw new Error("Failed to refresh session");
+      }
+    } catch (error) {
+      console.error("Failed to recover session:", error);
+      toast({
+        title: "Recovery failed",
+        description: "Please try logging out and back in to resolve the issue",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }, [refreshSession, toast]);
+
   // Logout user with improved error handling
   const logout = useCallback(async (): Promise<void> => {
     try {
@@ -126,6 +153,7 @@ export const useSession = () => {
     session, 
     isLoading, 
     logout,
-    refreshSession
+    refreshSession,
+    recoverUserSession
   };
 };

@@ -166,8 +166,8 @@ export const useProfile = (session: Session | null) => {
       }
       
       if (existingProfile) {
-        console.log("Profile already exists");
-        return true;
+        console.log("Profile already exists, no creation needed");
+        return false; // Return false to indicate no new profile was created
       }
       
       // Get user email from auth
@@ -182,7 +182,7 @@ export const useProfile = (session: Session | null) => {
       const lastName = authUser.user.user_metadata?.last_name || '';
       const email = authUser.user.email || '';
       
-      console.log("Creating profile with data:", { userId, email, firstName, lastName });
+      console.log("Creating new profile with data:", { userId, email, firstName, lastName });
       
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
@@ -205,13 +205,13 @@ export const useProfile = (session: Session | null) => {
       }
       
       console.log("Profile created successfully:", newProfile);
-      return true;
+      return true; // Return true to indicate a new profile was created
     } catch (error: any) {
       console.error("Error in createProfileIfNotExists:", error);
       setError(`Error creating profile: ${error.message || "Unknown error"}`);
       return false;
     }
-  }, [session, toast]);
+  }, [session]);
 
   // Effect to update user data when session changes
   useEffect(() => {
