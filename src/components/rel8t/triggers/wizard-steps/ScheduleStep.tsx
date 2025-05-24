@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
@@ -168,11 +167,16 @@ export function ScheduleStep({ validateAndNext }: { validateAndNext: () => void 
         )}
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-2">
         <Button type="button" variant="outline" onClick={onPreviousClick}>
           Previous
         </Button>
-        <Button type="button" onClick={validateAndNext}>Next Step</Button>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={() => window.location.href = '/rel8/wizard'}>
+            Skip
+          </Button>
+          <Button type="button" onClick={validateAndNext}>Next Step</Button>
+        </div>
       </div>
     </div>
   );
