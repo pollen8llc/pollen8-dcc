@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
@@ -11,7 +12,7 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
         .from('knowledge_articles')
         .select(`
           *,
-          author:profiles!knowledge_articles_user_id_fkey(id, first_name, last_name, avatar_url)
+          author:profiles!inner(id, first_name, last_name, avatar_url)
         `);
 
       if (options?.searchQuery) {
@@ -46,23 +47,7 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
       const { data, error } = await query;
 
       if (error) throw error;
-      
-      // Transform the data to match our interface
-      const transformedData = data?.map(item => ({
-        ...item,
-        author: item.author && typeof item.author === 'object' && 'id' in item.author ? {
-          id: item.author.id,
-          name: `${item.author.first_name || ''} ${item.author.last_name || ''}`.trim() || 'Unknown User',
-          first_name: item.author.first_name || undefined,
-          last_name: item.author.last_name || undefined,
-          avatar_url: item.author.avatar_url || undefined
-        } : {
-          id: item.user_id,
-          name: 'Unknown User'
-        }
-      })) as KnowledgeArticle[];
-
-      return transformedData;
+      return data as KnowledgeArticle[];
     },
   });
 };
@@ -75,29 +60,13 @@ export const useArticle = (id: string) => {
         .from('knowledge_articles')
         .select(`
           *,
-          author:profiles!knowledge_articles_user_id_fkey(id, first_name, last_name, avatar_url)
+          author:profiles!inner(id, first_name, last_name, avatar_url)
         `)
         .eq('id', id)
         .single();
 
       if (error) throw error;
-      
-      // Transform the data to match our interface
-      const transformedData = {
-        ...data,
-        author: data.author && typeof data.author === 'object' && 'id' in data.author ? {
-          id: data.author.id,
-          name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim() || 'Unknown User',
-          first_name: data.author.first_name || undefined,
-          last_name: data.author.last_name || undefined,
-          avatar_url: data.author.avatar_url || undefined
-        } : {
-          id: data.user_id,
-          name: 'Unknown User'
-        }
-      } as KnowledgeArticle;
-
-      return transformedData;
+      return data as KnowledgeArticle;
     },
   });
 };

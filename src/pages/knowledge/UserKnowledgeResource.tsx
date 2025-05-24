@@ -67,6 +67,26 @@ const UserKnowledgeResource = () => {
     </Card>
   );
 
+  // Helper function to convert article data to KnowledgeArticle type
+  const convertToKnowledgeArticle = (article: any): KnowledgeArticle => ({
+    id: article.id,
+    title: article.title,
+    content: article.content || '',
+    content_type: article.content_type,
+    user_id: article.user_id || currentUser.id,
+    created_at: article.created_at,
+    updated_at: article.updated_at || article.created_at,
+    tags: article.tags || [],
+    vote_count: article.vote_count || 0,
+    user_vote: article.user_vote || null,
+    view_count: article.view_count || 0,
+    comment_count: article.comment_count || 0,
+    is_answered: article.is_answered,
+    is_featured: article.is_featured,
+    author: article.author,
+    subtitle: article.subtitle
+  });
+
   return (
     <Shell>
       <div className="container mx-auto px-4 py-6 space-y-8">
@@ -212,14 +232,7 @@ const UserKnowledgeResource = () => {
                 {stats?.articles?.map((article) => (
                   <ArticleCard
                     key={article.id}
-                    article={{
-                      ...article,
-                      author: {
-                        id: currentUser.id,
-                        name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Unknown User',
-                        avatar_url: currentUser.avatar_url
-                      }
-                    } as KnowledgeArticle}
+                    article={convertToKnowledgeArticle(article)}
                     onClick={() => navigate(`/knowledge/${article.id}`)}
                   />
                 ))}
@@ -262,14 +275,7 @@ const UserKnowledgeResource = () => {
                 {savedArticles?.map((article) => (
                   <ArticleCard
                     key={article.id}
-                    article={{
-                      ...article,
-                      author: {
-                        id: article.author?.id || article.user_id,
-                        name: article.author?.name || 'Unknown User',
-                        avatar_url: article.author?.avatar_url
-                      }
-                    } as KnowledgeArticle}
+                    article={article}
                     onClick={() => navigate(`/knowledge/${article.id}`)}
                   />
                 ))}
