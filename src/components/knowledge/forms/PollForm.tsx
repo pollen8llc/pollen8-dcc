@@ -179,8 +179,8 @@ export const PollForm: React.FC<PollFormProps> = ({
         <div className="space-y-4">
           <FormLabel>Poll Options</FormLabel>
           
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex items-center gap-2">
+          {fields.map((fieldItem, index) => (
+            <div key={fieldItem.id} className="flex items-center gap-2">
               <FormField
                 control={form.control}
                 name={`options.${index}.text`}
