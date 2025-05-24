@@ -10,8 +10,10 @@ import { ReviewStep } from "@/components/rel8t/triggers/wizard-steps/ReviewStep"
 import { FormProvider, useForm } from "react-hook-form";
 import { Shell } from "@/components/layout/Shell";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const TriggerWizard = () => {
+  const navigate = useNavigate();
   // Get trigger wizard state and functions
   const { 
     currentStep, 
@@ -53,11 +55,19 @@ const TriggerWizard = () => {
       <div className="container mx-auto px-4 py-8">
         <Rel8Navigation />
         
-        <div className="mt-6 mb-8">
-          <h1 className="text-3xl font-bold">Create Automation Trigger</h1>
-          <p className="text-muted-foreground mt-1">
-            Set up automated actions based on specific events or schedules
-          </p>
+        <div className="flex justify-between items-center mt-6 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Create Automation Trigger</h1>
+            <p className="text-muted-foreground mt-1">
+              Set up automated actions based on specific events or schedules
+            </p>
+          </div>
+          <button
+            className="text-sm text-primary underline hover:text-primary/80 font-medium"
+            onClick={() => navigate('/rel8/wizard')}
+          >
+            Skip
+          </button>
         </div>
 
         <Card className="mb-6">
