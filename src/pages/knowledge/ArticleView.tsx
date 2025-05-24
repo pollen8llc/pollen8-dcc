@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ChevronLeft, Calendar, User, Eye, MessageSquare, Archive, ArchiveRestore } from 'lucide-react';
-import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { useArticle, useArticleMutations } from '@/hooks/knowledge/useArticles';
 import { useAuth } from '@/hooks/useAuth';
 import { CommentSection } from '@/components/knowledge/CommentSection';
 import { PollVoting } from '@/components/knowledge/PollVoting';
@@ -18,9 +18,14 @@ const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { useArticle, archiveArticle, unarchiveArticle } = useKnowledgeBase();
+  const { archiveArticle, unarchiveArticle } = useArticleMutations();
   
   const { data: article, isLoading, error } = useArticle(id!);
+
+  console.log("ArticleView - Article ID:", id);
+  console.log("ArticleView - Article data:", article);
+  console.log("ArticleView - Loading:", isLoading);
+  console.log("ArticleView - Error:", error);
 
   // Increment view count when article is loaded
   useEffect(() => {
@@ -50,7 +55,28 @@ const ArticleView = () => {
     );
   }
 
-  if (error || !article) {
+  if (error) {
+    console.error("ArticleView - Error details:", error);
+    return (
+      <Shell>
+        <div className="container mx-auto px-4 py-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-2xl font-bold mb-4">Error Loading Article</h1>
+            <p className="text-muted-foreground mb-6">
+              There was an error loading the article: {error.message}
+            </p>
+            <Button onClick={() => navigate('/knowledge')}>
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back to Knowledge Base
+            </Button>
+          </div>
+        </div>
+      </Shell>
+    );
+  }
+
+  if (!article) {
+    console.log("ArticleView - No article found for ID:", id);
     return (
       <Shell>
         <div className="container mx-auto px-4 py-6">
