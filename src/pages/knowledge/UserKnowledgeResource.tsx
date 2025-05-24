@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -214,7 +215,7 @@ const UserKnowledgeResource = () => {
                     article={{
                       ...article,
                       author: {
-                        id: article.user_id || currentUser.id,
+                        id: currentUser.id,
                         name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Unknown User',
                         avatar_url: currentUser.avatar_url
                       }

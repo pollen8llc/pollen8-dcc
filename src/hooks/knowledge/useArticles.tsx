@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
@@ -54,9 +53,9 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
         author: item.author && typeof item.author === 'object' && 'id' in item.author ? {
           id: item.author.id,
           name: `${item.author.first_name || ''} ${item.author.last_name || ''}`.trim() || 'Unknown User',
-          first_name: item.author.first_name,
-          last_name: item.author.last_name,
-          avatar_url: item.author.avatar_url
+          first_name: item.author.first_name || undefined,
+          last_name: item.author.last_name || undefined,
+          avatar_url: item.author.avatar_url || undefined
         } : {
           id: item.user_id,
           name: 'Unknown User'
@@ -89,9 +88,9 @@ export const useArticle = (id: string) => {
         author: data.author && typeof data.author === 'object' && 'id' in data.author ? {
           id: data.author.id,
           name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim() || 'Unknown User',
-          first_name: data.author.first_name,
-          last_name: data.author.last_name,
-          avatar_url: data.author.avatar_url
+          first_name: data.author.first_name || undefined,
+          last_name: data.author.last_name || undefined,
+          avatar_url: data.author.avatar_url || undefined
         } : {
           id: data.user_id,
           name: 'Unknown User'
