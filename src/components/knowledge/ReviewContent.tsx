@@ -51,7 +51,7 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
 
         {/* Title */}
         <div>
-          <h3 className="text-xl font-semibold mb-2">{formData.title}</h3>
+          <h3 className="text-xl font-semibold mb-2">{formData.title || formData.question}</h3>
           
           {/* Tags */}
           {formData.tags && formData.tags.length > 0 && (
@@ -90,13 +90,23 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
           
           {contentType === ContentType.POLL && (
             <div>
-              <p className="whitespace-pre-wrap mb-4">{formData.content}</p>
+              <p className="whitespace-pre-wrap mb-4">{formData.question}</p>
               <h4 className="text-sm font-medium mb-2">Options:</h4>
               <ul className="list-disc pl-5 space-y-1">
-                {formData.options?.map((option: string, index: number) => (
-                  <li key={index}>{option}</li>
+                {formData.options?.map((option: { text: string }, index: number) => (
+                  <li key={index}>{option.text}</li>
                 ))}
               </ul>
+              {formData.allowMultipleSelections && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Multiple selections allowed
+                </p>
+              )}
+              {formData.duration && (
+                <p className="text-sm text-muted-foreground">
+                  Duration: {formData.duration} days
+                </p>
+              )}
             </div>
           )}
         </div>
