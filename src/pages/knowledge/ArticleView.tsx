@@ -17,7 +17,7 @@ import { format } from 'date-fns';
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   const { useArticle, archiveArticle, unarchiveArticle } = useKnowledgeBase();
   
   const { data: article, isLoading, error } = useArticle(id!);
@@ -69,7 +69,7 @@ const ArticleView = () => {
     );
   }
 
-  const isOwner = user?.id === article.user_id;
+  const isOwner = currentUser?.id === article.user_id;
   const contentType = article.content_type as ContentType;
 
   const handleArchive = async () => {
@@ -247,7 +247,16 @@ const ArticleView = () => {
           <Separator className="my-6" />
 
           {/* Comments Section */}
-          <CommentSection articleId={article.id} />
+          <CommentSection 
+            articleId={article.id}
+            comments={[]}
+            isArticleAuthor={isOwner}
+            isLoading={false}
+            onVote={() => {}}
+            onAccept={() => {}}
+            onDelete={() => {}}
+            onAddComment={async () => {}}
+          />
         </div>
       </div>
     </Shell>

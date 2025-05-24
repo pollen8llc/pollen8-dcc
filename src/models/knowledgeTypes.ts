@@ -10,7 +10,9 @@ export type VoteType = 'upvote' | 'downvote' | 'none';
 
 export interface KnowledgeAuthor {
   id: string;
-  name: string;
+  name: string; // Make name required but provide default in transformations
+  first_name?: string;
+  last_name?: string;
   avatar_url?: string;
   role?: string;
   is_admin?: boolean;
@@ -32,7 +34,11 @@ export interface KnowledgeArticle {
   is_answered?: boolean;
   is_featured?: boolean;
   author?: KnowledgeAuthor;
-  subtitle?: string; // Optional subtitle field for articles
+  subtitle?: string;
+  source?: string;
+  options?: any;
+  archived_at?: string | null;
+  archived_by?: string | null;
 }
 
 export interface KnowledgeComment {

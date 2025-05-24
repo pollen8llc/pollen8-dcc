@@ -72,7 +72,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
         await createArticle(articleData);
         navigate('/knowledge');
       } else if (mode === 'edit' && article) {
-        await updateArticle(article.id, articleData);
+        await updateArticle({ id: article.id, data: articleData });
         navigate(`/knowledge/${article.id}`);
       }
     } catch (error) {
