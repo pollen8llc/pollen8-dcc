@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -44,7 +43,7 @@ const Relationships = () => {
 
   // Handler for creating a new relationship
   const handleCreateRelationship = () => {
-    navigate("/rel8/wizard");
+    navigate("/rel8/triggers/wizard");
   };
   
   return (

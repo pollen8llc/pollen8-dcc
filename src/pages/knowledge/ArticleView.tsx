@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Shell } from '@/components/layout/Shell';
@@ -50,11 +50,26 @@ const ArticleView = () => {
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = useComments(id);
   
+  const [userVote, setUserVote] = useState(article.user_vote);
+
+  useEffect(() => {
+    setUserVote(article.user_vote);
+  }, [article.user_vote]);
+  
   // Handle voting
   const handleVote = (voteType: VoteType) => {
     if (!article) return;
     if (!id) return;
     
+    // Optimistically update local state
+    setUserVote(prev => {
+      if (voteType === 'upvote') {
+        return prev === 1 ? null : 1;
+      } else if (voteType === 'downvote') {
+        return prev === -1 ? null : -1;
+      }
+      return null;
+    });
     vote('article', id, voteType);
   };
   
@@ -202,7 +217,7 @@ const ArticleView = () => {
                   variant="outline" 
                   size="sm"
                   onClick={() => handleVote('upvote')} 
-                  className={article.user_vote === 1 ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800' : ''}
+                  className={userVote === 1 ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800' : ''}
                 >
                   <ThumbsUp className="h-4 w-4 mr-1" />
                   {article.vote_count || 0}
@@ -212,7 +227,7 @@ const ArticleView = () => {
                   variant="outline" 
                   size="sm"
                   onClick={() => handleVote('downvote')}
-                  className={article.user_vote === -1 ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800' : ''}
+                  className={userVote === -1 ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800' : ''}
                 >
                   <ThumbsDown className="h-4 w-4" />
                 </Button>
@@ -298,11 +313,15 @@ const ArticleView = () => {
               <Card>
                 <CardContent className="pt-6">
                   <h3 className="text-lg font-medium mb-3">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-2">
                     {article.tags.map(tag => (
                       <Badge 
                         key={tag} 
-                        className="cursor-pointer"
+                        className={
+                          tag.toLowerCase() === 'quote'
+                            ? 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-800'
+                            : 'cursor-pointer'
+                        }
                         onClick={() => navigate(`/knowledge/tags/${tag}`)}
                       >
                         {tag}

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -71,6 +70,9 @@ const Dashboard = () => {
             </Button>
             <Button onClick={() => navigate("/rel8/wizard")}>
               Build a Relationship
+            </Button>
+            <Button onClick={() => navigate("/rel8/triggers/wizard")}>
+              Create Trigger
             </Button>
           </div>
         </div>
