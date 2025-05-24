@@ -33,7 +33,7 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
         .from('knowledge_articles')
         .select(`
           *,
-          author:profiles!knowledge_articles_user_id_fkey(id, first_name, last_name, avatar_url)
+          author:profiles!inner(id, first_name, last_name, avatar_url)
         `);
 
       if (options?.searchQuery) {
@@ -96,18 +96,54 @@ export const useArticle = (id: string) => {
         throw new Error("Article ID is required");
       }
 
+      // First try to get the article with author info
       const { data, error } = await supabase
         .from('knowledge_articles')
         .select(`
           *,
-          author:profiles!knowledge_articles_user_id_fkey(id, first_name, last_name, avatar_url)
+          author:profiles!inner(id, first_name, last_name, avatar_url)
         `)
         .eq('id', id)
-        .maybeSingle(); // Use maybeSingle() instead of single() to handle missing articles
+        .maybeSingle();
 
       if (error) {
-        console.error("Error fetching article:", error);
-        throw error;
+        console.error("Error fetching article with author:", error);
+        
+        // If the join fails, try to get just the article without author info
+        console.log("Attempting to fetch article without author join...");
+        const { data: articleOnly, error: articleError } = await supabase
+          .from('knowledge_articles')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+          
+        if (articleError) {
+          console.error("Error fetching article:", articleError);
+          throw new Error("Failed to load article");
+        }
+        
+        if (!articleOnly) {
+          console.log("Article not found for ID:", id);
+          throw new Error("Article not found");
+        }
+        
+        // Get author info separately
+        let authorData = null;
+        if (articleOnly.user_id) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, avatar_url')
+            .eq('id', articleOnly.user_id)
+            .maybeSingle();
+          authorData = profile;
+        }
+        
+        console.log("Article fetched successfully (without join):", articleOnly.title);
+        
+        return {
+          ...articleOnly,
+          author: transformAuthor(authorData, articleOnly.user_id)
+        } as KnowledgeArticle;
       }
 
       if (!data) {
