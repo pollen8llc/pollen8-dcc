@@ -111,7 +111,7 @@ const UserKnowledgeResource = () => {
                     title="Total Posts"
                     value={stats?.totalArticles || 0}
                     description={stats?.recentArticlesCount ? `${stats?.recentArticlesCount} in last 30 days` : undefined}
-                    icon={<BookOpen className="h-5 w-5" />}
+                    icon={<BookOpen className="h-5 w-5 text-[#00eada]" />}
                     color="default"
                     isLoading={statsLoading}
                   />
@@ -119,7 +119,7 @@ const UserKnowledgeResource = () => {
                     title="Total Views"
                     value={stats?.totalViews || 0}
                     description={stats?.averageViewsPerArticle ? `${stats?.averageViewsPerArticle} avg per post` : undefined}
-                    icon={<Eye className="h-5 w-5" />}
+                    icon={<Eye className="h-5 w-5 text-green-500" />}
                     color="success"
                     isLoading={statsLoading}
                   />
@@ -127,16 +127,16 @@ const UserKnowledgeResource = () => {
                     title="Total Votes"
                     value={stats?.totalVotes || 0}
                     description={stats?.averageVotesPerArticle ? `${stats?.averageVotesPerArticle} avg per post` : undefined}
-                    icon={<ThumbsUp className="h-5 w-5" />}
-                    color="success"
+                    icon={<ThumbsUp className="h-5 w-5 text-purple-500" />}
+                    color="purple"
                     isLoading={statsLoading}
                   />
                   <MetricCard
                     title="Total Comments"
                     value={stats?.totalComments || 0}
                     description="Engagement received"
-                    icon={<MessageSquare className="h-5 w-5" />}
-                    color="default"
+                    icon={<MessageSquare className="h-5 w-5 text-red-500" />}
+                    color="danger"
                     isLoading={statsLoading}
                   />
                 </div>
