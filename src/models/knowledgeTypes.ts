@@ -1,3 +1,4 @@
+
 export enum ContentType {
   QUESTION = "QUESTION",
   ARTICLE = "ARTICLE",
@@ -9,7 +10,7 @@ export type VoteType = 'upvote' | 'downvote' | 'none';
 
 export interface KnowledgeAuthor {
   id: string;
-  name?: string;
+  name: string; // Make name required but provide default in transformations
   first_name?: string;
   last_name?: string;
   avatar_url?: string;

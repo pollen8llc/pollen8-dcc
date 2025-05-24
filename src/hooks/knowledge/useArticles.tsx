@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
@@ -11,7 +12,7 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
         .from('knowledge_articles')
         .select(`
           *,
-          author:profiles!inner(id, first_name, last_name, avatar_url)
+          author:profiles!knowledge_articles_user_id_fkey(id, first_name, last_name, avatar_url)
         `);
 
       if (options?.searchQuery) {
@@ -50,13 +51,16 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
       // Transform the data to match our interface
       const transformedData = data?.map(item => ({
         ...item,
-        author: item.author ? {
+        author: item.author && typeof item.author === 'object' && 'id' in item.author ? {
           id: item.author.id,
-          name: `${item.author.first_name || ''} ${item.author.last_name || ''}`.trim(),
+          name: `${item.author.first_name || ''} ${item.author.last_name || ''}`.trim() || 'Unknown User',
           first_name: item.author.first_name,
           last_name: item.author.last_name,
           avatar_url: item.author.avatar_url
-        } : undefined
+        } : {
+          id: item.user_id,
+          name: 'Unknown User'
+        }
       })) as KnowledgeArticle[];
 
       return transformedData;
@@ -72,7 +76,7 @@ export const useArticle = (id: string) => {
         .from('knowledge_articles')
         .select(`
           *,
-          author:profiles!inner(id, first_name, last_name, avatar_url)
+          author:profiles!knowledge_articles_user_id_fkey(id, first_name, last_name, avatar_url)
         `)
         .eq('id', id)
         .single();
@@ -82,13 +86,16 @@ export const useArticle = (id: string) => {
       // Transform the data to match our interface
       const transformedData = {
         ...data,
-        author: data.author ? {
+        author: data.author && typeof data.author === 'object' && 'id' in data.author ? {
           id: data.author.id,
-          name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim(),
+          name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim() || 'Unknown User',
           first_name: data.author.first_name,
           last_name: data.author.last_name,
           avatar_url: data.author.avatar_url
-        } : undefined
+        } : {
+          id: data.user_id,
+          name: 'Unknown User'
+        }
       } as KnowledgeArticle;
 
       return transformedData;
