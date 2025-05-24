@@ -1,380 +1,290 @@
 
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/contexts/UserContext';
-import { KnowledgeArticle, ContentType, KnowledgeAuthor } from '@/models/knowledgeTypes';
 
-export const useArticles = (filters?: { tag?: string | null, searchQuery?: string, limit?: number, type?: string | null }) => {
-  const queryKey = ['knowledgeArticles', filters];
-  const queryClient = useQueryClient();
-  
+export const useArticles = (options?: { searchQuery?: string; tag?: string; type?: string; sort?: string; limit?: number }) => {
   return useQuery({
-    queryKey,
+    queryKey: ['articles', options],
     queryFn: async () => {
-      console.log('Fetching articles with filters:', filters);
-      
-      // First fetch the articles without trying to join with profiles
       let query = supabase
         .from('knowledge_articles')
         .select(`
-          id, 
-          title,
-          content,
-          created_at,
-          updated_at,
-          view_count,
-          comment_count,
-          vote_count,
-          is_answered,
-          tags,
-          content_type,
-          user_id
-        `)
-        .order('created_at', { ascending: false });
-      
-      if (filters?.tag) {
-        query = query.contains('tags', [filters.tag]);
+          *,
+          author:profiles!inner(id, first_name, last_name, avatar_url)
+        `);
+
+      if (options?.searchQuery) {
+        query = query.or(`title.ilike.%${options.searchQuery}%,content.ilike.%${options.searchQuery}%`);
       }
-      
-      if (filters?.searchQuery) {
-        query = query.or(`title.ilike.%${filters.searchQuery}%,content.ilike.%${filters.searchQuery}%`);
+
+      if (options?.tag) {
+        query = query.contains('tags', [options.tag]);
       }
-      
-      // Only filter by type if it's not null/undefined and not 'all'
-      if (filters?.type && filters?.type !== 'all') {
-        // Convert from lowercase filter values to uppercase ContentType enum values
-        let contentType = filters.type.toUpperCase();
-        query = query.eq('content_type', contentType);
+
+      if (options?.type && options.type !== 'all') {
+        query = query.eq('content_type', options.type.toUpperCase());
       }
-      
-      if (filters?.limit) {
-        query = query.limit(filters.limit);
+
+      // Add archived filter
+      query = query.is('archived_at', null);
+
+      if (options?.sort === 'newest') {
+        query = query.order('created_at', { ascending: false });
+      } else if (options?.sort === 'oldest') {
+        query = query.order('created_at', { ascending: true });
+      } else if (options?.sort === 'most_voted') {
+        query = query.order('vote_count', { ascending: false });
+      } else {
+        query = query.order('created_at', { ascending: false });
       }
-      
-      const { data: articles, error } = await query;
-      
-      if (error) {
-        console.error('Error fetching articles:', error);
-        throw error;
+
+      if (options?.limit) {
+        query = query.limit(options.limit);
       }
-      
-      console.log('Articles fetched successfully:', articles?.length || 0);
-      
-      // If no articles, return empty array
-      if (!articles || articles.length === 0) {
-        return [] as KnowledgeArticle[];
-      }
-      
-      // Extract all unique user_ids to fetch their profiles
-      const userIds = [...new Set(articles.map(article => article.user_id))];
-      
-      // Fetch profiles for all authors in a single query
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, avatar_url')
-        .in('id', userIds);
-      
-      if (profilesError) {
-        console.error('Error fetching author profiles:', profilesError);
-        // Continue with articles even if profiles fetch fails
-      }
-      
-      // Create a map of user_id to profile for easy lookup
-      const profilesMap = (profiles || []).reduce((map, profile) => {
-        map[profile.id] = profile;
-        return map;
-      }, {} as Record<string, any>);
-      
-      // Format the articles with author information
-      return articles.map(article => {
-        const profileData = profilesMap[article.user_id];
-        
-        return {
-          ...article,
-          content_type: article.content_type || ContentType.ARTICLE,
-          author: profileData ? {
-            id: article.user_id,
-            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-            avatar_url: profileData.avatar_url || ''
-          } as KnowledgeAuthor : undefined
-        };
-      }) as KnowledgeArticle[];
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return data as KnowledgeArticle[];
     },
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
-export const useArticle = (id: string | undefined) => {
-  const { currentUser } = useUser();
-  
+export const useArticle = (id: string) => {
   return useQuery({
-    queryKey: ['knowledgeArticle', id],
+    queryKey: ['article', id],
     queryFn: async () => {
-      if (!id) throw new Error('Article ID is required');
-      
-      // Increment view count using the dedicated RPC function
-      await supabase.rpc('increment_view_count', { article_id: id });
-      
-      // Fetch the article without joining with profiles
-      const { data: article, error } = await supabase
+      const { data, error } = await supabase
         .from('knowledge_articles')
-        .select('*')
+        .select(`
+          *,
+          author:profiles!inner(id, first_name, last_name, avatar_url)
+        `)
         .eq('id', id)
         .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Now fetch the profile data separately
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, avatar_url')
-        .eq('id', article.user_id)
-        .maybeSingle();
-      
-      if (profileError) {
-        console.error('Error fetching author profile:', profileError);
-        // Continue with article even if profile fetch fails
-      }
-      
-      // Get vote count for article
-      const { data: voteData, error: voteError } = await supabase
-        .rpc('get_article_vote_count', { article_id: id });
-        
-      if (voteError) {
-        console.error('Error fetching vote count:', voteError);
-      }
-      
-      // Get user's vote if authenticated
-      let userVote = null;
-      if (currentUser) {
-        const { data: userVoteData, error: userVoteError } = await supabase
-          .from('knowledge_votes')
-          .select('vote_type')
-          .eq('article_id', id)
-          .eq('user_id', currentUser.id)
-          .maybeSingle();
-          
-        if (!userVoteError && userVoteData) {
-          userVote = userVoteData.vote_type;
-        }
-      }
-      
-      // Format author information
-      const profileData = profile;
-      
-      return {
-        ...article,
-        content_type: article.content_type || ContentType.ARTICLE,
-        author: profileData ? {
-          id: article.user_id,
-          name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-          avatar_url: profileData.avatar_url || ''
-        } as KnowledgeAuthor : undefined,
-        vote_count: voteData || 0,
-        user_vote: userVote
-      } as KnowledgeArticle;
+
+      if (error) throw error;
+      return data as KnowledgeArticle;
     },
-    enabled: !!id
   });
 };
 
 export const useArticleMutations = () => {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { currentUser } = useUser();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  // Mutation for creating an article
-  const createArticle = async (article: { 
-    title: string, 
-    content: string, 
-    tags?: string[], 
-    content_type?: ContentType,
-    subtitle?: string,
-    source?: string,
-    options?: string[] 
-  }) => {
-    try {
-      setIsSubmitting(true);
-      
-      if (!currentUser) {
-        throw new Error('You must be logged in to create content');
-      }
-      
-      // Build the article object with all required fields
-      const newArticle = {
-        title: article.title,
-        content: article.content,
-        user_id: currentUser.id,
-        tags: article.tags || [],
-        content_type: article.content_type || ContentType.ARTICLE,
-        // Additional fields for specific content types
-        ...(article.subtitle && { subtitle: article.subtitle }),
-        ...(article.source && { source: article.source }),
-        ...(article.options && { options: article.options })
+  const createArticle = useMutation({
+    mutationFn: async (data: any) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Map the form data based on content type
+      let mappedData: any = {
+        user_id: user.id,
+        content_type: data.content_type || ContentType.ARTICLE,
+        tags: data.tags || [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
-      
-      console.log('Creating new article:', newArticle);
-      
-      const { data, error } = await supabase
+
+      // Handle different content types
+      switch (data.content_type) {
+        case ContentType.QUOTE:
+          mappedData = {
+            ...mappedData,
+            title: data.quote || data.title, // Map quote to title
+            content: data.context || data.content || '', // Map context to content
+            source: data.author || data.source, // Map author to source
+          };
+          break;
+
+        case ContentType.POLL:
+          mappedData = {
+            ...mappedData,
+            title: data.question || data.title, // Map question to title
+            content: data.question || data.content || '', // Store question in content too
+            options: {
+              options: data.options || [],
+              allowMultipleSelections: data.allowMultipleSelections || false,
+              duration: data.duration || '7'
+            },
+          };
+          break;
+
+        case ContentType.QUESTION:
+          mappedData = {
+            ...mappedData,
+            title: data.question || data.title, // Map question to title for questions
+            content: data.content || '',
+          };
+          break;
+
+        case ContentType.ARTICLE:
+        default:
+          mappedData = {
+            ...mappedData,
+            title: data.title,
+            content: data.content || '',
+            subtitle: data.subtitle,
+          };
+          break;
+      }
+
+      console.log('Creating article with mapped data:', mappedData);
+
+      const { data: result, error } = await supabase
         .from('knowledge_articles')
-        .insert(newArticle)
+        .insert([mappedData])
         .select()
         .single();
-      
+
       if (error) {
-        console.error('Error inserting article:', error);
+        console.error('Error creating article:', error);
         throw error;
       }
-      
-      // Ensure tags exist
-      if (article.tags && article.tags.length > 0) {
-        const uniqueTags = [...new Set(article.tags)];
-        for (const tag of uniqueTags) {
-          // Skip empty tags
-          if (!tag.trim()) continue;
-          
-          // Insert tag if it doesn't exist (using upsert with on_conflict: nothing)
-          const { error: tagError } = await supabase
-            .from('knowledge_tags')
-            .upsert(
-              { name: tag.toLowerCase().trim(), description: null },
-              { onConflict: 'name', ignoreDuplicates: true }
-            );
-            
-          if (tagError) {
-            console.warn('Error upserting tag:', tagError);
-          }
-        }
-      }
-      
-      // Immediately invalidate relevant queries to force a refetch
-      await queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
-      await queryClient.invalidateQueries({ queryKey: ['knowledgeTags'] });
-      
-      // Force refetch all article queries
-      await queryClient.refetchQueries({ queryKey: ['knowledgeArticles'] });
-      
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
       toast({
-        title: "Success",
-        description: "Content created successfully",
+        title: "Success!",
+        description: "Your post has been created successfully.",
       });
-      
-      return data as KnowledgeArticle;
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
+      console.error('Error in createArticle mutation:', error);
       toast({
-        title: "Error creating content",
-        description: error.message,
-        variant: "destructive"
+        title: "Error",
+        description: error.message || "Failed to create post. Please try again.",
+        variant: "destructive",
       });
-      throw error;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  // Mutation for updating an article
-  const updateArticle = async (id: string, updates: { title?: string, content?: string, tags?: string[] }) => {
-    try {
-      setIsSubmitting(true);
-      
-      if (!currentUser) {
-        throw new Error('You must be logged in to update an article');
-      }
-      
-      const articleUpdates = {
-        ...(updates.title && { title: updates.title }),
-        ...(updates.content && { content: updates.content }),
-        ...(updates.tags && { tags: updates.tags })
-      };
-      
-      const { data, error } = await supabase
+    },
+  });
+
+  const updateArticle = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const { data: result, error } = await supabase
         .from('knowledge_articles')
-        .update(articleUpdates)
+        .update({
+          ...data,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', id)
         .select()
         .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Ensure tags exist
-      if (updates.tags && updates.tags.length > 0) {
-        for (const tag of updates.tags) {
-          // Insert tag if it doesn't exist
-          await supabase
-            .from('knowledge_tags')
-            .insert({ name: tag.toLowerCase(), description: null })
-            .select();
-        }
-      }
-      
-      queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', id] });
-      queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
       toast({
-        title: "Success",
-        description: "Article updated successfully",
+        title: "Success!",
+        description: "Article updated successfully.",
       });
-      
-      return data as KnowledgeArticle;
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
-        title: "Error updating article",
-        description: error.message,
-        variant: "destructive"
+        title: "Error",
+        description: error.message || "Failed to update article.",
+        variant: "destructive",
       });
-      throw error;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  // Mutation for deleting an article
-  const deleteArticle = async (id: string) => {
-    try {
-      setIsSubmitting(true);
-      
-      if (!currentUser) {
-        throw new Error('You must be logged in to delete an article');
-      }
-      
+    },
+  });
+
+  const deleteArticle = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('knowledge_articles')
         .delete()
         .eq('id', id);
-      
-      if (error) {
-        throw error;
-      }
-      
-      queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
       toast({
-        title: "Success",
-        description: "Article deleted successfully",
+        title: "Success!",
+        description: "Article deleted successfully.",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast({
-        title: "Error deleting article",
-        description: error.message,
-        variant: "destructive"
+        title: "Error",
+        description: error.message || "Failed to delete article.",
+        variant: "destructive",
       });
-      throw error;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+  });
+
+  const archiveArticle = useMutation({
+    mutationFn: async (id: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { error } = await supabase
+        .from('knowledge_articles')
+        .update({
+          archived_at: new Date().toISOString(),
+          archived_by: user.id,
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      toast({
+        title: "Success!",
+        description: "Article archived successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to archive article.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const unarchiveArticle = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('knowledge_articles')
+        .update({
+          archived_at: null,
+          archived_by: null,
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+      toast({
+        title: "Success!",
+        description: "Article unarchived successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to unarchive article.",
+        variant: "destructive",
+      });
+    },
+  });
 
   return {
-    createArticle,
-    updateArticle,
-    deleteArticle,
-    isSubmitting
+    createArticle: createArticle.mutateAsync,
+    updateArticle: updateArticle.mutateAsync,
+    deleteArticle: deleteArticle.mutateAsync,
+    archiveArticle: archiveArticle.mutateAsync,
+    unarchiveArticle: unarchiveArticle.mutateAsync,
+    isSubmitting: createArticle.isPending || updateArticle.isPending || deleteArticle.isPending || archiveArticle.isPending || unarchiveArticle.isPending,
   };
 };

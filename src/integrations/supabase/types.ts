@@ -288,12 +288,17 @@ export type Database = {
       }
       knowledge_articles: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           comment_count: number
           content: string
           content_type: string | null
           created_at: string
           id: string
           is_answered: boolean | null
+          options: Json | null
+          source: string | null
+          subtitle: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -302,12 +307,17 @@ export type Database = {
           vote_count: number
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           comment_count?: number
           content: string
           content_type?: string | null
           created_at?: string
           id?: string
           is_answered?: boolean | null
+          options?: Json | null
+          source?: string | null
+          subtitle?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -316,12 +326,17 @@ export type Database = {
           vote_count?: number
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           comment_count?: number
           content?: string
           content_type?: string | null
           created_at?: string
           id?: string
           is_answered?: boolean | null
+          options?: Json | null
+          source?: string | null
+          subtitle?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -457,6 +472,38 @@ export type Database = {
             columns: ["comment_id"]
             isOneToOne: false
             referencedRelation: "knowledge_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
             referencedColumns: ["id"]
           },
         ]
@@ -1194,7 +1241,7 @@ export type Database = {
       log_audit_action: {
         Args: {
           action_name: string
-          performer_id: string
+          performer_id?: string
           target_id?: string
           action_details?: Json
         }

@@ -20,7 +20,7 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
 }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({});
+    onSubmit(formData);
   };
 
   // Get content type label
@@ -39,6 +39,20 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
     }
   };
 
+  // Get title based on content type
+  const getTitle = () => {
+    switch (contentType) {
+      case ContentType.QUOTE:
+        return formData.quote;
+      case ContentType.POLL:
+      case ContentType.QUESTION:
+        return formData.question;
+      case ContentType.ARTICLE:
+      default:
+        return formData.title;
+    }
+  };
+
   return (
     <form id="content-form" onSubmit={handleSubmit}>
       <div className="space-y-6">
@@ -51,7 +65,12 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
 
         {/* Title */}
         <div>
-          <h3 className="text-xl font-semibold mb-2">{formData.title || formData.question}</h3>
+          <h3 className="text-xl font-semibold mb-2">{getTitle()}</h3>
+          
+          {/* Subtitle for articles */}
+          {contentType === ContentType.ARTICLE && formData.subtitle && (
+            <p className="text-lg text-muted-foreground mb-2">{formData.subtitle}</p>
+          )}
           
           {/* Tags */}
           {formData.tags && formData.tags.length > 0 && (
@@ -70,7 +89,11 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
         {/* Content */}
         <div className="prose prose-sm max-w-none dark:prose-invert">
           {contentType === ContentType.ARTICLE && (
-            <div dangerouslySetInnerHTML={{ __html: formData.content }} />
+            <div>
+              {formData.content && (
+                <div dangerouslySetInnerHTML={{ __html: formData.content }} />
+              )}
+            </div>
           )}
           
           {contentType === ContentType.QUESTION && (
@@ -78,14 +101,22 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
           )}
           
           {contentType === ContentType.QUOTE && (
-            <blockquote className="italic border-l-4 border-muted-foreground/20 pl-4">
-              "{formData.content}"
-              {formData.source && (
-                <footer className="text-sm text-muted-foreground mt-2">
-                  — {formData.source}
-                </footer>
+            <div>
+              <blockquote className="italic border-l-4 border-muted-foreground/20 pl-4 mb-4">
+                "{formData.quote}"
+                {formData.author && (
+                  <footer className="text-sm text-muted-foreground mt-2">
+                    — {formData.author}
+                  </footer>
+                )}
+              </blockquote>
+              {formData.context && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium mb-2">Context:</h4>
+                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">{formData.context}</p>
+                </div>
               )}
-            </blockquote>
+            </div>
           )}
           
           {contentType === ContentType.POLL && (
@@ -113,7 +144,7 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
 
         <Separator />
 
-        {/* Submit button - this will be controlled by the parent component */}
+        {/* Submit button */}
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Publishing...' : 'Publish'}
