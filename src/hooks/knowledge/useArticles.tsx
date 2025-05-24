@@ -50,7 +50,7 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
       // Transform the data to match our interface
       const transformedData = data?.map(item => ({
         ...item,
-        author: item.author && typeof item.author === 'object' && 'id' in item.author ? {
+        author: item.author ? {
           id: item.author.id,
           name: `${item.author.first_name || ''} ${item.author.last_name || ''}`.trim() || 'Unknown User',
           first_name: item.author.first_name || undefined,
@@ -85,7 +85,7 @@ export const useArticle = (id: string) => {
       // Transform the data to match our interface
       const transformedData = {
         ...data,
-        author: data.author && typeof data.author === 'object' && 'id' in data.author ? {
+        author: data.author ? {
           id: data.author.id,
           name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim() || 'Unknown User',
           first_name: data.author.first_name || undefined,
