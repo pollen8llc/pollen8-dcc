@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -207,9 +206,9 @@ const UserKnowledgeResource = () => {
                   <Skeleton key={i} className="h-48" />
                 ))}
               </div>
-            ) : (stats?.articles?.length || 0) > 0 ? (
+            ) : ((stats && Array.isArray(stats.articles) ? stats.articles.length : 0) > 0) ? (
               <div className="space-y-4">
-                {stats?.articles?.map((article) => (
+                {(stats?.articles || []).map((article) => (
                   <ArticleCard
                     key={article.id}
                     article={{
