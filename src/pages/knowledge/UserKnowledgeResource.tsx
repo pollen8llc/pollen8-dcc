@@ -26,6 +26,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MetricCard } from '@/components/rel8t/MetricCard';
+import { Rel8TNavigation } from '@/components/rel8t/Rel8TNavigation';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -68,24 +70,26 @@ const UserKnowledgeResource = () => {
 
   return (
     <Shell>
-      <div className="container mx-auto px-4 py-6 space-y-8">
+      <div className="container mx-auto px-4 py-8">
+        <Rel8TNavigation />
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Knowledge Resources</h1>
+            <h1 className="text-3xl font-bold">My Knowledge Resources</h1>
             <p className="text-muted-foreground mt-1">
               Track your contributions and manage your saved content
             </p>
           </div>
-          
-          <Button onClick={() => navigate('/knowledge/create')}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create New Post
-          </Button>
+          <div className="flex mt-4 md:mt-0 gap-2">
+            <Button onClick={() => navigate('/knowledge/create')}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create New Post
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="my-posts">My Posts</TabsTrigger>
             <TabsTrigger value="saved">Saved Articles</TabsTrigger>
@@ -101,31 +105,39 @@ const UserKnowledgeResource = () => {
               </div>
             ) : (
               <>
-                {/* Stats Cards */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <StatCard
-                    icon={BookOpen}
+                {/* Stats Cards - use MetricCard */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <MetricCard
                     title="Total Posts"
                     value={stats?.totalArticles || 0}
-                    description={`${stats?.recentArticlesCount || 0} in last 30 days`}
+                    description={stats?.recentArticlesCount ? `${stats?.recentArticlesCount} in last 30 days` : undefined}
+                    icon={<BookOpen className="h-5 w-5" />}
+                    color="default"
+                    isLoading={statsLoading}
                   />
-                  <StatCard
-                    icon={Eye}
+                  <MetricCard
                     title="Total Views"
                     value={stats?.totalViews || 0}
-                    description={`${stats?.averageViewsPerArticle || 0} avg per post`}
+                    description={stats?.averageViewsPerArticle ? `${stats?.averageViewsPerArticle} avg per post` : undefined}
+                    icon={<Eye className="h-5 w-5" />}
+                    color="success"
+                    isLoading={statsLoading}
                   />
-                  <StatCard
-                    icon={ThumbsUp}
+                  <MetricCard
                     title="Total Votes"
                     value={stats?.totalVotes || 0}
-                    description={`${stats?.averageVotesPerArticle || 0} avg per post`}
+                    description={stats?.averageVotesPerArticle ? `${stats?.averageVotesPerArticle} avg per post` : undefined}
+                    icon={<ThumbsUp className="h-5 w-5" />}
+                    color="success"
+                    isLoading={statsLoading}
                   />
-                  <StatCard
-                    icon={MessageSquare}
+                  <MetricCard
                     title="Total Comments"
                     value={stats?.totalComments || 0}
                     description="Engagement received"
+                    icon={<MessageSquare className="h-5 w-5" />}
+                    color="default"
+                    isLoading={statsLoading}
                   />
                 </div>
 
@@ -140,7 +152,7 @@ const UserKnowledgeResource = () => {
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(stats?.contentTypeStats || {}).map(([type, count]) => (
-                        <Badge key={type} variant="outline">
+                        <Badge key={type} variant="teal">
                           {type.toLowerCase()}: {count}
                         </Badge>
                       ))}
