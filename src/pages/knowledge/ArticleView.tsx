@@ -34,6 +34,7 @@ import AuthorCard from '@/components/knowledge/AuthorCard';
 
 // Mocks and types
 import { ContentType, VoteType } from '@/models/knowledgeTypes';
+import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +42,7 @@ const ArticleView = () => {
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
   const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer, deleteArticle } = useKnowledgeBase();
+  const { isArticleSaved, toggleSaveArticle } = useSavedArticles();
   
   // Fetch article
   const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id);
@@ -217,9 +219,13 @@ const ArticleView = () => {
               </div>
               
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
+                <Button
+                  variant={isArticleSaved(article.id) ? "secondary" : "outline"}
+                  size="sm"
+                  onClick={() => toggleSaveArticle(article.id)}
+                >
                   <Bookmark className="h-4 w-4 mr-1" />
-                  Save
+                  {isArticleSaved(article.id) ? "Unsave" : "Save"}
                 </Button>
                 
                 <Button variant="outline" size="sm">
