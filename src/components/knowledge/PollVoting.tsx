@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,6 +30,10 @@ interface VoteCount {
 }
 
 export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwner = false }) => {
+  if (!pollData || !Array.isArray(pollData.options)) {
+    return <div className="text-destructive p-4">Poll data is missing or invalid.</div>;
+  }
+
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
   const [voteCounts, setVoteCounts] = useState<VoteCount[]>([]);

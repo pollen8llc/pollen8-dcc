@@ -146,7 +146,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
 
       <CardContent className="pt-0">
         {/* Poll Voting UI for Polls */}
-        {article.content_type === ContentType.POLL && article.pollData && (
+        {article.content_type === ContentType.POLL && article.pollData && Array.isArray(article.pollData.options) && (
           <div className="mb-4">
             <PollVoting pollId={article.id} pollData={article.pollData} />
           </div>
