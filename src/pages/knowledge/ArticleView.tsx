@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -41,14 +40,7 @@ const ArticleView = () => {
   const navigate = useNavigate();
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
-  const { 
-    useArticle, 
-    vote, 
-    useComments, 
-    createComment, 
-    deleteComment, 
-    acceptAnswer 
-  } = useKnowledgeBase();
+  const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer, deleteArticle } = useKnowledgeBase();
   
   // Fetch article
   const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id);
@@ -85,6 +77,16 @@ const ArticleView = () => {
   const handleDeleteComment = (commentId: string) => {
     if (!id) return;
     deleteComment(commentId, id);
+  };
+
+  const handleDeleteArticle = async () => {
+    if (!window.confirm('Are you sure you want to delete this article? This action cannot be undone.')) return;
+    try {
+      await deleteArticle(article.id);
+      navigate('/knowledge');
+    } catch (err) {
+      // Error toast is handled in the hook
+    }
   };
 
   if (articleLoading) {
@@ -226,12 +228,17 @@ const ArticleView = () => {
                 </Button>
                 
                 {(isAdmin || isOrganizer || currentUser?.id === article.user_id) && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to={`/knowledge/${id}/edit`}>
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Link>
-                  </Button>
+                  <>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`/knowledge/${id}/edit`}>
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={handleDeleteArticle} className="ml-2">
+                      Delete
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
