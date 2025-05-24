@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,6 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ContentType } from '@/models/knowledgeTypes';
 import { cn } from '@/lib/utils';
-import { PollVoting } from './PollVoting';
 
 interface Article {
   id: string;
@@ -36,7 +36,6 @@ interface Article {
     name: string;
     avatar_url?: string;
   };
-  pollData?: any;
 }
 
 interface ArticleCardProps {
@@ -57,9 +56,9 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
       case ContentType.QUESTION:
         return <HelpCircle className="h-4 w-4" />;
       case ContentType.POLL:
-        return <BarChart3 className="h-4 w-4 text-[#00eada]" />;
+        return <BarChart3 className="h-4 w-4" />;
       case ContentType.QUOTE:
-        return <Quote className="h-4 w-4 text-pink-500" />;
+        return <Quote className="h-4 w-4" />;
       default:
         return <BookOpen className="h-4 w-4" />;
     }
@@ -72,9 +71,9 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
       case ContentType.QUESTION:
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case ContentType.POLL:
-        return 'bg-[#e0fcfa] text-[#00eada] dark:bg-[#00eada]/20 dark:text-[#00eada]';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case ContentType.QUOTE:
-        return 'bg-pink-100 text-pink-600 dark:bg-pink-900 dark:text-pink-200';
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
@@ -145,13 +144,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
       </CardHeader>
 
       <CardContent className="pt-0">
-        {/* Poll Voting UI for Polls */}
-        {article.content_type === ContentType.POLL && article.pollData && Array.isArray(article.pollData.options) && (
-          <div className="mb-4">
-            <PollVoting pollId={article.id} pollData={article.pollData} />
-          </div>
-        )}
-
         {/* Tags */}
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">

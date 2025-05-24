@@ -62,6 +62,12 @@ const TriggerWizard = () => {
               Set up automated actions based on specific events or schedules
             </p>
           </div>
+          <button
+            className="text-sm text-primary underline hover:text-primary/80 font-medium"
+            onClick={() => navigate('/rel8/wizard')}
+          >
+            Skip
+          </button>
         </div>
 
         <Card className="mb-6">

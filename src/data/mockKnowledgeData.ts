@@ -1,3 +1,4 @@
+
 import { 
   KnowledgeArticle, 
   KnowledgeTag, 
@@ -83,16 +84,6 @@ const mockArticles: KnowledgeArticle[] = [
       name: 'Priya Sharma',
       avatar_url: 'https://i.pravatar.cc/150?img=4',
       role: 'MEMBER'
-    },
-    pollData: {
-      options: [
-        { text: 'In-person events' },
-        { text: 'Online communities' },
-        { text: '1:1 introductions' },
-        { text: 'Social media' }
-      ],
-      allowMultipleSelections: false,
-      duration: '7d'
     }
   },
   {

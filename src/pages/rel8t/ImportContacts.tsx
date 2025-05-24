@@ -69,6 +69,18 @@ const ImportContacts = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mr-2" 
+            onClick={() => navigate("/rel8/contacts")}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Contacts
+          </Button>
+        </div>
+
         <Rel8Navigation />
         
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
