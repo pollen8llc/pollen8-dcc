@@ -228,17 +228,17 @@ const ArticleView = () => {
                 </Button>
                 
                 {(isAdmin || isOrganizer || currentUser?.id === article.user_id) && (
-                  <>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/knowledge/${id}/edit`}>
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Link>
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={handleDeleteArticle} className="ml-2">
-                      Delete
-                    </Button>
-                  </>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to={`/knowledge/${id}/edit`}>
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Link>
+                  </Button>
+                )}
+                {currentUser?.id === article.user_id && (
+                  <Button variant="destructive" size="sm" onClick={handleDeleteArticle} className="ml-2">
+                    Delete
+                  </Button>
                 )}
               </div>
             </div>
