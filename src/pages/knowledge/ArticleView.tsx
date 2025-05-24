@@ -50,10 +50,10 @@ const ArticleView = () => {
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = useComments(id);
   
-  const [userVote, setUserVote] = useState(article.user_vote);
+  const [userVote, setUserVote] = useState(article.user_vote ?? null);
 
   useEffect(() => {
-    setUserVote(article.user_vote);
+    setUserVote(article.user_vote ?? null);
   }, [article.user_vote]);
   
   // Handle voting
