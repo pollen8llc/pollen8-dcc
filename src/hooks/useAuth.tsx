@@ -16,12 +16,14 @@ export const useAuth = () => {
   // Combined loading state
   const isLoading = sessionLoading || profileLoading;
   
-  // Use a ref to track initialization and prevent excessive logging
+  // Use refs to prevent infinite loops and excessive operations
   const initialized = useRef(false);
   const profileCreationAttempted = useRef(false);
   const profileCompletionChecked = useRef(false);
   const authErrorShown = useRef(false);
   const recoveryAttempted = useRef(false);
+  const maxRetries = useRef(3);
+  const retryCount = useRef(0);
   
   // Log auth state for debugging, but only when it changes
   useEffect(() => {
@@ -37,13 +39,28 @@ export const useAuth = () => {
     }
   }, [session, sessionLoading, currentUser, profileLoading]);
 
+  // Reset retry count when session changes
+  useEffect(() => {
+    if (session) {
+      retryCount.current = 0;
+      authErrorShown.current = false;
+    }
+  }, [session?.access_token]); // Only reset when actual session changes
+
   // Auto-create profile if session exists but profile doesn't with improved error handling
   useEffect(() => {
     const checkAndCreateProfile = async () => {
+      // Prevent infinite loops
+      if (retryCount.current >= maxRetries.current) {
+        console.warn("Max retry attempts reached, stopping profile creation attempts");
+        return;
+      }
+
       // Only run if we have a session but no profile, and haven't tried to create one yet
       if (!sessionLoading && !profileLoading && session && !currentUser && !profileCreationAttempted.current) {
         console.log("Auth error: Session exists but profile could not be loaded, attempting to create profile");
         profileCreationAttempted.current = true;
+        retryCount.current += 1;
         
         try {
           // Try to create profile with multiple retries if needed
@@ -52,8 +69,9 @@ export const useAuth = () => {
             console.log("Profile created successfully");
             await refreshUser();
             
-            // Reset auth error flag since we succeeded
+            // Reset error flags since we succeeded
             authErrorShown.current = false;
+            retryCount.current = 0;
             
             // Show success toast
             toast({
@@ -63,7 +81,7 @@ export const useAuth = () => {
           } else {
             console.error("Failed to create profile automatically");
             
-            if (!authErrorShown.current) {
+            if (!authErrorShown.current && retryCount.current >= maxRetries.current) {
               authErrorShown.current = true;
               toast({
                 title: "Profile Setup Issue",
@@ -75,7 +93,7 @@ export const useAuth = () => {
         } catch (error) {
           console.error("Error creating profile:", error);
           
-          if (!authErrorShown.current) {
+          if (!authErrorShown.current && retryCount.current >= maxRetries.current) {
             authErrorShown.current = true;
             toast({
               title: "Authentication Error",
@@ -90,43 +108,42 @@ export const useAuth = () => {
     checkAndCreateProfile();
   }, [session, currentUser, sessionLoading, profileLoading, createProfileIfNotExists, refreshUser, toast]);
 
-  // Add recovery mechanism for session/auth issues
+  // Simplified recovery mechanism
   useEffect(() => {
-    // If we have a session but can't load the user after multiple attempts, try recovery
-    if (!sessionLoading && session && !currentUser && profileCreationAttempted.current && 
-        !recoveryAttempted.current && !authErrorShown.current) {
+    // Only attempt recovery once per session and only if we've hit max retries
+    if (!sessionLoading && session && !currentUser && 
+        retryCount.current >= maxRetries.current && !recoveryAttempted.current) {
       recoveryAttempted.current = true;
       
-      // Auto-attempt recovery of session
       const attemptRecovery = async () => {
-        console.log("Attempting automatic session recovery...");
+        console.log("Attempting session recovery after max retries...");
         
         try {
-          // Try refreshing the session first
           const refreshSuccess = await refreshSession();
           
           if (refreshSuccess) {
-            console.log("Session refreshed successfully, attempting to reload user");
-            // Wait a moment for refresh to complete
+            console.log("Session refreshed successfully during recovery");
             setTimeout(async () => {
               await refreshUser();
             }, 500);
           } else {
-            console.warn("Session refresh failed, recovery unsuccessful");
-            authErrorShown.current = true;
-            toast({
-              title: "Session issue detected",
-              description: "We're having trouble loading your profile. Try refreshing the page or logging out and back in.",
-              variant: "destructive",
-            });
+            console.warn("Session refresh failed during recovery");
+            if (!authErrorShown.current) {
+              authErrorShown.current = true;
+              toast({
+                title: "Session issue detected",
+                description: "We're having trouble loading your profile. Try refreshing the page or logging out and back in.",
+                variant: "destructive",
+              });
+            }
           }
         } catch (error) {
           console.error("Error during automatic recovery:", error);
         }
       };
       
-      // Wait a bit before trying recovery to avoid race conditions
-      setTimeout(attemptRecovery, 1000);
+      // Wait before trying recovery to avoid race conditions
+      setTimeout(attemptRecovery, 2000);
     }
   }, [session, currentUser, sessionLoading, profileLoading, toast, refreshUser, refreshSession]);
 
@@ -134,19 +151,10 @@ export const useAuth = () => {
   useEffect(() => {
     if (sessionLoading || profileLoading) return;
     
-    // If there's a session but no user, we've already tried to create a profile and failed
-    if (session && !currentUser && profileCreationAttempted.current) {
-      console.error("Auth error: Session exists but profile could not be loaded even after creation attempt");
-      
-      if (!authErrorShown.current) {
-        authErrorShown.current = true;
-        toast({
-          title: "Authentication Error",
-          description: "There was a problem loading your profile. Please try logging out and back in.",
-          variant: "destructive",
-        });
-      }
-      return;
+    // If there's a session but no user after max retries, we have a persistent issue
+    if (session && !currentUser && retryCount.current >= maxRetries.current) {
+      console.error("Persistent auth error: Session exists but profile could not be loaded after max retries");
+      return; // Don't continue with profile completion check
     }
     
     // Skip profile completion check if we're already on the setup page
@@ -213,11 +221,12 @@ export const useAuth = () => {
     try {
       console.log("Attempting to recover user session");
       
-      // Clear flags to allow retrying profile creation and checks
+      // Reset all flags to allow retrying
       profileCreationAttempted.current = false;
       profileCompletionChecked.current = false;
       authErrorShown.current = false;
       recoveryAttempted.current = false;
+      retryCount.current = 0;
       
       // Refresh the session
       const refreshSuccess = await refreshSession();

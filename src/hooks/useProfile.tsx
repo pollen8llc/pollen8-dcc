@@ -57,7 +57,7 @@ export const useProfile = (session: Session | null) => {
         throw profileError;
       }
 
-      console.log("Profile fetched:", profile);
+      console.log("Profile fetched successfully:", profile);
 
       // First check if user has admin role using our non-recursive function
       let role = UserRole.MEMBER; // Default role
@@ -141,7 +141,7 @@ export const useProfile = (session: Session | null) => {
         profile_complete: profile?.profile_complete || false
       };
 
-      console.log("User data constructed:", userData);
+      console.log("User data constructed successfully:", userData);
       setCurrentUser(userData);
       setError(null);
       return userData;
@@ -155,10 +155,13 @@ export const useProfile = (session: Session | null) => {
   // Create profile if it doesn't exist with improved error handling and retries
   const createProfileIfNotExists = useCallback(async (retryCount = 0) => {
     try {
-      if (!session?.user) return false;
+      if (!session?.user) {
+        console.log("No session available for profile creation");
+        return false;
+      }
       
       const userId = session.user.id;
-      console.log("Attempting to create profile for user:", userId);
+      console.log("Attempting to create profile for user:", userId, "retry:", retryCount);
       setError(null);
       
       // First check if profile exists
@@ -173,7 +176,7 @@ export const useProfile = (session: Session | null) => {
         setError(`Error checking for profile: ${checkError.message}`);
         if (retryCount < 2) {
           console.log(`Retry attempt ${retryCount + 1} for checking profile existence`);
-          await new Promise(r => setTimeout(r, 500)); // Add delay before retry
+          await new Promise(r => setTimeout(r, 1000)); // Longer delay before retry
           return await createProfileIfNotExists(retryCount + 1);
         }
         return false;
@@ -198,6 +201,8 @@ export const useProfile = (session: Session | null) => {
       const lastName = authUser.user.user_metadata?.last_name || '';
       const email = authUser.user.email || '';
       
+      console.log("Creating profile with data:", { userId, email, firstName, lastName });
+      
       // Create profile with retry logic
       const createProfile = async (attempt = 0) => {
         try {
@@ -211,8 +216,8 @@ export const useProfile = (session: Session | null) => {
               email: email,
               first_name: firstName,
               last_name: lastName,
-              privacy_settings: { profile_visibility: "public" }, // Set to public for new users
-              profile_complete: false // Mark as incomplete so the wizard will show
+              privacy_settings: { profile_visibility: "public" },
+              profile_complete: false
             })
             .select()
             .single();
@@ -223,7 +228,7 @@ export const useProfile = (session: Session | null) => {
             
             if (attempt < 2) {
               console.log("Retrying profile creation...");
-              await new Promise(r => setTimeout(r, 500)); // Add delay before retry
+              await new Promise(r => setTimeout(r, 1000));
               return createProfile(attempt + 1);
             }
             
@@ -240,6 +245,7 @@ export const useProfile = (session: Session | null) => {
           console.error("Exception in profile creation:", err);
           setError(`Exception in profile creation: ${err.message || "Unknown error"}`);
           if (attempt < 2) {
+            await new Promise(r => setTimeout(r, 1000));
             return createProfile(attempt + 1);
           }
           return false;
@@ -263,13 +269,14 @@ export const useProfile = (session: Session | null) => {
       
       try {
         if (session && session.user) {
+          console.log("Session found, fetching user profile:", session.user.id);
           const profile = await fetchUserProfile(session.user.id);
           if (!profile) {
-            // Don't set currentUser to null yet, we'll handle profile creation in useAuth
-            console.log("No profile found for user");
+            console.log("No profile found for user, profile creation may be needed");
             setError("No profile found for user");
           }
         } else {
+          console.log("No session, clearing current user");
           setCurrentUser(null);
         }
       } catch (error: any) {
@@ -287,13 +294,14 @@ export const useProfile = (session: Session | null) => {
   // Refresh user data
   const refreshUser = useCallback(async (): Promise<void> => {
     if (!session?.user) {
+      console.log("No session for refresh, clearing user");
       setCurrentUser(null);
       return;
     }
     
     setIsLoading(true);
     setError(null);
-    console.log("Refreshing user data, session:", session);
+    console.log("Refreshing user data for session:", session.user.id);
     
     try {
       await fetchUserProfile(session.user.id);
