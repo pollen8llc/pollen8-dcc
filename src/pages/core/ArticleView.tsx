@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -264,8 +263,8 @@ const ArticleView = () => {
               <div className="flex gap-2">
                 <Button 
                   size="sm" 
-                  variant={article.user_vote === 1 ? "default" : "outline"}
-                  className={article.user_vote === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
+                  variant={(article.user_vote ?? null) === 1 ? "default" : "outline"}
+                  className={(article.user_vote ?? null) === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
                   onClick={() => handleArticleVote('upvote')}
                 >
                   <ThumbsUp className="h-4 w-4 mr-1" />
@@ -274,8 +273,8 @@ const ArticleView = () => {
                 
                 <Button 
                   size="sm" 
-                  variant={article.user_vote === -1 ? "default" : "outline"}
-                  className={article.user_vote === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
+                  variant={(article.user_vote ?? null) === -1 ? "default" : "outline"}
+                  className={(article.user_vote ?? null) === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
                   onClick={() => handleArticleVote('downvote')}
                 >
                   <ThumbsDown className="h-4 w-4" />
@@ -368,9 +367,9 @@ const ArticleView = () => {
                     <div className="flex gap-2">
                       <Button 
                         size="sm" 
-                        variant={comment.user_vote === 1 ? "default" : "outline"}
-                        className={comment.user_vote === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
-                        onClick={() => handleCommentVote(comment.id, 'upvote', comment.user_vote)}
+                        variant={(comment.user_vote ?? null) === 1 ? "default" : "outline"}
+                        className={(comment.user_vote ?? null) === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
+                        onClick={() => handleCommentVote(comment.id, 'upvote', comment.user_vote ?? null)}
                       >
                         <ThumbsUp className="h-4 w-4 mr-1" />
                         {comment.vote_count && comment.vote_count > 0 ? comment.vote_count : ''}
@@ -378,9 +377,9 @@ const ArticleView = () => {
                       
                       <Button 
                         size="sm" 
-                        variant={comment.user_vote === -1 ? "default" : "outline"}
-                        className={comment.user_vote === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
-                        onClick={() => handleCommentVote(comment.id, 'downvote', comment.user_vote)}
+                        variant={(comment.user_vote ?? null) === -1 ? "default" : "outline"}
+                        className={(comment.user_vote ?? null) === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
+                        onClick={() => handleCommentVote(comment.id, 'downvote', comment.user_vote ?? null)}
                       >
                         <ThumbsDown className="h-4 w-4" />
                       </Button>
