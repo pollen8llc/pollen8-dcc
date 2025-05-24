@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useUserKnowledgeStats } from '@/hooks/knowledge/useUserKnowledgeStats';
 import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
@@ -30,7 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
-  const { currentUser } = useUser();
+  const { currentUser } = useAuth();
   const { data: stats, isLoading: statsLoading } = useUserKnowledgeStats();
   const { savedArticles, isLoading: savedLoading } = useSavedArticles();
 
@@ -216,8 +216,8 @@ const UserKnowledgeResource = () => {
                       ...article,
                       author: {
                         id: currentUser.id,
-                        name: `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Unknown User',
-                        avatar_url: currentUser.avatar_url
+                        name: currentUser.email || 'Unknown User',
+                        avatar_url: undefined
                       }
                     } as KnowledgeArticle}
                     onClick={() => navigate(`/knowledge/${article.id}`)}
