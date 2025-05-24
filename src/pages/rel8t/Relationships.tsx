@@ -83,19 +83,7 @@ const Relationships = () => {
         </div>
         
         {/* Metrics cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Today</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Calendar className="h-8 w-8 mr-3 text-primary" />
-                <div className="text-2xl font-bold">{outreachCounts.today}</div>
-              </div>
-            </CardContent>
-          </Card>
-          
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming</CardTitle>
@@ -107,7 +95,6 @@ const Relationships = () => {
               </div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
@@ -119,7 +106,6 @@ const Relationships = () => {
               </div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Contacts</CardTitle>
@@ -141,7 +127,7 @@ const Relationships = () => {
           </TabsList>
           
           <TabsContent value="outreach">
-            <OutreachList defaultTab="today" />
+            <OutreachList />
           </TabsContent>
           
           <TabsContent value="completed">
@@ -150,7 +136,7 @@ const Relationships = () => {
         </Tabs>
 
         {/* Add empty state with CTA if no outreach tasks exist */}
-        {outreachCounts.today + outreachCounts.upcoming + outreachCounts.overdue === 0 && 
+        {outreachCounts.upcoming + outreachCounts.overdue === 0 && 
           activeTab === "outreach" && (
           <div className="text-center py-8 mt-6 border border-dashed rounded-lg">
             <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />

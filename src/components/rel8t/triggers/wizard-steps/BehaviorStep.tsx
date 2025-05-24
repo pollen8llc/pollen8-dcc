@@ -148,11 +148,16 @@ export function BehaviorStep({ validateAndNext }: { validateAndNext: () => void 
         </FormItem>
       </div>
       
-      <div className="flex justify-between pt-6">
+      <div className="flex justify-between pt-6 gap-2">
         <Button type="button" variant="outline" onClick={onPreviousClick}>
           Previous
         </Button>
-        <Button type="button" onClick={validateAndNext}>Next Step</Button>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={() => window.location.href = '/rel8/wizard'}>
+            Skip
+          </Button>
+          <Button type="button" onClick={validateAndNext}>Next Step</Button>
+        </div>
       </div>
     </div>
   );
