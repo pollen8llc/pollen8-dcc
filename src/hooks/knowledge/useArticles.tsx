@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
@@ -50,7 +51,7 @@ export const useArticles = (options?: { searchQuery?: string; tag?: string; type
       // Transform the data to match our interface
       const transformedData = data?.map(item => ({
         ...item,
-        author: item.author ? {
+        author: item.author && typeof item.author === 'object' && !Array.isArray(item.author) && 'id' in item.author ? {
           id: item.author.id,
           name: `${item.author.first_name || ''} ${item.author.last_name || ''}`.trim() || 'Unknown User',
           first_name: item.author.first_name || undefined,
@@ -85,7 +86,7 @@ export const useArticle = (id: string) => {
       // Transform the data to match our interface
       const transformedData = {
         ...data,
-        author: data.author ? {
+        author: data.author && typeof data.author === 'object' && !Array.isArray(data.author) && 'id' in data.author ? {
           id: data.author.id,
           name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim() || 'Unknown User',
           first_name: data.author.first_name || undefined,

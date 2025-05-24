@@ -344,7 +344,15 @@ export type Database = {
           view_count?: number | null
           vote_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_knowledge_articles_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       knowledge_comments: {
         Row: {
