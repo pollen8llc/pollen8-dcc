@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +6,7 @@ export function TriggerHeader() {
   const navigate = useNavigate();
 
   const handleCreateTrigger = () => {
-    navigate("/rel8/trigger-wizard");
+    navigate("/rel8/triggers/wizard");
   };
 
   return (
