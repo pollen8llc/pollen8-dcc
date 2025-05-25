@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +10,7 @@ import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
 import { Calendar, Users, PlusCircle } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
-import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -50,10 +51,10 @@ const Relationships = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
-        <Rel8Navigation />
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <Rel8OnlyNavigation />
         
-        <Breadcrumb className="mb-6 mt-4">
+        <Breadcrumb className="mb-4 sm:mb-6 mt-2 sm:mt-4">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
@@ -65,33 +66,36 @@ const Relationships = () => {
           </BreadcrumbList>
         </Breadcrumb>
         
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Relationships</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage your outreach and nurture your network
-            </p>
+        <div className="flex flex-col gap-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Relationships</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">
+                Manage your outreach and nurture your network
+              </p>
+            </div>
+            
+            <Button 
+              onClick={handleCreateRelationship}
+              className="flex items-center gap-2 w-full sm:w-auto"
+              size="sm"
+            >
+              <PlusCircle className="h-4 w-4" />
+              <span className="sm:inline">Create Plan</span>
+            </Button>
           </div>
-          
-          <Button 
-            onClick={handleCreateRelationship}
-            className="flex items-center gap-2"
-          >
-            <PlusCircle className="h-4 w-4" />
-            Create Relationship Plan
-          </Button>
         </div>
         
         {/* Metrics cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center">
-                <Calendar className="h-8 w-8 mr-3 text-primary" />
-                <div className="text-2xl font-bold">{outreachCounts.upcoming}</div>
+                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-primary" />
+                <div className="text-xl sm:text-2xl font-bold">{outreachCounts.upcoming}</div>
               </div>
             </CardContent>
           </Card>
@@ -101,8 +105,8 @@ const Relationships = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center">
-                <Calendar className="h-8 w-8 mr-3 text-destructive" />
-                <div className="text-2xl font-bold">{outreachCounts.overdue}</div>
+                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-destructive" />
+                <div className="text-xl sm:text-2xl font-bold">{outreachCounts.overdue}</div>
               </div>
             </CardContent>
           </Card>
@@ -112,8 +116,8 @@ const Relationships = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center">
-                <Users className="h-8 w-8 mr-3 text-primary" />
-                <div className="text-2xl font-bold">{contactCount}</div>
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-primary" />
+                <div className="text-xl sm:text-2xl font-bold">{contactCount}</div>
               </div>
             </CardContent>
           </Card>

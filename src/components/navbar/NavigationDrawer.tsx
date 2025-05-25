@@ -18,7 +18,6 @@ import {
   Users,
   FileText,
   Shield,
-  BookOpen,
   Book,
   FileTextIcon,
   Tag,
@@ -61,6 +60,12 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
     } catch (error) {
       console.error("Logout error:", error);
     }
+  };
+
+  const handleNotifications = () => {
+    // TODO: Implement notifications functionality
+    console.log("Notifications clicked");
+    onOpenChange(false);
   };
 
   // Check user roles safely
@@ -115,20 +120,20 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   Find Profiles
                 </Button>
 
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={handleNotifications}
+                >
+                  <Bell className="mr-2 h-4 w-4" />
+                  Notifications
+                </Button>
+
                 {/* Knowledge Section */}
                 <Separator className="my-2" />
                 <p className="px-4 py-2 text-sm font-medium opacity-70">
                   Knowledge
                 </p>
-
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/knowledge")}
-                >
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  Knowledge Base
-                </Button>
 
                 <Button
                   variant="ghost"
