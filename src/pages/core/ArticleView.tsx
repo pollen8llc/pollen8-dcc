@@ -24,8 +24,6 @@ import {
 import { 
   ChevronLeft, 
   Edit, 
-  ThumbsUp, 
-  ThumbsDown, 
   Check, 
   Tag, 
   Trash2,
@@ -37,6 +35,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { VoteType } from '@/models/knowledgeTypes';
 import DOMPurify from 'dompurify';
 import AuthorCard from '@/components/knowledge/AuthorCard';
+import { VotingButtons } from '@/components/knowledge/VotingButtons';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,19 +54,6 @@ const ArticleView = () => {
   
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = knowledgeBase.useComments(id);
-
-  // Handle voting on article
-  const handleArticleVote = (voteType: VoteType) => {
-    if (article) {
-      if (article.user_vote === 1 && voteType === 'upvote') {
-        knowledgeBase.vote('article', article.id, 'none');
-      } else if (article.user_vote === -1 && voteType === 'downvote') {
-        knowledgeBase.vote('article', article.id, 'none');
-      } else {
-        knowledgeBase.vote('article', article.id, voteType);
-      }
-    }
-  };
 
   // Handle voting on comment
   const handleCommentVote = (commentId: string, voteType: VoteType, currentVote?: number | null) => {
@@ -261,26 +247,14 @@ const ArticleView = () => {
           <CardFooter className="flex flex-col md:flex-row justify-between border-t pt-4 gap-4">
             <div className="flex items-center">
               <span className="mr-2">Was this helpful?</span>
-              <div className="flex gap-2">
-                <Button 
-                  size="sm" 
-                  variant={article.user_vote === 1 ? "default" : "outline"}
-                  className={article.user_vote === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
-                  onClick={() => handleArticleVote('upvote')}
-                >
-                  <ThumbsUp className="h-4 w-4 mr-1" />
-                  {article.vote_count && article.vote_count > 0 ? article.vote_count : ''}
-                </Button>
-                
-                <Button 
-                  size="sm" 
-                  variant={article.user_vote === -1 ? "default" : "outline"}
-                  className={article.user_vote === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
-                  onClick={() => handleArticleVote('downvote')}
-                >
-                  <ThumbsDown className="h-4 w-4" />
-                </Button>
-              </div>
+              <VotingButtons
+                itemType="article"
+                itemId={article.id}
+                voteCount={article.vote_count}
+                userVote={article.user_vote}
+                size="sm"
+                showCount={true}
+              />
             </div>
             
             <div className="flex items-center text-sm text-muted-foreground">
@@ -365,26 +339,14 @@ const ArticleView = () => {
                   </CardContent>
                   
                   <CardFooter className="flex justify-between pt-0">
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant={comment.user_vote === 1 ? "default" : "outline"}
-                        className={comment.user_vote === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
-                        onClick={() => handleCommentVote(comment.id, 'upvote', comment.user_vote)}
-                      >
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        {comment.vote_count && comment.vote_count > 0 ? comment.vote_count : ''}
-                      </Button>
-                      
-                      <Button 
-                        size="sm" 
-                        variant={comment.user_vote === -1 ? "default" : "outline"}
-                        className={comment.user_vote === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
-                        onClick={() => handleCommentVote(comment.id, 'downvote', comment.user_vote)}
-                      >
-                        <ThumbsDown className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <VotingButtons
+                      itemType="comment"
+                      itemId={comment.id}
+                      voteCount={comment.vote_count}
+                      userVote={comment.user_vote}
+                      size="sm"
+                      showCount={true}
+                    />
                   </CardFooter>
                 </Card>
               ))

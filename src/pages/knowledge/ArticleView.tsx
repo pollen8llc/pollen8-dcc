@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -11,8 +12,6 @@ import {
   Edit,
   Share2,
   Bookmark,
-  ThumbsUp,
-  ThumbsDown,
   MessageSquare,
   Eye,
   Tag as TagIcon,
@@ -31,6 +30,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
+import { VotingButtons } from '@/components/knowledge/VotingButtons';
 
 // Mocks and types
 import { ContentType, VoteType } from '@/models/knowledgeTypes';
@@ -49,29 +49,6 @@ const ArticleView = () => {
   
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = useComments(id);
-  
-  const [userVote, setUserVote] = useState(article.user_vote);
-
-  useEffect(() => {
-    setUserVote(article.user_vote);
-  }, [article.user_vote]);
-  
-  // Handle voting
-  const handleVote = (voteType: VoteType) => {
-    if (!article) return;
-    if (!id) return;
-    
-    // Optimistically update local state
-    setUserVote(prev => {
-      if (voteType === 'upvote') {
-        return prev === 1 ? null : 1;
-      } else if (voteType === 'downvote') {
-        return prev === -1 ? null : -1;
-      }
-      return null;
-    });
-    vote('article', id, voteType);
-  };
   
   // Handle comment voting
   const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
@@ -212,26 +189,14 @@ const ArticleView = () => {
             
             {/* Actions bar */}
             <div className="flex items-center justify-between mt-4 mb-8">
-              <div className="flex items-center space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleVote('upvote')} 
-                  className={userVote === 1 ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800' : ''}
-                >
-                  <ThumbsUp className="h-4 w-4 mr-1" />
-                  {article.vote_count || 0}
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleVote('downvote')}
-                  className={userVote === -1 ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800' : ''}
-                >
-                  <ThumbsDown className="h-4 w-4" />
-                </Button>
-              </div>
+              <VotingButtons
+                itemType="article"
+                itemId={article.id}
+                voteCount={article.vote_count}
+                userVote={article.user_vote}
+                size="default"
+                showCount={true}
+              />
               
               <div className="flex items-center space-x-2">
                 <Button
@@ -274,11 +239,6 @@ const ArticleView = () => {
               <div className="flex items-center">
                 <MessageSquare className="h-4 w-4 mr-1" />
                 <span>{article.comment_count || 0} comments</span>
-              </div>
-              
-              <div className="flex items-center">
-                <ThumbsUp className="h-4 w-4 mr-1" />
-                <span>{article.vote_count || 0} votes</span>
               </div>
             </div>
             

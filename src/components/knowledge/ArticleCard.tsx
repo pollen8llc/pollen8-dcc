@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   MessageSquare,
-  ThumbsUp,
   Eye,
   Calendar,
   Share2,
@@ -19,6 +19,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ContentType } from '@/models/knowledgeTypes';
 import { cn } from '@/lib/utils';
 import { PollVoting } from './PollVoting';
+import { VotingButtons } from './VotingButtons';
 
 interface Article {
   id: string;
@@ -31,6 +32,7 @@ interface Article {
   view_count?: number;
   comment_count?: number;
   vote_count?: number;
+  user_vote?: number | null;
   author?: {
     id: string;
     name: string;
@@ -108,6 +110,10 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
         window.location.origin + `/knowledge/${article.id}`
       );
     }
+  };
+
+  const handleVoteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
@@ -211,13 +217,18 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
                   <span>{article.comment_count}</span>
                 </div>
               )}
-              
-              {article.vote_count !== undefined && (
-                <div className="flex items-center gap-1">
-                  <ThumbsUp className="h-3 w-3" />
-                  <span>{article.vote_count}</span>
-                </div>
-              )}
+            </div>
+
+            {/* Voting buttons */}
+            <div onClick={handleVoteClick}>
+              <VotingButtons
+                itemType="article"
+                itemId={article.id}
+                voteCount={article.vote_count}
+                userVote={article.user_vote}
+                size="sm"
+                showCount={true}
+              />
             </div>
 
             {/* Share button - hidden on mobile */}
