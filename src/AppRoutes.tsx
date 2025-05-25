@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -6,6 +5,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 // Authentication
 import Auth from '@/pages/Auth';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import Rel8ProtectedRoute from '@/components/auth/Rel8ProtectedRoute';
 
 // Main Pages
 import Index from '@/pages/Index';
@@ -190,83 +190,83 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Rel8 CRM Routes */}
+        {/* Rel8 CRM Routes - Now protected for organizers only */}
         <Route path="/rel8" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <Dashboard />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/contacts" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <Contacts />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/contacts/create" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <ContactCreate />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/contacts/:id/edit" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <ContactEdit />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/contacts/import" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <ImportContacts />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/groups" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <Groups />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/categories" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <Categories />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/relationships" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <Relationships />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/wizard" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <RelationshipWizard />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/triggers/wizard" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <TriggerWizard />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/notifications" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <Notifications />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/settings" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <Settings />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
         
         <Route path="/rel8/email-test" element={
-          <ProtectedRoute>
+          <Rel8ProtectedRoute>
             <EmailTest />
-          </ProtectedRoute>
+          </Rel8ProtectedRoute>
         } />
 
         {/* 404 Route */}

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import {
   getActiveTriggerCount
 } from "@/services/rel8t/triggerService";
 import { useNavigate } from "react-router-dom";
-import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { OutreachSection } from "@/components/rel8t/dashboard/OutreachSection";
 import { ContactGrowthChart } from "@/components/rel8t/dashboard/ContactGrowthChart";
 import { MetricCard } from "@/components/rel8t/MetricCard";
@@ -54,7 +55,7 @@ const Dashboard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Rel8Navigation />
+        <Rel8OnlyNavigation />
         
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
           <div>

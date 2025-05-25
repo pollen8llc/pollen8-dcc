@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -28,7 +29,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MetricCard } from '@/components/rel8t/MetricCard';
-import { Rel8TNavigation } from '@/components/rel8t/Rel8TNavigation';
+import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -72,7 +73,7 @@ const UserKnowledgeResource = () => {
   return (
     <Shell>
       <div className="container mx-auto px-4 py-8">
-        <Rel8TNavigation />
+        <CoreNavigation />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
           <div>

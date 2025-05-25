@@ -19,8 +19,10 @@ const ArticleEdit: React.FC = () => {
   // Fetch the article
   const { data: article, isLoading, error } = useArticle(id);
   
-  // Check if user can edit
-  const canEdit = isAdmin || isOrganizer || (currentUser && article && currentUser.id === article.user_id);
+  // Check if user can edit - only author, organizers, or admins
+  const canEdit = currentUser && article && (
+    currentUser.id === article.user_id || isAdmin || isOrganizer()
+  );
   
   // Handle loading state
   if (isLoading) {
@@ -66,7 +68,7 @@ const ArticleEdit: React.FC = () => {
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold tracking-tight mb-8">Edit Article</h1>
           <div className="text-center">
-            <p className="text-red-500">You don't have permission to edit this article.</p>
+            <p className="text-red-500">You don't have permission to edit this article. Only the author or organizers can edit articles.</p>
             <Button 
               className="mt-4"
               onClick={() => navigate(`/knowledge/${id}`)}

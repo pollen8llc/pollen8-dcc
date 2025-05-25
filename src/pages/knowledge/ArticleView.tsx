@@ -50,6 +50,11 @@ const ArticleView = () => {
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = useComments(id);
   
+  // Check if current user can edit this article
+  const canEdit = currentUser && article && (
+    currentUser.id === article.user_id || isAdmin || isOrganizer
+  );
+  
   // Handle comment voting
   const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
     vote('comment', commentId, voteType);
@@ -213,7 +218,7 @@ const ArticleView = () => {
                   Share
                 </Button>
                 
-                {(isAdmin || isOrganizer || currentUser?.id === article.user_id) && (
+                {canEdit && (
                   <Button variant="outline" size="sm" asChild>
                     <Link to={`/knowledge/${id}/edit`}>
                       <Edit className="h-4 w-4 mr-1" />
@@ -221,6 +226,7 @@ const ArticleView = () => {
                     </Link>
                   </Button>
                 )}
+                
                 {currentUser?.id === article.user_id && (
                   <Button variant="destructive" size="sm" onClick={handleDeleteArticle} className="ml-2">
                     Delete
