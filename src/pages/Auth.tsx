@@ -139,8 +139,8 @@ const Auth = () => {
           description: "Your account has been created.",
         });
         
-        // In development, we won't wait for email verification
-        navigate("/onboarding", { replace: true });
+        // Redirect new users directly to profile setup
+        navigate("/profile/setup", { replace: true });
       }
     } catch (error: any) {
       console.error("Unexpected error during sign up:", error);

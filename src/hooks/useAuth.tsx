@@ -83,12 +83,13 @@ export const useAuth = () => {
     createProfileIfNeeded();
   }, [session, currentUser, sessionLoading, profileLoading, createProfileIfNotExists, refreshUser, toast]);
 
-  // Profile completion check - simplified
+  // Profile completion check - simplified and only for existing users
   useEffect(() => {
     if (sessionLoading || profileLoading || !currentUser || profileCompletionChecked.current) return;
     
-    // Skip if we're already on the setup page
-    if (window.location.pathname === "/profile/setup") {
+    // Skip profile completion check if we're already on setup or auth pages
+    const currentPath = window.location.pathname;
+    if (currentPath === "/profile/setup" || currentPath === "/auth") {
       return;
     }
     
