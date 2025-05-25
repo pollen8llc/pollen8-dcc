@@ -11,6 +11,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { Shell } from "@/components/layout/Shell";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 const TriggerWizard = () => {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ const TriggerWizard = () => {
   return (
     <Shell>
       <div className="container mx-auto px-4 py-8">
-        <Rel8Navigation />
+        <Rel8OnlyNavigation />
         
         <div className="flex justify-between items-center mt-6 mb-8">
           <div>

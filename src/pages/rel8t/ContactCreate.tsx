@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 const ContactCreate = () => {
   const navigate = useNavigate();
@@ -67,33 +67,12 @@ const ContactCreate = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink>New Contact</BreadcrumbLink>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/rel8/contacts")}
-            className="mr-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" /> Back
-          </Button>
+        <Rel8OnlyNavigation />
+
+        <div className="flex items-center justify-between mb-8 mt-6">
           <div>
-            <h1 className="text-2xl font-bold">Create New Contact</h1>
-            <p className="text-muted-foreground">Add a new contact to your network</p>
+            <h1 className="text-3xl font-bold">Create New Contact</h1>
+            <p className="text-muted-foreground mt-1">Add a new contact to your network</p>
           </div>
         </div>
 

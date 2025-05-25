@@ -13,6 +13,7 @@ import { Bell, CalendarClock, Users, UserPlus, Settings as SettingsIcon } from '
 import { useQuery } from '@tanstack/react-query';
 import { getOutreach } from '@/services/rel8t/outreachService';
 import { Rel8Navigation } from '@/components/rel8t/Rel8TNavigation';
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 // Placeholder data for analytics until we connect to real data
 const mockStats = {
@@ -65,36 +66,16 @@ const Notifications = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+        <Rel8OnlyNavigation />
+        
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 mt-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">REL8 Dashboard</h1>
+            <h1 className="text-3xl font-bold">Notifications</h1>
             <p className="text-muted-foreground mt-1">
-              Manage your relationships and outreach activities
+              Manage your relationship activities and reminders
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/rel8/contacts')}
-            >
-              <Users className="mr-2 h-4 w-4" />
-              Contacts
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/rel8/settings')}
-            >
-              <SettingsIcon className="mr-2 h-4 w-4" />
-              Settings
-            </Button>
-            <Button onClick={handleCreateOutreach}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Build Relationship
-            </Button>
-          </div>
         </div>
-
-        <Rel8Navigation />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <MetricCard
