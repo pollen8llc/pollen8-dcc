@@ -8,18 +8,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   MessageSquare,
   Eye,
-  Calendar,
   Share2,
   BookOpen,
   BarChart3,
   Quote,
   HelpCircle
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
 import { ContentType } from '@/models/knowledgeTypes';
 import { cn } from '@/lib/utils';
 import { PollVoting } from './PollVoting';
-import { VotingButtons } from './VotingButtons';
 
 interface Article {
   id: string;
@@ -55,15 +52,15 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
   const getContentTypeIcon = (type: ContentType) => {
     switch (type) {
       case ContentType.ARTICLE:
-        return <BookOpen className="h-4 w-4" />;
+        return <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />;
       case ContentType.QUESTION:
-        return <HelpCircle className="h-4 w-4" />;
+        return <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4" />;
       case ContentType.POLL:
-        return <BarChart3 className="h-4 w-4 text-[#00eada]" />;
+        return <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-[#00eada]" />;
       case ContentType.QUOTE:
-        return <Quote className="h-4 w-4 text-pink-500" />;
+        return <Quote className="h-3 w-3 sm:h-4 sm:w-4 text-pink-500" />;
       default:
-        return <BookOpen className="h-4 w-4" />;
+        return <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />;
     }
   };
 
@@ -112,10 +109,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
     }
   };
 
-  const handleVoteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
     <Card 
       className={cn(
@@ -139,7 +132,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
               </Badge>
             </div>
             
-            <h3 className="text-lg font-semibold line-clamp-2 mb-2">
+            <h3 className="text-base sm:text-lg font-semibold line-clamp-2 mb-2">
               {article.title}
             </h3>
             
@@ -176,29 +169,21 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
 
         <Separator className="mb-3" />
 
-        {/* Bottom section */}
+        {/* Bottom section - simplified without date and voting */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             {/* Author */}
             {article.author && (
               <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
+                <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
                   <AvatarImage src={article.author.avatar_url} />
                   <AvatarFallback className="text-xs">
                     {getAuthorInitials(article.author.name)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-xs">{article.author.name}</span>
+                <span className="text-xs sm:text-sm">{article.author.name}</span>
               </div>
             )}
-
-            {/* Date */}
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span className="text-xs">
-                {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
-              </span>
-            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -217,18 +202,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
                   <span>{article.comment_count}</span>
                 </div>
               )}
-            </div>
-
-            {/* Voting buttons */}
-            <div onClick={handleVoteClick}>
-              <VotingButtons
-                itemType="article"
-                itemId={article.id}
-                voteCount={article.vote_count}
-                userVote={article.user_vote}
-                size="sm"
-                showCount={true}
-              />
             </div>
 
             {/* Share button - hidden on mobile */}
