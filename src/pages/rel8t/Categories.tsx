@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
@@ -23,6 +22,11 @@ const Categories = () => {
           <CategoryManagement />
         </div>
       </div>
+
+      {/* Powered by Footer */}
+      <footer className="w-full text-center py-4 text-muted-foreground text-sm">
+        <p>Powered by POLLEN8 LABS</p>
+      </footer>
     </div>
   );
 };
