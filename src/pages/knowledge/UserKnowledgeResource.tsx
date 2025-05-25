@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -127,8 +128,8 @@ const UserKnowledgeResource = () => {
                     title="Total Votes"
                     value={stats?.totalVotes || 0}
                     description={stats?.averageVotesPerArticle ? `${stats?.averageVotesPerArticle} avg per post` : undefined}
-                    icon={<ThumbsUp className="h-5 w-5 text-purple-500" />}
-                    color="purple"
+                    icon={<ThumbsUp className="h-5 w-5 text-amber-500" />}
+                    color="warning"
                     isLoading={statsLoading}
                   />
                   <MetricCard
