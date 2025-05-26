@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -203,7 +204,7 @@ const AppRoutes = () => {
           </Rel8ProtectedRoute>
         } />
         
-        <Route path="/rel8/contacts/create" element={
+        <Route path="/rel8/contacts/new" element={
           <Rel8ProtectedRoute>
             <ContactCreate />
           </Rel8ProtectedRoute>

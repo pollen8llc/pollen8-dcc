@@ -70,7 +70,7 @@ const ContactCreate = () => {
         <Breadcrumb className="mb-4 sm:mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

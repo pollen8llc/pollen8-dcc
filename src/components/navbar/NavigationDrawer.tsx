@@ -43,7 +43,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
           {/* Notifications */}
           <SheetClose asChild>
             <Link 
-              to="/notifications" 
+              to="/rel8/notifications" 
               className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent rounded-md"
             >
               <Bell className="h-4 w-4" />
@@ -75,21 +75,21 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 </Link>
               </SheetClose>
 
-              {/* Connections */}
+              {/* Contacts */}
               <SheetClose asChild>
                 <Link 
-                  to="/connections" 
+                  to="/rel8/contacts" 
                   className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent rounded-md"
                 >
                   <Users className="h-4 w-4" />
-                  My Connections
+                  My Contacts
                 </Link>
               </SheetClose>
 
               {/* Settings */}
               <SheetClose asChild>
                 <Link 
-                  to="/settings" 
+                  to="/rel8/settings" 
                   className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent rounded-md"
                 >
                   <Settings className="h-4 w-4" />
