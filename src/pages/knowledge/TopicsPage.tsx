@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shell } from '@/components/layout/Shell';
+import Navbar from '@/components/Navbar';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
@@ -9,6 +9,7 @@ import { Search, Tag as TagIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { KnowledgeTag } from '@/models/knowledgeTypes';
+import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 const TopicsPage = () => {
   const navigate = useNavigate();
@@ -35,8 +36,12 @@ const TopicsPage = () => {
   }, [filteredTags]);
 
   return (
-    <Shell>
-      <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
+        <CoreNavigation />
+        
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Topics</h1>
@@ -110,7 +115,7 @@ const TopicsPage = () => {
           </div>
         )}
       </div>
-    </Shell>
+    </div>
   );
 };
 
