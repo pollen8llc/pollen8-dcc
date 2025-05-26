@@ -2,24 +2,73 @@
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-// Sample data - in a real app, this would come from an API
-const data = [
-  { name: 'Jan', contacts: 4 },
-  { name: 'Feb', contacts: 7 },
-  { name: 'Mar', contacts: 10 },
-  { name: 'Apr', contacts: 15 },
-  { name: 'May', contacts: 20 },
-  { name: 'Jun', contacts: 25 },
-  { name: 'Jul', contacts: 30 },
-];
+const ContactGrowthChart = () => {
+  const { data: chartData, isLoading } = useQuery({
+    queryKey: ['contact-growth'],
+    queryFn: async () => {
+      // Get contacts with their creation dates
+      const { data: contacts, error } = await supabase
+        .from('rms_contacts')
+        .select('created_at')
+        .order('created_at', { ascending: true });
 
-export const ContactGrowthChart = () => {
+      if (error) {
+        console.error('Error fetching contact growth data:', error);
+        return [];
+      }
+
+      if (!contacts || contacts.length === 0) {
+        // Return sample data if no contacts exist
+        return [
+          { name: 'Jan', contacts: 0 },
+          { name: 'Feb', contacts: 0 },
+          { name: 'Mar', contacts: 0 },
+          { name: 'Apr', contacts: 0 },
+          { name: 'May', contacts: 0 },
+          { name: 'Jun', contacts: 0 },
+        ];
+      }
+
+      // Group contacts by month
+      const monthCounts = contacts.reduce((acc, contact) => {
+        const date = new Date(contact.created_at);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        acc[monthKey] = (acc[monthKey] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Convert to chart format with cumulative counts
+      const chartData = [];
+      let cumulativeCount = 0;
+      
+      for (const [month, count] of Object.entries(monthCounts)) {
+        cumulativeCount += count;
+        chartData.push({
+          name: month,
+          contacts: cumulativeCount
+        });
+      }
+
+      return chartData;
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="h-[300px] w-full flex items-center justify-center">
+        <div className="text-muted-foreground">Loading contact growth data...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={data}
+          data={chartData}
           margin={{
             top: 5,
             right: 30,
@@ -55,3 +104,5 @@ export const ContactGrowthChart = () => {
     </div>
   );
 };
+
+export { ContactGrowthChart };

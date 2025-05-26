@@ -1,8 +1,7 @@
 
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shell } from '@/components/layout/Shell';
+import Navbar from '@/components/Navbar';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserKnowledgeStats } from '@/hooks/knowledge/useUserKnowledgeStats';
 import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
@@ -39,14 +38,15 @@ const UserKnowledgeResource = () => {
 
   if (!currentUser) {
     return (
-      <Shell>
+      <div className="min-h-screen bg-background">
+        <Navbar />
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Please log in to view your knowledge resources</h1>
             <Button onClick={() => navigate('/auth')}>Log In</Button>
           </div>
         </div>
-      </Shell>
+      </div>
     );
   }
 
@@ -71,9 +71,12 @@ const UserKnowledgeResource = () => {
   );
 
   return (
-    <Shell>
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
         <CoreNavigation />
+        
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
           <div>
@@ -305,7 +308,7 @@ const UserKnowledgeResource = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Shell>
+    </div>
   );
 };
 

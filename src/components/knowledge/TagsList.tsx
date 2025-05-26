@@ -44,8 +44,8 @@ export const TagsList: React.FC<TagsListProps> = ({
   const popularThreshold = Math.max(1, Math.ceil(sortedTags.length / 4));
   
   return (
-    <ScrollArea className="h-[300px] pr-4">
-      <div className="flex flex-wrap gap-2">
+    <ScrollArea className="h-[200px] w-full">
+      <div className="flex flex-wrap gap-2 pr-4">
         {sortedTags.map((tag, index) => {
           const isPopular = index < popularThreshold;
           return (
