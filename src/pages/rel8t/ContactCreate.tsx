@@ -84,11 +84,6 @@ const ContactCreate = () => {
           />
         </div>
       </div>
-
-      {/* Powered by Footer */}
-      <footer className="w-full text-center py-4 text-muted-foreground text-sm">
-        <p>Powered by POLLEN8 LABS</p>
-      </footer>
     </div>
   );
 };
