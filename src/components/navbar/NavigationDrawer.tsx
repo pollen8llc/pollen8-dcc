@@ -1,115 +1,317 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger, 
-  SheetClose 
-} from '@/components/ui/sheet';
-import { 
-  Bell,
-  LayoutDashboard,
-  Users,
-  Settings,
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { User } from "@/models/types";
+import {
+  Home,
   LogOut,
-  User
-} from 'lucide-react';
+  User as UserIcon,
+  Settings,
+  Users,
+  FileText,
+  Shield,
+  Book,
+  FileTextIcon,
+  Tag,
+  ContactIcon,
+  LayoutDashboard,
+  Grid3x3,
+  CalendarClock,
+  Import,
+  Bell,
+  Folder,
+  PlusCircle,
+  UserSearch
+} from "lucide-react";
 
 interface NavigationDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentUser: any;
-  logout: () => void;
+  currentUser: User | null;
+  logout: () => Promise<void>;
 }
 
 export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   open,
   onOpenChange,
   currentUser,
-  logout
+  logout,
 }) => {
+  const navigate = useNavigate();
+
+  const handleNavigation = (route: string) => {
+    navigate(route);
+    onOpenChange(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      onOpenChange(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  const handleNotifications = () => {
+    // TODO: Implement notifications functionality
+    console.log("Notifications clicked");
+    onOpenChange(false);
+  };
+  // do not change NavigationDrawer.tsx unless specifically specified
+
+  // Check user roles safely
+  const isAdmin = currentUser?.role === 'ADMIN';
+  const isOrganizer = currentUser?.role === 'ORGANIZER' || isAdmin;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-        <SheetHeader>
-          <SheetTitle>Navigation</SheetTitle>
+      <SheetContent className="w-[300px] sm:w-[350px] flex flex-col">
+        <SheetHeader className="mb-4">
+          <SheetTitle className="text-xl">ECO8</SheetTitle>
         </SheetHeader>
-        
-        <div className="flex flex-col gap-4 py-4">
-          {/* Notifications */}
-          <SheetClose asChild>
-            <Link 
-              to="/rel8/notifications" 
-              className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent rounded-md"
+
+        <div className="flex-1 overflow-y-auto">
+          <nav className="flex flex-col gap-1">
+            {/* Main Navigation */}
+            <Button
+              variant="ghost"
+              className="justify-start"
+              onClick={() => handleNavigation("/")}
             >
-              <Bell className="h-4 w-4" />
-              Notifications
-            </Link>
-          </SheetClose>
+              <Home className="mr-2 h-4 w-4" />
+              Home
+            </Button>
 
-          {currentUser && (
-            <>
-              {/* Profile */}
-              <SheetClose asChild>
-                <Link 
-                  to="/profile" 
-                  className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent rounded-md"
+            {currentUser && (
+              <>
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/welcome")}
                 >
-                  <User className="h-4 w-4" />
-                  Profile
-                </Link>
-              </SheetClose>
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
 
-              {/* REL8 Dashboard */}
-              <SheetClose asChild>
-                <Link 
-                  to="/rel8" 
-                  className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent rounded-md"
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/profile")}
                 >
-                  <LayoutDashboard className="h-4 w-4" />
-                  REL8 Dashboard
-                </Link>
-              </SheetClose>
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  My Profile
+                </Button>
 
-              {/* Contacts */}
-              <SheetClose asChild>
-                <Link 
-                  to="/rel8/contacts" 
-                  className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent rounded-md"
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/profile/search")}
                 >
-                  <Users className="h-4 w-4" />
-                  My Contacts
-                </Link>
-              </SheetClose>
+                  <UserSearch className="mr-2 h-4 w-4" />
+                  Find Profiles
+                </Button>
 
-              {/* Settings */}
-              <SheetClose asChild>
-                <Link 
-                  to="/rel8/settings" 
-                  className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-accent rounded-md"
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={handleNotifications}
                 >
-                  <Settings className="h-4 w-4" />
-                  Settings
-                </Link>
-              </SheetClose>
+                  <Bell className="mr-2 h-4 w-4" />
+                  Notifications
+                </Button>
 
-              {/* Logout */}
-              <Button 
-                variant="ghost" 
-                className="justify-start gap-3 px-3 py-2 text-sm"
-                onClick={() => {
-                  logout();
-                  onOpenChange(false);
-                }}
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
-            </>
+                {/* Knowledge Section */}
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  Knowledge
+                </p>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/knowledge/resources")}
+                >
+                  <FileTextIcon className="mr-2 h-4 w-4" />
+                  My Resources
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/knowledge/topics")}
+                >
+                  <Book className="mr-2 h-4 w-4" />
+                  Browse Topics
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/knowledge/create")}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create Article
+                </Button>
+
+                {/* Organizer Section */}
+                {isOrganizer && (
+                  <>
+                    <Separator className="my-2" />
+                    <p className="px-4 py-2 text-sm font-medium opacity-70">
+                      REL8
+                    </p>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8")}
+                    >
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/contacts")}
+                    >
+                      <ContactIcon className="mr-2 h-4 w-4" />
+                      Contacts
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/relationships")}
+                    >
+                      <CalendarClock className="mr-2 h-4 w-4" />
+                      Relationships
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/groups")}
+                    >
+                      <Grid3x3 className="mr-2 h-4 w-4" />
+                      Groups
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/categories")}
+                    >
+                      <Tag className="mr-2 h-4 w-4" />
+                      Categories
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/settings")}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Button>
+
+                    <Separator className="my-2" />
+                    <p className="px-4 py-2 text-sm font-medium opacity-70">
+                      Organizer
+                    </p>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/organizer")}
+                    >
+                      <Folder className="mr-2 h-4 w-4" />
+                      Organizer Dashboard
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/invites")}
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      Manage Invites
+                    </Button>
+                  </>
+                )}
+
+                {/* Admin Section */}
+                {isAdmin && (
+                  <>
+                    <Separator className="my-2" />
+                    <p className="px-4 py-2 text-sm font-medium opacity-70">
+                      Admin
+                    </p>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/admin")}
+                    >
+                      <Shield className="mr-2 h-4 w-4" />
+                      Admin Dashboard
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/admin/debugger")}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Debug Tools
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
+
+            <Separator className="my-2" />
+
+            <Button
+              variant="ghost"
+              className="justify-start"
+              onClick={() => handleNavigation("/docs")}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Documentation
+            </Button>
+          </nav>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t pt-4 flex flex-col gap-2">
+          {currentUser ? (
+            <Button
+              variant="outline"
+              className="justify-start"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          ) : (
+            <Button 
+              className="w-full"
+              onClick={() => handleNavigation("/auth")}
+            >
+              <UserIcon className="mr-2 h-4 w-4" />
+              Sign In
+            </Button>
           )}
         </div>
       </SheetContent>
