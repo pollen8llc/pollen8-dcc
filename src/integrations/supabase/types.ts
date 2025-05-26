@@ -288,6 +288,7 @@ export type Database = {
       }
       knowledge_articles: {
         Row: {
+          allow_multiple_responses: boolean | null
           archived_at: string | null
           archived_by: string | null
           comment_count: number
@@ -297,6 +298,8 @@ export type Database = {
           id: string
           is_answered: boolean | null
           options: Json | null
+          poll_data: Json | null
+          poll_expires_at: string | null
           source: string | null
           subtitle: string | null
           tags: string[] | null
@@ -307,6 +310,7 @@ export type Database = {
           vote_count: number
         }
         Insert: {
+          allow_multiple_responses?: boolean | null
           archived_at?: string | null
           archived_by?: string | null
           comment_count?: number
@@ -316,6 +320,8 @@ export type Database = {
           id?: string
           is_answered?: boolean | null
           options?: Json | null
+          poll_data?: Json | null
+          poll_expires_at?: string | null
           source?: string | null
           subtitle?: string | null
           tags?: string[] | null
@@ -326,6 +332,7 @@ export type Database = {
           vote_count?: number
         }
         Update: {
+          allow_multiple_responses?: boolean | null
           archived_at?: string | null
           archived_by?: string | null
           comment_count?: number
@@ -335,6 +342,8 @@ export type Database = {
           id?: string
           is_answered?: boolean | null
           options?: Json | null
+          poll_data?: Json | null
+          poll_expires_at?: string | null
           source?: string | null
           subtitle?: string | null
           tags?: string[] | null
@@ -480,6 +489,41 @@ export type Database = {
             columns: ["comment_id"]
             isOneToOne: false
             referencedRelation: "knowledge_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_responses: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
             referencedColumns: ["id"]
           },
         ]

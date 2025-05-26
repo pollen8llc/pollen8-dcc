@@ -25,67 +25,67 @@ interface PollVotingProps {
   isOwner?: boolean;
 }
 
-interface VoteCount {
+interface ResponseCount {
   option_index: number;
   count: number;
 }
 
 export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwner = false }) => {
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
-  const [hasVoted, setHasVoted] = useState(false);
-  const [voteCounts, setVoteCounts] = useState<VoteCount[]>([]);
-  const [totalVotes, setTotalVotes] = useState(0);
+  const [hasResponded, setHasResponded] = useState(false);
+  const [responseCounts, setResponseCounts] = useState<ResponseCount[]>([]);
+  const [totalResponses, setTotalResponses] = useState(0);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const loadVotes = async () => {
+  const loadResponses = async () => {
     try {
-      // Get vote counts for each option
-      const { data: votes, error } = await supabase
-        .from('poll_votes')
+      // Get response counts for each option
+      const { data: responses, error } = await supabase
+        .from('poll_responses')
         .select('option_index')
         .eq('poll_id', pollId);
 
       if (error) throw error;
 
-      // Count votes per option
+      // Count responses per option
       const counts: { [key: number]: number } = {};
-      votes?.forEach(vote => {
-        counts[vote.option_index] = (counts[vote.option_index] || 0) + 1;
+      responses?.forEach(response => {
+        counts[response.option_index] = (counts[response.option_index] || 0) + 1;
       });
 
-      const voteCountsArray = Object.entries(counts).map(([index, count]) => ({
+      const responseCountsArray = Object.entries(counts).map(([index, count]) => ({
         option_index: parseInt(index),
         count: count as number
       }));
 
-      setVoteCounts(voteCountsArray);
-      setTotalVotes(votes?.length || 0);
+      setResponseCounts(responseCountsArray);
+      setTotalResponses(responses?.length || 0);
 
-      // Check if current user has voted
+      // Check if current user has responded
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: userVotes } = await supabase
-          .from('poll_votes')
+        const { data: userResponses } = await supabase
+          .from('poll_responses')
           .select('option_index')
           .eq('poll_id', pollId)
           .eq('user_id', user.id);
 
-        if (userVotes && userVotes.length > 0) {
-          setHasVoted(true);
-          setSelectedOptions(userVotes.map(v => v.option_index));
+        if (userResponses && userResponses.length > 0) {
+          setHasResponded(true);
+          setSelectedOptions(userResponses.map(r => r.option_index));
         }
       }
     } catch (error) {
-      console.error('Error loading votes:', error);
+      console.error('Error loading responses:', error);
     }
   };
 
   useEffect(() => {
-    loadVotes();
+    loadResponses();
   }, [pollId]);
 
-  const handleVote = async () => {
+  const handleSubmitResponse = async () => {
     if (selectedOptions.length === 0) {
       toast({
         title: "Error",
@@ -100,38 +100,38 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Remove existing votes if any
+      // Remove existing responses if any
       await supabase
-        .from('poll_votes')
+        .from('poll_responses')
         .delete()
         .eq('poll_id', pollId)
         .eq('user_id', user.id);
 
-      // Insert new votes
-      const votes = selectedOptions.map(optionIndex => ({
+      // Insert new responses
+      const responses = selectedOptions.map(optionIndex => ({
         poll_id: pollId,
         user_id: user.id,
         option_index: optionIndex
       }));
 
       const { error } = await supabase
-        .from('poll_votes')
-        .insert(votes);
+        .from('poll_responses')
+        .insert(responses);
 
       if (error) throw error;
 
-      setHasVoted(true);
-      await loadVotes();
+      setHasResponded(true);
+      await loadResponses();
 
       toast({
         title: "Success!",
-        description: "Your vote has been recorded",
+        description: "Your response has been recorded",
       });
     } catch (error: any) {
-      console.error('Error voting:', error);
+      console.error('Error submitting response:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to record vote",
+        description: error.message || "Failed to record response",
         variant: "destructive"
       });
     } finally {
@@ -139,13 +139,13 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
     }
   };
 
-  const getVoteCount = (optionIndex: number) => {
-    return voteCounts.find(vc => vc.option_index === optionIndex)?.count || 0;
+  const getResponseCount = (optionIndex: number) => {
+    return responseCounts.find(rc => rc.option_index === optionIndex)?.count || 0;
   };
 
-  const getVotePercentage = (optionIndex: number) => {
-    if (totalVotes === 0) return 0;
-    return (getVoteCount(optionIndex) / totalVotes) * 100;
+  const getResponsePercentage = (optionIndex: number) => {
+    if (totalResponses === 0) return 0;
+    return (getResponseCount(optionIndex) / totalResponses) * 100;
   };
 
   const handleOptionChange = (optionIndex: number, checked: boolean) => {
@@ -164,13 +164,13 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
     <Card>
       <CardContent className="p-6">
         <div className="space-y-4">
-          {hasVoted || isOwner ? (
+          {hasResponded || isOwner ? (
             // Show results
             <div className="space-y-3">
-              <h4 className="font-medium text-sm text-muted-foreground">Results ({totalVotes} votes)</h4>
+              <h4 className="font-medium text-sm text-muted-foreground">Results ({totalResponses} responses)</h4>
               {pollData.options.map((option, index) => {
-                const voteCount = getVoteCount(index);
-                const percentage = getVotePercentage(index);
+                const responseCount = getResponseCount(index);
+                const percentage = getResponsePercentage(index);
                 const isSelected = selectedOptions.includes(index);
                 
                 return (
@@ -180,7 +180,7 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
                         {option.text} {isSelected && '✓'}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        {voteCount} ({percentage.toFixed(1)}%)
+                        {responseCount} ({percentage.toFixed(1)}%)
                       </span>
                     </div>
                     <Progress value={percentage} className="h-2" />
@@ -227,11 +227,11 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
               )}
               
               <Button 
-                onClick={handleVote} 
+                onClick={handleSubmitResponse} 
                 disabled={loading || selectedOptions.length === 0}
                 className="w-full"
               >
-                {loading ? 'Voting...' : 'Vote'}
+                {loading ? 'Submitting...' : 'Submit Response'}
               </Button>
             </div>
           )}

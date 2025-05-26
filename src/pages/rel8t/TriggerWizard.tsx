@@ -1,5 +1,6 @@
+
 import Navbar from "@/components/Navbar";
-import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Step, Steps } from "@/components/ui/steps";
 import { useTriggerWizard, TriggerFormData } from "@/hooks/rel8t/useTriggerWizard";
@@ -8,7 +9,6 @@ import { BehaviorStep } from "@/components/rel8t/triggers/wizard-steps/BehaviorS
 import { ScheduleStep } from "@/components/rel8t/triggers/wizard-steps/ScheduleStep";
 import { ReviewStep } from "@/components/rel8t/triggers/wizard-steps/ReviewStep";
 import { FormProvider, useForm } from "react-hook-form";
-import { Shell } from "@/components/layout/Shell";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -51,22 +51,24 @@ const TriggerWizard = () => {
   };
 
   return (
-    <Shell>
-      <div className="container mx-auto px-4 py-8">
-        <Rel8Navigation />
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
+        <Rel8OnlyNavigation />
         
-        <div className="flex justify-between items-center mt-6 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Create Automation Trigger</h1>
-            <p className="text-muted-foreground mt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 sm:mt-6 mb-6 sm:mb-8 gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">Create Automation Trigger</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
               Set up automated actions based on specific events or schedules
             </p>
           </div>
         </div>
 
         <Card className="mb-6">
-          <CardContent className="p-6">
-            <Steps currentStep={currentStep} className="mb-8">
+          <CardContent className="p-4 sm:p-6">
+            <Steps currentStep={currentStep} className="mb-6 sm:mb-8">
               <Step title="Basic Info" />
               <Step title="Behavior" />
               <Step title="Schedule" />
@@ -106,7 +108,7 @@ const TriggerWizard = () => {
           </CardContent>
         </Card>
       </div>
-    </Shell>
+    </div>
   );
 };
 

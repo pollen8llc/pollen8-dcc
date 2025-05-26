@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { KnowledgeArticle, ContentType, KnowledgeAuthor } from '@/models/knowledgeTypes';
@@ -211,6 +212,12 @@ export const useArticleMutations = () => {
               allowMultipleSelections: data.allowMultipleSelections || false,
               duration: data.duration || '7'
             },
+            poll_data: {
+              options: data.options || [],
+              allowMultipleSelections: data.allowMultipleSelections || false,
+              duration: data.duration || '7'
+            },
+            allow_multiple_responses: data.allowMultipleSelections || false,
           };
           break;
 

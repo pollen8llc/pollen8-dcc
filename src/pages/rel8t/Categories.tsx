@@ -9,12 +9,12 @@ const Categories = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
         <Rel8OnlyNavigation />
         
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Categories</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6 mt-4 sm:mt-6">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Categories</h1>
             <p className="text-sm sm:text-base text-muted-foreground">Manage contact categories for better organization</p>
           </div>
         </div>

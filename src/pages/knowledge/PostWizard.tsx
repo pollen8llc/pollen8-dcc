@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Shell } from '@/components/layout/Shell';
+import Navbar from '@/components/Navbar';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Steps, Step } from '@/components/ui/steps';
+import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
 import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
@@ -153,21 +154,26 @@ const PostWizard = () => {
   // If still loading or no post type, show loading state
   if (!postType) {
     return (
-      <Shell>
-        <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh]">
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh] max-w-full">
           <div className="text-center">
             <p>Redirecting to post type selector...</p>
           </div>
         </div>
-      </Shell>
+      </div>
     );
   }
   
   return (
-    <Shell>
-      <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
+        <CoreNavigation />
+        
         {/* Navigation */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <Button variant="ghost" className="pl-0" onClick={handleBack}>
             <ChevronLeft className="mr-2 h-4 w-4" />
             {currentStep === 1 ? 'Back to Type Selection' : 'Back'}
@@ -176,13 +182,13 @@ const PostWizard = () => {
         
         <div className="max-w-3xl mx-auto">
           {/* Header */}
-          <div className="mb-8 flex items-center gap-3">
+          <div className="mb-6 sm:mb-8 flex items-center gap-3">
             {getPostTypeIcon()}
-            <h1 className="text-3xl font-bold tracking-tight">{getPostTypeTitle()}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{getPostTypeTitle()}</h1>
           </div>
           
           {/* Steps Indicator */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <Steps currentStep={currentStep} steps={getSteps()} />
           </div>
           
@@ -257,7 +263,7 @@ const PostWizard = () => {
           </Card>
         </div>
       </div>
-    </Shell>
+    </div>
   );
 };
 

@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { Shell } from '@/components/layout/Shell';
+import Navbar from '@/components/Navbar';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -31,6 +30,8 @@ import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
 import { VotingButtons } from '@/components/knowledge/VotingButtons';
+import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
+import { PollVoting } from '@/components/knowledge/PollVoting';
 
 // Mocks and types
 import { ContentType, VoteType } from '@/models/knowledgeTypes';
@@ -90,8 +91,9 @@ const ArticleView = () => {
 
   if (articleLoading) {
     return (
-      <Shell>
-        <div className="container mx-auto px-4 py-6">
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-6 max-w-full">
           <div className="animate-pulse space-y-4">
             <div className="h-8 w-3/4 bg-muted rounded"></div>
             <div className="h-4 w-1/4 bg-muted rounded"></div>
@@ -99,14 +101,15 @@ const ArticleView = () => {
             <div className="h-4 w-1/2 bg-muted rounded"></div>
           </div>
         </div>
-      </Shell>
+      </div>
     );
   }
   
   if (articleError || !article) {
     return (
-      <Shell>
-        <div className="container mx-auto px-4 py-6">
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-6 max-w-full">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
@@ -122,15 +125,19 @@ const ArticleView = () => {
             </Link>
           </Button>
         </div>
-      </Shell>
+      </div>
     );
   }
 
   return (
-    <Shell>
-      <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
+        <CoreNavigation />
+        
         {/* Navigation */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <Button variant="ghost" className="pl-0" asChild>
             <Link to="/knowledge">
               <ChevronLeft className="mr-2 h-4 w-4" />
@@ -139,7 +146,7 @@ const ArticleView = () => {
           </Button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Main content */}
           <div className="md:col-span-2">
             {/* Content type badge */}
@@ -150,7 +157,7 @@ const ArticleView = () => {
             </div>
             
             {/* Article title */}
-            <h1 className="text-3xl font-bold tracking-tight mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
               {article.title}
             </h1>
             
@@ -166,6 +173,17 @@ const ArticleView = () => {
                   <blockquote className="border-l-4 border-primary pl-4 italic">
                     <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                   </blockquote>
+                ) : article.content_type === ContentType.POLL && article.options ? (
+                  <div className="space-y-4">
+                    <div className="prose dark:prose-invert max-w-none">
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
+                    </div>
+                    <PollVoting 
+                      pollId={article.id} 
+                      pollData={article.options}
+                      isOwner={currentUser?.id === article.user_id}
+                    />
+                  </div>
                 ) : (
                   <div 
                     className="prose dark:prose-invert max-w-none"
@@ -300,7 +318,7 @@ const ArticleView = () => {
           </div>
         </div>
       </div>
-    </Shell>
+    </div>
   );
 };
 
