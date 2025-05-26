@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +24,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const ContactEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -131,7 +138,21 @@ const ContactEdit = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <Rel8OnlyNavigation />
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink>Edit Contact</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
@@ -149,7 +170,21 @@ const ContactEdit = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <Rel8OnlyNavigation />
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink>Not Found</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Contact not found</h2>
@@ -167,9 +202,23 @@ const ContactEdit = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Rel8OnlyNavigation />
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink>Edit Contact</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         
-        <div className="flex items-center mb-6 mt-6">
+        <div className="flex items-center mb-6">
           <Button
             variant="ghost"
             onClick={() => navigate("/rel8/contacts")}
@@ -178,7 +227,7 @@ const ContactEdit = () => {
             <ArrowLeft className="h-4 w-4 mr-2" /> Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Edit Contact</h1>
+            <h1 className="text-2xl font-bold">Edit Contact</h1>
             <p className="text-muted-foreground">Update contact information</p>
           </div>
           <Button
@@ -214,11 +263,6 @@ const ContactEdit = () => {
           )}
         </div>
       </div>
-
-      {/* Powered by Footer */}
-      <footer className="w-full text-center py-4 text-muted-foreground text-sm">
-        <p>Powered by POLLEN8 LABS</p>
-      </footer>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

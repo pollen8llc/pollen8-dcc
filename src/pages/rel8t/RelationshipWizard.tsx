@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -11,7 +12,6 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { Trigger } from "@/services/rel8t/triggerService";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 type WizardStep = 
   | "select-contacts" 
@@ -74,9 +74,21 @@ const RelationshipWizard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Rel8OnlyNavigation />
+        <div className="flex items-center mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mr-2" 
+            onClick={() => navigate("/rel8/dashboard")}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Dashboard
+          </Button>
+        </div>
         
-        <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6 mt-6">
+        <Rel8Navigation />
+        
+        <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">{getStepTitle()}</h1>
             <p className="text-muted-foreground">

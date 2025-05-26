@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Shell } from "@/components/layout/Shell";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface EmailFormData {
@@ -74,7 +75,7 @@ const EmailTest = () => {
   return (
     <Shell>
       <div className="container mx-auto px-4 py-8">
-        <Rel8OnlyNavigation />
+        <Rel8Navigation />
         
         <div className="mt-6 mb-8">
           <h1 className="text-3xl font-bold">Email Testing</h1>
@@ -147,11 +148,6 @@ const EmailTest = () => {
           </form>
         </Card>
       </div>
-
-      {/* Powered by Footer */}
-      <footer className="w-full text-center py-4 text-muted-foreground text-sm">
-        <p>Powered by POLLEN8 LABS</p>
-      </footer>
     </Shell>
   );
 };

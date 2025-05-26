@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { getContactGroups, createContactGroup, ContactGroup, deleteContactGroup } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 const Groups = () => {
   const navigate = useNavigate();
@@ -117,7 +116,7 @@ const Groups = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Rel8OnlyNavigation />
+        <Rel8Navigation />
         
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
           <div>
@@ -277,11 +276,6 @@ const Groups = () => {
           </div>
         )}
       </div>
-
-      {/* Powered by Footer */}
-      <footer className="w-full text-center py-4 text-muted-foreground text-sm">
-        <p>Powered by POLLEN8 LABS</p>
-      </footer>
     </div>
   );
 };
