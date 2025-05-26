@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -129,6 +128,11 @@ const Dashboard = () => {
         {/* Outreach Section */}
         <OutreachSection />
       </div>
+
+      {/* Powered by Footer */}
+      <footer className="w-full text-center py-4 text-muted-foreground text-sm">
+        <p>Powered by POLLEN8 LABS</p>
+      </footer>
     </div>
   );
 };
