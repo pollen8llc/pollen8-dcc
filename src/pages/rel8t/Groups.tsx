@@ -1,6 +1,6 @@
 
 import Navbar from "@/components/Navbar";
-import { ContactGroupsManager } from "@/components/rel8t/ContactGroupsManager";
+import ContactGroupsManager from "@/components/rel8t/ContactGroupsManager";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 const Groups = () => {
