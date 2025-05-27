@@ -20,7 +20,7 @@ import {
   CardDescription 
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Steps, Step } from '@/components/ui/steps';
+import { Steps } from '@/components/ui/steps';
 import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
@@ -75,7 +75,6 @@ const PostWizard = () => {
     }
   };
   
-  // Standardized to always use exactly 2 steps
   const getSteps = () => {
     return ['Content & Tags', 'Review & Submit'];
   };
@@ -100,15 +99,16 @@ const PostWizard = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      // Back to type selection
       navigate('/knowledge/create');
     }
   };
   
   const handleSubmit = async (data: any) => {
     try {
+      console.log('Form submission data:', data);
+      
       if (currentStep === 1) {
-        // Store form data and advance to next step if not on final step
+        // Store form data and advance to next step
         setFormData(data);
         handleNext();
         return;
@@ -118,16 +118,15 @@ const PostWizard = () => {
       if (isSubmittingForm) return;
       setIsSubmittingForm(true);
 
-      // On final step, submit the form data
+      // Final submission - merge stored data with current data
       const finalData = {
-        ...formData, // Use stored data from first step
-        ...data, // Merge with any data from current step
+        ...formData,
+        ...data,
         content_type: getContentType()
       };
       
-      console.log('Submitting form data:', { type: postType, data: finalData });
+      console.log('Final submission data:', finalData);
       
-      // Submit to backend based on the post type
       await createArticle(finalData);
       
       toast({
@@ -135,11 +134,10 @@ const PostWizard = () => {
         description: "Your post has been published",
       });
       
-      // Add a slight delay before redirecting to ensure the data is saved
-      // and to give the user time to see the success message
       setTimeout(() => {
         navigate('/knowledge');
       }, 1000);
+      
     } catch (error) {
       console.error('Error submitting post:', error);
       toast({
@@ -147,18 +145,19 @@ const PostWizard = () => {
         description: "There was a problem publishing your post",
         variant: "destructive"
       });
+    } finally {
       setIsSubmittingForm(false);
     }
   };
   
-  // If still loading or no post type, show loading state
+  // Loading state
   if (!postType) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh] max-w-full">
+        <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <p>Redirecting to post type selector...</p>
+            <p>Loading...</p>
           </div>
         </div>
       </div>
@@ -169,7 +168,7 @@ const PostWizard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
         <CoreNavigation />
         
         {/* Navigation */}
@@ -184,7 +183,7 @@ const PostWizard = () => {
           {/* Header */}
           <div className="mb-6 sm:mb-8 flex items-center gap-3">
             {getPostTypeIcon()}
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{getPostTypeTitle()}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{getPostTypeTitle()}</h1>
           </div>
           
           {/* Steps Indicator */}
@@ -204,8 +203,7 @@ const PostWizard = () => {
             </CardHeader>
             
             <CardContent>
-              {/* Show appropriate form based on post type and step */}
-              {currentStep === 2 && (
+              {currentStep === 2 && formData && (
                 <ReviewContent 
                   formData={formData} 
                   contentType={getContentType()} 
@@ -217,36 +215,36 @@ const PostWizard = () => {
               {currentStep === 1 && postType === 'question' && (
                 <QuestionForm 
                   onSubmit={handleSubmit} 
-                  isSubmitting={isSubmitting}
-                  step={currentStep}
-                  initialData={formData}
+                  isSubmitting={false}
+                  step={1}
+                  initialData={null}
                 />
               )}
               
               {currentStep === 1 && postType === 'quote' && (
                 <QuoteForm 
                   onSubmit={handleSubmit} 
-                  isSubmitting={isSubmitting} 
-                  step={currentStep}
-                  initialData={formData}
+                  isSubmitting={false} 
+                  step={1}
+                  initialData={null}
                 />
               )}
               
               {currentStep === 1 && postType === 'poll' && (
                 <PollForm 
                   onSubmit={handleSubmit} 
-                  isSubmitting={isSubmitting}
-                  step={currentStep}
-                  initialData={formData}
+                  isSubmitting={false}
+                  step={1}
+                  initialData={null}
                 />
               )}
               
               {currentStep === 1 && postType === 'article' && (
                 <ArticleForm 
                   onSubmit={handleSubmit} 
-                  isSubmitting={isSubmitting}
-                  step={currentStep}
-                  initialData={formData}
+                  isSubmitting={false}
+                  step={1}
+                  initialData={null}
                 />
               )}
             </CardContent>
@@ -257,7 +255,9 @@ const PostWizard = () => {
               </Button>
               
               {currentStep === 1 && (
-                <Button type="submit" form="content-form">Next Step</Button>
+                <Button type="submit" form="content-form">
+                  Next Step
+                </Button>
               )}
             </CardFooter>
           </Card>
