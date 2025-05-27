@@ -52,11 +52,7 @@ const PostTypeSelector = () => {
   ];
 
   const handleTypeSelect = (type: string) => {
-    if (type === 'poll') {
-      navigate('/knowledge/wizard', { state: { contentType: 'POLL' } });
-    } else {
-      navigate('/knowledge/wizard', { state: { contentType: type.toUpperCase() } });
-    }
+    navigate(`/knowledge/wizard?type=${type}`);
   };
 
   return (
