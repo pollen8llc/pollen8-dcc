@@ -18,8 +18,6 @@ export interface Contact {
   last_contact_date?: string;
   // Include category details when joined
   category?: ContactCategory;
-  // Include affiliations when joined
-  affiliations?: ContactAffiliation[];
   // Include groups when joined
   groups?: ContactGroup[];
 }
@@ -105,7 +103,7 @@ export const getContactCount = async (): Promise<number> => {
   return count || 0;
 };
 
-// Get a contact by ID with affiliations and groups
+// Get a contact by ID with groups
 export const getContactById = async (id: string): Promise<Contact | null> => {
   try {
     const { data, error } = await supabase
@@ -130,47 +128,6 @@ export const getContactById = async (id: string): Promise<Contact | null> => {
       return null;
     }
 
-    // Get affiliations separately to avoid type errors
-    const { data: affiliationsData, error: affiliationsError } = await supabase
-      .from("rms_contact_affiliations")
-      .select(`
-        id, 
-        affiliation_type,
-        affiliated_user_id,
-        affiliated_contact_id,
-        affiliated_community_id,
-        relationship,
-        created_at
-      `)
-      .eq("contact_id", id);
-
-    if (affiliationsError) {
-      console.error("Error fetching affiliations:", affiliationsError);
-    }
-
-    // Process affiliations safely
-    const affiliations: ContactAffiliation[] = [];
-    
-    if (affiliationsData && Array.isArray(affiliationsData)) {
-      for (const affiliation of affiliationsData) {
-        if (affiliation && typeof affiliation === 'object') {
-          const newAffiliation: ContactAffiliation = {
-            id: affiliation.id,
-            contact_id: id,
-            user_id: data.user_id,
-            affiliation_type: affiliation.affiliation_type as 'user' | 'contact' | 'community',
-            affiliated_user_id: affiliation.affiliated_user_id,
-            affiliated_contact_id: affiliation.affiliated_contact_id,
-            affiliated_community_id: affiliation.affiliated_community_id,
-            relationship: affiliation.relationship,
-            created_at: affiliation.created_at,
-            updated_at: affiliation.created_at // Use created_at as fallback
-          };
-          affiliations.push(newAffiliation);
-        }
-      }
-    }
-
     // Get groups that this contact belongs to
     const { data: groupMembers, error: groupMembersError } = await supabase
       .from("rms_contact_group_members")
@@ -191,12 +148,11 @@ export const getContactById = async (id: string): Promise<Contact | null> => {
       console.error("Error fetching group memberships:", groupMembersError);
     }
 
-    // Add affiliations and groups to the contact
+    // Add groups to the contact
     const groups = groupMembers?.map(member => member.group as ContactGroup) || [];
     
     return {
       ...data,
-      affiliations,
       groups
     };
   } catch (error) {
@@ -230,8 +186,8 @@ export const createContact = async (contact: Omit<Contact, "id" | "created_at" |
 
 // Update a contact
 export const updateContact = async (id: string, contact: Partial<Contact>): Promise<Contact> => {
-  // Remove affiliations and groups from the contact data as they're stored in separate tables
-  const { affiliations, groups, ...contactData } = contact;
+  // Remove groups from the contact data as they're stored in separate tables
+  const { groups, ...contactData } = contact;
   
   const { data, error } = await supabase
     .from("rms_contacts")

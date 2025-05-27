@@ -1,12 +1,9 @@
 
 import Navbar from "@/components/Navbar";
-import { useNavigate } from "react-router-dom";
 import { TriggerManagement } from "@/components/rel8t/TriggerManagement";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 const Settings = () => {
-  const navigate = useNavigate();
-  
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
