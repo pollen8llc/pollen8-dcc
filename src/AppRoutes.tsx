@@ -258,7 +258,7 @@ const AppRoutes = () => {
           </Rel8ProtectedRoute>
         } />
         
-        <Route path="/rel8/settings" element={
+        <Route path="/rel8/triggers" element={
           <Rel8ProtectedRoute>
             <Settings />
           </Rel8ProtectedRoute>

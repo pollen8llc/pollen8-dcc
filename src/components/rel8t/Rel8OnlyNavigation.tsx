@@ -2,58 +2,86 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
-  LayoutDashboard, 
   Users, 
-  Settings, 
-  Import, 
-  Grid3x3, 
-  ContactIcon,
-  CalendarClock,
-  Tag
+  Building2, 
+  Heart, 
+  Zap, 
+  Bell, 
+  Upload,
+  BarChart3,
+  UserPlus,
+  FolderOpen
 } from "lucide-react";
 
-export const Rel8OnlyNavigation = () => {
+export function Rel8OnlyNavigation() {
   const location = useLocation();
   
-  const navigationItems = [
-    { name: "Dashboard", href: "/rel8", icon: LayoutDashboard },
-    { name: "Contacts", href: "/rel8/contacts", icon: ContactIcon },
-    { name: "Relationships", href: "/rel8/relationships", icon: CalendarClock },
-    { name: "Groups", href: "/rel8/groups", icon: Grid3x3 },
-    { name: "Categories", href: "/rel8/categories", icon: Tag },
-    { name: "Import", href: "/rel8/contacts/import", icon: Import },
-    { name: "Settings", href: "/rel8/settings", icon: Settings }
+  const navItems = [
+    {
+      href: "/rel8",
+      label: "Dashboard",
+      icon: BarChart3,
+      isActive: location.pathname === "/rel8"
+    },
+    {
+      href: "/rel8/contacts",
+      label: "Contacts",
+      icon: Users,
+      isActive: location.pathname.startsWith("/rel8/contacts")
+    },
+    {
+      href: "/rel8/groups",
+      label: "Groups",
+      icon: FolderOpen,
+      isActive: location.pathname === "/rel8/groups"
+    },
+    {
+      href: "/rel8/categories",
+      label: "Categories",
+      icon: Building2,
+      isActive: location.pathname === "/rel8/categories"
+    },
+    {
+      href: "/rel8/relationships",
+      label: "Relationships",
+      icon: Heart,
+      isActive: location.pathname.startsWith("/rel8/relationships") || location.pathname === "/rel8/wizard"
+    },
+    {
+      href: "/rel8/triggers",
+      label: "Triggers",
+      icon: Zap,
+      isActive: location.pathname.startsWith("/rel8/triggers")
+    },
+    {
+      href: "/rel8/notifications",
+      label: "Notifications",
+      icon: Bell,
+      isActive: location.pathname === "/rel8/notifications"
+    }
   ];
 
   return (
-    <nav className="mb-4 overflow-x-auto">
-      <div className="flex flex-col space-y-4">
-        <div>
-          <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">REL8</p>
-          <div className="flex space-x-1 border-b border-border/30 pb-1">
-            {navigationItems.map((item) => {
-              const isActive = location.pathname === item.href || 
-                              location.pathname.startsWith(item.href + '/');
-              
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",
-                    isActive 
-                      ? "bg-royal-blue-600 text-white" 
-                      : "text-muted-foreground hover:bg-royal-blue-600/10"
-                  )}
-                >
-                  <item.icon className="mr-2 h-4 w-4" />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+    <nav className="flex flex-wrap gap-1 p-1 bg-muted/50 rounded-lg">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            to={item.href}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+              "hover:bg-background hover:text-foreground hover:shadow-sm",
+              item.isActive
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground"
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            <span className="hidden sm:inline">{item.label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
-};
+}

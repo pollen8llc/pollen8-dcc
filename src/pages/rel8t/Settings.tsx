@@ -13,8 +13,8 @@ const Settings = () => {
         
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
           <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Settings</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Configure your relationship management</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Triggers</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Configure your automation triggers</p>
           </div>
         </div>
 

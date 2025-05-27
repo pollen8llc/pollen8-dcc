@@ -51,12 +51,12 @@ const ContactEdit = () => {
       if (!id) throw new Error("Contact ID is required");
       
       // Extract selectedGroups from values before updating contact
-      const { selectedGroups, ...contactData } = values;
+      const { selectedGroups, groups, ...contactData } = values;
       
       // Update basic contact data
       const updatedContact = await updateContact(id, contactData);
       
-      // Handle group membership changes
+      // Handle group membership changes if selectedGroups is provided
       if (selectedGroups && contact?.groups) {
         // Find groups to add and remove
         const currentGroupIds = contact.groups.map(g => g.id);
@@ -222,15 +222,15 @@ const ContactEdit = () => {
             <ContactForm
               initialValues={{
                 name: contact.name,
-                email: contact.email,
-                phone: contact.phone,
-                organization: contact.organization,
-                role: contact.role,
-                notes: contact.notes,
+                email: contact.email || '',
+                phone: contact.phone || '',
+                organization: contact.organization || '',
+                role: contact.role || '',
+                notes: contact.notes || '',
                 tags: contact.tags || [],
-                category_id: contact.category_id,
-                location: contact.location,
-                groups: contact.groups || []
+                category_id: contact.category_id || '',
+                location: contact.location || '',
+                selectedGroups: contact.groups ? contact.groups.map(g => g.id) : []
               }}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
