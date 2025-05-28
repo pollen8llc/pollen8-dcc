@@ -40,7 +40,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   React.useEffect(() => {
     if (session && !profileLoading && !currentUser) {
       console.log("Session exists but no profile found, attempting to create");
-      createProfileIfNotExists();
+      createProfileIfNotExists().catch(error => {
+        console.error("Failed to create profile:", error);
+      });
     }
   }, [session, currentUser, profileLoading, createProfileIfNotExists]);
 
@@ -49,7 +51,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'should_refresh_user_role' && e.newValue === 'true' && currentUser) {
         console.log("Role change detected via localStorage, refreshing user data");
-        refreshUser();
+        refreshUser().catch(error => {
+          console.error("Failed to refresh user:", error);
+        });
       }
     };
     
