@@ -437,6 +437,28 @@ export const deleteCategory = async (id: string): Promise<void> => {
   }
 };
 
+// Update a contact group
+export const updateContactGroup = async (
+  id: string, 
+  group: {
+    name: string;
+    description?: string;
+    color?: string;
+  }
+): Promise<ContactGroup> => {
+  const { data, error } = await supabase
+    .from("rms_contact_groups")
+    .update(group)
+    .eq("id", id)
+    .select();
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data[0] as ContactGroup;
+};
+
 // Delete a contact group
 export const deleteContactGroup = async (id: string): Promise<boolean> => {
   try {

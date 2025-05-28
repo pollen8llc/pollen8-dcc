@@ -51,7 +51,7 @@ const ContactEdit = () => {
       if (!id) throw new Error("Contact ID is required");
       
       // Extract selectedGroups from values before updating contact
-      const { selectedGroups, groups, ...contactData } = values;
+      const { selectedGroups, ...contactData } = values;
       
       // Update basic contact data
       const updatedContact = await updateContact(id, contactData);
