@@ -19,10 +19,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Contact } from "@/services/rel8t/contactService";
 import { Label } from "@/components/ui/label";
-import { Check, AlertCircle, Flag, CalendarIcon } from "lucide-react";
+import { Check, AlertCircle, Flag, CalendarIcon, Plus } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getTriggers, Trigger } from "@/services/rel8t/triggerService";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface SelectTriggersStepProps {
   selectedContacts: Contact[];
@@ -37,6 +38,7 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
 }) => {
   const [selectedTriggers, setSelectedTriggers] = useState<Trigger[]>([]);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const navigate = useNavigate();
 
   // Fetch actual triggers from database
   const { data: triggers = [], isLoading } = useQuery({
@@ -57,6 +59,10 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
 
   const handleSubmit = () => {
     onNext({ triggers: selectedTriggers, priority });
+  };
+
+  const handleCreateTrigger = () => {
+    navigate("/rel8/triggers/wizard");
   };
 
   // Format the execution date display
@@ -136,14 +142,24 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
         </RadioGroup>
       </div>
 
-      <div>
-        <h3 className="text-lg font-medium mb-2">Add Reminders</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Select reminders to help you stay in touch with 
-          {selectedContacts.length === 1 
-            ? " this contact" 
-            : ` these ${selectedContacts.length} contacts`}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Add Reminders</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Select reminders to help you stay in touch with 
+            {selectedContacts.length === 1 
+              ? " this contact" 
+              : ` these ${selectedContacts.length} contacts`}
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={handleCreateTrigger}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Create New Trigger
+        </Button>
       </div>
 
       {isLoading ? (
@@ -158,8 +174,15 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
               <AlertCircle className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
               <p className="text-muted-foreground">No reminders available</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Create triggers in Settings to use here
+                Create your first trigger to get started
               </p>
+              <Button 
+                className="mt-4" 
+                onClick={handleCreateTrigger}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Trigger
+              </Button>
             </div>
           ) : (
             triggers.map((trigger) => {
