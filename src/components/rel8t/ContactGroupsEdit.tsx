@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,9 +31,7 @@ import {
   createContactGroup,
   updateContactGroup,
   deleteContactGroup,
-  getContactsInGroup,
   ContactGroup,
-  Contact,
 } from "@/services/rel8t/contactService";
 
 interface GroupFormData {
@@ -43,14 +40,20 @@ interface GroupFormData {
   color: string;
 }
 
-const ContactGroupsEdit: React.FC = () => {
+interface ContactGroupsEditProps {
+  group?: ContactGroup;
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+const ContactGroupsEdit: React.FC<ContactGroupsEditProps> = ({ group, isOpen, onClose }) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<ContactGroup | null>(null);
+  const [editingGroup, setEditingGroup] = useState<ContactGroup | null>(group || null);
   const [deletingGroup, setDeletingGroup] = useState<ContactGroup | null>(null);
   const [formData, setFormData] = useState<GroupFormData>({
-    name: "",
-    description: "",
-    color: "#3B82F6",
+    name: group?.name || "",
+    description: group?.description || "",
+    color: group?.color || "#3B82F6",
   });
 
   const queryClient = useQueryClient();
@@ -60,6 +63,18 @@ const ContactGroupsEdit: React.FC = () => {
     queryKey: ["contact-groups"],
     queryFn: getContactGroups,
   });
+
+  // Update form data when group prop changes
+  useEffect(() => {
+    if (group) {
+      setFormData({
+        name: group.name,
+        description: group.description || "",
+        color: group.color || "#3B82F6",
+      });
+      setEditingGroup(group);
+    }
+  }, [group]);
 
   // Create group mutation
   const createMutation = useMutation({
@@ -84,12 +99,13 @@ const ContactGroupsEdit: React.FC = () => {
 
   // Update group mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<ContactGroup> }) =>
+    mutationFn: ({ id, data }: { id: string; data: { name: string; description?: string; color?: string } }) =>
       updateContactGroup(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contact-groups"] });
       setEditingGroup(null);
       resetForm();
+      if (onClose) onClose();
       toast({
         title: "Group updated",
         description: "Contact group has been successfully updated.",
@@ -110,6 +126,10 @@ const ContactGroupsEdit: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contact-groups"] });
       setDeletingGroup(null);
+      toast({
+        title: "Group deleted",
+        description: "Contact group has been successfully deleted.",
+      });
     },
   });
 
@@ -126,13 +146,13 @@ const ContactGroupsEdit: React.FC = () => {
     setIsCreateDialogOpen(true);
   };
 
-  const openEditDialog = (group: ContactGroup) => {
+  const openEditDialog = (groupToEdit: ContactGroup) => {
     setFormData({
-      name: group.name,
-      description: group.description || "",
-      color: group.color || "#3B82F6",
+      name: groupToEdit.name,
+      description: groupToEdit.description || "",
+      color: groupToEdit.color || "#3B82F6",
     });
-    setEditingGroup(group);
+    setEditingGroup(groupToEdit);
   };
 
   const handleSubmit = () => {
@@ -148,15 +168,23 @@ const ContactGroupsEdit: React.FC = () => {
     if (editingGroup) {
       updateMutation.mutate({
         id: editingGroup.id,
-        data: formData,
+        data: {
+          name: formData.name.trim(),
+          description: formData.description.trim() || undefined,
+          color: formData.color,
+        },
       });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate({
+        name: formData.name.trim(),
+        description: formData.description.trim() || undefined,
+        color: formData.color,
+      });
     }
   };
 
-  const handleDelete = (group: ContactGroup) => {
-    setDeletingGroup(group);
+  const handleDelete = (groupToDelete: ContactGroup) => {
+    setDeletingGroup(groupToDelete);
   };
 
   const confirmDelete = () => {
@@ -165,6 +193,82 @@ const ContactGroupsEdit: React.FC = () => {
     }
   };
 
+  // If this is being used as a dialog (with props), render just the dialog
+  if (group && isOpen !== undefined && onClose) {
+    return (
+      <>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Group</DialogTitle>
+              <DialogDescription>
+                Update the group details below.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="Group name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Group description"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="color">Color</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="color"
+                    type="color"
+                    value={formData.color}
+                    onChange={(e) =>
+                      setFormData({ ...formData, color: e.target.value })
+                    }
+                    className="w-16 h-10"
+                  />
+                  <div
+                    className="w-10 h-10 rounded border"
+                    style={{ backgroundColor: formData.color }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? "Saving..." : "Update Group"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  // Otherwise, render the full page
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -207,23 +311,23 @@ const ContactGroupsEdit: React.FC = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {groups.map((group) => (
-            <Card key={group.id} className="hover:shadow-md transition-shadow">
+          {groups.map((groupItem) => (
+            <Card key={groupItem.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-2">
-                  {group.color && (
+                  {groupItem.color && (
                     <div
                       className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: group.color }}
+                      style={{ backgroundColor: groupItem.color }}
                     />
                   )}
-                  <CardTitle className="text-base">{group.name}</CardTitle>
+                  <CardTitle className="text-base">{groupItem.name}</CardTitle>
                 </div>
                 <div className="flex gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => openEditDialog(group)}
+                    onClick={() => openEditDialog(groupItem)}
                     className="h-8 w-8 p-0"
                   >
                     <Edit2 className="h-4 w-4" />
@@ -231,7 +335,7 @@ const ContactGroupsEdit: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(group)}
+                    onClick={() => handleDelete(groupItem)}
                     className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -239,9 +343,9 @@ const ContactGroupsEdit: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                {group.description && (
+                {groupItem.description && (
                   <CardDescription className="mb-2">
-                    {group.description}
+                    {groupItem.description}
                   </CardDescription>
                 )}
                 <Badge variant="secondary" className="flex items-center gap-1 w-fit">
