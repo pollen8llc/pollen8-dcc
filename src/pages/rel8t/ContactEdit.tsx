@@ -230,7 +230,7 @@ const ContactEdit = () => {
                 tags: contact.tags || [],
                 category_id: contact.category_id || '',
                 location: contact.location || '',
-                selectedGroups: contact.groups ? contact.groups.map(g => g.id) : []
+                groups: contact.groups || []
               }}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
