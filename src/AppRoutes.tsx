@@ -79,17 +79,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } />
 
-          {/* Knowledge Base routes */}
-          <Route path="/knowledge/resources" element={
-            <ProtectedRoute>
-              <KnowledgeBase />
-            </ProtectedRoute>
-          } />
-          <Route path="/knowledge/articles/:id" element={
-            <ProtectedRoute>
-              <ArticleView />
-            </ProtectedRoute>
-          } />
+          {/* Knowledge Base routes - Fixed order and paths */}
           <Route path="/knowledge/create" element={
             <ProtectedRoute>
               <ContentCreator />
@@ -100,14 +90,29 @@ const AppRoutes = () => {
               <PostWizard />
             </ProtectedRoute>
           } />
+          <Route path="/knowledge/topics" element={
+            <ProtectedRoute>
+              <TopicsPage />
+            </ProtectedRoute>
+          } />
           <Route path="/knowledge/user/:userId" element={
             <ProtectedRoute>
               <UserKnowledgeResource />
             </ProtectedRoute>
           } />
-          <Route path="/knowledge/topics" element={
+          <Route path="/knowledge/:id" element={
             <ProtectedRoute>
-              <TopicsPage />
+              <ArticleView />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/resources" element={
+            <ProtectedRoute>
+              <KnowledgeBase />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge" element={
+            <ProtectedRoute>
+              <KnowledgeBase />
             </ProtectedRoute>
           } />
 
