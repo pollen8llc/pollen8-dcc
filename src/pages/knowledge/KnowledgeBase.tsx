@@ -55,6 +55,12 @@ const KnowledgeBase = () => {
     return stats;
   }, [articles]);
 
+  // Get top 10 tags sorted by popularity
+  const topTags = useMemo(() => {
+    const sortedTags = [...tags].sort((a, b) => (b.count || 0) - (a.count || 0));
+    return sortedTags.slice(0, 10);
+  }, [tags]);
+
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedTag('');
@@ -212,31 +218,37 @@ const KnowledgeBase = () => {
                 )}
               </div>
               
-              {/* Tags Filter with Scrolling */}
-              {tags.length > 0 && (
+              {/* Top 10 Tags with Pulse Functionality */}
+              {topTags.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium mb-3">Filter by Tags</h3>
-                  <ScrollArea className="w-full max-h-20">
-                    <div className="flex gap-2 pb-2">
-                      <Badge
-                        variant={selectedTag === '' ? 'default' : 'secondary'}
-                        className="cursor-pointer whitespace-nowrap"
-                        onClick={() => setSelectedTag('')}
-                      >
-                        All Tags
-                      </Badge>
-                      {tags.map(tag => (
+                  <h3 className="text-sm font-medium mb-3">Popular Tags</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge
+                      variant={selectedTag === '' ? 'default' : 'secondary'}
+                      className="cursor-pointer whitespace-nowrap"
+                      onClick={() => setSelectedTag('')}
+                    >
+                      All Tags
+                    </Badge>
+                    {topTags.map((tag, index) => {
+                      const isVeryPopular = index < 3; // Top 3 get pulse animation
+                      return (
                         <Badge
                           key={tag.id}
                           variant={selectedTag === tag.name ? 'default' : 'secondary'}
-                          className="cursor-pointer whitespace-nowrap"
+                          className={`cursor-pointer whitespace-nowrap ${
+                            isVeryPopular ? 'animate-pulse' : ''
+                          }`}
                           onClick={() => setSelectedTag(tag.name === selectedTag ? '' : tag.name)}
                         >
                           {tag.name}
+                          <span className="ml-1 opacity-70">
+                            ({tag.count})
+                          </span>
                         </Badge>
-                      ))}
-                    </div>
-                  </ScrollArea>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>

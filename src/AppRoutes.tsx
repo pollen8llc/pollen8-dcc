@@ -121,6 +121,12 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         
+        <Route path="/knowledge/articles/:id" element={
+          <ProtectedRoute>
+            <ArticleView />
+          </ProtectedRoute>
+        } />
+        
         <Route path="/knowledge/:id" element={
           <ProtectedRoute>
             <ArticleView />
@@ -214,7 +220,7 @@ const AppRoutes = () => {
           </Rel8ProtectedRoute>
         } />
         
-        <Route path="/rel8/contacts/import" element={
+        <Route path="/rel8/import" element={
           <Rel8ProtectedRoute>
             <ImportContacts />
           </Rel8ProtectedRoute>
