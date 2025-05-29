@@ -41,7 +41,9 @@ src/
 │   ├── ui/             # shadcn/ui components
 │   ├── auth/           # Authentication components
 │   ├── admin/          # Admin-specific components
-│   └── community/      # Community-related components
+│   ├── community/      # Community-related components
+│   ├── knowledge/      # Knowledge base components
+│   └── rel8t/          # Rel8 CRM components
 ├── contexts/           # React contexts for state management
 ├── data/               # Mock data and data utilities
 ├── hooks/              # Custom React hooks
@@ -51,11 +53,407 @@ src/
 ├── models/             # TypeScript type definitions
 ├── pages/              # Page components for each route
 │   ├── admin/          # Admin pages
-│   └── knowledge/      # Knowledge base pages
+│   ├── knowledge/      # Knowledge base pages
+│   └── rel8t/          # Rel8 CRM pages
 ├── repositories/       # Data access layer
 │   └── community/      # Community-specific data access
 └── services/           # Business logic and API services
 ```
+
+## Knowledge Base System - Technical UX/UI Documentation
+
+### Overview
+The Knowledge Base system is a comprehensive content management and collaboration platform that enables users to create, share, and discover knowledge through various content types including articles, questions, quotes, and polls.
+
+### User Experience Design Philosophy
+
+#### Core UX Principles
+1. **Content-First Design**: Interface prioritizes readability and content consumption
+2. **Progressive Disclosure**: Complex features revealed based on user context and permissions
+3. **Collaborative Learning**: Social features encourage knowledge sharing and community building
+4. **Accessible Knowledge**: Multiple content types cater to different learning preferences
+5. **Contextual Actions**: Tools and options appear when relevant to user's current task
+
+#### Information Architecture
+```
+Knowledge Base
+├── Content Discovery
+│   ├── Browse All Articles
+│   ├── Search & Filters
+│   ├── Tag-based Navigation
+│   └── Related Content
+├── Content Creation
+│   ├── Article Writing
+│   ├── Question Asking
+│   ├── Quote Sharing
+│   └── Poll Creation
+├── Content Interaction
+│   ├── Voting System
+│   ├── Comment System
+│   ├── Bookmarking
+│   └── Sharing
+└── Content Management
+    ├── User Resources
+    ├── Analytics
+    └── Moderation
+```
+
+### Database Architecture for Knowledge Base
+
+#### Core Tables
+
+**knowledge_articles**
+- Primary content storage table
+- Supports multiple content types (ARTICLE, QUESTION, QUOTE, POLL)
+- Fields: id, user_id, title, subtitle, content, content_type, tags, vote_count, view_count, comment_count, is_answered, poll_data, options, source, created_at, updated_at
+
+**knowledge_comments**
+- Threaded comment system
+- Support for accepted answers on questions
+- Fields: id, article_id, user_id, content, is_accepted, created_at, updated_at
+
+**knowledge_votes**
+- Unified voting system for articles and comments
+- Supports upvote/downvote mechanics
+- Fields: id, user_id, article_id, comment_id, vote_type, created_at
+
+**knowledge_saved_articles**
+- User bookmarking system
+- Personal knowledge library
+- Fields: id, user_id, article_id, saved_at
+
+**knowledge_tags**
+- Tag management and categorization
+- Enables content discovery
+- Fields: id, name, description, created_at
+
+**poll_responses & poll_votes**
+- Dedicated poll interaction tracking
+- Support for multiple choice and single choice polls
+- Fields: id, poll_id, user_id, option_index, created_at
+
+#### Database Relationships
+```mermaid
+erDiagram
+    knowledge_articles ||--o{ knowledge_comments : "has"
+    knowledge_articles ||--o{ knowledge_votes : "receives"
+    knowledge_articles ||--o{ knowledge_saved_articles : "saved_by"
+    knowledge_comments ||--o{ knowledge_votes : "receives"
+    knowledge_articles ||--o{ poll_responses : "poll_answers"
+    profiles ||--o{ knowledge_articles : "creates"
+    profiles ||--o{ knowledge_comments : "writes"
+    profiles ||--o{ knowledge_votes : "casts"
+```
+
+### App Routes for Knowledge Base
+
+#### Public Routes
+- `/knowledge` - Main knowledge base landing page with content discovery
+- `/knowledge/:id` - Individual article/content view with full interaction
+- `/knowledge/tags/:tag` - Tag-filtered content browsing
+
+#### Protected Routes (Authenticated Users)
+- `/knowledge/create` - Content type selection interface
+- `/knowledge/wizard` - Step-by-step content creation wizard
+- `/knowledge/resources` - User's personal knowledge dashboard
+- `/knowledge/topics` - Topic exploration and management
+- `/knowledge/:id/edit` - Content editing interface
+
+#### Route Structure Analysis
+```typescript
+// Route hierarchy and user flow
+/knowledge
+├── / (discovery & browsing)
+├── /create (content type selection)
+├── /wizard (guided content creation)
+├── /resources (personal dashboard)
+├── /topics (topic management)
+├── /:id (content view)
+├── /:id/edit (content editing)
+└── /tags/:tag (tag-filtered browsing)
+```
+
+### UI Component Architecture
+
+#### Page-Level Components
+
+**KnowledgeBase.tsx** - Main landing page
+- Content discovery interface
+- Search and filtering capabilities
+- Content type toggles
+- Recent activity feed
+
+**ArticleView.tsx** - Individual content display
+- Responsive content rendering based on type
+- Voting and interaction components
+- Comment threading system
+- Related content suggestions
+
+**PostWizard.tsx** - Content creation flow
+- Multi-step form interface
+- Content type specific forms
+- Preview and review stages
+- Submission handling
+
+**PostTypeSelector.tsx** - Content type selection
+- Visual content type picker
+- Feature comparison matrix
+- Quick creation shortcuts
+
+#### Reusable UI Components
+
+**Content Display Components**
+- `ArticleCard.tsx` - Content preview cards with metadata
+- `VotingButtons.tsx` - Unified voting interface with animations
+- `CommentSection.tsx` - Threaded comment display and creation
+- `AuthorCard.tsx` - User information display with context
+- `TagsList.tsx` - Interactive tag display and navigation
+
+**Form Components**
+- `ArticleForm.tsx` - Rich text article creation
+- `QuestionForm.tsx` - Question-specific form with tagging
+- `QuoteForm.tsx` - Streamlined quote sharing interface
+- `PollForm.tsx` - Multi-option poll creation with preview
+
+**Interactive Components**
+- `PollVoting.tsx` - Real-time poll interaction with results
+- `RelatedArticles.tsx` - Context-aware content suggestions
+- `ContentTypeSelector.tsx` - Visual content type picker
+
+### UX/UI Design Patterns
+
+#### Content Type Differentiation
+```css
+/* Visual hierarchy for different content types */
+.content-article { @apply border-l-4 border-blue-500; }
+.content-question { @apply border-l-4 border-yellow-500; }
+.content-quote { @apply border-l-4 border-purple-500; }
+.content-poll { @apply border-l-4 border-green-500; }
+```
+
+#### Responsive Design Strategy
+1. **Mobile-First Approach**: Core content consumption optimized for mobile
+2. **Progressive Enhancement**: Desktop features like sidebar content
+3. **Touch-Friendly Interactions**: Large tap targets for voting and actions
+4. **Readable Typography**: Optimized line heights and spacing for long-form content
+
+#### Accessibility Features
+- Semantic HTML structure for screen readers
+- Keyboard navigation support throughout
+- High contrast color schemes
+- Alternative text for visual content
+- Focus management for modal interactions
+
+## Rel8 CRM System - Technical UX/UI Documentation
+
+### Overview
+Rel8 is a comprehensive relationship management system designed for organizers to manage contacts, track relationships, automate outreach, and build meaningful connections within their communities.
+
+### User Experience Design Philosophy
+
+#### Core UX Principles
+1. **Relationship-Centric Design**: Every feature supports building and maintaining relationships
+2. **Automation with Human Touch**: Technology enhances but doesn't replace personal connection
+3. **Context-Aware Interactions**: Information and actions relevant to current relationship state
+4. **Scalable Personal Touch**: Systems that work for both small and large contact bases
+5. **Data-Driven Insights**: Analytics help improve relationship building strategies
+
+#### Information Architecture
+```
+Rel8 CRM
+├── Contact Management
+│   ├── Contact Database
+│   ├── Contact Profiles
+│   ├── Contact Groups
+│   └── Contact Categories
+├── Relationship Tracking
+│   ├── Interaction History
+│   ├── Relationship Mapping
+│   ├── Connection Strength
+│   └── Follow-up Reminders
+├── Automation & Triggers
+│   ├── Time-based Triggers
+│   ├── Event-based Triggers
+│   ├── Email Templates
+│   └── Notification System
+├── Analytics & Insights
+│   ├── Contact Growth
+│   ├── Engagement Metrics
+│   ├── Outreach Effectiveness
+│   └── Relationship Health
+└── Communication Tools
+    ├── Email Integration
+    ├── Outreach Campaigns
+    ├── Message Templates
+    └── Response Tracking
+```
+
+### Database Architecture for Rel8 CRM
+
+#### Core Tables
+
+**rms_contacts**
+- Central contact information storage
+- Comprehensive contact profiles with metadata
+- Fields: id, user_id, name, email, phone, organization, role, location, notes, tags, category_id, last_contact_date, created_at, updated_at
+
+**rms_contact_groups**
+- Flexible contact organization system
+- Support for overlapping group memberships
+- Fields: id, user_id, name, description, color, created_at, updated_at
+
+**rms_contact_group_members**
+- Many-to-many relationship between contacts and groups
+- Enables complex contact segmentation
+- Fields: id, group_id, contact_id, added_at
+
+**rms_contact_categories**
+- Hierarchical contact classification
+- Visual organization with color coding
+- Fields: id, user_id, name, color, created_at, updated_at
+
+**rms_contact_affiliations**
+- Complex relationship mapping between contacts
+- Support for multiple affiliation types
+- Fields: id, user_id, contact_id, affiliation_type, affiliated_contact_id, affiliated_user_id, affiliated_community_id, relationship, created_at, updated_at
+
+**rms_triggers**
+- Automation engine for relationship management
+- Time-based and event-based trigger support
+- Fields: id, user_id, name, description, condition, action, recurrence_pattern, execution_time, next_execution, last_executed_at, is_active, created_at, updated_at
+
+**rms_email_notifications**
+- Email automation and tracking
+- Integration with trigger system
+- Fields: id, user_id, trigger_id, recipient_email, recipient_name, subject, body, status, scheduled_for, sent_at, created_at, updated_at
+
+**rms_outreach**
+- Campaign and outreach management
+- Priority and status tracking
+- Fields: id, user_id, title, description, status, priority, due_date, created_at, updated_at
+
+#### Database Relationships
+```mermaid
+erDiagram
+    profiles ||--o{ rms_contacts : "manages"
+    rms_contacts ||--o{ rms_contact_group_members : "belongs_to"
+    rms_contact_groups ||--o{ rms_contact_group_members : "contains"
+    rms_contacts }o--|| rms_contact_categories : "categorized_by"
+    rms_contacts ||--o{ rms_contact_affiliations : "affiliated_with"
+    profiles ||--o{ rms_triggers : "creates"
+    rms_triggers ||--o{ rms_email_notifications : "generates"
+    profiles ||--o{ rms_outreach : "manages"
+    rms_outreach ||--o{ rms_outreach_contacts : "includes"
+```
+
+### App Routes for Rel8 CRM
+
+#### Protected Routes (Organizers Only)
+- `/rel8` - Main dashboard with metrics and overview
+- `/rel8/contacts` - Contact database and management
+- `/rel8/contacts/new` - New contact creation form
+- `/rel8/contacts/:id/edit` - Contact editing interface
+- `/rel8/contacts/import` - Bulk contact import system
+- `/rel8/groups` - Contact group management
+- `/rel8/categories` - Contact category administration
+- `/rel8/relationships` - Relationship mapping interface
+- `/rel8/wizard` - Relationship creation wizard
+- `/rel8/triggers` - Automation trigger management
+- `/rel8/triggers/wizard` - Trigger creation wizard
+- `/rel8/notifications` - Email notification center
+- `/rel8/email-test` - Email system testing interface
+
+#### Route Structure Analysis
+```typescript
+// Route hierarchy optimized for workflow efficiency
+/rel8
+├── / (dashboard overview)
+├── /contacts (contact management hub)
+│   ├── /new (streamlined contact creation)
+│   ├── /:id/edit (comprehensive contact editing)
+│   └── /import (bulk operations)
+├── /groups (contact organization)
+├── /categories (contact classification)
+├── /relationships (relationship mapping)
+├── /wizard (guided relationship creation)
+├── /triggers (automation center)
+│   └── /wizard (automation setup)
+├── /notifications (communication hub)
+└── /email-test (system validation)
+```
+
+### UI Component Architecture
+
+#### Page-Level Components
+
+**Dashboard.tsx** - Analytics and overview
+- Key metrics display with charts
+- Recent activity timeline
+- Quick action buttons
+- Contact growth visualization
+
+**Contacts.tsx** - Contact database interface
+- Searchable and filterable contact list
+- Bulk operations support
+- Quick preview and actions
+- Export and import capabilities
+
+**ContactCreate.tsx & ContactEdit.tsx** - Contact management
+- Comprehensive contact forms
+- Real-time validation
+- Photo upload support
+- Relationship mapping
+
+**Groups.tsx** - Contact organization
+- Visual group management
+- Drag-and-drop contact assignment
+- Group analytics and insights
+- Color-coded organization
+
+#### Specialized UI Components
+
+**Contact Management Components**
+- `ContactCard.tsx` - Contact preview with key information
+- `ContactForm.tsx` - Comprehensive contact editing interface
+- `ContactList.tsx` - Efficient list view with search and filters
+- `ContactGroupsManager.tsx` - Group assignment and management
+
+**Automation Components**
+- `TriggerManagement.tsx` - Trigger overview and control panel
+- `TriggerWizard.tsx` - Step-by-step automation setup
+- `EmailNotificationsList.tsx` - Email queue and status tracking
+- `TriggerStatsCards.tsx` - Automation effectiveness metrics
+
+**Analytics Components**
+- `MetricCard.tsx` - Key performance indicator display
+- `StatisticsChart.tsx` - Visual data representation
+- `ContactGrowthChart.tsx` - Contact acquisition tracking
+- `DistributionChart.tsx` - Contact distribution analysis
+
+### UX/UI Design Patterns
+
+#### Relationship-Centric Design
+```typescript
+// Visual indicators for relationship strength
+const RelationshipStrength = {
+  strong: "border-green-500 bg-green-50",
+  moderate: "border-yellow-500 bg-yellow-50", 
+  weak: "border-red-500 bg-red-50",
+  unknown: "border-gray-500 bg-gray-50"
+};
+```
+
+#### Automation UX Patterns
+1. **Progressive Disclosure**: Basic triggers first, advanced options on demand
+2. **Visual Feedback**: Clear status indicators for automated processes
+3. **Safety Mechanisms**: Confirmation dialogs for destructive actions
+4. **Template System**: Pre-built templates for common automation scenarios
+
+#### Data Visualization
+- Clean, minimal charts focused on actionable insights
+- Color-coded categories for quick visual scanning
+- Responsive charts that work on mobile devices
+- Interactive elements for drill-down analysis
 
 ## Database Structure
 
@@ -74,6 +472,10 @@ erDiagram
     profiles ||--o{ admin_roles : "has"
     admin_roles }o--|| role_types : "defines"
     communities ||--o{ community_data : "has"
+    profiles ||--o{ knowledge_articles : "creates"
+    profiles ||--o{ rms_contacts : "manages"
+    knowledge_articles ||--o{ knowledge_comments : "has"
+    rms_contacts ||--o{ rms_contact_group_members : "belongs_to"
 ```
 
 ## Community System Architecture
@@ -367,7 +769,8 @@ The application implements route protection based on user roles:
 - `/profile`: Protected for authenticated users (MEMBER+)
 - `/admin`: Protected for platform administrators (ORGANIZER+)
 - `/admin/community/:id`: Protected for community administrators (ORGANIZER+)
-- `/knowledge/:communityId`: Protected for community members (MEMBER+)
+- `/knowledge/*`: Protected for community members (MEMBER+)
+- `/rel8/*`: Protected for organizers only (ORGANIZER+)
 
 ## Client-side Services
 
@@ -446,6 +849,22 @@ The application can be deployed using:
 - Netlify for the frontend
 - Supabase for backend services and database
 
+## Performance Optimization
+
+### Knowledge Base Optimizations
+- Lazy loading for large content lists
+- Image optimization for article content
+- Virtual scrolling for comment threads
+- Debounced search functionality
+- Cached tag queries
+
+### Rel8 CRM Optimizations
+- Contact list virtualization for large datasets
+- Batch operations for bulk contact management
+- Background sync for email automation
+- Optimistic updates for better UX
+- Efficient relationship graph queries
+
 ## Appendix
 
 ### TypeScript Models
@@ -502,6 +921,79 @@ export interface Community {
   socialMedia?: Record<string, string | { url?: string }>; // Alias for social_media
   newsletterUrl?: string; // Alias for newsletter_url
 }
+
+// Knowledge Base Types
+export enum ContentType {
+  ARTICLE = "ARTICLE",
+  QUESTION = "QUESTION", 
+  QUOTE = "QUOTE",
+  POLL = "POLL"
+}
+
+export interface KnowledgeArticle {
+  id: string;
+  user_id: string;
+  title: string;
+  subtitle?: string;
+  content: string;
+  content_type: ContentType;
+  tags?: string[];
+  vote_count: number;
+  view_count: number;
+  comment_count: number;
+  is_answered?: boolean;
+  poll_data?: any;
+  options?: any;
+  source?: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  user_vote?: number;
+}
+
+// Rel8 CRM Types
+export interface Contact {
+  id: string;
+  user_id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  organization?: string;
+  role?: string;
+  location?: string;
+  notes?: string;
+  tags?: string[];
+  category_id?: string;
+  last_contact_date?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContactGroup {
+  id: string;
+  user_id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Trigger {
+  id: string;
+  user_id: string;
+  name: string;
+  description?: string;
+  condition: string;
+  action: string;
+  recurrence_pattern?: any;
+  execution_time?: string;
+  next_execution?: string;
+  last_executed_at?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 ```
 
 ### Row-Level Security (RLS)
@@ -532,6 +1024,26 @@ CREATE POLICY "Admins can access all communities"
       WHERE user_id = auth.uid() AND role = 'ADMIN'
     )
   );
+
+-- Knowledge Base RLS policies
+ALTER TABLE public.knowledge_articles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view articles"
+  ON public.knowledge_articles
+  FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can create articles"
+  ON public.knowledge_articles
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Rel8 CRM RLS policies  
+ALTER TABLE public.rms_contacts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own contacts"
+  ON public.rms_contacts
+  USING (user_id = auth.uid());
 ```
 
 ### Community Creation Workflow
@@ -638,5 +1150,52 @@ The platform uses a consistent design system for community UI elements:
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 240 4.9% 83.9%;
+}
+```
+
+### Knowledge Base Hook Integration
+
+The knowledge base system uses a centralized hook pattern for clean API integration:
+
+```typescript
+// Example hook usage pattern
+const {
+  useArticles,
+  useArticle, 
+  createArticle,
+  updateArticle,
+  deleteArticle,
+  vote,
+  createComment,
+  deleteComment
+} = useKnowledgeBase();
+
+// Query usage
+const { data: articles, isLoading } = useArticles();
+const { data: article } = useArticle(id);
+
+// Mutation usage
+const handleVote = (itemType, itemId, voteType) => {
+  vote(itemType, itemId, voteType);
+};
+```
+
+### Rel8 CRM Service Integration
+
+The Rel8 system integrates with external services for enhanced functionality:
+
+```typescript
+// Email service integration
+interface EmailService {
+  sendEmail(to: string, subject: string, body: string): Promise<void>;
+  scheduleEmail(to: string, subject: string, body: string, scheduleFor: Date): Promise<void>;
+  getEmailStatus(emailId: string): Promise<EmailStatus>;
+}
+
+// Trigger automation system
+interface TriggerSystem {
+  createTrigger(trigger: TriggerConfig): Promise<Trigger>;
+  executeTrigger(triggerId: string): Promise<void>;
+  scheduleTrigger(triggerId: string, scheduleFor: Date): Promise<void>;
 }
 ```
