@@ -179,7 +179,7 @@ const Contacts = () => {
           isLoading={isLoading}
           onEdit={handleEditContact}
           onRefresh={handleRefresh}
-          onContactSelect={isSelectionMode ? handleContactSelect : undefined}
+          onContactMultiSelect={isSelectionMode ? handleContactSelect : undefined}
           selectedContacts={selectedContacts}
           isSelectionMode={isSelectionMode}
         />

@@ -7,10 +7,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface ContactListProps {
   contacts?: Contact[];
   isLoading?: boolean;
-  onContactSelect?: (contact: Contact) => void;
   onEdit?: (contact: Contact) => void;
   onRefresh?: () => void;
-  onContactSelect?: (contactId: string, selected: boolean) => void;
+  onContactMultiSelect?: (contactId: string, selected: boolean) => void;
   selectedContacts?: string[];
   isSelectionMode?: boolean;
 }
@@ -20,7 +19,7 @@ const ContactList: React.FC<ContactListProps> = ({
   isLoading = false,
   onEdit,
   onRefresh,
-  onContactSelect,
+  onContactMultiSelect,
   selectedContacts = [],
   isSelectionMode = false
 }) => {
@@ -52,7 +51,7 @@ const ContactList: React.FC<ContactListProps> = ({
             key={contact.id} 
             contact={contact}
             onEdit={onEdit}
-            onSelect={onContactSelect}
+            onSelect={onContactMultiSelect}
             isSelected={selectedContacts.includes(contact.id)}
             isSelectionMode={isSelectionMode}
           />
