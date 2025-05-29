@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ArticleCard from '@/components/knowledge/ArticleCard';
+import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 import { ContentType } from '@/models/knowledgeTypes';
 

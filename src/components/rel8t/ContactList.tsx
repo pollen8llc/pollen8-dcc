@@ -5,15 +5,19 @@ import ContactCard from './ContactCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ContactListProps {
-  contacts: Contact[];
+  contacts?: Contact[];
   isLoading?: boolean;
   onContactSelect?: (contact: Contact) => void;
+  onEdit?: (contact: Contact) => void;
+  onRefresh?: () => void;
 }
 
 const ContactList: React.FC<ContactListProps> = ({ 
-  contacts, 
+  contacts = [], 
   isLoading = false,
-  onContactSelect 
+  onContactSelect,
+  onEdit,
+  onRefresh 
 }) => {
   if (isLoading) {
     return (
@@ -42,7 +46,7 @@ const ContactList: React.FC<ContactListProps> = ({
           <ContactCard 
             key={contact.id} 
             contact={contact}
-            onClick={() => onContactSelect?.(contact)}
+            onEdit={onEdit}
           />
         ))}
       </div>

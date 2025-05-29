@@ -7,10 +7,17 @@ import ContactList from "@/components/rel8t/ContactList";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { getContacts } from "@/services/rel8t/contactService";
 
 const Contacts = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Fetch contacts
+  const { data: contacts = [], isLoading } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: getContacts,
+  });
 
   const handleEditContact = (contact: any) => {
     navigate(`/rel8/contacts/${contact.id}/edit`);
@@ -44,6 +51,8 @@ const Contacts = () => {
         </div>
 
         <ContactList
+          contacts={contacts}
+          isLoading={isLoading}
           onEdit={handleEditContact}
           onRefresh={handleRefresh}
         />
