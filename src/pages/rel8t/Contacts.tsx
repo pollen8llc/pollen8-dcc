@@ -16,7 +16,7 @@ const Contacts = () => {
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts"],
-    queryFn: getContacts,
+    queryFn: () => getContacts(),
   });
 
   const handleEditContact = (contact: any) => {
