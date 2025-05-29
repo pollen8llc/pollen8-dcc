@@ -80,12 +80,22 @@ port = 54328
 [functions.process-triggers]
 verify_jwt = true
 
-# SMTP configuration with placeholders for settings
-# These should be set to actual values in production
+# SMTP configuration with actual values
 [functions.process-triggers.env]
-SMTP_HOST = ""
+SMTP_HOST = "mail.pollen8.app"
 SMTP_PORT = "587"
-SMTP_USER = ""
-SMTP_PASSWORD = ""
-SMTP_FROM_EMAIL = ""
+SMTP_USER = "notifications@pollen8.app"
+SMTP_PASS = "JdT*9GeCp&APcH04"
+FROM_EMAIL = "notifications@pollen8.app"
 SMTP_FROM_NAME = "Rel8t Automation"
+
+# SMTP configuration for send-email function
+[functions.send-email]
+verify_jwt = true
+
+[functions.send-email.env]
+SMTP_HOST = "mail.pollen8.app"
+SMTP_PORT = "587"
+SMTP_USER = "notifications@pollen8.app"
+SMTP_PASS = "JdT*9GeCp&APcH04"
+FROM_EMAIL = "notifications@pollen8.app"

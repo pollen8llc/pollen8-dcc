@@ -14,7 +14,7 @@ import {
   getActiveTriggerCount
 } from "@/services/rel8t/triggerService";
 import { useNavigate } from "react-router-dom";
-import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { OutreachSection } from "@/components/rel8t/dashboard/OutreachSection";
 import { ContactGrowthChart } from "@/components/rel8t/dashboard/ContactGrowthChart";
 import { MetricCard } from "@/components/rel8t/MetricCard";
@@ -54,23 +54,26 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
-        <Rel8Navigation />
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
+        <Rel8OnlyNavigation />
         
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 sm:mb-8 mt-4 sm:mt-6 gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">Dashboard</h1>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
               Track and manage your professional relationships
             </p>
           </div>
-          <div className="flex mt-4 md:mt-0 gap-2">
-            <Button variant="outline" onClick={() => navigate("/rel8/contacts")}>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={() => navigate("/rel8/contacts")} className="w-full sm:w-auto">
               <Users className="mr-2 h-4 w-4" />
               View Contacts
             </Button>
-            <Button onClick={() => navigate("/rel8/wizard")}>
+            <Button onClick={() => navigate("/rel8/wizard")} className="w-full sm:w-auto">
               Build a Relationship
+            </Button>
+            <Button onClick={() => navigate("/rel8/triggers/wizard")} className="w-full sm:w-auto">
+              Create Trigger
             </Button>
           </div>
         </div>

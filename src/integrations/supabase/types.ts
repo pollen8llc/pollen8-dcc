@@ -288,39 +288,80 @@ export type Database = {
       }
       knowledge_articles: {
         Row: {
+          allow_multiple_responses: boolean | null
+          archived_at: string | null
+          archived_by: string | null
+          comment_count: number
           content: string
+          content_type: string | null
           created_at: string
           id: string
           is_answered: boolean | null
+          options: Json | null
+          poll_data: Json | null
+          poll_expires_at: string | null
+          source: string | null
+          subtitle: string | null
           tags: string[] | null
           title: string
           updated_at: string
           user_id: string
           view_count: number | null
+          vote_count: number
         }
         Insert: {
+          allow_multiple_responses?: boolean | null
+          archived_at?: string | null
+          archived_by?: string | null
+          comment_count?: number
           content: string
+          content_type?: string | null
           created_at?: string
           id?: string
           is_answered?: boolean | null
+          options?: Json | null
+          poll_data?: Json | null
+          poll_expires_at?: string | null
+          source?: string | null
+          subtitle?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
           user_id: string
           view_count?: number | null
+          vote_count?: number
         }
         Update: {
+          allow_multiple_responses?: boolean | null
+          archived_at?: string | null
+          archived_by?: string | null
+          comment_count?: number
           content?: string
+          content_type?: string | null
           created_at?: string
           id?: string
           is_answered?: boolean | null
+          options?: Json | null
+          poll_data?: Json | null
+          poll_expires_at?: string | null
+          source?: string | null
+          subtitle?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string
           view_count?: number | null
+          vote_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_knowledge_articles_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       knowledge_comments: {
         Row: {
@@ -353,6 +394,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "knowledge_comments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_saved_articles: {
+        Row: {
+          article_id: string
+          id: string
+          saved_at: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          id?: string
+          saved_at?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          id?: string
+          saved_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_saved_articles_article_id_fkey"
             columns: ["article_id"]
             isOneToOne: false
             referencedRelation: "knowledge_articles"
@@ -419,6 +489,73 @@ export type Database = {
             columns: ["comment_id"]
             isOneToOne: false
             referencedRelation: "knowledge_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_responses: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_articles"
             referencedColumns: ["id"]
           },
         ]
@@ -1055,6 +1192,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_profile: {
+        Args: { profile_user_id: string }
+        Returns: boolean
+      }
       can_manage_community: {
         Args: { user_id: string; community_id: string }
         Returns: boolean
@@ -1156,7 +1297,7 @@ export type Database = {
       log_audit_action: {
         Args: {
           action_name: string
-          performer_id: string
+          performer_id?: string
           target_id?: string
           action_details?: Json
         }

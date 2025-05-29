@@ -40,20 +40,8 @@ const OnboardingPage: React.FC = () => {
   const handleRoleSelected = (role: UserRole) => {
     setSelectedRole(role);
     
-    switch (role) {
-      case UserRole.ORGANIZER:
-        navigate('/create-community');
-        break;
-      case UserRole.MEMBER:
-        setCurrentStep(OnboardingStep.COMMUNITY_SELECTION);
-        break;
-      case UserRole.GUEST:
-        navigate('/');
-        break;
-      default:
-        // Admin or other roles - navigate to dashboard
-        navigate('/');
-    }
+    // Since communities are deprecated, redirect all users to profile setup
+    navigate('/profile/setup');
   };
 
   return (

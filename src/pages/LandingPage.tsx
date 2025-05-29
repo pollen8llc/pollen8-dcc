@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Check, ChevronRight } from "lucide-react";
@@ -96,7 +97,7 @@ const LandingPage: React.FC = () => {
               size="lg" 
               className="px-8 gap-2 shadow-lg shadow-[#00eada]/20"
             >
-              <Link to="/auth">
+              <Link to="/knowledge">
                 Get Started
                 <ArrowRight className="w-4 h-4" />
               </Link>
@@ -127,7 +128,7 @@ const LandingPage: React.FC = () => {
               size="lg" 
               className="px-8 gap-2 shadow-lg bg-[#00eada] hover:bg-[#00eada]/90 text-black"
             >
-              <Link to="/auth">
+              <Link to="/knowledge">
                 Start for Free
                 <ArrowRight className="w-4 h-4" />
               </Link>

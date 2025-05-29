@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -78,8 +77,8 @@ export function useTriggerWizard() {
           description: "Your automation trigger has been created."
         });
         
-        // Navigate back to settings page
-        navigate("/rel8/settings");
+        // Navigate to the Relationship Wizard after trigger creation
+        navigate("/rel8/wizard");
       }
     } catch (error) {
       console.error("Error creating trigger:", error);

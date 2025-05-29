@@ -1,23 +1,20 @@
 
 import Navbar from "@/components/Navbar";
-import { useNavigate } from "react-router-dom";
 import { TriggerManagement } from "@/components/rel8t/TriggerManagement";
-import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 const Settings = () => {
-  const navigate = useNavigate();
-  
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Rel8Navigation />
+        <Rel8OnlyNavigation />
         
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
           <div>
-            <h1 className="text-3xl font-bold">Settings</h1>
-            <p className="text-muted-foreground">Configure your relationship management</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Triggers</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Configure your automation triggers</p>
           </div>
         </div>
 

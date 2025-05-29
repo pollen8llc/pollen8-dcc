@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Mail, Smartphone, Users } from "lucide-react";
+import { Mail, Smartphone } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { createContact } from "@/services/rel8t/contactService";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
@@ -69,18 +70,6 @@ const ImportContacts = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mr-2" 
-            onClick={() => navigate("/rel8/contacts")}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Contacts
-          </Button>
-        </div>
-
         <Rel8Navigation />
         
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
