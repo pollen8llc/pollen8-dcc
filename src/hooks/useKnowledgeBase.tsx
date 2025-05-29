@@ -11,8 +11,6 @@ export const useKnowledgeBase = () => {
   const articleMutations = useArticleMutations();
   const commentMutations = useCommentMutations();
   
-  console.log("useKnowledgeBase - Initialized");
-  
   return {
     // Queries
     useArticles,

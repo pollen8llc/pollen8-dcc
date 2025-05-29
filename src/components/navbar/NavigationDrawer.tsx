@@ -10,26 +10,28 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { User } from "@/models/types";
+import { UserRole } from "@/models/types";
 import {
   Home,
   LogOut,
   User as UserIcon,
   Settings,
   Users,
-  FileText,
-  Shield,
-  Book,
-  FileTextIcon,
-  Tag,
-  ContactIcon,
-  LayoutDashboard,
-  Grid3x3,
-  CalendarClock,
-  Import,
-  Bell,
-  Folder,
   PlusCircle,
-  UserSearch
+  FileText,
+  UserSearch,
+  Shield,
+  Network,
+  ContactIcon,
+  Bell,
+  Import,
+  Grid3x3,
+  LayoutDashboard,
+  CalendarClock,
+  Folder,
+  BookOpen,
+  Book,
+  FileTextIcon
 } from "lucide-react";
 
 interface NavigationDrawerProps {
@@ -39,7 +41,7 @@ interface NavigationDrawerProps {
   logout: () => Promise<void>;
 }
 
-export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
+const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   open,
   onOpenChange,
   currentUser,
@@ -53,25 +55,14 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   };
 
   const handleLogout = async () => {
-    try {
-      await logout();
-      onOpenChange(false);
-      navigate("/");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
-
-  const handleNotifications = () => {
-    // TODO: Implement notifications functionality
-    console.log("Notifications clicked");
+    await logout();
     onOpenChange(false);
+    navigate("/");
   };
-  // do not change NavigationDrawer.tsx unless specifically specified
 
-  // Check user roles safely
-  const isAdmin = currentUser?.role === 'ADMIN';
-  const isOrganizer = currentUser?.role === 'ORGANIZER' || isAdmin;
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
+  const isOrganizer = currentUser?.role === UserRole.ORGANIZER || 
+                      (currentUser?.managedCommunities && currentUser.managedCommunities.length > 0);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -82,7 +73,6 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
 
         <div className="flex-1 overflow-y-auto">
           <nav className="flex flex-col gap-1">
-            {/* Main Navigation */}
             <Button
               variant="ghost"
               className="justify-start"
@@ -92,191 +82,189 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
               Home
             </Button>
 
+            {/* Authenticated user menu items */}
             {currentUser && (
               <>
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/welcome")}
-                >
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/profile")}
+                  onClick={() => handleNavigation(`/profile/${currentUser.id}`)}
                 >
                   <UserIcon className="mr-2 h-4 w-4" />
                   My Profile
                 </Button>
-
+                
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/profile/search")}
+                  onClick={() => handleNavigation("/profiles/search")}
                 >
                   <UserSearch className="mr-2 h-4 w-4" />
-                  Find Profiles
+                  Find People
                 </Button>
+                
+                {isOrganizer && (
+                  <Button
+                    variant="ghost"
+                    className="justify-start"
+                    onClick={() => handleNavigation("/community/create")}
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create Community
+                  </Button>
+                )}
 
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={handleNotifications}
-                >
-                  <Bell className="mr-2 h-4 w-4" />
-                  Notifications
-                </Button>
-
-                {/* Knowledge Section */}
+                {/* CORE section */}
                 <Separator className="my-2" />
                 <p className="px-4 py-2 text-sm font-medium opacity-70">
-                  Knowledge
+                  CORE
                 </p>
 
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/knowledge/resources")}
+                  onClick={() => handleNavigation("/core")}
+                >
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Knowledge Base
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/core/articles")}
                 >
                   <FileTextIcon className="mr-2 h-4 w-4" />
-                  My Resources
+                  Browse Articles
                 </Button>
 
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/knowledge/topics")}
+                  onClick={() => handleNavigation("/core/latest")}
                 >
                   <Book className="mr-2 h-4 w-4" />
-                  Browse Topics
+                  Latest Articles
                 </Button>
+              </>
+            )}
+
+            {/* REL8 menu items (for organizers) */}
+            {isOrganizer && (
+              <>
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  REL8T
+                </p>
 
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/knowledge/create")}
+                  onClick={() => handleNavigation("/rel8/dashboard")}
                 >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Create Article
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
                 </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8/contacts")}
+                >
+                  <ContactIcon className="mr-2 h-4 w-4" />
+                  Contacts
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8/relationships")}
+                >
+                  <CalendarClock className="mr-2 h-4 w-4" />
+                  Relationships
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8/groups")}
+                >
+                  <Grid3x3 className="mr-2 h-4 w-4" />
+                  Groups
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8/contacts/import")}
+                >
+                  <Import className="mr-2 h-4 w-4" />
+                  Import
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/rel8/settings")}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </Button>
+              </>
+            )}
 
-                {/* Organizer Section */}
-                {isOrganizer && (
-                  <>
-                    <Separator className="my-2" />
-                    <p className="px-4 py-2 text-sm font-medium opacity-70">
-                      REL8
-                    </p>
+            {/* Organizer-specific menu items */}
+            {isOrganizer && (
+              <>
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  Organizer
+                </p>      
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/organizer")}
+                >
+                  <Folder className="mr-2 h-4 w-4" />
+                  Organizer Dashboard 
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/invites")}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Manage Invites
+                </Button>
+              </>
+            )}
 
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/rel8")}
-                    >
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/rel8/contacts")}
-                    >
-                      <ContactIcon className="mr-2 h-4 w-4" />
-                      Contacts
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/rel8/relationships")}
-                    >
-                      <CalendarClock className="mr-2 h-4 w-4" />
-                      Relationships
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/rel8/groups")}
-                    >
-                      <Grid3x3 className="mr-2 h-4 w-4" />
-                      Groups
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/rel8/categories")}
-                    >
-                      <Tag className="mr-2 h-4 w-4" />
-                      Categories
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/rel8/settings")}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Button>
-
-                    <Separator className="my-2" />
-                    <p className="px-4 py-2 text-sm font-medium opacity-70">
-                      Organizer
-                    </p>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/organizer")}
-                    >
-                      <Folder className="mr-2 h-4 w-4" />
-                      Organizer Dashboard
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/invites")}
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      Manage Invites
-                    </Button>
-                  </>
-                )}
-
-                {/* Admin Section */}
-                {isAdmin && (
-                  <>
-                    <Separator className="my-2" />
-                    <p className="px-4 py-2 text-sm font-medium opacity-70">
-                      Admin
-                    </p>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/admin")}
-                    >
-                      <Shield className="mr-2 h-4 w-4" />
-                      Admin Dashboard
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/admin/debugger")}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Debug Tools
-                    </Button>
-                  </>
-                )}
+            {/* Admin-specific menu items */}
+            {isAdmin && (
+              <>
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  Admin
+                </p>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/admin")}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Admin Dashboard
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/admin/debugger")}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Debug Tools
+                </Button>
               </>
             )}
 
@@ -285,7 +273,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
             <Button
               variant="ghost"
               className="justify-start"
-              onClick={() => handleNavigation("/docs")}
+              onClick={() => handleNavigation("/documentation")}
             >
               <FileText className="mr-2 h-4 w-4" />
               Documentation
@@ -293,7 +281,6 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
           </nav>
         </div>
 
-        {/* Footer */}
         <div className="border-t pt-4 flex flex-col gap-2">
           {currentUser ? (
             <Button
@@ -318,3 +305,5 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
     </Sheet>
   );
 };
+
+export default NavigationDrawer;

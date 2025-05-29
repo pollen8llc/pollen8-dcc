@@ -11,19 +11,20 @@ export const useProfile = (session: Session | null) => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Listen for role change events
+  // Listen for role change events via localStorage to support cross-tab updates
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'should_refresh_user_role' && e.newValue === 'true') {
-        console.log("Role change detected, refreshing user data");
+        console.log("Role change detected via localStorage, refreshing user data");
         refreshUser();
       }
     };
     
     window.addEventListener('storage', handleStorageChange);
     
+    // Also check on mount if we need to refresh
     if (localStorage.getItem('should_refresh_user_role') === 'true') {
-      console.log("Role refresh flag detected on mount");
+      console.log("Role refresh flag detected on mount, refreshing user data");
       refreshUser();
     }
     
@@ -32,7 +33,7 @@ export const useProfile = (session: Session | null) => {
     };
   }, []);
 
-  // Fetch user profile with simplified approach
+  // Fetch user profile from Supabase with improved error handling
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log("Fetching profile for user ID:", userId);
@@ -43,26 +44,26 @@ export const useProfile = (session: Session | null) => {
         .from('profiles') 
         .select('*')
         .eq('id', userId)
-        .maybeSingle();
+        .single();
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
+        if (profileError.code === 'PGRST116') {
+          console.log("Profile not found, will attempt to create one");
+          setError("Profile not found");
+          return null;
+        }
         setError(`Error fetching profile: ${profileError.message}`);
-        return null;
+        throw profileError;
       }
 
-      if (!profile) {
-        console.log("Profile not found for user:", userId);
-        setError("Profile not found");
-        return null;
-      }
+      console.log("Profile fetched:", profile);
 
-      console.log("Profile fetched successfully:", profile);
-
-      // Get user role using the simplified approach
+      // First check if user has admin role using our non-recursive function
       let role = UserRole.MEMBER; // Default role
       
       try {
+        // Get all user roles from the user_roles table
         const { data: userRoles, error: userRolesError } = await supabase
           .from('user_roles')
           .select(`
@@ -76,19 +77,27 @@ export const useProfile = (session: Session | null) => {
         if (userRolesError) {
           console.error("Error fetching user roles:", userRolesError);
         } else if (userRoles && userRoles.length > 0) {
-          console.log("User roles fetched:", userRoles);
+          console.log("User roles fetched:", JSON.stringify(userRoles, null, 2));
           
-          // Check for admin role first
-          const hasAdminRole = userRoles.some(r => r.roles && r.roles.name === 'ADMIN');
+          // Check for admin role first (highest priority)
+          const hasAdminRole = userRoles.some(r => {
+            return r.roles && r.roles.name === 'ADMIN';
+          });
+          
           if (hasAdminRole) {
             role = UserRole.ADMIN;
             console.log("User has ADMIN role");
           } else {
-            // Check for organizer role
-            const hasOrganizerRole = userRoles.some(r => r.roles && r.roles.name === 'ORGANIZER');
+            // Check for organizer role next
+            const hasOrganizerRole = userRoles.some(r => {
+              return r.roles && r.roles.name === 'ORGANIZER';
+            });
+            
             if (hasOrganizerRole) {
               role = UserRole.ORGANIZER;
               console.log("User has ORGANIZER role");
+            } else {
+              console.log("User is a regular MEMBER");
             }
           }
         } else {
@@ -96,9 +105,10 @@ export const useProfile = (session: Session | null) => {
         }
       } catch (roleErr) {
         console.error("Exception in role fetching:", roleErr);
+        // Continue with default role
       }
       
-      // Get managed communities (simplified)
+      // Try to get user's owned communities with error handling
       let managedCommunities: string[] = [];
       try {
         const { data: ownedCommunities, error: ownedError } = await supabase
@@ -107,12 +117,14 @@ export const useProfile = (session: Session | null) => {
         if (ownedError) {
           console.error("Error fetching owned communities:", ownedError);
         } else {
+          console.log("User owned communities:", ownedCommunities || []);
           managedCommunities = ownedCommunities?.map(m => m.community_id) || [];
         }
       } catch (err) {
         console.error("Exception fetching communities:", err);
       }
       
+      // In the new model, users are only members of communities they own
       const communities = managedCommunities;
 
       // Create user object
@@ -129,7 +141,7 @@ export const useProfile = (session: Session | null) => {
         profile_complete: profile?.profile_complete || false
       };
 
-      console.log("User data constructed successfully:", userData);
+      console.log("User data constructed:", userData);
       setCurrentUser(userData);
       setError(null);
       return userData;
@@ -140,19 +152,16 @@ export const useProfile = (session: Session | null) => {
     }
   };
 
-  // Create profile with simplified retry logic
-  const createProfileIfNotExists = useCallback(async () => {
+  // Create profile if it doesn't exist with improved error handling and retries
+  const createProfileIfNotExists = useCallback(async (retryCount = 0) => {
     try {
-      if (!session?.user) {
-        console.log("No session available for profile creation");
-        return false;
-      }
+      if (!session?.user) return false;
       
       const userId = session.user.id;
-      console.log("Checking/creating profile for user:", userId);
+      console.log("Attempting to create profile for user:", userId);
       setError(null);
       
-      // Check if profile exists
+      // First check if profile exists
       const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
         .select('id')
@@ -162,15 +171,21 @@ export const useProfile = (session: Session | null) => {
       if (checkError) {
         console.error("Error checking for existing profile:", checkError);
         setError(`Error checking for profile: ${checkError.message}`);
+        if (retryCount < 2) {
+          console.log(`Retry attempt ${retryCount + 1} for checking profile existence`);
+          await new Promise(r => setTimeout(r, 500)); // Add delay before retry
+          return await createProfileIfNotExists(retryCount + 1);
+        }
         return false;
       }
       
+      // If profile exists, don't create a new one
       if (existingProfile) {
-        console.log("Profile already exists, no creation needed");
-        return false; // Return false to indicate no new profile was created
+        console.log("Profile already exists, no need to create");
+        return true;
       }
       
-      // Get user email from auth
+      // Get user email from auth user
       const { data: authUser } = await supabase.auth.getUser();
       if (!authUser?.user) {
         console.error("Could not get auth user data");
@@ -178,40 +193,67 @@ export const useProfile = (session: Session | null) => {
         return false;
       }
       
+      // Extract name from user metadata if available
       const firstName = authUser.user.user_metadata?.first_name || '';
       const lastName = authUser.user.user_metadata?.last_name || '';
       const email = authUser.user.email || '';
       
-      console.log("Creating new profile with data:", { userId, email, firstName, lastName });
+      // Create profile with retry logic
+      const createProfile = async (attempt = 0) => {
+        try {
+          console.log(`Creating profile, attempt ${attempt + 1}`);
+          
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              user_id: userId,
+              email: email,
+              first_name: firstName,
+              last_name: lastName,
+              privacy_settings: { profile_visibility: "public" }, // Set to public for new users
+              profile_complete: false // Mark as incomplete so the wizard will show
+            })
+            .select()
+            .single();
+            
+          if (insertError) {
+            console.error("Error creating profile:", insertError);
+            setError(`Error creating profile: ${insertError.message}`);
+            
+            if (attempt < 2) {
+              console.log("Retrying profile creation...");
+              await new Promise(r => setTimeout(r, 500)); // Add delay before retry
+              return createProfile(attempt + 1);
+            }
+            
+            return false;
+          }
+          
+          console.log("Profile created successfully:", newProfile);
+          toast({
+            title: "Profile created",
+            description: "Your profile has been set up and is ready to customize"
+          });
+          return true;
+        } catch (err: any) {
+          console.error("Exception in profile creation:", err);
+          setError(`Exception in profile creation: ${err.message || "Unknown error"}`);
+          if (attempt < 2) {
+            return createProfile(attempt + 1);
+          }
+          return false;
+        }
+      };
       
-      const { data: newProfile, error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          user_id: userId,
-          email: email,
-          first_name: firstName,
-          last_name: lastName,
-          privacy_settings: { profile_visibility: "public" },
-          profile_complete: false
-        })
-        .select()
-        .single();
-        
-      if (insertError) {
-        console.error("Error creating profile:", insertError);
-        setError(`Error creating profile: ${insertError.message}`);
-        return false;
-      }
+      return await createProfile();
       
-      console.log("Profile created successfully:", newProfile);
-      return true; // Return true to indicate a new profile was created
     } catch (error: any) {
       console.error("Error in createProfileIfNotExists:", error);
       setError(`Error creating profile: ${error.message || "Unknown error"}`);
       return false;
     }
-  }, [session]);
+  }, [session, toast]);
 
   // Effect to update user data when session changes
   useEffect(() => {
@@ -221,10 +263,13 @@ export const useProfile = (session: Session | null) => {
       
       try {
         if (session && session.user) {
-          console.log("Session found, fetching user profile:", session.user.id);
-          await fetchUserProfile(session.user.id);
+          const profile = await fetchUserProfile(session.user.id);
+          if (!profile) {
+            // Don't set currentUser to null yet, we'll handle profile creation in useAuth
+            console.log("No profile found for user");
+            setError("No profile found for user");
+          }
         } else {
-          console.log("No session, clearing current user");
           setCurrentUser(null);
         }
       } catch (error: any) {
@@ -242,17 +287,17 @@ export const useProfile = (session: Session | null) => {
   // Refresh user data
   const refreshUser = useCallback(async (): Promise<void> => {
     if (!session?.user) {
-      console.log("No session for refresh, clearing user");
       setCurrentUser(null);
       return;
     }
     
     setIsLoading(true);
     setError(null);
-    console.log("Refreshing user data for session:", session.user.id);
+    console.log("Refreshing user data, session:", session);
     
     try {
       await fetchUserProfile(session.user.id);
+      // Clear the role refresh flag after successful refresh
       localStorage.removeItem('should_refresh_user_role');
     } catch (error: any) {
       console.error("Error refreshing user data:", error);

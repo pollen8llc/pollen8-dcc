@@ -66,11 +66,11 @@ const ContactCreate = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-8">
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -83,23 +83,21 @@ const ContactCreate = () => {
           </BreadcrumbList>
         </Breadcrumb>
         
-        <div className="flex flex-col sm:flex-row sm:items-center mb-8 gap-4">
+        <div className="flex items-center mb-6">
           <Button
             variant="ghost"
-            size="sm"
             onClick={() => navigate("/rel8/contacts")}
-            className="self-start flex items-center gap-2"
+            className="mr-4"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back
           </Button>
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold truncate">Create New Contact</h1>
+          <div>
+            <h1 className="text-2xl font-bold">Create New Contact</h1>
             <p className="text-muted-foreground">Add a new contact to your network</p>
           </div>
         </div>
 
-        <div className="bg-card rounded-lg border shadow-sm p-6">
+        <div className="bg-card rounded-lg border border-border/20 p-6">
           <ContactForm
             onSubmit={handleSubmit}
             onCancel={handleCancel}

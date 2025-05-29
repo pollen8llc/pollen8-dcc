@@ -57,7 +57,7 @@ const Notifications = () => {
   const completedCount = notifications.filter(n => n.status === 'completed').length;
 
   const handleCreateOutreach = () => {
-    navigate('/rel8/triggers/wizard');
+    navigate('/rel8/wizard');
   };
 
   return (

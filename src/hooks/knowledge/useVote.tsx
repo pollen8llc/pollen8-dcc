@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,10 +85,8 @@ export const useVote = () => {
       // Invalidate queries
       if (type === 'article') {
         queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', id] });
-        queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
       } else {
         queryClient.invalidateQueries({ queryKey: ['knowledgeComments'] });
-        queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', id] });
       }
     } catch (error: any) {
       toast({

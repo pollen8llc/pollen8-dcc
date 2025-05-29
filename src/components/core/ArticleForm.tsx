@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { KnowledgeArticle, KnowledgeTag } from '@/models/knowledgeTypes';
+import { KnowledgeArticle } from '@/models/knowledgeTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,10 +19,11 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X, PlusCircle, Save, ArrowLeft, Eye, Edit } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import DOMPurify from 'dompurify';
+import { Textarea } from '@/components/ui/textarea';
+import { X, PlusCircle, Save, ArrowLeft } from 'lucide-react';
+
+// Add TailwindCSS dark mode styles for TinyMCE
+import { useEffect as useEffectTinyMCE } from 'react';
 
 interface ArticleFormProps {
   article?: KnowledgeArticle;
@@ -39,10 +40,79 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
   const [tags, setTags] = useState<string[]>(article?.tags || []);
   const [tagInput, setTagInput] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [activeTab, setActiveTab] = useState<string>("editor");
   
   // Fetch existing tags for suggestions
   const { data: existingTags } = useTags();
+  
+  // Add Tiny MCE editor
+  useEffectTinyMCE(() => {
+    const loadEditor = async () => {
+      // @ts-ignore
+      if (window.tinymce) return;
+      
+      const script = document.createElement('script');
+      script.src = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js';
+      script.referrerPolicy = 'origin';
+      
+      script.onload = () => {
+        // @ts-ignore
+        window.tinymce.init({
+          selector: '#article-editor',
+          plugins: 'link image lists table code help wordcount',
+          toolbar: 'undo redo | blocks | bold italic underline strikethrough | link image | numlist bullist | table | code',
+          menubar: 'file edit view insert format tools table help',
+          setup: (editor: any) => {
+            // Update content in state when editor content changes
+            editor.on('change', () => {
+              setContent(editor.getContent());
+            });
+            
+            // Set initial content if available
+            if (article?.content) {
+              editor.on('init', () => {
+                editor.setContent(article.content);
+              });
+            }
+          },
+          height: 500,
+          content_style: `
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+              font-size: 16px;
+              color: #374151;
+              margin: 1rem;
+            }
+            .dark body {
+              color: #e5e7eb;
+              background-color: #1f2937;
+            }
+            .dark a { color: #60a5fa; }
+            .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 { color: #f3f4f6; }
+            .dark code { 
+              background-color: #374151; 
+              color: #e5e7eb; 
+              padding: 0.2em 0.4em;
+              border-radius: 3px;
+            }
+          `,
+          skin: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oxide-dark' : 'oxide',
+          content_css: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
+        });
+      };
+      
+      document.head.appendChild(script);
+    };
+    
+    loadEditor();
+    
+    return () => {
+      // @ts-ignore
+      if (window.tinymce) {
+        // @ts-ignore
+        window.tinymce.remove('#article-editor');
+      }
+    };
+  }, [article]);
   
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,21 +129,18 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
     }
     
     try {
-      // Sanitize HTML content before submission
-      const sanitizedContent = DOMPurify.sanitize(content);
-      
       const articleData = {
         title: title.trim(),
-        content: sanitizedContent,
+        content,
         tags
       };
       
       if (mode === 'create') {
         await createArticle(articleData);
-        navigate('/knowledge');
+        navigate('/core');
       } else if (mode === 'edit' && article) {
-        await updateArticle({ id: article.id, data: articleData });
-        navigate(`/knowledge/${article.id}`);
+        await updateArticle(article.id, articleData);
+        navigate(`/core/articles/${article.id}`);
       }
     } catch (error) {
       console.error('Error submitting article:', error);
@@ -204,57 +271,18 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
         
         {/* Content */}
         <div>
-          <Label htmlFor="content-editor" className="text-base">Article Content</Label>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="flex justify-between items-center mb-2">
-              <TabsList>
-                <TabsTrigger value="editor" className="flex items-center">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Editor
-                </TabsTrigger>
-                <TabsTrigger value="preview" className="flex items-center">
-                  <Eye className="h-4 w-4 mr-2" />
-                  Preview
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            
-            <TabsContent value="editor">
-              <Card>
-                <CardContent className="p-4">
-                  <TiptapEditor 
-                    content={content} 
-                    onChange={setContent}
-                    className="min-h-[400px]"
-                    placeholder="Write your article content here..."
-                  />
-                  {errors.content && (
-                    <p className="mt-1 text-sm text-red-500">{errors.content}</p>
-                  )}
-                </CardContent>
-                <CardFooter className="text-xs text-muted-foreground bg-muted/40 rounded-b-lg py-2 px-4">
-                  <p>Use the toolbar to format your content</p>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="preview">
-              <Card>
-                <CardContent className="py-4">
-                  {content ? (
-                    <div 
-                      className="prose dark:prose-invert max-w-none"
-                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
-                    />
-                  ) : (
-                    <div className="text-muted-foreground italic p-4 text-center">
-                      No content to preview
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <Label htmlFor="article-editor" className="text-base">Article Content</Label>
+          <Card>
+            <CardContent className="p-0">
+              <textarea 
+                id="article-editor" 
+                className={`min-h-40 w-full ${errors.content ? 'border-red-500' : ''}`}
+              />
+              {errors.content && (
+                <p className="mt-1 text-sm text-red-500">{errors.content}</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
         
         {/* Actions */}

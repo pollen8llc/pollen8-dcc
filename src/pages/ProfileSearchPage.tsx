@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -14,7 +15,6 @@ import { ExtendedProfile } from "@/services/profileService";
 import { useDebounce } from "@/hooks/useDebounce";
 import ProfileSearchList from "@/components/profile/ProfileSearchList";
 import { Shell } from "@/components/layout/Shell";
-import { UserRole } from "@/models/types";
 
 const ProfileSearchPage: React.FC = () => {
   const { currentUser } = useUser();
@@ -81,7 +81,7 @@ const ProfileSearchPage: React.FC = () => {
     fetchInterests();
   }, []);
 
-  // Search profiles with role information - using an approach similar to the admin panel
+  // Search profiles
   useEffect(() => {
     const searchProfiles = async () => {
       if (!currentUser) return;
@@ -90,7 +90,6 @@ const ProfileSearchPage: React.FC = () => {
       setError(null);
       
       try {
-        // First, get profiles based on search criteria
         let query = supabase
           .from('profiles')
           .select('*');
@@ -114,16 +113,16 @@ const ProfileSearchPage: React.FC = () => {
         }
         
         // Execute the query
-        const { data: profilesData, error: profilesError } = await query;
+        const { data, error } = await query;
         
-        if (profilesError) {
-          console.error("Error searching profiles:", profilesError);
-          setError("Search failed: " + profilesError.message);
+        if (error) {
+          console.error("Error searching profiles:", error);
+          setError("Search failed: " + error.message);
           return;
         }
-
-        // Process the profile results
-        const profilesWithProcessedData = profilesData.map(profile => ({
+        
+        // Process the results
+        const searchResults = data.map(profile => ({
           ...profile,
           social_links: profile.social_links ? 
             (typeof profile.social_links === 'string' ? 
@@ -135,83 +134,7 @@ const ProfileSearchPage: React.FC = () => {
               }
         }));
         
-        // Efficiently fetch roles in a single query (similar to admin panel approach)
-        // Get all user IDs from profiles
-        const userIds = profilesWithProcessedData.map(profile => profile.id);
-        
-        // Get all roles for these users in a single query
-        const { data: rolesData, error: rolesError } = await supabase
-          .from('user_roles')
-          .select(`
-            user_id,
-            roles:role_id (
-              name
-            )
-          `)
-          .in('user_id', userIds);
-          
-        if (rolesError) {
-          console.error("Error fetching user roles:", rolesError);
-          // Continue with profiles but without roles
-        }
-        
-        // Create a map of user_id to role name (taking the highest role for each user)
-        const userRoleMap = new Map<string, UserRole>();
-        
-        if (rolesData) {
-          // Process all roles
-          rolesData.forEach(roleItem => {
-            const userId = roleItem.user_id;
-            const roleName = roleItem.roles?.name;
-            
-            if (userId && roleName) {
-              // Determine the highest role (ADMIN > ORGANIZER > MEMBER > GUEST)
-              let role: UserRole | undefined;
-              
-              // Map the role string to UserRole enum
-              if (roleName === 'ADMIN') {
-                role = UserRole.ADMIN;
-              } else if (roleName === 'ORGANIZER') {
-                role = UserRole.ORGANIZER;
-              } else if (roleName === 'MEMBER') {
-                role = UserRole.MEMBER;
-              } else if (roleName === 'GUEST') {
-                role = UserRole.GUEST;
-              }
-              
-              // If this role is defined and higher than any existing role for this user
-              if (role !== undefined) {
-                const existingRole = userRoleMap.get(userId);
-                if (existingRole === undefined || role < existingRole) {
-                  // In the enum, lower values = higher roles (ADMIN = 0, GUEST = 3)
-                  userRoleMap.set(userId, role);
-                }
-              }
-            }
-          });
-        }
-        
-        // Merge role data with profile data
-        const profilesWithRoles = profilesWithProcessedData.map(profile => {
-          // Get the role from the map or default to MEMBER
-          const role = userRoleMap.get(profile.id) ?? UserRole.MEMBER;
-          
-          return {
-            ...profile,
-            role,
-            // Get the string representation for logging
-            roleString: UserRole[role]
-          };
-        });
-        
-        console.log('Profiles with roles:', profilesWithRoles.map(p => ({ 
-          id: p.id, 
-          name: `${p.first_name} ${p.last_name}`, 
-          role: p.role,
-          roleString: p.roleString
-        })));
-        
-        setProfiles(profilesWithRoles);
+        setProfiles(searchResults);
       } catch (error) {
         console.error("Error in searchProfiles:", error);
         setError("An unexpected error occurred while searching profiles");
@@ -254,7 +177,7 @@ const ProfileSearchPage: React.FC = () => {
         
         <div className="flex flex-col xl:flex-row gap-8">
           {/* Search filters sidebar */}
-          <Card className="xl:w-80 w-full h-fit xl:sticky xl:top-20 border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-[#00eada]/20">
+          <Card className="xl:w-80 w-full h-fit sticky top-20 border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-[#00eada]/20">
             <CardContent className="p-6">
               <h3 className="font-medium text-lg mb-4">Filters</h3>
               

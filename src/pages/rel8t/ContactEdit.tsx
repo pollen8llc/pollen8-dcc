@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ContactForm from "@/components/rel8t/ContactForm";
 import { 
@@ -56,7 +56,7 @@ const ContactEdit = () => {
       // Update basic contact data
       const updatedContact = await updateContact(id, contactData);
       
-      // Handle group membership changes if selectedGroups is provided
+      // Handle group membership changes
       if (selectedGroups && contact?.groups) {
         // Find groups to add and remove
         const currentGroupIds = contact.groups.map(g => g.id);
@@ -138,10 +138,26 @@ const ContactEdit = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink>Edit Contact</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
-              <Loader2 className="animate-spin h-8 w-8 mx-auto text-primary" />
-              <p className="mt-4 text-muted-foreground">Loading contact details...</p>
+              <Loader2 className="animate-spin h-8 w-8 mx-auto text-[#00eada]" />
+              <p className="mt-4">Loading contact details...</p>
             </div>
           </div>
         </div>
@@ -154,6 +170,22 @@ const ContactEdit = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/rel8/contacts">Contacts</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink>Not Found</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Contact not found</h2>
             <Button onClick={() => navigate("/rel8/contacts")}>
@@ -169,11 +201,11 @@ const ContactEdit = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-8">
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -186,51 +218,43 @@ const ContactEdit = () => {
           </BreadcrumbList>
         </Breadcrumb>
         
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/rel8/contacts")}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Edit Contact</h1>
-              <p className="text-muted-foreground">Update contact information</p>
-            </div>
+        <div className="flex items-center mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/rel8/contacts")}
+            className="mr-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Edit Contact</h1>
+            <p className="text-muted-foreground">Update contact information</p>
           </div>
-          
           <Button
             variant="destructive"
-            size="sm"
             onClick={handleDelete}
+            className="ml-auto"
             disabled={updateMutation.isPending || deleteMutation.isPending}
-            className="flex items-center gap-2"
           >
-            <Trash2 className="h-4 w-4" />
             Delete Contact
           </Button>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-card rounded-lg border shadow-sm p-6">
+        <div className="bg-card rounded-lg border border-border/20 p-6">
           {contact && (
             <ContactForm
               initialValues={{
                 name: contact.name,
-                email: contact.email || '',
-                phone: contact.phone || '',
-                organization: contact.organization || '',
-                role: contact.role || '',
-                notes: contact.notes || '',
+                email: contact.email,
+                phone: contact.phone,
+                organization: contact.organization,
+                role: contact.role,
+                notes: contact.notes,
                 tags: contact.tags || [],
-                category_id: contact.category_id || '',
-                location: contact.location || '',
-                groups: contact.groups || []
+                category_id: contact.category_id,
+                location: contact.location,
+                groups: contact.groups || [],
+                affiliations: contact.affiliations || []
               }}
               onSubmit={handleSubmit}
               onCancel={handleCancel}

@@ -12,13 +12,8 @@ const Index = () => {
   
   useEffect(() => {
     if (!isLoading && currentUser) {
-      // Check if profile is complete before redirecting
-      if (!currentUser.profile_complete) {
-        navigate("/profile/setup");
-      } else {
-        // If user is logged in and profile is complete, redirect to knowledge base
-        navigate("/knowledge");
-      }
+      // If user is logged in, redirect to CORE dashboard
+      navigate("/core");
     }
   }, [currentUser, isLoading, navigate]);
   

@@ -24,6 +24,8 @@ import {
 import { 
   ChevronLeft, 
   Edit, 
+  ThumbsUp, 
+  ThumbsDown, 
   Check, 
   Tag, 
   Trash2,
@@ -32,17 +34,21 @@ import {
   Eye
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { VoteType } from '@/models/knowledgeTypes';
-import DOMPurify from 'dompurify';
-import AuthorCard from '@/components/knowledge/AuthorCard';
-import { VotingButtons } from '@/components/knowledge/VotingButtons';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
-  const knowledgeBase = useKnowledgeBase();
+  const { 
+    useArticle, 
+    useComments, 
+    vote, 
+    createComment, 
+    deleteArticle,
+    acceptAnswer,
+    deleteComment 
+  } = useKnowledgeBase();
 
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,19 +56,32 @@ const ArticleView = () => {
   const [deleteCommentId, setDeleteCommentId] = useState<string | null>(null);
 
   // Fetch article data
-  const { data: article, isLoading: articleLoading, error: articleError } = knowledgeBase.useArticle(id);
+  const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id);
   
   // Fetch comments
-  const { data: comments, isLoading: commentsLoading } = knowledgeBase.useComments(id);
+  const { data: comments, isLoading: commentsLoading } = useComments(id);
+
+  // Handle voting on article
+  const handleArticleVote = (voteType: 'upvote' | 'downvote') => {
+    if (article) {
+      if (article.user_vote === 1 && voteType === 'upvote') {
+        vote('article', article.id, 'none');
+      } else if (article.user_vote === -1 && voteType === 'downvote') {
+        vote('article', article.id, 'none');
+      } else {
+        vote('article', article.id, voteType);
+      }
+    }
+  };
 
   // Handle voting on comment
-  const handleCommentVote = (commentId: string, voteType: VoteType, currentVote?: number | null) => {
+  const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number) => {
     if (currentVote === 1 && voteType === 'upvote') {
-      knowledgeBase.vote('comment', commentId, 'none');
+      vote('comment', commentId, 'none');
     } else if (currentVote === -1 && voteType === 'downvote') {
-      knowledgeBase.vote('comment', commentId, 'none');
+      vote('comment', commentId, 'none');
     } else {
-      knowledgeBase.vote('comment', commentId, voteType);
+      vote('comment', commentId, voteType);
     }
   };
 
@@ -73,7 +92,7 @@ const ArticleView = () => {
     
     try {
       setIsSubmitting(true);
-      await knowledgeBase.createComment(id!, newComment);
+      await createComment(id!, newComment);
       setNewComment('');
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -85,8 +104,8 @@ const ArticleView = () => {
   // Handle delete article confirmation
   const confirmDeleteArticle = async () => {
     try {
-      await knowledgeBase.deleteArticle(id!);
-      navigate('/knowledge');
+      await deleteArticle(id!);
+      navigate('/core');
     } catch (error) {
       console.error('Error deleting article:', error);
     }
@@ -97,7 +116,7 @@ const ArticleView = () => {
     if (!deleteCommentId) return;
     
     try {
-      await knowledgeBase.deleteComment(deleteCommentId, id!);
+      await deleteComment(deleteCommentId, id!);
       setDeleteCommentId(null);
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -106,7 +125,7 @@ const ArticleView = () => {
 
   // Handle accepting a comment as answer
   const handleAcceptAnswer = (commentId: string, isAccepted: boolean) => {
-    knowledgeBase.acceptAnswer(commentId, id!, !isAccepted);
+    acceptAnswer(commentId, id!, !isAccepted);
   };
 
   // Generate initials for avatar
@@ -146,7 +165,7 @@ const ArticleView = () => {
             <h2 className="text-2xl font-bold mb-4">Article Not Found</h2>
             <p className="mb-4">The article you're looking for might have been removed or doesn't exist.</p>
             <Button asChild>
-              <Link to="/knowledge"><ChevronLeft className="mr-2 h-4 w-4" /> Back to Knowledge Base</Link>
+              <Link to="/core"><ChevronLeft className="mr-2 h-4 w-4" /> Back to Knowledge Base</Link>
             </Button>
           </div>
         </div>
@@ -165,7 +184,7 @@ const ArticleView = () => {
         {/* Breadcrumb */}
         <div className="mb-6">
           <Button variant="ghost" asChild className="pl-0">
-            <Link to="/knowledge">
+            <Link to="/core">
               <ChevronLeft className="mr-2 h-4 w-4" />
               Back to Knowledge Base
             </Link>
@@ -180,7 +199,7 @@ const ArticleView = () => {
             <div className="flex gap-2 mt-4 md:mt-0">
               {canEdit && (
                 <Button variant="outline" asChild>
-                  <Link to={`/knowledge/${article.id}/edit`}>
+                  <Link to={`/core/articles/${article.id}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </Link>
@@ -211,15 +230,14 @@ const ArticleView = () => {
           
           {/* Article Meta */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center text-sm text-muted-foreground">
-            <AuthorCard 
-              author={{
-                id: article.user_id,
-                name: article.author?.name,
-                avatar_url: article.author?.avatar_url,
-                is_admin: article.author?.is_admin
-              }} 
-              minimal={true} 
-            />
+            <div className="flex items-center">
+              <Avatar className="h-6 w-6 mr-2">
+                <AvatarImage src={article.author?.avatar_url} alt={article.author?.name} />
+                <AvatarFallback>{getInitials(article.author?.name)}</AvatarFallback>
+              </Avatar>
+              <span className="mr-2">{article.author?.name || 'Unknown User'}</span>
+              <span>posted {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}</span>
+            </div>
             
             <div className="flex items-center gap-4 mt-2 md:mt-0">
               <div className="flex items-center">
@@ -238,23 +256,32 @@ const ArticleView = () => {
         {/* Article Content */}
         <Card className="mb-8">
           <CardContent className="pt-6">
-            <div 
-              className="prose dark:prose-invert max-w-none" 
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
-            />
+            <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: article.content }} />
           </CardContent>
           
           <CardFooter className="flex flex-col md:flex-row justify-between border-t pt-4 gap-4">
             <div className="flex items-center">
               <span className="mr-2">Was this helpful?</span>
-              <VotingButtons
-                itemType="article"
-                itemId={article.id}
-                voteCount={article.vote_count}
-                userVote={article.user_vote}
-                size="sm"
-                showCount={true}
-              />
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant={article.user_vote === 1 ? "default" : "outline"}
+                  className={article.user_vote === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
+                  onClick={() => handleArticleVote('upvote')}
+                >
+                  <ThumbsUp className="h-4 w-4 mr-1" />
+                  {article.vote_count && article.vote_count > 0 ? article.vote_count : ''}
+                </Button>
+                
+                <Button 
+                  size="sm" 
+                  variant={article.user_vote === -1 ? "default" : "outline"}
+                  className={article.user_vote === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
+                  onClick={() => handleArticleVote('downvote')}
+                >
+                  <ThumbsDown className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             
             <div className="flex items-center text-sm text-muted-foreground">
@@ -339,14 +366,26 @@ const ArticleView = () => {
                   </CardContent>
                   
                   <CardFooter className="flex justify-between pt-0">
-                    <VotingButtons
-                      itemType="comment"
-                      itemId={comment.id}
-                      voteCount={comment.vote_count}
-                      userVote={comment.user_vote}
-                      size="sm"
-                      showCount={true}
-                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant={comment.user_vote === 1 ? "default" : "outline"}
+                        className={comment.user_vote === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
+                        onClick={() => handleCommentVote(comment.id, 'upvote', comment.user_vote)}
+                      >
+                        <ThumbsUp className="h-4 w-4 mr-1" />
+                        {comment.vote_count && comment.vote_count > 0 ? comment.vote_count : ''}
+                      </Button>
+                      
+                      <Button 
+                        size="sm" 
+                        variant={comment.user_vote === -1 ? "default" : "outline"}
+                        className={comment.user_vote === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
+                        onClick={() => handleCommentVote(comment.id, 'downvote', comment.user_vote)}
+                      >
+                        <ThumbsDown className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardFooter>
                 </Card>
               ))

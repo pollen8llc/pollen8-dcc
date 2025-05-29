@@ -2,9 +2,7 @@
 import { useState, useEffect } from "react";
 import { 
   getContactGroups, 
-  createContactGroup,
-  updateContactGroup,
-  deleteContactGroup,
+  createContactGroup, 
   ContactGroup 
 } from "@/services/rel8t/contactService";
 import { Button } from "@/components/ui/button";
@@ -18,17 +16,10 @@ import {
   DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { Folder, FolderPlus, Users, MoreVertical, Edit, Trash } from "lucide-react";
+import { Folder, FolderPlus, Users } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import ContactGroupsEdit from "./ContactGroupsEdit";
 
 interface ContactGroupsManagerProps {
   onSelectGroup?: (groupId: string) => void;
@@ -38,8 +29,6 @@ const ContactGroupsManager = ({ onSelectGroup }: ContactGroupsManagerProps) => {
   const [groups, setGroups] = useState<ContactGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<ContactGroup | null>(null);
   const [newGroup, setNewGroup] = useState({ name: "", description: "", color: "#6366f1" });
   const [isCreating, setIsCreating] = useState(false);
   const queryClient = useQueryClient();
@@ -104,35 +93,6 @@ const ContactGroupsManager = ({ onSelectGroup }: ContactGroupsManagerProps) => {
       });
     } finally {
       setIsCreating(false);
-    }
-  };
-
-  const handleEditGroup = (group: ContactGroup) => {
-    setEditingGroup(group);
-    setEditDialogOpen(true);
-  };
-
-  const handleDeleteGroup = async (group: ContactGroup) => {
-    if (confirm(`Are you sure you want to delete the group "${group.name}"?`)) {
-      try {
-        await deleteContactGroup(group.id);
-        
-        // Refresh groups
-        queryClient.invalidateQueries({ queryKey: ["contact-groups"] });
-        await loadGroups();
-        
-        toast({
-          title: "Success",
-          description: `Group "${group.name}" deleted successfully.`,
-        });
-      } catch (error) {
-        console.error("Error deleting group:", error);
-        toast({
-          title: "Error",
-          description: "Failed to delete contact group.",
-          variant: "destructive",
-        });
-      }
     }
   };
 
@@ -232,12 +192,10 @@ const ContactGroupsManager = ({ onSelectGroup }: ContactGroupsManagerProps) => {
             {groups.map((group) => (
               <div 
                 key={group.id}
-                className="flex items-center justify-between border rounded-md p-3 hover:bg-secondary/20 transition-colors"
+                className="flex items-center border rounded-md p-3 hover:bg-secondary/20 cursor-pointer transition-colors"
+                onClick={() => onSelectGroup && onSelectGroup(group.id)}
               >
-                <div 
-                  className="flex items-center gap-2 flex-1 cursor-pointer"
-                  onClick={() => onSelectGroup && onSelectGroup(group.id)}
-                >
+                <div className="flex items-center gap-2 flex-1">
                   <div 
                     className="w-3 h-3 rounded-full" 
                     style={{ backgroundColor: group.color || '#6366f1' }} 
@@ -249,43 +207,10 @@ const ContactGroupsManager = ({ onSelectGroup }: ContactGroupsManagerProps) => {
                     )}
                   </div>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEditGroup(group)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleDeleteGroup(group)}
-                      className="text-red-600"
-                    >
-                      <Trash className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             ))}
           </div>
         </ScrollArea>
-      )}
-
-      {/* Edit Dialog */}
-      {editingGroup && (
-        <ContactGroupsEdit
-          group={editingGroup}
-          isOpen={editDialogOpen}
-          onClose={() => {
-            setEditDialogOpen(false);
-            setEditingGroup(null);
-            loadGroups(); // Refresh the list after editing
-          }}
-        />
       )}
     </div>
   );

@@ -1,36 +1,23 @@
 
-import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useUser } from '@/contexts/UserContext';
-import { usePermissions } from '@/hooks/usePermissions'; 
-import { KnowledgeArticle } from '@/models/knowledgeTypes';
-import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { 
-  Tag, 
-  ChevronLeft, 
-  X, 
-  RefreshCcw, 
-  PlusCircle, 
-  ThumbsUp, 
-  MessageSquare, 
-  Eye, 
-  Calendar 
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
-import { formatDistanceToNow } from 'date-fns';
 import { 
-  Card, 
-  CardHeader, 
-  CardContent, 
-  CardFooter, 
-  CardTitle 
-} from '@/components/ui/card';
+  ChevronLeft, 
+  PlusCircle,
+  ThumbsUp,
+  MessageSquare,
+  Eye,
+  Calendar,
+  Tag
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 const TagView = () => {
   const { tag } = useParams<{ tag: string }>();
@@ -49,7 +36,7 @@ const TagView = () => {
         {/* Breadcrumb */}
         <div className="mb-6">
           <Button variant="ghost" asChild className="pl-0">
-            <Link to="/knowledge">
+            <Link to="/core">
               <ChevronLeft className="mr-2 h-4 w-4" />
               Back to Knowledge Base
             </Link>
@@ -70,7 +57,7 @@ const TagView = () => {
           
           {(isOrganizer || isAdmin) && (
             <Button className="mt-4 md:mt-0 bg-royal-blue-600 hover:bg-royal-blue-700" asChild>
-              <Link to="/knowledge/create">
+              <Link to="/core/articles/new">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Article
               </Link>
@@ -100,7 +87,7 @@ const TagView = () => {
               {articles.map(article => (
                 <Card key={article.id} className="transition-shadow hover:shadow-md">
                   <CardHeader>
-                    <Link to={`/knowledge/${article.id}`} className="group">
+                    <Link to={`/core/articles/${article.id}`} className="group">
                       <CardTitle className="text-xl group-hover:text-royal-blue-600 dark:group-hover:text-royal-blue-400 transition-colors">
                         {article.title}
                       </CardTitle>
@@ -160,7 +147,7 @@ const TagView = () => {
               
               {(isOrganizer || isAdmin) && (
                 <Button asChild className="bg-royal-blue-600 hover:bg-royal-blue-700">
-                  <Link to="/knowledge/create">
+                  <Link to="/core/articles/new">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create New Article
                   </Link>

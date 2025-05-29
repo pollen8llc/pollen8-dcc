@@ -1,279 +1,269 @@
 
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useUser } from "./contexts/UserContext";
 
-// Authentication
-import Auth from '@/pages/Auth';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import Rel8ProtectedRoute from '@/components/auth/Rel8ProtectedRoute';
+// Pages
+import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
+import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { UserRole } from "./models/types";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import DebuggerDashboard from "./pages/admin/DebuggerDashboard";
+import OrganizerDashboard from "./pages/OrganizerDashboard";
+import ProfileEditPage from "./pages/ProfileEditPage";
+import ProfileSetupPage from "./pages/ProfileSetupPage";
+import Onboarding from "./pages/Onboarding";
+import ProfileSearchPage from "./pages/ProfileSearchPage";
+import InvitePage from "./pages/InvitePage";
+import InvitesManagementPage from "./pages/InvitesManagementPage";
+import ProfilePage from "./pages/ProfilePage";
+import Documentation from "./pages/Documentation";
 
-// Main Pages
-import Index from '@/pages/Index';
-import LandingPage from '@/pages/LandingPage';
-import ProfilePage from '@/pages/ProfilePage';
-import ProfileEditPage from '@/pages/ProfileEditPage';
-import ProfileSetupPage from '@/pages/ProfileSetupPage';
-import ProfileSearchPage from '@/pages/ProfileSearchPage';
-import Onboarding from '@/pages/Onboarding';
-import NotFound from '@/pages/NotFound';
-import InvitePage from '@/pages/InvitePage';
-import InvitesManagementPage from '@/pages/InvitesManagementPage';
-import Documentation from '@/pages/Documentation';
+// REL8T Pages
+import RelationshipWizard from "./pages/rel8t/RelationshipWizard";
+import Contacts from "./pages/rel8t/Contacts";
+import ContactCreate from "./pages/rel8t/ContactCreate";
+import ContactEdit from "./pages/rel8t/ContactEdit";
+import Groups from "./pages/rel8t/Groups";
+import Dashboard from "./pages/rel8t/Dashboard";
+import ImportContacts from "./pages/rel8t/ImportContacts";
+import Relationships from "./pages/rel8t/Relationships";
+import Settings from "./pages/rel8t/Settings";
+import Notifications from "./pages/rel8t/Notifications";
+import DotConnectorDashboard from "./pages/DotConnectorDashboard";
+import TriggerWizard from "./pages/rel8t/TriggerWizard";
 
-// Knowledge Base (includes former core functionality)
-import KnowledgeBase from '@/pages/knowledge/KnowledgeBase';
-import ArticleView from '@/pages/knowledge/ArticleView';
-import ContentCreator from '@/pages/knowledge/ContentCreator';
-import PostWizard from '@/pages/knowledge/PostWizard';
-import PostTypeSelector from '@/pages/knowledge/PostTypeSelector';
-import TopicsPage from '@/pages/knowledge/TopicsPage';
-import UserKnowledgeResource from '@/pages/knowledge/UserKnowledgeResource';
-
-// Core Content (now integrated into knowledge)
-import TagView from '@/pages/core/TagView';
-import ArticleCreate from '@/pages/core/ArticleCreate';
-import ArticleEdit from '@/pages/core/ArticleEdit';
-
-// Admin
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import DebuggerDashboard from '@/pages/admin/DebuggerDashboard';
-import OrganizerDashboard from '@/pages/OrganizerDashboard';
-import DotConnectorDashboard from '@/pages/DotConnectorDashboard';
-
-// Rel8 CRM
-import Dashboard from '@/pages/rel8t/Dashboard';
-import Contacts from '@/pages/rel8t/Contacts';
-import ContactCreate from '@/pages/rel8t/ContactCreate';
-import ContactEdit from '@/pages/rel8t/ContactEdit';
-import ImportContacts from '@/pages/rel8t/ImportContacts';
-import Groups from '@/pages/rel8t/Groups';
-import Categories from '@/pages/rel8t/Categories';
-import Relationships from '@/pages/rel8t/Relationships';
-import RelationshipWizard from '@/pages/rel8t/RelationshipWizard';
-import TriggerWizard from '@/pages/rel8t/TriggerWizard';
-import Notifications from '@/pages/rel8t/Notifications';
-import Settings from '@/pages/rel8t/Settings';
-import EmailTest from '@/pages/rel8t/EmailTest';
+// CORE Knowledge Base Pages
+import CoreLandingPage from "./pages/core/CoreLandingPage";
+import ArticleView from "./pages/core/ArticleView";
+import ArticleCreate from "./pages/core/ArticleCreate";
+import ArticleEdit from "./pages/core/ArticleEdit";
+import TagView from "./pages/core/TagView";
 
 const AppRoutes = () => {
+  const { currentUser } = useUser();
+
   return (
-    <ErrorBoundary>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/invite/:code" element={<InvitePage />} />
-        <Route path="/docs" element={<Documentation />} />
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/invite/:code" element={<InvitePage />} />
+      <Route path="/documentation" element={<Documentation />} />
 
-        {/* Protected Routes */}
-        <Route path="/welcome" element={
-          <ProtectedRoute>
-            <Index />
+      {/* CORE Knowledge Base Routes */}
+      <Route path="/core" element={<CoreLandingPage />} />
+      <Route path="/core/articles/:id" element={<ArticleView />} />
+      <Route path="/core/tags/:tag" element={<TagView />} />
+      <Route 
+        path="/core/articles/new" 
+        element={
+          <ProtectedRoute role={UserRole.ORGANIZER}>
+            <ArticleCreate />
           </ProtectedRoute>
-        } />
-        
-        <Route path="/onboarding" element={
-          <ProtectedRoute>
-            <Onboarding />
-          </ProtectedRoute>
-        } />
-
-        {/* Profile Routes */}
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile/:id" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile/edit" element={
-          <ProtectedRoute>
-            <ProfileEditPage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile/setup" element={
-          <ProtectedRoute>
-            <ProfileSetupPage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile/search" element={
-          <ProtectedRoute>
-            <ProfileSearchPage />
-          </ProtectedRoute>
-        } />
-
-        {/* Knowledge Base Routes (includes former core functionality) */}
-        <Route path="/knowledge" element={
-          <ProtectedRoute>
-            <KnowledgeBase />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/resources" element={
-          <ProtectedRoute>
-            <UserKnowledgeResource />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/:id" element={
-          <ProtectedRoute>
-            <ArticleView />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/create" element={
-          <ProtectedRoute>
-            <PostTypeSelector />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/wizard" element={
-          <ProtectedRoute>
-            <PostWizard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/topics" element={
-          <ProtectedRoute>
-            <TopicsPage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/tags/:tag" element={
-          <ProtectedRoute>
-            <TagView />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/:id/edit" element={
-          <ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/core/articles/:id/edit" 
+        element={
+          <ProtectedRoute role={UserRole.ORGANIZER}>
             <ArticleEdit />
           </ProtectedRoute>
-        } />
+        } 
+      />
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <AdminDashboard />
+      {/* Protected Routes */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            {currentUser ? <Navigate to={`/profile/${currentUser.id}`} replace /> : <Profile />}
           </ProtectedRoute>
-        } />
-        
-        <Route path="/admin/debugger" element={
-          <ProtectedRoute>
-            <DebuggerDashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/organizer" element={
-          <ProtectedRoute>
-            <OrganizerDashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/dot-connector" element={
-          <ProtectedRoute>
-            <DotConnectorDashboard />
-          </ProtectedRoute>
-        } />
+        }
+      />
 
-        {/* Invites Management */}
-        <Route path="/invites" element={
-          <ProtectedRoute>
+      <Route
+        path="/profile/edit"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <ProfileEditPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/setup"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <ProfileSetupPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/:id"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profiles/search"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <ProfileSearchPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <Onboarding />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/invites"
+        element={
+          <ProtectedRoute role={UserRole.ORGANIZER}>
             <InvitesManagementPage />
           </ProtectedRoute>
-        } />
+        }
+      />
 
-        {/* Rel8 CRM Routes - Now protected for organizers only */}
-        <Route path="/rel8" element={
-          <Rel8ProtectedRoute>
+      {/* Admin Routes */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute role={UserRole.ADMIN}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/debugger"
+        element={
+          <ProtectedRoute role={UserRole.ADMIN}>
+            <DebuggerDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/organizer"
+        element={
+          <ProtectedRoute role={UserRole.ORGANIZER}>
+            <OrganizerDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dot-connector"
+        element={
+          <ProtectedRoute role={UserRole.ORGANIZER}>
+            <DotConnectorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* REL8 Routes */}
+      <Route
+        path="/rel8/dashboard"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Dashboard />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/contacts" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/contacts"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Contacts />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/contacts/new" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/contacts/create"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ContactCreate />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/contacts/:id/edit" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/contacts/:id/edit"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ContactEdit />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/contacts/import" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/contacts/import"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <ImportContacts />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/groups" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/groups"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Groups />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/categories" element={
-          <Rel8ProtectedRoute>
-            <Categories />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/relationships" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/relationships"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Relationships />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/wizard" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/wizard"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <RelationshipWizard />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/triggers/wizard" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/trigger-wizard"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <TriggerWizard />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/notifications" element={
-          <Rel8ProtectedRoute>
-            <Notifications />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/triggers" element={
-          <Rel8ProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/settings"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
             <Settings />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/email-test" element={
-          <Rel8ProtectedRoute>
-            <EmailTest />
-          </Rel8ProtectedRoute>
-        } />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/rel8/notifications"
+        element={
+          <ProtectedRoute role={UserRole.MEMBER}>
+            <Notifications />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* 404 Route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </ErrorBoundary>
+      {/* Fallback route for /communities - redirect to profile search */}
+      <Route path="/communities" element={<Navigate to="/profiles/search" replace />} />
+
+      {/* 404 Route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 

@@ -10,6 +10,7 @@ export const useSession = () => {
   const { toast } = useToast();
   const initialCheckComplete = useRef(false);
   const authStateInitialized = useRef(false);
+  const refreshAttempts = useRef(0);
 
   // Check for existing session on mount and subscribe to auth changes
   useEffect(() => {
@@ -17,10 +18,10 @@ export const useSession = () => {
     if (authStateInitialized.current) return;
     authStateInitialized.current = true;
     
-    console.log("Initializing session management");
+    console.log("Setting up auth state listener");
     setIsLoading(true);
     
-    // Set up auth state listener FIRST
+    // Set up auth state listener FIRST to prevent missing auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         console.log(`Auth event: ${event}`, newSession ? "Session exists" : "No session");
@@ -33,7 +34,7 @@ export const useSession = () => {
           setSession(newSession);
         }
         
-        // Set loading to false after initial check
+        // Don't set isLoading=false until we've completed the initial check
         if (initialCheckComplete.current) {
           setIsLoading(false);
         }
@@ -43,22 +44,23 @@ export const useSession = () => {
     // THEN check for existing session
     const fetchInitialSession = async () => {
       try {
-        console.log("Checking for existing session...");
+        console.log("Initializing auth state...");
         const { data: { session: initialSession } } = await supabase.auth.getSession();
-        console.log("Initial session check:", initialSession ? "Session found" : "No session");
+        console.log("Initial session:", initialSession ? "Session exists" : "No session");
         
         setSession(initialSession);
         initialCheckComplete.current = true;
-        setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching initial session:", error);
+        console.error("Error fetching session:", error);
         setSession(null);
+      } finally {
         setIsLoading(false);
       }
     };
 
     fetchInitialSession();
 
+    // Cleanup subscription on unmount
     return () => {
       console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
@@ -68,7 +70,7 @@ export const useSession = () => {
   // Function to manually refresh the session token
   const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
-      console.log("Refreshing session token...");
+      console.log("Manually refreshing session token...");
       const { data, error } = await supabase.auth.refreshSession();
       
       if (error) {
@@ -89,37 +91,29 @@ export const useSession = () => {
     }
   }, []);
 
-  // Recovery function for manual use
+  // Attempt to recover user session if necessary
   const recoverUserSession = useCallback(async (): Promise<boolean> => {
-    try {
-      console.log("Attempting to recover user session");
-      
-      const refreshSuccess = await refreshSession();
-      
-      if (refreshSuccess) {
-        toast({
-          title: "Session recovered",
-          description: "Your session has been successfully restored",
-        });
-        return true;
-      } else {
-        throw new Error("Failed to refresh session");
-      }
-    } catch (error) {
-      console.error("Failed to recover session:", error);
-      toast({
-        title: "Recovery failed",
-        description: "Please try logging out and back in to resolve the issue",
-        variant: "destructive",
-      });
+    if (refreshAttempts.current >= 3) {
+      console.log("Too many refresh attempts, giving up");
       return false;
     }
-  }, [refreshSession, toast]);
+    
+    refreshAttempts.current += 1;
+    
+    try {
+      console.log("Attempting to recover user session...");
+      return await refreshSession();
+    } catch (error) {
+      console.error("Error recovering session:", error);
+      return false;
+    }
+  }, [refreshSession]);
 
   // Logout user with improved error handling
   const logout = useCallback(async (): Promise<void> => {
     try {
       console.log("Logging out user...");
+      refreshAttempts.current = 0;
       
       // Clear all cached data first
       Object.keys(localStorage).forEach(key => {
@@ -131,21 +125,24 @@ export const useSession = () => {
       localStorage.removeItem('shouldRedirectToAdmin');
       localStorage.removeItem('should_refresh_user_role');
       
-      // Sign out with Supabase
+      // Attempt to sign out with Supabase
       const { error } = await supabase.auth.signOut();
       
+      // Even if there's an error, we'll still clear the local state
       if (error) {
         console.warn("Warning during logout:", error.message);
+        // We'll continue with local cleanup even if there was an error with Supabase
       }
       
-      // Clear local session state
+      // Always clear local session state
       setSession(null);
       
-      console.log("Logout completed");
+      console.log("Local user state cleared successfully");
+      return Promise.resolve();
     } catch (error) {
       console.error("Error in logout function:", error);
-      // Still clear local state even on error
-      setSession(null);
+      // We'll still resolve the promise even on error to avoid blocking the UI
+      return Promise.resolve();
     }
   }, []);
 

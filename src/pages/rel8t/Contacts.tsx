@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import ContactList from "@/components/rel8t/ContactList";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 
 const Contacts = () => {
   const navigate = useNavigate();
@@ -24,22 +24,21 @@ const Contacts = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <Rel8OnlyNavigation />
+      <div className="container mx-auto px-4 py-8">
+        <Rel8Navigation />
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6 mt-4 sm:mt-6">
-          <div className="w-full sm:w-auto">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Contacts</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Manage your professional network</p>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
+          <div>
+            <h1 className="text-3xl font-bold">Contacts</h1>
+            <p className="text-muted-foreground">Manage your professional network</p>
           </div>
           
           <Button 
             onClick={() => navigate("/rel8/contacts/new")}
-            className="flex items-center gap-2 w-full sm:w-auto"
-            size="sm"
+            className="flex items-center gap-2"
           >
             <PlusCircle className="h-4 w-4" />
-            <span className="sm:inline">New Contact</span>
+            New Contact
           </Button>
         </div>
 

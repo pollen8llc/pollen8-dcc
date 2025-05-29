@@ -1,48 +1,31 @@
 
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
 } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
-import { getCategories, getContactGroups, ContactCategory, ContactGroup } from "@/services/rel8t/contactService";
+import { 
+  getCategories, 
+  ContactCategory, 
+  ContactGroup, 
+  getContactGroups 
+} from "@/services/rel8t/contactService";
+import { 
+  MapPin,
+  User,
+  Building,
+  Users
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-
-const contactSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
-  phone: z.string().optional(),
-  organization: z.string().optional(),
-  role: z.string().optional(),
-  notes: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  category_id: z.string().optional(),
-  location: z.string().optional(),
-});
-
-type ContactFormData = z.infer<typeof contactSchema> & {
-  selectedGroups?: string[];
-};
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ContactFormProps {
   initialValues?: {
@@ -56,70 +39,118 @@ interface ContactFormProps {
     category_id?: string;
     location?: string;
     groups?: ContactGroup[];
+    affiliations?: any[];
   };
-  onSubmit: (data: ContactFormData) => void;
+  onSubmit: (values: any) => void;
   onCancel: () => void;
-  isSubmitting?: boolean;
+  isSubmitting: boolean;
 }
 
-const ContactForm: React.FC<ContactFormProps> = ({
-  initialValues,
+const DEFAULT_VALUES = {
+  name: "",
+  email: "",
+  phone: "",
+  organization: "",
+  role: "",
+  notes: "",
+  tags: [],
+  category_id: "",
+  location: "",
+  groups: [],
+  affiliations: []
+};
+
+const ContactForm = ({
+  initialValues = DEFAULT_VALUES,
   onSubmit,
   onCancel,
-  isSubmitting = false,
-}) => {
-  const [currentTag, setCurrentTag] = useState("");
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-
-  // Fetch categories and groups
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategories,
-  });
-
-  const { data: groups = [] } = useQuery({
-    queryKey: ["contact-groups"],
-    queryFn: getContactGroups,
-  });
-
-  const form = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: initialValues?.name || "",
-      email: initialValues?.email || "",
-      phone: initialValues?.phone || "",
-      organization: initialValues?.organization || "",
-      role: initialValues?.role || "",
-      notes: initialValues?.notes || "",
-      tags: initialValues?.tags || [],
-      category_id: initialValues?.category_id || "",
-      location: initialValues?.location || "",
-    },
-  });
-
-  // Initialize selected groups from initial values
+  isSubmitting
+}: ContactFormProps) => {
+  const [values, setValues] = useState(initialValues);
+  const [tagsInput, setTagsInput] = useState("");
+  const [categories, setCategories] = useState<ContactCategory[]>([]);
+  const [groups, setGroups] = useState<ContactGroup[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>(
+    initialValues.groups?.map(g => g.id) || []
+  );
+  
   useEffect(() => {
-    if (initialValues?.groups) {
-      setSelectedGroups(initialValues.groups.map(g => g.id));
-    }
-  }, [initialValues?.groups]);
-
-  const handleAddTag = () => {
-    if (currentTag.trim()) {
-      const currentTags = form.getValues("tags") || [];
-      if (!currentTags.includes(currentTag.trim())) {
-        form.setValue("tags", [...currentTags, currentTag.trim()]);
+    const loadCategories = async () => {
+      try {
+        const fetchedCategories = await getCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error("Error loading categories:", error);
       }
-      setCurrentTag("");
+    };
+    
+    const loadGroups = async () => {
+      try {
+        const fetchedGroups = await getContactGroups();
+        setGroups(fetchedGroups);
+      } catch (error) {
+        console.error("Error loading groups:", error);
+      }
+    };
+    
+    loadCategories();
+    loadGroups();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setValues({ ...values, [name]: value });
+  };
+
+  const handleTagsKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      
+      if (!tagsInput.trim()) return;
+      
+      // Add the tag if it doesn't exist already
+      const newTag = tagsInput.trim();
+      if (!values.tags?.includes(newTag)) {
+        setValues({
+          ...values,
+          tags: [...(values.tags || []), newTag]
+        });
+      }
+      
+      // Clear the input
+      setTagsInput("");
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    const currentTags = form.getValues("tags") || [];
-    form.setValue("tags", currentTags.filter(tag => tag !== tagToRemove));
+  const removeTag = (tagToRemove: string) => {
+    setValues({
+      ...values,
+      tags: values.tags?.filter(tag => tag !== tagToRemove) || []
+    });
   };
 
-  const handleGroupToggle = (groupId: string) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Prepare form data with selected groups
+    const formData = {
+      ...values,
+      selectedGroups // Pass selected groups for processing in the parent component
+    };
+    
+    onSubmit(formData);
+  };
+
+  const handleSelectCategory = (category_id: string) => {
+    setValues({
+      ...values,
+      category_id: category_id === "none" ? undefined : category_id
+    });
+  };
+
+  const toggleGroupSelection = (groupId: string) => {
     setSelectedGroups(prev => {
       if (prev.includes(groupId)) {
         return prev.filter(id => id !== groupId);
@@ -129,227 +160,201 @@ const ContactForm: React.FC<ContactFormProps> = ({
     });
   };
 
-  const handleSubmit = (data: ContactFormData) => {
-    // Include selected groups in submission
-    onSubmit({
-      ...data,
-      selectedGroups,
-    });
-  };
-
-  const tags = form.watch("tags") || [];
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Full name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="email@example.com" type="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone</FormLabel>
-                <FormControl>
-                  <Input placeholder="Phone number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Organization</FormLabel>
-                <FormControl>
-                  <Input placeholder="Company or organization" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role</FormLabel>
-                <FormControl>
-                  <Input placeholder="Job title or role" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location</FormLabel>
-                <FormControl>
-                  <Input placeholder="City, Country" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="category_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories.map((category: ContactCategory) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center gap-2">
-                        {category.color && (
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: category.color }}
-                          />
-                        )}
-                        {category.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Name field */}
+      <div>
+        <Label htmlFor="name">Name*</Label>
+        <Input
+          id="name"
+          name="name"
+          value={values.name}
+          onChange={handleChange}
+          required
         />
+      </div>
 
-        {/* Groups Section */}
-        <div className="space-y-3">
-          <Label>Groups</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {groups.map((group: ContactGroup) => (
-              <div key={group.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`group-${group.id}`}
-                  checked={selectedGroups.includes(group.id)}
-                  onCheckedChange={() => handleGroupToggle(group.id)}
-                />
-                <Label
-                  htmlFor={`group-${group.id}`}
-                  className="text-sm font-normal cursor-pointer flex items-center gap-2"
-                >
-                  {group.color && (
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: group.color }}
-                    />
-                  )}
-                  {group.name}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Email field */}
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          value={values.email}
+          onChange={handleChange}
+        />
+      </div>
 
-        <div className="space-y-3">
-          <Label>Tags</Label>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add a tag"
-              value={currentTag}
-              onChange={(e) => setCurrentTag(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddTag();
-                }
-              }}
-            />
-            <Button type="button" onClick={handleAddTag} variant="outline">
-              Add
-            </Button>
-          </div>
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {tag}
-                  <X
-                    className="h-3 w-3 cursor-pointer"
-                    onClick={() => handleRemoveTag(tag)}
+      {/* Phone field */}
+      <div>
+        <Label htmlFor="phone">Phone</Label>
+        <Input
+          id="phone"
+          name="phone"
+          value={values.phone}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* Location field */}
+      <div>
+        <Label htmlFor="location" className="flex items-center gap-1.5">
+          <MapPin className="h-4 w-4 text-muted-foreground" /> Location
+        </Label>
+        <Input
+          id="location"
+          name="location"
+          value={values.location || ""}
+          onChange={handleChange}
+          placeholder="City, State, Country"
+        />
+      </div>
+
+      {/* Organization field */}
+      <div>
+        <Label htmlFor="organization" className="flex items-center gap-1.5">
+          <Building className="h-4 w-4 text-muted-foreground" /> Organization
+        </Label>
+        <Input
+          id="organization"
+          name="organization"
+          value={values.organization}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* Role field */}
+      <div>
+        <Label htmlFor="role">Role</Label>
+        <Input
+          id="role"
+          name="role"
+          value={values.role}
+          onChange={handleChange}
+        />
+      </div>
+      
+      {/* Category field */}
+      <div>
+        <Label htmlFor="category">Category</Label>
+        <Select
+          value={values.category_id || ""}
+          onValueChange={handleSelectCategory}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                <span className="flex items-center gap-2">
+                  <span 
+                    className="inline-block w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: category.color }} 
                   />
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
+                  {category.name}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <FormField
-          control={form.control}
+      {/* Groups field */}
+      {groups.length > 0 && (
+        <div>
+          <Label htmlFor="groups" className="flex items-center gap-1.5 mb-2">
+            <Users className="h-4 w-4 text-muted-foreground" /> Groups
+          </Label>
+          <div className="border border-border/40 rounded-md p-2 max-h-40">
+            <ScrollArea className="h-32">
+              <div className="space-y-2">
+                {groups.map((group) => (
+                  <div key={group.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`group-${group.id}`}
+                      checked={selectedGroups.includes(group.id)}
+                      onCheckedChange={() => toggleGroupSelection(group.id)}
+                    />
+                    <label
+                      htmlFor={`group-${group.id}`}
+                      className="flex items-center gap-2 text-sm cursor-pointer"
+                    >
+                      {group.color && (
+                        <div 
+                          className="w-2 h-2 rounded-full" 
+                          style={{ backgroundColor: group.color }}
+                        />
+                      )}
+                      {group.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      )}
+
+      {/* Tags field */}
+      <div>
+        <Label htmlFor="tags">Tags</Label>
+        <div className="flex flex-wrap gap-1 border border-border/40 rounded-md p-2 min-h-[42px]">
+          {values.tags?.map((tag) => (
+            <span
+              key={tag}
+              className="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm flex items-center gap-1"
+            >
+              {tag}
+              <button
+                type="button"
+                onClick={() => removeTag(tag)}
+                className="text-xs hover:text-destructive focus:outline-none"
+              >
+                &times;
+              </button>
+            </span>
+          ))}
+          <Input
+            id="tagsInput"
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
+            onKeyDown={handleTagsKeyDown}
+            className="flex-1 min-w-[100px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 h-7 p-0"
+            placeholder={values.tags?.length ? "" : "Add tags (press Enter)"}
+          />
+        </div>
+      </div>
+
+      {/* Notes field */}
+      <div>
+        <Label htmlFor="notes">Notes</Label>
+        <Textarea
+          id="notes"
           name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Additional notes or comments"
-                  className="min-h-[100px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          value={values.notes}
+          onChange={handleChange}
+          rows={4}
         />
+      </div>
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save Contact"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      {/* Form actions */}
+      <div className="flex justify-end gap-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save Contact"}
+        </Button>
+      </div>
+    </form>
   );
 };
 

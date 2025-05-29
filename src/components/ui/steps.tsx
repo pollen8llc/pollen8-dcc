@@ -47,26 +47,24 @@ export const Steps: React.FC<StepsProps> = ({
         >
           <div
             className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all",
+              "w-8 h-8 rounded-full flex items-center justify-center",
               currentStep === index + 1
-                ? "bg-[#00eada] text-primary-foreground knowledge-tag-border"
-                : currentStep > index + 1
                 ? "bg-primary text-primary-foreground"
+                : currentStep > index + 1
+                ? "bg-primary/80 text-primary-foreground"
                 : "bg-muted text-muted-foreground"
             )}
           >
             {currentStep > index + 1 ? "✓" : index + 1}
           </div>
           
-          <div className="text-sm mt-2 text-center font-medium">
-            {step.title}
-          </div>
+          <div className="text-xs mt-2 text-center max-w-[120px] truncate px-2">{step.title}</div>
           
           {index !== stepsData.length - 1 && (
             <div
               className={cn(
-                "absolute top-5 left-1/2 w-full h-0.5",
-                currentStep > index + 1 ? "bg-primary" : "bg-muted"
+                "absolute top-4 left-1/2 w-full h-0.5",
+                currentStep > index + 1 ? "bg-primary/80" : "bg-muted"
               )}
             />
           )}
