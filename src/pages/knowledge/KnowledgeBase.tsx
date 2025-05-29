@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, BookOpen, MessageSquare, Quote, HelpCircle, BarChart3 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
@@ -17,6 +17,7 @@ import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 import { ContentType } from '@/models/knowledgeTypes';
 
 const KnowledgeBase = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -62,6 +63,10 @@ const KnowledgeBase = () => {
   };
 
   const hasActiveFilters = searchQuery || selectedTag || selectedType !== 'all' || sortBy !== 'newest';
+
+  const handleArticleClick = (articleId: string) => {
+    navigate(`/knowledge/articles/${articleId}`);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -211,7 +216,7 @@ const KnowledgeBase = () => {
               {tags.length > 0 && (
                 <div>
                   <h3 className="text-sm font-medium mb-3">Filter by Tags</h3>
-                  <ScrollArea className="w-full">
+                  <ScrollArea className="w-full max-h-20">
                     <div className="flex gap-2 pb-2">
                       <Badge
                         variant={selectedTag === '' ? 'default' : 'secondary'}
@@ -277,7 +282,9 @@ const KnowledgeBase = () => {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {articles.map(article => (
-                <ArticleCard key={article.id} article={article} />
+                <div key={article.id} onClick={() => handleArticleClick(article.id)} className="cursor-pointer">
+                  <ArticleCard article={article} />
+                </div>
               ))}
             </div>
           )}

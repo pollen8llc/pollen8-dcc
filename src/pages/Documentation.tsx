@@ -57,76 +57,74 @@ const Documentation = () => {
             </p>
           </div>
 
-          <ScrollArea className="h-[calc(100vh-200px)]">
-            <div className="space-y-8 pr-4">
-              {sections.map((section, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      {section.title}
-                      <Badge variant="outline">{section.items.length} items</Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-4">
-                      {section.items.map((item, itemIndex) => (
-                        <div key={itemIndex} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                          <h3 className="font-semibold mb-2">{item.name}</h3>
-                          <p className="text-muted-foreground text-sm">{item.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              <Card>
+          <div className="space-y-8 max-h-[calc(100vh-250px)] overflow-y-auto pr-4">
+            {sections.map((section, index) => (
+              <Card key={index}>
                 <CardHeader>
-                  <CardTitle>Platform Architecture</CardTitle>
-                  <CardDescription>Technical overview of the platform</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    {section.title}
+                    <Badge variant="outline">{section.items.length} items</Badge>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold mb-2">Frontend Stack</h3>
-                      <p className="text-muted-foreground text-sm">React, TypeScript, Tailwind CSS, Shadcn/ui</p>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold mb-2">Backend Services</h3>
-                      <p className="text-muted-foreground text-sm">Supabase (Authentication, Database, Real-time)</p>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold mb-2">Database</h3>
-                      <p className="text-muted-foreground text-sm">PostgreSQL with Row Level Security (RLS)</p>
-                    </div>
+                  <div className="grid gap-4">
+                    {section.items.map((item, itemIndex) => (
+                      <div key={itemIndex} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                        <h3 className="font-semibold mb-2">{item.name}</h3>
+                        <p className="text-muted-foreground text-sm">{item.description}</p>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
+            ))}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>API Endpoints</CardTitle>
-                  <CardDescription>Available API endpoints and their usage</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="p-3 bg-muted rounded-lg">
-                      <code className="text-sm">GET /api/knowledge/articles</code>
-                      <p className="text-xs text-muted-foreground mt-1">Fetch knowledge base articles</p>
-                    </div>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <code className="text-sm">POST /api/rel8/contacts</code>
-                      <p className="text-xs text-muted-foreground mt-1">Create new contact</p>
-                    </div>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <code className="text-sm">PUT /api/profiles/:id</code>
-                      <p className="text-xs text-muted-foreground mt-1">Update user profile</p>
-                    </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Platform Architecture</CardTitle>
+                <CardDescription>Technical overview of the platform</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-semibold mb-2">Frontend Stack</h3>
+                    <p className="text-muted-foreground text-sm">React, TypeScript, Tailwind CSS, Shadcn/ui</p>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </ScrollArea>
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-semibold mb-2">Backend Services</h3>
+                    <p className="text-muted-foreground text-sm">Supabase (Authentication, Database, Real-time)</p>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-semibold mb-2">Database</h3>
+                    <p className="text-muted-foreground text-sm">PostgreSQL with Row Level Security (RLS)</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>API Endpoints</CardTitle>
+                <CardDescription>Available API endpoints and their usage</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="p-3 bg-muted rounded-lg">
+                    <code className="text-sm">GET /api/knowledge/articles</code>
+                    <p className="text-xs text-muted-foreground mt-1">Fetch knowledge base articles</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <code className="text-sm">POST /api/rel8/contacts</code>
+                    <p className="text-xs text-muted-foreground mt-1">Create new contact</p>
+                  </div>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <code className="text-sm">PUT /api/profiles/:id</code>
+                    <p className="text-xs text-muted-foreground mt-1">Update user profile</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

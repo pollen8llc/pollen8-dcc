@@ -10,21 +10,26 @@ interface ContactListProps {
   onContactSelect?: (contact: Contact) => void;
   onEdit?: (contact: Contact) => void;
   onRefresh?: () => void;
+  onContactSelect?: (contactId: string, selected: boolean) => void;
+  selectedContacts?: string[];
+  isSelectionMode?: boolean;
 }
 
 const ContactList: React.FC<ContactListProps> = ({ 
   contacts = [], 
   isLoading = false,
-  onContactSelect,
   onEdit,
-  onRefresh 
+  onRefresh,
+  onContactSelect,
+  selectedContacts = [],
+  isSelectionMode = false
 }) => {
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {Array.from({ length: 6 }).map((_, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="animate-pulse">
-            <div className="h-24 bg-muted rounded-lg"></div>
+            <div className="h-48 bg-muted rounded-2xl"></div>
           </div>
         ))}
       </div>
@@ -41,12 +46,15 @@ const ContactList: React.FC<ContactListProps> = ({
 
   return (
     <ScrollArea className="h-[calc(100vh-300px)]">
-      <div className="space-y-4 pr-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pr-4">
         {contacts.map((contact) => (
           <ContactCard 
             key={contact.id} 
             contact={contact}
             onEdit={onEdit}
+            onSelect={onContactSelect}
+            isSelected={selectedContacts.includes(contact.id)}
+            isSelectionMode={isSelectionMode}
           />
         ))}
       </div>

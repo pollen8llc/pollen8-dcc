@@ -3,8 +3,11 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Phone, Trash2, Edit, Building, MapPin, Tag } from "lucide-react";
 import { Contact } from "@/services/rel8t/contactService";
+import { deleteContact } from "@/services/rel8t/contactService";
+import { toast } from "@/hooks/use-toast";
 
 interface ContactCardProps {
   contact: Contact;
@@ -12,6 +15,7 @@ interface ContactCardProps {
   onDelete?: (id: string) => void;
   onSelect?: (id: string, selected: boolean) => void;
   isSelected?: boolean;
+  isSelectionMode?: boolean;
 }
 
 const ContactCard = ({ 
@@ -19,21 +23,43 @@ const ContactCard = ({
   onEdit, 
   onDelete,
   onSelect,
-  isSelected = false
+  isSelected = false,
+  isSelectionMode = false
 }: ContactCardProps) => {
   const handleEdit = () => {
     if (onEdit) onEdit(contact);
   };
   
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onDelete && confirm("Are you sure you want to delete this contact?")) {
-      onDelete(contact.id);
+    if (confirm("Are you sure you want to delete this contact?")) {
+      try {
+        await deleteContact(contact.id);
+        toast({
+          title: "Contact deleted",
+          description: "Contact has been successfully deleted.",
+        });
+        if (onDelete) onDelete(contact.id);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete contact",
+          variant: "destructive",
+        });
+      }
     }
   };
   
   const handleSelect = () => {
     if (onSelect) onSelect(contact.id, !isSelected);
+  };
+
+  const handleCardClick = () => {
+    if (isSelectionMode) {
+      handleSelect();
+    } else {
+      handleEdit();
+    }
   };
 
   const getCategoryColor = () => {
@@ -48,11 +74,22 @@ const ContactCard = ({
     <div 
       className={`h-full overflow-hidden transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
         bg-white/5 border border-white/10 shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20
-        ${isSelected ? 'ring-1 ring-[#00eada] ring-inset' : ''}`}
-      onClick={isSelected ? handleSelect : handleEdit}
+        ${isSelected ? 'ring-2 ring-[#00eada] ring-inset bg-[#00eada]/10' : ''}`}
+      onClick={handleCardClick}
     >
+      {/* Selection checkbox */}
+      {isSelectionMode && (
+        <div className="absolute top-3 left-3 z-10">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) => onSelect?.(contact.id, checked as boolean)}
+            className="bg-white/90 border-2"
+          />
+        </div>
+      )}
+
       {/* Section 1: Header with name and category */}
-      <div className="p-4 pb-2 relative">
+      <div className={`p-4 pb-2 relative ${isSelectionMode ? 'pt-12' : ''}`}>
         <div className="flex justify-between items-start">
           <h3 className="text-base font-medium mb-1 line-clamp-1 text-white">{contact.name}</h3>
           
@@ -168,28 +205,30 @@ const ContactCard = ({
             )}
           </div>
           
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 hover:bg-[#00eada]/10 hover:text-[#00eada]"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEdit();
-              }}
-            >
-              <Edit className="h-3.5 w-3.5" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+          {!isSelectionMode && (
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 hover:bg-[#00eada]/10 hover:text-[#00eada]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit();
+                }}
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -6,10 +6,8 @@ import {
   Building2, 
   Heart, 
   Zap, 
-  Bell, 
   Upload,
   BarChart3,
-  UserPlus,
   FolderOpen
 } from "lucide-react";
 
@@ -24,28 +22,22 @@ export function Rel8OnlyNavigation() {
       isActive: location.pathname === "/rel8"
     },
     {
+      href: "/rel8/relationships",
+      label: "Relationships",
+      icon: Heart,
+      isActive: location.pathname.startsWith("/rel8/relationships") || location.pathname === "/rel8/wizard"
+    },
+    {
       href: "/rel8/contacts",
       label: "Contacts",
       icon: Users,
       isActive: location.pathname.startsWith("/rel8/contacts")
     },
     {
-      href: "/rel8/groups",
-      label: "Groups",
-      icon: FolderOpen,
-      isActive: location.pathname === "/rel8/groups"
-    },
-    {
-      href: "/rel8/categories",
-      label: "Categories",
-      icon: Building2,
-      isActive: location.pathname === "/rel8/categories"
-    },
-    {
-      href: "/rel8/relationships",
-      label: "Relationships",
-      icon: Heart,
-      isActive: location.pathname.startsWith("/rel8/relationships") || location.pathname === "/rel8/wizard"
+      href: "/rel8/import",
+      label: "Import",
+      icon: Upload,
+      isActive: location.pathname === "/rel8/import"
     },
     {
       href: "/rel8/triggers",
@@ -54,10 +46,10 @@ export function Rel8OnlyNavigation() {
       isActive: location.pathname.startsWith("/rel8/triggers")
     },
     {
-      href: "/rel8/notifications",
-      label: "Notifications",
-      icon: Bell,
-      isActive: location.pathname === "/rel8/notifications"
+      href: "/rel8/categories",
+      label: "Categories",
+      icon: Building2,
+      isActive: location.pathname === "/rel8/categories"
     }
   ];
 
