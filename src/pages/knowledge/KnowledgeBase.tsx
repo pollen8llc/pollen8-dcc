@@ -1,500 +1,286 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { Plus, Search, Filter, BookOpen, MessageSquare, Quote, HelpCircle, BarChart3 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { useTags } from '@/hooks/knowledge/useTags';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  PlusCircle, 
-  Search,
-  SlidersHorizontal,
-  Tag,
-  Filter
-} from 'lucide-react';
-import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
-import { TagsList } from '@/components/knowledge/TagsList';
-import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { ContentType } from '@/models/knowledgeTypes';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { useToast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import ArticleCard from '@/components/knowledge/ArticleCard';
 import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
+import { ContentType } from '@/models/knowledgeTypes';
 
 const KnowledgeBase = () => {
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  // States
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(
-    searchParams.get('tag')
-  );
-  const [selectedType, setSelectedType] = useState<string | null>(
-    searchParams.get('type') || 'all'
-  );
-  const [sortOption, setSortOption] = useState(
-    searchParams.get('sort') || 'newest'
-  );
-  const [articles, setArticles] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedTag, setSelectedTag] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
   
-  // Hooks
-  const { useTags } = useKnowledgeBase();
+  const { useArticles } = useKnowledgeBase();
+  const { data: tags = [] } = useTags();
   
-  // Fetch tags for the filter sidebar
-  const { data: tags, isLoading: isTagsLoading } = useTags();
-  
-  // Function to directly fetch articles
-  const fetchArticles = async () => {
-    setIsLoading(true);
-    try {
-      console.log('Directly fetching articles with filters:', { selectedTag, searchQuery, selectedType });
-      
-      // First fetch articles without trying to join with profiles
-      let query = supabase
-        .from('knowledge_articles')
-        .select(`
-          id, 
-          title,
-          content,
-          created_at,
-          updated_at,
-          view_count,
-          comment_count,
-          vote_count,
-          tags,
-          content_type,
-          user_id
-        `)
-        .order('created_at', { ascending: false })
-        .limit(100); // Limit to top 100 posts
-      
-      if (selectedTag) {
-        query = query.contains('tags', [selectedTag]);
-      }
-      
-      if (searchQuery && searchQuery.length > 2) {
-        query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
-      }
-      
-      // Only filter by type if it's not null/undefined and not 'all'
-      if (selectedType && selectedType !== 'all') {
-        // Convert from lowercase filter values to uppercase ContentType enum values
-        let contentType = selectedType.toUpperCase();
-        query = query.eq('content_type', contentType);
-      }
-      
-      const { data: articles, error } = await query;
-      
-      if (error) {
-        console.error('Error fetching articles directly:', error);
-        toast({
-          title: "Failed to load content",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      console.log('Articles fetched successfully:', articles?.length || 0);
-      
-      // If no articles, set empty array and return
-      if (!articles || articles.length === 0) {
-        setArticles([]);
-        setIsLoading(false);
-        return;
-      }
-      
-      // Extract all unique user_ids to fetch their profiles
-      const userIds = [...new Set(articles.map(article => article.user_id))];
-      
-      // Fetch profiles for all authors in a single query
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, avatar_url')
-        .in('id', userIds);
-      
-      if (profilesError) {
-        console.error('Error fetching author profiles:', profilesError);
-        // Continue with articles even if profiles fetch fails
-      }
-      
-      // Create a map of user_id to profile for easy lookup
-      const profilesMap = (profiles || []).reduce((map, profile) => {
-        map[profile.id] = profile;
-        return map;
-      }, {} as Record<string, any>);
-      
-      // Format the articles with author information
-      const formattedData = articles.map(article => {
-        const profileData = profilesMap[article.user_id];
-        
-        return {
-          ...article,
-          content_type: article.content_type || ContentType.ARTICLE,
-          author: profileData ? {
-            id: article.user_id,
-            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-            avatar_url: profileData.avatar_url || ''
-          } : undefined
-        };
-      });
-      
-      setArticles(formattedData || []);
-    } catch (error: any) {
-      console.error('Error fetching articles:', error);
-      toast({
-        title: "Failed to load content",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (selectedTag) params.set('tag', selectedTag);
-    if (selectedType && selectedType !== 'all') params.set('type', selectedType);
-    if (sortOption) params.set('sort', sortOption);
-    setSearchParams(params, { replace: true });
-  }, [selectedTag, selectedType, sortOption, setSearchParams]);
+  // Fetch articles with current filters
+  const { data: articles = [], isLoading } = useArticles({
+    searchQuery: searchQuery || undefined,
+    tag: selectedTag || undefined,
+    type: selectedType,
+    sort: sortBy
+  });
 
-  // Fetch articles when filters change
-  useEffect(() => {
-    fetchArticles();
-  }, [selectedTag, selectedType]);
+  // Content type options with icons
+  const contentTypes = [
+    { value: 'all', label: 'All Content', icon: BookOpen },
+    { value: 'article', label: 'Articles', icon: BookOpen },
+    { value: 'question', label: 'Questions', icon: HelpCircle },
+    { value: 'quote', label: 'Quotes', icon: Quote },
+    { value: 'poll', label: 'Polls', icon: BarChart3 }
+  ];
 
-  // Debug articles data
-  useEffect(() => {
-    if (articles && articles.length > 0) {
-      console.log(`Displaying ${articles.length} articles:`, 
-        articles.map(a => ({ id: a.id, title: a.title, type: a.content_type }))
-      );
-    }
+  // Filter articles by type for stats
+  const articleStats = useMemo(() => {
+    const stats = {
+      total: articles.length,
+      articles: articles.filter(a => a.content_type === ContentType.ARTICLE).length,
+      questions: articles.filter(a => a.content_type === ContentType.QUESTION).length,
+      quotes: articles.filter(a => a.content_type === ContentType.QUOTE).length,
+      polls: articles.filter(a => a.content_type === ContentType.POLL).length,
+    };
+    return stats;
   }, [articles]);
 
-  // Handle search input debouncing
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery.length > 2 || searchQuery === '') {
-        fetchArticles();
-      }
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-  
-  // Handle tag selection
-  const handleTagSelect = (tagName: string) => {
-    if (selectedTag === tagName) {
-      setSelectedTag(null);
-    } else {
-      setSelectedTag(tagName);
-    }
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedTag('');
+    setSelectedType('all');
+    setSortBy('newest');
   };
 
-  // Handle content type selection
-  const handleTypeSelect = (type: string) => {
-    setSelectedType(type);
-  };
-  
-  // Sort function for articles
-  const sortedArticles = React.useMemo(() => {
-    if (!articles) return [];
-    
-    let sorted = [...articles];
-    
-    switch (sortOption) {
-      case 'newest':
-        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      case 'oldest':
-        sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        break;
-      case 'mostViewed':
-        sorted.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
-        break;
-      case 'mostVoted':
-        sorted.sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
-        break;
-      default:
-        // Default to newest
-        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    }
-    
-    return sorted;
-  }, [articles, sortOption]);
-  
-  // Get content type label
-  const getContentTypeLabel = (type: string | null) => {
-    switch (type) {
-      case ContentType.ARTICLE:
-        return 'Articles';
-      case ContentType.QUESTION:
-        return 'Questions';
-      case ContentType.QUOTE:
-        return 'Quotes';
-      case ContentType.POLL:
-        return 'Polls';
-      default:
-        return 'All Content';
-    }
-  };
-  
-  // Filtered content text
-  const getFilteredContentText = () => {
-    const typeText = selectedType ? getContentTypeLabel(selectedType) : 'All content';
-    const tagText = selectedTag ? `tagged with "${selectedTag}"` : '';
-    return `${typeText} ${tagText}`;
-  };
-  
-  // Main JSX
+  const hasActiveFilters = searchQuery || selectedTag || selectedType !== 'all' || sortBy !== 'newest';
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
+      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
         <CoreNavigation />
         
-        <div className="space-y-8">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Knowledge Base</h1>
-              <p className="text-muted-foreground">
-                Browse and find useful resources, articles, and community knowledge
-              </p>
-            </div>
-            
-            <div className="flex gap-2 items-start">
-              <Button 
-                onClick={() => navigate("/knowledge/topics")}
-                variant="outline"
-                className="hidden sm:flex"
-              >
-                <Tag className="mr-2 h-4 w-4" />
-                Browse Tags
-              </Button>
-              
-              <Button 
-                onClick={() => navigate("/knowledge/topics")}
-                variant="outline"
-                size="icon"
-                className="sm:hidden"
-              >
-                <Tag className="h-4 w-4" />
-              </Button>
-              
-              <Button 
-                onClick={() => navigate("/knowledge/create")}
-                className="shrink-0 hidden sm:flex"
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Create Post
-              </Button>
-              
-              <Button 
-                onClick={() => navigate("/knowledge/create")}
-                size="icon"
-                className="sm:hidden"
-              >
-                <PlusCircle className="h-4 w-4" />
-              </Button>
-              
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="md:hidden hidden sm:flex">
-                    <SlidersHorizontal className="h-4 w-4 mr-2" />
-                    Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="md:hidden sm:hidden">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right">
-                  <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
-                    <SheetDescription>
-                      Narrow down the results based on specific criteria
-                    </SheetDescription>
-                  </SheetHeader>
-                  
-                  <div className="space-y-6 mt-6">
-                    <div>
-                      <h3 className="text-sm font-medium mb-2">Content Type</h3>
-                      <ContentTypeSelector
-                        selected={selectedType || 'all'}
-                        onChange={handleTypeSelect}
-                      />
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-sm font-medium mb-2">Tags</h3>
-                      <TagsList 
-                        tags={tags || []} 
-                        selectedTag={selectedTag}
-                        isLoading={isTagsLoading}
-                        onSelectTag={handleTagSelect}
-                      />
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-sm font-medium mb-2">Sort By</h3>
-                      <Select value={sortOption} onValueChange={setSortOption}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sort by" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="newest">Newest First</SelectItem>
-                          <SelectItem value="oldest">Oldest First</SelectItem>
-                          <SelectItem value="mostViewed">Most Viewed</SelectItem>
-                          <SelectItem value="mostVoted">Most Upvoted</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 mt-6">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Knowledge Base</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Discover, share, and contribute to our collective knowledge
+            </p>
           </div>
           
-          {/* Search and Filters */}
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="w-full lg:w-3/4 relative">
-              <Search className="absolute top-1/2 transform -translate-y-1/2 left-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search the knowledge base..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            
-            <div className="w-full lg:w-1/4 flex gap-2">
-              <Select value={sortOption} onValueChange={setSortOption}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="mostViewed">Most Viewed</SelectItem>
-                  <SelectItem value="mostVoted">Most Upvoted</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex gap-2 shrink-0">
+            <Button asChild>
+              <Link to="/knowledge/create">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Content
+              </Link>
+            </Button>
           </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.total}</p>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           
-          {/* Main content area */}
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Filter sidebar - desktop */}
-            <div className="hidden md:block w-full lg:w-1/4 space-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-3">Content Type</h3>
-                <ContentTypeSelector
-                  selected={selectedType || 'all'}
-                  onChange={handleTypeSelect}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <BookOpen className="h-4 w-4 text-blue-600" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.articles}</p>
+                  <p className="text-xs text-muted-foreground">Articles</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <HelpCircle className="h-4 w-4 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.questions}</p>
+                  <p className="text-xs text-muted-foreground">Questions</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <Quote className="h-4 w-4 text-purple-600" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.quotes}</p>
+                  <p className="text-xs text-muted-foreground">Quotes</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <BarChart3 className="h-4 w-4 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.polls}</p>
+                  <p className="text-xs text-muted-foreground">Polls</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Filters */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search articles, questions, quotes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
                 />
               </div>
               
-              <div>
-                <h3 className="text-lg font-medium mb-3">Tags</h3>
-                <TagsList 
-                  tags={tags || []} 
-                  selectedTag={selectedTag}
-                  isLoading={isTagsLoading}
-                  onSelectTag={handleTagSelect}
-                />
-              </div>
-            </div>
-            
-            {/* Article list */}
-            <div className="w-full lg:w-3/4 space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">
-                  {getFilteredContentText()}
-                </h2>
+              {/* Filter Controls */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Select value={selectedType} onValueChange={setSelectedType}>
+                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectValue placeholder="Content Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {contentTypes.map(type => {
+                      const Icon = type.icon;
+                      return (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div className="flex items-center">
+                            <Icon className="h-4 w-4 mr-2" />
+                            {type.label}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
                 
-                {(selectedTag || selectedType !== 'all' && selectedType !== null) && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => {
-                      setSelectedTag(null);
-                      setSelectedType('all');
-                    }}
-                  >
-                    Clear filters
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="most_voted">Most Voted</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {hasActiveFilters && (
+                  <Button variant="outline" onClick={clearFilters}>
+                    <Filter className="h-4 w-4 mr-2" />
+                    Clear Filters
                   </Button>
                 )}
               </div>
               
-              {isLoading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
-                  ))}
-                </div>
-              ) : sortedArticles && sortedArticles.length > 0 ? (
-                <div className="space-y-4">
-                  {sortedArticles.map((article) => (
-                    <ArticleCard
-                      key={article.id}
-                      article={article}
-                      onClick={() => navigate(`/knowledge/${article.id}`)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-muted/50 rounded-lg">
-                  <h3 className="font-medium text-xl mb-2">No content found</h3>
-                  <p className="text-muted-foreground mb-6">
-                    {searchQuery.length > 0 
-                      ? `No results found for "${searchQuery}"` 
-                      : selectedTag 
-                        ? `No content tagged with "${selectedTag}"`
-                        : selectedType
-                          ? `No ${getContentTypeLabel(selectedType).toLowerCase()} found`
-                          : "No content has been created yet"
-                    }
-                  </p>
-                  <div className="flex flex-col sm:flex-row justify-center gap-3">
-                    <Button onClick={() => fetchArticles()}>
-                      Reload Content
-                    </Button>
-                    <Button onClick={() => navigate("/knowledge/create")}>
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Create New Post
-                    </Button>
-                  </div>
+              {/* Tags Filter with Scrolling */}
+              {tags.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium mb-3">Filter by Tags</h3>
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-2 pb-2">
+                      <Badge
+                        variant={selectedTag === '' ? 'default' : 'secondary'}
+                        className="cursor-pointer whitespace-nowrap"
+                        onClick={() => setSelectedTag('')}
+                      >
+                        All Tags
+                      </Badge>
+                      {tags.map(tag => (
+                        <Badge
+                          key={tag.id}
+                          variant={selectedTag === tag.name ? 'default' : 'secondary'}
+                          className="cursor-pointer whitespace-nowrap"
+                          onClick={() => setSelectedTag(tag.name === selectedTag ? '' : tag.name)}
+                        >
+                          {tag.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
               )}
             </div>
-          </div>
+          </CardContent>
+        </Card>
+
+        {/* Content Area */}
+        <div className="space-y-6">
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-6">
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-3 bg-muted rounded w-1/2"></div>
+                      <div className="h-20 bg-muted rounded"></div>
+                      <div className="h-3 bg-muted rounded w-1/4"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : articles.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No content found</h3>
+                <p className="text-muted-foreground mb-4">
+                  {hasActiveFilters 
+                    ? "Try adjusting your filters or search terms"
+                    : "Be the first to share your knowledge!"
+                  }
+                </p>
+                <Button asChild>
+                  <Link to="/knowledge/create">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Content
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {articles.map(article => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

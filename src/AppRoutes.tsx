@@ -47,12 +47,10 @@ import Contacts from '@/pages/rel8t/Contacts';
 import ContactCreate from '@/pages/rel8t/ContactCreate';
 import ContactEdit from '@/pages/rel8t/ContactEdit';
 import ImportContacts from '@/pages/rel8t/ImportContacts';
-import Groups from '@/pages/rel8t/Groups';
 import Categories from '@/pages/rel8t/Categories';
 import Relationships from '@/pages/rel8t/Relationships';
 import RelationshipWizard from '@/pages/rel8t/RelationshipWizard';
 import TriggerWizard from '@/pages/rel8t/TriggerWizard';
-import Notifications from '@/pages/rel8t/Notifications';
 import Settings from '@/pages/rel8t/Settings';
 import EmailTest from '@/pages/rel8t/EmailTest';
 
@@ -222,12 +220,6 @@ const AppRoutes = () => {
           </Rel8ProtectedRoute>
         } />
         
-        <Route path="/rel8/groups" element={
-          <Rel8ProtectedRoute>
-            <Groups />
-          </Rel8ProtectedRoute>
-        } />
-        
         <Route path="/rel8/categories" element={
           <Rel8ProtectedRoute>
             <Categories />
@@ -249,12 +241,6 @@ const AppRoutes = () => {
         <Route path="/rel8/triggers/wizard" element={
           <Rel8ProtectedRoute>
             <TriggerWizard />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/notifications" element={
-          <Rel8ProtectedRoute>
-            <Notifications />
           </Rel8ProtectedRoute>
         } />
         

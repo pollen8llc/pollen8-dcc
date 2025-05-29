@@ -51,10 +51,8 @@ const ArticleView = () => {
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = useComments(id);
   
-  // Check if current user can edit this article
-  const canEdit = currentUser && article && (
-    currentUser.id === article.user_id || isAdmin || isOrganizer
-  );
+  // Check if current user can edit this article - ONLY the creator can edit
+  const canEdit = currentUser && article && currentUser.id === article.user_id;
   
   // Handle comment voting
   const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
