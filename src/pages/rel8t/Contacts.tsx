@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import ContactList from "@/components/rel8t/ContactList";
-import { PlusCircle, Trash2, Edit, CheckSquare, Square } from "lucide-react";
+import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { getContacts, deleteMultipleContacts } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
@@ -15,12 +16,26 @@ const Contacts = () => {
   const queryClient = useQueryClient();
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts"],
     queryFn: () => getContacts(),
   });
+
+  // Filter contacts based on search query
+  const filteredContacts = useMemo(() => {
+    if (!searchQuery.trim()) return contacts;
+    
+    const query = searchQuery.toLowerCase();
+    return contacts.filter(contact => 
+      contact.name?.toLowerCase().includes(query) ||
+      contact.email?.toLowerCase().includes(query) ||
+      contact.organization?.toLowerCase().includes(query) ||
+      contact.role?.toLowerCase().includes(query)
+    );
+  }, [contacts, searchQuery]);
 
   const handleEditContact = (contact: any) => {
     navigate(`/rel8/contacts/${contact.id}/edit`);
@@ -39,10 +54,10 @@ const Contacts = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedContacts.length === contacts.length) {
+    if (selectedContacts.length === filteredContacts.length) {
       setSelectedContacts([]);
     } else {
-      setSelectedContacts(contacts.map(contact => contact.id));
+      setSelectedContacts(filteredContacts.map(contact => contact.id));
     }
   };
 
@@ -103,13 +118,13 @@ const Contacts = () => {
                   className="flex items-center gap-2"
                   size="sm"
                 >
-                  {selectedContacts.length === contacts.length ? (
+                  {selectedContacts.length === filteredContacts.length ? (
                     <CheckSquare className="h-4 w-4" />
                   ) : (
                     <Square className="h-4 w-4" />
                   )}
                   <span className="hidden sm:inline">
-                    {selectedContacts.length === contacts.length ? "Deselect All" : "Select All"}
+                    {selectedContacts.length === filteredContacts.length ? "Deselect All" : "Select All"}
                   </span>
                 </Button>
                 
@@ -119,7 +134,7 @@ const Contacts = () => {
                       variant="outline"
                       onClick={() => {
                         // For now, just edit the first selected contact
-                        const firstContact = contacts.find(c => c.id === selectedContacts[0]);
+                        const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
                         if (firstContact) handleEditContact(firstContact);
                       }}
                       className="flex items-center gap-2"
@@ -174,8 +189,19 @@ const Contacts = () => {
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search contacts by name, email, organization..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
         <ContactList
-          contacts={contacts}
+          contacts={filteredContacts}
           isLoading={isLoading}
           onEdit={handleEditContact}
           onRefresh={handleRefresh}

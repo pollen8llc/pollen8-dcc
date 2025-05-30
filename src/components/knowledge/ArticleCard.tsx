@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ContentType } from '@/models/knowledgeTypes';
 import { cn } from '@/lib/utils';
+import { truncateText } from '@/utils/textUtils';
 import { PollVoting } from './PollVoting';
 
 interface Article {
@@ -79,11 +80,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
     }
   };
 
-  const truncateContent = (content: string, maxLength: number = 200) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength).trim() + '...';
-  };
-
   const getAuthorInitials = (name: string) => {
     return name
       .split(' ')
@@ -98,7 +94,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
     if (navigator.share) {
       navigator.share({
         title: article.title,
-        text: truncateContent(article.content, 100),
+        text: truncateText(article.content, 100),
         url: window.location.origin + `/knowledge/${article.id}`
       });
     } else {
@@ -137,7 +133,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
             </h3>
             
             <p className="text-muted-foreground text-sm line-clamp-3">
-              {truncateContent(article.content)}
+              {truncateText(article.content)}
             </p>
           </div>
         </div>
@@ -169,7 +165,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
 
         <Separator className="mb-3" />
 
-        {/* Bottom section - simplified without date and voting */}
+        {/* Bottom section */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             {/* Author */}

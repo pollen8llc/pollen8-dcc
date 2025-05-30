@@ -9,7 +9,7 @@ import { Search, Tag as TagIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { KnowledgeTag } from '@/models/knowledgeTypes';
-import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
+import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
 
 const TopicsPage = () => {
   const navigate = useNavigate();
@@ -40,10 +40,10 @@ const TopicsPage = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
-        <CoreNavigation />
+        <KnowledgeNavigation />
         
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 mt-6">
           <h1 className="text-3xl font-bold tracking-tight">Topics</h1>
           <p className="text-muted-foreground mt-1">
             Browse topics to find conversations that interest you

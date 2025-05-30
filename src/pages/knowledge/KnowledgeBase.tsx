@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
+import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
 import { ContentType } from '@/models/knowledgeTypes';
 
 const KnowledgeBase = () => {
@@ -79,7 +79,7 @@ const KnowledgeBase = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
-        <CoreNavigation />
+        <KnowledgeNavigation />
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 mt-6">

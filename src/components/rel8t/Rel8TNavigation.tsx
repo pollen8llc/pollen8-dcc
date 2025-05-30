@@ -56,7 +56,7 @@ export const Rel8Navigation = () => {
                   )}
                 >
                   <item.icon className="mr-2 h-4 w-4" />
-                  {item.name}
+                  <span className="hidden sm:inline">{item.name}</span>
                 </Link>
               );
             })}
@@ -82,7 +82,7 @@ export const Rel8Navigation = () => {
                   )}
                 >
                   <item.icon className="mr-2 h-4 w-4" />
-                  {item.name}
+                  <span className="hidden sm:inline">{item.name}</span>
                 </Link>
               );
             })}
