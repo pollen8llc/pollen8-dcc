@@ -7,7 +7,7 @@ import ContactList from "@/components/rel8t/ContactList";
 import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { Rel8TNavigation } from "@/components/rel8t/Rel8TNavigation";
 import { getContacts, deleteMultipleContacts } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 
@@ -29,11 +29,10 @@ const Contacts = () => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      contact.first_name?.toLowerCase().includes(query) ||
-      contact.last_name?.toLowerCase().includes(query) ||
+      contact.name?.toLowerCase().includes(query) ||
       contact.email?.toLowerCase().includes(query) ||
-      contact.company?.toLowerCase().includes(query) ||
-      contact.job_title?.toLowerCase().includes(query)
+      contact.organization?.toLowerCase().includes(query) ||
+      contact.role?.toLowerCase().includes(query)
     );
   });
 
@@ -94,7 +93,7 @@ const Contacts = () => {
       <Navbar />
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <Rel8OnlyNavigation />
+        <Rel8TNavigation />
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6 mt-4 sm:mt-6">
           <div className="w-full sm:w-auto">
@@ -193,7 +192,7 @@ const Contacts = () => {
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
-            placeholder="Search contacts by name, email, company, or job title..."
+            placeholder="Search contacts by name, email, organization, or role..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"

@@ -1,19 +1,36 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { Shell } from "@/components/layout/Shell";
 import { KnowledgeNavigation } from "@/components/knowledge/KnowledgeNavigation";
-import { mockArticles } from "@/data/mockKnowledgeData";
+import { getMockArticles } from "@/data/mockKnowledgeData";
 
 const TopicsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [articles, setArticles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load articles on component mount
+  useEffect(() => {
+    const loadArticles = async () => {
+      try {
+        const data = await getMockArticles();
+        setArticles(data);
+      } catch (error) {
+        console.error("Error loading articles:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadArticles();
+  }, []);
 
   // Get all tags with their counts
   const tagData = useMemo(() => {
     const tagCounts = new Map<string, number>();
-    mockArticles.forEach(article => {
+    articles.forEach(article => {
       article.tags?.forEach(tag => {
         tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
       });
@@ -22,7 +39,7 @@ const TopicsPage = () => {
     return Array.from(tagCounts.entries())
       .map(([tag, count], index) => ({ tag, count, index }))
       .sort((a, b) => b.count - a.count);
-  }, []);
+  }, [articles]);
 
   // Filter tags based on search
   const filteredTags = useMemo(() => {
@@ -31,6 +48,17 @@ const TopicsPage = () => {
       tag.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [tagData, searchQuery]);
+
+  if (isLoading) {
+    return (
+      <Shell>
+        <KnowledgeNavigation />
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-muted-foreground">Loading topics...</div>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <Shell>

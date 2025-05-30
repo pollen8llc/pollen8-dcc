@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Search, Plus } from "lucide-react";
 import { ArticleCard } from "@/components/knowledge/ArticleCard";
 import { Shell } from "@/components/layout/Shell";
 import { KnowledgeNavigation } from "@/components/knowledge/KnowledgeNavigation";
-import { mockArticles } from "@/data/mockKnowledgeData";
+import { getMockArticles } from "@/data/mockKnowledgeData";
 import { ContentType } from "@/models/knowledgeTypes";
 
 const KnowledgeBase = () => {
@@ -16,11 +16,28 @@ const KnowledgeBase = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedContentType, setSelectedContentType] = useState<ContentType | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load articles on component mount
+  useEffect(() => {
+    const loadArticles = async () => {
+      try {
+        const data = await getMockArticles();
+        setArticles(data);
+      } catch (error) {
+        console.error("Error loading articles:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadArticles();
+  }, []);
 
   // Get unique tags from articles and sort by frequency (top 10)
   const allTags = useMemo(() => {
     const tagCounts = new Map<string, number>();
-    mockArticles.forEach(article => {
+    articles.forEach(article => {
       article.tags?.forEach(tag => {
         tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
       });
@@ -30,11 +47,11 @@ const KnowledgeBase = () => {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([tag, count], index) => ({ tag, count, index }));
-  }, []);
+  }, [articles]);
 
   // Filter articles based on search query, content type, and selected tag
   const filteredArticles = useMemo(() => {
-    return mockArticles.filter(article => {
+    return articles.filter(article => {
       const matchesSearch = !searchQuery || 
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -45,7 +62,7 @@ const KnowledgeBase = () => {
       
       return matchesSearch && matchesContentType && matchesTag;
     });
-  }, [searchQuery, selectedContentType, selectedTag]);
+  }, [articles, searchQuery, selectedContentType, selectedTag]);
 
   const handleArticleClick = (articleId: string) => {
     navigate(`/knowledge/${articleId}`);
@@ -58,6 +75,17 @@ const KnowledgeBase = () => {
   const handleContentTypeFilter = (type: ContentType) => {
     setSelectedContentType(selectedContentType === type ? null : type);
   };
+
+  if (isLoading) {
+    return (
+      <Shell>
+        <KnowledgeNavigation />
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-muted-foreground">Loading articles...</div>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <Shell>

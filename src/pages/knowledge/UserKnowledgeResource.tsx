@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,20 +8,37 @@ import { Search, Plus } from "lucide-react";
 import { ArticleCard } from "@/components/knowledge/ArticleCard";
 import { Shell } from "@/components/layout/Shell";
 import { KnowledgeNavigation } from "@/components/knowledge/KnowledgeNavigation";
-import { mockArticles } from "@/data/mockKnowledgeData";
+import { getMockArticles } from "@/data/mockKnowledgeData";
 import { ContentType } from "@/models/knowledgeTypes";
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedContentType, setSelectedContentType] = useState<ContentType | null>(null);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load articles on component mount
+  useEffect(() => {
+    const loadArticles = async () => {
+      try {
+        const data = await getMockArticles();
+        setArticles(data);
+      } catch (error) {
+        console.error("Error loading articles:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadArticles();
+  }, []);
 
   // Filter to only user's articles (mock data - in real app would filter by user ID)
   const userArticles = useMemo(() => {
-    return mockArticles.filter(article => 
+    return articles.filter(article => 
       article.author?.name === "Current User" // Mock filter
     );
-  }, []);
+  }, [articles]);
 
   // Filter articles based on search query and content type
   const filteredArticles = useMemo(() => {
@@ -44,6 +61,17 @@ const UserKnowledgeResource = () => {
   const handleContentTypeFilter = (type: ContentType) => {
     setSelectedContentType(selectedContentType === type ? null : type);
   };
+
+  if (isLoading) {
+    return (
+      <Shell>
+        <KnowledgeNavigation />
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-muted-foreground">Loading your resources...</div>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <Shell>
