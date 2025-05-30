@@ -11,6 +11,7 @@ import {
   CalendarClock,
   Book,
   FileText,
+  Clock,
   Tag
 } from "lucide-react";
 
@@ -34,29 +35,60 @@ export const Rel8Navigation = () => {
   ];
 
   return (
-    <nav className="flex flex-wrap gap-1 p-1 bg-muted/50 rounded-lg mb-4">
-      {navigationItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = location.pathname === item.href || 
-                        location.pathname.startsWith(item.href + '/');
-        
-        return (
-          <Link
-            key={item.name}
-            to={item.href}
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
-              "hover:bg-background hover:text-foreground hover:shadow-sm",
-              isActive
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground"
-            )}
-          >
-            <Icon className="h-4 w-4" />
-            <span className="hidden sm:inline">{item.name}</span>
-          </Link>
-        );
-      })}
+    <nav className="mb-4 overflow-x-auto">
+      <div className="flex flex-col space-y-4">
+        <div>
+          <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">REL8</p>
+          <div className="flex space-x-1 border-b border-border/30 pb-1">
+            {navigationItems.map((item) => {
+              const isActive = location.pathname === item.href || 
+                              location.pathname.startsWith(item.href + '/');
+              
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={cn(
+                    "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",
+                    isActive 
+                      ? "bg-royal-blue-600 text-white" 
+                      : "text-muted-foreground hover:bg-royal-blue-600/10"
+                  )}
+                >
+                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <p className="px-3 text-xs uppercase font-semibold text-muted-foreground mb-2">CORE</p>
+          <div className="flex space-x-1 border-b border-border/30 pb-1">
+            {coreItems.map((item) => {
+              const isActive = location.pathname === item.href || 
+                              location.pathname.startsWith(item.href + '/');
+              
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={cn(
+                    "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",
+                    isActive 
+                      ? "bg-royal-blue-600 text-white" 
+                      : "text-muted-foreground hover:bg-royal-blue-600/10"
+                  )}
+                >
+                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </nav>
   );
 };

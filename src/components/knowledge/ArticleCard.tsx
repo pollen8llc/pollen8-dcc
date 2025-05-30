@@ -79,24 +79,9 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
     }
   };
 
-  // Function to strip markdown and create a clean excerpt
-  const createExcerpt = (content: string, maxLength: number = 200) => {
-    // Remove markdown formatting
-    let cleanText = content
-      .replace(/#{1,6}\s+/g, '') // Remove headers
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links, keep text
-      .replace(/`(.*?)`/g, '$1') // Remove inline code
-      .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-      .replace(/>\s+/g, '') // Remove blockquotes
-      .replace(/[-*+]\s+/g, '') // Remove list markers
-      .replace(/\d+\.\s+/g, '') // Remove numbered list markers
-      .replace(/\n+/g, ' ') // Replace line breaks with spaces
-      .trim();
-
-    if (cleanText.length <= maxLength) return cleanText;
-    return cleanText.substring(0, maxLength).trim() + '...';
+  const truncateContent = (content: string, maxLength: number = 200) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength).trim() + '...';
   };
 
   const getAuthorInitials = (name: string) => {
@@ -113,7 +98,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
     if (navigator.share) {
       navigator.share({
         title: article.title,
-        text: createExcerpt(article.content, 100),
+        text: truncateContent(article.content, 100),
         url: window.location.origin + `/knowledge/${article.id}`
       });
     } else {
@@ -152,7 +137,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
             </h3>
             
             <p className="text-muted-foreground text-sm line-clamp-3">
-              {createExcerpt(article.content)}
+              {truncateContent(article.content)}
             </p>
           </div>
         </div>
@@ -184,7 +169,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
 
         <Separator className="mb-3" />
 
-        {/* Bottom section */}
+        {/* Bottom section - simplified without date and voting */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-4">
             {/* Author */}
