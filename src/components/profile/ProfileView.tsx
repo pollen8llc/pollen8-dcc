@@ -137,112 +137,125 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
 
   if (!profile) {
     return (
-      <Card className="max-w-3xl mx-auto">
-        <CardContent className="pt-6">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>Profile data could not be loaded</AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
+      <div className="w-full">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>Profile data could not be loaded</AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <Card className="max-w-3xl mx-auto">
-      <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4">
-        <div className="flex items-center gap-4">
-          <div className={isAdmin ? 'admin-avatar-border rounded-full' : ''}>
-            <Avatar className="h-20 w-20">
+    <div className="w-full space-y-8">
+      {/* Hero Profile Section */}
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        {/* Avatar and Basic Info */}
+        <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+          <div className={isAdmin ? 'admin-avatar-border rounded-full p-1' : ''}>
+            <Avatar className="h-32 w-32 lg:h-40 lg:w-40">
               <AvatarImage src={profile?.avatar_url || ""} alt={getFullName()} />
-              <AvatarFallback>{getInitials()}</AvatarFallback>
+              <AvatarFallback className="text-2xl lg:text-3xl">{getInitials()}</AvatarFallback>
             </Avatar>
           </div>
-          <div>
-            <CardTitle className="text-2xl">{getFullName()}</CardTitle>
+          <div className="mt-4">
+            <h1 className="text-3xl lg:text-4xl font-bold">{getFullName()}</h1>
             {profile?.location && (
-              <div className="flex items-center text-muted-foreground mt-1">
+              <div className="flex items-center justify-center lg:justify-start text-muted-foreground mt-2">
                 <MapPin className="h-4 w-4 mr-1" />
                 <span>{profile.location}</span>
               </div>
             )}
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-2">
               Member since {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'recently'}
             </p>
           </div>
         </div>
 
-        {isOwnProfile && (
-          <Button variant="outline" onClick={onEdit} className="flex items-center gap-2">
-            <Edit className="h-4 w-4" />
-            Edit Profile
-          </Button>
-        )}
-      </CardHeader>
+        {/* Main Profile Content */}
+        <div className="flex-1 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* About Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  About
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {profile?.bio ? (
+                  <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
+                ) : (
+                  <p className="text-muted-foreground italic">No bio provided</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Interests Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Interests</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {profile.interests.map((interest: string, idx: number) => (
+                      <Badge key={idx} variant="secondary" className="text-sm">{interest}</Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground italic">No interests listed</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Social Links */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Social Links
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {profile?.social_links && typeof profile.social_links === 'object' && 
+               Object.keys(profile.social_links).length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(profile.social_links).map(([platform, url]) => (
+                    <a 
+                      key={platform}
+                      href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-primary hover:underline p-3 border rounded-md hover:bg-muted/50 transition-colors"
+                    >
+                      <Globe className="h-4 w-4" />
+                      <span className="capitalize font-medium">{platform}</span>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground italic">No social links added</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <Separator className="my-8" />
       
-      <CardContent className="space-y-6">
-        {/* Bio Section */}
-        <section>
-          <h3 className="font-medium text-lg mb-2">About</h3>
-          {profile?.bio ? (
-            <p className="text-muted-foreground">{profile.bio}</p>
-          ) : (
-            <p className="text-muted-foreground italic">No bio provided</p>
-          )}
-        </section>
-        
-        <Separator />
-        
-        {/* Interests Section */}
-        <section>
-          <h3 className="font-medium text-lg mb-2">Interests</h3>
-          {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {profile.interests.map((interest: string, idx: number) => (
-                <Badge key={idx} variant="secondary">{interest}</Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground italic">No interests listed</p>
-          )}
-        </section>
-        
-        <Separator />
-        
-        {/* Social Links Section */}
-        <section>
-          <h3 className="font-medium text-lg mb-2">Social Links</h3>
-          {profile?.social_links && typeof profile.social_links === 'object' && 
-           Object.keys(profile.social_links).length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {Object.entries(profile.social_links).map(([platform, url]) => (
-                <a 
-                  key={platform}
-                  href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <Globe className="h-4 w-4" />
-                  <span className="capitalize">{platform}</span>
-                </a>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground italic">No social links added</p>
-          )}
-        </section>
-        
-        <Separator />
-        
-        {/* Communities Section */}
-        <section>
-          <h3 className="font-medium text-lg mb-2 flex items-center gap-2">
-            <Users className="h-5 w-5" />
+      {/* Communities Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-2xl">
+            <Users className="h-6 w-6" />
             Communities
-          </h3>
-          
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
@@ -252,65 +265,65 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
           )}
           
           {isLoading ? (
-            <div className="flex justify-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
             </div>
           ) : communities.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {communities.map((community) => (
-                <Card key={community.id} className="overflow-hidden">
-                  <div className="p-4">
-                    <div className="flex items-start gap-3">
+                <Card key={community.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
                       {community.logo_url ? (
                         <img 
                           src={community.logo_url} 
                           alt={community.name}
-                          className="w-10 h-10 rounded-md object-cover"
+                          className="w-12 h-12 rounded-lg object-cover"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center">
-                          <Users className="h-5 w-5 text-muted-foreground" />
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                          <Users className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
-                      <div>
-                        <h4 className="font-medium text-base line-clamp-1">{community.name}</h4>
-                        <p className="text-xs text-muted-foreground mt-1">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-lg line-clamp-1">{community.name}</h4>
+                        <p className="text-sm text-muted-foreground mt-1">
                           {community.member_count || '1'} {parseInt(community.member_count || '1') === 1 ? 'member' : 'members'}
                         </p>
+                        {community.description && (
+                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                            {community.description}
+                          </p>
+                        )}
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="mt-3 px-0 h-auto"
+                          onClick={() => window.location.href = `/community/${community.id}`}
+                        >
+                          View Community →
+                        </Button>
                       </div>
                     </div>
-                    {community.description && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {community.description}
-                      </p>
-                    )}
-                    <Button 
-                      variant="link" 
-                      size="sm" 
-                      className="mt-2 px-0"
-                      onClick={() => window.location.href = `/community/${community.id}`}
-                    >
-                      View Community
-                    </Button>
-                  </div>
+                  </CardContent>
                 </Card>
               ))}
             </div>
           ) : (
-            <div className="bg-muted rounded-md p-4 text-center">
-              <p className="text-muted-foreground mb-2">Not a member of any communities yet</p>
+            <div className="bg-muted/50 rounded-lg p-8 text-center">
+              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground mb-4 text-lg">Not a member of any communities yet</p>
               <Button 
-                variant="outline" 
-                size="sm"
+                variant="outline"
                 onClick={() => window.location.href = "/communities/join"}
               >
                 Explore Communities
               </Button>
             </div>
           )}
-        </section>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

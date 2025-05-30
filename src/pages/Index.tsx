@@ -16,8 +16,8 @@ const Index = () => {
       if (!currentUser.profile_complete) {
         navigate("/profile/setup");
       } else {
-        // If user is logged in and profile is complete, redirect to knowledge resources page
-        navigate("/knowledge/resources");
+        // If user is logged in and profile is complete, redirect to knowledge base
+        navigate("/knowledge");
       }
     }
   }, [currentUser, isLoading, navigate]);

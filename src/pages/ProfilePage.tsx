@@ -177,9 +177,9 @@ const ProfilePage: React.FC = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <Navbar />
-        <div className="container mx-auto py-8 px-4">
+        <div className="w-full py-16 px-4">
           <div className="flex justify-center items-center min-h-[50vh]">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
@@ -191,75 +191,96 @@ const ProfilePage: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <Navbar />
-        <div className="container mx-auto py-8 px-4">
-          <Card className="max-w-md mx-auto">
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-5 w-5 text-red-500" />
-                <h2 className="text-xl font-semibold">Error</h2>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Alert variant="destructive" className="mb-4">
-                <AlertTitle>Profile Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-              <div className="flex gap-2 mt-4">
-                <Button onClick={() => navigate("/")}>Go Home</Button>
-                {!isOwnProfile && currentUser && (
-                  <Button variant="outline" onClick={() => navigate("/profile")}>
-                    View Your Profile
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="w-full py-16 px-4">
+          <div className="max-w-md mx-auto">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  <h2 className="text-xl font-semibold">Error</h2>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Alert variant="destructive" className="mb-4">
+                  <AlertTitle>Profile Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+                <div className="flex gap-2 mt-4">
+                  <Button onClick={() => navigate("/")}>Go Home</Button>
+                  {!isOwnProfile && currentUser && (
+                    <Button variant="outline" onClick={() => navigate("/profile")}>
+                      View Your Profile
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <Navbar />
-      <div className="container mx-auto py-8 px-4">
-        {isOwnProfile && (
-          <div className="flex justify-end mb-4">
-            <Button
-              variant="outline"
-              onClick={() => setIsEditing(!isEditing)}
-              className="flex items-center gap-2"
-            >
-              {isEditing ? (
-                <>
-                  <Eye className="h-4 w-4" />
-                  View Mode
-                </>
-              ) : (
-                <>
-                  <Edit className="h-4 w-4" />
-                  Edit Profile
-                </>
-              )}
-            </Button>
+      
+      {/* Full-width hero section */}
+      <div className="w-full bg-gradient-to-r from-primary/10 via-background to-accent/10 py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Edit button positioned in hero */}
+          {isOwnProfile && (
+            <div className="flex justify-end mb-8">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(!isEditing)}
+                className="flex items-center gap-2 bg-background/80 backdrop-blur-sm"
+              >
+                {isEditing ? (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    View Mode
+                  </>
+                ) : (
+                  <>
+                    <Edit className="h-4 w-4" />
+                    Edit Profile
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+          
+          {/* Profile content with full-width design */}
+          <div className="w-full">
+            {isEditing && isOwnProfile ? (
+              <div className="bg-background/80 backdrop-blur-sm rounded-lg p-8 shadow-lg">
+                <ProfileEdit 
+                  profile={profile} 
+                  onUpdate={handleProfileUpdate} 
+                  onCancel={() => setIsEditing(false)}
+                />
+              </div>
+            ) : (
+              <div className="bg-background/80 backdrop-blur-sm rounded-lg p-8 shadow-lg">
+                <ProfileView 
+                  profile={profile}
+                  isOwnProfile={isOwnProfile}
+                  onEdit={() => setIsEditing(true)}
+                />
+              </div>
+            )}
           </div>
-        )}
-        
-        {isEditing && isOwnProfile ? (
-          <ProfileEdit 
-            profile={profile} 
-            onUpdate={handleProfileUpdate} 
-            onCancel={() => setIsEditing(false)}
-          />
-        ) : (
-          <ProfileView 
-            profile={profile}
-            isOwnProfile={isOwnProfile}
-            onEdit={() => setIsEditing(true)}
-          />
-        )}
+        </div>
+      </div>
+      
+      {/* Additional content sections can be added here for microsite feel */}
+      <div className="w-full py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Future: Activity feed, achievements, etc. */}
+        </div>
       </div>
     </div>
   );

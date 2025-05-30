@@ -43,10 +43,9 @@ const KnowledgeBase = () => {
     { value: 'poll', label: 'Polls', icon: BarChart3 }
   ];
 
-  // Filter articles by type for stats
+  // Filter articles by type for stats (excluding total)
   const articleStats = useMemo(() => {
     const stats = {
-      total: articles.length,
       articles: articles.filter(a => a.content_type === ContentType.ARTICLE).length,
       questions: articles.filter(a => a.content_type === ContentType.QUESTION).length,
       quotes: articles.filter(a => a.content_type === ContentType.QUOTE).length,
@@ -100,20 +99,8 @@ const KnowledgeBase = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-2xl font-bold">{articleStats.total}</p>
-                  <p className="text-xs text-muted-foreground">Total</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
+        {/* Stats Cards - Removed Total Count */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
