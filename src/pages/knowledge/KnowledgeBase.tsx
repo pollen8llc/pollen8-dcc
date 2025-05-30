@@ -1,308 +1,191 @@
 
-import React, { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, BookOpen, MessageSquare, Quote, HelpCircle, BarChart3 } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
-import { useTags } from '@/hooks/knowledge/useTags';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
-import { ContentType } from '@/models/knowledgeTypes';
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, Plus } from "lucide-react";
+import { ArticleCard } from "@/components/knowledge/ArticleCard";
+import { Shell } from "@/components/layout/Shell";
+import { KnowledgeNavigation } from "@/components/knowledge/KnowledgeNavigation";
+import { mockArticles } from "@/data/mockKnowledgeData";
+import { ContentType } from "@/models/knowledgeTypes";
 
 const KnowledgeBase = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string>('');
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('newest');
-  
-  const { useArticles } = useKnowledgeBase();
-  const { data: tags = [] } = useTags();
-  
-  // Fetch articles with current filters
-  const { data: articles = [], isLoading } = useArticles({
-    searchQuery: searchQuery || undefined,
-    tag: selectedTag || undefined,
-    type: selectedType,
-    sort: sortBy
-  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedContentType, setSelectedContentType] = useState<ContentType | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  // Content type options with icons
-  const contentTypes = [
-    { value: 'all', label: 'All Content', icon: BookOpen },
-    { value: 'article', label: 'Articles', icon: BookOpen },
-    { value: 'question', label: 'Questions', icon: HelpCircle },
-    { value: 'quote', label: 'Quotes', icon: Quote },
-    { value: 'poll', label: 'Polls', icon: BarChart3 }
-  ];
+  // Get unique tags from articles and sort by frequency (top 10)
+  const allTags = useMemo(() => {
+    const tagCounts = new Map<string, number>();
+    mockArticles.forEach(article => {
+      article.tags?.forEach(tag => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      });
+    });
+    
+    return Array.from(tagCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([tag, count], index) => ({ tag, count, index }));
+  }, []);
 
-  // Filter articles by type for stats
-  const articleStats = useMemo(() => {
-    const stats = {
-      total: articles.length,
-      articles: articles.filter(a => a.content_type === ContentType.ARTICLE).length,
-      questions: articles.filter(a => a.content_type === ContentType.QUESTION).length,
-      quotes: articles.filter(a => a.content_type === ContentType.QUOTE).length,
-      polls: articles.filter(a => a.content_type === ContentType.POLL).length,
-    };
-    return stats;
-  }, [articles]);
-
-  // Get top 10 tags sorted by popularity
-  const topTags = useMemo(() => {
-    const sortedTags = [...tags].sort((a, b) => (b.count || 0) - (a.count || 0));
-    return sortedTags.slice(0, 10);
-  }, [tags]);
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedTag('');
-    setSelectedType('all');
-    setSortBy('newest');
-  };
-
-  const hasActiveFilters = searchQuery || selectedTag || selectedType !== 'all' || sortBy !== 'newest';
+  // Filter articles based on search query, content type, and selected tag
+  const filteredArticles = useMemo(() => {
+    return mockArticles.filter(article => {
+      const matchesSearch = !searchQuery || 
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesContentType = !selectedContentType || article.content_type === selectedContentType;
+      const matchesTag = !selectedTag || article.tags?.includes(selectedTag);
+      
+      return matchesSearch && matchesContentType && matchesTag;
+    });
+  }, [searchQuery, selectedContentType, selectedTag]);
 
   const handleArticleClick = (articleId: string) => {
-    navigate(`/knowledge/articles/${articleId}`);
+    navigate(`/knowledge/${articleId}`);
+  };
+
+  const handleTagClick = (tag: string) => {
+    setSelectedTag(selectedTag === tag ? null : tag);
+  };
+
+  const handleContentTypeFilter = (type: ContentType) => {
+    setSelectedContentType(selectedContentType === type ? null : type);
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <Shell>
+      <KnowledgeNavigation />
       
-      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
-        <CoreNavigation />
-        
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 mt-6">
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Knowledge Base</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Discover, share, and contribute to our collective knowledge
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Knowledge Base</h1>
+            <p className="text-muted-foreground mt-1">
+              Discover and explore community knowledge
             </p>
           </div>
-          
-          <div className="flex gap-2 shrink-0">
-            <Button asChild>
-              <Link to="/knowledge/create">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Content
-              </Link>
-            </Button>
+          <Button 
+            onClick={() => navigate("/knowledge/create")} 
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create Article
+          </Button>
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search articles, questions, polls..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Content Type Filters */}
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm font-medium text-muted-foreground mr-2">Filter by type:</span>
+          {Object.values(ContentType).map((type) => (
+            <Badge
+              key={type}
+              variant={selectedContentType === type ? "default" : "outline"}
+              className="cursor-pointer capitalize"
+              onClick={() => handleContentTypeFilter(type)}
+            >
+              {type.toLowerCase()}
+            </Badge>
+          ))}
+        </div>
+
+        {/* Top Tags */}
+        <div className="space-y-2">
+          <span className="text-sm font-medium text-muted-foreground">Popular Tags:</span>
+          <div className="flex flex-wrap gap-2">
+            {allTags.map(({ tag, count, index }) => (
+              <Badge
+                key={tag}
+                variant={selectedTag === tag ? "default" : "outline"}
+                className={`cursor-pointer transition-all duration-200 ${
+                  index < 3 ? 'animate-pulse' : ''
+                }`}
+                onClick={() => handleTagClick(tag)}
+              >
+                {tag} ({count})
+              </Badge>
+            ))}
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-2xl font-bold">{articleStats.total}</p>
-                  <p className="text-xs text-muted-foreground">Total</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="h-4 w-4 text-blue-600" />
-                <div>
-                  <p className="text-2xl font-bold">{articleStats.articles}</p>
-                  <p className="text-xs text-muted-foreground">Articles</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <HelpCircle className="h-4 w-4 text-green-600" />
-                <div>
-                  <p className="text-2xl font-bold">{articleStats.questions}</p>
-                  <p className="text-xs text-muted-foreground">Questions</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Quote className="h-4 w-4 text-purple-600" />
-                <div>
-                  <p className="text-2xl font-bold">{articleStats.quotes}</p>
-                  <p className="text-xs text-muted-foreground">Quotes</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <BarChart3 className="h-4 w-4 text-orange-600" />
-                <div>
-                  <p className="text-2xl font-bold">{articleStats.polls}</p>
-                  <p className="text-xs text-muted-foreground">Polls</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Active Filters */}
+        {(selectedContentType || selectedTag) && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
+            {selectedContentType && (
+              <Badge variant="secondary" className="capitalize">
+                {selectedContentType.toLowerCase()}
+                <button
+                  onClick={() => setSelectedContentType(null)}
+                  className="ml-1 hover:text-destructive"
+                >
+                  ×
+                </button>
+              </Badge>
+            )}
+            {selectedTag && (
+              <Badge variant="secondary">
+                {selectedTag}
+                <button
+                  onClick={() => setSelectedTag(null)}
+                  className="ml-1 hover:text-destructive"
+                >
+                  ×
+                </button>
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Results count */}
+        <div className="text-sm text-muted-foreground">
+          {filteredArticles.length} {filteredArticles.length === 1 ? 'article' : 'articles'} found
         </div>
 
-        {/* Search and Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search articles, questions, quotes..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              {/* Filter Controls */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger className="w-full sm:w-48">
-                    <SelectValue placeholder="Content Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {contentTypes.map(type => {
-                      const Icon = type.icon;
-                      return (
-                        <SelectItem key={type.value} value={type.value}>
-                          <div className="flex items-center">
-                            <Icon className="h-4 w-4 mr-2" />
-                            {type.label}
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full sm:w-48">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest First</SelectItem>
-                    <SelectItem value="oldest">Oldest First</SelectItem>
-                    <SelectItem value="most_voted">Most Voted</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters}>
-                    <Filter className="h-4 w-4 mr-2" />
-                    Clear Filters
-                  </Button>
-                )}
-              </div>
-              
-              {/* Top 10 Tags with Pulse Functionality */}
-              {topTags.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-3">Popular Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant={selectedTag === '' ? 'default' : 'secondary'}
-                      className="cursor-pointer whitespace-nowrap"
-                      onClick={() => setSelectedTag('')}
-                    >
-                      All Tags
-                    </Badge>
-                    {topTags.map((tag, index) => {
-                      const isVeryPopular = index < 3; // Top 3 get pulse animation
-                      return (
-                        <Badge
-                          key={tag.id}
-                          variant={selectedTag === tag.name ? 'default' : 'secondary'}
-                          className={`cursor-pointer whitespace-nowrap ${
-                            isVeryPopular ? 'animate-pulse' : ''
-                          }`}
-                          onClick={() => setSelectedTag(tag.name === selectedTag ? '' : tag.name)}
-                        >
-                          {tag.name}
-                          <span className="ml-1 opacity-70">
-                            ({tag.count})
-                          </span>
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Content Area */}
-        <div className="space-y-6">
-          {isLoading ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-6">
-                    <div className="animate-pulse space-y-4">
-                      <div className="h-4 bg-muted rounded w-3/4"></div>
-                      <div className="h-3 bg-muted rounded w-1/2"></div>
-                      <div className="h-20 bg-muted rounded"></div>
-                      <div className="h-3 bg-muted rounded w-1/4"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : articles.length === 0 ? (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No content found</h3>
-                <p className="text-muted-foreground mb-4">
-                  {hasActiveFilters 
-                    ? "Try adjusting your filters or search terms"
-                    : "Be the first to share your knowledge!"
-                  }
-                </p>
-                <Button asChild>
-                  <Link to="/knowledge/create">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Content
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {articles.map(article => (
-                <div key={article.id} onClick={() => handleArticleClick(article.id)} className="cursor-pointer">
-                  <ArticleCard article={article} />
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Articles Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredArticles.map((article) => (
+            <ArticleCard
+              key={article.id}
+              article={article}
+              onClick={() => handleArticleClick(article.id)}
+            />
+          ))}
         </div>
+
+        {/* Empty State */}
+        {filteredArticles.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">No articles found matching your criteria</p>
+            <Button variant="outline" onClick={() => {
+              setSearchQuery("");
+              setSelectedContentType(null);
+              setSelectedTag(null);
+            }}>
+              Clear filters
+            </Button>
+          </div>
+        )}
       </div>
-    </div>
+    </Shell>
   );
 };
 
