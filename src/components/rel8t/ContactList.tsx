@@ -2,7 +2,6 @@
 import React from 'react';
 import { Contact } from '@/services/rel8t/contactService';
 import ContactCard from './ContactCard';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ContactListProps {
   contacts?: Contact[];
