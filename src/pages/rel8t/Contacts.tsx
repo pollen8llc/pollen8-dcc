@@ -133,10 +133,10 @@ const Contacts = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background">
       <Navbar />
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="flex-1 flex flex-col container mx-auto px-3 sm:px-4 py-4 sm:py-8 overflow-hidden">
         <Rel8OnlyNavigation />
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6 mt-4 sm:mt-6">
@@ -232,7 +232,7 @@ const Contacts = () => {
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="space-y-4 mb-6">
+        <div className="space-y-4 mb-6 flex-shrink-0">
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -291,8 +291,8 @@ const Contacts = () => {
           </div>
         </div>
 
-        {/* Fixed height container for better scrolling */}
-        <div className="h-[calc(100vh-400px)] overflow-hidden">
+        {/* Contacts List - Uses remaining vertical space */}
+        <div className="flex-1 min-h-0">
           <ContactList
             contacts={filteredContacts}
             isLoading={isLoading}

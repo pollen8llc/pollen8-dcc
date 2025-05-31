@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -6,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import ProfileView from "@/components/profile/ProfileView";
 import ProfileEdit from "@/components/profile/ProfileEdit";
+import PlexusBackground from "@/components/community/PlexusBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Edit, Eye, AlertCircle } from "lucide-react";
@@ -81,7 +83,7 @@ const ProfilePage: React.FC = () => {
         }
 
         // Check if profile is viewable
-        const privacySettings = data.privacy_settings as { profile_visibility?: string } || {};
+        const privacySettings = (data.privacy_settings as { profile_visibility?: string }) || {};
         const isPublic = privacySettings.profile_visibility === 'public';
         const isOwner = currentUser && data.id === currentUser.id;
         
@@ -232,36 +234,42 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen">
       <Navbar />
       
-      {/* Centered profile container */}
-      <div className="w-full py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          {/* Edit button positioned at top */}
+      {/* Animated Plexus Header */}
+      <section className="relative w-full h-64 flex items-center justify-center overflow-hidden">
+        <PlexusBackground />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/30 to-background/70 z-10"></div>
+        <div className="relative z-20 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
+            {isOwnProfile ? "Your Profile" : "Profile"}
+          </h1>
           {isOwnProfile && (
-            <div className="flex justify-end mb-8">
-              <Button
-                variant="outline"
-                onClick={() => setIsEditing(!isEditing)}
-                className="flex items-center gap-2 bg-background/80 backdrop-blur-sm"
-              >
-                {isEditing ? (
-                  <>
-                    <Eye className="h-4 w-4" />
-                    View Mode
-                  </>
-                ) : (
-                  <>
-                    <Edit className="h-4 w-4" />
-                    Edit Profile
-                  </>
-                )}
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditing(!isEditing)}
+              className="flex items-center gap-2 bg-background/80 backdrop-blur-sm"
+            >
+              {isEditing ? (
+                <>
+                  <Eye className="h-4 w-4" />
+                  View Mode
+                </>
+              ) : (
+                <>
+                  <Edit className="h-4 w-4" />
+                  Edit Profile
+                </>
+              )}
+            </Button>
           )}
-          
-          {/* Profile content */}
+        </div>
+      </section>
+      
+      {/* Profile content */}
+      <div className="w-full py-8 px-4">
+        <div className="max-w-6xl mx-auto">
           <div className="w-full">
             {isEditing && isOwnProfile ? (
               <div className="bg-background/80 backdrop-blur-sm rounded-lg p-8 shadow-lg">

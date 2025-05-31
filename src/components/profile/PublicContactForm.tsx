@@ -95,7 +95,7 @@ const PublicContactForm: React.FC<PublicContactFormProps> = ({
       if (error) throw error;
 
       toast({
-        title: "Message Sent!",
+        title: "Contact Information Sent!",
         description: `Your contact information has been sent to ${profileUserName}.`,
       });
 
@@ -111,7 +111,7 @@ const PublicContactForm: React.FC<PublicContactFormProps> = ({
       console.error('Error submitting contact form:', error);
       toast({
         title: "Error",
-        description: "Failed to send your message. Please try again.",
+        description: "Failed to send your contact information. Please try again.",
         variant: "destructive",
       });
     } finally {

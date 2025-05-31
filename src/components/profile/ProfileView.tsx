@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -5,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Edit, MapPin, Globe, User, Users, AlertCircle, Mail, Phone } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Community, UserRole } from "@/models/types";
@@ -21,10 +23,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
   const [communities, setCommunities] = useState<Community[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showContactForm, setShowContactForm] = useState(false);
   
   // Check if the user is an admin
   const isAdmin = profile?.role === UserRole.ADMIN;
+
+  // Fixed avatar URL for all users
+  const FIXED_AVATAR_URL = "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif";
 
   useEffect(() => {
     const fetchUserCommunities = async () => {
@@ -151,7 +155,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
         <div className="relative inline-block mb-4">
           <div className={isAdmin ? 'admin-avatar-border rounded-full p-1' : ''}>
             <Avatar className="h-32 w-32">
-              <AvatarImage src={profile?.avatar_url || ""} alt={getFullName()} />
+              <AvatarImage src={FIXED_AVATAR_URL} alt={getFullName()} />
               <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
             </Avatar>
           </div>
@@ -172,32 +176,38 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
 
         {/* Action buttons - centered */}
         <div className="flex justify-center gap-3 mb-6">
-          {isOwnProfile ? (
+          {isOwnProfile && (
             <Button onClick={onEdit} className="flex items-center gap-2">
               <Edit className="h-4 w-4" />
               Edit Profile
             </Button>
-          ) : (
-            <Button 
-              onClick={() => setShowContactForm(!showContactForm)}
-              className="flex items-center gap-2"
-            >
-              <Mail className="h-4 w-4" />
-              Contact
-            </Button>
           )}
         </div>
-
-        {/* Contact form for non-own profiles */}
-        {!isOwnProfile && showContactForm && (
-          <div className="flex justify-center mb-6">
-            <PublicContactForm 
-              profileUserId={profile.id}
-              profileUserName={getFullName()}
-            />
-          </div>
-        )}
       </div>
+
+      {/* Contact form for non-own profiles - Full-width accordion */}
+      {!isOwnProfile && (
+        <Card className="mb-8">
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="contact" className="border-none">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-2 text-lg font-semibold">
+                  <Mail className="h-5 w-5" />
+                  Contact {getFullName()}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="flex justify-center">
+                  <PublicContactForm 
+                    profileUserId={profile.id}
+                    profileUserName={getFullName()}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </Card>
+      )}
 
       {/* Symmetrical content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
