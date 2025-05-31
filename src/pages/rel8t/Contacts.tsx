@@ -290,8 +290,7 @@ const Contacts = () => {
             )}
           </div>
         </div>
-
-        {/* Contacts List - Uses remaining vertical space */}
+        
         <div className="flex-1 min-h-0">
           <ContactList
             contacts={filteredContacts}
