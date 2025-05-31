@@ -14,7 +14,7 @@ interface ContactListProps {
   onEdit?: (contact: Contact) => void;
   onRefresh?: () => void;
   onContactMultiSelect?: (contactId: string, selected: boolean) => void;
-  selectedContacts?: string[];
+  
   isSelectionMode?: boolean;
 }
 
@@ -24,7 +24,7 @@ const ContactList: React.FC<ContactListProps> = ({
   onEdit,
   onRefresh,
   onContactMultiSelect,
-  selectedContacts = [],
+  
   isSelectionMode = false
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
