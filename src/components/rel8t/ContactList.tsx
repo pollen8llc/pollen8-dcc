@@ -2,7 +2,6 @@
 import React from 'react';
 import { Contact } from '@/services/rel8t/contactService';
 import ContactCard from './ContactCard';
-
 interface ContactListProps {
   contacts?: Contact[];
   isLoading?: boolean;
@@ -43,7 +42,7 @@ const ContactList: React.FC<ContactListProps> = ({
   }
 
   return (
-   \
+   
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-1">
         {contacts.map((contact) => (
           <ContactCard 
