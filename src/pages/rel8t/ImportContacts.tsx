@@ -66,12 +66,44 @@ const ImportContacts = () => {
   };
 
   return (
+     return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
-        <Rel8Navigation />
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <Rel8OnlyNavigation />
         
+        <Breadcrumb className="mb-4 sm:mb-6 mt-2 sm:mt-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink>Relationships</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        <div className="flex flex-col gap-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Relationships</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">
+                Manage your outreach and nurture your network
+              </p>
+            </div>
+            
+            <Button 
+              onClick={handleCreateRelationship}
+              className="flex items-center gap-2 w-full sm:w-auto"
+              size="sm"
+            >
+              <PlusCircle className="h-4 w-4" />
+              <span className="sm:inline">Create Plan</span>
+            </Button>
+          </div>
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
           <div>
             <h1 className="text-3xl font-bold">Import Contacts</h1>
