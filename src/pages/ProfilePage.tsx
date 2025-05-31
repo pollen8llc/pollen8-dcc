@@ -23,10 +23,12 @@ interface ProfileData {
   created_at: string;
   interests?: string[];
   social_links?: Record<string, string>;
+  invited_by?: string;
+  profile_complete?: boolean;
   privacy_settings?: {
     profile_visibility: "public" | "connections" | "connections2" | "connections3" | "private";
   };
-  profile_complete?: boolean;
+  role?: string;
 }
 
 const ProfilePage: React.FC = () => {
@@ -43,23 +45,20 @@ const ProfilePage: React.FC = () => {
   const isOwnProfile = currentUser && (!id || id === currentUser.id);
   const profileId = id || currentUser?.id;
 
-  // Fetch profile data
+  // Fetch profile data - now supports public viewing
   useEffect(() => {
     async function fetchProfile() {
-      if (!profileId) return;
+      if (!profileId) {
+        setError("No profile ID provided");
+        setIsLoading(false);
+        return;
+      }
       
       setIsLoading(true);
       setError(null);
       
       try {
-        // Check if user is authenticated
-        if (!currentUser) {
-          console.log("User not authenticated, redirecting to login");
-          navigate("/auth?redirectTo=" + window.location.pathname);
-          return;
-        }
-        
-        // Get profile data
+        // Get profile data - this will work for public profiles even without auth
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -79,6 +78,15 @@ const ProfilePage: React.FC = () => {
         
         if (!data) {
           setError("Profile not found");
+          return;
+        }
+
+        // Check if profile is viewable
+        const isPublic = data.privacy_settings?.profile_visibility === 'public';
+        const isOwner = currentUser && data.id === currentUser.id;
+        
+        if (!isPublic && !isOwner && !currentUser) {
+          setError("This profile is private. Please log in to view it.");
           return;
         }
         
@@ -107,7 +115,7 @@ const ProfilePage: React.FC = () => {
     }
     
     fetchProfile();
-  }, [profileId, isEditing, currentUser, navigate]);
+  }, [profileId, isEditing, currentUser]);
 
   // Handle profile update
   const handleProfileUpdate = async (updatedProfile: Partial<ProfileData>) => {
@@ -122,7 +130,7 @@ const ProfilePage: React.FC = () => {
           updated_at: new Date().toISOString(),
           privacy_settings: {
             ...updatedProfile.privacy_settings,
-            profile_visibility: updatedProfile.privacy_settings?.profile_visibility || "public" // Default to public
+            profile_visibility: updatedProfile.privacy_settings?.profile_visibility || "public"
           }
         })
         .eq('id', currentUser.id)
@@ -227,10 +235,10 @@ const ProfilePage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <Navbar />
       
-      {/* Full-width hero section */}
-      <div className="w-full bg-gradient-to-r from-primary/10 via-background to-accent/10 py-16 px-4">
+      {/* Centered profile container */}
+      <div className="w-full py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          {/* Edit button positioned in hero */}
+          {/* Edit button positioned at top */}
           {isOwnProfile && (
             <div className="flex justify-end mb-8">
               <Button
@@ -253,7 +261,7 @@ const ProfilePage: React.FC = () => {
             </div>
           )}
           
-          {/* Profile content with full-width design */}
+          {/* Profile content */}
           <div className="w-full">
             {isEditing && isOwnProfile ? (
               <div className="bg-background/80 backdrop-blur-sm rounded-lg p-8 shadow-lg">
@@ -273,13 +281,6 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
-      </div>
-      
-      {/* Additional content sections can be added here for microsite feel */}
-      <div className="w-full py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          {/* Future: Activity feed, achievements, etc. */}
         </div>
       </div>
     </div>

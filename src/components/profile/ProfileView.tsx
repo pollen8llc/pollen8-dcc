@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Edit, MapPin, Globe, User, Users, AlertCircle } from "lucide-react";
+import { Edit, MapPin, Globe, User, Users, AlertCircle, Mail, Phone } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Community, UserRole } from "@/models/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import PublicContactForm from "./PublicContactForm";
 
 interface ProfileViewProps {
   profile: any;
@@ -20,6 +21,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
   const [communities, setCommunities] = useState<Community[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showContactForm, setShowContactForm] = useState(false);
   
   // Check if the user is an admin
   const isAdmin = profile?.role === UserRole.ADMIN;
@@ -35,7 +37,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
       setError(null);
       
       try {
-        // Get communities where the user is the owner
         const { data, error } = await supabase
           .from('communities')
           .select('*')
@@ -47,10 +48,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
           return;
         }
         
-        // Map the fetched data to match the Community type expected by the state
         if (data) {
           const mappedCommunities: Community[] = data.map(comm => {
-            // Properly handle social_media to ensure it's a Record type
             let typeSafeSocialMedia: Record<string, string | { url?: string }> = {};
             
             if (comm.social_media && typeof comm.social_media === 'object') {
@@ -78,20 +77,18 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
               created_at: comm.created_at,
               updated_at: comm.updated_at,
               is_public: comm.is_public,
-              // Adding additional fields from DB to match Community type
               type: comm.type,
               format: comm.format,
               target_audience: comm.target_audience || [],
-              social_media: typeSafeSocialMedia, // Use our properly typed social_media
+              social_media: typeSafeSocialMedia,
               website: comm.website || '',
               newsletter_url: comm.newsletter_url,
               logo_url: comm.logo_url,
               founder_name: comm.founder_name,
-              // Aliases for backward compatibility
               createdAt: comm.created_at,
               updatedAt: comm.updated_at,
               targetAudience: comm.target_audience || [],
-              socialMedia: typeSafeSocialMedia, // Also update the alias
+              socialMedia: typeSafeSocialMedia,
               newsletterUrl: comm.newsletter_url,
               communityType: comm.type || comm.community_type
             };
@@ -148,106 +145,130 @@ const ProfileView: React.FC<ProfileViewProps> = ({ profile, isOwnProfile, onEdit
   }
 
   return (
-    <div className="w-full space-y-8">
-      {/* Hero Profile Section */}
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        {/* Avatar and Basic Info */}
-        <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+    <div className="w-full max-w-4xl mx-auto">
+      {/* Android-style symmetrical profile header */}
+      <div className="text-center mb-8">
+        <div className="relative inline-block mb-4">
           <div className={isAdmin ? 'admin-avatar-border rounded-full p-1' : ''}>
-            <Avatar className="h-32 w-32 lg:h-40 lg:w-40">
+            <Avatar className="h-32 w-32">
               <AvatarImage src={profile?.avatar_url || ""} alt={getFullName()} />
-              <AvatarFallback className="text-2xl lg:text-3xl">{getInitials()}</AvatarFallback>
+              <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
             </Avatar>
           </div>
-          <div className="mt-4">
-            <h1 className="text-3xl lg:text-4xl font-bold">{getFullName()}</h1>
-            {profile?.location && (
-              <div className="flex items-center justify-center lg:justify-start text-muted-foreground mt-2">
-                <MapPin className="h-4 w-4 mr-1" />
-                <span>{profile.location}</span>
-              </div>
-            )}
-            <p className="text-sm text-muted-foreground mt-2">
-              Member since {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'recently'}
-            </p>
+        </div>
+        
+        <h1 className="text-3xl font-bold mb-2">{getFullName()}</h1>
+        
+        {profile?.location && (
+          <div className="flex items-center justify-center text-muted-foreground mb-2">
+            <MapPin className="h-4 w-4 mr-1" />
+            <span>{profile.location}</span>
           </div>
+        )}
+        
+        <p className="text-sm text-muted-foreground mb-4">
+          Member since {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'recently'}
+        </p>
+
+        {/* Action buttons - centered */}
+        <div className="flex justify-center gap-3 mb-6">
+          {isOwnProfile ? (
+            <Button onClick={onEdit} className="flex items-center gap-2">
+              <Edit className="h-4 w-4" />
+              Edit Profile
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => setShowContactForm(!showContactForm)}
+              className="flex items-center gap-2"
+            >
+              <Mail className="h-4 w-4" />
+              Contact
+            </Button>
+          )}
         </div>
 
-        {/* Main Profile Content */}
-        <div className="flex-1 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* About Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  About
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {profile?.bio ? (
-                  <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
-                ) : (
-                  <p className="text-muted-foreground italic">No bio provided</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Interests Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Interests</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {profile.interests.map((interest: string, idx: number) => (
-                      <Badge key={idx} variant="secondary" className="text-sm">{interest}</Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground italic">No interests listed</p>
-                )}
-              </CardContent>
-            </Card>
+        {/* Contact form for non-own profiles */}
+        {!isOwnProfile && showContactForm && (
+          <div className="flex justify-center mb-6">
+            <PublicContactForm 
+              profileUserId={profile.id}
+              profileUserName={getFullName()}
+            />
           </div>
-
-          {/* Social Links */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Social Links
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {profile?.social_links && typeof profile.social_links === 'object' && 
-               Object.keys(profile.social_links).length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.entries(profile.social_links).map(([platform, url]) => (
-                    <a 
-                      key={platform}
-                      href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-primary hover:underline p-3 border rounded-md hover:bg-muted/50 transition-colors"
-                    >
-                      <Globe className="h-4 w-4" />
-                      <span className="capitalize font-medium">{platform}</span>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground italic">No social links added</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        )}
       </div>
 
-      <Separator className="my-8" />
-      
-      {/* Communities Section */}
+      {/* Symmetrical content grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* About Section */}
+        <Card className="h-fit">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              About
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {profile?.bio ? (
+              <p className="text-muted-foreground leading-relaxed">{profile.bio}</p>
+            ) : (
+              <p className="text-muted-foreground italic">No bio provided</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Interests Section */}
+        <Card className="h-fit">
+          <CardHeader>
+            <CardTitle>Interests</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {profile.interests.map((interest: string, idx: number) => (
+                  <Badge key={idx} variant="secondary" className="text-sm">{interest}</Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground italic">No interests listed</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Social Links - Full width */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Social Links
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {profile?.social_links && typeof profile.social_links === 'object' && 
+           Object.keys(profile.social_links).length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(profile.social_links).map(([platform, url]) => (
+                <a 
+                  key={platform}
+                  href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline p-3 border rounded-md hover:bg-muted/50 transition-colors"
+                >
+                  <Globe className="h-4 w-4" />
+                  <span className="capitalize font-medium">{platform}</span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground italic text-center py-4">No social links added</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Communities Section - Full width */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">

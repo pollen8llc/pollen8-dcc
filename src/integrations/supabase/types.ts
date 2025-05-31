@@ -680,6 +680,7 @@ export type Database = {
           color: string | null
           created_at: string | null
           id: string
+          is_system_protected: boolean | null
           name: string
           updated_at: string | null
           user_id: string
@@ -688,6 +689,7 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           id?: string
+          is_system_protected?: boolean | null
           name: string
           updated_at?: string | null
           user_id: string
@@ -696,6 +698,7 @@ export type Database = {
           color?: string | null
           created_at?: string | null
           id?: string
+          is_system_protected?: boolean | null
           name?: string
           updated_at?: string | null
           user_id?: string
@@ -781,6 +784,7 @@ export type Database = {
           organization: string | null
           phone: string | null
           role: string | null
+          source: string | null
           tags: string[] | null
           updated_at: string | null
           user_id: string
@@ -797,6 +801,7 @@ export type Database = {
           organization?: string | null
           phone?: string | null
           role?: string | null
+          source?: string | null
           tags?: string[] | null
           updated_at?: string | null
           user_id: string
@@ -813,6 +818,7 @@ export type Database = {
           organization?: string | null
           phone?: string | null
           role?: string | null
+          source?: string | null
           tags?: string[] | null
           updated_at?: string | null
           user_id?: string
