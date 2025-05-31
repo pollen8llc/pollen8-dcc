@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -82,7 +81,8 @@ const ProfilePage: React.FC = () => {
         }
 
         // Check if profile is viewable
-        const isPublic = data.privacy_settings?.profile_visibility === 'public';
+        const privacySettings = data.privacy_settings as { profile_visibility?: string } || {};
+        const isPublic = privacySettings.profile_visibility === 'public';
         const isOwner = currentUser && data.id === currentUser.id;
         
         if (!isPublic && !isOwner && !currentUser) {
