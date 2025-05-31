@@ -28,6 +28,7 @@ const ContactList: React.FC<ContactListProps> = ({
   isSelectionMode = false
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const queryClient = useQueryClient();
 
   useEffect(() => {
