@@ -5,9 +5,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Mail, Phone, User, MessageSquare } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Mail, Phone, User, Tag, X } from 'lucide-react';
 
 interface PublicContactFormProps {
   profileUserId: string;
@@ -22,10 +22,35 @@ const PublicContactForm: React.FC<PublicContactFormProps> = ({
     name: '',
     email: '',
     phone: '',
-    message: ''
+    tags: [] as string[]
   });
+  const [currentTag, setCurrentTag] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  const handleAddTag = () => {
+    if (currentTag.trim() && !formData.tags.includes(currentTag.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, currentTag.trim()]
+      }));
+      setCurrentTag('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTag();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +87,7 @@ const PublicContactForm: React.FC<PublicContactFormProps> = ({
           name: formData.name,
           email: formData.email,
           phone: formData.phone || null,
-          notes: formData.message || null,
+          tags: formData.tags.length > 0 ? formData.tags : null,
           category_id: organicCategory.id,
           source: 'organic'
         });
@@ -79,7 +104,7 @@ const PublicContactForm: React.FC<PublicContactFormProps> = ({
         name: '',
         email: '',
         phone: '',
-        message: ''
+        tags: []
       });
 
     } catch (error: any) {
@@ -148,17 +173,44 @@ const PublicContactForm: React.FC<PublicContactFormProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="message" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Message (Optional)
+            <Label htmlFor="tags" className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Tags (Optional)
             </Label>
-            <Textarea
-              id="message"
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              placeholder="Your message..."
-              rows={3}
-            />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="tags"
+                  value={currentTag}
+                  onChange={(e) => setCurrentTag(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Add a tag and press Enter"
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddTag}
+                  variant="outline"
+                  size="sm"
+                  disabled={!currentTag.trim()}
+                >
+                  Add
+                </Button>
+              </div>
+              
+              {formData.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                      {tag}
+                      <X
+                        className="h-3 w-3 cursor-pointer hover:text-destructive"
+                        onClick={() => handleRemoveTag(tag)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <Button 

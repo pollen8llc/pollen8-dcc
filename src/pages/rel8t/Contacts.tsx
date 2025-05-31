@@ -4,11 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import ContactList from "@/components/rel8t/ContactList";
-import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search } from "lucide-react";
+import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
-import { getContacts, deleteMultipleContacts } from "@/services/rel8t/contactService";
+import { getContacts, deleteMultipleContacts, getCategories } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 
 const Contacts = () => {
@@ -17,6 +18,8 @@ const Contacts = () => {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedTag, setSelectedTag] = useState<string>("all");
 
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
@@ -24,18 +27,52 @@ const Contacts = () => {
     queryFn: () => getContacts(),
   });
 
-  // Filter contacts based on search query
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => getCategories(),
+  });
+
+  // Get unique tags from all contacts
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    contacts.forEach(contact => {
+      if (contact.tags && Array.isArray(contact.tags)) {
+        contact.tags.forEach(tag => tagSet.add(tag));
+      }
+    });
+    return Array.from(tagSet).sort();
+  }, [contacts]);
+
+  // Filter contacts based on search query, category, and tags
   const filteredContacts = useMemo(() => {
-    if (!searchQuery.trim()) return contacts;
+    let filtered = contacts;
     
-    const query = searchQuery.toLowerCase();
-    return contacts.filter(contact => 
-      contact.name?.toLowerCase().includes(query) ||
-      contact.email?.toLowerCase().includes(query) ||
-      contact.organization?.toLowerCase().includes(query) ||
-      contact.role?.toLowerCase().includes(query)
-    );
-  }, [contacts, searchQuery]);
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(contact => 
+        contact.name?.toLowerCase().includes(query) ||
+        contact.email?.toLowerCase().includes(query) ||
+        contact.organization?.toLowerCase().includes(query) ||
+        contact.role?.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(contact => contact.category?.id === selectedCategory);
+    }
+    
+    // Filter by tag
+    if (selectedTag !== "all") {
+      filtered = filtered.filter(contact => 
+        contact.tags && Array.isArray(contact.tags) && contact.tags.includes(selectedTag)
+      );
+    }
+    
+    return filtered;
+  }, [contacts, searchQuery, selectedCategory, selectedTag]);
 
   const handleEditContact = (contact: any) => {
     navigate(`/rel8/contacts/${contact.id}/edit`);
@@ -89,6 +126,12 @@ const Contacts = () => {
     setSelectedContacts([]);
   };
 
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setSelectedTag("all");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -133,7 +176,6 @@ const Contacts = () => {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        // For now, just edit the first selected contact
                         const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
                         if (firstContact) handleEditContact(firstContact);
                       }}
@@ -189,26 +231,78 @@ const Contacts = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search contacts by name, email, organization..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+        {/* Search and Filter Controls */}
+        <div className="space-y-4 mb-6">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search contacts by name, email, organization..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Filter Controls */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex items-center gap-2 flex-1">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedTag} onValueChange={setSelectedTag}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="All Tags" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tags</SelectItem>
+                  {allTags.map((tag) => (
+                    <SelectItem key={tag} value={tag}>
+                      {tag}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(searchQuery || selectedCategory !== "all" || selectedTag !== "all") && (
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
         </div>
 
-        <ContactList
-          contacts={filteredContacts}
-          isLoading={isLoading}
-          onEdit={handleEditContact}
-          onRefresh={handleRefresh}
-          onContactMultiSelect={isSelectionMode ? handleContactSelect : undefined}
-          selectedContacts={selectedContacts}
-          isSelectionMode={isSelectionMode}
-        />
+        {/* Fixed height container for better scrolling */}
+        <div className="h-[calc(100vh-400px)] overflow-hidden">
+          <ContactList
+            contacts={filteredContacts}
+            isLoading={isLoading}
+            onEdit={handleEditContact}
+            onRefresh={handleRefresh}
+            onContactMultiSelect={isSelectionMode ? handleContactSelect : undefined}
+            selectedContacts={selectedContacts}
+            isSelectionMode={isSelectionMode}
+          />
+        </div>
       </div>
     </div>
   );

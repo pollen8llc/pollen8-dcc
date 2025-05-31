@@ -2,7 +2,6 @@
 import React from 'react';
 import { Contact } from '@/services/rel8t/contactService';
 import ContactCard from './ContactCard';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ContactListProps {
   contacts?: Contact[];
@@ -44,8 +43,8 @@ const ContactList: React.FC<ContactListProps> = ({
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-300px)]">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pr-4">
+    <div className="h-full overflow-y-auto pr-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {contacts.map((contact) => (
           <ContactCard 
             key={contact.id} 
@@ -57,7 +56,7 @@ const ContactList: React.FC<ContactListProps> = ({
           />
         ))}
       </div>
-    </ScrollArea>
+    </div>
   );
 };
 
