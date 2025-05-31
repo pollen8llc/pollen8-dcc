@@ -56,7 +56,6 @@ const ContactList: React.FC<ContactListProps> = ({
           />
         ))}
       </div>
-    </ScrollArea>
   );
 };
 
