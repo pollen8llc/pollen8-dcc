@@ -8,6 +8,7 @@ import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search, Filter } from "l
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { getContacts, deleteMultipleContacts, getCategories } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
@@ -133,121 +134,98 @@ const Contacts = () => {
   };
 
   return (
-  return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="flex flex-col flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-8 min-h-0">
         <Rel8OnlyNavigation />
         
-        <Breadcrumb className="mb-4 sm:mb-6 mt-2 sm:mt-4">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/rel8/dashboard">Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink>Relationships</BreadcrumbLink>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        
-        <div className="flex flex-col gap-4 mb-4 sm:mb-6">
+        <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Relationships</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Contacts</h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                Manage your outreach and nurture your network
+                Manage your network and relationships
               </p>
             </div>
             
-            <Button 
-              onClick={handleCreateRelationship}
-              className="flex items-center gap-2 w-full sm:w-auto"
-              size="sm"
-            >
-              <PlusCircle className="h-4 w-4" />
-              <span className="sm:inline">Create Plan</span>
-            </Button>
-          </div>
-        </div>
-          
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            {isSelectionMode ? (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={handleSelectAll}
-                  className="flex items-center gap-2"
-                  size="sm"
-                >
-                  {selectedContacts.length === filteredContacts.length ? (
-                    <CheckSquare className="h-4 w-4" />
-                  ) : (
-                    <Square className="h-4 w-4" />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {isSelectionMode ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={handleSelectAll}
+                    className="flex items-center gap-2"
+                    size="sm"
+                  >
+                    {selectedContacts.length === filteredContacts.length ? (
+                      <CheckSquare className="h-4 w-4" />
+                    ) : (
+                      <Square className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">
+                      {selectedContacts.length === filteredContacts.length ? "Deselect All" : "Select All"}
+                    </span>
+                  </Button>
+                  
+                  {selectedContacts.length > 0 && (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
+                          if (firstContact) handleEditContact(firstContact);
+                        }}
+                        className="flex items-center gap-2"
+                        size="sm"
+                      >
+                        <Edit className="h-4 w-4" />
+                        <span className="hidden sm:inline">Edit</span>
+                      </Button>
+                      
+                      <Button
+                        variant="destructive"
+                        onClick={handleBulkDelete}
+                        className="flex items-center gap-2"
+                        size="sm"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="hidden sm:inline">Delete ({selectedContacts.length})</span>
+                      </Button>
+                    </>
                   )}
-                  <span className="hidden sm:inline">
-                    {selectedContacts.length === filteredContacts.length ? "Deselect All" : "Select All"}
-                  </span>
-                </Button>
-                
-                {selectedContacts.length > 0 && (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
-                        if (firstContact) handleEditContact(firstContact);
-                      }}
-                      className="flex items-center gap-2"
-                      size="sm"
-                    >
-                      <Edit className="h-4 w-4" />
-                      <span className="hidden sm:inline">Edit</span>
-                    </Button>
-                    
-                    <Button
-                      variant="destructive"
-                      onClick={handleBulkDelete}
-                      className="flex items-center gap-2"
-                      size="sm"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Delete ({selectedContacts.length})</span>
-                    </Button>
-                  </>
-                )}
-                
-                <Button
-                  variant="outline"
-                  onClick={toggleSelectionMode}
-                  size="sm"
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={toggleSelectionMode}
-                  className="flex items-center gap-2"
-                  size="sm"
-                >
-                  <CheckSquare className="h-4 w-4" />
-                  <span className="hidden sm:inline">Select</span>
-                </Button>
-                
-                <Button 
-                  onClick={() => navigate("/rel8/contacts/new")}
-                  className="flex items-center gap-2 w-full sm:w-auto"
-                  size="sm"
-                >
-                  <PlusCircle className="h-4 w-4" />
-                  <span className="sm:inline">New Contact</span>
-                </Button>
-              </>
-            )}
+                  
+                  <Button
+                    variant="outline"
+                    onClick={toggleSelectionMode}
+                    size="sm"
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={toggleSelectionMode}
+                    className="flex items-center gap-2"
+                    size="sm"
+                  >
+                    <CheckSquare className="h-4 w-4" />
+                    <span className="hidden sm:inline">Select</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => navigate("/rel8/contacts/new")}
+                    className="flex items-center gap-2 w-full sm:w-auto"
+                    size="sm"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    <span className="sm:inline">New Contact</span>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -311,7 +289,7 @@ const Contacts = () => {
           </div>
         </div>
         
-        <div className="flex-1 min-h-0">
+        <ScrollArea className="flex-1">
           <ContactList
             contacts={filteredContacts}
             isLoading={isLoading}
@@ -321,7 +299,7 @@ const Contacts = () => {
             selectedContacts={selectedContacts}
             isSelectionMode={isSelectionMode}
           />
-        </div>
+        </ScrollArea>
       </div>
     </div>
   );
