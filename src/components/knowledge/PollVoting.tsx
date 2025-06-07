@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { CheckCircle2, TrendingUp } from 'lucide-react';
 
 interface PollOption {
   text: string;
@@ -30,12 +30,43 @@ interface ResponseCount {
   count: number;
 }
 
+// Custom hook for animated counting
+const useAnimatedCounter = (target: number, duration: number = 1000) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const startCount = count;
+    
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentCount = Math.floor(startCount + (target - startCount) * easeOutQuart);
+      
+      setCount(currentCount);
+      
+      if (progress >= 1) {
+        clearInterval(timer);
+        setCount(target);
+      }
+    }, 16);
+
+    return () => clearInterval(timer);
+  }, [target, duration]);
+
+  return count;
+};
+
 export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwner = false }) => {
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [hasResponded, setHasResponded] = useState(false);
   const [responseCounts, setResponseCounts] = useState<ResponseCount[]>([]);
   const [totalResponses, setTotalResponses] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const { toast } = useToast();
 
   const loadResponses = async () => {
@@ -84,6 +115,13 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
   useEffect(() => {
     loadResponses();
   }, [pollId]);
+
+  // Trigger results animation after data loads
+  useEffect(() => {
+    if ((hasResponded || isOwner) && responseCounts.length > 0) {
+      setTimeout(() => setShowResults(true), 300);
+    }
+  }, [hasResponded, isOwner, responseCounts]);
 
   const handleSubmitResponse = async () => {
     if (selectedOptions.length === 0) {
@@ -160,51 +198,121 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
     }
   };
 
+  // Animated Result Option Component
+  const AnimatedResultOption = ({ option, index, delay }: { option: PollOption, index: number, delay: number }) => {
+    const responseCount = getResponseCount(index);
+    const percentage = getResponsePercentage(index);
+    const isSelected = selectedOptions.includes(index);
+    const animatedCount = useAnimatedCounter(responseCount, 1200);
+    const animatedPercentage = useAnimatedCounter(percentage, 1500);
+    
+    return (
+      <div 
+        className={`space-y-3 p-4 rounded-lg border transition-all duration-500 hover:shadow-md ${
+          isSelected 
+            ? 'bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30 shadow-sm' 
+            : 'bg-background hover:bg-muted/30'
+        }`}
+        style={{ 
+          animationDelay: `${delay}ms`,
+          animation: showResults ? 'fade-in 0.6s ease-out forwards' : 'none',
+          opacity: showResults ? 1 : 0,
+          transform: showResults ? 'translateY(0)' : 'translateY(20px)'
+        }}
+      >
+        <div className="flex justify-between items-start">
+          <div className="flex items-start gap-3 flex-1">
+            {isSelected && (
+              <CheckCircle2 
+                className="h-5 w-5 text-primary mt-0.5 animate-scale-in" 
+                style={{ animationDelay: `${delay + 200}ms` }}
+              />
+            )}
+            <span className={`text-sm leading-relaxed ${isSelected ? 'font-medium text-primary' : 'text-foreground'}`}>
+              {option.text}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-3 text-right">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <TrendingUp className="h-3 w-3" />
+              <span className="font-mono font-medium">
+                {showResults ? animatedCount : 0}
+              </span>
+            </div>
+            <div className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+              {showResults ? `${animatedPercentage.toFixed(1)}%` : '0.0%'}
+            </div>
+          </div>
+        </div>
+        
+        <div className="relative">
+          <Progress 
+            value={showResults ? percentage : 0} 
+            className="h-3 transition-all duration-1000 ease-out" 
+            style={{ transitionDelay: `${delay + 100}ms` }}
+            indicatorClassName={isSelected ? 'bg-primary' : 'bg-muted-foreground/60'}
+          />
+          {percentage > 0 && (
+            <div 
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"
+              style={{ 
+                width: `${percentage}%`,
+                animationDelay: `${delay + 300}ms`,
+                animationDuration: '2s'
+              }}
+            />
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardContent className="p-6">
         <div className="space-y-4">
           {hasResponded || isOwner ? (
-            // Show results
-            <div className="space-y-3">
-              <h4 className="font-medium text-sm text-muted-foreground">Results ({totalResponses} responses)</h4>
-              {pollData.options.map((option, index) => {
-                const responseCount = getResponseCount(index);
-                const percentage = getResponsePercentage(index);
-                const isSelected = selectedOptions.includes(index);
-                
-                return (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className={`text-sm ${isSelected ? 'font-medium' : ''}`}>
-                        {option.text} {isSelected && '✓'}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {responseCount} ({percentage.toFixed(1)}%)
-                      </span>
-                    </div>
-                    <Progress value={percentage} className="h-2" />
-                  </div>
-                );
-              })}
+            // Show animated results
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-6">
+                <h4 className="font-semibold text-lg flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Poll Results
+                </h4>
+                <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                  {totalResponses} {totalResponses === 1 ? 'response' : 'responses'}
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                {pollData.options.map((option, index) => (
+                  <AnimatedResultOption
+                    key={index}
+                    option={option}
+                    index={index}
+                    delay={index * 150}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
             // Show voting interface
-            <div className="space-y-4">
-              <h4 className="font-medium text-sm text-muted-foreground">
+            <div className="space-y-6">
+              <h4 className="font-medium text-base text-muted-foreground">
                 {pollData.allowMultipleSelections ? 'Select one or more options:' : 'Select one option:'}
               </h4>
               
               {pollData.allowMultipleSelections ? (
                 <div className="space-y-3">
                   {pollData.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
+                    <div key={index} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                       <Checkbox
                         id={`option-${index}`}
                         checked={selectedOptions.includes(index)}
                         onCheckedChange={(checked) => handleOptionChange(index, checked as boolean)}
                       />
-                      <Label htmlFor={`option-${index}`} className="text-sm flex-1">
+                      <Label htmlFor={`option-${index}`} className="text-sm flex-1 cursor-pointer">
                         {option.text}
                       </Label>
                     </div>
@@ -216,9 +324,9 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
                   onValueChange={(value) => setSelectedOptions([parseInt(value)])}
                 >
                   {pollData.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
+                    <div key={index} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                      <Label htmlFor={`option-${index}`} className="text-sm flex-1">
+                      <Label htmlFor={`option-${index}`} className="text-sm flex-1 cursor-pointer">
                         {option.text}
                       </Label>
                     </div>
