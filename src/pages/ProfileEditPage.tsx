@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useProfiles } from "@/hooks/useProfiles";
+import { FormProvider, useForm } from "react-hook-form";
 import Navbar from "@/components/Navbar";
 import UnifiedProfileForm from "@/components/profile/UnifiedProfileForm";
 
@@ -12,19 +13,45 @@ const ProfileEditPage: React.FC = () => {
   const { profile, getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<any>(null);
 
-  // Fetch profile data
+  // Initialize form with react-hook-form
+  const form = useForm({
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      bio: '',
+      location: '',
+      interests: [],
+      socialLinks: {},
+      profileVisibility: 'public'
+    }
+  });
+
+  // Fetch profile data and populate form
   React.useEffect(() => {
     const fetchProfile = async () => {
       if (currentUser) {
         const fetchedProfile = await getProfileById(currentUser.id);
-        setProfileData(fetchedProfile);
+        if (fetchedProfile) {
+          setProfileData(fetchedProfile);
+          
+          // Populate form with existing data
+          form.reset({
+            firstName: fetchedProfile.first_name || '',
+            lastName: fetchedProfile.last_name || '',
+            bio: fetchedProfile.bio || '',
+            location: fetchedProfile.location || '',
+            interests: fetchedProfile.interests || [],
+            socialLinks: fetchedProfile.social_links || {},
+            profileVisibility: fetchedProfile.privacy_settings?.profile_visibility || 'public'
+          });
+        }
       }
     };
 
     if (currentUser && !isLoading) {
       fetchProfile();
     }
-  }, [currentUser, isLoading, getProfileById]);
+  }, [currentUser, isLoading, getProfileById, form]);
 
   // Redirect if user is not authenticated
   if (!isLoading && !currentUser) {
@@ -54,11 +81,13 @@ const ProfileEditPage: React.FC = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-3xl mx-auto">
-          <UnifiedProfileForm 
-            mode="edit" 
-            existingData={profileData}
-            onComplete={() => navigate(`/profile/${currentUser.id}`)}
-          />
+          <FormProvider {...form}>
+            <UnifiedProfileForm 
+              mode="edit" 
+              existingData={profileData}
+              onComplete={() => navigate(`/profile/${currentUser.id}`)}
+            />
+          </FormProvider>
         </div>
       </div>
     </div>

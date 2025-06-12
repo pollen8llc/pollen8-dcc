@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
-import ThemeToggle from '@/components/ThemeToggle';
 import UserMenuDropdown from '@/components/navbar/UserMenuDropdown';
 import { NavigationDrawer } from '@/components/navbar/NavigationDrawer';
 import { Menu } from 'lucide-react';
@@ -33,8 +32,6 @@ const Navbar = () => {
         />
         
         <div className="flex items-center space-x-2">
-          <ThemeToggle />
-          
           {currentUser ? (
             <UserMenuDropdown currentUser={currentUser} isAdmin={currentUser.role === 'ADMIN'} />
           ) : (
