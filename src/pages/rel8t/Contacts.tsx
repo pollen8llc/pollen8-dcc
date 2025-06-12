@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import ContactList from "@/components/rel8t/ContactList";
-import Rel8TNavigation from "@/components/rel8t/Rel8TNavigation";
+import { Rel8TNavigation } from "@/components/rel8t/Rel8TNavigation";
 import { Shell } from "@/components/layout/Shell";
 
 const Contacts = () => {
@@ -116,7 +116,7 @@ const Contacts = () => {
           </div>
         </div>
 
-        <ContactList searchTerm={searchTerm} selectedCategory={selectedCategory} />
+        <ContactList />
       </div>
     </Shell>
   );

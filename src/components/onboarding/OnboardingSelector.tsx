@@ -88,6 +88,7 @@ const OnboardingSelector = () => {
         navigate("/communities/join");
       }
     } else {
+      // For service provider or other roles, go to main page
       navigate("/");
     }
   };
@@ -183,25 +184,25 @@ const OnboardingSelector = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Just Browsing
+              Service Provider
             </CardTitle>
             <CardDescription>
-              Browse public communities as a guest
+              Provide services to the community
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              Browse public communities and content without joining. You can
-              always join or create communities later.
+              Offer your services to community members and access specialized
+              features for service providers.
             </p>
           </CardContent>
           <CardFooter>
             <Button 
-              onClick={() => handleRoleSelected(UserRole.GUEST)}
+              onClick={() => handleRoleSelected(UserRole.SERVICE_PROVIDER)}
               className="w-full"
               variant="outline"
             >
-              Continue as Guest
+              Become Service Provider
             </Button>
           </CardFooter>
         </Card>

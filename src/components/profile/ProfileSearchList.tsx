@@ -51,8 +51,8 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
         return "bg-blue-500 text-white";
       case UserRole.MEMBER:
         return "bg-green-500 text-white";
-      case UserRole.GUEST:
-        return "bg-gray-500 text-white";
+      case UserRole.SERVICE_PROVIDER:
+        return "bg-orange-500 text-white";
       default:
         return "bg-gray-500 text-white";
     }
@@ -60,8 +60,8 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
   
   // Get role display name
   const getRoleDisplayName = (role?: UserRole) => {
-    if (role === undefined) return "GUEST";
-    return UserRole[role] || "GUEST";
+    if (role === undefined) return "MEMBER";
+    return UserRole[role] || "MEMBER";
   };
 
   // Check if user is admin
