@@ -40,6 +40,8 @@ export const usePermissions = (currentUser: User | null) => {
       switch (currentUser.role) {
         case UserRole.ORGANIZER:
           return action === 'read' || resource === 'knowledgeBase';
+        case UserRole.SERVICE_PROVIDER:
+          return action === 'read' || resource === 'knowledgeBase' || resource === 'rel8';
         case UserRole.MEMBER:
           return action === 'read' || resource === 'comment';
         default:
@@ -73,6 +75,8 @@ export const usePermissions = (currentUser: User | null) => {
           return action === 'read';
         }
         return resource === 'knowledgeBase' || action === 'read';
+      case UserRole.SERVICE_PROVIDER:
+        return resource === 'knowledgeBase' || resource === 'rel8' || action === 'read';
       case UserRole.MEMBER:
         return action === 'read' || resource === 'comment';
       default:
@@ -100,6 +104,11 @@ export const usePermissions = (currentUser: User | null) => {
     
     // Check if user manages the specific community
     return Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.includes(communityId);
+  };
+
+  // Check if user is a service provider
+  const isServiceProvider = (): boolean => {
+    return currentUser?.role === UserRole.SERVICE_PROVIDER;
   };
   
   // Check if user is an owner of a specific community
@@ -133,6 +142,10 @@ export const usePermissions = (currentUser: User | null) => {
     if (isOrganizer()) {
       return { text: "Organizer", color: "bg-blue-500 hover:bg-blue-600" };
     }
+
+    if (isServiceProvider()) {
+      return { text: "Service Provider", color: "bg-orange-500 hover:bg-orange-600" };
+    }
     
     if (currentUser.role === UserRole.MEMBER) {
       return { text: "Member", color: "bg-green-500 hover:bg-green-600" };
@@ -146,6 +159,7 @@ export const usePermissions = (currentUser: User | null) => {
     checkPermission, 
     isAdmin, 
     isOrganizer, 
+    isServiceProvider,
     isOwner,
     getRoleBadge
   };

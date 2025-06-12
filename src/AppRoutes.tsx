@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Authentication
@@ -42,7 +42,6 @@ import OrganizerDashboard from '@/pages/OrganizerDashboard';
 import DotConnectorDashboard from '@/pages/DotConnectorDashboard';
 
 // Rel8 CRM
-import Dashboard from '@/pages/rel8t/Dashboard';
 import Contacts from '@/pages/rel8t/Contacts';
 import ContactCreate from '@/pages/rel8t/ContactCreate';
 import ContactEdit from '@/pages/rel8t/ContactEdit';
@@ -196,9 +195,10 @@ const AppRoutes = () => {
         } />
 
         {/* Rel8 CRM Routes - Now protected for organizers only */}
+        {/* Redirect /rel8 to /rel8/relationships */}
         <Route path="/rel8" element={
           <Rel8ProtectedRoute>
-            <Dashboard />
+            <Navigate to="/rel8/relationships" replace />
           </Rel8ProtectedRoute>
         } />
         

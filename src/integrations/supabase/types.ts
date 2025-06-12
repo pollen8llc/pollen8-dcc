@@ -1321,9 +1321,13 @@ export type Database = {
         Args: { p_user_id: string; p_role_name: string; p_assigner_id: string }
         Returns: boolean
       }
+      update_user_role_self: {
+        Args: { new_role: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "ADMIN" | "ORGANIZER" | "MEMBER" | "SERVICE_PROVIDER"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1438,6 +1442,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["ADMIN", "ORGANIZER", "MEMBER", "SERVICE_PROVIDER"],
+    },
   },
 } as const

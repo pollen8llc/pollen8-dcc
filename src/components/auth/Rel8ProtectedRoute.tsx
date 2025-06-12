@@ -10,7 +10,7 @@ interface Rel8ProtectedRouteProps {
 
 const Rel8ProtectedRoute = ({ children }: Rel8ProtectedRouteProps) => {
   const { currentUser, isLoading } = useUser();
-  const { isOrganizer, isAdmin } = usePermissions(currentUser);
+  const { isOrganizer, isAdmin, isServiceProvider } = usePermissions(currentUser);
   
   // Show loading while checking authentication
   if (isLoading) {
@@ -27,8 +27,8 @@ const Rel8ProtectedRoute = ({ children }: Rel8ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Check if user has organizer permissions
-  if (!isAdmin && !isOrganizer()) {
+  // Check if user has organizer, service provider, or admin permissions
+  if (!isAdmin && !isOrganizer() && !isServiceProvider()) {
     return <Navigate to="/" replace />;
   }
 

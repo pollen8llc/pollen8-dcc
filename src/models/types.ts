@@ -1,9 +1,8 @@
-
 export enum UserRole {
-  ADMIN = "ADMIN",        // System administrators
-  ORGANIZER = "ORGANIZER", // Community organizers
-  MEMBER = "MEMBER",      // Regular community members
-  GUEST = "GUEST"         // Unauthenticated/public users
+  ADMIN = "ADMIN",
+  ORGANIZER = "ORGANIZER", 
+  MEMBER = "MEMBER",
+  SERVICE_PROVIDER = "SERVICE_PROVIDER"
 }
 
 export interface User {
