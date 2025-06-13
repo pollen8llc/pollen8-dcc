@@ -133,7 +133,7 @@ const Contacts = () => {
   };
 
   return (
-    <div className="flex flex-col bg-background">
+    <div className="flex flex-col h-screen bg-background">
       <Navbar />
       
       <div className="flex flex-col flex-1 overflow-hidden">
