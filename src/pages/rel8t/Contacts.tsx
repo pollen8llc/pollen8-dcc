@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -137,11 +136,11 @@ const Contacts = () => {
     <div className="flex flex-col h-screen bg-background">
       <Navbar />
       
-      <div className="flex flex-col flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-8 min-h-0">
-        <Rel8OnlyNavigation />
-        
-        <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 flex-shrink-0">
+          <Rel8OnlyNavigation />
+          
+          <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-4">
             <div className="w-full sm:w-auto">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Contacts</h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-1">
