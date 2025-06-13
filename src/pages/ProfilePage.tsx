@@ -5,7 +5,6 @@ import { useUser } from "@/contexts/UserContext";
 import { useProfiles } from "@/hooks/useProfiles";
 import Navbar from "@/components/Navbar";
 import MobileProfileView from "@/components/profile/MobileProfileView";
-import DesktopProfileView from "@/components/profile/DesktopProfileView";
 import { useNavigate } from "react-router-dom";
 
 const ProfilePage: React.FC = () => {
@@ -63,24 +62,11 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      {/* Desktop View */}
-      <div className="hidden md:block">
-        <DesktopProfileView 
-          user={profileData}
-          isOwnProfile={isOwnProfile}
-          onEdit={handleEdit}
-        />
-      </div>
-      
-      {/* Mobile View */}
-      <div className="md:hidden">
-        <MobileProfileView 
-          user={profileData}
-          isOwnProfile={isOwnProfile}
-          onEdit={handleEdit}
-        />
-      </div>
+      <MobileProfileView 
+        user={profileData}
+        isOwnProfile={isOwnProfile}
+        onEdit={handleEdit}
+      />
     </div>
   );
 };

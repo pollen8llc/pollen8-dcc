@@ -11,15 +11,13 @@ const Index = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    if (!isLoading) {
-      if (currentUser) {
-        // Check if profile is complete before redirecting
-        if (!currentUser.profile_complete) {
-          navigate("/profile/setup", { replace: true });
-        } else {
-          // If user is logged in and profile is complete, redirect to knowledge resources
-          navigate("/knowledge/resources", { replace: true });
-        }
+    if (!isLoading && currentUser) {
+      // Check if profile is complete before redirecting
+      if (!currentUser.profile_complete) {
+        navigate("/profile/setup");
+      } else {
+        // If user is logged in and profile is complete, redirect to knowledge resources
+        navigate("/knowledge/resources");
       }
     }
   }, [currentUser, isLoading, navigate]);
@@ -32,20 +30,11 @@ const Index = () => {
     );
   }
 
-  // If not logged in, show the landing page
-  if (!currentUser) {
-    return (
-      <Shell heroMode={true}>
-        <LandingPage />
-      </Shell>
-    );
-  }
-
-  // Show loading while redirecting
+  // If not logged in, show the landing page with heroMode=true for full-width layout
   return (
-    <div className="flex items-center justify-center h-screen">
-      <Loader2 className="h-8 w-8 animate-spin" />
-    </div>
+    <Shell heroMode={true}>
+      <LandingPage />
+    </Shell>
   );
 };
 

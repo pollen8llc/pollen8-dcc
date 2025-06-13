@@ -1,4 +1,3 @@
-
 export enum UserRole {
   ADMIN = "ADMIN",
   ORGANIZER = "ORGANIZER", 
@@ -13,9 +12,6 @@ export interface User {
   imageUrl: string;
   email: string;
   bio: string;
-  location?: string;
-  phone?: string;
-  interests?: string[];
   communities: string[];
   managedCommunities?: string[]; // Communities where user is organizer
   createdAt?: string;

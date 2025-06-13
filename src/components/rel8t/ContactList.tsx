@@ -2,7 +2,6 @@
 import React from 'react';
 import { Contact } from '@/services/rel8t/contactService';
 import ContactCard from './ContactCard';
-
 interface ContactListProps {
   contacts?: Contact[];
   isLoading?: boolean;
@@ -42,27 +41,19 @@ const ContactList: React.FC<ContactListProps> = ({
     );
   }
 
-  const handleContactDelete = (contactId: string) => {
-    // Trigger refresh after delete
-    if (onRefresh) {
-      onRefresh();
-    }
-  };
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-1">
-      {contacts.map((contact) => (
-        <ContactCard 
-          key={contact.id} 
-          contact={contact}
-          onEdit={onEdit}
-          onDelete={handleContactDelete}
-          onSelect={onContactMultiSelect}
-          isSelected={selectedContacts.includes(contact.id)}
-          isSelectionMode={isSelectionMode}
-        />
-      ))}
-    </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-1">
+        {contacts.map((contact) => (
+          <ContactCard 
+            key={contact.id} 
+            contact={contact}
+            onEdit={onEdit}
+            onSelect={onContactMultiSelect}
+            isSelected={selectedContacts.includes(contact.id)}
+            isSelectionMode={isSelectionMode}
+          />
+        ))}
+      </div>
   );
 };
 

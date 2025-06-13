@@ -165,7 +165,7 @@ const ProfileSearchPage: React.FC = () => {
             const roleName = roleItem.roles?.name;
             
             if (userId && roleName) {
-              // Determine the highest role (ADMIN > ORGANIZER > MEMBER > SERVICE_PROVIDER)
+              // Determine the highest role (ADMIN > ORGANIZER > MEMBER > GUEST)
               let role: UserRole | undefined;
               
               // Map the role string to UserRole enum
@@ -175,15 +175,15 @@ const ProfileSearchPage: React.FC = () => {
                 role = UserRole.ORGANIZER;
               } else if (roleName === 'MEMBER') {
                 role = UserRole.MEMBER;
-              } else if (roleName === 'SERVICE_PROVIDER') {
-                role = UserRole.SERVICE_PROVIDER;
+              } else if (roleName === 'GUEST') {
+                role = UserRole.GUEST;
               }
               
               // If this role is defined and higher than any existing role for this user
               if (role !== undefined) {
                 const existingRole = userRoleMap.get(userId);
                 if (existingRole === undefined || role < existingRole) {
-                  // In the enum, lower values = higher roles (ADMIN = 0, SERVICE_PROVIDER = 3)
+                  // In the enum, lower values = higher roles (ADMIN = 0, GUEST = 3)
                   userRoleMap.set(userId, role);
                 }
               }
