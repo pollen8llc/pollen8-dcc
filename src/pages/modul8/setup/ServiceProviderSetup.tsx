@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -59,8 +58,7 @@ const ServiceProviderSetup = () => {
         description: "Your service provider profile has been created."
       });
       
-      navigate('/mo
-dul8/provider');
+      navigate('/modul8/provider');
     } catch (error) {
       console.error('Error creating service provider profile:', error);
       toast({
