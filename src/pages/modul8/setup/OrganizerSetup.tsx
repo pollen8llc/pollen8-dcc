@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { createOrganizer } from '@/services/modul8Service';
+import { CreateOrganizerData } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +24,7 @@ const OrganizerSetup = () => {
     logo_url: '',
     focus_areas: [] as string[]
   });
+  
   const [newFocusArea, setNewFocusArea] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,10 +33,15 @@ const OrganizerSetup = () => {
     
     setLoading(true);
     try {
-      await createOrganizer({
-        ...formData,
-        user_id: session.user.id
-      });
+      const createData: CreateOrganizerData = {
+        user_id: session.user.id,
+        organization_name: formData.organization_name,
+        description: formData.description || undefined,
+        logo_url: formData.logo_url || undefined,
+        focus_areas: formData.focus_areas
+      };
+
+      await createOrganizer(createData);
       
       toast({
         title: "Success!",
@@ -64,13 +71,6 @@ const OrganizerSetup = () => {
     }
   };
 
-  const removeFocusArea = (area: string) => {
-    setFormData(prev => ({
-      ...prev,
-      focus_areas: prev.focus_areas.filter(a => a !== area)
-    }));
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -79,10 +79,10 @@ const OrganizerSetup = () => {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Set Up Your Organizer Profile
+              Set Up Your Organization Profile
             </h1>
             <p className="text-gray-600">
-              Create your profile to start managing ecosystem partnerships
+              Create your profile to start requesting services from providers
             </p>
           </div>
 
@@ -131,7 +131,7 @@ const OrganizerSetup = () => {
                     <Input
                       value={newFocusArea}
                       onChange={(e) => setNewFocusArea(e.target.value)}
-                      placeholder="e.g., Education, Healthcare, Environment"
+                      placeholder="e.g., Technology, Education, Healthcare"
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFocusArea())}
                     />
                     <Button type="button" variant="outline" onClick={addFocusArea}>
@@ -146,7 +146,10 @@ const OrganizerSetup = () => {
                           {area}
                           <X 
                             className="h-3 w-3 cursor-pointer" 
-                            onClick={() => removeFocusArea(area)}
+                            onClick={() => setFormData(prev => ({
+                              ...prev,
+                              focus_areas: prev.focus_areas.filter(a => a !== area)
+                            }))}
                           />
                         </Badge>
                       ))}

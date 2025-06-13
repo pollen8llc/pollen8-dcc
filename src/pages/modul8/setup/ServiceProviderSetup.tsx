@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { createServiceProvider } from '@/services/modul8Service';
+import { CreateServiceProviderData } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,11 +48,19 @@ const ServiceProviderSetup = () => {
         currency: formData.pricing_range.currency
       };
 
-      await createServiceProvider({
-        ...formData,
+      const createData: CreateServiceProviderData = {
         user_id: session.user.id,
-        pricing_range: pricingRange
-      });
+        business_name: formData.business_name,
+        tagline: formData.tagline || undefined,
+        description: formData.description || undefined,
+        logo_url: formData.logo_url || undefined,
+        services: formData.services,
+        tags: formData.tags,
+        pricing_range: pricingRange,
+        portfolio_links: formData.portfolio_links
+      };
+
+      await createServiceProvider(createData);
       
       toast({
         title: "Success!",

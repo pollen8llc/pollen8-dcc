@@ -77,6 +77,64 @@ export interface Deal {
   completed_at?: string;
 }
 
+// Database insert/update types
+export interface CreateServiceProviderData {
+  user_id: string;
+  business_name: string;
+  logo_url?: string;
+  tagline?: string;
+  description?: string;
+  services?: string[];
+  tags?: string[];
+  pricing_range?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+  };
+  portfolio_links?: string[];
+}
+
+export interface CreateOrganizerData {
+  user_id: string;
+  organization_name: string;
+  logo_url?: string;
+  description?: string;
+  focus_areas?: string[];
+}
+
+export interface CreateServiceRequestData {
+  organizer_id: string;
+  domain_page: number;
+  title: string;
+  description?: string;
+  budget_range?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+  };
+  timeline?: string;
+  milestones?: string[];
+}
+
+export interface CreateProposalData {
+  service_request_id: string;
+  from_user_id: string;
+  proposal_type: 'initial' | 'counter' | 'revision';
+  quote_amount?: number;
+  timeline?: string;
+  scope_details?: string;
+  terms?: string;
+}
+
+export interface CreateDealData {
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  final_amount: number;
+  deal_terms: any;
+  deel_contract_url?: string;
+}
+
 export const DOMAIN_PAGES = [
   { id: 1, title: 'Fundraising & Sponsorship', description: 'Grant writing, donor management, sponsorship acquisition' },
   { id: 2, title: 'Event Production & Logistics', description: 'Event planning, venue management, logistics coordination' },
