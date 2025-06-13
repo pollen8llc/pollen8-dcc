@@ -29,7 +29,8 @@ import {
   Bell,
   Folder,
   PlusCircle,
-  UserSearch
+  UserSearch,
+  Building2
 } from "lucide-react";
 
 interface NavigationDrawerProps {
@@ -128,6 +129,21 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 >
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
+                </Button>
+
+                {/* Modul8 Section */}
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  Modul8
+                </p>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/modul8")}
+                >
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Ecosystem Hub
                 </Button>
 
                 {/* Knowledge Section */}

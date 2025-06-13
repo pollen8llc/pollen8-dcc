@@ -7,11 +7,47 @@ import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus, Users, MessageSquare, CheckCircle } from 'lucide-react';
+import { Plus, Users, MessageSquare, CheckCircle, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Organizer, ServiceRequest } from '@/types/modul8';
 import ServiceRequestCard from '@/components/modul8/ServiceRequestCard';
 import { toast } from '@/hooks/use-toast';
+
+// Mock service providers for each domain
+const MOCK_PROVIDERS = {
+  1: [ // Fundraising & Sponsorship
+    { name: "FundRaise Pro", tagline: "Expert grant writers for nonprofits", logo: "💰" },
+    { name: "Sponsor Connect", tagline: "Corporate partnership specialists", logo: "🤝" }
+  ],
+  2: [ // Event Production & Logistics
+    { name: "EventFlow Solutions", tagline: "End-to-end event management", logo: "🎪" },
+    { name: "Logistics Masters", tagline: "Seamless venue coordination", logo: "📋" }
+  ],
+  3: [ // Legal & Compliance
+    { name: "LegalEase Partners", tagline: "Nonprofit legal specialists", logo: "⚖️" },
+    { name: "Compliance Guard", tagline: "Risk management & compliance", logo: "🛡️" }
+  ],
+  4: [ // Marketing & Communications
+    { name: "Brand Builders", tagline: "Digital marketing for impact", logo: "📢" },
+    { name: "Story Craft", tagline: "Content & communications", logo: "✍️" }
+  ],
+  5: [ // Technology & Digital Infrastructure
+    { name: "TechForGood", tagline: "Custom software solutions", logo: "💻" },
+    { name: "Digital Bridge", tagline: "CRM & automation experts", logo: "🌐" }
+  ],
+  6: [ // Vendor & Marketplace Management
+    { name: "Supply Chain Pro", tagline: "Vendor relationship management", logo: "🔗" },
+    { name: "Market Connect", tagline: "Marketplace development", logo: "🏪" }
+  ],
+  7: [ // Partnership Development & Collaboration
+    { name: "Alliance Partners", tagline: "Strategic partnership building", logo: "🤲" },
+    { name: "Collab Network", tagline: "Collaboration frameworks", logo: "🌟" }
+  ],
+  8: [ // Community Engagement & Relationship Management
+    { name: "Community First", tagline: "Member engagement specialists", logo: "👥" },
+    { name: "Relationship Labs", tagline: "Community growth experts", logo: "💬" }
+  ]
+};
 
 const Modul8Dashboard = () => {
   const { session } = useSession();
@@ -65,6 +101,7 @@ const Modul8Dashboard = () => {
   });
 
   const currentDomain = DOMAIN_PAGES.find(p => p.id === selectedPage);
+  const currentProviders = MOCK_PROVIDERS[selectedPage as keyof typeof MOCK_PROVIDERS] || [];
 
   if (loading) {
     return (
@@ -75,13 +112,13 @@ const Modul8Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Modul8 Dashboard</h1>
-          <p className="text-gray-600">Manage your ecosystem partnerships and collaborations</p>
+          <h1 className="text-3xl font-bold mb-2">Modul8 Dashboard</h1>
+          <p className="text-muted-foreground">Manage your ecosystem partnerships and collaborations</p>
         </div>
 
         {/* Domain Page Selector */}
@@ -90,16 +127,16 @@ const Modul8Dashboard = () => {
             {DOMAIN_PAGES.map((page) => (
               <Card 
                 key={page.id}
-                className={`cursor-pointer transition-all ${
+                className={`cursor-pointer transition-all hover:shadow-md ${
                   selectedPage === page.id 
                     ? 'ring-2 ring-primary bg-primary/5' 
-                    : 'hover:shadow-md'
+                    : 'hover:bg-muted/50'
                 }`}
                 onClick={() => setSelectedPage(page.id)}
               >
                 <CardContent className="p-4">
                   <h3 className="font-semibold text-sm mb-1">{page.title}</h3>
-                  <p className="text-xs text-gray-600">{page.description}</p>
+                  <p className="text-xs text-muted-foreground">{page.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -112,7 +149,7 @@ const Modul8Dashboard = () => {
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-xl">{currentDomain?.title}</CardTitle>
-                <p className="text-gray-600 mt-1">{currentDomain?.description}</p>
+                <p className="text-muted-foreground mt-1">{currentDomain?.description}</p>
               </div>
               <Button 
                 onClick={() => navigate(`/modul8/request/new?domain=${selectedPage}`)}
@@ -123,6 +160,29 @@ const Modul8Dashboard = () => {
               </Button>
             </div>
           </CardHeader>
+        </Card>
+
+        {/* Featured Providers */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Featured Service Providers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {currentProviders.map((provider, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+                  <div className="text-2xl">{provider.logo}</div>
+                  <div>
+                    <h4 className="font-medium">{provider.name}</h4>
+                    <p className="text-sm text-muted-foreground">{provider.tagline}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
         </Card>
 
         {/* Tabs */}
@@ -146,11 +206,11 @@ const Modul8Dashboard = () => {
             {filteredRequests.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Users className="h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                  <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
                     No {activeTab === 'all' ? 'service requests' : activeTab} partnerships yet
                   </h3>
-                  <p className="text-gray-500 text-center mb-4">
+                  <p className="text-muted-foreground text-center mb-4">
                     Start building your ecosystem by requesting services from providers
                   </p>
                   <Button 
