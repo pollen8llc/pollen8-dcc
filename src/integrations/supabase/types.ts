@@ -493,6 +493,255 @@ export type Database = {
           },
         ]
       }
+      modul8_deals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          deal_terms: Json
+          deel_contract_url: string | null
+          final_amount: number
+          id: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          status: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          deal_terms: Json
+          deel_contract_url?: string | null
+          final_amount: number
+          id?: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          status?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          deal_terms?: Json
+          deel_contract_url?: string | null
+          final_amount?: number
+          id?: string
+          organizer_id?: string
+          service_provider_id?: string
+          service_request_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_deals_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_deals_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_deals_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_organizers: {
+        Row: {
+          created_at: string
+          description: string | null
+          focus_areas: string[] | null
+          id: string
+          logo_url: string | null
+          organization_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          focus_areas?: string[] | null
+          id?: string
+          logo_url?: string | null
+          organization_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          focus_areas?: string[] | null
+          id?: string
+          logo_url?: string | null
+          organization_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      modul8_proposals: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          id: string
+          proposal_type: string
+          quote_amount: number | null
+          scope_details: string | null
+          service_request_id: string
+          status: string | null
+          terms: string | null
+          timeline: string | null
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          id?: string
+          proposal_type: string
+          quote_amount?: number | null
+          scope_details?: string | null
+          service_request_id: string
+          status?: string | null
+          terms?: string | null
+          timeline?: string | null
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          proposal_type?: string
+          quote_amount?: number | null
+          scope_details?: string | null
+          service_request_id?: string
+          status?: string | null
+          terms?: string | null
+          timeline?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_proposals_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_service_providers: {
+        Row: {
+          business_name: string
+          created_at: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          portfolio_links: string[] | null
+          pricing_range: Json | null
+          services: Json | null
+          tagline: string | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          portfolio_links?: string[] | null
+          pricing_range?: Json | null
+          services?: Json | null
+          tagline?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          portfolio_links?: string[] | null
+          pricing_range?: Json | null
+          services?: Json | null
+          tagline?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      modul8_service_requests: {
+        Row: {
+          budget_range: Json | null
+          created_at: string
+          description: string | null
+          domain_page: number
+          engagement_status: string | null
+          id: string
+          milestones: Json | null
+          organizer_id: string
+          service_provider_id: string | null
+          status: string | null
+          timeline: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          budget_range?: Json | null
+          created_at?: string
+          description?: string | null
+          domain_page: number
+          engagement_status?: string | null
+          id?: string
+          milestones?: Json | null
+          organizer_id: string
+          service_provider_id?: string | null
+          status?: string | null
+          timeline?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          budget_range?: Json | null
+          created_at?: string
+          description?: string | null
+          domain_page?: number
+          engagement_status?: string | null
+          id?: string
+          milestones?: Json | null
+          organizer_id?: string
+          service_provider_id?: string | null
+          status?: string | null
+          timeline?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_service_requests_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_service_requests_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_responses: {
         Row: {
           created_at: string

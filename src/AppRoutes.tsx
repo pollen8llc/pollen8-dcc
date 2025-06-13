@@ -53,6 +53,11 @@ import TriggerWizard from '@/pages/rel8t/TriggerWizard';
 import Settings from '@/pages/rel8t/Settings';
 import EmailTest from '@/pages/rel8t/EmailTest';
 
+// Modul8 Platform
+import Modul8Dashboard from '@/pages/modul8/Modul8Dashboard';
+import OrganizerSetup from '@/pages/modul8/setup/OrganizerSetup';
+import ServiceProviderSetup from '@/pages/modul8/setup/ServiceProviderSetup';
+
 const AppRoutes = () => {
   return (
     <ErrorBoundary>
@@ -260,6 +265,25 @@ const AppRoutes = () => {
           <Rel8ProtectedRoute>
             <EmailTest />
           </Rel8ProtectedRoute>
+        } />
+
+        {/* Modul8 Platform Routes */}
+        <Route path="/modul8" element={
+          <ProtectedRoute>
+            <Modul8Dashboard />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/modul8/setup/organizer" element={
+          <ProtectedRoute>
+            <OrganizerSetup />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/modul8/setup/provider" element={
+          <ProtectedRoute>
+            <ServiceProviderSetup />
+          </ProtectedRoute>
         } />
 
         {/* 404 Route */}
