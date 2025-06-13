@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,8 +54,8 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
         return 'organizer';
       case UserRole.MEMBER:
         return 'member';
-      case UserRole.GUEST:
-        return 'guest';
+      case UserRole.SERVICE_PROVIDER:
+        return 'service provider';
       default:
         return 'member';
     }
