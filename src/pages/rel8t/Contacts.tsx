@@ -134,7 +134,7 @@ const Contacts = () => {
   };
 
   return (
-    <div className="flex flex-col bg-background">
+    <div className="flex flex-col h-screen bg-background">
       <Navbar />
       
       <div className="flex flex-col flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-8 min-h-0">
