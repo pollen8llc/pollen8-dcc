@@ -30,7 +30,7 @@ const ContentCreator = () => {
   
   const handleCreateContent = () => {
     if (selectedType && selectedType !== 'all') {
-      navigate(`/knowledge/create/${selectedType}`);
+      navigate(`/knowledge/create/${selectedType.toLowerCase()}`);
     } else {
       toast({
         title: "Select a content type",
