@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -95,12 +94,12 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
       navigator.share({
         title: article.title,
         text: truncateText(article.content, 100),
-        url: window.location.origin + `/knowledge/${article.id}`
+        url: window.location.origin + `/knowledge/article/${article.id}`
       });
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(
-        window.location.origin + `/knowledge/${article.id}`
+        window.location.origin + `/knowledge/article/${article.id}`
       );
     }
   };

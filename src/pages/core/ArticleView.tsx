@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
@@ -180,7 +179,7 @@ const ArticleView = () => {
             <div className="flex gap-2 mt-4 md:mt-0">
               {canEdit && (
                 <Button variant="outline" asChild>
-                  <Link to={`/knowledge/${article.id}/edit`}>
+                  <Link to={`/knowledge/article/${article.id}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </Link>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -269,7 +268,7 @@ const ArticleView = () => {
                 
                 {canEdit && (
                   <Button variant="outline" size="sm" asChild>
-                    <Link to={`/knowledge/${id}/edit`}>
+                    <Link to={`/knowledge/article/${id}/edit`}>
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Link>

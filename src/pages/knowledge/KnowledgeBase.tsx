@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, BookOpen, MessageSquare, Quote, HelpCircle, BarChart3 } from 'lucide-react';
@@ -70,7 +69,7 @@ const KnowledgeBase = () => {
   const hasActiveFilters = searchQuery || selectedTag || selectedType !== 'all' || sortBy !== 'newest';
 
   const handleArticleClick = (articleId: string) => {
-    navigate(`/knowledge/articles/${articleId}`);
+    navigate(`/knowledge/article/${articleId}`);
   };
 
   return (

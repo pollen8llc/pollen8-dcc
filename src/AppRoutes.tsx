@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -30,6 +29,7 @@ const UserKnowledgeResource = lazy(() => import("@/pages/knowledge/UserKnowledge
 const TopicsPage = lazy(() => import("@/pages/knowledge/TopicsPage"));
 const ContentCreator = lazy(() => import("@/pages/knowledge/ContentCreator"));
 const ArticleView = lazy(() => import("@/pages/knowledge/ArticleView"));
+const ArticleEdit = lazy(() => import("@/pages/core/ArticleEdit"));
 
 // REL8 pages
 const Rel8Dashboard = lazy(() => import("@/pages/rel8t/Dashboard"));
@@ -96,6 +96,7 @@ function AppRoutes() {
           <Route path="/knowledge/topics" element={<TopicsPage />} />
           <Route path="/knowledge/create" element={<ContentCreator />} />
           <Route path="/knowledge/article/:id" element={<ArticleView />} />
+          <Route path="/knowledge/article/:id/edit" element={<ArticleEdit />} />
           
           {/* REL8 routes */}
           <Route path="/rel8" element={<Rel8Dashboard />} />
