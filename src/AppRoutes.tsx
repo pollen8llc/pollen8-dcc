@@ -49,6 +49,7 @@ const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
 
 // Modul8 pages
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
+const DomainProviders = lazy(() => import("@/pages/modul8/DomainProviders"));
 const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
 const OrganizerSetup = lazy(() => import("@/pages/modul8/setup/OrganizerSetup"));
 const ServiceRequestForm = lazy(() => import("@/pages/modul8/ServiceRequestForm"));
@@ -156,6 +157,7 @@ function AppRoutes() {
 
           {/* Modul8 routes */}
           <Route path="/modul8" element={<Modul8Dashboard />} />
+          <Route path="/modul8/domain/:domainId" element={<DomainProviders />} />
           <Route path="/modul8/setup/provider" element={<ServiceProviderSetup />} />
           <Route path="/modul8/setup/organizer" element={<OrganizerSetup />} />
           <Route path="/modul8/request/new" element={<ServiceRequestForm />} />
