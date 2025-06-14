@@ -74,9 +74,10 @@ const Modul8Dashboard = () => {
       
       setOrganizer(organizerData);
       const requests = await getOrganizerServiceRequests(organizerData.id);
-      setServiceRequests(requests);
+      setServiceRequests(Array.isArray(requests) ? requests : []);
     } catch (error) {
       console.error('Error loading organizer data:', error);
+      setServiceRequests([]); // Set empty array on error
       toast({
         title: "Error",
         description: "Failed to load dashboard data",
@@ -87,7 +88,7 @@ const Modul8Dashboard = () => {
     }
   };
 
-  const filteredRequests = serviceRequests.filter(request => {
+  const filteredRequests = (serviceRequests || []).filter(request => {
     if (request.domain_page !== selectedPage) return false;
     
     switch (activeTab) {
@@ -103,10 +104,21 @@ const Modul8Dashboard = () => {
   const currentDomain = DOMAIN_PAGES.find(p => p.id === selectedPage);
   const currentProviders = MOCK_PROVIDERS[selectedPage as keyof typeof MOCK_PROVIDERS] || [];
 
+  const getStatusCounts = () => {
+    const domainRequests = (serviceRequests || []).filter(r => r.domain_page === selectedPage);
+    return {
+      all: domainRequests.length,
+      active: domainRequests.filter(r => r.engagement_status === 'negotiating').length,
+      affiliated: domainRequests.filter(r => r.engagement_status === 'affiliated').length
+    };
+  };
+
+  const statusCounts = getStatusCounts();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
       </div>
     );
   }
@@ -129,7 +141,7 @@ const Modul8Dashboard = () => {
                 key={page.id}
                 className={`cursor-pointer transition-all hover:shadow-md ${
                   selectedPage === page.id 
-                    ? 'ring-2 ring-primary bg-primary/5' 
+                    ? 'ring-2 ring-[#00eada] bg-[#00eada]/5' 
                     : 'hover:bg-muted/50'
                 }`}
                 onClick={() => setSelectedPage(page.id)}
@@ -153,7 +165,7 @@ const Modul8Dashboard = () => {
               </div>
               <Button 
                 onClick={() => navigate(`/modul8/request/new?domain=${selectedPage}`)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
               >
                 <Plus className="h-4 w-4" />
                 Request Service
@@ -190,15 +202,15 @@ const Modul8Dashboard = () => {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="all" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              All ({filteredRequests.length})
+              All ({statusCounts.all})
             </TabsTrigger>
             <TabsTrigger value="active" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
-              Active ({serviceRequests.filter(r => r.domain_page === selectedPage && r.engagement_status === 'negotiating').length})
+              Active ({statusCounts.active})
             </TabsTrigger>
             <TabsTrigger value="affiliated" className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
-              Affiliated ({serviceRequests.filter(r => r.domain_page === selectedPage && r.engagement_status === 'affiliated').length})
+              Affiliated ({statusCounts.affiliated})
             </TabsTrigger>
           </TabsList>
 
@@ -215,7 +227,7 @@ const Modul8Dashboard = () => {
                   </p>
                   <Button 
                     onClick={() => navigate(`/modul8/request/new?domain=${selectedPage}`)}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
                   >
                     <Plus className="h-4 w-4" />
                     Request Service

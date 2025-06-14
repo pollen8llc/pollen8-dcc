@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ServiceRequest } from '@/types/modul8';
 import { DollarSign, Clock, Users, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ServiceRequestCardProps {
   request: ServiceRequest;
@@ -12,12 +13,14 @@ interface ServiceRequestCardProps {
 }
 
 const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({ request, onUpdate }) => {
+  const navigate = useNavigate();
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
         return 'bg-muted text-muted-foreground';
       case 'negotiating':
-        return 'bg-primary/10 text-primary';
+        return 'bg-[#00eada]/10 text-[#00eada]';
       case 'agreed':
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case 'completed':
@@ -36,7 +39,7 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({ request, onUpda
       case 'negotiating':
         return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
       case 'affiliated':
-        return 'bg-primary/10 text-primary';
+        return 'bg-[#00eada]/10 text-[#00eada]';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -118,7 +121,12 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({ request, onUpda
         )}
         
         <div className="flex gap-2 pt-2">
-          <Button variant="outline" size="sm" className="flex-1">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex-1"
+            onClick={() => navigate(`/modul8/request/${request.id}`)}
+          >
             <MessageSquare className="h-4 w-4 mr-1" />
             View Details
           </Button>

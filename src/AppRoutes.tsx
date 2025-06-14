@@ -1,296 +1,134 @@
 
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Toaster } from "@/components/ui/toaster";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
-// Authentication
-import Auth from '@/pages/Auth';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import Rel8ProtectedRoute from '@/components/auth/Rel8ProtectedRoute';
+// Lazy load components for better performance
+const Index = lazy(() => import("@/pages/Index"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const ProfileEditPage = lazy(() => import("@/pages/ProfileEditPage"));
+const ProfileSetupPage = lazy(() => import("@/pages/ProfileSetupPage"));
+const ProfileSearchPage = lazy(() => import("@/pages/ProfileSearchPage"));
+const Documentation = lazy(() => import("@/pages/Documentation"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const Onboarding = lazy(() => import("@/pages/Onboarding"));
+const DotConnectorDashboard = lazy(() => import("@/pages/DotConnectorDashboard"));
+const OrganizerDashboard = lazy(() => import("@/pages/OrganizerDashboard"));
+const InvitesManagementPage = lazy(() => import("@/pages/InvitesManagementPage"));
+const InvitePage = lazy(() => import("@/pages/InvitePage"));
 
-// Main Pages
-import Index from '@/pages/Index';
-import LandingPage from '@/pages/LandingPage';
-import ProfilePage from '@/pages/ProfilePage';
-import ProfileEditPage from '@/pages/ProfileEditPage';
-import ProfileSetupPage from '@/pages/ProfileSetupPage';
-import ProfileSearchPage from '@/pages/ProfileSearchPage';
-import Onboarding from '@/pages/Onboarding';
-import NotFound from '@/pages/NotFound';
-import InvitePage from '@/pages/InvitePage';
-import InvitesManagementPage from '@/pages/InvitesManagementPage';
-import Documentation from '@/pages/Documentation';
+// Admin pages
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
+const DebuggerDashboard = lazy(() => import("@/pages/admin/DebuggerDashboard"));
 
-// Knowledge Base (includes former core functionality)
-import KnowledgeBase from '@/pages/knowledge/KnowledgeBase';
-import ArticleView from '@/pages/knowledge/ArticleView';
-import ContentCreator from '@/pages/knowledge/ContentCreator';
-import PostWizard from '@/pages/knowledge/PostWizard';
-import PostTypeSelector from '@/pages/knowledge/PostTypeSelector';
-import TopicsPage from '@/pages/knowledge/TopicsPage';
-import UserKnowledgeResource from '@/pages/knowledge/UserKnowledgeResource';
+// Knowledge base pages
+const KnowledgeBase = lazy(() => import("@/pages/knowledge/KnowledgeBase"));
+const UserKnowledgeResource = lazy(() => import("@/pages/knowledge/UserKnowledgeResource"));
+const TopicsPage = lazy(() => import("@/pages/knowledge/TopicsPage"));
+const ContentCreator = lazy(() => import("@/pages/knowledge/ContentCreator"));
+const ArticleView = lazy(() => import("@/pages/knowledge/ArticleView"));
 
-// Core Content (now integrated into knowledge)
-import TagView from '@/pages/core/TagView';
-import ArticleCreate from '@/pages/core/ArticleCreate';
-import ArticleEdit from '@/pages/core/ArticleEdit';
+// REL8 pages
+const Rel8Dashboard = lazy(() => import("@/pages/rel8t/Dashboard"));
+const Contacts = lazy(() => import("@/pages/rel8t/Contacts"));
+const ContactCreate = lazy(() => import("@/pages/rel8t/ContactCreate"));
+const ContactEdit = lazy(() => import("@/pages/rel8t/ContactEdit"));
+const Relationships = lazy(() => import("@/pages/rel8t/Relationships"));
+const Categories = lazy(() => import("@/pages/rel8t/Categories"));
+const Rel8Settings = lazy(() => import("@/pages/rel8t/Settings"));
+const RelationshipWizard = lazy(() => import("@/pages/rel8t/RelationshipWizard"));
+const ImportContacts = lazy(() => import("@/pages/rel8t/ImportContacts"));
+const TriggerWizard = lazy(() => import("@/pages/rel8t/TriggerWizard"));
+const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
 
-// Admin
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import DebuggerDashboard from '@/pages/admin/DebuggerDashboard';
-import OrganizerDashboard from '@/pages/OrganizerDashboard';
-import DotConnectorDashboard from '@/pages/DotConnectorDashboard';
+// Modul8 pages
+const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
+const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
+const OrganizerSetup = lazy(() => import("@/pages/modul8/setup/OrganizerSetup"));
+const ServiceRequestForm = lazy(() => import("@/pages/modul8/ServiceRequestForm"));
+const ServiceRequestDetails = lazy(() => import("@/pages/modul8/ServiceRequestDetails"));
 
-// Rel8 CRM
-import Contacts from '@/pages/rel8t/Contacts';
-import ContactCreate from '@/pages/rel8t/ContactCreate';
-import ContactEdit from '@/pages/rel8t/ContactEdit';
-import ImportContacts from '@/pages/rel8t/ImportContacts';
-import Categories from '@/pages/rel8t/Categories';
-import Relationships from '@/pages/rel8t/Relationships';
-import RelationshipWizard from '@/pages/rel8t/RelationshipWizard';
-import TriggerWizard from '@/pages/rel8t/TriggerWizard';
-import Settings from '@/pages/rel8t/Settings';
-import EmailTest from '@/pages/rel8t/EmailTest';
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+  </div>
+);
 
-// Modul8 Platform
-import Modul8Dashboard from '@/pages/modul8/Modul8Dashboard';
-import OrganizerSetup from '@/pages/modul8/setup/OrganizerSetup';
-import ServiceProviderSetup from '@/pages/modul8/setup/ServiceProviderSetup';
-
-const AppRoutes = () => {
+function AppRoutes() {
   return (
     <ErrorBoundary>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/invite/:code" element={<InvitePage />} />
-        <Route path="/docs" element={<Documentation />} />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/welcome" element={<DotConnectorDashboard />} />
+          
+          {/* Profile routes */}
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<ProfileEditPage />} />
+          <Route path="/profile/setup" element={<ProfileSetupPage />} />
+          <Route path="/profile/search" element={<ProfileSearchPage />} />
+          
+          {/* Organizer routes */}
+          <Route path="/organizer" element={<OrganizerDashboard />} />
+          <Route path="/invites" element={<InvitesManagementPage />} />
+          <Route path="/invite/:code" element={<InvitePage />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/debugger" element={<DebuggerDashboard />} />
+          
+          {/* Knowledge base routes */}
+          <Route path="/knowledge" element={<KnowledgeBase />} />
+          <Route path="/knowledge/resources" element={<UserKnowledgeResource />} />
+          <Route path="/knowledge/topics" element={<TopicsPage />} />
+          <Route path="/knowledge/create" element={<ContentCreator />} />
+          <Route path="/knowledge/article/:id" element={<ArticleView />} />
+          
+          {/* REL8 routes */}
+          <Route path="/rel8" element={<Rel8Dashboard />} />
+          <Route path="/rel8t" element={<Rel8Dashboard />} />
+          <Route path="/rel8/contacts" element={<Contacts />} />
+          <Route path="/rel8t/contacts" element={<Contacts />} />
+          <Route path="/rel8/contacts/create" element={<ContactCreate />} />
+          <Route path="/rel8t/contacts/create" element={<ContactCreate />} />
+          <Route path="/rel8/contacts/:id/edit" element={<ContactEdit />} />
+          <Route path="/rel8t/contacts/:id/edit" element={<ContactEdit />} />
+          <Route path="/rel8/relationships" element={<Relationships />} />
+          <Route path="/rel8t/relationships" element={<Relationships />} />
+          <Route path="/rel8/categories" element={<Categories />} />
+          <Route path="/rel8t/categories" element={<Categories />} />
+          <Route path="/rel8/settings" element={<Rel8Settings />} />
+          <Route path="/rel8t/settings" element={<Rel8Settings />} />
+          <Route path="/rel8/wizard" element={<RelationshipWizard />} />
+          <Route path="/rel8t/wizard" element={<RelationshipWizard />} />
+          <Route path="/rel8/import" element={<ImportContacts />} />
+          <Route path="/rel8t/import" element={<ImportContacts />} />
+          <Route path="/rel8/triggers/wizard" element={<TriggerWizard />} />
+          <Route path="/rel8t/triggers/wizard" element={<TriggerWizard />} />
+          <Route path="/rel8/test-email" element={<EmailTest />} />
+          <Route path="/rel8t/test-email" element={<EmailTest />} />
 
-        {/* Protected Routes */}
-        <Route path="/welcome" element={
-          <ProtectedRoute>
-            <Index />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/onboarding" element={
-          <ProtectedRoute>
-            <Onboarding />
-          </ProtectedRoute>
-        } />
-
-        {/* Profile Routes */}
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile/:id" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile/edit" element={
-          <ProtectedRoute>
-            <ProfileEditPage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile/setup" element={
-          <ProtectedRoute>
-            <ProfileSetupPage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/profile/search" element={
-          <ProtectedRoute>
-            <ProfileSearchPage />
-          </ProtectedRoute>
-        } />
-
-        {/* Knowledge Base Routes (includes former core functionality) */}
-        <Route path="/knowledge" element={
-          <ProtectedRoute>
-            <KnowledgeBase />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/resources" element={
-          <ProtectedRoute>
-            <UserKnowledgeResource />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/articles/:id" element={
-          <ProtectedRoute>
-            <ArticleView />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/:id" element={
-          <ProtectedRoute>
-            <ArticleView />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/create" element={
-          <ProtectedRoute>
-            <PostTypeSelector />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/wizard" element={
-          <ProtectedRoute>
-            <PostWizard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/topics" element={
-          <ProtectedRoute>
-            <TopicsPage />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/tags/:tag" element={
-          <ProtectedRoute>
-            <TagView />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/knowledge/:id/edit" element={
-          <ProtectedRoute>
-            <ArticleEdit />
-          </ProtectedRoute>
-        } />
-
-        {/* Admin Routes */}
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/admin/debugger" element={
-          <ProtectedRoute>
-            <DebuggerDashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/organizer" element={
-          <ProtectedRoute>
-            <OrganizerDashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/dot-connector" element={
-          <ProtectedRoute>
-            <DotConnectorDashboard />
-          </ProtectedRoute>
-        } />
-
-        {/* Invites Management */}
-        <Route path="/invites" element={
-          <ProtectedRoute>
-            <InvitesManagementPage />
-          </ProtectedRoute>
-        } />
-
-        {/* Rel8 CRM Routes - Now protected for organizers only */}
-        {/* Redirect /rel8 to /rel8/relationships */}
-        <Route path="/rel8" element={
-          <Rel8ProtectedRoute>
-            <Navigate to="/rel8/relationships" replace />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/contacts" element={
-          <Rel8ProtectedRoute>
-            <Contacts />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/contacts/new" element={
-          <Rel8ProtectedRoute>
-            <ContactCreate />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/contacts/:id/edit" element={
-          <Rel8ProtectedRoute>
-            <ContactEdit />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/import" element={
-          <Rel8ProtectedRoute>
-            <ImportContacts />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/categories" element={
-          <Rel8ProtectedRoute>
-            <Categories />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/relationships" element={
-          <Rel8ProtectedRoute>
-            <Relationships />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/wizard" element={
-          <Rel8ProtectedRoute>
-            <RelationshipWizard />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/triggers/wizard" element={
-          <Rel8ProtectedRoute>
-            <TriggerWizard />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/triggers" element={
-          <Rel8ProtectedRoute>
-            <Settings />
-          </Rel8ProtectedRoute>
-        } />
-        
-        <Route path="/rel8/email-test" element={
-          <Rel8ProtectedRoute>
-            <EmailTest />
-          </Rel8ProtectedRoute>
-        } />
-
-        {/* Modul8 Platform Routes */}
-        <Route path="/modul8" element={
-          <ProtectedRoute>
-            <Modul8Dashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/modul8/setup/organizer" element={
-          <ProtectedRoute>
-            <OrganizerSetup />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/modul8/setup/provider" element={
-          <ProtectedRoute>
-            <ServiceProviderSetup />
-          </ProtectedRoute>
-        } />
-
-        {/* 404 Route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* Modul8 routes */}
+          <Route path="/modul8" element={<Modul8Dashboard />} />
+          <Route path="/modul8/setup/provider" element={<ServiceProviderSetup />} />
+          <Route path="/modul8/setup/organizer" element={<OrganizerSetup />} />
+          <Route path="/modul8/request/new" element={<ServiceRequestForm />} />
+          <Route path="/modul8/request/:id" element={<ServiceRequestDetails />} />
+          
+          <Route path="/docs" element={<Documentation />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+      <Toaster />
     </ErrorBoundary>
   );
-};
+}
 
 export default AppRoutes;
