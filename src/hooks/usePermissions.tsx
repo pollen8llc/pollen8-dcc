@@ -1,4 +1,3 @@
-
 import { User, UserRole } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,9 +11,9 @@ export const usePermissions = (currentUser: User | null) => {
       return true;
     }
     
-    // Service providers only have access to LABR8 resources
+    // Service providers ONLY have access to LABR8 resources and their own profile
     if (isServiceProvider()) {
-      return resource.startsWith('labr8') || resource === 'profile' || action === 'read';
+      return resource.startsWith('labr8') || (resource === 'profile' && action === 'read');
     }
     
     try {
@@ -46,7 +45,7 @@ export const usePermissions = (currentUser: User | null) => {
         case UserRole.ORGANIZER:
           return action === 'read' || resource === 'knowledgeBase';
         case UserRole.SERVICE_PROVIDER:
-          return resource.startsWith('labr8') || resource === 'profile' || action === 'read';
+          return resource.startsWith('labr8') || (resource === 'profile' && action === 'read');
         case UserRole.MEMBER:
           return action === 'read' || resource === 'comment';
         default:
@@ -67,9 +66,9 @@ export const usePermissions = (currentUser: User | null) => {
       return true;
     }
     
-    // Service providers are restricted to LABR8 only
+    // Service providers are STRICTLY restricted to LABR8 only
     if (isServiceProvider()) {
-      return resource.startsWith('labr8') || resource === 'profile' || action === 'read';
+      return resource.startsWith('labr8') || (resource === 'profile' && action === 'read');
     }
     
     // Basic role-based check for UI rendering
@@ -86,7 +85,7 @@ export const usePermissions = (currentUser: User | null) => {
         }
         return resource === 'knowledgeBase' || action === 'read';
       case UserRole.SERVICE_PROVIDER:
-        return resource.startsWith('labr8') || resource === 'profile' || action === 'read';
+        return resource.startsWith('labr8') || (resource === 'profile' && action === 'read');
       case UserRole.MEMBER:
         return action === 'read' || resource === 'comment';
       default:
@@ -164,9 +163,10 @@ export const usePermissions = (currentUser: User | null) => {
     return { text: "Guest", color: "bg-gray-500 hover:bg-gray-600" };
   };
 
-  // Check if service provider can access other platform areas
+  // Check if service provider can access other platform areas - ALWAYS FALSE
   const canAccessMainPlatform = (): boolean => {
     if (!currentUser) return false;
+    // Service providers are completely restricted from main platform
     return currentUser.role !== UserRole.SERVICE_PROVIDER;
   };
 
