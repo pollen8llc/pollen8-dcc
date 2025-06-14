@@ -2,9 +2,9 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
-import { Loader2 } from "lucide-react";
 import { Shell } from "@/components/layout/Shell";
 import LandingPage from "./LandingPage";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Index = () => {
   const { currentUser, isLoading } = useUser();
@@ -13,7 +13,7 @@ const Index = () => {
   useEffect(() => {
     if (!isLoading) {
       if (currentUser) {
-        // If user is a service provider, redirect to LABR8
+        // If user is a service provider, redirect to LAB-R8
         if (currentUser.role === 'SERVICE_PROVIDER') {
           if (!currentUser.profile_complete) {
             navigate("/labr8/setup", { replace: true });
@@ -37,7 +37,7 @@ const Index = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <LoadingSpinner size="lg" text="Loading..." />
       </div>
     );
   }
@@ -54,7 +54,7 @@ const Index = () => {
   // Show loading while redirecting
   return (
     <div className="flex items-center justify-center h-screen">
-      <Loader2 className="h-8 w-8 animate-spin" />
+      <LoadingSpinner size="lg" text="Redirecting..." />
     </div>
   );
 };

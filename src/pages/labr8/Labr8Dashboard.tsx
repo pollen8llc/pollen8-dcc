@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, Briefcase, MessageSquare, CheckCircle, DollarSign, Clock, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 
 const Labr8Dashboard = () => {
   const { session } = useSession();
@@ -87,8 +88,11 @@ const Labr8Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center h-96">
+          <LoadingSpinner size="lg" text="Loading LAB-R8 Dashboard..." />
+        </div>
       </div>
     );
   }

@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { updateUserRole } from "@/services/roleService";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Labr8Auth = () => {
   const [email, setEmail] = useState("");
@@ -142,9 +143,7 @@ const Labr8Auth = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        <LoadingSpinner size="lg" text="Loading LAB-R8..." />
       </div>
     );
   }
@@ -227,10 +226,10 @@ const Labr8Auth = () => {
                   </div>
                   <Button type="submit" className="w-full bg-[#00eada] hover:bg-[#00eada]/90 text-black" disabled={loading}>
                     {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <div className="flex items-center gap-2">
+                        <LoadingSpinner size="sm" />
                         Signing in...
-                      </>
+                      </div>
                     ) : (
                       "Sign In to LAB-R8"
                     )}
@@ -314,10 +313,10 @@ const Labr8Auth = () => {
                   </div>
                   <Button type="submit" className="w-full bg-[#00eada] hover:bg-[#00eada]/90 text-black" disabled={loading}>
                     {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <div className="flex items-center gap-2">
+                        <LoadingSpinner size="sm" />
                         Creating account...
-                      </>
+                      </div>
                     ) : (
                       "Join LAB-R8 as Service Provider"
                     )}

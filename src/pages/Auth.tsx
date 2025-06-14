@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuthLayout from "@/components/auth/AuthLayout";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -130,7 +131,7 @@ const Auth = () => {
     return (
       <AuthLayout>
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <LoadingSpinner size="lg" text="Loading..." />
         </div>
       </AuthLayout>
     );
@@ -205,10 +206,10 @@ const Auth = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
                       Signing in...
-                    </>
+                    </div>
                   ) : (
                     "Sign In"
                   )}
@@ -292,10 +293,10 @@ const Auth = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
                       Creating account...
-                    </>
+                    </div>
                   ) : (
                     "Create Account"
                   )}
