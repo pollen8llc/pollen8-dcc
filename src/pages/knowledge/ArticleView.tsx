@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -44,12 +45,14 @@ const ArticleView = () => {
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
   const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer, deleteArticle } = useKnowledgeBase();
   const { isArticleSaved, toggleSaveArticle } = useSavedArticles();
+
+  console.log('ArticleView - Article ID from params:', id);
   
   // Fetch article
-  const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id);
+  const { data: article, isLoading: articleLoading, error: articleError } = useArticle(id || '');
   
   // Fetch comments
-  const { data: comments, isLoading: commentsLoading } = useComments(id);
+  const { data: comments, isLoading: commentsLoading } = useComments(id || '');
   
   // Check if current user can edit this article - ONLY the creator can edit
   const canEdit = currentUser && article && currentUser.id === article.user_id;
@@ -87,7 +90,34 @@ const ArticleView = () => {
     }
   };
 
+  // Early return if no ID
+  if (!id) {
+    console.error('ArticleView - No article ID provided');
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-6 max-w-full">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              No article ID provided
+            </AlertDescription>
+          </Alert>
+          
+          <Button className="mt-4" variant="outline" asChild>
+            <Link to="/knowledge">
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back to Knowledge Base
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (articleLoading) {
+    console.log('ArticleView - Loading article with ID:', id);
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -104,6 +134,7 @@ const ArticleView = () => {
   }
   
   if (articleError || !article) {
+    console.error('ArticleView - Error or no article found:', articleError, 'ID:', id);
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -126,6 +157,8 @@ const ArticleView = () => {
       </div>
     );
   }
+
+  console.log('ArticleView - Successfully loaded article:', article.title);
 
   return (
     <div className="min-h-screen bg-background">
@@ -268,7 +301,7 @@ const ArticleView = () => {
             
             {/* Comments section */}
             <CommentSection 
-              articleId={id!}
+              articleId={id}
               comments={comments}
               isArticleAuthor={currentUser?.id === article.user_id}
               isLoading={commentsLoading}
