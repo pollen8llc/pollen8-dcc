@@ -20,3 +20,13 @@ export const getUserRole = async (userId: string) => {
   if (error) throw error;
   return data;
 };
+
+export const getRoles = async () => {
+  const { data, error } = await supabase
+    .from('roles')
+    .select('*')
+    .order('name');
+  
+  if (error) throw error;
+  return data || [];
+};
