@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useToast } from '@/hooks/use-toast';
@@ -34,26 +34,24 @@ type PostType = 'question' | 'quote' | 'poll' | 'article';
 
 const PostWizard = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const { type } = useParams<{ type: string }>();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   
-  // Get type from URL parameters
-  const typeFromUrl = searchParams.get('type') as PostType | null;
-  const [postType, setPostType] = useState<PostType | null>(typeFromUrl);
+  // Get type from URL parameters and validate it
+  const postType = type as PostType | undefined;
+  const validTypes: PostType[] = ['question', 'quote', 'poll', 'article'];
   
   const { isSubmitting, createArticle } = useKnowledgeBase();
   const [formData, setFormData] = useState<any>(null);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   
-  // Redirect to type selector if no type is provided
+  // Redirect to type selector if no type is provided or invalid type
   useEffect(() => {
-    if (!typeFromUrl) {
+    if (!type || !validTypes.includes(type as PostType)) {
       navigate('/knowledge/create');
-    } else {
-      setPostType(typeFromUrl);
     }
-  }, [typeFromUrl, navigate]);
+  }, [type, navigate]);
   
   const getPostTypeTitle = () => {
     switch (postType) {
@@ -150,8 +148,8 @@ const PostWizard = () => {
     }
   };
   
-  // Loading state
-  if (!postType) {
+  // Loading state or invalid type
+  if (!postType || !validTypes.includes(postType)) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
