@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useToast } from '@/hooks/use-toast';
@@ -34,26 +34,38 @@ type PostType = 'question' | 'quote' | 'poll' | 'article';
 
 const PostWizard = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const { type } = useParams<{ type: string }>();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   
-  // Get type from URL parameters
-  const typeFromUrl = searchParams.get('type') as PostType | null;
-  const [postType, setPostType] = useState<PostType | null>(typeFromUrl);
+  // Get type from URL parameters and validate
+  const [postType, setPostType] = useState<PostType | null>(null);
   
   const { isSubmitting, createArticle } = useKnowledgeBase();
   const [formData, setFormData] = useState<any>(null);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   
-  // Redirect to type selector if no type is provided
+  // Validate and set post type from URL
   useEffect(() => {
-    if (!typeFromUrl) {
+    if (!type) {
       navigate('/knowledge/create');
-    } else {
-      setPostType(typeFromUrl);
+      return;
     }
-  }, [typeFromUrl, navigate]);
+    
+    const validTypes: PostType[] = ['question', 'quote', 'poll', 'article'];
+    const normalizedType = type.toLowerCase() as PostType;
+    
+    if (validTypes.includes(normalizedType)) {
+      setPostType(normalizedType);
+    } else {
+      toast({
+        title: "Invalid content type",
+        description: "Please select a valid content type",
+        variant: "destructive"
+      });
+      navigate('/knowledge/create');
+    }
+  }, [type, navigate, toast]);
   
   const getPostTypeTitle = () => {
     switch (postType) {
