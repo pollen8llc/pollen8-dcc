@@ -12,6 +12,11 @@ export const usePermissions = (currentUser: User | null) => {
       return true;
     }
     
+    // Service providers only have access to LABR8 resources
+    if (isServiceProvider()) {
+      return resource.startsWith('labr8') || resource === 'profile' || action === 'read';
+    }
+    
     try {
       // For community resources, check ownership
       if (resource.startsWith('community:')) {
@@ -41,7 +46,7 @@ export const usePermissions = (currentUser: User | null) => {
         case UserRole.ORGANIZER:
           return action === 'read' || resource === 'knowledgeBase';
         case UserRole.SERVICE_PROVIDER:
-          return action === 'read' || resource === 'knowledgeBase' || resource === 'rel8';
+          return resource.startsWith('labr8') || resource === 'profile' || action === 'read';
         case UserRole.MEMBER:
           return action === 'read' || resource === 'comment';
         default:
@@ -62,6 +67,11 @@ export const usePermissions = (currentUser: User | null) => {
       return true;
     }
     
+    // Service providers are restricted to LABR8 only
+    if (isServiceProvider()) {
+      return resource.startsWith('labr8') || resource === 'profile' || action === 'read';
+    }
+    
     // Basic role-based check for UI rendering
     switch (currentUser.role) {
       case UserRole.ADMIN:
@@ -76,7 +86,7 @@ export const usePermissions = (currentUser: User | null) => {
         }
         return resource === 'knowledgeBase' || action === 'read';
       case UserRole.SERVICE_PROVIDER:
-        return resource === 'knowledgeBase' || resource === 'rel8' || action === 'read';
+        return resource.startsWith('labr8') || resource === 'profile' || action === 'read';
       case UserRole.MEMBER:
         return action === 'read' || resource === 'comment';
       default:
@@ -154,6 +164,12 @@ export const usePermissions = (currentUser: User | null) => {
     return { text: "Guest", color: "bg-gray-500 hover:bg-gray-600" };
   };
 
+  // Check if service provider can access other platform areas
+  const canAccessMainPlatform = (): boolean => {
+    if (!currentUser) return false;
+    return currentUser.role !== UserRole.SERVICE_PROVIDER;
+  };
+
   return { 
     hasPermission, 
     checkPermission, 
@@ -161,6 +177,7 @@ export const usePermissions = (currentUser: User | null) => {
     isOrganizer, 
     isServiceProvider,
     isOwner,
-    getRoleBadge
+    getRoleBadge,
+    canAccessMainPlatform
   };
 };

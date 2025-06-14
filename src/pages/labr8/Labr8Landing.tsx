@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -87,92 +86,95 @@ const Labr8Landing = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <div className="inline-block mb-4">
-            <Badge className="bg-[#00eada]/10 text-[#00eada] border-[#00eada]/20 text-lg px-6 py-2">
-              LABR8 Service Provider Portal
-            </Badge>
+      {/* Hero Section */}
+      <section className="relative py-20 px-4">
+        <div className="container mx-auto text-center">
+          <div className="mb-8">
+            <h1 className="text-6xl font-bold mb-4">
+              <span className="text-[#00eada]">LABR8</span>
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Connect with event organizers seeking specialized services. 
+              Join the ecosystem as a verified service provider and grow your business.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-semibold px-8"
+                onClick={() => navigate('/labr8/auth')}
+              >
+                Join as Service Provider
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => navigate('/modul8')}
+              >
+                Browse Opportunities
+              </Button>
+            </div>
           </div>
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-[#00eada] to-blue-600 bg-clip-text text-transparent">
-            Your Gateway to
-            <br />
-            Meaningful Partnerships
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Connect with community organizers seeking your expertise. From volunteers to vendors, 
-            LABR8 matches your skills with organizations that need them most.
+        </div>
+      </section>
+
+      {/* Provider Types */}
+      <div className="mb-16">
+        <h2 className="text-3xl font-bold text-center mb-8">Who Can Join LABR8?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {providerTypes.map((provider, index) => (
+            <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-[#00eada]">{provider.type}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{provider.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Features Grid */}
+      <div className="mb-16">
+        <h2 className="text-3xl font-bold text-center mb-8">Why Choose LABR8?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {features.map((feature, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-4">
+                  {feature.icon}
+                  <CardTitle>{feature.title}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <Card className="bg-gradient-to-r from-[#00eada]/10 to-blue-600/10 border-[#00eada]/20">
+        <CardContent className="text-center py-12">
+          <h2 className="text-3xl font-bold mb-4">Ready to Start Building Partnerships?</h2>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Join thousands of service providers already connecting with organizations 
+            through our structured partnership platform.
           </p>
           <Button 
             onClick={handleGetStarted}
             size="lg"
             className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-lg px-8 py-4"
           >
-            {hasProfile ? 'Go to Dashboard' : 'Get Started'}
+            {hasProfile ? 'Access Your Dashboard' : 'Create Your Profile'}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-        </div>
-
-        {/* Provider Types */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Who Can Join LABR8?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {providerTypes.map((provider, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-[#00eada]">{provider.type}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{provider.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Features Grid */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Why Choose LABR8?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    {feature.icon}
-                    <CardTitle>{feature.title}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <Card className="bg-gradient-to-r from-[#00eada]/10 to-blue-600/10 border-[#00eada]/20">
-          <CardContent className="text-center py-12">
-            <h2 className="text-3xl font-bold mb-4">Ready to Start Building Partnerships?</h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join thousands of service providers already connecting with organizations 
-              through our structured partnership platform.
-            </p>
-            <Button 
-              onClick={handleGetStarted}
-              size="lg"
-              className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-lg px-8 py-4"
-            >
-              {hasProfile ? 'Access Your Dashboard' : 'Create Your Profile'}
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

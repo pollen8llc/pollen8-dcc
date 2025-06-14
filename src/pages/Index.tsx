@@ -13,7 +13,17 @@ const Index = () => {
   useEffect(() => {
     if (!isLoading) {
       if (currentUser) {
-        // Check if profile is complete before redirecting
+        // If user is a service provider, redirect to LABR8
+        if (currentUser.role === 'SERVICE_PROVIDER') {
+          if (!currentUser.profile_complete) {
+            navigate("/labr8/setup", { replace: true });
+          } else {
+            navigate("/labr8/dashboard", { replace: true });
+          }
+          return;
+        }
+        
+        // For other users, check if profile is complete before redirecting
         if (!currentUser.profile_complete) {
           navigate("/profile/setup", { replace: true });
         } else {

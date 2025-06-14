@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import ServiceProviderProtectedRoute from "@/components/auth/ServiceProviderProtectedRoute";
 
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
@@ -57,6 +58,7 @@ const ServiceRequestDetails = lazy(() => import("@/pages/modul8/ServiceRequestDe
 
 // LABR8 pages
 const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
+const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
 const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
@@ -165,9 +167,22 @@ function AppRoutes() {
           
           {/* LABR8 routes */}
           <Route path="/labr8" element={<Labr8Landing />} />
-          <Route path="/labr8/setup" element={<Labr8Setup />} />
-          <Route path="/labr8/dashboard" element={<Labr8Dashboard />} />
-          <Route path="/labr8/request/:id" element={<Labr8RequestDetails />} />
+          <Route path="/labr8/auth" element={<Labr8Auth />} />
+          <Route path="/labr8/setup" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8Setup />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/dashboard" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8Dashboard />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/request/:id" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8RequestDetails />
+            </ServiceProviderProtectedRoute>
+          } />
           
           <Route path="/docs" element={<Documentation />} />
           <Route path="*" element={<NotFound />} />
