@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { getUserServiceProvider, getServiceRequests } from '@/services/modul8Service';
@@ -35,11 +34,10 @@ const Labr8Dashboard = () => {
       
       setServiceProvider(provider);
       
-      // Load service requests from domains the provider specializes in
+      // Load all service requests and filter by provider's specializations
       const allRequests = await getServiceRequests();
       const relevantRequests = allRequests.filter(request => 
-        provider.domain_specializations.includes(request.domain_page) &&
-        request.status === 'pending'
+        provider.domain_specializations.includes(request.domain_page)
       );
       setServiceRequests(relevantRequests);
     } catch (error) {
@@ -58,7 +56,7 @@ const Labr8Dashboard = () => {
     return serviceRequests.filter(request => {
       switch (status) {
         case 'available':
-          return request.engagement_status === 'none';
+          return request.engagement_status === 'none' && request.status === 'pending';
         case 'negotiating':
           return request.engagement_status === 'negotiating';
         case 'active':
@@ -203,7 +201,7 @@ const Labr8Dashboard = () => {
                     No available requests
                   </h3>
                   <p className="text-muted-foreground text-center">
-                    New service requests matching your specializations will appear here
+                    New service requests from organizers matching your specializations will appear here
                   </p>
                 </CardContent>
               </Card>
