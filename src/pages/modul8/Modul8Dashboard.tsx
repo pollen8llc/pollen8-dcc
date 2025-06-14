@@ -93,7 +93,7 @@ const Modul8Dashboard = () => {
         {/* Domain Pages Grid */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Service Domains</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {DOMAIN_PAGES.map((page) => (
               <Card 
                 key={page.id}

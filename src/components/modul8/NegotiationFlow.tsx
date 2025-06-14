@@ -18,7 +18,7 @@ import {
   Handshake
 } from 'lucide-react';
 import { ServiceRequest, Proposal } from '@/types/modul8';
-import { createProposal, getRequestProposals } from '@/services/modul8Service';
+import { createProposal, getRequestProposals, updateServiceRequest } from '@/services/modul8Service';
 import { useSession } from '@/hooks/useSession';
 import { toast } from '@/hooks/use-toast';
 
@@ -46,6 +46,7 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
     terms: ''
   });
   const [loading, setLoading] = useState(false);
+  const [agreeing, setAgreeing] = useState(false);
 
   useEffect(() => {
     loadProposals();
@@ -109,6 +110,32 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
     }
   };
 
+  const handleAgree = async () => {
+    setAgreeing(true);
+    try {
+      await updateServiceRequest(serviceRequest.id, {
+        status: 'agreed',
+        engagement_status: 'affiliated'
+      });
+
+      toast({
+        title: "Agreement Reached!",
+        description: "You can now proceed to create the contract."
+      });
+
+      onUpdate();
+    } catch (error) {
+      console.error('Error updating service request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reach agreement",
+        variant: "destructive"
+      });
+    } finally {
+      setAgreeing(false);
+    }
+  };
+
   const handleLockDeal = () => {
     // Generate Deel deeplink with prefilled data
     const deelParams = new URLSearchParams({
@@ -134,6 +161,7 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
   const latestProposal = proposals[proposals.length - 1];
   const canLockDeal = serviceRequest.status === 'agreed' || 
     (proposals.length > 0 && latestProposal?.status === 'accepted');
+  const canAgree = proposals.length > 0 && serviceRequest.status !== 'agreed';
 
   return (
     <div className="space-y-6">
@@ -254,13 +282,26 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
       {/* Action Buttons */}
       <div className="flex gap-4">
         {!showProposalForm && !canLockDeal && (
-          <Button
-            onClick={() => setShowProposalForm(true)}
-            className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
-          >
-            <MessageSquare className="h-4 w-4" />
-            {proposals.length === 0 ? 'Send Proposal' : 'Counter Proposal'}
-          </Button>
+          <>
+            <Button
+              onClick={() => setShowProposalForm(true)}
+              className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+            >
+              <MessageSquare className="h-4 w-4" />
+              {proposals.length === 0 ? 'Send Proposal' : 'Counter Proposal'}
+            </Button>
+            
+            {canAgree && (
+              <Button
+                onClick={handleAgree}
+                disabled={agreeing}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <CheckCircle className="h-4 w-4" />
+                {agreeing ? 'Agreeing...' : 'AGREE'}
+              </Button>
+            )}
+          </>
         )}
 
         {canLockDeal && (
