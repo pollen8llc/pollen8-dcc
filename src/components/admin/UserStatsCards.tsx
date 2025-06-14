@@ -1,47 +1,68 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface UserStats {
-  total: number;
-  admins: number;
-  organizers: number;
-}
+import { Users, Shield, UserCheck, Briefcase } from "lucide-react";
 
 interface UserStatsCardsProps {
-  userStats: UserStats;
+  userStats: {
+    total: number;
+    admins: number;
+    organizers: number;
+    members: number;
+    serviceProviders?: number;
+  };
 }
 
 const UserStatsCards = ({ userStats }: UserStatsCardsProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Total Users</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{userStats.total}</div>
-          <p className="text-xs text-muted-foreground mt-1">All active accounts</p>
+          <div className="text-2xl font-bold">{userStats.total}</div>
         </CardContent>
       </Card>
       
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Administrators</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Admins</CardTitle>
+          <Shield className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{userStats.admins}</div>
-          <p className="text-xs text-muted-foreground mt-1">With full system access</p>
+          <div className="text-2xl font-bold">{userStats.admins}</div>
         </CardContent>
       </Card>
       
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Organizers</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Organizers</CardTitle>
+          <UserCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{userStats.organizers}</div>
-          <p className="text-xs text-muted-foreground mt-1">Community managers</p>
+          <div className="text-2xl font-bold">{userStats.organizers}</div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Service Providers</CardTitle>
+          <Briefcase className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{userStats.serviceProviders || 0}</div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Members</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{userStats.members}</div>
         </CardContent>
       </Card>
     </div>

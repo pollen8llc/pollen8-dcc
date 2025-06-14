@@ -117,6 +117,19 @@ const UserRoleSelector = ({
     setSelectedRole(currentRole);
   }, [currentRole]);
 
+  const getRoleWarningMessage = (role: UserRole) => {
+    switch (role) {
+      case UserRole.ADMIN:
+        return "Warning: Assigning ADMIN role grants complete access to all system functions!";
+      case UserRole.SERVICE_PROVIDER:
+        return "Warning: Service providers will only have access to LABR8 functionality and cannot access other platform areas!";
+      default:
+        return null;
+    }
+  };
+
+  const warningMessage = getRoleWarningMessage(selectedRole);
+
   return (
     <>
       <Select
@@ -146,9 +159,9 @@ const UserRoleSelector = ({
             <AlertDialogTitle>Change User Role</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to change this user's role from {UserRole[currentRole]} to {UserRole[selectedRole]}?
-              {selectedRole === UserRole.ADMIN && (
+              {warningMessage && (
                 <p className="mt-2 text-amber-500 font-semibold">
-                  Warning: Assigning ADMIN role grants complete access to all system functions!
+                  {warningMessage}
                 </p>
               )}
             </AlertDialogDescription>

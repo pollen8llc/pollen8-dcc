@@ -1,10 +1,8 @@
 
-import { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserRole } from "@/models/types";
-import { Button } from "@/components/ui/button";
+import * as z from "zod";
 import {
   Dialog,
   DialogContent,
@@ -16,13 +14,11 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -30,28 +26,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, UserPlus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { UserRole } from "@/models/types";
 
-// Define the form schema using string literals to match the enum
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["ADMIN", "ORGANIZER", "MEMBER"]),
+  role: z.enum(["ADMIN", "ORGANIZER", "MEMBER", "SERVICE_PROVIDER"]),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>;
 
 interface AddUserFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (data: FormData) => Promise<void>;
 }
 
-export default function AddUserForm({ open, onOpenChange, onSubmit }: AddUserFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const form = useForm<FormValues>({
+const AddUserForm = ({ open, onOpenChange, onSubmit }: AddUserFormProps) => {
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -61,26 +56,32 @@ export default function AddUserForm({ open, onOpenChange, onSubmit }: AddUserFor
     },
   });
 
-  const handleSubmit = async (values: FormValues) => {
-    setIsSubmitting(true);
+  const handleSubmit = async (data: FormData) => {
     try {
-      await onSubmit(values);
+      await onSubmit(data);
       form.reset();
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      console.error("Error adding user:", error);
     }
   };
 
+  const roleOptions = [
+    { value: "MEMBER", label: "Member", description: "Basic community member" },
+    { value: "ORGANIZER", label: "Organizer", description: "Community organizer with additional privileges" },
+    { value: "SERVICE_PROVIDER", label: "Service Provider", description: "Service provider with access to LABR8" },
+    { value: "ADMIN", label: "Admin", description: "Full system administrator" },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add New User</DialogTitle>
           <DialogDescription>
-            Send an invitation to a new user. They will receive an email with instructions to set up their account.
+            Send an invitation to a new user to join the platform.
           </DialogDescription>
         </DialogHeader>
-
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
@@ -92,14 +93,11 @@ export default function AddUserForm({ open, onOpenChange, onSubmit }: AddUserFor
                   <FormControl>
                     <Input placeholder="user@example.com" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    An invitation will be sent to this email address.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
+            
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -114,7 +112,7 @@ export default function AddUserForm({ open, onOpenChange, onSubmit }: AddUserFor
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={form.control}
                 name="lastName"
@@ -129,13 +127,13 @@ export default function AddUserForm({ open, onOpenChange, onSubmit }: AddUserFor
                 )}
               />
             </div>
-
+            
             <FormField
               control={form.control}
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>User Role</FormLabel>
+                  <FormLabel>Role</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -143,49 +141,32 @@ export default function AddUserForm({ open, onOpenChange, onSubmit }: AddUserFor
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="MEMBER">Member</SelectItem>
-                      <SelectItem value="ORGANIZER">Organizer</SelectItem>
-                      <SelectItem value="ADMIN">Administrator</SelectItem>
+                      {roleOptions.map((role) => (
+                        <SelectItem key={role.value} value={role.value}>
+                          <div>
+                            <div className="font-medium">{role.label}</div>
+                            <div className="text-xs text-muted-foreground">{role.description}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    {field.value === "ADMIN"
-                      ? "Administrators have full system access."
-                      : field.value === "ORGANIZER"
-                      ? "Organizers can manage communities."
-                      : "Members have standard user privileges."}
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
+            
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-              >
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending Invitation...
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Send Invitation
-                  </>
-                )}
-              </Button>
+              <Button type="submit">Send Invitation</Button>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
   );
-}
+};
+
+export default AddUserForm;

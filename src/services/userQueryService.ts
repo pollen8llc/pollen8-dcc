@@ -50,11 +50,16 @@ export const getAllUsers = async (): Promise<User[]> => {
       // Check if user has organizer role
       const isOrganizer = userRolesForUser.some(r => r.roles && r.roles.name === 'ORGANIZER');
       
+      // Check if user has service provider role
+      const isServiceProvider = userRolesForUser.some(r => r.roles && r.roles.name === 'SERVICE_PROVIDER');
+      
       // Determine user's role based on the roles system
       let role = UserRole.MEMBER;
       
       if (isAdmin) {
         role = UserRole.ADMIN;
+      } else if (isServiceProvider) {
+        role = UserRole.SERVICE_PROVIDER;
       } else if (isOrganizer) {
         role = UserRole.ORGANIZER;
       }
@@ -96,8 +101,8 @@ export const getAllUsers = async (): Promise<User[]> => {
             .filter(m => m.role === 'admin')
             .map(m => m.community_id);
             
-          // Adjust role based on community memberships if needed
-          if (user.role !== UserRole.ADMIN && user.managedCommunities.length > 0) {
+          // Adjust role based on community memberships if needed (but don't override SERVICE_PROVIDER)
+          if (user.role !== UserRole.ADMIN && user.role !== UserRole.SERVICE_PROVIDER && user.managedCommunities.length > 0) {
             user.role = UserRole.ORGANIZER;
           }
         }
@@ -127,6 +132,7 @@ export const getUserCounts = async () => {
       admins: users.filter(user => user.role === UserRole.ADMIN).length,
       organizers: users.filter(user => user.role === UserRole.ORGANIZER).length,
       members: users.filter(user => user.role === UserRole.MEMBER).length,
+      serviceProviders: users.filter(user => user.role === UserRole.SERVICE_PROVIDER).length,
     };
     
     console.log("User counts:", counts);
@@ -136,4 +142,3 @@ export const getUserCounts = async () => {
     throw error;
   }
 };
-
