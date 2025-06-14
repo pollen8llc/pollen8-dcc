@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
@@ -6,6 +5,14 @@ import { Button } from '@/components/ui/button';
 import UserMenuDropdown from '@/components/navbar/UserMenuDropdown';
 import { NavigationDrawer } from '@/components/navbar/NavigationDrawer';
 import { Menu } from 'lucide-react';
+
+const navigationItems = [
+  { name: 'Home', href: '/' },
+  { name: 'REL8T', href: '/rel8' },
+  { name: 'Knowledge', href: '/knowledge' },
+  { name: 'Modul8', href: '/modul8' },
+  { name: 'LABR8', href: '/labr8' }, // Add LABR8 to navigation
+];
 
 const Navbar = () => {
   const { currentUser, logout } = useUser();

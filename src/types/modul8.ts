@@ -1,4 +1,3 @@
-
 export interface ServiceProvider {
   id: string;
   user_id: string;
@@ -11,9 +10,10 @@ export interface ServiceProvider {
   pricing_range: {
     min?: number;
     max?: number;
-    currency?: string;
+    currency: string;
   };
   portfolio_links: string[];
+  domain_specializations: number[];
   created_at: string;
   updated_at: string;
 }
@@ -39,7 +39,7 @@ export interface ServiceRequest {
   budget_range: {
     min?: number;
     max?: number;
-    currency?: string;
+    currency: string;
   };
   timeline?: string;
   milestones: string[];
@@ -77,6 +77,26 @@ export interface Deal {
   completed_at?: string;
 }
 
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: 'service_request' | 'proposal_update' | 'deal_locked';
+  title: string;
+  message: string;
+  data: any;
+  read_at?: string;
+  created_at: string;
+}
+
+export interface Engagement {
+  id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  service_request_id?: string;
+  engagement_type: 'view_profile' | 'engage' | 'proposal_sent';
+  created_at: string;
+}
+
 // Database insert/update types
 export interface CreateServiceProviderData {
   user_id: string;
@@ -92,6 +112,7 @@ export interface CreateServiceProviderData {
     currency?: string;
   };
   portfolio_links?: string[];
+  domain_specializations?: number[];
 }
 
 export interface CreateOrganizerData {

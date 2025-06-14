@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ServiceProvider, 
@@ -47,7 +46,8 @@ export const createServiceProvider = async (data: CreateServiceProviderData) => 
       services: data.services || [],
       tags: data.tags || [],
       pricing_range: data.pricing_range || {},
-      portfolio_links: data.portfolio_links || []
+      portfolio_links: data.portfolio_links || [],
+      domain_specializations: data.domain_specializations || []
     })
     .select()
     .single();
@@ -75,6 +75,88 @@ export const getUserServiceProvider = async (userId: string) => {
   
   if (error && error.code !== 'PGRST116') throw error;
   return data ? transformServiceProvider(data) : null;
+};
+
+// Enhanced service request retrieval with domain filtering
+export const getServiceRequestsByDomain = async (domainId: number) => {
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .eq('domain_page', domainId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data?.map(transformServiceRequest) || [];
+};
+
+// Get service providers by domain
+export const getServiceProvidersByDomain = async (domainId: number) => {
+  const { data, error } = await supabase
+    .from('modul8_service_providers')
+    .select('*')
+    .contains('domain_specializations', [domainId])
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data?.map(transformServiceProvider) || [];
+};
+
+// Create engagement tracking
+export const createEngagement = async (data: {
+  organizer_id: string;
+  service_provider_id: string;
+  service_request_id?: string;
+  engagement_type: 'view_profile' | 'engage' | 'proposal_sent';
+}) => {
+  const { data: result, error } = await supabase
+    .from('modul8_engagements')
+    .insert(data)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return result;
+};
+
+// Create notification
+export const createNotification = async (data: {
+  user_id: string;
+  type: 'service_request' | 'proposal_update' | 'deal_locked';
+  title: string;
+  message: string;
+  data?: any;
+}) => {
+  const { data: result, error } = await supabase
+    .from('modul8_notifications')
+    .insert({
+      user_id: data.user_id,
+      type: data.type,
+      title: data.title,
+      message: data.message,
+      data: data.data || {}
+    })
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return result;
+};
+
+// Get user notifications
+export const getUserNotifications = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('modul8_notifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data;
 };
 
 // Organizer Services

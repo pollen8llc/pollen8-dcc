@@ -554,6 +554,88 @@ export type Database = {
           },
         ]
       }
+      modul8_engagements: {
+        Row: {
+          created_at: string
+          engagement_type: string
+          id: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          engagement_type: string
+          id?: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          engagement_type?: string
+          id?: string
+          organizer_id?: string
+          service_provider_id?: string
+          service_request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_engagements_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_engagements_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_engagements_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          message: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       modul8_organizers: {
         Row: {
           created_at: string
@@ -639,6 +721,7 @@ export type Database = {
           business_name: string
           created_at: string
           description: string | null
+          domain_specializations: number[] | null
           id: string
           logo_url: string | null
           portfolio_links: string[] | null
@@ -653,6 +736,7 @@ export type Database = {
           business_name: string
           created_at?: string
           description?: string | null
+          domain_specializations?: number[] | null
           id?: string
           logo_url?: string | null
           portfolio_links?: string[] | null
@@ -667,6 +751,7 @@ export type Database = {
           business_name?: string
           created_at?: string
           description?: string | null
+          domain_specializations?: number[] | null
           id?: string
           logo_url?: string | null
           portfolio_links?: string[] | null
