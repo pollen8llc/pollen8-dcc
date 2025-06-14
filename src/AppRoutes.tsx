@@ -1,7 +1,9 @@
+
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
@@ -28,6 +30,7 @@ const KnowledgeBase = lazy(() => import("@/pages/knowledge/KnowledgeBase"));
 const UserKnowledgeResource = lazy(() => import("@/pages/knowledge/UserKnowledgeResource"));
 const TopicsPage = lazy(() => import("@/pages/knowledge/TopicsPage"));
 const ContentCreator = lazy(() => import("@/pages/knowledge/ContentCreator"));
+const PostWizard = lazy(() => import("@/pages/knowledge/PostWizard"));
 const ArticleView = lazy(() => import("@/pages/knowledge/ArticleView"));
 const ArticleEdit = lazy(() => import("@/pages/core/ArticleEdit"));
 
@@ -90,13 +93,42 @@ function AppRoutes() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/debugger" element={<DebuggerDashboard />} />
           
-          {/* Knowledge base routes */}
-          <Route path="/knowledge" element={<KnowledgeBase />} />
-          <Route path="/knowledge/resources" element={<UserKnowledgeResource />} />
-          <Route path="/knowledge/topics" element={<TopicsPage />} />
-          <Route path="/knowledge/create" element={<ContentCreator />} />
-          <Route path="/knowledge/article/:id" element={<ArticleView />} />
-          <Route path="/knowledge/article/:id/edit" element={<ArticleEdit />} />
+          {/* Knowledge base routes - Protected */}
+          <Route path="/knowledge" element={
+            <ProtectedRoute>
+              <KnowledgeBase />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/resources" element={
+            <ProtectedRoute>
+              <UserKnowledgeResource />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/topics" element={
+            <ProtectedRoute>
+              <TopicsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/create" element={
+            <ProtectedRoute>
+              <ContentCreator />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/create/:type" element={
+            <ProtectedRoute>
+              <PostWizard />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/article/:id" element={
+            <ProtectedRoute>
+              <ArticleView />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/article/:id/edit" element={
+            <ProtectedRoute>
+              <ArticleEdit />
+            </ProtectedRoute>
+          } />
           
           {/* REL8 routes */}
           <Route path="/rel8" element={<Rel8Dashboard />} />
