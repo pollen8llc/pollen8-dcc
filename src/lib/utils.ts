@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -6,9 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Helper function to replace "Rel8t" with "REL8" in text
+// Helper function to replace "Rel8t" with "REL8" and "LABR8" with "LAB-R8" in text
 export function rebrandText(text: string): string {
-  return text.replace(/Rel8t/g, "REL8").replace(/rel8t/g, "rel8");
+  return text
+    .replace(/Rel8t/g, "REL8")
+    .replace(/rel8t/g, "rel8")
+    .replace(/LABR8/g, "LAB-R8")
+    .replace(/labr8/g, "LAB-R8");
 }
 
 // Utility for parsing CSV files with various formats

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { getUserServiceProvider, getServiceRequests } from '@/services/modul8Service';
@@ -121,7 +122,7 @@ const Labr8Dashboard = () => {
         <div className="mb-8">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold mb-2">LABR8 Dashboard</h1>
+              <h1 className="text-3xl font-bold mb-2">LAB-R8 Dashboard</h1>
               <p className="text-muted-foreground">Welcome back, {serviceProvider.business_name}</p>
             </div>
             <Button variant="outline" className="flex items-center gap-2">

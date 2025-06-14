@@ -83,22 +83,46 @@ export const useAuth = () => {
     createProfileIfNeeded();
   }, [session, currentUser, sessionLoading, profileLoading, createProfileIfNotExists, refreshUser, toast]);
 
-  // Profile completion check - simplified and only for existing users
+  // Profile completion check and service provider redirection
   useEffect(() => {
     if (sessionLoading || profileLoading || !currentUser || profileCompletionChecked.current) return;
     
     // Skip profile completion check if we're already on setup or auth pages
     const currentPath = window.location.pathname;
-    if (currentPath === "/profile/setup" || currentPath === "/auth") {
+    if (currentPath === "/profile/setup" || currentPath === "/auth" || currentPath.startsWith("/labr8")) {
       return;
     }
     
     profileCompletionChecked.current = true;
     
-    const checkProfileCompletion = async () => {
+    const checkProfileAndRedirect = async () => {
       try {
         console.log("Checking profile completion for user:", currentUser.id);
         
+        // If user is a service provider, redirect to LABR8
+        if (currentUser.role === 'SERVICE_PROVIDER') {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('profile_complete')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+            
+          if (error) {
+            console.error("Error checking service provider profile:", error);
+            return;
+          }
+          
+          if (!data || data.profile_complete === false) {
+            console.log("Service provider profile incomplete, redirecting to LAB-R8 setup");
+            navigate("/labr8/setup");
+          } else {
+            console.log("Service provider profile complete, redirecting to LAB-R8 dashboard");
+            navigate("/labr8/dashboard");
+          }
+          return;
+        }
+        
+        // For non-service providers, check profile completion
         const { data, error } = await supabase
           .from('profiles')
           .select('profile_complete, first_name, last_name')
@@ -131,7 +155,7 @@ export const useAuth = () => {
       }
     };
     
-    checkProfileCompletion();
+    checkProfileAndRedirect();
   }, [currentUser, sessionLoading, profileLoading, navigate, toast]);
 
   return { 

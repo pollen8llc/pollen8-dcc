@@ -62,7 +62,7 @@ const Labr8Auth = () => {
       if (data.user) {
         toast({
           title: "Welcome back!",
-          description: "You have successfully signed in to LABR8.",
+          description: "You have successfully signed in to LAB-R8.",
         });
         
         const redirectTo = searchParams.get("redirectTo") || "/labr8/dashboard";
@@ -124,12 +124,12 @@ const Labr8Auth = () => {
 
         if (data.user.email_confirmed_at) {
           toast({
-            title: "Welcome to LABR8!",
+            title: "Welcome to LAB-R8!",
             description: "Your service provider account has been created successfully.",
           });
           navigate("/labr8/dashboard", { replace: true });
         } else {
-          setMessage("Please check your email and click the confirmation link to complete your LABR8 service provider registration.");
+          setMessage("Please check your email and click the confirmation link to complete your LAB-R8 service provider registration.");
         }
       }
     } catch (err: any) {
@@ -154,7 +154,7 @@ const Labr8Auth = () => {
       <div className="w-full max-w-md mx-auto">
         <div className="flex items-center justify-center mb-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-[#00eada] mb-2">LABR8</h1>
+            <h1 className="text-3xl font-bold text-[#00eada] mb-2">LAB-R8</h1>
             <p className="text-lg font-semibold text-muted-foreground">Service Provider Portal</p>
             <p className="text-sm text-muted-foreground mt-1">Join the ecosystem as a service provider</p>
           </div>
@@ -171,7 +171,7 @@ const Labr8Auth = () => {
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Join LABR8</TabsTrigger>
+                <TabsTrigger value="signup">Join LAB-R8</TabsTrigger>
               </TabsList>
 
               {error && (
@@ -232,7 +232,7 @@ const Labr8Auth = () => {
                         Signing in...
                       </>
                     ) : (
-                      "Sign In to LABR8"
+                      "Sign In to LAB-R8"
                     )}
                   </Button>
                 </form>
@@ -319,7 +319,7 @@ const Labr8Auth = () => {
                         Creating account...
                       </>
                     ) : (
-                      "Join LABR8 as Service Provider"
+                      "Join LAB-R8 as Service Provider"
                     )}
                   </Button>
                 </form>

@@ -12,7 +12,7 @@ const navigationItems = [
   { name: 'REL8T', href: '/rel8' },
   { name: 'Knowledge', href: '/knowledge' },
   { name: 'Modul8', href: '/modul8' },
-  { name: 'LABR8', href: '/labr8' },
+  { name: 'LAB-R8', href: '/labr8' },
 ];
 
 const Navbar = () => {
@@ -32,7 +32,7 @@ const Navbar = () => {
           className="mr-auto flex items-center space-x-2"
         >
           {isServiceProvider ? (
-            <div className="text-2xl font-bold text-[#00eada]">LABR8</div>
+            <div className="text-2xl font-bold text-[#00eada]">LAB-R8</div>
           ) : (
             <img 
               src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans.png" 

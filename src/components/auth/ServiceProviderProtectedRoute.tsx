@@ -20,12 +20,12 @@ const ServiceProviderProtectedRoute = ({ children }: ServiceProviderProtectedRou
     );
   }
 
-  // Redirect to LABR8 auth if not logged in
+  // Redirect to LAB-R8 auth if not logged in
   if (!currentUser) {
     return <Navigate to="/labr8/auth" replace />;
   }
 
-  // Redirect to LABR8 auth if not a service provider
+  // Redirect to LAB-R8 auth if not a service provider
   if (currentUser.role !== 'SERVICE_PROVIDER') {
     return <Navigate to="/labr8/auth" replace />;
   }
