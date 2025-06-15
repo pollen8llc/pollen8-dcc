@@ -38,18 +38,28 @@ const EnhancedLabr8Dashboard = () => {
 
     try {
       setLoading(true);
+      console.log('Loading dashboard data for user:', session.user.id);
       
       const provider = await getUserServiceProvider(session.user.id);
+      console.log('Service provider found:', provider);
+      
       if (!provider) {
+        console.log('No service provider found, redirecting to setup');
         navigate('/labr8/setup');
         return;
       }
       setServiceProvider(provider);
 
+      // Get requests assigned to this provider
+      console.log('Fetching assigned requests for provider:', provider.id);
       const assigned = await getProviderServiceRequests(provider.id);
+      console.log('Assigned requests:', assigned);
       setAssignedRequests(assigned);
 
+      // Get available requests for this provider (based on domain specializations)
+      console.log('Fetching available requests for provider:', provider.id);
       const available = await getAvailableServiceRequestsForProvider(provider.id);
+      console.log('Available requests:', available);
       setIncomingRequests(available);
       
     } catch (error) {
@@ -69,12 +79,18 @@ const EnhancedLabr8Dashboard = () => {
     loadDashboardData();
   };
 
-  // Categorize requests
+  // Categorize requests more carefully
   const pendingRequests = incomingRequests.filter(r => r.status === 'pending');
   const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating');
   const activeProjects = assignedRequests.filter(r => ['agreed', 'in_progress'].includes(r.status));
   const completedProjects = assignedRequests.filter(r => r.status === 'completed');
-  const declinedRequests = assignedRequests.filter(r => r.status === 'declined');
+
+  console.log('Request categories:', {
+    pending: pendingRequests.length,
+    negotiating: negotiatingRequests.length,
+    active: activeProjects.length,
+    completed: completedProjects.length
+  });
 
   if (loading) {
     return (
@@ -108,6 +124,17 @@ const EnhancedLabr8Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Debug Info - Remove this in production */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 p-4 bg-gray-100 rounded">
+            <p className="text-sm">Debug Info:</p>
+            <p className="text-xs">Provider ID: {serviceProvider?.id}</p>
+            <p className="text-xs">Domain Specializations: {serviceProvider?.domain_specializations?.join(', ') || 'None'}</p>
+            <p className="text-xs">Total Assigned: {assignedRequests.length}</p>
+            <p className="text-xs">Total Available: {incomingRequests.length}</p>
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -196,6 +223,11 @@ const EnhancedLabr8Dashboard = () => {
                   <p className="text-muted-foreground text-center">
                     New service requests will appear here when organizers reach out to you.
                   </p>
+                  {serviceProvider?.domain_specializations?.length === 0 && (
+                    <p className="text-sm text-orange-600 mt-2">
+                      Consider adding domain specializations to your profile to receive relevant requests.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             ) : (
