@@ -87,10 +87,12 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
   };
 
   const handleViewRequest = () => {
+    // Adjust: Use new status page path!
     if (type === 'active' || type === 'completed') {
-      navigate(`/labr8/project/${request.id}`);
+      navigate(`/labr8/project/${request.id}`); // Project details page (existing)
     } else {
-      navigate(`/labr8/${request.id}/status`);
+      // For incoming/discussing: point to new status page
+      navigate(`/labr8/project/${request.id}/status`);
     }
   };
 

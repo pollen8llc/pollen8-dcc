@@ -64,6 +64,7 @@ const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
 const ModernLabr8Dashboard = lazy(() => import("@/pages/labr8/ModernLabr8Dashboard"));
 const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
 const Labr8ProjectDetails = lazy(() => import("@/pages/labr8/Labr8ProjectDetails"));
+const Labr8ProjectStatus = lazy(() => import("@/pages/labr8/Labr8ProjectStatus"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -371,6 +372,11 @@ const AppRoutes = () => {
             <Route path="/labr8/project/:projectId" element={
               <ServiceProviderProtectedRoute>
                 <Labr8ProjectDetails />
+              </ServiceProviderProtectedRoute>
+            } />
+            <Route path="/labr8/project/:requestId/status" element={
+              <ServiceProviderProtectedRoute>
+                <Labr8ProjectStatus />
               </ServiceProviderProtectedRoute>
             } />
             

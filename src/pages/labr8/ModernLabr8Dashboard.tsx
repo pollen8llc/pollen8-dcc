@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useSession } from "@/hooks/useSession";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -131,7 +130,6 @@ const ModernLabr8Dashboard: React.FC = () => {
               <TabsTrigger value="active">Active ({activeProjects.length})</TabsTrigger>
               <TabsTrigger value="completed">Completed ({completedProjects.length})</TabsTrigger>
             </TabsList>
-
             <TabsContent value="incoming" className="mt-3">
               <RequestList
                 type="incoming"
