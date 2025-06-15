@@ -1,3 +1,4 @@
+
 export interface ServiceProvider {
   id: string;
   user_id: string;
@@ -43,7 +44,7 @@ export interface ServiceRequest {
   };
   timeline?: string;
   milestones: string[];
-  status: 'pending' | 'negotiating' | 'agreed' | 'in_progress' | 'pending_review' | 'revision_requested' | 'pending_completion' | 'completed' | 'cancelled' | 'closed' | 'assigned' | 'declined';
+  status: 'pending' | 'provider_responded' | 'provider_declined' | 'provider_agreed' | 'negotiating' | 'agreed' | 'in_progress' | 'pending_review' | 'revision_requested' | 'pending_completion' | 'completed' | 'cancelled' | 'closed' | 'assigned' | 'declined';
   engagement_status: 'none' | 'negotiating' | 'affiliated';
   project_progress?: number;
   created_at: string;
