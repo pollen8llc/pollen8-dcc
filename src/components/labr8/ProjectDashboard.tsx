@@ -33,14 +33,28 @@ const ProjectDashboard = () => {
   }, [session?.user?.id]);
 
   const loadProjects = async () => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      console.log('No user session found');
+      setLoading(false);
+      return;
+    }
     
     try {
+      console.log('Loading projects for user:', session.user.id);
       const provider = await getUserServiceProvider(session.user.id);
-      if (!provider) return;
+      console.log('Service provider found:', provider);
       
+      if (!provider) {
+        console.log('No service provider profile found');
+        setProjects([]);
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Loading projects for provider ID:', provider.id);
       const projectData = await getServiceProviderProjects(provider.id);
-      setProjects(projectData);
+      console.log('Projects loaded:', projectData);
+      setProjects(projectData || []);
     } catch (error) {
       console.error('Error loading projects:', error);
       toast({
@@ -48,6 +62,7 @@ const ProjectDashboard = () => {
         description: "Failed to load projects",
         variant: "destructive"
       });
+      setProjects([]);
     } finally {
       setLoading(false);
     }
@@ -197,7 +212,7 @@ const ProjectDashboard = () => {
                     {tab === 'active' && "You don't have any active projects at the moment."}
                     {tab === 'review' && "No projects are currently under review."}
                     {tab === 'completed' && "You haven't completed any projects yet."}
-                    {tab === 'all' && "You don't have any projects yet."}
+                    {tab === 'all' && "You don't have any projects yet. Projects will appear here when organizers assign work to you."}
                   </p>
                 </CardContent>
               </Card>

@@ -6,13 +6,15 @@ import { getServiceProviderProjects } from '@/services/modul8ProjectService';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { 
   Users, 
   MessageSquare, 
   CheckCircle, 
   Building2,
   FolderOpen,
-  Star
+  Star,
+  LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceProvider, ServiceRequest } from '@/types/modul8';
@@ -20,7 +22,7 @@ import { toast } from '@/hooks/use-toast';
 import ProjectDashboard from '@/components/labr8/ProjectDashboard';
 
 const Labr8Dashboard = () => {
-  const { session } = useSession();
+  const { session, logout } = useSession();
   const navigate = useNavigate();
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
   const [myProjects, setMyProjects] = useState<ServiceRequest[]>([]);
@@ -35,8 +37,12 @@ const Labr8Dashboard = () => {
     if (!session?.user?.id) return;
     
     try {
+      console.log('Loading dashboard data for user:', session.user.id);
       const provider = await getUserServiceProvider(session.user.id);
+      console.log('Service provider:', provider);
+      
       if (!provider) {
+        console.log('No service provider found, redirecting to setup');
         navigate('/labr8/setup');
         return;
       }
@@ -44,7 +50,9 @@ const Labr8Dashboard = () => {
       setServiceProvider(provider);
       
       // Load provider's current projects
+      console.log('Loading projects for provider:', provider.id);
       const projects = await getServiceProviderProjects(provider.id);
+      console.log('Loaded projects:', projects);
       setMyProjects(projects);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -55,6 +63,20 @@ const Labr8Dashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/labr8');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive"
+      });
     }
   };
 
@@ -82,9 +104,19 @@ const Labr8Dashboard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">LAB-R8 Dashboard</h1>
-          <p className="text-muted-foreground">Service provider portal for project management</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">LAB-R8 Dashboard</h1>
+            <p className="text-muted-foreground">Service provider portal for project management</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
         </div>
 
         {/* Stats Cards */}
