@@ -58,9 +58,9 @@ const ModernLabr8Dashboard: React.FC = () => {
       </>
     : <span className="text-muted-foreground">Loading profile...</span>;
 
-  // Match Modul8's card grid, tab style, stat layout, and card aesthetics more closely
+  // Use bg-background for the main wrapper to match Modul8 dark design
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-[#f9fbff] to-[#e5fff3]">
+    <div className="min-h-screen bg-background"> {/* <-- switched from gradient to bg-background */}
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
@@ -123,8 +123,8 @@ const ModernLabr8Dashboard: React.FC = () => {
           />
         </div>
 
-        {/* Request Management Tabs (colors, grid, tab style modernized to match modul8 look) */}
-        <div className="bg-white/70 rounded-2xl shadow-xl px-0 md:px-4 py-8 backdrop-blur-lg">
+        {/* Request Management Tabs */}
+        <div className="bg-card/70 rounded-2xl shadow-xl px-0 md:px-4 py-8 backdrop-blur-lg">
           <Tabs defaultValue="incoming" className="w-full">
             <TabsList className="grid w-full grid-cols-4 rounded-xl border mb-6">
               <TabsTrigger value="incoming">Incoming ({pendingRequests.length})</TabsTrigger>
@@ -172,7 +172,7 @@ const ModernLabr8Dashboard: React.FC = () => {
           </Tabs>
         </div>
 
-        {/* Recent Activity - modern card appearance */}
+        {/* Recent Activity */}
         <div className="mt-12">
           <h2 className="text-xl font-extrabold mb-4">Recent Activity</h2>
           <ActivityFeed />
@@ -183,3 +183,4 @@ const ModernLabr8Dashboard: React.FC = () => {
 };
 
 export default ModernLabr8Dashboard;
+
