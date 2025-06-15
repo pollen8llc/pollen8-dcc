@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -133,10 +132,12 @@ const DomainProviders = () => {
         engagement_type: 'engage'
       });
       
-      navigate(`/modul8/request/new?domain=${domainId}&provider=${providerId}`);
+      // Navigate to provider-specific request portal
+      navigate(`/modul8/provider/${providerId}/request`);
     } catch (error) {
       console.error('Error tracking engagement:', error);
-      navigate(`/modul8/request/new?domain=${domainId}&provider=${providerId}`);
+      // Still navigate to the portal even if tracking fails
+      navigate(`/modul8/provider/${providerId}/request`);
     }
   };
 
@@ -202,13 +203,6 @@ const DomainProviders = () => {
                 {filteredProviders.length} of {serviceProviders.length} providers
               </div>
             </div>
-            <Button 
-              onClick={() => navigate(`/modul8/request/new?domain=${domainId}`)}
-              className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
-            >
-              <Plus className="h-4 w-4" />
-              Request Service
-            </Button>
           </div>
         </div>
 
@@ -352,7 +346,7 @@ const DomainProviders = () => {
                       className="flex-1 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
                       onClick={() => handleEngageProvider(provider.id)}
                     >
-                      Engage
+                      Request Service
                     </Button>
                   </div>
                 </CardContent>

@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -54,7 +53,7 @@ const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
 const DomainProviders = lazy(() => import("@/pages/modul8/DomainProviders"));
 const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
 const OrganizerSetup = lazy(() => import("@/pages/modul8/setup/OrganizerSetup"));
-const ServiceRequestForm = lazy(() => import("@/pages/modul8/ServiceRequestForm"));
+const ProviderRequestPortal = lazy(() => import("@/pages/modul8/ProviderRequestPortal"));
 const ServiceRequestDetails = lazy(() => import("@/pages/modul8/ServiceRequestDetails"));
 
 // LABR8 pages
@@ -334,9 +333,9 @@ function AppRoutes() {
               <OrganizerSetup />
             </NonServiceProviderRoute>
           } />
-          <Route path="/modul8/request/new" element={
+          <Route path="/modul8/provider/:providerId/request" element={
             <NonServiceProviderRoute>
-              <ServiceRequestForm />
+              <ProviderRequestPortal />
             </NonServiceProviderRoute>
           } />
           <Route path="/modul8/request/:id" element={

@@ -77,6 +77,18 @@ export const getUserServiceProvider = async (userId: string) => {
   return data ? transformServiceProvider(data) : null;
 };
 
+// Add new function to get service provider by ID
+export const getServiceProviderById = async (providerId: string) => {
+  const { data, error } = await supabase
+    .from('modul8_service_providers')
+    .select('*')
+    .eq('id', providerId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') throw error;
+  return data ? transformServiceProvider(data) : null;
+};
+
 // Enhanced service request retrieval with domain filtering
 export const getServiceRequestsByDomain = async (domainId: number) => {
   const { data, error } = await supabase
@@ -198,8 +210,12 @@ export const getUserOrganizer = async (userId: string) => {
   return data as Organizer | null;
 };
 
-// Service Request Services
-export const createServiceRequest = async (data: CreateServiceRequestData) => {
+// Service Request Services - Updated to support direct provider assignment
+export const createServiceRequest = async (data: CreateServiceRequestData & {
+  service_provider_id?: string;
+  status?: string;
+  engagement_status?: string;
+}) => {
   const { data: result, error } = await supabase
     .from('modul8_service_requests')
     .insert({
@@ -209,13 +225,63 @@ export const createServiceRequest = async (data: CreateServiceRequestData) => {
       description: data.description,
       budget_range: data.budget_range || {},
       timeline: data.timeline,
-      milestones: data.milestones || []
+      milestones: data.milestones || [],
+      service_provider_id: data.service_provider_id || null,
+      status: data.status || 'pending',
+      engagement_status: data.engagement_status || 'none'
     })
     .select()
     .single();
   
   if (error) throw error;
   return transformServiceRequest(result);
+};
+
+// Get service requests assigned to a specific provider
+export const getProviderServiceRequests = async (providerId: string) => {
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .eq('service_provider_id', providerId)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data?.map(transformServiceRequest) || [];
+};
+
+// Get available service requests for a provider (by domain specialization)
+export const getAvailableServiceRequestsForProvider = async (providerId: string) => {
+  // First get the provider's domain specializations
+  const { data: provider, error: providerError } = await supabase
+    .from('modul8_service_providers')
+    .select('domain_specializations')
+    .eq('id', providerId)
+    .single();
+  
+  if (providerError) throw providerError;
+  
+  if (!provider?.domain_specializations || provider.domain_specializations.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .in('domain_page', provider.domain_specializations)
+    .is('service_provider_id', null)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data?.map(transformServiceRequest) || [];
 };
 
 export const getServiceRequests = async (filters?: {
