@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -346,6 +347,7 @@ function AppRoutes() {
           
           {/* LAB-R8 Routes */}
           <Route path="/labr8" element={<Labr8Landing />} />
+          <Route path="/labr8/auth" element={<Labr8Auth />} />
           <Route path="/labr8/setup" element={
             <ProtectedRoute>
               <Labr8Setup />
