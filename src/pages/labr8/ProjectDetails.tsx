@@ -398,7 +398,7 @@ const ProjectDetails = () => {
                       {revisions.map((revision) => (
                         <div key={revision.id} className="border-l-2 border-muted pl-4">
                           <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" size="sm">
+                            <Badge variant="outline">
                               {revision.revision_type === 'requested' ? 'Request' : 'Response'}
                             </Badge>
                             <span className="text-xs text-muted-foreground">
