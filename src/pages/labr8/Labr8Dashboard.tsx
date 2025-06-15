@@ -5,7 +5,6 @@ import { getUserServiceProvider } from '@/services/modul8Service';
 import { getServiceProviderProjects } from '@/services/modul8ProjectService';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { 
   Users, 
@@ -14,12 +13,13 @@ import {
   Building2,
   FolderOpen,
   Star,
-  LogOut
+  LogOut,
+  Clock,
+  AlertCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceProvider, ServiceRequest } from '@/types/modul8';
 import { toast } from '@/hooks/use-toast';
-import ProjectDashboard from '@/components/labr8/ProjectDashboard';
 
 const Labr8Dashboard = () => {
   const { session, logout } = useSession();
@@ -27,7 +27,6 @@ const Labr8Dashboard = () => {
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
   const [myProjects, setMyProjects] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('projects');
 
   useEffect(() => {
     loadDashboardData();
@@ -89,6 +88,25 @@ const Labr8Dashboard = () => {
     };
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'text-green-600 bg-green-50 border-green-200';
+      case 'in_progress':
+        return 'text-blue-600 bg-blue-50 border-blue-200';
+      case 'pending_review':
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'revision_requested':
+        return 'text-orange-600 bg-orange-50 border-orange-200';
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   const stats = getProjectStats();
 
   if (loading) {
@@ -108,6 +126,11 @@ const Labr8Dashboard = () => {
           <div>
             <h1 className="text-3xl font-bold mb-2">LAB-R8 Dashboard</h1>
             <p className="text-muted-foreground">Service provider portal for project management</p>
+            {serviceProvider && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Welcome back, {serviceProvider.business_name || serviceProvider.user_id}
+              </p>
+            )}
           </div>
           <Button
             variant="outline"
@@ -178,16 +201,66 @@ const Labr8Dashboard = () => {
           </Card>
         </div>
 
-        {/* Main Dashboard Content - Only Projects Tab */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-1 max-w-md">
-            <TabsTrigger value="projects">My Projects ({stats.total})</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="projects">
-            <ProjectDashboard />
-          </TabsContent>
-        </Tabs>
+        {/* Projects List */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FolderOpen className="h-5 w-5" />
+              My Projects ({stats.total})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {myProjects.length > 0 ? (
+              <div className="space-y-4">
+                {myProjects.map((project) => (
+                  <div
+                    key={project.id}
+                    className={`p-4 rounded-lg border cursor-pointer hover:shadow-md transition-shadow ${getStatusColor(project.status)}`}
+                    onClick={() => navigate(`/labr8/request/${project.id}`)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="font-semibold text-lg">{project.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {project.description}
+                        </p>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(project.status)}`}>
+                        {formatStatus(project.status)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Building2 className="h-4 w-4" />
+                        <span>{project.domain_name}</span>
+                      </div>
+                      {project.budget && (
+                        <div className="flex items-center gap-1">
+                          <span>Budget: ${project.budget}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>
+                          {new Date(project.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Projects Yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  You don't have any projects assigned yet. Check back later for new opportunities.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
