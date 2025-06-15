@@ -67,6 +67,18 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
   // Check if user is admin
   const isAdmin = (role?: UserRole) => role === UserRole.ADMIN;
 
+  // Handle view profile navigation
+  const handleViewProfile = (profile: ExtendedProfile) => {
+    console.log('Navigating to profile:', profile.id, profile);
+    // Use the profile's user_id if available, otherwise fallback to id
+    const userId = profile.user_id || profile.id;
+    if (userId) {
+      navigate(`/profile/${userId}`);
+    } else {
+      console.error('No valid user ID found for profile:', profile);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="bg-background/95 backdrop-blur-sm rounded-2xl p-6">
@@ -185,7 +197,7 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
                   variant="outline"
                   size="sm"
                   className="w-full hover:bg-[#00eada]/10 hover:text-[#00eada] transition-colors"
-                  onClick={() => navigate(`/profile/${profile.id}`)}
+                  onClick={() => handleViewProfile(profile)}
                 >
                   View Profile
                   <ArrowRight className="ml-2 h-3 w-3" />
