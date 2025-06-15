@@ -669,6 +669,195 @@ export type Database = {
         }
         Relationships: []
       }
+      modul8_project_completions: {
+        Row: {
+          completion_notes: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          deliverables: Json | null
+          id: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          status: string
+          submitted_at: string
+        }
+        Insert: {
+          completion_notes?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          deliverables?: Json | null
+          id?: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          status?: string
+          submitted_at?: string
+        }
+        Update: {
+          completion_notes?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          deliverables?: Json | null
+          id?: string
+          organizer_id?: string
+          service_provider_id?: string
+          service_request_id?: string
+          status?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_project_completions_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_project_milestones: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          order_index: number | null
+          service_request_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          order_index?: number | null
+          service_request_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          order_index?: number | null
+          service_request_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_project_milestones_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_project_ratings: {
+        Row: {
+          completion_id: string
+          created_at: string
+          feedback: string | null
+          id: string
+          organizer_id: string
+          rating: number
+          service_provider_id: string
+          service_request_id: string
+        }
+        Insert: {
+          completion_id: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          organizer_id: string
+          rating: number
+          service_provider_id: string
+          service_request_id: string
+        }
+        Update: {
+          completion_id?: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          organizer_id?: string
+          rating?: number
+          service_provider_id?: string
+          service_request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_project_ratings_completion_id_fkey"
+            columns: ["completion_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_project_completions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_project_ratings_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_project_revisions: {
+        Row: {
+          attachments: Json | null
+          created_at: string
+          description: string
+          id: string
+          organizer_id: string
+          revision_type: string
+          service_provider_id: string
+          service_request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string
+          description: string
+          id?: string
+          organizer_id: string
+          revision_type: string
+          service_provider_id: string
+          service_request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string
+          description?: string
+          id?: string
+          organizer_id?: string
+          revision_type?: string
+          service_provider_id?: string
+          service_request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_project_revisions_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modul8_proposals: {
         Row: {
           created_at: string
@@ -774,6 +963,7 @@ export type Database = {
           id: string
           milestones: Json | null
           organizer_id: string
+          project_progress: number | null
           service_provider_id: string | null
           status: string | null
           timeline: string | null
@@ -789,6 +979,7 @@ export type Database = {
           id?: string
           milestones?: Json | null
           organizer_id: string
+          project_progress?: number | null
           service_provider_id?: string | null
           status?: string | null
           timeline?: string | null
@@ -804,6 +995,7 @@ export type Database = {
           id?: string
           milestones?: Json | null
           organizer_id?: string
+          project_progress?: number | null
           service_provider_id?: string | null
           status?: string | null
           timeline?: string | null

@@ -43,12 +43,63 @@ export interface ServiceRequest {
   };
   timeline?: string;
   milestones: string[];
-  status: 'pending' | 'negotiating' | 'agreed' | 'completed' | 'cancelled';
+  status: 'pending' | 'negotiating' | 'agreed' | 'in_progress' | 'pending_review' | 'revision_requested' | 'pending_completion' | 'completed' | 'cancelled';
   engagement_status: 'none' | 'negotiating' | 'affiliated';
+  project_progress?: number;
   created_at: string;
   updated_at: string;
   service_provider?: ServiceProvider;
   organizer?: Organizer;
+}
+
+export interface ProjectRevision {
+  id: string;
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  revision_type: 'requested' | 'response';
+  description: string;
+  attachments: string[];
+  status: 'pending' | 'addressed' | 'accepted';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectCompletion {
+  id: string;
+  service_request_id: string;
+  service_provider_id: string;
+  organizer_id: string;
+  completion_notes?: string;
+  deliverables: string[];
+  submitted_at: string;
+  confirmed_at?: string;
+  confirmed_by?: string;
+  status: 'submitted' | 'confirmed' | 'rejected';
+}
+
+export interface ProjectRating {
+  id: string;
+  service_request_id: string;
+  completion_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  rating: number;
+  feedback?: string;
+  created_at: string;
+}
+
+export interface ProjectMilestone {
+  id: string;
+  service_request_id: string;
+  title: string;
+  description?: string;
+  due_date?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'overdue';
+  completed_at?: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Proposal {
@@ -154,6 +205,40 @@ export interface CreateDealData {
   final_amount: number;
   deal_terms: any;
   deel_contract_url?: string;
+}
+
+export interface CreateProjectRevisionData {
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  revision_type: 'requested' | 'response';
+  description: string;
+  attachments?: string[];
+}
+
+export interface CreateProjectCompletionData {
+  service_request_id: string;
+  service_provider_id: string;
+  organizer_id: string;
+  completion_notes?: string;
+  deliverables?: string[];
+}
+
+export interface CreateProjectRatingData {
+  service_request_id: string;
+  completion_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  rating: number;
+  feedback?: string;
+}
+
+export interface CreateProjectMilestoneData {
+  service_request_id: string;
+  title: string;
+  description?: string;
+  due_date?: string;
+  order_index?: number;
 }
 
 export const DOMAIN_PAGES = [

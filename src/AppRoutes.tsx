@@ -62,6 +62,7 @@ const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
 const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
+const ProjectDetails = lazy(() => import("@/pages/labr8/ProjectDetails"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -343,13 +344,12 @@ function AppRoutes() {
             </NonServiceProviderRoute>
           } />
           
-          {/* LABR8 routes - Only accessible to service providers */}
+          {/* LAB-R8 Routes */}
           <Route path="/labr8" element={<Labr8Landing />} />
-          <Route path="/labr8/auth" element={<Labr8Auth />} />
           <Route path="/labr8/setup" element={
-            <ServiceProviderProtectedRoute>
+            <ProtectedRoute>
               <Labr8Setup />
-            </ServiceProviderProtectedRoute>
+            </ProtectedRoute>
           } />
           <Route path="/labr8/dashboard" element={
             <ServiceProviderProtectedRoute>
@@ -361,7 +361,12 @@ function AppRoutes() {
               <Labr8RequestDetails />
             </ServiceProviderProtectedRoute>
           } />
-          
+          <Route path="/labr8/project/:id" element={
+            <ServiceProviderProtectedRoute>
+              <ProjectDetails />
+            </ServiceProviderProtectedRoute>
+          } />
+
           {/* Documentation and 404 - Accessible to all */}
           <Route path="/docs" element={
             <NonServiceProviderRoute>
