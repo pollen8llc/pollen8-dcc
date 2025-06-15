@@ -81,7 +81,8 @@ const EnhancedLabr8Dashboard = () => {
 
   // Categorize requests more carefully
   const pendingRequests = incomingRequests.filter(r => r.status === 'pending');
-  const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating');
+  // Changed this line ↓
+  const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating' || r.status === 'assigned');
   const activeProjects = assignedRequests.filter(r => ['agreed', 'in_progress'].includes(r.status));
   const completedProjects = assignedRequests.filter(r => r.status === 'completed');
 
