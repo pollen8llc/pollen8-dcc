@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/models/types";
 
@@ -23,96 +22,27 @@ export interface ExtendedProfile {
 }
 
 /**
- * Get a profile by ID with privacy checks and role information
+ * Get a profile by ID with privacy checks
  */
 export const getProfileById = async (profileId: string): Promise<ExtendedProfile | null> => {
   try {
-    // Get basic profile data
-    const { data: profileData, error: profileError } = await supabase
+    // This will use RLS to enforce privacy
+    const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', profileId)
       .single();
       
-    if (profileError) {
-      console.error("Error fetching profile:", profileError);
+    if (error) {
+      console.error("Error fetching profile:", error);
       return null;
     }
-
-    // Get user roles using the new roles system
-    const { data: userRoles, error: rolesError } = await supabase
-      .from('user_roles')
-      .select(`
-        user_id,
-        role_id,
-        roles:role_id (
-          name
-        )
-      `)
-      .eq('user_id', profileId);
-      
-    if (rolesError) {
-      console.error("Error fetching user roles:", rolesError);
-      // Don't throw error for roles, just log it
-    }
-
-    // Also check admin_roles table for legacy admin users
-    const { data: adminRoles, error: adminRolesError } = await supabase
-      .from('admin_roles')
-      .select('user_id, role')
-      .eq('user_id', profileId);
-      
-    if (adminRolesError) {
-      console.error("Error fetching admin roles:", adminRolesError);
-      // Don't throw error for admin roles, just log it
-    }
-
-    console.log('Profile role data:', { userRoles, adminRoles });
     
-    // Determine user's role based on the roles system
-    let role: UserRole = UserRole.MEMBER; // Default role
-    
-    if (userRoles && userRoles.length > 0) {
-      // Check for specific roles - make sure we handle both formats
-      const isAdmin = userRoles.some(r => 
-        r.roles && (r.roles.name === 'ADMIN' || r.roles.name === 'admin')
-      ) || adminRoles?.some(ar => ar.role === 'ADMIN');
-      
-      const isServiceProvider = userRoles.some(r => 
-        r.roles && (r.roles.name === 'SERVICE_PROVIDER' || r.roles.name === 'service_provider')
-      );
-      
-      const isOrganizer = userRoles.some(r => 
-        r.roles && (r.roles.name === 'ORGANIZER' || r.roles.name === 'organizer')
-      );
-      
-      // Determine role - check SERVICE_PROVIDER first, then ADMIN, then ORGANIZER
-      if (isServiceProvider) {
-        role = UserRole.SERVICE_PROVIDER;
-      } else if (isAdmin) {
-        role = UserRole.ADMIN;
-      } else if (isOrganizer) {
-        role = UserRole.ORGANIZER;
-      } else {
-        role = UserRole.MEMBER;
-      }
-      
-      console.log(`User ${profileId} role determination:`, {
-        userRoles: userRoles.map(r => r.roles?.name),
-        adminRole: adminRoles?.map(ar => ar.role),
-        finalRole: role,
-        isServiceProvider,
-        isAdmin,
-        isOrganizer
-      });
-    }
-    
-    // Parse JSON fields to ensure type compatibility and include role
+    // Parse JSON fields to ensure type compatibility
     return {
-      ...profileData,
-      role: role, // Include the determined role
-      social_links: profileData.social_links ? JSON.parse(JSON.stringify(profileData.social_links)) : {},
-      privacy_settings: profileData.privacy_settings ? JSON.parse(JSON.stringify(profileData.privacy_settings)) : {
+      ...data,
+      social_links: data.social_links ? JSON.parse(JSON.stringify(data.social_links)) : {},
+      privacy_settings: data.privacy_settings ? JSON.parse(JSON.stringify(data.privacy_settings)) : {
         profile_visibility: "connections"
       }
     };
