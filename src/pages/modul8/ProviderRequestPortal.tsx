@@ -51,9 +51,18 @@ const ProviderRequestPortal = () => {
     if (!session?.user?.id || !providerId) return;
     
     try {
+      console.log('Loading data for provider:', providerId);
+      
       // Load organizer data
       const organizer = await getUserOrganizer(session.user.id);
+      console.log('Organizer data:', organizer);
+      
       if (!organizer) {
+        toast({
+          title: "Setup Required", 
+          description: "Please complete your organizer setup first.",
+          variant: "destructive"
+        });
         navigate('/modul8/setup/organizer');
         return;
       }
@@ -61,6 +70,8 @@ const ProviderRequestPortal = () => {
 
       // Load provider data
       const providerData = await getServiceProviderById(providerId);
+      console.log('Provider data:', providerData);
+      
       if (!providerData) {
         toast({
           title: "Provider Not Found",
@@ -83,10 +94,34 @@ const ProviderRequestPortal = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organizerData || !provider) return;
+    if (!organizerData || !provider) {
+      console.error('Missing required data:', { organizerData, provider });
+      toast({
+        title: "Error",
+        description: "Missing required data for submission",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.title.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please provide a service title",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setLoading(true);
     try {
+      console.log('Submitting request with data:', {
+        organizer: organizerData.id,
+        provider: provider.id,
+        title: formData.title,
+        budget_range: formData.budget_range
+      });
+
       const budgetRange = {
         min: formData.budget_range.min ? parseFloat(formData.budget_range.min) : undefined,
         max: formData.budget_range.max ? parseFloat(formData.budget_range.max) : undefined,
@@ -106,6 +141,8 @@ const ProviderRequestPortal = () => {
         status: 'assigned',
         engagement_status: 'affiliated'
       });
+
+      console.log('Service request created:', serviceRequest);
 
       // Create notification for the service provider
       await createNotification({
@@ -129,7 +166,7 @@ const ProviderRequestPortal = () => {
       console.error('Error creating service request:', error);
       toast({
         title: "Error",
-        description: "Failed to submit service request",
+        description: `Failed to submit service request: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
     } finally {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { 
@@ -56,10 +55,7 @@ const Labr8Dashboard = () => {
 
       // Load available requests in provider's domains
       const available = await getAvailableServiceRequestsForProvider(provider.id);
-      setAvail
-
-
-Requests(available);
+      setAvailableRequests(available);
       
     } catch (error) {
       console.error('Error loading dashboard data:', error);
