@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { getServiceRequests, getUserServiceProvider } from '@/services/modul8Service';
-import { createServiceRequestComment, updateServiceRequestStatus } from '@/services/commentService';
+import { getServiceRequests, getUserServiceProvider, updateServiceRequestStatus } from '@/services/modul8Service';
+import { createServiceRequestComment } from '@/services/commentService';
 import { ServiceRequest, ServiceProvider } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
