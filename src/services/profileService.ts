@@ -18,11 +18,11 @@ export interface ExtendedProfile {
   };
   created_at?: string;
   updated_at?: string;
-  role?: UserRole;  // Added role field to store user role
+  role?: UserRole;
 }
 
 /**
- * Get a profile by ID with privacy checks
+ * Get a profile by ID with privacy checks and role information
  */
 export const getProfileById = async (profileId: string): Promise<ExtendedProfile | null> => {
   try {
@@ -38,9 +38,53 @@ export const getProfileById = async (profileId: string): Promise<ExtendedProfile
       return null;
     }
     
+    // Get user role from user_roles table
+    let role = UserRole.MEMBER; // Default role
+    
+    try {
+      const { data: userRoles, error: userRolesError } = await supabase
+        .from('user_roles')
+        .select(`
+          role_id,
+          roles:role_id (
+            name
+          )
+        `)
+        .eq('user_id', profileId);
+
+      if (userRolesError) {
+        console.error("Error fetching user roles for profile:", userRolesError);
+      } else if (userRoles && userRoles.length > 0) {
+        console.log("Profile user roles fetched:", userRoles);
+        
+        // Check for admin role first
+        const hasAdminRole = userRoles.some(r => r.roles && r.roles.name === 'ADMIN');
+        if (hasAdminRole) {
+          role = UserRole.ADMIN;
+        } else {
+          // Check for service provider role
+          const hasServiceProviderRole = userRoles.some(r => 
+            r.roles && r.roles.name === 'SERVICE_PROVIDER'
+          );
+          if (hasServiceProviderRole) {
+            role = UserRole.SERVICE_PROVIDER;
+          } else {
+            // Check for organizer role
+            const hasOrganizerRole = userRoles.some(r => r.roles && r.roles.name === 'ORGANIZER');
+            if (hasOrganizerRole) {
+              role = UserRole.ORGANIZER;
+            }
+          }
+        }
+      }
+    } catch (roleErr) {
+      console.error("Exception fetching roles for profile:", roleErr);
+    }
+    
     // Parse JSON fields to ensure type compatibility
     return {
       ...data,
+      role: role,
       social_links: data.social_links ? JSON.parse(JSON.stringify(data.social_links)) : {},
       privacy_settings: data.privacy_settings ? JSON.parse(JSON.stringify(data.privacy_settings)) : {
         profile_visibility: "connections"

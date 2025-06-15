@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
@@ -19,12 +18,14 @@ export const useProfiles = () => {
   const { toast } = useToast();
 
   /**
-   * Get a user's profile by ID
+   * Get a user's profile by ID with role information
    */
   const fetchProfile = async (profileId: string): Promise<ExtendedProfile | null> => {
     setIsLoading(true);
     try {
+      console.log("Fetching profile with ID:", profileId);
       const fetchedProfile = await getProfileById(profileId);
+      console.log("Fetched profile with role:", fetchedProfile?.role);
       setProfile(fetchedProfile);
       return fetchedProfile;
     } catch (error) {

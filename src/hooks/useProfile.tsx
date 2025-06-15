@@ -59,7 +59,7 @@ export const useProfile = (session: Session | null) => {
 
       console.log("Profile fetched successfully:", profile);
 
-      // Get user role using the simplified approach
+      // Get user role using the user_roles system
       let role = UserRole.MEMBER; // Default role
       
       try {
@@ -84,11 +84,20 @@ export const useProfile = (session: Session | null) => {
             role = UserRole.ADMIN;
             console.log("User has ADMIN role");
           } else {
-            // Check for organizer role
-            const hasOrganizerRole = userRoles.some(r => r.roles && r.roles.name === 'ORGANIZER');
-            if (hasOrganizerRole) {
-              role = UserRole.ORGANIZER;
-              console.log("User has ORGANIZER role");
+            // Check for service provider role
+            const hasServiceProviderRole = userRoles.some(r => 
+              r.roles && r.roles.name === 'SERVICE_PROVIDER'
+            );
+            if (hasServiceProviderRole) {
+              role = UserRole.SERVICE_PROVIDER;
+              console.log("User has SERVICE_PROVIDER role");
+            } else {
+              // Check for organizer role
+              const hasOrganizerRole = userRoles.some(r => r.roles && r.roles.name === 'ORGANIZER');
+              if (hasOrganizerRole) {
+                role = UserRole.ORGANIZER;
+                console.log("User has ORGANIZER role");
+              }
             }
           }
         } else {
