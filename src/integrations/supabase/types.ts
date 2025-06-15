@@ -1092,6 +1092,47 @@ export type Database = {
         }
         Relationships: []
       }
+      modul8_service_request_comments: {
+        Row: {
+          comment_type: string
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          service_request_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_type?: string
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          service_request_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_type?: string
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          service_request_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_service_request_comments_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modul8_service_requests: {
         Row: {
           budget_range: Json | null
@@ -1154,6 +1195,44 @@ export type Database = {
             columns: ["service_provider_id"]
             isOneToOne: false
             referencedRelation: "modul8_service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_status_changes: {
+        Row: {
+          created_at: string
+          from_status: string | null
+          id: string
+          reason: string | null
+          service_request_id: string
+          to_status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          service_request_id: string
+          to_status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          service_request_id?: string
+          to_status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_status_changes_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
             referencedColumns: ["id"]
           },
         ]

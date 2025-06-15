@@ -533,3 +533,36 @@ export const deleteProposal = async (proposalId: string): Promise<void> => {
   
   if (error) throw error;
 };
+
+// Get existing service request between organizer and service provider
+export const getExistingServiceRequest = async (organizerId: string, serviceProviderId: string) => {
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .eq('organizer_id', organizerId)
+    .eq('service_provider_id', serviceProviderId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') throw error;
+  return data ? transformServiceRequest(data) : null;
+};
+
+// Get service request by ID
+export const getServiceRequestById = async (serviceRequestId: string) => {
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .eq('id', serviceRequestId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') throw error;
+  return data ? transformServiceRequest(data) : null;
+};

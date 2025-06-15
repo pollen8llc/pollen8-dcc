@@ -304,6 +304,43 @@ export interface CreateProjectCommentData {
   metadata?: any;
 }
 
+export interface CreateServiceRequestCommentData {
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'general' | 'status_change' | 'system_notification';
+  content: string;
+  metadata?: any;
+}
+
+export interface CreateStatusChangeData {
+  service_request_id: string;
+  user_id: string;
+  from_status?: string;
+  to_status: string;
+  reason?: string;
+}
+
+export interface ServiceRequestComment {
+  id: string;
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'general' | 'status_change' | 'system_notification';
+  content: string;
+  metadata: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StatusChange {
+  id: string;
+  service_request_id: string;
+  user_id: string;
+  from_status?: string;
+  to_status: string;
+  reason?: string;
+  created_at: string;
+}
+
 export const DOMAIN_PAGES = [
   { id: 1, title: 'Fundraising & Sponsorship', description: 'Grant writing, donor management, sponsorship acquisition' },
   { id: 2, title: 'Event Production & Logistics', description: 'Event planning, venue management, logistics coordination' },
