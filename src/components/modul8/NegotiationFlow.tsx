@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ import {
   ExternalLink,
   Handshake
 } from 'lucide-react';
-import { ServiceRequest, Proposal } from '@/types/modul8';
+import { ServiceRequest, Proposal, ServiceProvider } from '@/types/modul8';
 import { createProposal, getRequestProposals, assignServiceProvider } from '@/services/modul8Service';
 import { useSession } from '@/hooks/useSession';
 import { toast } from '@/hooks/use-toast';
@@ -37,7 +36,7 @@ const NEGOTIATION_STEPS = [
 
 const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpdate }) => {
   const { session } = useSession();
-  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [proposals, setProposals] = useState<(Proposal & { service_provider?: ServiceProvider })[]>([]);
   const [showProposalForm, setShowProposalForm] = useState(false);
   const [proposalData, setProposalData] = useState({
     quote_amount: '',
@@ -55,7 +54,7 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
   const loadProposals = async () => {
     try {
       const proposalsData = await getRequestProposals(serviceRequest.id);
-      setProposals(proposalsData);
+      setProposals(proposalsData as (Proposal & { service_provider?: ServiceProvider })[]);
     } catch (error) {
       console.error('Error loading proposals:', error);
     }

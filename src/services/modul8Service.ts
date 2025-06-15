@@ -373,11 +373,21 @@ export const createProposal = async (data: CreateProposalData) => {
   return result as Proposal;
 };
 
+// Enhanced proposal retrieval with proper typing
 export const getRequestProposals = async (serviceRequestId: string) => {
   const { data, error } = await supabase
     .from('modul8_proposals')
     .select(`
-      *,
+      id,
+      service_request_id,
+      from_user_id,
+      proposal_type,
+      quote_amount,
+      timeline,
+      scope_details,
+      terms,
+      status,
+      created_at,
       service_provider:modul8_service_providers!inner(
         id,
         user_id,
@@ -390,7 +400,16 @@ export const getRequestProposals = async (serviceRequestId: string) => {
     .order('created_at', { ascending: true });
   
   if (error) throw error;
-  return data || [];
+  
+  // Transform the data to match our Proposal type with service provider info
+  return (data || []).map(item => ({
+    ...item,
+    proposal_type: item.proposal_type as 'initial' | 'counter' | 'revision',
+    status: item.status as 'pending' | 'accepted' | 'rejected' | 'submitted' | 'countered',
+    service_provider: Array.isArray(item.service_provider) 
+      ? item.service_provider[0] 
+      : item.service_provider
+  }));
 };
 
 // Enhanced proposal acceptance function

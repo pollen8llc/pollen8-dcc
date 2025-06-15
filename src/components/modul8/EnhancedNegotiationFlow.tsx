@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import {
   ArrowRight,
   CheckCircle
 } from 'lucide-react';
-import { ServiceRequest, Proposal, ProposalThread, ProposalVersion } from '@/types/modul8';
+import { ServiceRequest, Proposal, ProposalThread, ProposalVersion, ServiceProvider } from '@/types/modul8';
 import { 
   getProposalThread, 
   createProposalThread, 
@@ -36,7 +35,7 @@ const EnhancedNegotiationFlow: React.FC<EnhancedNegotiationFlowProps> = ({
   onUpdate 
 }) => {
   const { session } = useSession();
-  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [proposals, setProposals] = useState<(Proposal & { service_provider?: ServiceProvider })[]>([]);
   const [proposalThread, setProposalThread] = useState<ProposalThread | null>(null);
   const [proposalVersions, setProposalVersions] = useState<ProposalVersion[]>([]);
   const [showCounterForm, setShowCounterForm] = useState(false);
@@ -56,7 +55,7 @@ const EnhancedNegotiationFlow: React.FC<EnhancedNegotiationFlowProps> = ({
   const loadNegotiationData = async () => {
     try {
       const proposalsData = await getRequestProposals(serviceRequest.id);
-      setProposals(proposalsData);
+      setProposals(proposalsData as (Proposal & { service_provider?: ServiceProvider })[]);
 
       if (proposalsData.length > 0) {
         const thread = await getProposalThread(serviceRequest.id);
