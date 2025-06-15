@@ -20,9 +20,8 @@ import {
   Handshake,
   ExternalLink
 } from 'lucide-react';
-import { ServiceRequest, ServiceRequestComment } from '@/types/modul8';
+import { ServiceRequest } from '@/types/modul8';
 import { getServiceRequests, deleteServiceRequest } from '@/services/modul8Service';
-import { getServiceRequestComments, createServiceRequestComment, updateServiceRequestStatus } from '@/services/commentService';
 import { useSession } from '@/hooks/useSession';
 import { toast } from '@/hooks/use-toast';
 
@@ -32,7 +31,6 @@ const RequestStatusPage = () => {
   const { session } = useSession();
   
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
-  const [comments, setComments] = useState<ServiceRequestComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -64,10 +62,6 @@ const RequestStatusPage = () => {
       
       setServiceRequest(request);
       
-      // Load comments
-      const requestComments = await getServiceRequestComments(requestId);
-      setComments(requestComments);
-      
     } catch (error) {
       console.error('Error loading data:', error);
       toast({
@@ -77,39 +71,6 @@ const RequestStatusPage = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAddComment = async () => {
-    if (!newComment.trim() || !session?.user?.id || !serviceRequest) return;
-    
-    try {
-      setSubmitting(true);
-      
-      await createServiceRequestComment({
-        service_request_id: serviceRequest.id,
-        user_id: session.user.id,
-        comment_type: 'general',
-        content: newComment.trim()
-      });
-      
-      setNewComment('');
-      await loadData(); // Reload to get updated comments
-      
-      toast({
-        title: "Comment Added",
-        description: "Your comment has been posted successfully."
-      });
-      
-    } catch (error) {
-      console.error('Error adding comment:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add comment",
-        variant: "destructive"
-      });
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -140,53 +101,6 @@ const RequestStatusPage = () => {
     }
   };
 
-  const handleStatusAction = async (action: 'respond' | 'decline' | 'agree', reason?: string) => {
-    if (!serviceRequest || !session?.user?.id) return;
-    
-    try {
-      let newStatus = '';
-      let message = '';
-      
-      switch (action) {
-        case 'respond':
-          newStatus = 'provider_responded';
-          message = 'Provider has responded to your request';
-          break;
-        case 'decline':
-          newStatus = 'provider_declined';
-          message = 'Provider has declined your request';
-          break;
-        case 'agree':
-          newStatus = 'provider_agreed';
-          message = 'Provider has agreed to your request';
-          break;
-      }
-      
-      await updateServiceRequestStatus(
-        serviceRequest.id,
-        newStatus,
-        session.user.id,
-        serviceRequest.status,
-        reason
-      );
-      
-      await loadData();
-      
-      toast({
-        title: "Status Updated",
-        description: message
-      });
-      
-    } catch (error) {
-      console.error('Error updating status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update status",
-        variant: "destructive"
-      });
-    }
-  };
-
   const handleLockDeal = () => {
     if (!serviceRequest) return;
     
@@ -210,14 +124,37 @@ const RequestStatusPage = () => {
     switch (status) {
       case 'pending':
         return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'provider_responded':
+      case 'negotiating':
         return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'provider_declined':
+      case 'declined':
         return 'bg-red-50 text-red-700 border-red-200';
-      case 'provider_agreed':
+      case 'agreed':
         return 'bg-green-50 text-green-700 border-green-200';
+      case 'in_progress':
+        return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'completed':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getStatusMessage = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'Request is pending review';
+      case 'negotiating':
+        return 'Negotiation in progress';
+      case 'declined':
+        return 'Request has been declined';
+      case 'agreed':
+        return 'Ready to create contract and lock deal';
+      case 'in_progress':
+        return 'Project is in progress';
+      case 'completed':
+        return 'Project has been completed';
+      default:
+        return 'Status unknown';
     }
   };
 
@@ -258,7 +195,7 @@ const RequestStatusPage = () => {
           Back to Dashboard
         </Button>
         
-        {isOrganizer && serviceRequest.status !== 'provider_agreed' && (
+        {isOrganizer && serviceRequest.status !== 'agreed' && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm" disabled={deleting}>
@@ -293,6 +230,9 @@ const RequestStatusPage = () => {
               <Badge className={`${getStatusColor(serviceRequest.status)} font-medium`} variant="outline">
                 {serviceRequest.status.replace('_', ' ').toUpperCase()}
               </Badge>
+              <p className="text-sm text-muted-foreground mt-2">
+                {getStatusMessage(serviceRequest.status)}
+              </p>
             </div>
             
             {serviceRequest.service_provider && (
@@ -333,7 +273,7 @@ const RequestStatusPage = () => {
       </Card>
 
       {/* Status Actions */}
-      {serviceRequest.status === 'provider_agreed' && isOrganizer && (
+      {serviceRequest.status === 'agreed' && isOrganizer && (
         <Card className="mb-8 border-green-200 bg-green-50">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -354,13 +294,13 @@ const RequestStatusPage = () => {
         </Card>
       )}
 
-      {serviceRequest.status === 'provider_declined' && (
+      {serviceRequest.status === 'declined' && (
         <Card className="mb-8 border-red-200 bg-red-50">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <XCircle className="h-6 w-6 text-red-600" />
               <div>
-                <h3 className="font-semibold text-red-800">Provider Declined</h3>
+                <h3 className="font-semibold text-red-800">Request Declined</h3>
                 <p className="text-red-700">This request has been declined by the service provider</p>
               </div>
             </div>
@@ -368,72 +308,27 @@ const RequestStatusPage = () => {
         </Card>
       )}
 
-      {/* Comments Section */}
+      {/* Negotiation Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            Discussion ({comments.length})
+            Discussion & Negotiation
           </CardTitle>
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Comments List */}
-          {comments.length > 0 ? (
-            <div className="space-y-4">
-              {comments.map((comment) => (
-                <div key={comment.id} className="flex gap-3 p-4 bg-muted/30 rounded-lg">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">
-                        {comment.comment_type === 'status_change' ? 'System' : 'User'}
-                      </span>
-                      <Badge 
-                        variant={comment.comment_type === 'status_change' ? 'secondary' : 'outline'}
-                        className="text-xs"
-                      >
-                        {comment.comment_type.replace('_', ' ')}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(comment.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                    <p className="text-sm">{comment.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">No comments yet. Start the conversation!</p>
-          )}
-
-          {/* Add Comment */}
-          {(isOrganizer || isServiceProvider) && serviceRequest.status !== 'provider_declined' && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <Textarea
-                  placeholder="Add a comment to the discussion..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  rows={3}
-                />
-                <div className="flex justify-end">
-                  <Button 
-                    onClick={handleAddComment} 
-                    disabled={!newComment.trim() || submitting}
-                  >
-                    {submitting ? 'Posting...' : 'Post Comment'}
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">
+              Use the main service request page for detailed negotiations and proposals.
+            </p>
+            <Button 
+              onClick={() => navigate(`/modul8/request/${serviceRequest.id}`)}
+              className="mt-4"
+            >
+              Go to Full Request Details
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

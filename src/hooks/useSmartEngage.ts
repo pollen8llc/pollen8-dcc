@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { getUserOrganizer, getExistingServiceRequest } from '@/services/modul8Service';
+import { getUserOrganizer, getServiceRequests } from '@/services/modul8Service';
 import { toast } from '@/hooks/use-toast';
 
 export const useSmartEngage = () => {
@@ -32,12 +32,16 @@ export const useSmartEngage = () => {
           description: "Please complete your organizer profile first",
           variant: "destructive"
         });
-        navigate('/profile-setup');
+        navigate('/modul8/setup/organizer');
         return;
       }
 
       // Check if there's an existing service request between this organizer and provider
-      const existingRequest = await getExistingServiceRequest(organizer.id, serviceProviderId);
+      const allRequests = await getServiceRequests();
+      const existingRequest = allRequests.find(r => 
+        r.organizer_id === organizer.id && 
+        r.service_provider_id === serviceProviderId
+      );
 
       if (existingRequest) {
         // Route to status page if request exists

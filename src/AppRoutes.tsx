@@ -75,10 +75,9 @@ const LoadingSpinner = () => (
 
 const AppRoutes = () => {
   return (
-    <BrowserRouter>
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={
               <NonServiceProviderRoute>
@@ -381,11 +380,10 @@ const AppRoutes = () => {
               </NonServiceProviderRoute>
             } />
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-        <Toaster />
-      </ErrorBoundary>
-    </BrowserRouter>
+        </Routes>
+      </Suspense>
+      <Toaster />
+    </ErrorBoundary>
   );
 };
 
