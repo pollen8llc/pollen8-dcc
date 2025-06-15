@@ -1,3 +1,4 @@
+
 import { User, UserRole } from "@/models/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,6 +14,7 @@ export const usePermissions = (currentUser: User | null) => {
     
     // Service providers ONLY have access to LABR8 resources and their own profile
     if (isServiceProvider()) {
+      console.log('Service provider permission check:', { resource, action, allowed: resource.startsWith('labr8') || (resource === 'profile' && action === 'read') });
       return resource.startsWith('labr8') || (resource === 'profile' && action === 'read');
     }
     
@@ -68,7 +70,9 @@ export const usePermissions = (currentUser: User | null) => {
     
     // Service providers are STRICTLY restricted to LABR8 only
     if (isServiceProvider()) {
-      return resource.startsWith('labr8') || (resource === 'profile' && action === 'read');
+      const allowed = resource.startsWith('labr8') || (resource === 'profile' && action === 'read');
+      console.log('Service provider sync permission check:', { resource, action, allowed, userRole: currentUser.role });
+      return allowed;
     }
     
     // Basic role-based check for UI rendering
@@ -95,7 +99,9 @@ export const usePermissions = (currentUser: User | null) => {
 
   // Helper functions for clear role checks - centralized here to avoid duplication
   const isAdmin = (): boolean => {
-    return currentUser?.role === UserRole.ADMIN;
+    const result = currentUser?.role === UserRole.ADMIN;
+    console.log('isAdmin check:', { currentUser: currentUser?.id, role: currentUser?.role, result });
+    return result;
   };
   
   // Check if user is an organizer (either by role OR by managing communities)
@@ -117,7 +123,9 @@ export const usePermissions = (currentUser: User | null) => {
 
   // Check if user is a service provider
   const isServiceProvider = (): boolean => {
-    return currentUser?.role === UserRole.SERVICE_PROVIDER;
+    const result = currentUser?.role === UserRole.SERVICE_PROVIDER;
+    console.log('isServiceProvider check:', { currentUser: currentUser?.id, role: currentUser?.role, result });
+    return result;
   };
   
   // Check if user is an owner of a specific community
@@ -148,12 +156,12 @@ export const usePermissions = (currentUser: User | null) => {
       return { text: "Admin", color: "bg-purple-500 hover:bg-purple-600" };
     }
     
-    if (isOrganizer()) {
-      return { text: "Organizer", color: "bg-blue-500 hover:bg-blue-600" };
-    }
-
     if (isServiceProvider()) {
       return { text: "Service Provider", color: "bg-orange-500 hover:bg-orange-600" };
+    }
+    
+    if (isOrganizer()) {
+      return { text: "Organizer", color: "bg-blue-500 hover:bg-blue-600" };
     }
     
     if (currentUser.role === UserRole.MEMBER) {
@@ -167,7 +175,9 @@ export const usePermissions = (currentUser: User | null) => {
   const canAccessMainPlatform = (): boolean => {
     if (!currentUser) return false;
     // Service providers are completely restricted from main platform
-    return currentUser.role !== UserRole.SERVICE_PROVIDER;
+    const canAccess = currentUser.role !== UserRole.SERVICE_PROVIDER;
+    console.log('canAccessMainPlatform check:', { userRole: currentUser.role, canAccess });
+    return canAccess;
   };
 
   return { 
