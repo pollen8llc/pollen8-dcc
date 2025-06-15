@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -5,7 +6,6 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ServiceProviderProtectedRoute from "@/components/auth/ServiceProviderProtectedRoute";
 import NonServiceProviderRoute from "@/components/auth/NonServiceProviderRoute";
-import { BrowserRouter } from "react-router-dom";
 
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
@@ -62,7 +62,8 @@ const RequestStatus = lazy(() => import("./pages/modul8/RequestStatus"));
 const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
 const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
-const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
+const EnhancedLabr8Dashboard = lazy(() => import("@/pages/labr8/EnhancedLabr8Dashboard"));
+const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
 const ProjectDetails = lazy(() => import("@/pages/labr8/ProjectDetails"));
 
@@ -345,6 +346,11 @@ const AppRoutes = () => {
                 <ServiceRequestDetails />
               </NonServiceProviderRoute>
             } />
+            <Route path="/modul8/provider/:providerId/:requestId/status" element={
+              <NonServiceProviderRoute>
+                <RequestStatus />
+              </NonServiceProviderRoute>
+            } />
             
             {/* LAB-R8 Routes */}
             <Route path="/labr8" element={<Labr8Landing />} />
@@ -356,7 +362,12 @@ const AppRoutes = () => {
             } />
             <Route path="/labr8/dashboard" element={
               <ServiceProviderProtectedRoute>
-                <Labr8Dashboard />
+                <EnhancedLabr8Dashboard />
+              </ServiceProviderProtectedRoute>
+            } />
+            <Route path="/labr8/request/:id/status" element={
+              <ServiceProviderProtectedRoute>
+                <Labr8RequestStatus />
               </ServiceProviderProtectedRoute>
             } />
             <Route path="/labr8/request/:id" element={
@@ -369,9 +380,6 @@ const AppRoutes = () => {
                 <ProjectDetails />
               </ServiceProviderProtectedRoute>
             } />
-            
-            {/* Add the new route before the catch-all route */}
-            <Route path="/modul8/provider/:providerId/:requestId/status" element={<RequestStatus />} />
             
             {/* Documentation and 404 - Accessible to all */}
             <Route path="/docs" element={
