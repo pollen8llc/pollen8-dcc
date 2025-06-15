@@ -44,8 +44,14 @@ export const useSmartEngage = () => {
       );
 
       if (existingRequest) {
-        // Route to status page if request exists
-        navigate(`/modul8/provider/${serviceProviderId}/${existingRequest.id}/status`);
+        // Route to appropriate page based on request status and user type
+        if (existingRequest.status === 'agreed') {
+          // For agreed requests, route to the enhanced status page
+          navigate(`/modul8/provider/${serviceProviderId}/${existingRequest.id}/status`);
+        } else {
+          // For other statuses, route to the regular status page
+          navigate(`/modul8/provider/${serviceProviderId}/${existingRequest.id}/status`);
+        }
       } else {
         // Route to new request page if no existing request
         navigate(`/modul8/provider/${serviceProviderId}/request`);

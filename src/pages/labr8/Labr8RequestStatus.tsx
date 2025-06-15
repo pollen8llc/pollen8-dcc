@@ -22,7 +22,9 @@ import {
   Building,
   DollarSign,
   Calendar,
-  Send
+  Send,
+  Handshake,
+  ExternalLink
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { toast } from '@/hooks/use-toast';
@@ -165,6 +167,25 @@ const Labr8RequestStatus = () => {
     await handleStatusUpdate('agreed', 'Provider accepted the request');
   };
 
+  const handleLockDeal = () => {
+    if (!serviceRequest) return;
+    
+    const deelParams = new URLSearchParams({
+      service_title: serviceRequest.title,
+      client_name: serviceRequest.organizer?.organization_name || 'Client',
+      description: serviceRequest.description || ''
+    });
+
+    const deelUrl = `https://app.deel.com/contracts/create?${deelParams.toString()}`;
+    
+    toast({
+      title: "Redirecting to Deel",
+      description: "Opening contract creation page..."
+    });
+
+    window.open(deelUrl, '_blank');
+  };
+
   const formatBudget = (budget: any) => {
     if (!budget || typeof budget !== 'object') return 'Budget: TBD';
     const { min, max, currency = 'USD' } = budget;
@@ -206,7 +227,7 @@ const Labr8RequestStatus = () => {
       case 'declined':
         return 'You declined this request';
       case 'agreed':
-        return 'Request accepted - awaiting deal lock';
+        return 'Request accepted - organizer can now lock the deal';
       case 'in_progress':
         return 'Project is active';
       case 'completed':
@@ -215,6 +236,8 @@ const Labr8RequestStatus = () => {
         return 'Status unknown';
     }
   };
+
+  const isOrganizer = session?.user?.id && serviceRequest?.organizer?.user_id === session.user.id;
 
   if (loading) {
     return (
@@ -339,9 +362,21 @@ const Labr8RequestStatus = () => {
                   <CheckCircle className="h-6 w-6 text-green-600" />
                   <div>
                     <h3 className="font-semibold text-green-800">Request Accepted!</h3>
-                    <p className="text-green-700">Waiting for organizer to lock the deal</p>
+                    <p className="text-green-700">
+                      {isOrganizer 
+                        ? "You can now lock the deal to start the project"
+                        : "Waiting for organizer to lock the deal"
+                      }
+                    </p>
                   </div>
                 </div>
+                {isOrganizer && (
+                  <Button onClick={handleLockDeal} className="bg-green-600 hover:bg-green-700">
+                    <Handshake className="h-4 w-4 mr-2" />
+                    Lock Deal
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -354,7 +389,12 @@ const Labr8RequestStatus = () => {
                 <XCircle className="h-6 w-6 text-red-600" />
                 <div>
                   <h3 className="font-semibold text-red-800">Request Declined</h3>
-                  <p className="text-red-700">You have declined this service request</p>
+                  <p className="text-red-700">
+                    {isOrganizer 
+                      ? "This request has been declined by the service provider"
+                      : "You have declined this service request"
+                    }
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -362,7 +402,7 @@ const Labr8RequestStatus = () => {
         )}
 
         {/* Action Buttons */}
-        {(serviceRequest.status === 'pending' || serviceRequest.status === 'negotiating') && (
+        {(serviceRequest.status === 'pending' || serviceRequest.status === 'negotiating') && !isOrganizer && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
