@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -114,12 +113,14 @@ const ProviderRequestPortal = () => {
     }
     
     setLoading(true);
+    let serviceRequest;
+
+    // Step 1: Create the Service Request
     try {
       console.log('Submitting request with data:', {
         organizer: organizerData.id,
         provider: provider.id,
         title: formData.title,
-        budget_range: formData.budget_range
       });
 
       const budgetRange = {
@@ -128,8 +129,7 @@ const ProviderRequestPortal = () => {
         currency: formData.budget_range.currency
       };
 
-      // Create service request with immediate provider assignment
-      const serviceRequest = await createServiceRequest({
+      serviceRequest = await createServiceRequest({
         organizer_id: organizerData.id,
         domain_page: provider.domain_specializations?.[0] || 1,
         title: formData.title,
@@ -137,41 +137,62 @@ const ProviderRequestPortal = () => {
         budget_range: budgetRange,
         timeline: formData.timeline || undefined,
         milestones: formData.milestones,
-        service_provider_id: provider.id, // Direct assignment
+        service_provider_id: provider.id,
         status: 'assigned',
         engagement_status: 'affiliated'
       });
 
-      console.log('Service request created:', serviceRequest);
+      console.log('Service request created successfully:', serviceRequest);
 
-      // Create notification for the service provider
-      await createNotification({
-        user_id: provider.user_id,
-        type: 'service_request',
-        title: 'New Service Request',
-        message: `You have received a new service request: "${formData.title}" from ${organizerData.organization_name}`,
-        data: {
-          service_request_id: serviceRequest.id,
-          organizer_name: organizerData.organization_name
-        }
-      });
-      
       toast({
         title: "Request Submitted!",
-        description: `Your request has been sent directly to ${provider.business_name}.`
+        description: `Your request has been sent to ${provider.business_name}.`
       });
-      
-      navigate(`/modul8/request/${serviceRequest.id}`);
+
     } catch (error) {
       console.error('Error creating service request:', error);
       toast({
-        title: "Error",
-        description: `Failed to submit service request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        title: "Error Creating Request",
+        description: `Failed to create the service request: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
+      return; // Stop if the request itself fails
     }
+
+    // Step 2: Attempt to create a notification (non-blocking)
+    if (serviceRequest) {
+      try {
+        if (!provider.user_id) {
+          throw new Error("Provider user ID is missing, cannot send notification.");
+        }
+        console.log(`Attempting to send notification to provider user: ${provider.user_id}`);
+        
+        await createNotification({
+          user_id: provider.user_id,
+          type: 'service_request',
+          title: 'New Service Request',
+          message: `You have received a new service request: "${formData.title}" from ${organizerData.organization_name}`,
+          data: {
+            service_request_id: serviceRequest.id,
+            organizer_name: organizerData.organization_name
+          }
+        });
+        console.log("Notification sent successfully.");
+      } catch (notificationError) {
+        console.error('Failed to send notification:', notificationError);
+        toast({
+          title: "Notification Failed",
+          description: "The request was created, but we failed to send a real-time notification to the provider.",
+          variant: "warning"
+        });
+      }
+
+      // Step 3: Navigate to the new request page
+      navigate(`/modul8/request/${serviceRequest.id}`);
+    }
+
+    setLoading(false);
   };
 
   const addMilestone = () => {
