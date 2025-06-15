@@ -669,6 +669,50 @@ export type Database = {
         }
         Relationships: []
       }
+      modul8_project_comments: {
+        Row: {
+          attachments: Json | null
+          comment_type: string
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          service_request_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          comment_type?: string
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          service_request_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          comment_type?: string
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          service_request_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_project_comments_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modul8_project_completions: {
         Row: {
           completion_notes: string | null
@@ -854,6 +898,101 @@ export type Database = {
             columns: ["service_request_id"]
             isOneToOne: false
             referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_proposal_threads: {
+        Row: {
+          created_at: string
+          id: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organizer_id?: string
+          service_provider_id?: string
+          service_request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_proposal_threads_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_proposal_versions: {
+        Row: {
+          change_notes: string | null
+          created_at: string
+          created_by: string
+          id: string
+          proposal_id: string
+          quote_amount: number | null
+          scope_details: string | null
+          terms: string | null
+          thread_id: string
+          timeline: string | null
+          version_number: number
+        }
+        Insert: {
+          change_notes?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          proposal_id: string
+          quote_amount?: number | null
+          scope_details?: string | null
+          terms?: string | null
+          thread_id: string
+          timeline?: string | null
+          version_number?: number
+        }
+        Update: {
+          change_notes?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          proposal_id?: string
+          quote_amount?: number | null
+          scope_details?: string | null
+          terms?: string | null
+          thread_id?: string
+          timeline?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_proposal_versions_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_proposal_versions_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_proposal_threads"
             referencedColumns: ["id"]
           },
         ]

@@ -43,13 +43,49 @@ export interface ServiceRequest {
   };
   timeline?: string;
   milestones: string[];
-  status: 'pending' | 'negotiating' | 'agreed' | 'in_progress' | 'pending_review' | 'revision_requested' | 'pending_completion' | 'completed' | 'cancelled';
+  status: 'pending' | 'negotiating' | 'agreed' | 'in_progress' | 'pending_review' | 'revision_requested' | 'pending_completion' | 'completed' | 'cancelled' | 'closed' | 'assigned' | 'declined';
   engagement_status: 'none' | 'negotiating' | 'affiliated';
   project_progress?: number;
   created_at: string;
   updated_at: string;
   service_provider?: ServiceProvider;
   organizer?: Organizer;
+}
+
+export interface ProposalThread {
+  id: string;
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  status: 'active' | 'closed' | 'completed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProposalVersion {
+  id: string;
+  thread_id: string;
+  proposal_id: string;
+  version_number: number;
+  quote_amount?: number;
+  timeline?: string;
+  scope_details?: string;
+  terms?: string;
+  change_notes?: string;
+  created_by: string;
+  created_at: string;
+}
+
+export interface ProjectComment {
+  id: string;
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'comment' | 'status_update' | 'deliverable' | 'milestone';
+  content: string;
+  attachments: string[];
+  metadata: any;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProjectRevision {
@@ -111,7 +147,7 @@ export interface Proposal {
   timeline?: string;
   scope_details?: string;
   terms?: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'countered';
+  status: 'pending' | 'accepted' | 'rejected' | 'submitted' | 'countered';
   created_at: string;
 }
 
@@ -239,6 +275,33 @@ export interface CreateProjectMilestoneData {
   description?: string;
   due_date?: string;
   order_index?: number;
+}
+
+export interface CreateProposalThreadData {
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+}
+
+export interface CreateProposalVersionData {
+  thread_id: string;
+  proposal_id: string;
+  version_number: number;
+  quote_amount?: number;
+  timeline?: string;
+  scope_details?: string;
+  terms?: string;
+  change_notes?: string;
+  created_by: string;
+}
+
+export interface CreateProjectCommentData {
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'comment' | 'status_update' | 'deliverable' | 'milestone';
+  content: string;
+  attachments?: string[];
+  metadata?: any;
 }
 
 export const DOMAIN_PAGES = [
