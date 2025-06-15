@@ -45,11 +45,7 @@ export const createStructuredRequest = async (data: StructuredRequestData): Prom
     description: data.description,
     budget_range: budgetRange,
     timeline: data.timeline,
-    milestones: data.milestones.map((milestone, index) => ({
-      id: `milestone_${index}`,
-      title: milestone,
-      order: index + 1
-    })),
+    milestones: data.milestones, // Keep as string array to match the type
     service_provider_id: data.serviceProviderId,
     status: 'pending',
     engagement_status: 'affiliated'
@@ -59,7 +55,7 @@ export const createStructuredRequest = async (data: StructuredRequestData): Prom
   await createServiceRequestComment({
     service_request_id: serviceRequest.id,
     user_id: data.organizerId,
-    comment_type: 'request_details',
+    comment_type: 'general', // Use allowed comment type
     content: `New service request: ${data.title}`,
     metadata: {
       request_type: 'structured',
@@ -97,7 +93,7 @@ export const submitProviderProposal = async (data: ProviderProposalData): Promis
   await createServiceRequestComment({
     service_request_id: data.serviceRequestId,
     user_id: data.fromUserId,
-    comment_type: 'proposal',
+    comment_type: 'general', // Use allowed comment type
     content: commentContent,
     metadata: {
       proposal_id: proposal.id,
@@ -219,8 +215,18 @@ export const checkExistingRequest = async (
     .not('status', 'in', '(completed,cancelled,closed)')
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle(); // Use maybeSingle instead of single to handle no results
 
-  if (error && error.code !== 'PGRST116') throw error;
-  return data || null;
+  if (error) throw error;
+  
+  // Type assertion to handle the Json types from Supabase
+  if (data) {
+    return {
+      ...data,
+      budget_range: data.budget_range as { min?: number; max?: number; currency: string; },
+      milestones: data.milestones as string[]
+    } as ServiceRequest;
+  }
+  
+  return null;
 };
