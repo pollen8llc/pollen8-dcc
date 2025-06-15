@@ -1,180 +1,215 @@
-import { useState, useEffect } from 'react';
+
 import { useNavigate } from 'react-router-dom';
-import { useSession } from '@/hooks/useSession';
-import { getUserServiceProvider } from '@/services/modul8Service';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Users, Briefcase, TrendingUp, CheckCircle } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Building2, 
+  Users, 
+  Handshake, 
+  Star,
+  ArrowRight,
+  CheckCircle
+} from 'lucide-react';
 
 const Labr8Landing = () => {
-  const { session } = useSession();
   const navigate = useNavigate();
-  const [hasProfile, setHasProfile] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkExistingProfile();
-  }, [session?.user?.id]);
-
-  const checkExistingProfile = async () => {
-    if (!session?.user?.id) {
-      setLoading(false);
-      return;
-    }
-    
-    try {
-      const provider = await getUserServiceProvider(session.user.id);
-      setHasProfile(!!provider);
-    } catch (error) {
-      console.error('Error checking service provider profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGetStarted = () => {
-    if (!session?.user) {
-      navigate('/auth');
-      return;
-    }
-
-    if (hasProfile) {
-      navigate('/labr8/dashboard');
-    } else {
-      navigate('/labr8/setup');
-    }
-  };
-
-  const features = [
-    {
-      icon: <Briefcase className="h-8 w-8 text-[#00eada]" />,
-      title: "Professional Opportunities",
-      description: "Connect with organizations seeking your expertise across 8 specialized domains"
-    },
-    {
-      icon: <Users className="h-8 w-8 text-[#00eada]" />,
-      title: "Structured Negotiations",
-      description: "Clear proposal system with guided negotiations and transparent terms"
-    },
-    {
-      icon: <TrendingUp className="h-8 w-8 text-[#00eada]" />,
-      title: "Streamlined Contracts",
-      description: "Automated contract generation through Deel integration for secure payments"
-    },
-    {
-      icon: <CheckCircle className="h-8 w-8 text-[#00eada]" />,
-      title: "Quality Assurance",
-      description: "Vetted organizations and clear project requirements ensure quality partnerships"
-    }
-  ];
-
-  const providerTypes = [
-    { type: "Vendors", description: "Specialized service companies and agencies" },
-    { type: "Volunteers", description: "Skilled professionals offering pro-bono services" },
-    { type: "Affiliates", description: "Partner organizations and consultants" },
-    { type: "Service Providers", description: "Independent contractors and freelancers" }
-  ];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
-      <Navbar />
-      
-      {/* Hero Section */}
-      <section className="relative py-20 px-4">
-        <div className="container mx-auto text-center">
-          <div className="mb-8">
-            <h1 className="text-6xl font-bold mb-4">
-              <span className="text-[#00eada]">LABR8</span>
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Connect with event organizers seeking specialized services. 
-              Join the ecosystem as a verified service provider and grow your business.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Navigation */}
+      <nav className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-[#00eada] flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-black" />
+              </div>
+              <span className="text-xl font-bold text-white">LAB-R8</span>
+            </div>
+            <div className="flex items-center gap-4">
               <Button 
-                size="lg" 
-                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-semibold px-8"
-                onClick={() => navigate('/labr8/auth')}
+                variant="ghost" 
+                onClick={() => navigate('/')}
+                className="text-white hover:text-[#00eada]"
               >
-                Join as Service Provider
+                Back to Home
               </Button>
               <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => navigate('/modul8')}
+                onClick={() => navigate('/labr8/auth')}
+                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black"
               >
-                Browse Opportunities
+                Get Started
               </Button>
             </div>
           </div>
         </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            Connect. Collaborate. <span className="text-[#00eada]">Create.</span>
+          </h1>
+          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            LAB-R8 bridges the gap between organizers and service providers, 
+            creating seamless partnerships for extraordinary projects.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => navigate('/labr8/auth')}
+              size="lg"
+              className="bg-[#00eada] hover:bg-[#00eada]/90 text-black px-8"
+            >
+              Join as Service Provider
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button 
+              onClick={() => navigate('/modul8')}
+              variant="outline"
+              size="lg"
+              className="border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10 px-8"
+            >
+              Find Service Providers
+            </Button>
+          </div>
+        </div>
       </section>
 
-      {/* Provider Types */}
-      <div className="mb-16">
-        <h2 className="text-3xl font-bold text-center mb-8">Who Can Join LABR8?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {providerTypes.map((provider, index) => (
-            <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+      {/* Features */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-white text-center mb-12">
+            Why Choose LAB-R8?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="bg-white/5 border-white/10">
               <CardHeader>
-                <CardTitle className="text-[#00eada]">{provider.type}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{provider.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Features Grid */}
-      <div className="mb-16">
-        <h2 className="text-3xl font-bold text-center mb-8">Why Choose LABR8?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {features.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-4">
-                  {feature.icon}
-                  <CardTitle>{feature.title}</CardTitle>
+                <div className="h-12 w-12 rounded-lg bg-[#00eada]/20 flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-[#00eada]" />
                 </div>
+                <CardTitle className="text-white">Smart Matching</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <p className="text-gray-300">
+                  Our intelligent system connects you with the right partners based on expertise, 
+                  location, and project requirements.
+                </p>
               </CardContent>
             </Card>
-          ))}
+
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-[#00eada]/20 flex items-center justify-center mb-4">
+                  <Handshake className="h-6 w-6 text-[#00eada]" />
+                </div>
+                <CardTitle className="text-white">Seamless Collaboration</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-300">
+                  Built-in tools for project management, communication, and milestone tracking 
+                  keep everyone aligned and productive.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-[#00eada]/20 flex items-center justify-center mb-4">
+                  <Star className="h-6 w-6 text-[#00eada]" />
+                </div>
+                <CardTitle className="text-white">Quality Assurance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-300">
+                  Vetted professionals, transparent reviews, and secure payment processing 
+                  ensure quality outcomes for every project.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 px-4 bg-black/20">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-white text-center mb-12">
+            How It Works
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              {
+                step: "1",
+                title: "Create Profile",
+                description: "Set up your service provider profile with your expertise and portfolio"
+              },
+              {
+                step: "2", 
+                title: "Receive Requests",
+                description: "Get matched with relevant project requests from organizers"
+              },
+              {
+                step: "3",
+                title: "Collaborate",
+                description: "Negotiate terms, scope, and timeline through our platform"
+              },
+              {
+                step: "4",
+                title: "Deliver",
+                description: "Complete the project with built-in tools and get paid securely"
+              }
+            ].map((item, index) => (
+              <div key={index} className="text-center">
+                <div className="h-12 w-12 rounded-full bg-[#00eada] text-black font-bold text-lg flex items-center justify-center mx-auto mb-4">
+                  {item.step}
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-gray-300 text-sm">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
-      <Card className="bg-gradient-to-r from-[#00eada]/10 to-blue-600/10 border-[#00eada]/20">
-        <CardContent className="text-center py-12">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Building Partnerships?</h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of service providers already connecting with organizations 
-            through our structured partnership platform.
+      <section className="py-20 px-4">
+        <div className="container mx-auto text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Ready to Get Started?
+          </h2>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            Join thousands of service providers who have found their perfect project matches through LAB-R8.
           </p>
-          <Button 
-            onClick={handleGetStarted}
-            size="lg"
-            className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-lg px-8 py-4"
-          >
-            {hasProfile ? 'Access Your Dashboard' : 'Create Your Profile'}
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </CardContent>
-      </Card>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => navigate('/labr8/auth')}
+              size="lg"
+              className="bg-[#00eada] hover:bg-[#00eada]/90 text-black px-8"
+            >
+              Join LAB-R8 Today
+              <CheckCircle className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 bg-black/20 backdrop-blur-sm py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded bg-[#00eada] flex items-center justify-center">
+                <Building2 className="h-4 w-4 text-black" />
+              </div>
+              <span className="text-white font-semibold">LAB-R8</span>
+            </div>
+            <p className="text-gray-400 text-sm">
+              © 2024 LAB-R8. Part of the MODUL8 ecosystem.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

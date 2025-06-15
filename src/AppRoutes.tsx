@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -58,14 +57,12 @@ const ProviderRequestPortal = lazy(() => import("@/pages/modul8/ProviderRequestP
 const ServiceRequestDetails = lazy(() => import("@/pages/modul8/ServiceRequestDetails"));
 const RequestStatus = lazy(() => import("./pages/modul8/RequestStatus"));
 
-// LABR8 pages
+// LAB-R8 pages
 const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
 const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
-const EnhancedLabr8Dashboard = lazy(() => import("@/pages/labr8/EnhancedLabr8Dashboard"));
-const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
-const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
-const ProjectDetails = lazy(() => import("@/pages/labr8/ProjectDetails"));
+const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
+const Labr8ProjectDetails = lazy(() => import("@/pages/labr8/Labr8ProjectDetails"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -362,22 +359,12 @@ const AppRoutes = () => {
             } />
             <Route path="/labr8/dashboard" element={
               <ServiceProviderProtectedRoute>
-                <EnhancedLabr8Dashboard />
+                <Labr8Dashboard />
               </ServiceProviderProtectedRoute>
             } />
-            <Route path="/labr8/request/:id/status" element={
+            <Route path="/labr8/project/:projectId" element={
               <ServiceProviderProtectedRoute>
-                <Labr8RequestStatus />
-              </ServiceProviderProtectedRoute>
-            } />
-            <Route path="/labr8/request/:id" element={
-              <ServiceProviderProtectedRoute>
-                <Labr8RequestDetails />
-              </ServiceProviderProtectedRoute>
-            } />
-            <Route path="/labr8/project/:id" element={
-              <ServiceProviderProtectedRoute>
-                <ProjectDetails />
+                <Labr8ProjectDetails />
               </ServiceProviderProtectedRoute>
             } />
             
