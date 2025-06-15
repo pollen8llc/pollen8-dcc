@@ -138,7 +138,7 @@ export const getAllUsers = async (): Promise<User[]> => {
             .map(m => m.community_id);
             
           // Adjust role based on community memberships if needed (but don't override SERVICE_PROVIDER or ADMIN)
-          if (user.role !== UserRole.ADMIN && user.role !== UserRole.SERVICE_PROVIDER && user.managedCommunities.length > 0) {
+          if (user.role === UserRole.MEMBER && user.managedCommunities.length > 0) {
             user.role = UserRole.ORGANIZER;
           }
         }
