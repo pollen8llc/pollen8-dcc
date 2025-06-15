@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { 
@@ -22,7 +21,8 @@ import {
   Users,
   Building,
   DollarSign,
-  Calendar
+  Calendar,
+  LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -99,6 +99,27 @@ const Labr8Dashboard = () => {
 
   const handleViewRequest = (request: ServiceRequest) => {
     navigate(`/labr8/${request.id}/status`);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { session } = useSession();
+      if (session) {
+        await session.logout();
+        navigate('/labr8');
+        toast({
+          title: "Logged out",
+          description: "You have been successfully logged out",
+        });
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to log out",
+        variant: "destructive"
+      });
+    }
   };
 
   // Categorize requests
@@ -190,16 +211,26 @@ const Labr8Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="h-12 w-12 rounded-lg bg-[#00eada] flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-black" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-lg bg-[#00eada] flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-black" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">LAB-R8 Dashboard</h1>
+                <p className="text-muted-foreground">
+                  Welcome back, {serviceProvider?.business_name}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold">LAB-R8 Dashboard</h1>
-              <p className="text-muted-foreground">
-                Welcome back, {serviceProvider?.business_name}
-              </p>
-            </div>
+            <Button 
+              onClick={handleLogout}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
           </div>
         </div>
 
