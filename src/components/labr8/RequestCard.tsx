@@ -90,7 +90,7 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
     if (type === 'active' || type === 'completed') {
       navigate(`/labr8/project/${request.id}`);
     } else {
-      navigate(`/labr8/request/${request.id}/status`);
+      navigate(`/labr8/${request.id}/status`);
     }
   };
 
