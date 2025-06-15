@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSession } from "@/hooks/useSession";
-import { getServiceRequests, getUserServiceProvider } from "@/services/modul8Service";
+import { getServiceRequests, getUserServiceProvider, createProposal } from "@/services/modul8Service";
 import { createServiceRequestComment, updateServiceRequestStatus } from "@/services/commentService";
 import { ServiceRequest, ServiceProvider } from "@/types/modul8";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -23,7 +25,9 @@ import {
   ArrowLeft,
   Trash2,
   Calendar,
-  DollarSign
+  DollarSign,
+  FileText,
+  Send
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -35,6 +39,13 @@ const Labr8ProjectStatus = () => {
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [showProposalForm, setShowProposalForm] = useState(false);
+  const [proposalData, setProposalData] = useState({
+    quote_amount: '',
+    timeline: '',
+    scope_details: '',
+    terms: ''
+  });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -88,6 +99,45 @@ const Labr8ProjectStatus = () => {
     }
   };
 
+  const handleSubmitProposal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!serviceRequest || !session?.user?.id) return;
+    
+    setSubmitting(true);
+    try {
+      await createProposal({
+        service_request_id: serviceRequest.id,
+        from_user_id: session.user.id,
+        proposal_type: 'initial',
+        quote_amount: proposalData.quote_amount ? parseFloat(proposalData.quote_amount) : undefined,
+        timeline: proposalData.timeline || undefined,
+        scope_details: proposalData.scope_details || undefined,
+        terms: proposalData.terms || undefined
+      });
+      
+      // Update status to negotiating after proposal submission
+      await handleStatusUpdate('negotiating', 'Provider submitted proposal');
+      
+      toast({ 
+        title: "Proposal Submitted!", 
+        description: "Your proposal has been sent to the organizer for review." 
+      });
+      
+      setShowProposalForm(false);
+      setProposalData({ quote_amount: '', timeline: '', scope_details: '', terms: '' });
+      
+    } catch (error) {
+      console.error('Error submitting proposal:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to submit proposal", 
+        variant: "destructive" 
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleAddComment = async () => {
     if (!serviceRequest || !session?.user?.id || !newComment.trim()) return;
     setSubmitting(true);
@@ -114,6 +164,8 @@ const Labr8ProjectStatus = () => {
   const handleDecline = async () => await handleStatusUpdate('declined', 'Provider declined the request');
 
   const isOrganizer = session?.user?.id && serviceRequest?.organizer?.user_id === session.user.id;
+  
+  // ... keep existing code (getStatusColor function)
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -161,6 +213,7 @@ const Labr8ProjectStatus = () => {
         >
           <ArrowLeft className="h-4 w-4" /> Back to Dashboard
         </Button>
+        
         {/* Request Header */}
         <Card className="mb-8">
           <CardHeader>
@@ -221,21 +274,13 @@ const Labr8ProjectStatus = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea
-                placeholder="Ask a question, propose edits, or respond…"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                rows={4}
-                className="mb-3"
-              />
-              <div className="flex gap-4">
+              <div className="flex gap-2 mb-6">
                 <Button
-                  onClick={handleAddComment}
-                  disabled={submitting || !newComment.trim()}
-                  className="flex items-center gap-2"
+                  onClick={() => setShowProposalForm(!showProposalForm)}
+                  className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
                 >
-                  <MessageSquare className="h-4 w-4" />
-                  {submitting ? "Sending..." : "Send Response"}
+                  <FileText className="h-4 w-4" />
+                  {showProposalForm ? 'Hide Proposal Form' : 'Submit Proposal'}
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -280,11 +325,106 @@ const Labr8ProjectStatus = () => {
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
+
+              {/* Proposal Form */}
+              {showProposalForm && (
+                <Card className="border-2 border-[#00eada]/20 mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Submit Your Proposal</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmitProposal} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="quote_amount">Quote Amount ($)</Label>
+                          <Input
+                            id="quote_amount"
+                            type="number"
+                            value={proposalData.quote_amount}
+                            onChange={(e) => setProposalData(prev => ({ ...prev, quote_amount: e.target.value }))}
+                            placeholder="5000"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="timeline">Estimated Timeline</Label>
+                          <Input
+                            id="timeline"
+                            value={proposalData.timeline}
+                            onChange={(e) => setProposalData(prev => ({ ...prev, timeline: e.target.value }))}
+                            placeholder="2-3 weeks"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="scope_details">Scope & Approach</Label>
+                        <Textarea
+                          id="scope_details"
+                          value={proposalData.scope_details}
+                          onChange={(e) => setProposalData(prev => ({ ...prev, scope_details: e.target.value }))}
+                          placeholder="Describe your approach and what you will deliver..."
+                          rows={4}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="terms">Terms & Conditions</Label>
+                        <Textarea
+                          id="terms"
+                          value={proposalData.terms}
+                          onChange={(e) => setProposalData(prev => ({ ...prev, terms: e.target.value }))}
+                          placeholder="Payment terms, revision policy, etc..."
+                          rows={3}
+                        />
+                      </div>
+
+                      <div className="flex gap-4 pt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowProposalForm(false)}
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={submitting}
+                          className="flex-1 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          {submitting ? 'Submitting...' : 'Submit Proposal'}
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Quick Comment */}
+              <div className="space-y-3">
+                <Label>Or send a quick message:</Label>
+                <Textarea
+                  placeholder="Ask a question or add a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  rows={3}
+                />
+                <Button
+                  onClick={handleAddComment}
+                  disabled={submitting || !newComment.trim()}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  {submitting ? "Sending..." : "Send Message"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Status Card for Declined/Agreed */}
+        {/* Status Cards for Declined/Agreed */}
         {serviceRequest.status === "agreed" && (
           <Card className="mb-8 border-green-200 bg-green-50">
             <CardContent className="pt-6">
@@ -300,6 +440,7 @@ const Labr8ProjectStatus = () => {
             </CardContent>
           </Card>
         )}
+        
         {serviceRequest.status === "declined" && (
           <Card className="mb-8 border-red-200 bg-red-50">
             <CardContent className="pt-6">
@@ -313,6 +454,7 @@ const Labr8ProjectStatus = () => {
             </CardContent>
           </Card>
         )}
+        
         {/* Thread/History (placeholder) */}
         <Card>
           <CardHeader>
