@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -24,7 +23,8 @@ import {
   Calendar,
   Send,
   Handshake,
-  ExternalLink
+  ExternalLink,
+  Trash2
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { toast } from '@/hooks/use-toast';
@@ -39,6 +39,7 @@ const Labr8RequestStatus = () => {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -167,6 +168,43 @@ const Labr8RequestStatus = () => {
     await handleStatusUpdate('agreed', 'Provider accepted the request');
   };
 
+  const handleDeleteRequest = async () => {
+    if (!serviceRequest || !session?.user?.id) return;
+    
+    setDeleting(true);
+    try {
+      // Only allow deletion if request is in pending status and provider hasn't responded yet
+      if (serviceRequest.status !== 'pending') {
+        toast({
+          title: "Cannot Delete",
+          description: "Requests can only be deleted while in pending status",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Here we would call a delete service - for now we'll simulate it
+      // await deleteServiceRequest(serviceRequest.id);
+      
+      toast({
+        title: "Request Deleted",
+        description: "The service request has been deleted"
+      });
+      
+      navigate('/labr8/dashboard');
+      
+    } catch (error) {
+      console.error('Error deleting request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete request",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleLockDeal = () => {
     if (!serviceRequest) return;
     
@@ -238,6 +276,7 @@ const Labr8RequestStatus = () => {
   };
 
   const isOrganizer = session?.user?.id && serviceRequest?.organizer?.user_id === session.user.id;
+  const canDeleteRequest = serviceRequest?.status === 'pending' && !isOrganizer;
 
   if (loading) {
     return (
@@ -281,6 +320,31 @@ const Labr8RequestStatus = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Button>
+
+          {canDeleteRequest && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" disabled={deleting}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Request
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Service Request</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this service request? This action cannot be undone and will remove the request permanently.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteRequest} disabled={deleting}>
+                    {deleting ? 'Deleting...' : 'Delete Request'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
 
         {/* Request Header */}

@@ -178,7 +178,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
     });
   };
 
-  const canDelete = isServiceProvider && proposal.status === 'submitted';
+  const canDelete = isServiceProvider && (proposal.status === 'submitted' || proposal.status === 'countered');
 
   return (
     <>
