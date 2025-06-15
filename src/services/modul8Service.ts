@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ServiceProvider, 
@@ -281,17 +280,27 @@ export const updateServiceRequest = async (id: string, data: Partial<ServiceRequ
   return transformServiceRequest(result);
 };
 
-// Assign service provider to a service request
-export const assignServiceProvider = async (serviceRequestId: string, serviceProviderUserId: string) => {
-  // First, get the service provider record from the user ID
+// Fixed assign service provider to use the correct user ID mapping
+export const assignServiceProvider = async (serviceRequestId: string, proposalId: string) => {
+  // Get the proposal to find the service provider user
+  const { data: proposal, error: proposalError } = await supabase
+    .from('modul8_proposals')
+    .select('from_user_id')
+    .eq('id', proposalId)
+    .single();
+  
+  if (proposalError) throw proposalError;
+  if (!proposal) throw new Error('Proposal not found');
+
+  // Get the service provider record from the user ID
   const { data: serviceProvider, error: providerError } = await supabase
     .from('modul8_service_providers')
     .select('id')
-    .eq('user_id', serviceProviderUserId)
+    .eq('user_id', proposal.from_user_id)
     .single();
   
   if (providerError) throw providerError;
-  if (!serviceProvider) throw new Error('Service provider not found');
+  if (!serviceProvider) throw new Error('Service provider not found for this user');
 
   // Update the service request with the service provider assignment
   const { data: result, error } = await supabase
@@ -299,7 +308,7 @@ export const assignServiceProvider = async (serviceRequestId: string, servicePro
     .update({
       service_provider_id: serviceProvider.id,
       engagement_status: 'affiliated',
-      status: 'agreed'
+      status: 'assigned'
     })
     .eq('id', serviceRequestId)
     .select(`
@@ -310,6 +319,13 @@ export const assignServiceProvider = async (serviceRequestId: string, servicePro
     .single();
   
   if (error) throw error;
+
+  // Update the proposal status to accepted
+  await supabase
+    .from('modul8_proposals')
+    .update({ status: 'accepted' })
+    .eq('id', proposalId);
+
   return transformServiceRequest(result);
 };
 
@@ -360,12 +376,39 @@ export const createProposal = async (data: CreateProposalData) => {
 export const getRequestProposals = async (serviceRequestId: string) => {
   const { data, error } = await supabase
     .from('modul8_proposals')
-    .select('*')
+    .select(`
+      *,
+      service_provider:modul8_service_providers!inner(
+        id,
+        user_id,
+        business_name,
+        logo_url,
+        tagline
+      )
+    `)
     .eq('service_request_id', serviceRequestId)
     .order('created_at', { ascending: true });
   
   if (error) throw error;
-  return data as Proposal[];
+  return data || [];
+};
+
+// Enhanced proposal acceptance function
+export const acceptProposal = async (proposalId: string, serviceRequestId: string) => {
+  return await assignServiceProvider(serviceRequestId, proposalId);
+};
+
+// Decline proposal function
+export const declineProposal = async (proposalId: string) => {
+  const { data, error } = await supabase
+    .from('modul8_proposals')
+    .update({ status: 'rejected' })
+    .eq('id', proposalId)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
 };
 
 // Deal Services

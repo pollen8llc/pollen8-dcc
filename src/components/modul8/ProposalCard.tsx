@@ -15,11 +15,14 @@ import {
   User
 } from 'lucide-react';
 import { Proposal, ServiceProvider } from '@/types/modul8';
+import { acceptProposal, declineProposal } from '@/services/modul8Service';
 import { toast } from '@/hooks/use-toast';
 
 interface ProposalCardProps {
-  proposal: Proposal;
-  serviceProvider?: ServiceProvider;
+  proposal: Proposal & {
+    service_provider?: ServiceProvider;
+  };
+  serviceRequestId: string;
   onAccept: (proposalId: string) => Promise<void>;
   onDecline: (proposalId: string) => Promise<void>;
   onCounter: (proposalId: string) => void;
@@ -29,7 +32,7 @@ interface ProposalCardProps {
 
 const ProposalCard: React.FC<ProposalCardProps> = ({
   proposal,
-  serviceProvider,
+  serviceRequestId,
   onAccept,
   onDecline,
   onCounter,
@@ -56,6 +59,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
   const handleAccept = async () => {
     setActionLoading(true);
     try {
+      await acceptProposal(proposal.id, serviceRequestId);
       await onAccept(proposal.id);
       toast({
         title: "Proposal Accepted",
@@ -76,6 +80,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
   const handleDecline = async () => {
     setActionLoading(true);
     try {
+      await declineProposal(proposal.id);
       await onDecline(proposal.id);
       toast({
         title: "Proposal Declined",
@@ -99,17 +104,17 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={serviceProvider?.logo_url} />
+              <AvatarImage src={proposal.service_provider?.logo_url} />
               <AvatarFallback>
                 <User className="h-5 w-5" />
               </AvatarFallback>
             </Avatar>
             <div>
               <CardTitle className="text-lg">
-                {serviceProvider?.business_name || 'Service Provider'}
+                {proposal.service_provider?.business_name || 'Service Provider'}
               </CardTitle>
-              {serviceProvider?.tagline && (
-                <p className="text-sm text-muted-foreground">{serviceProvider.tagline}</p>
+              {proposal.service_provider?.tagline && (
+                <p className="text-sm text-muted-foreground">{proposal.service_provider.tagline}</p>
               )}
             </div>
           </div>
