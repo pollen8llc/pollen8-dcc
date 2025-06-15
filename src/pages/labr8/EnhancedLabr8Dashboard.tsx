@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { 
@@ -39,10 +38,10 @@ const EnhancedLabr8Dashboard = () => {
     try {
       setLoading(true);
       console.log('Loading dashboard data for user:', session.user.id);
-      
+
       const provider = await getUserServiceProvider(session.user.id);
       console.log('Service provider found:', provider);
-      
+
       if (!provider) {
         console.log('No service provider found, redirecting to setup');
         navigate('/labr8/setup');
@@ -51,17 +50,19 @@ const EnhancedLabr8Dashboard = () => {
       setServiceProvider(provider);
 
       // Get requests assigned to this provider
-      console.log('Fetching assigned requests for provider:', provider.id);
       const assigned = await getProviderServiceRequests(provider.id);
       console.log('Assigned requests:', assigned);
-      setAssignedRequests(assigned);
 
       // Get available requests for this provider (based on domain specializations)
-      console.log('Fetching available requests for provider:', provider.id);
       const available = await getAvailableServiceRequestsForProvider(provider.id);
       console.log('Available requests:', available);
+
+      setAssignedRequests(assigned);
       setIncomingRequests(available);
-      
+
+      // Debug: log status counts
+      console.log('Assigned (raw):', assigned.map(r => r.status));
+      console.log('Available (raw):', available.map(r => r.status));
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       toast({
