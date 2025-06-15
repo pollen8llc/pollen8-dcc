@@ -64,6 +64,11 @@ const EnhancedLabr8Dashboard = () => {
     }
   };
 
+  const handleRequestDeleted = () => {
+    // Reload the dashboard data after deletion
+    loadDashboardData();
+  };
+
   // Categorize requests
   const pendingRequests = incomingRequests.filter(r => r.status === 'pending');
   const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating');
@@ -181,7 +186,7 @@ const EnhancedLabr8Dashboard = () => {
           </TabsList>
 
           <TabsContent value="incoming" className="mt-6">
-            {pendingRequests.length ===  0 ? (
+            {pendingRequests.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <ExternalLink className="h-12 w-12 text-muted-foreground mb-4" />
@@ -196,7 +201,12 @@ const EnhancedLabr8Dashboard = () => {
             ) : (
               <div className="grid gap-4">
                 {pendingRequests.map((request) => (
-                  <RequestCard key={request.id} request={request} type="incoming" />
+                  <RequestCard 
+                    key={request.id} 
+                    request={request} 
+                    type="incoming" 
+                    onDelete={handleRequestDeleted}
+                  />
                 ))}
               </div>
             )}
@@ -218,7 +228,12 @@ const EnhancedLabr8Dashboard = () => {
             ) : (
               <div className="grid gap-4">
                 {negotiatingRequests.map((request) => (
-                  <RequestCard key={request.id} request={request} type="incoming" />
+                  <RequestCard 
+                    key={request.id} 
+                    request={request} 
+                    type="incoming" 
+                    onDelete={handleRequestDeleted}
+                  />
                 ))}
               </div>
             )}
@@ -240,7 +255,12 @@ const EnhancedLabr8Dashboard = () => {
             ) : (
               <div className="grid gap-4">
                 {activeProjects.map((request) => (
-                  <RequestCard key={request.id} request={request} type="active" />
+                  <RequestCard 
+                    key={request.id} 
+                    request={request} 
+                    type="active" 
+                    onDelete={handleRequestDeleted}
+                  />
                 ))}
               </div>
             )}
@@ -262,7 +282,12 @@ const EnhancedLabr8Dashboard = () => {
             ) : (
               <div className="grid gap-4">
                 {completedProjects.map((request) => (
-                  <RequestCard key={request.id} request={request} type="completed" />
+                  <RequestCard 
+                    key={request.id} 
+                    request={request} 
+                    type="completed" 
+                    onDelete={handleRequestDeleted}
+                  />
                 ))}
               </div>
             )}
