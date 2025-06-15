@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -62,7 +61,7 @@ const RequestStatus = lazy(() => import("./pages/modul8/RequestStatus"));
 const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
 const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
-const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
+const ModernLabr8Dashboard = lazy(() => import("@/pages/labr8/ModernLabr8Dashboard"));
 const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
 const Labr8ProjectDetails = lazy(() => import("@/pages/labr8/Labr8ProjectDetails"));
 
@@ -361,7 +360,7 @@ const AppRoutes = () => {
             } />
             <Route path="/labr8/dashboard" element={
               <ServiceProviderProtectedRoute>
-                <Labr8Dashboard />
+                <ModernLabr8Dashboard />
               </ServiceProviderProtectedRoute>
             } />
             <Route path="/labr8/:requestId/status" element={
