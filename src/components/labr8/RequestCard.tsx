@@ -1,4 +1,3 @@
-
 import { ServiceRequest } from '@/types/modul8';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -125,7 +124,9 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
 
   // Check if current user is the organizer who created this request
   const isOrganizer = session?.user?.id && request.organizer?.user_id === session.user.id;
-  const canDelete = isOrganizer && request.status === 'pending';
+
+  // Allow delete if organizer and status is pending OR cancelled
+  const canDelete = isOrganizer && (request.status === 'pending' || request.status === 'cancelled');
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -194,9 +195,20 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Service Request</AlertDialogTitle>
+                      <AlertDialogTitle>
+                        Delete Service Request
+                      </AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete "{request.title}"? This action cannot be undone and will permanently remove the request.
+                        {request.status === "cancelled" ? (
+                          <>
+                            Are you sure you want to permanently delete the cancelled request "
+                            {request.title}"? This action cannot be undone and will permanently remove the request.
+                          </>
+                        ) : (
+                          <>
+                            Are you sure you want to delete "{request.title}"? This action cannot be undone and will permanently remove the request.
+                          </>
+                        )}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

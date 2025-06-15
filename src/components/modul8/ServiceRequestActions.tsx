@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -81,8 +80,18 @@ const ServiceRequestActions: React.FC<ServiceRequestActionsProps> = ({
     }
   };
 
+  // Can close unless already cancelled/completed
   const canCloseRequest = request.status !== 'cancelled' && request.status !== 'completed';
-  const canDeleteRequest = canDelete && request.engagement_status === 'none' && !request.service_provider_id;
+
+  // Allow delete if: 
+  // a) permitted by parent (organizer) AND 
+  //    - (never engaged AND not assigned) OR 
+  //    - status is "cancelled"
+  const canDeleteRequest =
+    canDelete && (
+      (request.engagement_status === 'none' && !request.service_provider_id) ||
+      request.status === 'cancelled'
+    );
 
   if (!canCloseRequest && !canDeleteRequest) {
     return null;
@@ -144,9 +153,18 @@ const ServiceRequestActions: React.FC<ServiceRequestActionsProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Service Request</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to permanently delete "{request.title}"? This will completely 
-              remove the request and cannot be undone. This is only possible because there has been 
-              no engagement yet.
+              {request.status === 'cancelled' ? (
+                <>
+                  Are you sure you want to permanently delete the cancelled request "{request.title}"?
+                  This will completely remove the request and cannot be undone.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to permanently delete "{request.title}"? This will completely 
+                  remove the request and cannot be undone. This is only possible because there has been 
+                  no engagement yet.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
