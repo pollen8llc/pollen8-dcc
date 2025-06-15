@@ -280,6 +280,30 @@ export const updateServiceRequest = async (id: string, data: Partial<ServiceRequ
   return transformServiceRequest(result);
 };
 
+// Close a service request (set status to cancelled)
+export const closeServiceRequest = async (id: string) => {
+  const { data: result, error } = await supabase
+    .from('modul8_service_requests')
+    .update({ status: 'cancelled' })
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return transformServiceRequest(result);
+};
+
+// Delete a service request completely
+export const deleteServiceRequest = async (id: string) => {
+  const { error } = await supabase
+    .from('modul8_service_requests')
+    .delete()
+    .eq('id', id);
+  
+  if (error) throw error;
+  return true;
+};
+
 // Proposal Services
 export const createProposal = async (data: CreateProposalData) => {
   const { data: result, error } = await supabase
