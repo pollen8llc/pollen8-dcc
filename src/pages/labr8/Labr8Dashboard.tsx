@@ -14,8 +14,7 @@ import {
   Building2,
   FolderOpen,
   Star,
-  LogOut,
-  RefreshCw
+  LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceProvider, ServiceRequest } from '@/types/modul8';
@@ -31,36 +30,19 @@ const Labr8Dashboard = () => {
   const [activeTab, setActiveTab] = useState('projects');
 
   useEffect(() => {
-    console.log('Labr8Dashboard: Session state changed:', session);
-    if (session?.user?.id) {
-      loadDashboardData();
-    } else {
-      console.log('Labr8Dashboard: No session found, redirecting to auth');
-      navigate('/labr8');
-    }
+    loadDashboardData();
   }, [session?.user?.id]);
 
   const loadDashboardData = async () => {
-    if (!session?.user?.id) {
-      console.log('No user session available');
-      setLoading(false);
-      return;
-    }
+    if (!session?.user?.id) return;
     
     try {
-      setLoading(true);
       console.log('Loading dashboard data for user:', session.user.id);
-      
       const provider = await getUserServiceProvider(session.user.id);
-      console.log('Service provider found:', provider);
+      console.log('Service provider:', provider);
       
       if (!provider) {
         console.log('No service provider found, redirecting to setup');
-        toast({
-          title: "Setup Required",
-          description: "Please complete your service provider setup first",
-          variant: "destructive"
-        });
         navigate('/labr8/setup');
         return;
       }
@@ -71,23 +53,14 @@ const Labr8Dashboard = () => {
       console.log('Loading projects for provider:', provider.id);
       const projects = await getServiceProviderProjects(provider.id);
       console.log('Loaded projects:', projects);
-      setMyProjects(Array.isArray(projects) ? projects : []);
-      
-      if (!projects || projects.length === 0) {
-        console.log('No projects found for provider');
-        toast({
-          title: "No Projects",
-          description: "You don't have any active projects yet. Projects will appear here when organizers assign work to you.",
-        });
-      }
+      setMyProjects(projects);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       toast({
         title: "Error",
-        description: "Failed to load dashboard data. Please try again.",
+        description: "Failed to load dashboard data",
         variant: "destructive"
       });
-      setMyProjects([]);
     } finally {
       setLoading(false);
     }
@@ -107,11 +80,6 @@ const Labr8Dashboard = () => {
     }
   };
 
-  const handleRefresh = () => {
-    console.log('Refreshing dashboard data...');
-    loadDashboardData();
-  };
-
   const getProjectStats = () => {
     return {
       active: myProjects.filter(p => ['agreed', 'in_progress'].includes(p.status)).length,
@@ -126,35 +94,7 @@ const Labr8Dashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada] mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your projects...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show auth required message if no session
-  if (!session?.user?.id) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <LogOut className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                Authentication Required
-              </h3>
-              <p className="text-muted-foreground text-center mb-4">
-                Please log in to access your LAB-R8 dashboard
-              </p>
-              <Button onClick={() => navigate('/labr8')}>
-                Go to Login
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
       </div>
     );
   }
@@ -167,34 +107,16 @@ const Labr8Dashboard = () => {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">LAB-R8 Dashboard</h1>
-            <p className="text-muted-foreground">
-              Service provider portal for project management
-              {serviceProvider && (
-                <span className="ml-2 text-sm">
-                  • {serviceProvider.business_name}
-                </span>
-              )}
-            </p>
+            <p className="text-muted-foreground">Service provider portal for project management</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={loading}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -256,22 +178,7 @@ const Labr8Dashboard = () => {
           </Card>
         </div>
 
-        {/* Debug Info - Remove this in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <Card className="mb-6 border-yellow-200 bg-yellow-50">
-            <CardHeader>
-              <CardTitle className="text-sm text-yellow-800">Debug Info</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-yellow-700">
-              <div>User ID: {session?.user?.id || 'None'}</div>
-              <div>Service Provider: {serviceProvider ? serviceProvider.business_name : 'None'}</div>
-              <div>Projects Count: {myProjects.length}</div>
-              <div>Loading: {loading ? 'Yes' : 'No'}</div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Main Dashboard Content */}
+        {/* Main Dashboard Content - Only Projects Tab */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-1 max-w-md">
             <TabsTrigger value="projects">My Projects ({stats.total})</TabsTrigger>

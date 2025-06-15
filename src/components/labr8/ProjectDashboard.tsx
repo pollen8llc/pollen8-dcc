@@ -12,9 +12,7 @@ import {
   AlertTriangle, 
   Star,
   FileText,
-  MessageSquare,
-  RefreshCw,
-  AlertCircle
+  MessageSquare
 } from 'lucide-react';
 import { ServiceRequest } from '@/types/modul8';
 import { getServiceProviderProjects } from '@/services/modul8ProjectService';
@@ -29,59 +27,39 @@ const ProjectDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<ServiceRequest | null>(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('ProjectDashboard: Session changed:', session?.user?.id);
-    if (session?.user?.id) {
-      loadProjects();
-    } else {
-      console.log('ProjectDashboard: No session, clearing projects');
-      setProjects([]);
-      setLoading(false);
-    }
+    loadProjects();
   }, [session?.user?.id]);
 
   const loadProjects = async () => {
     if (!session?.user?.id) {
-      console.log('ProjectDashboard: No user session found');
+      console.log('No user session found');
       setLoading(false);
       return;
     }
     
     try {
-      setLoading(true);
-      setError(null);
-      console.log('ProjectDashboard: Loading projects for user:', session.user.id);
-      
+      console.log('Loading projects for user:', session.user.id);
       const provider = await getUserServiceProvider(session.user.id);
-      console.log('ProjectDashboard: Service provider found:', provider);
+      console.log('Service provider found:', provider);
       
       if (!provider) {
-        console.log('ProjectDashboard: No service provider profile found');
-        setError('No service provider profile found. Please complete your setup.');
+        console.log('No service provider profile found');
         setProjects([]);
         setLoading(false);
         return;
       }
       
-      console.log('ProjectDashboard: Loading projects for provider ID:', provider.id);
+      console.log('Loading projects for provider ID:', provider.id);
       const projectData = await getServiceProviderProjects(provider.id);
-      console.log('ProjectDashboard: Projects loaded:', projectData);
-      
-      const validProjects = Array.isArray(projectData) ? projectData : [];
-      setProjects(validProjects);
-      
-      if (validProjects.length === 0) {
-        console.log('ProjectDashboard: No projects found');
-      }
+      console.log('Projects loaded:', projectData);
+      setProjects(projectData || []);
     } catch (error) {
-      console.error('ProjectDashboard: Error loading projects:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setError(`Failed to load projects: ${errorMessage}`);
+      console.error('Error loading projects:', error);
       toast({
         title: "Error",
-        description: "Failed to load projects. Please try again.",
+        description: "Failed to load projects",
         variant: "destructive"
       });
       setProjects([]);
@@ -135,35 +113,11 @@ const ProjectDashboard = () => {
     setShowCompletionModal(true);
   };
 
-  const handleRefresh = () => {
-    console.log('ProjectDashboard: Refreshing projects...');
-    loadProjects();
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00eada] mx-auto mb-2"></div>
-          <p className="text-sm text-muted-foreground">Loading projects...</p>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#00eada]"></div>
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-          <h3 className="text-lg font-semibold text-red-700 mb-2">Error Loading Projects</h3>
-          <p className="text-red-600 text-center mb-4">{error}</p>
-          <Button onClick={handleRefresh} className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Try Again
-          </Button>
-        </CardContent>
-      </Card>
     );
   }
 
@@ -171,17 +125,8 @@ const ProjectDashboard = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Projects</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">{projects.length} Total Projects</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span>{projects.length} Total Projects</span>
         </div>
       </div>
 
@@ -269,16 +214,6 @@ const ProjectDashboard = () => {
                     {tab === 'completed' && "You haven't completed any projects yet."}
                     {tab === 'all' && "You don't have any projects yet. Projects will appear here when organizers assign work to you."}
                   </p>
-                  {tab === 'all' && (
-                    <Button 
-                      onClick={handleRefresh} 
-                      className="mt-4 flex items-center gap-2"
-                      variant="outline"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                      Check for Projects
-                    </Button>
-                  )}
                 </CardContent>
               </Card>
             )}
