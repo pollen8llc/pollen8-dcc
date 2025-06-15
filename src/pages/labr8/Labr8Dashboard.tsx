@@ -28,7 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
 const Labr8Dashboard = () => {
-  const { session } = useSession();
+  const { session, logout } = useSession();
   const navigate = useNavigate();
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
   const [assignedRequests, setAssignedRequests] = useState<ServiceRequest[]>([]);
@@ -103,15 +103,12 @@ const Labr8Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      const { session } = useSession();
-      if (session) {
-        await session.logout();
-        navigate('/labr8');
-        toast({
-          title: "Logged out",
-          description: "You have been successfully logged out",
-        });
-      }
+      await logout();
+      navigate('/labr8');
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
     } catch (error) {
       console.error('Error logging out:', error);
       toast({
