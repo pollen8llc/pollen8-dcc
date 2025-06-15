@@ -13,11 +13,13 @@ const ProfilePage: React.FC = () => {
   const { currentUser, isLoading } = useUser();
   const { getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<any>(null);
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
   const navigate = useNavigate();
 
   // Handle missing userId parameter
   React.useEffect(() => {
     if (!isLoading && !userId) {
+      setIsRedirecting(true);
       if (currentUser) {
         // Redirect to current user's profile if authenticated
         navigate(`/profile/${currentUser.id}`, { replace: true });
@@ -35,7 +37,7 @@ const ProfilePage: React.FC = () => {
   // Fetch profile data
   React.useEffect(() => {
     const fetchProfile = async () => {
-      if (profileId) {
+      if (profileId && !isRedirecting) {
         if (isOwnProfile && currentUser) {
           // For own profile, we still want to fetch fresh data with role info
           console.log('Fetching own profile with role info');
@@ -82,13 +84,13 @@ const ProfilePage: React.FC = () => {
       }
     };
 
-    if (!isLoading && profileId) {
+    if (!isLoading && profileId && !isRedirecting) {
       fetchProfile();
     }
-  }, [profileId, currentUser, isLoading, isOwnProfile, getProfileById]);
+  }, [profileId, currentUser, isLoading, isOwnProfile, getProfileById, isRedirecting]);
 
   // Don't render anything if we're redirecting due to missing userId
-  if (!userId) {
+  if (!userId || isRedirecting) {
     return null;
   }
 
