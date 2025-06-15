@@ -524,3 +524,12 @@ export const getDeals = async () => {
   if (error) throw error;
   return data as Deal[];
 };
+
+export const deleteProposal = async (proposalId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('modul8_proposals')
+    .delete()
+    .eq('id', proposalId);
+  
+  if (error) throw error;
+};

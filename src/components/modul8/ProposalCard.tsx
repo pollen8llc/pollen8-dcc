@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,16 +5,34 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { 
   DollarSign, 
   Clock, 
   FileText, 
   CheckCircle, 
   XCircle, 
   MessageSquare,
-  User
+  User,
+  MoreVertical,
+  Trash2
 } from 'lucide-react';
 import { Proposal, ServiceProvider } from '@/types/modul8';
-import { acceptProposal, declineProposal } from '@/services/modul8Service';
+import { acceptProposal, declineProposal, deleteProposal } from '@/services/modul8Service';
 import { toast } from '@/hooks/use-toast';
 
 interface ProposalCardProps {
@@ -26,7 +43,9 @@ interface ProposalCardProps {
   onAccept: (proposalId: string) => Promise<void>;
   onDecline: (proposalId: string) => Promise<void>;
   onCounter: (proposalId: string) => void;
+  onDelete?: (proposalId: string) => Promise<void>;
   isOrganizer: boolean;
+  isServiceProvider?: boolean;
   loading?: boolean;
 }
 
@@ -36,10 +55,13 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
   onAccept,
   onDecline,
   onCounter,
+  onDelete,
   isOrganizer,
+  isServiceProvider = false,
   loading = false
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -98,114 +120,184 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
     }
   };
 
+  const handleDelete = async () => {
+    setActionLoading(true);
+    try {
+      await deleteProposal(proposal.id);
+      if (onDelete) {
+        await onDelete(proposal.id);
+      }
+      toast({
+        title: "Proposal Deleted",
+        description: "Your proposal has been deleted."
+      });
+    } catch (error) {
+      console.error('Error deleting proposal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete proposal",
+        variant: "destructive"
+      });
+    } finally {
+      setActionLoading(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
+  const canDelete = isServiceProvider && proposal.status === 'submitted';
+
   return (
-    <Card className="w-full hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={proposal.service_provider?.logo_url} />
-              <AvatarFallback>
-                <User className="h-5 w-5" />
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-lg">
-                {proposal.service_provider?.business_name || 'Service Provider'}
-              </CardTitle>
-              {proposal.service_provider?.tagline && (
-                <p className="text-sm text-muted-foreground">{proposal.service_provider.tagline}</p>
+    <>
+      <Card className="w-full hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={proposal.service_provider?.logo_url} />
+                <AvatarFallback>
+                  <User className="h-5 w-5" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-lg">
+                  {proposal.service_provider?.business_name || 'Service Provider'}
+                </CardTitle>
+                {proposal.service_provider?.tagline && (
+                  <p className="text-sm text-muted-foreground">{proposal.service_provider.tagline}</p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className={getStatusColor(proposal.status)} variant="secondary">
+                {proposal.status}
+              </Badge>
+              {canDelete && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                      onClick={() => setShowDeleteDialog(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Proposal
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           </div>
-          <Badge className={getStatusColor(proposal.status)} variant="secondary">
-            {proposal.status}
-          </Badge>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          {proposal.quote_amount && (
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">${proposal.quote_amount.toLocaleString()}</span>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            {proposal.quote_amount && (
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">${proposal.quote_amount.toLocaleString()}</span>
+              </div>
+            )}
+            
+            {proposal.timeline && (
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{proposal.timeline}</span>
+              </div>
+            )}
+          </div>
+
+          {proposal.scope_details && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Scope Details</span>
+              </div>
+              <p className="text-sm text-muted-foreground pl-6">
+                {proposal.scope_details}
+              </p>
             </div>
           )}
-          
-          {proposal.timeline && (
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{proposal.timeline}</span>
+
+          {proposal.terms && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Terms</span>
+              </div>
+              <p className="text-sm text-muted-foreground pl-6">
+                {proposal.terms}
+              </p>
             </div>
           )}
-        </div>
 
-        {proposal.scope_details && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Scope Details</span>
-            </div>
-            <p className="text-sm text-muted-foreground pl-6">
-              {proposal.scope_details}
-            </p>
+          <div className="text-xs text-muted-foreground">
+            Submitted on {new Date(proposal.created_at).toLocaleDateString()}
           </div>
-        )}
 
-        {proposal.terms && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Terms</span>
-            </div>
-            <p className="text-sm text-muted-foreground pl-6">
-              {proposal.terms}
-            </p>
-          </div>
-        )}
+          {isOrganizer && proposal.status === 'submitted' && (
+            <>
+              <Separator />
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAccept}
+                  disabled={actionLoading || loading}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  {actionLoading ? 'Accepting...' : 'Accept'}
+                </Button>
+                
+                <Button
+                  onClick={() => onCounter(proposal.id)}
+                  disabled={actionLoading || loading}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Counter
+                </Button>
+                
+                <Button
+                  onClick={handleDecline}
+                  disabled={actionLoading || loading}
+                  variant="outline"
+                  className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Decline
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
-        <div className="text-xs text-muted-foreground">
-          Submitted on {new Date(proposal.created_at).toLocaleDateString()}
-        </div>
-
-        {isOrganizer && proposal.status === 'submitted' && (
-          <>
-            <Separator />
-            <div className="flex gap-2">
-              <Button
-                onClick={handleAccept}
-                disabled={actionLoading || loading}
-                className="flex-1 bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                {actionLoading ? 'Accepting...' : 'Accept'}
-              </Button>
-              
-              <Button
-                onClick={() => onCounter(proposal.id)}
-                disabled={actionLoading || loading}
-                variant="outline"
-                className="flex-1"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Counter
-              </Button>
-              
-              <Button
-                onClick={handleDecline}
-                disabled={actionLoading || loading}
-                variant="outline"
-                className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Decline
-              </Button>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Proposal</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this proposal? This action cannot be undone and the organizer will no longer see your proposal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={actionLoading}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {actionLoading ? 'Deleting...' : 'Delete Proposal'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
