@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSession } from "@/hooks/useSession";
@@ -64,7 +63,11 @@ const Labr8ProjectStatus = () => {
     }
   };
 
-  const handleStatusUpdate = async (status: string, reason: string) => {
+  // --- FIX: status argument is now properly typed ---
+  const handleStatusUpdate = async (
+    status: ServiceRequest['status'], // restricts to allowed literal values
+    reason: string
+  ) => {
     if (!serviceRequest || !session?.user?.id) return;
     setSubmitting(true);
     try {
@@ -76,6 +79,7 @@ const Labr8ProjectStatus = () => {
         reason
       );
       toast({ title: "Status Updated", description: `Request status changed to ${status}` });
+      // This set is now type safe!
       setServiceRequest(prev => prev ? { ...prev, status } : null);
     } catch (error) {
       toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
