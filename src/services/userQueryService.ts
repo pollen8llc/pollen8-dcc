@@ -71,8 +71,8 @@ export const getAllUsers = async (): Promise<User[]> => {
         r.roles && (r.roles.name === 'ORGANIZER' || r.roles.name === 'organizer')
       );
       
-      // Determine user's role based on the roles system
-      let role = UserRole.MEMBER;
+      // Determine user's role based on the roles system - check SERVICE_PROVIDER first
+      let role: UserRole;
       
       if (isAdmin) {
         role = UserRole.ADMIN;
@@ -80,6 +80,8 @@ export const getAllUsers = async (): Promise<User[]> => {
         role = UserRole.SERVICE_PROVIDER;
       } else if (isOrganizer) {
         role = UserRole.ORGANIZER;
+      } else {
+        role = UserRole.MEMBER;
       }
       
       console.log(`User ${profile.id} role determination:`, {
