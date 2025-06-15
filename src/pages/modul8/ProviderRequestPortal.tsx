@@ -184,7 +184,6 @@ const ProviderRequestPortal = () => {
         toast({
           title: "Notification Failed",
           description: "The request was created, but we failed to send a real-time notification to the provider.",
-          variant: "warning"
         });
       }
 
