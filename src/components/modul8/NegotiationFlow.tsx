@@ -18,7 +18,7 @@ import {
   Handshake
 } from 'lucide-react';
 import { ServiceRequest, Proposal } from '@/types/modul8';
-import { createProposal, getRequestProposals, updateServiceRequest } from '@/services/modul8Service';
+import { createProposal, getRequestProposals, assignServiceProvider } from '@/services/modul8Service';
 import { useSession } from '@/hooks/useSession';
 import { toast } from '@/hooks/use-toast';
 
@@ -113,19 +113,23 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
   const handleAgree = async () => {
     setAgreeing(true);
     try {
-      await updateServiceRequest(serviceRequest.id, {
-        status: 'agreed',
-        engagement_status: 'affiliated'
-      });
+      // Get the latest proposal to find the service provider
+      const latestProposal = proposals[proposals.length - 1];
+      if (!latestProposal) {
+        throw new Error('No proposal found to agree to');
+      }
+
+      // Assign the service provider and update the request status
+      await assignServiceProvider(serviceRequest.id, latestProposal.from_user_id);
 
       toast({
         title: "Agreement Reached!",
-        description: "You can now proceed to create the contract."
+        description: "Service provider has been assigned. You can now proceed to create the contract."
       });
 
       onUpdate();
     } catch (error) {
-      console.error('Error updating service request:', error);
+      console.error('Error reaching agreement:', error);
       toast({
         title: "Error",
         description: "Failed to reach agreement",
@@ -162,6 +166,12 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
   const canLockDeal = serviceRequest.status === 'agreed' || 
     (proposals.length > 0 && latestProposal?.status === 'accepted');
   const canAgree = proposals.length > 0 && serviceRequest.status !== 'agreed';
+  
+  // Check if current user is the organizer (can agree to proposals)
+  const isOrganizer = session?.user?.id && serviceRequest.organizer?.user_id === session.user.id;
+  
+  // Check if current user is a service provider (can submit proposals)
+  const isServiceProvider = session?.user?.id && !isOrganizer;
 
   return (
     <div className="space-y-6">
@@ -235,6 +245,17 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
               </div>
             </div>
           )}
+
+          {/* Show assigned service provider */}
+          {serviceRequest.service_provider && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <h4 className="font-medium text-green-800 mb-1">Assigned Service Provider</h4>
+              <p className="text-sm text-green-700">{serviceRequest.service_provider.business_name}</p>
+              {serviceRequest.service_provider.tagline && (
+                <p className="text-xs text-green-600 mt-1">{serviceRequest.service_provider.tagline}</p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -281,27 +302,25 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
 
       {/* Action Buttons */}
       <div className="flex gap-4">
-        {!showProposalForm && !canLockDeal && (
-          <>
-            <Button
-              onClick={() => setShowProposalForm(true)}
-              className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
-            >
-              <MessageSquare className="h-4 w-4" />
-              {proposals.length === 0 ? 'Send Proposal' : 'Counter Proposal'}
-            </Button>
-            
-            {canAgree && (
-              <Button
-                onClick={handleAgree}
-                disabled={agreeing}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-              >
-                <CheckCircle className="h-4 w-4" />
-                {agreeing ? 'Agreeing...' : 'AGREE'}
-              </Button>
-            )}
-          </>
+        {!showProposalForm && !canLockDeal && isServiceProvider && (
+          <Button
+            onClick={() => setShowProposalForm(true)}
+            className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+          >
+            <MessageSquare className="h-4 w-4" />
+            {proposals.length === 0 ? 'Send Proposal' : 'Counter Proposal'}
+          </Button>
+        )}
+        
+        {canAgree && isOrganizer && (
+          <Button
+            onClick={handleAgree}
+            disabled={agreeing}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+          >
+            <CheckCircle className="h-4 w-4" />
+            {agreeing ? 'Assigning Provider...' : 'AGREE & Assign Provider'}
+          </Button>
         )}
 
         {canLockDeal && (
@@ -317,7 +336,7 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
       </div>
 
       {/* Proposal Form */}
-      {showProposalForm && (
+      {showProposalForm && isServiceProvider && (
         <Card>
           <CardHeader>
             <CardTitle>Submit Proposal</CardTitle>

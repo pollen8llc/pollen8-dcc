@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ServiceProvider, 
@@ -274,6 +275,38 @@ export const updateServiceRequest = async (id: string, data: Partial<ServiceRequ
     .update(updateData)
     .eq('id', id)
     .select()
+    .single();
+  
+  if (error) throw error;
+  return transformServiceRequest(result);
+};
+
+// Assign service provider to a service request
+export const assignServiceProvider = async (serviceRequestId: string, serviceProviderUserId: string) => {
+  // First, get the service provider record from the user ID
+  const { data: serviceProvider, error: providerError } = await supabase
+    .from('modul8_service_providers')
+    .select('id')
+    .eq('user_id', serviceProviderUserId)
+    .single();
+  
+  if (providerError) throw providerError;
+  if (!serviceProvider) throw new Error('Service provider not found');
+
+  // Update the service request with the service provider assignment
+  const { data: result, error } = await supabase
+    .from('modul8_service_requests')
+    .update({
+      service_provider_id: serviceProvider.id,
+      engagement_status: 'affiliated',
+      status: 'agreed'
+    })
+    .eq('id', serviceRequestId)
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
     .single();
   
   if (error) throw error;
