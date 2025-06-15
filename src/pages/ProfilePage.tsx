@@ -1,24 +1,30 @@
 
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useProfiles } from "@/hooks/useProfiles";
 import Navbar from "@/components/Navbar";
 import MobileProfileView from "@/components/profile/MobileProfileView";
 import DesktopProfileView from "@/components/profile/DesktopProfileView";
-import { useNavigate } from "react-router-dom";
 import { UserRole } from "@/models/types";
 
 const ProfilePage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { userId } = useParams<{ userId: string }>();
   const { currentUser, isLoading } = useUser();
   const { profile, getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<any>(null);
   const navigate = useNavigate();
 
+  // If no userId is provided, redirect to current user's profile
+  React.useEffect(() => {
+    if (!isLoading && !userId && currentUser) {
+      navigate(`/profile/${currentUser.id}`, { replace: true });
+    }
+  }, [userId, currentUser, isLoading, navigate]);
+
   // Determine which profile to show
-  const profileId = id || currentUser?.id;
-  const isOwnProfile = !id || id === currentUser?.id;
+  const profileId = userId || currentUser?.id;
+  const isOwnProfile = !userId || userId === currentUser?.id;
 
   // Fetch profile data
   React.useEffect(() => {

@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,7 +10,6 @@ import NonServiceProviderRoute from "@/components/auth/NonServiceProviderRoute";
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
 const Auth = lazy(() => import("@/pages/Auth"));
-const Profile = lazy(() => import("@/pages/Profile"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const ProfileEditPage = lazy(() => import("@/pages/ProfileEditPage"));
 const ProfileSetupPage = lazy(() => import("@/pages/ProfileSetupPage"));
@@ -93,11 +93,6 @@ function AppRoutes() {
           } />
           
           {/* Profile routes - Protected from service providers */}
-          <Route path="/profile" element={
-            <NonServiceProviderRoute>
-              <Profile />
-            </NonServiceProviderRoute>
-          } />
           <Route path="/profile/:userId" element={
             <NonServiceProviderRoute>
               <ProfilePage />
