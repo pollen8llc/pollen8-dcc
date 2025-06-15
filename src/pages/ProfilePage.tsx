@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import MobileProfileView from "@/components/profile/MobileProfileView";
 import DesktopProfileView from "@/components/profile/DesktopProfileView";
 import { useNavigate } from "react-router-dom";
+import { UserRole } from "@/models/types";
 
 const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,12 +25,47 @@ const ProfilePage: React.FC = () => {
     const fetchProfile = async () => {
       if (profileId) {
         if (isOwnProfile && currentUser) {
-          // Use current user data for own profile
-          setProfileData(currentUser);
+          // For own profile, we still want to fetch fresh data with role info
+          console.log('Fetching own profile with role info');
+          const fetchedProfile = await getProfileById(profileId);
+          if (fetchedProfile) {
+            // Convert ExtendedProfile to User format for compatibility
+            const userData = {
+              ...currentUser,
+              role: fetchedProfile.role || currentUser.role,
+              bio: fetchedProfile.bio || currentUser.bio,
+              location: fetchedProfile.location || currentUser.location,
+              interests: fetchedProfile.interests || currentUser.interests,
+              // Add other fields as needed
+            };
+            console.log('Own profile with role:', userData.role);
+            setProfileData(userData);
+          } else {
+            setProfileData(currentUser);
+          }
         } else {
           // Fetch other user's profile
+          console.log('Fetching other user profile with role info');
           const fetchedProfile = await getProfileById(profileId);
-          setProfileData(fetchedProfile);
+          if (fetchedProfile) {
+            // Convert ExtendedProfile to User format for compatibility
+            const userData = {
+              id: fetchedProfile.id,
+              name: `${fetchedProfile.first_name || ''} ${fetchedProfile.last_name || ''}`.trim() || 'User',
+              role: fetchedProfile.role || UserRole.MEMBER,
+              imageUrl: fetchedProfile.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+              email: fetchedProfile.email || "",
+              bio: fetchedProfile.bio || "",
+              location: fetchedProfile.location || "",
+              interests: fetchedProfile.interests || [],
+              communities: [],
+              managedCommunities: [],
+              createdAt: fetchedProfile.created_at || new Date().toISOString(),
+              profile_complete: fetchedProfile.profile_complete || false
+            };
+            console.log('Other user profile with role:', userData.role);
+            setProfileData(userData);
+          }
         }
       }
     };

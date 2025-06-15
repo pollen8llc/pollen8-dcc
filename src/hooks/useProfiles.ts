@@ -19,12 +19,14 @@ export const useProfiles = () => {
   const { toast } = useToast();
 
   /**
-   * Get a user's profile by ID
+   * Get a user's profile by ID with role information
    */
   const fetchProfile = async (profileId: string): Promise<ExtendedProfile | null> => {
     setIsLoading(true);
     try {
+      console.log('Fetching profile with role info for:', profileId);
       const fetchedProfile = await getProfileById(profileId);
+      console.log('Fetched profile with role:', fetchedProfile?.role);
       setProfile(fetchedProfile);
       return fetchedProfile;
     } catch (error) {
