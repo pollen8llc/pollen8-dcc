@@ -58,9 +58,8 @@ const ModernLabr8Dashboard: React.FC = () => {
       </>
     : <span className="text-muted-foreground">Loading profile...</span>;
 
-  // Use bg-background for the main wrapper to match Modul8 dark design
   return (
-    <div className="min-h-screen bg-background"> {/* <-- switched from gradient to bg-background */}
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
@@ -124,7 +123,7 @@ const ModernLabr8Dashboard: React.FC = () => {
         </div>
 
         {/* Request Management Tabs */}
-        <div className="bg-card/70 rounded-2xl shadow-xl px-0 md:px-4 py-8 backdrop-blur-lg">
+        <div className="bg-background/95 backdrop-blur-sm rounded-2xl p-6 border-border/40">
           <Tabs defaultValue="incoming" className="w-full">
             <TabsList className="grid w-full grid-cols-4 rounded-xl border mb-6">
               <TabsTrigger value="incoming">Incoming ({pendingRequests.length})</TabsTrigger>
@@ -183,4 +182,3 @@ const ModernLabr8Dashboard: React.FC = () => {
 };
 
 export default ModernLabr8Dashboard;
-

@@ -17,7 +17,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   accentColor,
   trailing,
 }) => (
-  <Card className="bg-white/70 backdrop-blur-md border-0 shadow-xl hover:shadow-[#00eada]/20 transition-all duration-150">
+  <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300">
     <CardContent className="p-6 flex flex-col gap-2 h-full">
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground font-medium">{label}</span>
