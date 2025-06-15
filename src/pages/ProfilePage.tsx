@@ -11,20 +11,26 @@ import { UserRole } from "@/models/types";
 const ProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const { currentUser, isLoading } = useUser();
-  const { profile, getProfileById, isLoading: profileLoading } = useProfiles();
+  const { getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<any>(null);
   const navigate = useNavigate();
 
-  // If no userId is provided, redirect to current user's profile
+  // Handle missing userId parameter
   React.useEffect(() => {
-    if (!isLoading && !userId && currentUser) {
-      navigate(`/profile/${currentUser.id}`, { replace: true });
+    if (!isLoading && !userId) {
+      if (currentUser) {
+        // Redirect to current user's profile if authenticated
+        navigate(`/profile/${currentUser.id}`, { replace: true });
+      } else {
+        // Redirect to auth if not authenticated and no userId
+        navigate('/auth', { replace: true });
+      }
     }
   }, [userId, currentUser, isLoading, navigate]);
 
-  // Determine which profile to show
-  const profileId = userId || currentUser?.id;
-  const isOwnProfile = !userId || userId === currentUser?.id;
+  // Determine which profile to show - only if userId exists
+  const profileId = userId;
+  const isOwnProfile = userId === currentUser?.id;
 
   // Fetch profile data
   React.useEffect(() => {
@@ -80,6 +86,11 @@ const ProfilePage: React.FC = () => {
       fetchProfile();
     }
   }, [profileId, currentUser, isLoading, isOwnProfile, getProfileById]);
+
+  // Don't render anything if we're redirecting due to missing userId
+  if (!userId) {
+    return null;
+  }
 
   // Show loading state
   if (isLoading || profileLoading || !profileData) {
