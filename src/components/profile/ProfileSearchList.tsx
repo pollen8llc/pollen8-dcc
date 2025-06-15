@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -70,10 +69,8 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
   // Handle view profile navigation
   const handleViewProfile = (profile: ExtendedProfile) => {
     console.log('Navigating to profile:', profile.id, profile);
-    // Use the profile's user_id if available, otherwise fallback to id
-    const userId = profile.user_id || profile.id;
-    if (userId) {
-      navigate(`/profile/${userId}`);
+    if (profile.id) {
+      navigate(`/profile/${profile.id}`);
     } else {
       console.error('No valid user ID found for profile:', profile);
     }
