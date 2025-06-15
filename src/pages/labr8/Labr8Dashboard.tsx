@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { getUserServiceProvider } from '@/services/modul8Service';
 import { getServiceProviderProjects } from '@/services/modul8ProjectService';
+import { DOMAIN_PAGES } from '@/types/modul8';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -105,6 +106,25 @@ const Labr8Dashboard = () => {
 
   const formatStatus = (status: string) => {
     return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const getDomainName = (domainPage: number) => {
+    const domain = DOMAIN_PAGES.find(d => d.id === domainPage);
+    return domain ? domain.title : `Domain ${domainPage}`;
+  };
+
+  const formatBudgetRange = (budgetRange: any) => {
+    if (!budgetRange || typeof budgetRange !== 'object') return null;
+    
+    const { min, max, currency = 'USD' } = budgetRange;
+    if (min && max) {
+      return `$${min} - $${max}`;
+    } else if (min) {
+      return `$${min}+`;
+    } else if (max) {
+      return `Up to $${max}`;
+    }
+    return null;
   };
 
   const stats = getProjectStats();
@@ -233,11 +253,11 @@ const Labr8Dashboard = () => {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Building2 className="h-4 w-4" />
-                        <span>{project.domain_name}</span>
+                        <span>{getDomainName(project.domain_page)}</span>
                       </div>
-                      {project.budget && (
+                      {formatBudgetRange(project.budget_range) && (
                         <div className="flex items-center gap-1">
-                          <span>Budget: ${project.budget}</span>
+                          <span>Budget: {formatBudgetRange(project.budget_range)}</span>
                         </div>
                       )}
                       <div className="flex items-center gap-1">
