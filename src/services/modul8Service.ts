@@ -566,3 +566,21 @@ export const getServiceRequestById = async (serviceRequestId: string) => {
   if (error && error.code !== 'PGRST116') throw error;
   return data ? transformServiceRequest(data) : null;
 };
+
+export const getProposalsByRequestId = async (requestId: string): Promise<Proposal[]> => {
+  const { data, error } = await supabase
+    .from('modul8_proposals')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*)
+    `)
+    .eq('service_request_id', requestId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching proposals:', error);
+    throw error;
+  }
+
+  return data || [];
+};

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ServiceRequest, Proposal } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +34,7 @@ const NegotiationFlow = ({
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showContractModal, setShowContractModal] = useState(false);
+  const [showResponseForm, setShowResponseForm] = useState(false);
 
   useEffect(() => {
     loadProposals();
@@ -57,8 +57,19 @@ const NegotiationFlow = ({
   };
 
   const handleProposalUpdate = () => {
+    setShowResponseForm(false);
     loadProposals();
     onUpdate();
+  };
+
+  const handleResponseFormCancel = () => {
+    setShowResponseForm(false);
+  };
+
+  const handleResponseFormSubmit = (data: any) => {
+    // Handle form submission logic here
+    console.log('Proposal submitted:', data);
+    handleProposalUpdate();
   };
 
   const getStageNumber = (status: string) => {
@@ -123,10 +134,20 @@ const NegotiationFlow = ({
                 </div>
               </div>
 
-              {isServiceProvider && (
+              {isServiceProvider && !showResponseForm && (
+                <Button
+                  onClick={() => setShowResponseForm(true)}
+                  className="w-full bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+                >
+                  Submit Proposal
+                </Button>
+              )}
+
+              {isServiceProvider && showResponseForm && (
                 <ProviderResponseForm
                   serviceRequest={serviceRequest}
-                  onSubmit={handleProposalUpdate}
+                  onSubmit={handleResponseFormSubmit}
+                  onCancel={handleResponseFormCancel}
                 />
               )}
 
@@ -160,9 +181,8 @@ const NegotiationFlow = ({
                     <ProposalCard
                       key={proposal.id}
                       proposal={proposal}
-                      serviceRequest={serviceRequest}
                       onUpdate={handleProposalUpdate}
-                      isServiceProvider={isServiceProvider}
+                      isOrganizer={!isServiceProvider}
                     />
                   ))}
                 </div>
@@ -347,10 +367,11 @@ const NegotiationFlow = ({
       {/* Contract Creation Modal */}
       {showContractModal && (
         <ContractCreationModal
+          isOpen={showContractModal}
           serviceRequest={serviceRequest}
           proposal={proposals.find(p => p.status === 'accepted')}
           onClose={() => setShowContractModal(false)}
-          onContractCreated={handleProposalUpdate}
+          onCreateContract={handleProposalUpdate}
         />
       )}
     </div>
