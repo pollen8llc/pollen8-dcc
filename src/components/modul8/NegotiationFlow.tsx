@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,6 +26,9 @@ import { ServiceRequest, Proposal, ServiceProvider } from '@/types/modul8';
 import { createProposal, getRequestProposals, assignServiceProvider } from '@/services/modul8Service';
 import { useSession } from '@/hooks/useSession';
 import { toast } from '@/hooks/use-toast';
+import ContractCreationModal from './ContractCreationModal';
+import ProposalCard from './ProposalCard';
+import { acceptProposal, declineProposal, lockDeal } from '@/services/negotiationService';
 
 interface NegotiationFlowProps {
   serviceRequest: ServiceRequest;
@@ -38,13 +40,14 @@ const NEGOTIATION_STEPS = [
   { key: 'proposal', label: 'Proposal', icon: FileText },
   { key: 'negotiating', label: 'Negotiating', icon: ArrowRight },
   { key: 'agreement', label: 'Agreement', icon: CheckCircle },
-  { key: 'deel', label: 'Contract', icon: Handshake }
+  { key: 'contract', label: 'Contract', icon: Handshake }
 ];
 
 const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpdate }) => {
   const { session } = useSession();
   const [proposals, setProposals] = useState<(Proposal & { service_provider?: ServiceProvider })[]>([]);
   const [showProposalForm, setShowProposalForm] = useState(false);
+  const [showContractModal, setShowContractModal] = useState(false);
   const [proposalData, setProposalData] = useState({
     quote_amount: '',
     timeline: '',
@@ -52,7 +55,7 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
     terms: ''
   });
   const [loading, setLoading] = useState(false);
-  const [agreeing, setAgreeing] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     loadProposals();
@@ -68,9 +71,10 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
   };
 
   const getCurrentStep = () => {
-    if (serviceRequest.status === 'completed') return 4;
+    if (serviceRequest.status === 'completed' || serviceRequest.status === 'in_progress') return 4;
     if (serviceRequest.status === 'agreed') return 3;
-    if (proposals.length > 0) return serviceRequest.engagement_status === 'negotiating' ? 2 : 1;
+    if (serviceRequest.status === 'negotiating') return 2;
+    if (proposals.length > 0) return 1;
     return 0;
   };
 
@@ -140,57 +144,84 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
     }
   };
 
-  const handleAgree = async () => {
-    setAgreeing(true);
+  const handleAcceptProposal = async (proposalId: string) => {
+    if (!session?.user?.id) return;
+    
+    setProcessing(true);
     try {
-      const latestProposal = proposals[proposals.length - 1];
-      if (!latestProposal) {
-        throw new Error('No proposal found to agree to');
-      }
-
-      await assignServiceProvider(serviceRequest.id, latestProposal.from_user_id);
-
+      await acceptProposal(serviceRequest.id, proposalId, session.user.id);
+      
       toast({
-        title: "Agreement Reached! 🎉",
-        description: "Service provider has been assigned. You can now proceed to create the contract."
+        title: "Proposal Accepted! 🎉",
+        description: "The service provider has been assigned to this project."
       });
-
+      
       onUpdate();
+      loadProposals();
     } catch (error) {
-      console.error('Error reaching agreement:', error);
+      console.error('Error accepting proposal:', error);
       toast({
         title: "Error",
-        description: "Failed to reach agreement",
+        description: "Failed to accept proposal",
         variant: "destructive"
       });
     } finally {
-      setAgreeing(false);
+      setProcessing(false);
     }
   };
 
-  const handleLockDeal = () => {
-    const deelParams = new URLSearchParams({
-      service_title: serviceRequest.title,
-      client_name: serviceRequest.organizer?.organization_name || 'Client',
-      amount: proposalData.quote_amount || '0',
-      timeline: proposalData.timeline || 'TBD',
-      description: serviceRequest.description || ''
-    });
-
-    const deelUrl = `https://app.deel.com/contracts/create?${deelParams.toString()}`;
+  const handleDeclineProposal = async (proposalId: string, reason?: string) => {
+    if (!session?.user?.id) return;
     
-    toast({
-      title: "Redirecting to Deel",
-      description: "Opening contract creation page..."
-    });
+    setProcessing(true);
+    try {
+      await declineProposal(serviceRequest.id, proposalId, session.user.id, reason);
+      
+      toast({
+        title: "Proposal Declined",
+        description: "The service provider has been notified."
+      });
+      
+      onUpdate();
+      loadProposals();
+    } catch (error) {
+      console.error('Error declining proposal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to decline proposal",
+        variant: "destructive"
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
 
-    window.open(deelUrl, '_blank');
+  const handleCreateContract = async (contractData: any) => {
+    if (!session?.user?.id) return;
+    
+    try {
+      await lockDeal(serviceRequest.id, session.user.id);
+      
+      toast({
+        title: "Contract Created! 📋",
+        description: "Project is now active. Please complete the contract signing in Deel."
+      });
+      
+      onUpdate();
+    } catch (error) {
+      console.error('Error creating contract:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create contract",
+        variant: "destructive"
+      });
+    }
   };
 
   const latestProposal = proposals[proposals.length - 1];
-  const canLockDeal = serviceRequest.status === 'agreed' || 
-    (proposals.length > 0 && latestProposal?.status === 'accepted');
-  const canAgree = proposals.length > 0 && serviceRequest.status !== 'agreed';
+  const acceptedProposal = proposals.find(p => p.status === 'accepted');
+  const canShowContract = serviceRequest.status === 'agreed' && acceptedProposal;
+  const canSubmitProposal = serviceRequest.status !== 'completed' && serviceRequest.status !== 'in_progress';
   
   const isOrganizer = session?.user?.id && serviceRequest.organizer?.user_id === session.user.id;
   const isServiceProvider = session?.user?.id && !isOrganizer;
@@ -242,7 +273,7 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
         </CardContent>
       </Card>
 
-      {/* Enhanced Service Request Details */}
+      {/* Service Request Details */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-2xl">
@@ -315,116 +346,36 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
               </div>
             </div>
           )}
-
-          {/* Assigned Provider Status */}
-          {serviceRequest.service_provider && (
-            <div className="p-4 bg-green-50 border-2 border-green-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-                <div>
-                  <h4 className="font-semibold text-green-800">Assigned Service Provider</h4>
-                  <p className="text-green-700">{serviceRequest.service_provider.business_name}</p>
-                  {serviceRequest.service_provider.tagline && (
-                    <p className="text-sm text-green-600 mt-1">{serviceRequest.service_provider.tagline}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      {/* Enhanced Proposals Thread */}
+      {/* Proposals Section */}
       {proposals.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <MessageSquare className="h-6 w-6 text-[#00eada]" />
-              Proposal Discussion ({proposals.length})
+              <FileText className="h-6 w-6 text-[#00eada]" />
+              Proposals ({proposals.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {proposals.map((proposal, index) => (
-              <div key={proposal.id} className="relative">
-                {index > 0 && (
-                  <div className="absolute -top-3 left-6 w-0.5 h-6 bg-[#00eada]/30"></div>
-                )}
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      proposal.status === 'accepted' ? 'bg-green-100 text-green-600' : 'bg-[#00eada]/10 text-[#00eada]'
-                    }`}>
-                      {proposal.status === 'accepted' ? (
-                        <CheckCircle className="h-6 w-6" />
-                      ) : (
-                        <FileText className="h-6 w-6" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Badge variant={proposal.status === 'accepted' ? 'default' : 'secondary'} className="font-medium">
-                          {proposal.proposal_type.charAt(0).toUpperCase() + proposal.proposal_type.slice(1)} Proposal
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {new Date(proposal.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-muted/20 p-4 rounded-lg border space-y-3">
-                      {proposal.quote_amount && (
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-green-600" />
-                          <span className="font-semibold text-lg text-green-700">
-                            ${proposal.quote_amount.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {proposal.timeline && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-blue-600" />
-                          <span className="text-blue-700"><strong>Timeline:</strong> {proposal.timeline}</span>
-                        </div>
-                      )}
-                      
-                      {proposal.scope_details && (
-                        <div>
-                          <p className="font-medium text-sm text-muted-foreground mb-2">Scope Details:</p>
-                          <div className="text-sm leading-relaxed">
-                            {renderTextWithLinks(proposal.scope_details)}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {proposal.terms && (
-                        <div>
-                          <p className="font-medium text-sm text-muted-foreground mb-2">Terms:</p>
-                          <div className="text-sm leading-relaxed">
-                            {renderTextWithLinks(proposal.terms)}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {proposals.map((proposal) => (
+              <ProposalCard
+                key={proposal.id}
+                proposal={proposal}
+                isOrganizer={isOrganizer}
+                onAccept={() => handleAcceptProposal(proposal.id)}
+                onDecline={() => handleDeclineProposal(proposal.id)}
+                onCounter={() => setShowProposalForm(true)}
+              />
             ))}
           </CardContent>
         </Card>
       )}
 
-      {/* Enhanced Action Buttons */}
+      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4">
-        {!showProposalForm && !canLockDeal && isServiceProvider && (
+        {!showProposalForm && canSubmitProposal && isServiceProvider && (
           <Button
             onClick={() => setShowProposalForm(true)}
             className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black font-medium px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
@@ -434,22 +385,10 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
             {proposals.length === 0 ? 'Send Initial Proposal' : 'Send Counter Proposal'}
           </Button>
         )}
-        
-        {canAgree && isOrganizer && (
-          <Button
-            onClick={handleAgree}
-            disabled={agreeing}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 font-medium px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
-            size="lg"
-          >
-            <CheckCircle className="h-5 w-5" />
-            {agreeing ? 'Assigning Provider...' : 'Accept & Assign Provider'}
-          </Button>
-        )}
 
-        {canLockDeal && (
+        {canShowContract && isOrganizer && (
           <Button
-            onClick={handleLockDeal}
+            onClick={() => setShowContractModal(true)}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 font-medium px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
             size="lg"
           >
@@ -460,7 +399,7 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
         )}
       </div>
 
-      {/* Enhanced Proposal Form */}
+      {/* Proposal Form */}
       {showProposalForm && isServiceProvider && (
         <Card className="border-2 border-[#00eada]/20">
           <CardHeader>
@@ -561,6 +500,15 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ serviceRequest, onUpd
           </CardContent>
         </Card>
       )}
+
+      {/* Contract Creation Modal */}
+      <ContractCreationModal
+        isOpen={showContractModal}
+        onClose={() => setShowContractModal(false)}
+        serviceRequest={serviceRequest}
+        proposal={acceptedProposal}
+        onCreateContract={handleCreateContract}
+      />
     </div>
   );
 };

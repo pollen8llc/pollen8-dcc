@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceRequest, ServiceProvider, Proposal } from "@/types/modul8";
 import { 
