@@ -98,7 +98,12 @@ const Labr8Dashboard = () => {
   };
 
   const handleViewRequest = (request: ServiceRequest) => {
-    navigate(`/labr8/${request.id}/status`);
+    // Navigate to the new negotiation flow status page
+    if (request.service_provider_id) {
+      navigate(`/labr8/${request.service_provider_id}/${request.id}/status`);
+    } else {
+      navigate(`/labr8/request/${request.id}/status`);
+    }
   };
 
   const handleLogout = async () => {
@@ -194,7 +199,9 @@ const Labr8Dashboard = () => {
             size="sm"
             className="bg-[#00eada] hover:bg-[#00eada]/90 text-black"
           >
-            View Request
+            {request.status === 'pending' ? 'Respond' : 
+             request.status === 'negotiating' ? 'Continue' :
+             request.status === 'agreed' ? 'View Agreement' : 'View Request'}
           </Button>
         </div>
       </CardContent>

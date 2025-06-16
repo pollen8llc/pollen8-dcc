@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   ArrowLeft, 
   Building, 
@@ -18,7 +19,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { ServiceRequest, ServiceProvider, Organizer } from '@/types/modul8';
-import { getServiceRequestById } from '@/services/modul8Service';
+import { getServiceRequestById, getUserServiceProvider } from '@/services/modul8Service';
 import { checkExistingRequest } from '@/services/negotiationService';
 import NegotiationFlow from './NegotiationFlow';
 import NegotiationTimeline from './NegotiationTimeline';
@@ -30,7 +31,9 @@ const RequestStatusPage = () => {
   const { session } = useSession();
 
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
+  const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);  
   const [loading, setLoading] = useState(true);
+  const [isServiceProvider, setIsServiceProvider] = useState(false);
 
   useEffect(() => {
     loadRequestData();
@@ -41,6 +44,13 @@ const RequestStatusPage = () => {
     
     setLoading(true);
     try {
+      // Check if current user is a service provider
+      const provider = await getUserServiceProvider(session.user.id);
+      if (provider) {
+        setServiceProvider(provider);
+        setIsServiceProvider(true);
+      }
+
       const requestData = await getServiceRequestById(requestId);
       
       if (!requestData) {
@@ -49,7 +59,7 @@ const RequestStatusPage = () => {
           description: "The service request could not be found",
           variant: "destructive"
         });
-        navigate('/modul8');
+        navigate(isServiceProvider ? '/labr8/dashboard' : '/modul8');
         return;
       }
 
@@ -61,7 +71,7 @@ const RequestStatusPage = () => {
         description: "Failed to load request information",
         variant: "destructive"
       });
-      navigate('/modul8');
+      navigate(isServiceProvider ? '/labr8/dashboard' : '/modul8');
     } finally {
       setLoading(false);
     }
@@ -125,7 +135,7 @@ const RequestStatusPage = () => {
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
-            <Button onClick={() => navigate('/modul8')}>
+            <Button onClick={() => navigate(isServiceProvider ? '/labr8/dashboard' : '/modul8')}>
               Back to Dashboard
             </Button>
           </div>
@@ -157,6 +167,12 @@ const RequestStatusPage = () => {
                   {serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1)}
                 </span>
               </Badge>
+              {isServiceProvider && (
+                <Badge className="bg-blue-100 text-blue-800 border border-blue-200">
+                  <Building className="h-4 w-4 mr-1" />
+                  Service Provider View
+                </Badge>
+              )}
               <span className="text-muted-foreground text-sm">
                 Created {new Date(serviceRequest.created_at).toLocaleDateString()}
               </span>
@@ -247,6 +263,7 @@ const RequestStatusPage = () => {
             <NegotiationFlow 
               serviceRequest={serviceRequest}
               onUpdate={handleUpdate}
+              isServiceProvider={isServiceProvider}
             />
           </div>
         </div>

@@ -5,6 +5,8 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ServiceProviderProtectedRoute from "@/components/auth/ServiceProviderProtectedRoute";
 import NonServiceProviderRoute from "@/components/auth/NonServiceProviderRoute";
+import Rel8ProtectedRoute from "@/components/auth/Rel8ProtectedRoute";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
@@ -65,6 +67,9 @@ const ModernLabr8Dashboard = lazy(() => import("@/pages/labr8/ModernLabr8Dashboa
 const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
 const Labr8ProjectDetails = lazy(() => import("@/pages/labr8/Labr8ProjectDetails"));
 const Labr8ProjectStatus = lazy(() => import("@/pages/labr8/Labr8ProjectStatus"));
+
+// Enhanced LAB-R8 dashboard
+const EnhancedLabr8Dashboard = lazy(() => import("@/pages/labr8/EnhancedLabr8Dashboard"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -354,32 +359,63 @@ const AppRoutes = () => {
             {/* LAB-R8 Routes */}
             <Route path="/labr8" element={<Labr8Landing />} />
             <Route path="/labr8/auth" element={<Labr8Auth />} />
-            <Route path="/labr8/setup" element={
-              <ProtectedRoute>
-                <Labr8Setup />
-              </ProtectedRoute>
-            } />
-            <Route path="/labr8/dashboard" element={
-              <ServiceProviderProtectedRoute>
-                <ModernLabr8Dashboard />
-              </ServiceProviderProtectedRoute>
-            } />
-            <Route path="/labr8/:requestId/status" element={
-              <ServiceProviderProtectedRoute>
-                <Labr8RequestStatus />
-              </ServiceProviderProtectedRoute>
-            } />
-            <Route path="/labr8/project/:projectId" element={
-              <ServiceProviderProtectedRoute>
-                <Labr8ProjectDetails />
-              </ServiceProviderProtectedRoute>
-            } />
-            <Route path="/labr8/project/:requestId/status" element={
-              <ServiceProviderProtectedRoute>
-                <Labr8ProjectStatus />
-              </ServiceProviderProtectedRoute>
-            } />
-            
+            <Route
+              path="/labr8/setup"
+              element={
+                <ProtectedRoute>
+                  <Labr8Setup />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/labr8/dashboard"
+              element={
+                <ServiceProviderProtectedRoute>
+                  <ModernLabr8Dashboard />
+                </ServiceProviderProtectedRoute>
+              }
+            />
+            <Route
+              path="/labr8/enhanced"
+              element={
+                <ServiceProviderProtectedRoute>
+                  <EnhancedLabr8Dashboard />
+                </ServiceProviderProtectedRoute>
+              }
+            />
+            <Route
+              path="/labr8/project/:id"
+              element={
+                <ServiceProviderProtectedRoute>
+                  <Labr8ProjectDetails />
+                </ServiceProviderProtectedRoute>
+              }
+            />
+            <Route
+              path="/labr8/project/:id/status"
+              element={
+                <ServiceProviderProtectedRoute>
+                  <Labr8ProjectStatus />
+                </ServiceProviderProtectedRoute>
+              }
+            />
+            <Route
+              path="/labr8/:providerId/:requestId/status"
+              element={
+                <ServiceProviderProtectedRoute>
+                  <Labr8RequestStatus />
+                </ServiceProviderProtectedRoute>
+              }
+            />
+            <Route
+              path="/labr8/request/:requestId/status"
+              element={
+                <ServiceProviderProtectedRoute>
+                  <Labr8RequestStatus />
+                </ServiceProviderProtectedRoute>
+              }
+            />
+
             {/* Documentation and 404 - Accessible to all */}
             <Route path="/docs" element={
               <NonServiceProviderRoute>

@@ -1,3 +1,4 @@
+
 import { ServiceRequest } from '@/types/modul8';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,9 @@ import {
   CheckCircle,
   XCircle,
   MoreVertical,
-  Trash2
+  Trash2,
+  MessageSquare,
+  FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -77,22 +80,21 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <Clock className="h-4 w-4" />;
-      case 'negotiating': return <AlertCircle className="h-4 w-4" />;
+      case 'negotiating': return <MessageSquare className="h-4 w-4" />;
       case 'agreed': return <CheckCircle className="h-4 w-4" />;
       case 'declined': return <XCircle className="h-4 w-4" />;
-      case 'in_progress': return <Clock className="h-4 w-4" />;
+      case 'in_progress': return <FileText className="h-4 w-4" />;
       case 'completed': return <CheckCircle className="h-4 w-4" />;
       default: return <Clock className="h-4 w-4" />;
     }
   };
 
   const handleViewRequest = () => {
-    // Adjust: Use new status page path!
-    if (type === 'active' || type === 'completed') {
-      navigate(`/labr8/project/${request.id}`); // Project details page (existing)
+    // Navigate to the new request status page for full negotiation flow
+    if (request.service_provider_id) {
+      navigate(`/labr8/${request.service_provider_id}/${request.id}/status`);
     } else {
-      // For incoming/discussing: point to new status page
-      navigate(`/labr8/project/${request.id}/status`);
+      navigate(`/labr8/request/${request.id}/status`);
     }
   };
 
@@ -129,6 +131,23 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
 
   // Allow delete if organizer and status is pending OR cancelled
   const canDelete = isOrganizer && (request.status === 'pending' || request.status === 'cancelled');
+
+  const getActionButtonText = () => {
+    switch (request.status) {
+      case 'pending':
+        return 'Respond';
+      case 'negotiating':
+        return 'Continue';
+      case 'agreed':
+        return 'View Agreement';
+      case 'in_progress':
+        return 'View Project';
+      case 'completed':
+        return 'View Completed';
+      default:
+        return 'View Request';
+    }
+  };
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -237,9 +256,9 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
           <Button
             onClick={handleViewRequest}
             size="sm"
-            className="bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+            className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-medium"
           >
-            {type === 'incoming' ? 'View Request' : 'View Project'}
+            {getActionButtonText()}
           </Button>
         </div>
       </CardContent>
