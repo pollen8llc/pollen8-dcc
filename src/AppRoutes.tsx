@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,7 +7,6 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ServiceProviderProtectedRoute from "@/components/auth/ServiceProviderProtectedRoute";
 import NonServiceProviderRoute from "@/components/auth/NonServiceProviderRoute";
 import Rel8ProtectedRoute from "@/components/auth/Rel8ProtectedRoute";
-import LoadingSpinner from "@/components/ui/loading-spinner";
 
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
@@ -72,7 +72,7 @@ const Labr8ProjectStatus = lazy(() => import("@/pages/labr8/Labr8ProjectStatus")
 const EnhancedLabr8Dashboard = lazy(() => import("@/pages/labr8/EnhancedLabr8Dashboard"));
 
 // Loading component
-const LoadingSpinner = () => (
+const AppLoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
   </div>
@@ -81,7 +81,7 @@ const LoadingSpinner = () => (
 const AppRoutes = () => {
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<AppLoadingSpinner />}>
         <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={
