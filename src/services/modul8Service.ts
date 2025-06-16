@@ -582,5 +582,13 @@ export const getProposalsByRequestId = async (requestId: string): Promise<Propos
     throw error;
   }
 
-  return data || [];
+  // Transform the data to match our Proposal type with correct type casting
+  return (data || []).map(item => ({
+    ...item,
+    proposal_type: item.proposal_type as 'initial' | 'counter' | 'revision',
+    status: item.status as 'pending' | 'accepted' | 'rejected' | 'submitted' | 'countered',
+    service_provider: Array.isArray(item.service_provider) 
+      ? item.service_provider[0] 
+      : item.service_provider
+  }));
 };

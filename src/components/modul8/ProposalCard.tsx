@@ -21,6 +21,7 @@ interface ProposalCardProps {
   onAccept?: () => void;
   onDecline?: () => void;
   onCounter?: () => void;
+  onUpdate?: () => void;
   isOrganizer?: boolean;
   className?: string;
 }
@@ -30,6 +31,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
   onAccept,
   onDecline,
   onCounter,
+  onUpdate,
   isOrganizer = false,
   className = ''
 }) => {
