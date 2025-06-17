@@ -40,6 +40,43 @@ export interface ActivityLogEntry {
   created_at: string;
 }
 
+// Helper function to transform database service request to our type
+const transformServiceRequest = (dbRequest: any): ServiceRequest => {
+  return {
+    ...dbRequest,
+    budget_range: typeof dbRequest.budget_range === 'object' && dbRequest.budget_range !== null 
+      ? dbRequest.budget_range as { min?: number; max?: number; currency: string }
+      : { currency: 'USD' },
+    milestones: Array.isArray(dbRequest.milestones) 
+      ? dbRequest.milestones 
+      : [],
+    status: dbRequest.status as ServiceRequest['status'],
+    engagement_status: dbRequest.engagement_status as ServiceRequest['engagement_status']
+  };
+};
+
+// Helper function to transform database notification to our type
+const transformNotification = (dbNotification: any): CrossPlatformNotification => {
+  return {
+    ...dbNotification,
+    platform_context: dbNotification.platform_context as 'modul8' | 'labr8' | 'both',
+    data: typeof dbNotification.data === 'object' && dbNotification.data !== null 
+      ? dbNotification.data 
+      : {}
+  };
+};
+
+// Helper function to transform database activity log to our type
+const transformActivityLog = (dbActivity: any): ActivityLogEntry => {
+  return {
+    ...dbActivity,
+    platform: dbActivity.platform as 'modul8' | 'labr8',
+    activity_data: typeof dbActivity.activity_data === 'object' && dbActivity.activity_data !== null 
+      ? dbActivity.activity_data 
+      : {}
+  };
+};
+
 // Negotiation Status Management
 export const createNegotiationStatus = async (data: {
   service_request_id: string;
@@ -122,7 +159,7 @@ export const createCrossPlatformNotification = async (data: {
     .single();
 
   if (error) throw error;
-  return result;
+  return transformNotification(result);
 };
 
 export const getCrossPlatformNotifications = async (userId: string, platform?: 'modul8' | 'labr8'): Promise<CrossPlatformNotification[]> => {
@@ -138,7 +175,7 @@ export const getCrossPlatformNotifications = async (userId: string, platform?: '
 
   const { data, error } = await query;
   if (error) throw error;
-  return data || [];
+  return (data || []).map(transformNotification);
 };
 
 export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
@@ -165,7 +202,7 @@ export const logCrossPlatformActivity = async (data: {
     .single();
 
   if (error) throw error;
-  return result;
+  return transformActivityLog(result);
 };
 
 export const getActivityLog = async (serviceRequestId: string): Promise<ActivityLogEntry[]> => {
@@ -176,7 +213,7 @@ export const getActivityLog = async (serviceRequestId: string): Promise<Activity
     .order('created_at', { ascending: true });
 
   if (error) throw error;
-  return data || [];
+  return (data || []).map(transformActivityLog);
 };
 
 // Enhanced service request operations with cross-platform integration
@@ -198,7 +235,7 @@ export const getServiceRequestWithNegotiationStatus = async (serviceRequestId: s
   if (serviceRequest.error) throw serviceRequest.error;
 
   return {
-    serviceRequest: serviceRequest.data,
+    serviceRequest: transformServiceRequest(serviceRequest.data),
     negotiationStatus,
     activityLog
   };
@@ -282,7 +319,7 @@ export const subscribeToCrossPlatformUpdates = (
           table: 'cross_platform_activity_log',
           filter: `service_request_id=eq.${serviceRequestId}`
         },
-        (payload) => callbacks.onActivityLog!(payload.new as ActivityLogEntry)
+        (payload) => callbacks.onActivityLog!(transformActivityLog(payload.new))
       )
       .subscribe();
     channels.push(activityChannel);
@@ -299,7 +336,7 @@ export const subscribeToCrossPlatformUpdates = (
           table: 'cross_platform_notifications',
           filter: `service_request_id=eq.${serviceRequestId}`
         },
-        (payload) => callbacks.onNotification!(payload.new as CrossPlatformNotification)
+        (payload) => callbacks.onNotification!(transformNotification(payload.new))
       )
       .subscribe();
     channels.push(notificationChannel);
