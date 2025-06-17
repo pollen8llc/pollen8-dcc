@@ -229,6 +229,94 @@ export type Database = {
         }
         Relationships: []
       }
+      cross_platform_activity_log: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string
+          id: string
+          platform: string
+          service_request_id: string
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string
+          id?: string
+          platform: string
+          service_request_id: string
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string
+          id?: string
+          platform?: string
+          service_request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cross_platform_activity_log_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cross_platform_notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          message: string
+          notification_type: string
+          platform_context: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string | null
+          service_request_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message: string
+          notification_type: string
+          platform_context: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id?: string | null
+          service_request_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          message?: string
+          notification_type?: string
+          platform_context?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string | null
+          service_request_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cross_platform_notifications_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invites: {
         Row: {
           code: string
@@ -596,6 +684,53 @@ export type Database = {
           },
           {
             foreignKeyName: "modul8_engagements_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_negotiation_status: {
+        Row: {
+          created_at: string
+          current_status: string
+          id: string
+          organizer_id: string
+          previous_status: string | null
+          service_provider_id: string | null
+          service_request_id: string
+          status_data: Json | null
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          current_status?: string
+          id?: string
+          organizer_id: string
+          previous_status?: string | null
+          service_provider_id?: string | null
+          service_request_id: string
+          status_data?: Json | null
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          current_status?: string
+          id?: string
+          organizer_id?: string
+          previous_status?: string | null
+          service_provider_id?: string | null
+          service_request_id?: string
+          status_data?: Json | null
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_negotiation_status_service_request_id_fkey"
             columns: ["service_request_id"]
             isOneToOne: false
             referencedRelation: "modul8_service_requests"
