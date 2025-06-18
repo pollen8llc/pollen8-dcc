@@ -24,8 +24,8 @@ const Labr8Auth = () => {
 
   useEffect(() => {
     if (session?.user) {
-      // Check if there's a redirect path in state, otherwise go to dashboard
-      const redirectTo = location.state?.from?.pathname || '/labr8/dashboard';
+      // Redirect to setup page instead of dashboard
+      const redirectTo = location.state?.from?.pathname || '/labr8/setup';
       navigate(redirectTo, { replace: true });
     }
   }, [session, navigate, location.state]);
@@ -52,7 +52,7 @@ const Labr8Auth = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/labr8/dashboard`
+            emailRedirectTo: `${window.location.origin}/labr8/setup`
           }
         });
         if (error) throw error;

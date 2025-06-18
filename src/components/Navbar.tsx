@@ -1,80 +1,186 @@
 
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '@/contexts/UserContext';
+import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import UserMenuDropdown from '@/components/navbar/UserMenuDropdown';
-import { NavigationDrawer } from '@/components/navbar/NavigationDrawer';
-import { Menu } from 'lucide-react';
-
-const navigationItems = [
-  { name: 'Home', href: '/' },
-  { name: 'REL8T', href: '/rel8' },
-  { name: 'Knowledge', href: '/knowledge' },
-  { name: 'Modul8', href: '/modul8' },
-  { name: 'LAB-R8', href: '/labr8' },
-];
+import { useSession } from '@/hooks/useSession';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  User, 
+  LogOut, 
+  Settings, 
+  Menu, 
+  X,
+  Home,
+  Users,
+  BookOpen,
+  Brain,
+  Network,
+  Building2,
+  UserCheck,
+  Zap
+} from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const Navbar = () => {
-  const { currentUser, logout } = useUser();
+  const { session, logout } = useSession();
   const navigate = useNavigate();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Check if user is a service provider
-  const isServiceProvider = currentUser?.role === 'SERVICE_PROVIDER';
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account."
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const navItems = [
+    { name: 'Home', href: '/', icon: Home },
+    { name: 'Communities', href: '/communities', icon: Users },
+    { name: 'Knowledge', href: '/knowledge', icon: BookOpen },
+    { name: 'REL8', href: '/rel8', icon: Network },
+    { name: 'RMS', href: '/rms', icon: UserCheck },
+    { name: 'LAB-R8', href: '/labr8', icon: Building2 },
+  ];
+
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="flex h-14 items-center px-4">
-        {/* Logo */}
-        <Link 
-          to={isServiceProvider ? "/labr8/dashboard" : "/welcome"} 
-          className="mr-auto flex items-center space-x-2"
-        >
-          {isServiceProvider ? (
-            <div className="text-2xl font-bold text-[#00eada]">LAB-R8</div>
-          ) : (
-            <img 
-              src="https://www.pollen8.app/wp-content/uploads/2024/03/POLLEN8-1trans.png" 
-              alt="Pollen8" 
-              className="max-w-full w-[100px]" 
-            />
-          )}
-        </Link>
-        
-        {!isServiceProvider && (
-          <NavigationDrawer 
-            open={drawerOpen}
-            onOpenChange={setDrawerOpen}
-            currentUser={currentUser}
-            logout={logout}
-          />
-        )}
-        
-        <div className="flex items-center space-x-2">
-          {currentUser ? (
-            <UserMenuDropdown currentUser={currentUser} isAdmin={currentUser.role === 'ADMIN'} />
-          ) : (
-            <Button 
-              onClick={() => navigate(isServiceProvider ? '/labr8/auth' : '/auth')} 
-              variant="ghost" 
-              size="sm"
-            >
-              Sign In
-            </Button>
-          )}
-          
-          {/* Menu button for drawer - only show for non-service providers */}
-          {!isServiceProvider && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDrawerOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
+    <nav className="bg-background border-b border-border sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="h-8 w-8 rounded-lg bg-[#00eada] flex items-center justify-center">
+                <Zap className="h-5 w-5 text-black" />
+              </div>
+              <span className="font-bold text-xl">POLLEN-8</span>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive(item.href)
+                      ? 'bg-[#00eada]/10 text-[#00eada]'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* User Menu */}
+          <div className="flex items-center space-x-4">
+            {session?.user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session.user.user_metadata?.avatar_url} />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <div className="flex items-center justify-start gap-2 p-2">
+                    <div className="flex flex-col space-y-1 leading-none">
+                      <p className="font-medium">{session.user.email}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button onClick={() => navigate('/auth')} size="sm">
+                Sign In
+              </Button>
+            )}
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
+          </div>
         </div>
+
+        {/* Mobile Navigation */}
+        {isOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-border">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                      isActive(item.href)
+                        ? 'bg-[#00eada]/10 text-[#00eada]'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Icon className="h-5 w-5 mr-3" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
