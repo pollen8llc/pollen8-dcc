@@ -96,7 +96,7 @@ const GridLabr8Dashboard = () => {
         variant: "destructive"
       });
     } finally {
-      set­Loading(false);
+      setLoading(false);
     }
   };
 
