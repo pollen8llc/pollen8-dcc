@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -70,6 +69,10 @@ const Labr8ProjectStatus = lazy(() => import("@/pages/labr8/Labr8ProjectStatus")
 
 // Enhanced LAB-R8 dashboard
 const EnhancedLabr8Dashboard = lazy(() => import("@/pages/labr8/EnhancedLabr8Dashboard"));
+
+// Grid LAB-R8 dashboard and Fixed Request Status
+const GridLabr8Dashboard = lazy(() => import("@/pages/labr8/GridLabr8Dashboard"));
+const FixedRequestStatusPage = lazy(() => import("@/components/modul8/FixedRequestStatusPage"));
 
 // Loading component
 const AppLoadingSpinner = () => (
@@ -371,7 +374,7 @@ const AppRoutes = () => {
               path="/labr8/dashboard"
               element={
                 <ServiceProviderProtectedRoute>
-                  <ModernLabr8Dashboard />
+                  <GridLabr8Dashboard />
                 </ServiceProviderProtectedRoute>
               }
             />
@@ -403,7 +406,7 @@ const AppRoutes = () => {
               path="/labr8/:providerId/:requestId/status"
               element={
                 <ServiceProviderProtectedRoute>
-                  <Labr8RequestStatus />
+                  <FixedRequestStatusPage />
                 </ServiceProviderProtectedRoute>
               }
             />
@@ -411,10 +414,17 @@ const AppRoutes = () => {
               path="/labr8/request/:requestId/status"
               element={
                 <ServiceProviderProtectedRoute>
-                  <Labr8RequestStatus />
+                  <FixedRequestStatusPage />
                 </ServiceProviderProtectedRoute>
               }
             />
+
+            {/* Update status page routes to use fixed version */}
+            <Route path="/modul8/request/:requestId/status" element={
+              <NonServiceProviderRoute>
+                <FixedRequestStatusPage />
+              </NonServiceProviderRoute>
+            } />
 
             {/* Documentation and 404 - Accessible to all */}
             <Route path="/docs" element={
