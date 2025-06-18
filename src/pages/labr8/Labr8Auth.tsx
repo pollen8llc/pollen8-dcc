@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast';
 const Labr8Auth = () => {
   const { session } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,9 +24,11 @@ const Labr8Auth = () => {
 
   useEffect(() => {
     if (session?.user) {
-      navigate('/labr8/dashboard');
+      // Check if there's a redirect path in state, otherwise go to dashboard
+      const redirectTo = location.state?.from?.pathname || '/labr8/dashboard';
+      navigate(redirectTo, { replace: true });
     }
-  }, [session, navigate]);
+  }, [session, navigate, location.state]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +68,11 @@ const Labr8Auth = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBackToLabr8 = () => {
+    // Use replace to avoid adding to history stack
+    navigate('/labr8', { replace: true });
   };
 
   return (
@@ -163,7 +171,7 @@ const Labr8Auth = () => {
               >
                 {isLogin 
                   ? "Don't have an account? Create one" 
-                  :                   "Already have an account? Sign in"
+                  : "Already have an account? Sign in"
                 }
               </Button>
             </div>
@@ -171,10 +179,10 @@ const Labr8Auth = () => {
             <div className="mt-4 text-center">
               <Button
                 variant="outline"
-                onClick={() => navigate('/labr8')}
+                onClick={handleBackToLabr8}
                 className="text-sm"
               >
-                Back to LAB-R8
+                Back to POLLEN-8 Providers
               </Button>
             </div>
           </CardContent>
