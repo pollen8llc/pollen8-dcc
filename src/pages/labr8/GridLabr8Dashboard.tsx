@@ -112,7 +112,7 @@ const GridLabr8Dashboard = () => {
     setFilteredRequests(filtered);
   };
 
-  const handleStatusUpdate = async (requestId: string, newStatus: string) => {
+  const handleStatusUpdate = async (requestId: string, newStatus: 'pending' | 'negotiating' | 'agreed' | 'in_progress' | 'completed' | 'declined') => {
     try {
       await updateServiceRequest(requestId, { status: newStatus });
       toast({
@@ -340,8 +340,8 @@ const GridLabr8Dashboard = () => {
                     
                     {/* Status Update Dropdown */}
                     {request.status !== 'completed' && request.status !== 'declined' && (
-                      <Select onValueChange={(value) => handleStatusUpdate(request.id, value)}>
-                        <SelectTrigger size="sm">
+                      <Select onValueChange={(value) => handleStatusUpdate(request.id, value as any)}>
+                        <SelectTrigger>
                           <SelectValue placeholder="Update Status" />
                         </SelectTrigger>
                         <SelectContent>

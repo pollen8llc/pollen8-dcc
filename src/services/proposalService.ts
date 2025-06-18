@@ -1,6 +1,19 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Proposal } from "@/types/modul8";
+
+// Define the Proposal type to match the database structure
+export interface Proposal {
+  id: string;
+  service_request_id: string;
+  from_user_id: string;
+  proposal_type: 'initial' | 'counter' | 'revision';
+  quote_amount?: number;
+  scope_details?: string;
+  timeline?: string;
+  terms?: string;
+  status: string;
+  created_at: string;
+}
 
 export const getProposalsByRequestId = async (serviceRequestId: string): Promise<Proposal[]> => {
   const { data, error } = await supabase
@@ -14,7 +27,21 @@ export const getProposalsByRequestId = async (serviceRequestId: string): Promise
     throw error;
   }
 
-  return data || [];
+  // Transform the data to match our Proposal type
+  const proposals: Proposal[] = (data || []).map(item => ({
+    id: item.id,
+    service_request_id: item.service_request_id,
+    from_user_id: item.from_user_id,
+    proposal_type: item.proposal_type as 'initial' | 'counter' | 'revision',
+    quote_amount: item.quote_amount,
+    scope_details: item.scope_details,
+    timeline: item.timeline,
+    terms: item.terms,
+    status: item.status,
+    created_at: item.created_at
+  }));
+
+  return proposals;
 };
 
 export const updateProposalStatus = async (proposalId: string, status: string): Promise<void> => {

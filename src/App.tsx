@@ -5,7 +5,7 @@ import Modul8Dashboard from './pages/modul8/Modul8Dashboard';
 import Labr8Dashboard from './pages/labr8/Labr8Dashboard';
 import ServiceRequestForm from './pages/modul8/ServiceRequestForm';
 import ProviderRequestPortal from './pages/modul8/ProviderRequestPortal';
-import OrganizerSetup from './pages/modul8/OrganizerSetup';
+import OrganizerSetup from './pages/modul8/setup/OrganizerSetup';
 import ServiceProviderSetup from './pages/labr8/ServiceProviderSetup';
 import RequestStatusPage from './pages/modul8/RequestStatusPage';
 import EnhancedLabr8Dashboard from './pages/labr8/EnhancedLabr8Dashboard';
