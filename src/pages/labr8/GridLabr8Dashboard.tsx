@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +31,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  UserX
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -45,27 +45,35 @@ const GridLabr8Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
 
   useEffect(() => {
-    loadDashboardData();
+    checkAccessAndLoadData();
   }, [session?.user?.id]);
 
   useEffect(() => {
     filterRequests();
   }, [allRequests, searchTerm, statusFilter]);
 
-  const loadDashboardData = async () => {
-    if (!session?.user?.id) return;
+  const checkAccessAndLoadData = async () => {
+    if (!session?.user?.id) {
+      navigate('/labr8/auth');
+      return;
+    }
 
     try {
       setLoading(true);
       const provider = await getUserServiceProvider(session.user.id);
       
+      // Only allow service providers to access this dashboard
       if (!provider) {
-        navigate('/labr8/setup');
+        setAccessDenied(true);
+        setLoading(false);
         return;
       }
+      
       setServiceProvider(provider);
+      setAccessDenied(false);
 
       // Get both assigned and available requests
       const [assigned, available] = await Promise.all([
@@ -88,7 +96,7 @@ const GridLabr8Dashboard = () => {
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      set­Loading(false);
     }
   };
 
@@ -119,7 +127,7 @@ const GridLabr8Dashboard = () => {
         title: "Status Updated",
         description: `Request status updated to ${newStatus}`,
       });
-      loadDashboardData(); // Refresh data
+      checkAccessAndLoadData(); // Refresh data
     } catch (error) {
       console.error('Error updating status:', error);
       toast({
@@ -137,7 +145,7 @@ const GridLabr8Dashboard = () => {
         title: "Request Rejected",
         description: "The request has been removed from your dashboard",
       });
-      loadDashboardData(); // Refresh data
+      checkAccessAndLoadData(); // Refresh data
     } catch (error) {
       console.error('Error rejecting request:', error);
       toast({
@@ -195,6 +203,33 @@ const GridLabr8Dashboard = () => {
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <UserX className="h-16 w-16 text-muted-foreground mb-4" />
+              <h2 className="text-2xl font-semibold mb-2">Access Restricted</h2>
+              <p className="text-muted-foreground text-center mb-6">
+                This dashboard is only available to registered service providers.
+              </p>
+              <div className="flex gap-4">
+                <Button onClick={() => navigate('/labr8/setup')}>
+                  Set Up Provider Profile
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/labr8')}>
+                  Back to LAB-R8
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

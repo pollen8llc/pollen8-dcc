@@ -1,9 +1,12 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSession } from "@/hooks/useSession";
 import { getServiceRequests, getUserServiceProvider, createProposal } from "@/services/modul8Service";
+import { getProposalsByRequestId } from "@/services/proposalService";
 import { createServiceRequestComment, updateServiceRequestStatus } from "@/services/commentService";
 import { ServiceRequest, ServiceProvider } from "@/types/modul8";
+import { Proposal } from "@/services/proposalService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import Navbar from "@/components/Navbar";
 import { 
   MessageSquare,
   CheckCircle,
@@ -27,7 +31,8 @@ import {
   Calendar,
   DollarSign,
   FileText,
-  Send
+  Send,
+  Link
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -38,20 +43,22 @@ const Labr8ProjectStatus = () => {
 
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
   const [newComment, setNewComment] = useState('');
   const [showProposalForm, setShowProposalForm] = useState(false);
   const [proposalData, setProposalData] = useState({
     quote_amount: '',
     timeline: '',
     scope_details: '',
-    terms: ''
+    terms_url: '',
+    proposal_url: ''
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [proposalsLoading, setProposalsLoading] = useState(false);
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line
   }, [requestId, session?.user?.id]);
 
   const loadData = async () => {
@@ -66,17 +73,42 @@ const Labr8ProjectStatus = () => {
       const req = requests.find(r => r.id === requestId);
       setServiceRequest(req ?? null);
       setServiceProvider(provider ?? null);
+      
+      // Load proposals
+      if (req) {
+        await loadProposals(req.id);
+      }
     } catch (e) {
-      toast({ title: "Error", description: "Failed to load request", variant: "destructive" });
-      navigate("/labr8/dashboard");
+      console.error('Error loading data:', e);
+      toast({ 
+        title: "Error", 
+        description: "Failed to load request details", 
+        variant: "destructive" 
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // --- FIX: status argument is now properly typed ---
+  const loadProposals = async (serviceRequestId: string) => {
+    setProposalsLoading(true);
+    try {
+      const proposalsList = await getProposalsByRequestId(serviceRequestId);
+      setProposals(proposalsList);
+    } catch (error) {
+      console.error('Error loading proposals:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load proposals",
+        variant: "destructive"
+      });
+    } finally {
+      setProposalsLoading(false);
+    }
+  };
+
   const handleStatusUpdate = async (
-    status: ServiceRequest['status'], // restricts to allowed literal values
+    status: ServiceRequest['status'],
     reason: string
   ) => {
     if (!serviceRequest || !session?.user?.id) return;
@@ -90,9 +122,9 @@ const Labr8ProjectStatus = () => {
         reason
       );
       toast({ title: "Status Updated", description: `Request status changed to ${status}` });
-      // This set is now type safe!
       setServiceRequest(prev => prev ? { ...prev, status } : null);
     } catch (error) {
+      console.error('Error updating status:', error);
       toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
     } finally {
       setSubmitting(false);
@@ -105,6 +137,7 @@ const Labr8ProjectStatus = () => {
     
     setSubmitting(true);
     try {
+      // Create proposal with URL fields
       await createProposal({
         service_request_id: serviceRequest.id,
         from_user_id: session.user.id,
@@ -112,7 +145,7 @@ const Labr8ProjectStatus = () => {
         quote_amount: proposalData.quote_amount ? parseFloat(proposalData.quote_amount) : undefined,
         timeline: proposalData.timeline || undefined,
         scope_details: proposalData.scope_details || undefined,
-        terms: proposalData.terms || undefined
+        terms: proposalData.terms_url || undefined
       });
       
       // Update status to negotiating after proposal submission
@@ -124,7 +157,16 @@ const Labr8ProjectStatus = () => {
       });
       
       setShowProposalForm(false);
-      setProposalData({ quote_amount: '', timeline: '', scope_details: '', terms: '' });
+      setProposalData({ 
+        quote_amount: '', 
+        timeline: '', 
+        scope_details: '', 
+        terms_url: '',
+        proposal_url: '' 
+      });
+
+      // Reload proposals
+      await loadProposals(serviceRequest.id);
       
     } catch (error) {
       console.error('Error submitting proposal:', error);
@@ -153,7 +195,8 @@ const Labr8ProjectStatus = () => {
       }
       toast({ title: "Comment Added", description: "Discussion started" });
       setNewComment('');
-    } catch {
+    } catch (error) {
+      console.error('Error adding comment:', error);
       toast({ title: "Error", description: "Failed to send comment", variant: "destructive" });
     } finally {
       setSubmitting(false);
@@ -163,9 +206,8 @@ const Labr8ProjectStatus = () => {
   const handleAccept = async () => await handleStatusUpdate('agreed', 'Provider accepted the request');
   const handleDecline = async () => await handleStatusUpdate('declined', 'Provider declined the request');
 
-  const isOrganizer = session?.user?.id && serviceRequest?.organizer?.user_id === session.user.id;
+  const isProvider = session?.user?.id && serviceProvider?.user_id === session.user.id;
   
-  // ... keep existing code (getStatusColor function)
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -187,23 +229,30 @@ const Labr8ProjectStatus = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-background">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]" />
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="min-h-screen flex justify-center items-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]" />
+        </div>
       </div>
     );
   }
 
   if (!serviceRequest) {
     return (
-      <div className="min-h-screen bg-background flex flex-col justify-center items-center">
-        <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
-        <Button onClick={() => navigate('/labr8/dashboard')}>Back to Dashboard</Button>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="min-h-screen flex flex-col justify-center items-center">
+          <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
+          <Button onClick={() => navigate('/labr8/dashboard')}>Back to Dashboard</Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
       <div className="max-w-3xl mx-auto px-2 py-8">
         <Button
           variant="outline"
@@ -264,8 +313,8 @@ const Labr8ProjectStatus = () => {
           </CardContent>
         </Card>
 
-        {/* Provider Actions */}
-        {!isOrganizer && ["pending", "negotiating"].includes(serviceRequest.status) && (
+        {/* Provider Actions - Only show to providers */}
+        {isProvider && ["pending", "negotiating"].includes(serviceRequest.status) && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -368,13 +417,30 @@ const Labr8ProjectStatus = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="terms">Terms & Conditions</Label>
-                        <Textarea
-                          id="terms"
-                          value={proposalData.terms}
-                          onChange={(e) => setProposalData(prev => ({ ...prev, terms: e.target.value }))}
-                          placeholder="Payment terms, revision policy, etc..."
-                          rows={3}
+                        <Label htmlFor="proposal_url" className="flex items-center gap-2">
+                          <Link className="h-4 w-4" />
+                          Proposal Document URL
+                        </Label>
+                        <Input
+                          id="proposal_url"
+                          type="url"
+                          value={proposalData.proposal_url}
+                          onChange={(e) => setProposalData(prev => ({ ...prev, proposal_url: e.target.value }))}
+                          placeholder="https://your-proposal-document.com"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="terms_url" className="flex items-center gap-2">
+                          <Link className="h-4 w-4" />
+                          Terms & Conditions URL
+                        </Label>
+                        <Input
+                          id="terms_url"
+                          type="url"
+                          value={proposalData.terms_url}
+                          onChange={(e) => setProposalData(prev => ({ ...prev, terms_url: e.target.value }))}
+                          placeholder="https://your-terms-document.com"
                         />
                       </div>
 
@@ -424,6 +490,77 @@ const Labr8ProjectStatus = () => {
           </Card>
         )}
 
+        {/* Proposals Section */}
+        {proposals.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Proposals ({proposals.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {proposalsLoading ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00eada]" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {proposals.map((proposal) => (
+                    <div key={proposal.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <Badge variant="outline" className="mb-2">
+                            {proposal.proposal_type}
+                          </Badge>
+                          {proposal.quote_amount && (
+                            <p className="text-lg font-semibold text-green-600">
+                              ${proposal.quote_amount.toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(proposal.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      
+                      {proposal.timeline && (
+                        <p className="text-sm mb-2">
+                          <strong>Timeline:</strong> {proposal.timeline}
+                        </p>
+                      )}
+                      
+                      {proposal.scope_details && (
+                        <p className="text-sm mb-2">
+                          <strong>Scope:</strong> {proposal.scope_details}
+                        </p>
+                      )}
+                      
+                      {proposal.terms && (
+                        <div className="text-sm">
+                          <strong>Terms:</strong>
+                          {proposal.terms.startsWith('http') ? (
+                            <a 
+                              href={proposal.terms} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="ml-2 text-blue-600 hover:underline flex items-center gap-1"
+                            >
+                              View Terms Document <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : (
+                            <span className="ml-2">{proposal.terms}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Status Cards for Declined/Agreed */}
         {serviceRequest.status === "agreed" && (
           <Card className="mb-8 border-green-200 bg-green-50">
@@ -455,7 +592,7 @@ const Labr8ProjectStatus = () => {
           </Card>
         )}
         
-        {/* Thread/History (placeholder) */}
+        {/* Communication Thread */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -466,7 +603,6 @@ const Labr8ProjectStatus = () => {
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
               Communication and status history coming soon!
-              {/* Here you'd map over the actual comment thread */}
             </div>
           </CardContent>
         </Card>
