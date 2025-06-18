@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
@@ -6,8 +7,8 @@ import Labr8Dashboard from './pages/labr8/Labr8Dashboard';
 import ServiceRequestForm from './pages/modul8/ServiceRequestForm';
 import ProviderRequestPortal from './pages/modul8/ProviderRequestPortal';
 import OrganizerSetup from './pages/modul8/setup/OrganizerSetup';
-import ServiceProviderSetup from './pages/labr8/ServiceProviderSetup';
-import RequestStatusPage from './pages/modul8/RequestStatusPage';
+import ServiceProviderSetup from './pages/labr8/Labr8Setup';
+import RequestStatusPage from './components/modul8/RequestStatusPage';
 import EnhancedLabr8Dashboard from './pages/labr8/EnhancedLabr8Dashboard';
 import ProjectDashboard from './components/labr8/ProjectDashboard';
 import ModernLabr8Dashboard from './pages/labr8/ModernLabr8Dashboard';
