@@ -1,21 +1,22 @@
 
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter as Router } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
+import { BrowserRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App.tsx";
-import "./index.css";
-import "./globals.css";
 import { UserProvider } from "./contexts/UserContext";
+import "./index.css";
+
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Router>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
         <UserProvider>
           <App />
         </UserProvider>
-      </ThemeProvider>
-    </Router>
-  </React.StrictMode>
+      </QueryClientProvider>
+    </BrowserRouter>
+  </React.StrictMode>,
 );
