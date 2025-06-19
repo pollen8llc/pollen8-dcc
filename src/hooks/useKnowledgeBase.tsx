@@ -14,7 +14,7 @@ export const useKnowledgeBase = () => {
   console.log("useKnowledgeBase - Initialized");
   
   return {
-    // Queries - re-export the hooks themselves
+    // Query hooks - re-export the hooks themselves
     useArticles,
     useArticle,
     useTags,
