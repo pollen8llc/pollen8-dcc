@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import Navbar from "@/components/Navbar";
 import { 
@@ -22,17 +22,17 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Handshake,
   ExternalLink,
   User,
   Building,
   ArrowLeft,
+  Trash2,
   Calendar,
   DollarSign,
   FileText,
   Send,
-  Link,
-  AlertTriangle,
-  Loader2
+  Link
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -56,42 +56,30 @@ const Labr8ProjectStatus = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [proposalsLoading, setProposalsLoading] = useState(false);
-  const [proposalError, setProposalError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
   }, [requestId, session?.user?.id]);
 
   const loadData = async () => {
-    if (!requestId || !session?.user?.id) {
-      navigate('/labr8/auth');
-      return;
-    }
-    
+    if (!requestId || !session?.user?.id) return;
     setLoading(true);
+
     try {
       const [requests, provider] = await Promise.all([
         getServiceRequests(),
         getUserServiceProvider(session.user.id)
       ]);
-      
       const req = requests.find(r => r.id === requestId);
-      if (!req) {
-        toast({ 
-          title: "Request Not Found", 
-          description: "The service request could not be found", 
-          variant: "destructive" 
-        });
-        navigate('/labr8/dashboard');
-        return;
-      }
-      
-      setServiceRequest(req);
+      setServiceRequest(req ?? null);
       setServiceProvider(provider ?? null);
       
-      await loadProposals(req.id);
-    } catch (error) {
-      console.error('Error loading data:', error);
+      // Load proposals
+      if (req) {
+        await loadProposals(req.id);
+      }
+    } catch (e) {
+      console.error('Error loading data:', e);
       toast({ 
         title: "Error", 
         description: "Failed to load request details", 
@@ -104,13 +92,11 @@ const Labr8ProjectStatus = () => {
 
   const loadProposals = async (serviceRequestId: string) => {
     setProposalsLoading(true);
-    setProposalError(null);
     try {
       const proposalsList = await getProposalsByRequestId(serviceRequestId);
       setProposals(proposalsList);
     } catch (error) {
       console.error('Error loading proposals:', error);
-      setProposalError('Failed to load proposals');
       toast({
         title: "Error",
         description: "Failed to load proposals",
@@ -118,34 +104,6 @@ const Labr8ProjectStatus = () => {
       });
     } finally {
       setProposalsLoading(false);
-    }
-  };
-
-  const validateProposalData = () => {
-    if (!proposalData.quote_amount || isNaN(parseFloat(proposalData.quote_amount))) {
-      return "Please enter a valid quote amount";
-    }
-    if (!proposalData.timeline.trim()) {
-      return "Please provide an estimated timeline";
-    }
-    if (!proposalData.scope_details.trim()) {
-      return "Please describe your approach and scope";
-    }
-    if (proposalData.terms_url && !isValidUrl(proposalData.terms_url)) {
-      return "Please enter a valid URL for terms and conditions";
-    }
-    if (proposalData.proposal_url && !isValidUrl(proposalData.proposal_url)) {
-      return "Please enter a valid URL for proposal document";
-    }
-    return null;
-  };
-
-  const isValidUrl = (string: string) => {
-    try {
-      new URL(string);
-      return true;
-    } catch {
-      return false;
     }
   };
 
@@ -163,18 +121,11 @@ const Labr8ProjectStatus = () => {
         serviceRequest.status,
         reason
       );
-      toast({ 
-        title: "Status Updated", 
-        description: `Request status changed to ${status.replace('_', ' ')}` 
-      });
+      toast({ title: "Status Updated", description: `Request status changed to ${status}` });
       setServiceRequest(prev => prev ? { ...prev, status } : null);
     } catch (error) {
       console.error('Error updating status:', error);
-      toast({ 
-        title: "Error", 
-        description: "Failed to update status", 
-        variant: "destructive" 
-      });
+      toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -184,28 +135,20 @@ const Labr8ProjectStatus = () => {
     e.preventDefault();
     if (!serviceRequest || !session?.user?.id) return;
     
-    const validationError = validateProposalData();
-    if (validationError) {
-      toast({
-        title: "Validation Error",
-        description: validationError,
-        variant: "destructive"
-      });
-      return;
-    }
-    
     setSubmitting(true);
     try {
+      // Create proposal with URL fields
       await createProposal({
         service_request_id: serviceRequest.id,
         from_user_id: session.user.id,
         proposal_type: 'initial',
-        quote_amount: parseFloat(proposalData.quote_amount),
-        timeline: proposalData.timeline,
-        scope_details: proposalData.scope_details,
+        quote_amount: proposalData.quote_amount ? parseFloat(proposalData.quote_amount) : undefined,
+        timeline: proposalData.timeline || undefined,
+        scope_details: proposalData.scope_details || undefined,
         terms: proposalData.terms_url || undefined
       });
       
+      // Update status to negotiating after proposal submission
       await handleStatusUpdate('negotiating', 'Provider submitted proposal');
       
       toast({ 
@@ -222,6 +165,7 @@ const Labr8ProjectStatus = () => {
         proposal_url: '' 
       });
 
+      // Reload proposals
       await loadProposals(serviceRequest.id);
       
     } catch (error) {
@@ -267,19 +211,19 @@ const Labr8ProjectStatus = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'negotiating':
-        return 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800';
+        return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'declined':
-        return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800';
+        return 'bg-red-50 text-red-700 border-red-200';
       case 'agreed':
-        return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800';
+        return 'bg-green-50 text-green-700 border-green-200';
       case 'in_progress':
-        return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800';
+        return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'completed':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
@@ -288,10 +232,7 @@ const Labr8ProjectStatus = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="min-h-screen flex justify-center items-center">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-[#00eada]" />
-            <p className="text-muted-foreground">Loading request details...</p>
-          </div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]" />
         </div>
       </div>
     );
@@ -302,14 +243,8 @@ const Labr8ProjectStatus = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="min-h-screen flex flex-col justify-center items-center">
-          <div className="text-center space-y-4">
-            <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto" />
-            <h2 className="text-2xl font-semibold">Request Not Found</h2>
-            <p className="text-muted-foreground">The service request could not be found or may have been removed.</p>
-            <Button onClick={() => navigate('/labr8/dashboard')} className="bg-[#00eada] hover:bg-[#00eada]/90 text-black">
-              Back to Dashboard
-            </Button>
-          </div>
+          <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
+          <Button onClick={() => navigate('/labr8/dashboard')}>Back to Dashboard</Button>
         </div>
       </div>
     );
@@ -318,7 +253,7 @@ const Labr8ProjectStatus = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-2 py-8">
         <Button
           variant="outline"
           size="sm"
@@ -329,62 +264,49 @@ const Labr8ProjectStatus = () => {
         </Button>
         
         {/* Request Header */}
-        <Card className="mb-8 card-hover-effect">
+        <Card className="mb-8">
           <CardHeader>
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <CardTitle className="text-2xl">{serviceRequest.title}</CardTitle>
-                  <Badge className={`${getStatusColor(serviceRequest.status)} font-medium`} variant="outline">
-                    {serviceRequest.status.replace('_', ' ').toUpperCase()}
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground mb-4">{serviceRequest.description}</p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {serviceRequest.budget_range?.min && (
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-green-600" />
-                      <span className="text-sm">
-                        Budget: ${serviceRequest.budget_range.min?.toLocaleString()}
-                        {serviceRequest.budget_range.max && 
-                          ` - $${serviceRequest.budget_range.max.toLocaleString()}`
-                        }
-                      </span>
-                    </div>
-                  )}
-                  
-                  {serviceRequest.timeline && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm">{serviceRequest.timeline}</span>
-                    </div>
-                  )}
-                </div>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="text-2xl mb-2">{serviceRequest.title}</CardTitle>
+                <Badge className={`${getStatusColor(serviceRequest.status)} font-medium`} variant="outline">
+                  {serviceRequest.status.replace('_', ' ').toUpperCase()}
+                </Badge>
+                <p className="text-sm text-muted-foreground mt-2">{serviceRequest.description}</p>
               </div>
-              
               {serviceRequest.organizer && (
-                <Card className="w-full lg:w-auto lg:min-w-[280px]">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={serviceRequest.organizer.logo_url} />
-                        <AvatarFallback>
-                          <Building className="h-6 w-6" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-medium">{serviceRequest.organizer.organization_name}</h3>
-                        <p className="text-sm text-muted-foreground">Client Organization</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={serviceRequest.organizer.logo_url} />
+                    <AvatarFallback>
+                      <Building className="h-6 w-6" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-medium">{serviceRequest.organizer.organization_name}</h3>
+                  </div>
+                </div>
               )}
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="grid grid-cols-2 gap-4 text-sm mb-2">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  {serviceRequest.budget_range?.min
+                    ? `From $${serviceRequest.budget_range.min?.toLocaleString()}`
+                    : "Budget: TBD"}
+                </span>
+              </div>
+              {serviceRequest.timeline && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span>{serviceRequest.timeline}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
               <Clock className="h-4 w-4" />
               Created {new Date(serviceRequest.created_at).toLocaleDateString()}
             </div>
@@ -401,20 +323,17 @@ const Labr8ProjectStatus = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex gap-2 mb-6">
                 <Button
                   onClick={() => setShowProposalForm(!showProposalForm)}
                   className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
-                  disabled={submitting}
                 >
                   <FileText className="h-4 w-4" />
                   {showProposalForm ? 'Hide Proposal Form' : 'Submit Proposal'}
                 </Button>
-                
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" disabled={submitting}>
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                    <Button variant="outline" className="text-green-600 border-green-200 hover:bg-green-50">
                       Accept Request
                     </Button>
                   </AlertDialogTrigger>
@@ -422,7 +341,7 @@ const Labr8ProjectStatus = () => {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Accept Request?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This will change status to agreed and notify the organizer that you accept their request.
+                        This will change status to agreed and notify the organizer.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -433,11 +352,9 @@ const Labr8ProjectStatus = () => {
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-                
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" disabled={submitting}>
-                      <XCircle className="h-4 w-4 mr-2" />
+                    <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
                       Decline Request
                     </Button>
                   </AlertDialogTrigger>
@@ -445,13 +362,13 @@ const Labr8ProjectStatus = () => {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Decline Request?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to decline this request? The organizer will be notified and this action cannot be undone.
+                        Are you sure? The organizer will be notified and cannot undo this action.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction onClick={handleDecline} disabled={submitting}>
-                        {submitting ? "Declining..." : "Decline Request"}
+                        {submitting ? "Declining..." : "Decline"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -468,46 +385,41 @@ const Labr8ProjectStatus = () => {
                     <form onSubmit={handleSubmitProposal} className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="quote_amount" className="required">Quote Amount ($)</Label>
+                          <Label htmlFor="quote_amount">Quote Amount ($)</Label>
                           <Input
                             id="quote_amount"
                             type="number"
-                            step="0.01"
-                            min="0"
                             value={proposalData.quote_amount}
                             onChange={(e) => setProposalData(prev => ({ ...prev, quote_amount: e.target.value }))}
-                            placeholder="5000.00"
-                            required
+                            placeholder="5000"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="timeline" className="required">Estimated Timeline</Label>
+                          <Label htmlFor="timeline">Estimated Timeline</Label>
                           <Input
                             id="timeline"
                             value={proposalData.timeline}
                             onChange={(e) => setProposalData(prev => ({ ...prev, timeline: e.target.value }))}
                             placeholder="2-3 weeks"
-                            required
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="scope_details" className="required">Scope & Approach</Label>
+                        <Label htmlFor="scope_details">Scope & Approach</Label>
                         <Textarea
                           id="scope_details"
                           value={proposalData.scope_details}
                           onChange={(e) => setProposalData(prev => ({ ...prev, scope_details: e.target.value }))}
-                          placeholder="Describe your approach, deliverables, and what you will provide..."
+                          placeholder="Describe your approach and what you will deliver..."
                           rows={4}
-                          required
                         />
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="proposal_url" className="flex items-center gap-2">
                           <Link className="h-4 w-4" />
-                          Proposal Document URL (Optional)
+                          Proposal Document URL
                         </Label>
                         <Input
                           id="proposal_url"
@@ -521,7 +433,7 @@ const Labr8ProjectStatus = () => {
                       <div className="space-y-2">
                         <Label htmlFor="terms_url" className="flex items-center gap-2">
                           <Link className="h-4 w-4" />
-                          Terms & Conditions URL (Optional)
+                          Terms & Conditions URL
                         </Label>
                         <Input
                           id="terms_url"
@@ -532,13 +444,12 @@ const Labr8ProjectStatus = () => {
                         />
                       </div>
 
-                      <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                      <div className="flex gap-4 pt-4">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={() => setShowProposalForm(false)}
                           className="flex-1"
-                          disabled={submitting}
                         >
                           Cancel
                         </Button>
@@ -547,17 +458,8 @@ const Labr8ProjectStatus = () => {
                           disabled={submitting}
                           className="flex-1 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
                         >
-                          {submitting ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Submitting...
-                            </>
-                          ) : (
-                            <>
-                              <Send className="h-4 w-4 mr-2" />
-                              Submit Proposal
-                            </>
-                          )}
+                          <Send className="h-4 w-4 mr-2" />
+                          {submitting ? 'Submitting...' : 'Submit Proposal'}
                         </Button>
                       </div>
                     </form>
@@ -580,17 +482,8 @@ const Labr8ProjectStatus = () => {
                   variant="outline"
                   className="w-full"
                 >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Send Message
-                    </>
-                  )}
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  {submitting ? "Sending..." : "Send Message"}
                 </Button>
               </div>
             </CardContent>
@@ -598,89 +491,70 @@ const Labr8ProjectStatus = () => {
         )}
 
         {/* Proposals Section */}
-        {(proposals.length > 0 || proposalsLoading || proposalError) && (
+        {proposals.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Proposals {proposals.length > 0 && `(${proposals.length})`}
+                Proposals ({proposals.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               {proposalsLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-[#00eada]" />
-                    <p className="text-muted-foreground">Loading proposals...</p>
-                  </div>
-                </div>
-              ) : proposalError ? (
-                <Alert className="border-red-200 bg-red-50 dark:bg-red-900/10">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-red-700 dark:text-red-300">
-                    {proposalError}
-                  </AlertDescription>
-                </Alert>
-              ) : proposals.length > 0 ? (
-                <div className="space-y-4">
-                  {proposals.map((proposal) => (
-                    <Card key={proposal.id} className="border-l-4 border-l-[#00eada]">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <Badge variant="outline" className="mb-2 bg-[#00eada]/10 text-[#00eada] border-[#00eada]/30">
-                              {proposal.proposal_type.charAt(0).toUpperCase() + proposal.proposal_type.slice(1)} Proposal
-                            </Badge>
-                            {proposal.quote_amount && (
-                              <p className="text-xl font-semibold text-green-600">
-                                ${proposal.quote_amount.toLocaleString()}
-                              </p>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(proposal.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                        
-                        {proposal.timeline && (
-                          <div className="mb-3">
-                            <strong className="text-sm">Timeline:</strong>
-                            <p className="text-sm text-muted-foreground">{proposal.timeline}</p>
-                          </div>
-                        )}
-                        
-                        {proposal.scope_details && (
-                          <div className="mb-3">
-                            <strong className="text-sm">Scope & Approach:</strong>
-                            <p className="text-sm text-muted-foreground mt-1">{proposal.scope_details}</p>
-                          </div>
-                        )}
-                        
-                        {proposal.terms && (
-                          <div className="text-sm">
-                            <strong>Terms & Conditions:</strong>
-                            {proposal.terms.startsWith('http') ? (
-                              <a 
-                                href={proposal.terms} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="ml-2 text-[#00eada] hover:underline flex items-center gap-1 inline-flex"
-                              >
-                                View Terms Document <ExternalLink className="h-3 w-3" />
-                              </a>
-                            ) : (
-                              <span className="ml-2 text-muted-foreground">{proposal.terms}</span>
-                            )}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00eada]" />
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                  <p>No proposals submitted yet.</p>
+                <div className="space-y-4">
+                  {proposals.map((proposal) => (
+                    <div key={proposal.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <Badge variant="outline" className="mb-2">
+                            {proposal.proposal_type}
+                          </Badge>
+                          {proposal.quote_amount && (
+                            <p className="text-lg font-semibold text-green-600">
+                              ${proposal.quote_amount.toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(proposal.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      
+                      {proposal.timeline && (
+                        <p className="text-sm mb-2">
+                          <strong>Timeline:</strong> {proposal.timeline}
+                        </p>
+                      )}
+                      
+                      {proposal.scope_details && (
+                        <p className="text-sm mb-2">
+                          <strong>Scope:</strong> {proposal.scope_details}
+                        </p>
+                      )}
+                      
+                      {proposal.terms && (
+                        <div className="text-sm">
+                          <strong>Terms:</strong>
+                          {proposal.terms.startsWith('http') ? (
+                            <a 
+                              href={proposal.terms} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="ml-2 text-blue-600 hover:underline flex items-center gap-1"
+                            >
+                              View Terms Document <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : (
+                            <span className="ml-2">{proposal.terms}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
@@ -689,14 +563,14 @@ const Labr8ProjectStatus = () => {
 
         {/* Status Cards for Declined/Agreed */}
         {serviceRequest.status === "agreed" && (
-          <Card className="mb-8 border-green-200 bg-green-50 dark:bg-green-900/10">
+          <Card className="mb-8 border-green-200 bg-green-50">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-6 w-6 text-green-600" />
                   <div>
-                    <h3 className="font-semibold text-green-800 dark:text-green-200">Request Accepted!</h3>
-                    <p className="text-green-700 dark:text-green-300">The organizer can now proceed to lock the deal and start the project.</p>
+                    <h3 className="font-semibold text-green-800">Request Accepted!</h3>
+                    <p className="text-green-700">Organizer can now lock the deal to start the project.</p>
                   </div>
                 </div>
               </div>
@@ -705,20 +579,20 @@ const Labr8ProjectStatus = () => {
         )}
         
         {serviceRequest.status === "declined" && (
-          <Card className="mb-8 border-red-200 bg-red-50 dark:bg-red-900/10">
+          <Card className="mb-8 border-red-200 bg-red-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <XCircle className="h-6 w-6 text-red-600" />
                 <div>
-                  <h3 className="font-semibold text-red-800 dark:text-red-200">Request Declined</h3>
-                  <p className="text-red-700 dark:text-red-300">The organizer has been notified of your decision.</p>
+                  <h3 className="font-semibold text-red-800">Request Declined</h3>
+                  <p className="text-red-700">The organizer will see this update and can archive or delete the request.</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
         
-        {/* Communication Thread Placeholder */}
+        {/* Communication Thread */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -728,8 +602,7 @@ const Labr8ProjectStatus = () => {
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
-              <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-              <p>Communication and status history coming soon!</p>
+              Communication and status history coming soon!
             </div>
           </CardContent>
         </Card>

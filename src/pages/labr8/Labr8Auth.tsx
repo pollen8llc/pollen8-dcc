@@ -1,195 +1,339 @@
 
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useSession } from '@/hooks/useSession';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Building2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@/contexts/UserContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { updateUserRole } from "@/services/roleService";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Labr8Auth = () => {
-  const { session } = useSession();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { currentUser, isLoading } = useUser();
+  const { toast } = useToast();
 
+  // Redirect if already authenticated
   useEffect(() => {
-    if (session?.user) {
-      // Check if there's a redirect path in state, otherwise go to dashboard
-      const redirectTo = location.state?.from?.pathname || '/labr8/dashboard';
-      navigate(redirectTo, { replace: true });
+    if (!isLoading && currentUser) {
+      // Check if user has SERVICE_PROVIDER role, if not redirect to main platform
+      if (currentUser.role === 'SERVICE_PROVIDER') {
+        const redirectTo = searchParams.get("redirectTo") || "/labr8/dashboard";
+        navigate(redirectTo, { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     }
-  }, [session, navigate, location.state]);
+  }, [currentUser, isLoading, navigate, searchParams]);
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError(null);
+    setMessage(null);
 
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      if (data.user) {
         toast({
           title: "Welcome back!",
-          description: "You have successfully signed in to POLLEN-8 Providers.",
+          description: "You have successfully signed in to LAB-R8.",
         });
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/labr8/dashboard`
-          }
-        });
-        if (error) throw error;
         
-        toast({
-          title: "Account Created!",
-          description: "Please check your email to verify your account.",
-        });
+        const redirectTo = searchParams.get("redirectTo") || "/labr8/dashboard";
+        navigate(redirectTo, { replace: true });
       }
-    } catch (error: any) {
-      console.error('Auth error:', error);
-      setError(error.message || 'An error occurred during authentication');
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBackToLabr8 = () => {
-    // Use replace to avoid adding to history stack
-    navigate('/labr8', { replace: true });
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const redirectUrl = `${window.location.origin}/labr8/dashboard`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            role: 'SERVICE_PROVIDER'
+          }
+        }
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      if (data.user) {
+        // Assign SERVICE_PROVIDER role
+        try {
+          await updateUserRole(data.user.id, 'SERVICE_PROVIDER');
+        } catch (roleError) {
+          console.error('Error assigning SERVICE_PROVIDER role:', roleError);
+        }
+
+        if (data.user.email_confirmed_at) {
+          toast({
+            title: "Welcome to LAB-R8!",
+            description: "Your service provider account has been created successfully.",
+          });
+          navigate("/labr8/dashboard", { replace: true });
+        } else {
+          setMessage("Please check your email and click the confirmation link to complete your LAB-R8 service provider registration.");
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-12 w-12 rounded-lg bg-[#00eada] flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-black" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900">POLLEN-8</h1>
-          </div>
-          <p className="text-gray-600">
-            Service Provider Access Portal
-          </p>
-        </div>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingSpinner size="lg" text="Loading LAB-R8..." />
+      </div>
+    );
+  }
 
-        <Card className="shadow-lg">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl">
-              {isLogin ? 'Sign In' : 'Create Account'}
-            </CardTitle>
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md mx-auto">
+        <div className="flex items-center justify-center mb-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-[#00eada] mb-2">LAB-R8</h1>
+            <p className="text-lg font-semibold text-muted-foreground">Service Provider Portal</p>
+            <p className="text-sm text-muted-foreground mt-1">Join the ecosystem as a service provider</p>
+          </div>
+        </div>
+        
+        <Card className="w-full">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl">Service Provider Access</CardTitle>
+            <CardDescription>
+              Sign in to your service provider account or create a new one
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {error && (
-              <Alert className="mb-4 border-red-200 bg-red-50">
-                <AlertDescription className="text-red-700">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Join LAB-R8</TabsTrigger>
+              </TabsList>
 
-            <form onSubmit={handleAuth} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="w-full"
-                />
-              </div>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="flex items-center gap-2">
-                  <Lock className="h-4 w-4" />
-                  Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    required
-                    className="w-full pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+              {message && (
+                <Alert className="mt-4">
+                  <AlertDescription>{message}</AlertDescription>
+                </Alert>
+              )}
+
+              <TabsContent value="signin">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="signin-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full bg-[#00eada] hover:bg-[#00eada]/90 text-black" disabled={loading}>
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <LoadingSpinner size="sm" />
+                        Signing in...
+                      </div>
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      "Sign In to LAB-R8"
                     )}
                   </Button>
-                </div>
-              </div>
+                </form>
+              </TabsContent>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#00eada] hover:bg-[#00eada]/90 text-black font-medium"
-              >
-                {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <Button
-                variant="ghost"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                {isLogin 
-                  ? "Don't have an account? Create one" 
-                  : "Already have an account? Sign in"
-                }
-              </Button>
-            </div>
-
-            <div className="mt-4 text-center">
-              <Button
-                variant="outline"
-                onClick={handleBackToLabr8}
-                className="text-sm"
-              >
-                Back to POLLEN-8 Providers
-              </Button>
-            </div>
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="John"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        placeholder="Doe"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="signup-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create a password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full bg-[#00eada] hover:bg-[#00eada]/90 text-black" disabled={loading}>
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <LoadingSpinner size="sm" />
+                        Creating account...
+                      </div>
+                    ) : (
+                      "Join LAB-R8 as Service Provider"
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
-
-        <div className="mt-6 text-center text-xs text-gray-500">
-          POLLEN-8 Providers • Secure Service Provider Portal
+        
+        <div className="text-center mt-4">
+          <p className="text-sm text-muted-foreground">
+            Need to access the main platform?{" "}
+            <Button variant="link" className="p-0 h-auto" onClick={() => navigate("/auth")}>
+              Sign in here
+            </Button>
+          </p>
         </div>
       </div>
     </div>

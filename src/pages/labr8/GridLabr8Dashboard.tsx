@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { useNavigate } from 'react-router-dom';
 import { 
   getUserServiceProvider,
   getProviderServiceRequests,
-  getAvailableServiceRequestsForProvider
+  getAvailableServiceRequestsForProvider,
+  updateServiceRequest
 } from '@/services/modul8Service';
 import { ServiceProvider, ServiceRequest } from '@/types/modul8';
 import Navbar from '@/components/Navbar';
@@ -120,6 +120,42 @@ const GridLabr8Dashboard = () => {
     setFilteredRequests(filtered);
   };
 
+  const handleStatusUpdate = async (requestId: string, newStatus: 'pending' | 'negotiating' | 'agreed' | 'in_progress' | 'completed' | 'declined') => {
+    try {
+      await updateServiceRequest(requestId, { status: newStatus });
+      toast({
+        title: "Status Updated",
+        description: `Request status updated to ${newStatus}`,
+      });
+      checkAccessAndLoadData(); // Refresh data
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update request status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRejectRequest = async (requestId: string) => {
+    try {
+      await updateServiceRequest(requestId, { status: 'declined' });
+      toast({
+        title: "Request Rejected",
+        description: "The request has been removed from your dashboard",
+      });
+      checkAccessAndLoadData(); // Refresh data
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reject request",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleViewRequest = (request: ServiceRequest) => {
     navigate(`/labr8/${serviceProvider?.id}/${request.id}/status`);
   };
@@ -211,7 +247,7 @@ const GridLabr8Dashboard = () => {
               <Building2 className="h-6 w-6 text-black" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">POLLEN-8 Providers</h1>
+              <h1 className="text-3xl font-bold">LAB-R8 Dashboard</h1>
               <p className="text-muted-foreground">
                 Welcome back, {serviceProvider?.business_name}
               </p>
@@ -316,15 +352,42 @@ const GridLabr8Dashboard = () => {
                     )}
                   </div>
 
-                  {/* Single Action Button - No Status Dropdown */}
+                  {/* Quick Actions */}
                   <div className="flex flex-col gap-2">
-                    <Button
-                      onClick={() => handleViewRequest(request)}
-                      size="sm"
-                      className="w-full bg-[#00eada] hover:bg-[#00eada]/90 text-black"
-                    >
-                      View Details
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleViewRequest(request)}
+                        size="sm"
+                        className="flex-1 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+                      >
+                        View Details
+                      </Button>
+                      {request.status === 'pending' && (
+                        <Button
+                          onClick={() => handleRejectRequest(request.id)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {/* Status Update Dropdown */}
+                    {request.status !== 'completed' && request.status !== 'declined' && (
+                      <Select onValueChange={(value) => handleStatusUpdate(request.id, value as any)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Update Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="negotiating">Start Negotiating</SelectItem>
+                          <SelectItem value="agreed">Accept Request</SelectItem>
+                          <SelectItem value="in_progress">Mark In Progress</SelectItem>
+                          <SelectItem value="completed">Mark Completed</SelectItem>
+                          <SelectItem value="declined">Decline</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
 
                   <div className="text-xs text-muted-foreground mt-3">
