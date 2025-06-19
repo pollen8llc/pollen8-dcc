@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -50,7 +49,8 @@ const ImportContacts = lazy(() => import("@/pages/rel8t/ImportContacts"));
 const TriggerWizard = lazy(() => import("@/pages/rel8t/TriggerWizard"));
 const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
 
-// Modul8 pages (without dashboard)
+// Modul8 pages
+const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
 const DomainProviders = lazy(() => import("@/pages/modul8/DomainProviders"));
 const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
 const OrganizerSetup = lazy(() => import("@/pages/modul8/setup/OrganizerSetup"));
@@ -58,10 +58,11 @@ const ProviderRequestPortal = lazy(() => import("@/pages/modul8/ProviderRequestP
 const ServiceRequestDetails = lazy(() => import("@/pages/modul8/ServiceRequestDetails"));
 const RequestStatus = lazy(() => import("./pages/modul8/RequestStatus"));
 
-// LAB-R8 pages (without dashboard)
+// LAB-R8 pages
 const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
 const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
+const ModernLabr8Dashboard = lazy(() => import("@/pages/labr8/ModernLabr8Dashboard"));
 const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
 const Labr8ProjectDetails = lazy(() => import("@/pages/labr8/Labr8ProjectDetails"));
 const Labr8ProjectStatus = lazy(() => import("@/pages/labr8/Labr8ProjectStatus"));
@@ -321,10 +322,10 @@ const AppRoutes = () => {
               </NonServiceProviderRoute>
             } />
 
-            {/* Modul8 routes - No dashboard, redirect to setup */}
+            {/* Modul8 routes - Protected from service providers */}
             <Route path="/modul8" element={
               <NonServiceProviderRoute>
-                <OrganizerSetup />
+                <Modul8Dashboard />
               </NonServiceProviderRoute>
             } />
             <Route path="/modul8/domain/:domainId" element={
@@ -358,7 +359,7 @@ const AppRoutes = () => {
               </NonServiceProviderRoute>
             } />
             
-            {/* LAB-R8 Routes - No dashboard, redirect to setup or enhanced dashboard */}
+            {/* LAB-R8 Routes */}
             <Route path="/labr8" element={<Labr8Landing />} />
             <Route path="/labr8/auth" element={<Labr8Auth />} />
             <Route
@@ -370,18 +371,18 @@ const AppRoutes = () => {
               }
             />
             <Route
-              path="/labr8/enhanced"
+              path="/labr8/dashboard"
               element={
                 <ServiceProviderProtectedRoute>
-                  <EnhancedLabr8Dashboard />
+                  <GridLabr8Dashboard />
                 </ServiceProviderProtectedRoute>
               }
             />
             <Route
-              path="/labr8/grid"
+              path="/labr8/enhanced"
               element={
                 <ServiceProviderProtectedRoute>
-                  <GridLabr8Dashboard />
+                  <EnhancedLabr8Dashboard />
                 </ServiceProviderProtectedRoute>
               }
             />

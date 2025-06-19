@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -53,8 +54,11 @@ const Labr8Landing = () => {
 
     setLoading(true);
     try {
-      // Always navigate to setup page instead of dashboard
-      navigate('/labr8/setup');
+      if (serviceProvider) {
+        navigate('/labr8/dashboard');
+      } else {
+        navigate('/labr8/setup');
+      }
     } catch (error) {
       console.error('Navigation error:', error);
       toast({
@@ -171,9 +175,13 @@ const Labr8Landing = () => {
               >
                 {loading ? (
                   "Loading..."
+                ) : serviceProvider ? (
+                  <>
+                    Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                  </>
                 ) : session?.user ? (
                   <>
-                    Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                    Complete Setup <ArrowRight className="ml-2 h-5 w-5" />
                   </>
                 ) : (
                   <>
