@@ -21,15 +21,7 @@ export const useArticles = (params: UseArticlesParams = {}) => {
       
       let query = supabase
         .from('knowledge_articles')
-        .select(`
-          *,
-          author:profiles!knowledge_articles_user_id_fkey(
-            id,
-            first_name,
-            last_name,
-            avatar_url
-          )
-        `);
+        .select('*');
 
       // Apply filters
       if (params.searchQuery) {
@@ -67,13 +59,9 @@ export const useArticles = (params: UseArticlesParams = {}) => {
 
       return data?.map(article => ({
         ...article,
-        author: article.author ? {
-          id: article.author.id,
-          name: `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim(),
-          avatar_url: article.author.avatar_url
-        } : {
+        author: {
           id: article.user_id,
-          name: 'Unknown User',
+          name: 'User',
           avatar_url: null
         }
       })) as KnowledgeArticle[] || [];
@@ -93,15 +81,7 @@ export const useArticle = (id: string | undefined) => {
       
       const { data, error } = await supabase
         .from('knowledge_articles')
-        .select(`
-          *,
-          author:profiles!knowledge_articles_user_id_fkey(
-            id,
-            first_name,
-            last_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .maybeSingle();
         
@@ -114,13 +94,9 @@ export const useArticle = (id: string | undefined) => {
       
       return {
         ...data,
-        author: data.author ? {
-          id: data.author.id,
-          name: `${data.author.first_name || ''} ${data.author.last_name || ''}`.trim(),
-          avatar_url: data.author.avatar_url
-        } : {
+        author: {
           id: data.user_id,
-          name: 'Unknown User',
+          name: 'User',
           avatar_url: null
         }
       } as KnowledgeArticle;
@@ -271,7 +247,10 @@ export const useArticleMutations = () => {
       
       const { error } = await supabase
         .from('knowledge_articles')
-        .update({ is_archived: true })
+        .update({ 
+          archived_at: new Date().toISOString(),
+          archived_by: currentUser?.id 
+        })
         .eq('id', id);
 
       if (error) throw error;
@@ -301,7 +280,10 @@ export const useArticleMutations = () => {
       
       const { error } = await supabase
         .from('knowledge_articles')
-        .update({ is_archived: false })
+        .update({ 
+          archived_at: null,
+          archived_by: null 
+        })
         .eq('id', id);
 
       if (error) throw error;
