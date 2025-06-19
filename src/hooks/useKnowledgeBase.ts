@@ -1,8 +1,7 @@
 
 import { useState } from 'react';
-import { useArticles, useArticle, useArticleMutations } from './knowledge/useArticles';
-import { useComments, useCommentMutations } from './knowledge/useComments';
-import { useTags } from './knowledge/useTags';
+import { useArticleMutations } from './knowledge/useArticles';
+import { useCommentMutations } from './knowledge/useComments';
 import { useVote } from './knowledge/useVote';
 
 export const useKnowledgeBase = () => {
@@ -12,12 +11,6 @@ export const useKnowledgeBase = () => {
   const commentMutations = useCommentMutations();
   
   return {
-    // Queries
-    useArticles,
-    useArticle,
-    useTags,
-    useComments,
-    
     // Mutations
     ...articleMutations,
     ...commentMutations,
