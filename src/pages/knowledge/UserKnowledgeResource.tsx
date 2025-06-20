@@ -29,6 +29,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MetricCard } from '@/components/rel8t/MetricCard';
 import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
+import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const UserKnowledgeResource = () => {
         <Navbar />
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Please log in to view your knowledge resources</h1>
+            <h1 className="text-2xl font-bold mb-4 text-white">Please log in to view your knowledge resources</h1>
             <Button onClick={() => navigate('/auth')}>Log In</Button>
           </div>
         </div>
@@ -58,11 +59,11 @@ const UserKnowledgeResource = () => {
   }) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-white">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold text-white">{value}</div>
         {description && (
           <p className="text-xs text-muted-foreground">{description}</p>
         )}
@@ -77,10 +78,15 @@ const UserKnowledgeResource = () => {
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
         <CoreNavigation />
         
+        {/* Add Knowledge Navigation */}
+        <div className="mt-6 mb-6">
+          <KnowledgeNavigation />
+        </div>
+        
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">My Knowledge Resources</h1>
+            <h1 className="text-3xl font-bold text-white">My Knowledge Resources</h1>
             <p className="text-muted-foreground mt-1">
               Track your contributions and manage your saved content
             </p>
@@ -95,9 +101,9 @@ const UserKnowledgeResource = () => {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="my-posts">My Posts</TabsTrigger>
-            <TabsTrigger value="saved">Saved Articles</TabsTrigger>
+            <TabsTrigger value="overview" className="text-white">Overview</TabsTrigger>
+            <TabsTrigger value="my-posts" className="text-white">My Posts</TabsTrigger>
+            <TabsTrigger value="saved" className="text-white">Saved Articles</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -149,7 +155,7 @@ const UserKnowledgeResource = () => {
                 {/* Content Type Breakdown */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <BarChart3 className="h-5 w-5" />
                       Content Breakdown
                     </CardTitle>
@@ -168,7 +174,7 @@ const UserKnowledgeResource = () => {
                 {/* Recent Activity */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <TrendingUp className="h-5 w-5" />
                       Recent Activity
                     </CardTitle>
@@ -178,7 +184,7 @@ const UserKnowledgeResource = () => {
                       {stats?.articles?.slice(0, 3).map((article) => (
                         <div key={article.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
-                            <h4 className="font-medium">{article.title}</h4>
+                            <h4 className="font-medium text-white">{article.title}</h4>
                             <p className="text-sm text-muted-foreground">
                               {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
                             </p>
@@ -210,7 +216,7 @@ const UserKnowledgeResource = () => {
           {/* My Posts Tab */}
           <TabsContent value="my-posts" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">My Posts ({stats?.totalArticles || 0})</h2>
+              <h2 className="text-xl font-semibold text-white">My Posts ({stats?.totalArticles || 0})</h2>
               <Button onClick={() => navigate('/knowledge/create')}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create New Post
@@ -244,7 +250,7 @@ const UserKnowledgeResource = () => {
               <Card className="p-8 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No posts yet</h3>
+                  <h3 className="text-lg font-medium mb-2 text-white">No posts yet</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     Start sharing your knowledge by creating your first post!
                   </p>
@@ -260,7 +266,7 @@ const UserKnowledgeResource = () => {
           {/* Saved Articles Tab */}
           <TabsContent value="saved" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Saved Articles ({savedArticles?.length || 0})</h2>
+              <h2 className="text-xl font-semibold text-white">Saved Articles ({savedArticles?.length || 0})</h2>
               <Button variant="outline" onClick={() => navigate('/knowledge')}>
                 <BookOpen className="mr-2 h-4 w-4" />
                 Browse Knowledge Base
@@ -294,7 +300,7 @@ const UserKnowledgeResource = () => {
               <Card className="p-8 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No saved articles</h3>
+                  <h3 className="text-lg font-medium mb-2 text-white">No saved articles</h3>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     Save articles you find interesting to read them later!
                   </p>

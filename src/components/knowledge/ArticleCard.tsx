@@ -127,7 +127,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
               </Badge>
             </div>
             
-            <h3 className="text-base sm:text-lg font-semibold line-clamp-2 mb-2">
+            <h3 className="text-base sm:text-lg font-semibold line-clamp-2 mb-2 text-white">
               {article.title}
             </h3>
             
@@ -176,7 +176,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
                     {getAuthorInitials(article.author.name)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-xs sm:text-sm">{article.author.name}</span>
+                <span className="text-xs sm:text-sm text-white">{article.author.name}</span>
               </div>
             )}
           </div>
@@ -203,7 +203,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 hidden sm:flex"
+              className="h-8 w-8 p-0 hidden sm:flex hover:text-[#00eada]"
               onClick={handleShare}
             >
               <Share2 className="h-3 w-3" />
