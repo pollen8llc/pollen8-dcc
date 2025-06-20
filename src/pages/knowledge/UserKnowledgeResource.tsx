@@ -18,11 +18,12 @@ import {
   Bookmark,
   TrendingUp,
   Calendar,
-  PlusCircle
+  PlusCircle,
+  Tag as TagIcon
 } from 'lucide-react';
 
 // UI Components
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -179,7 +180,11 @@ const UserKnowledgeResource = () => {
                   <CardContent>
                     <div className="space-y-4">
                       {stats?.articles?.slice(0, 3).map((article) => (
-                        <div key={article.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div 
+                          key={article.id} 
+                          className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/20 transition-colors"
+                          onClick={() => navigate(`/knowledge/article/${article.id}`)}
+                        >
                           <div>
                             <h4 className="font-medium text-white">{article.title}</h4>
                             <p className="text-sm text-white">
@@ -229,18 +234,54 @@ const UserKnowledgeResource = () => {
             ) : ((stats && Array.isArray(stats.articles) ? stats.articles.length : 0) > 0) ? (
               <div className="space-y-4">
                 {(stats?.articles || []).map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={{
-                      ...article,
-                      author: {
-                        id: currentUser.id,
-                        name: currentUser.email || 'Unknown User',
-                        avatar_url: undefined
-                      }
-                    } as KnowledgeArticle}
-                    onClick={() => navigate(`/knowledge/${article.id}`)}
-                  />
+                  <Card key={article.id} className="transition-shadow hover:shadow-md cursor-pointer" onClick={() => navigate(`/knowledge/article/${article.id}`)}>
+                    <CardHeader>
+                      <CardTitle className="text-xl hover:text-royal-blue-600 dark:hover:text-royal-blue-400 transition-colors">
+                        {article.title}
+                      </CardTitle>
+                      <div className="flex flex-wrap gap-2">
+                        {article.tags?.map(t => (
+                          <Badge 
+                            key={t} 
+                            variant="outline"
+                          >
+                            <TagIcon className="h-3 w-3 mr-1" />
+                            {t}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <p className="text-muted-foreground line-clamp-2">
+                        {article.content?.replace(/<[^>]*>?/gm, '').substring(0, 150)}...
+                      </p>
+                    </CardContent>
+                    
+                    <CardFooter className="flex justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center">
+                          <ThumbsUp className="h-4 w-4 mr-1" />
+                          <span>{article.vote_count || 0}</span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          <span>0</span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <Eye className="h-4 w-4 mr-1" />
+                          <span>{article.view_count}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        <span>{formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}</span>
+                      </div>
+                    </CardFooter>
+                  </Card>
                 ))}
               </div>
             ) : (
@@ -279,18 +320,54 @@ const UserKnowledgeResource = () => {
             ) : (savedArticles?.length || 0) > 0 ? (
               <div className="space-y-4">
                 {savedArticles?.map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={{
-                      ...article,
-                      author: {
-                        id: article.author?.id || article.user_id,
-                        name: article.author?.name || 'Unknown User',
-                        avatar_url: article.author?.avatar_url
-                      }
-                    } as KnowledgeArticle}
-                    onClick={() => navigate(`/knowledge/${article.id}`)}
-                  />
+                  <Card key={article.id} className="transition-shadow hover:shadow-md cursor-pointer" onClick={() => navigate(`/knowledge/article/${article.id}`)}>
+                    <CardHeader>
+                      <CardTitle className="text-xl hover:text-royal-blue-600 dark:hover:text-royal-blue-400 transition-colors">
+                        {article.title}
+                      </CardTitle>
+                      <div className="flex flex-wrap gap-2">
+                        {article.tags?.map(t => (
+                          <Badge 
+                            key={t} 
+                            variant="outline"
+                          >
+                            <TagIcon className="h-3 w-3 mr-1" />
+                            {t}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <p className="text-muted-foreground line-clamp-2">
+                        {article.content?.replace(/<[^>]*>?/gm, '').substring(0, 150)}...
+                      </p>
+                    </CardContent>
+                    
+                    <CardFooter className="flex justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center">
+                          <ThumbsUp className="h-4 w-4 mr-1" />
+                          <span>{article.vote_count || 0}</span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          <span>0</span>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <Eye className="h-4 w-4 mr-1" />
+                          <span>{article.view_count}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        <span>{formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}</span>
+                      </div>
+                    </CardFooter>
+                  </Card>
                 ))}
               </div>
             ) : (

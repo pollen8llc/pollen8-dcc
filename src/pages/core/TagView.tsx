@@ -98,13 +98,11 @@ const TagView = () => {
           ) : articles && articles.length > 0 ? (
             <>
               {articles.map(article => (
-                <Card key={article.id} className="transition-shadow hover:shadow-md">
+                <Card key={article.id} className="transition-shadow hover:shadow-md cursor-pointer" onClick={() => window.location.href = `/knowledge/article/${article.id}`}>
                   <CardHeader>
-                    <Link to={`/knowledge/${article.id}`} className="group">
-                      <CardTitle className="text-xl group-hover:text-royal-blue-600 dark:group-hover:text-royal-blue-400 transition-colors">
-                        {article.title}
-                      </CardTitle>
-                    </Link>
+                    <CardTitle className="text-xl hover:text-royal-blue-600 dark:hover:text-royal-blue-400 transition-colors">
+                      {article.title}
+                    </CardTitle>
                     <div className="flex flex-wrap gap-2">
                       {article.tags?.map(t => (
                         <Badge 

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -190,8 +191,8 @@ const ArticleView = () => {
               </Badge>
             </div>
             
-            {/* Article title */}
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6 text-white leading-tight">
+            {/* Article title - Made teal */}
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6 text-[#00eada] leading-tight">
               {article.title}
             </h1>
             
