@@ -5,6 +5,7 @@ import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import UserMenuDropdown from '@/components/navbar/UserMenuDropdown';
 import { NavigationDrawer } from '@/components/navbar/NavigationDrawer';
+import { Labr8NavigationDrawer } from '@/components/navbar/Labr8NavigationDrawer';
 import { Menu } from 'lucide-react';
 
 const navigationItems = [
@@ -42,7 +43,15 @@ const Navbar = () => {
           )}
         </Link>
         
-        {!isServiceProvider && (
+        {/* Navigation Drawers */}
+        {isServiceProvider ? (
+          <Labr8NavigationDrawer 
+            open={drawerOpen}
+            onOpenChange={setDrawerOpen}
+            currentUser={currentUser}
+            logout={logout}
+          />
+        ) : (
           <NavigationDrawer 
             open={drawerOpen}
             onOpenChange={setDrawerOpen}
@@ -64,16 +73,14 @@ const Navbar = () => {
             </Button>
           )}
           
-          {/* Menu button for drawer - only show for non-service providers */}
-          {!isServiceProvider && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDrawerOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
+          {/* Menu button for drawer */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setDrawerOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </nav>
