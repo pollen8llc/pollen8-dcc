@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -22,6 +23,7 @@ const DotConnectorDashboard = lazy(() => import("@/pages/DotConnectorDashboard")
 const OrganizerDashboard = lazy(() => import("@/pages/OrganizerDashboard"));
 const InvitesManagementPage = lazy(() => import("@/pages/InvitesManagementPage"));
 const InvitePage = lazy(() => import("@/pages/InvitePage"));
+const Settings = lazy(() => import("@/pages/Settings"));
 
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -102,6 +104,15 @@ const AppRoutes = () => {
             <Route path="/welcome" element={
               <NonServiceProviderRoute>
                 <DotConnectorDashboard />
+              </NonServiceProviderRoute>
+            } />
+            
+            {/* Add new Settings route */}
+            <Route path="/settings" element={
+              <NonServiceProviderRoute>
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
               </NonServiceProviderRoute>
             } />
             
