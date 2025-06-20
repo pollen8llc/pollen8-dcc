@@ -168,6 +168,13 @@ const AppRoutes = () => {
                 </ProtectedRoute>
               </NonServiceProviderRoute>
             } />
+            <Route path="/knowledge/my-resources" element={
+              <NonServiceProviderRoute>
+                <ProtectedRoute>
+                  <UserKnowledgeResource />
+                </ProtectedRoute>
+              </NonServiceProviderRoute>
+            } />
             <Route path="/knowledge/resources" element={
               <NonServiceProviderRoute>
                 <ProtectedRoute>
