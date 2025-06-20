@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Contact } from "@/services/rel8t/contactService";
@@ -41,6 +40,7 @@ interface ReviewSubmitStepProps {
   };
   onSubmit: () => void;
   onPrevious?: () => void;
+  selectedTriggerId?: string | null;
 }
 
 // Helper function to get due date from trigger
@@ -78,6 +78,7 @@ export const ReviewSubmitStep = ({
   wizardData,
   onSubmit,
   onPrevious,
+  selectedTriggerId,
 }: ReviewSubmitStepProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();

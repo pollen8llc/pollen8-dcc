@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +39,14 @@ const RelationshipWizard = () => {
   
   const [step, setStep] = useState<WizardStep>("select-contacts");
   const [data, setData] = useState<WizardData>(initialData);
+
+  // Auto-advance to review step when we have a triggerId
+  useEffect(() => {
+    if (step === "select-triggers" && triggerId) {
+      const timer = setTimeout(() => setStep("review"), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [step, triggerId]);
 
   const handleSelectContactsNext = (stepData: { contacts: Contact[] }) => {
     setData(prev => ({ ...prev, contacts: stepData.contacts }));
@@ -155,8 +164,6 @@ const RelationshipWizard = () => {
                 <p className="text-muted-foreground mb-4">
                   Trigger already selected. Proceeding to review...
                 </p>
-                {/* Auto-advance to review step */}
-                {setTimeout(() => setStep("review"), 100)}
               </div>
             )}
             
