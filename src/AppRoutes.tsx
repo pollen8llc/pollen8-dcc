@@ -42,7 +42,6 @@ const Rel8Dashboard = lazy(() => import("@/pages/rel8t/Dashboard"));
 const Contacts = lazy(() => import("@/pages/rel8t/Contacts"));
 const ContactCreate = lazy(() => import("@/pages/rel8t/ContactCreate"));
 const ContactEdit = lazy(() => import("@/pages/rel8t/ContactEdit"));
-const Relationships = lazy(() => import("@/pages/rel8t/Relationships"));
 const Categories = lazy(() => import("@/pages/rel8t/Categories"));
 const Rel8Settings = lazy(() => import("@/pages/rel8t/Settings"));
 const RelationshipWizard = lazy(() => import("@/pages/rel8t/RelationshipWizard"));
@@ -264,16 +263,6 @@ const AppRoutes = () => {
             <Route path="/rel8t/contacts/:id/edit" element={
               <NonServiceProviderRoute>
                 <ContactEdit />
-              </NonServiceProviderRoute>
-            } />
-            <Route path="/rel8/relationships" element={
-              <NonServiceProviderRoute>
-                <Relationships />
-              </NonServiceProviderRoute>
-            } />
-            <Route path="/rel8t/relationships" element={
-              <NonServiceProviderRoute>
-                <Relationships />
               </NonServiceProviderRoute>
             } />
             <Route path="/rel8/categories" element={
