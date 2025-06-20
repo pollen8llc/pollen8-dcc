@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -81,9 +80,9 @@ const RelationshipWizard = () => {
   };
 
   const handleReviewSubmit = () => {
-    // Clear wizard data and redirect to the relationships page
+    // Clear wizard data and redirect to the main rel8 dashboard
     clearWizardData();
-    navigate("/rel8/relationships");
+    navigate("/rel8");
   };
 
   const getStepTitle = () => {
