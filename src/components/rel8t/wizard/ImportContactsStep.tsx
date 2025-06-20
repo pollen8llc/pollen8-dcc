@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, FileText, AlertCircle, RotateCcw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { CSVParser, ParsedCSVData } from '@/utils/csvParser';
+import { VCardParser } from '@/utils/vCardParser';
 import { ColumnDetector, ColumnMapping } from '@/utils/columnDetector';
 import { DataNormalizer, NormalizedContact, ValidationResult } from '@/utils/dataNormalizer';
 import { ColumnMappingStep } from './ColumnMappingStep';
@@ -50,15 +51,36 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
     setIsProcessing(true);
 
     try {
-      // Parse CSV
-      const parsed = await CSVParser.parseFile(uploadedFile, {
-        skipEmptyLines: true,
-        maxFileSize: 10 * 1024 * 1024
-      });
+      let parsed: ParsedCSVData;
+
+      // Check if it's a vCard file
+      if (uploadedFile.name.toLowerCase().endsWith('.vcf')) {
+        const content = await uploadedFile.text();
+        const vCardContacts = VCardParser.parseVCard(content);
+        
+        if (vCardContacts.length === 0) {
+          toast({
+            title: "Invalid vCard file",
+            description: "No valid contacts found in the vCard file.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Convert vCard to CSV format for processing
+        const csvContent = VCardParser.convertToCSVFormat(vCardContacts);
+        parsed = CSVParser.parseText(csvContent, { skipEmptyLines: true });
+      } else {
+        // Parse as CSV
+        parsed = await CSVParser.parseFile(uploadedFile, {
+          skipEmptyLines: true,
+          maxFileSize: 10 * 1024 * 1024
+        });
+      }
 
       if (parsed.headers.length === 0 || parsed.rows.length === 0) {
         toast({
-          title: "Invalid CSV file",
+          title: "Invalid file",
           description: "The file appears to be empty or has no valid data.",
           variant: "destructive"
         });
@@ -72,16 +94,16 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
       setMappings(detection.mappings);
 
       toast({
-        title: "CSV file processed",
+        title: "File processed successfully",
         description: `Found ${parsed.headers.length} columns and ${parsed.rows.length} rows. ${detection.mappings.length} columns auto-mapped.`
       });
 
       setCurrentStep('mapping');
     } catch (error) {
-      console.error('Error parsing CSV:', error);
+      console.error('Error parsing file:', error);
       toast({
         title: "Error parsing file",
-        description: "There was an error reading the CSV file. Please check the file format.",
+        description: "There was an error reading the file. Please check the file format.",
         variant: "destructive"
       });
     } finally {
@@ -94,6 +116,7 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
     accept: {
       'text/csv': ['.csv'],
       'text/plain': ['.txt'],
+      'text/vcard': ['.vcf'],
       'application/vnd.ms-excel': ['.xls'],
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
     },
@@ -228,12 +251,12 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
         <input {...getInputProps()} />
         <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         {isDragActive ? (
-          <p className="text-lg">Drop your CSV file here...</p>
+          <p className="text-lg">Drop your file here...</p>
         ) : (
           <div>
-            <p className="text-lg mb-2">Drag & drop your CSV file here</p>
+            <p className="text-lg mb-2">Drag & drop your contact file here</p>
             <p className="text-sm text-muted-foreground mb-4">or click to browse files</p>
-            <Badge variant="secondary">Supports CSV, TXT, XLS, XLSX (max 10MB)</Badge>
+            <Badge variant="secondary">Supports CSV, TXT, vCard (.vcf), XLS, XLSX (max 10MB)</Badge>
           </div>
         )}
       </div>
@@ -261,6 +284,7 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
             <div className="space-y-2 mb-4">
               <p><strong>File:</strong> {file.name}</p>
               <p><strong>Size:</strong> {(file.size / 1024).toFixed(2)} KB</p>
+              <p><strong>Type:</strong> {file.name.toLowerCase().endsWith('.vcf') ? 'vCard' : 'CSV'}</p>
               {csvData && (
                 <>
                   <p><strong>Columns:</strong> {csvData.headers.length}</p>
@@ -283,9 +307,9 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
             <div className="flex items-center justify-center text-center">
               <AlertCircle className="h-8 w-8 text-blue-500 mr-3" />
               <div>
-                <p className="font-medium">Advanced CSV Processing</p>
+                <p className="font-medium">Advanced Contact Processing</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Supports various formats, intelligent column detection, and data validation.
+                  Supports CSV, vCard, and Excel formats with intelligent column detection and data validation.
                 </p>
               </div>
             </div>

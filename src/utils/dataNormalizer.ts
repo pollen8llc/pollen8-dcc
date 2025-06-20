@@ -1,3 +1,4 @@
+
 // Data normalization utilities for contacts
 
 export interface NormalizedContact {
@@ -16,6 +17,18 @@ export interface ValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
+}
+
+export interface ServiceContact {
+  name: string;
+  email?: string;
+  phone?: string;
+  organization?: string;
+  role?: string;
+  notes?: string;
+  location?: string;
+  category_id?: string;
+  tags?: string[];
 }
 
 export class DataNormalizer {
@@ -55,6 +68,19 @@ export class DataNormalizer {
     contact.notes = this.normalizeText(rawData.notes);
 
     return contact;
+  }
+
+  static transformToServiceContact(normalized: NormalizedContact): ServiceContact {
+    return {
+      name: normalized.name,
+      email: normalized.email || undefined,
+      phone: normalized.phone || undefined,
+      organization: normalized.organization || undefined,
+      role: normalized.role || undefined,
+      notes: normalized.notes || undefined,
+      location: normalized.location || undefined,
+      tags: []
+    };
   }
 
   private static normalizeName(name: string): { fullName: string; firstName?: string; lastName?: string } {
