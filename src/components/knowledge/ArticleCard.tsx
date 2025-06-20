@@ -150,12 +150,12 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {article.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
+              <Badge key={index} variant="tag" className="text-xs">
                 {tag}
               </Badge>
             ))}
             {article.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="tag" className="text-xs">
                 +{article.tags.length - 3} more
               </Badge>
             )}
