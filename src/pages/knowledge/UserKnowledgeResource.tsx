@@ -236,14 +236,14 @@ const UserKnowledgeResource = () => {
                 {(stats?.articles || []).map((article) => (
                   <Card key={article.id} className="transition-shadow hover:shadow-md cursor-pointer" onClick={() => navigate(`/knowledge/article/${article.id}`)}>
                     <CardHeader>
-                      <CardTitle className="text-xl hover:text-royal-blue-600 dark:hover:text-royal-blue-400 transition-colors">
+                      <CardTitle className="text-xl hover:text-[#00eada] transition-colors text-white">
                         {article.title}
                       </CardTitle>
                       <div className="flex flex-wrap gap-2">
                         {article.tags?.map(t => (
                           <Badge 
                             key={t} 
-                            variant="outline"
+                            variant="tag"
                           >
                             <TagIcon className="h-3 w-3 mr-1" />
                             {t}
@@ -322,14 +322,14 @@ const UserKnowledgeResource = () => {
                 {savedArticles?.map((article) => (
                   <Card key={article.id} className="transition-shadow hover:shadow-md cursor-pointer" onClick={() => navigate(`/knowledge/article/${article.id}`)}>
                     <CardHeader>
-                      <CardTitle className="text-xl hover:text-royal-blue-600 dark:hover:text-royal-blue-400 transition-colors">
+                      <CardTitle className="text-xl hover:text-[#00eada] transition-colors text-white">
                         {article.title}
                       </CardTitle>
                       <div className="flex flex-wrap gap-2">
                         {article.tags?.map(t => (
                           <Badge 
                             key={t} 
-                            variant="outline"
+                            variant="tag"
                           >
                             <TagIcon className="h-3 w-3 mr-1" />
                             {t}
