@@ -4,8 +4,9 @@ import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { areDuplicateContacts, parseCSV } from '@/lib/utils';
 
 interface ImportContactsStepProps {
   onNext: (data: { importedContacts: any[] }) => void;
@@ -19,111 +20,131 @@ interface ParsedContact {
   role?: string;
   location?: string;
   notes?: string;
+  _rowNumber?: number;
+  _validationErrors?: string[];
+  _isValid?: boolean;
+}
+
+interface ParseResult {
+  validContacts: ParsedContact[];
+  rejectedContacts: ParsedContact[];
+  duplicates: ParsedContact[];
+  totalProcessed: number;
 }
 
 export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }) => {
   const [file, setFile] = useState<File | null>(null);
-  const [contacts, setContacts] = useState<ParsedContact[]>([]);
+  const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showRejected, setShowRejected] = useState(false);
 
-  // Enhanced CSV parsing function
-  const parseCSV = (csvText: string): ParsedContact[] => {
-    const lines = csvText.split('\n').filter(line => line.trim());
-    if (lines.length === 0) return [];
-
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
-    console.log('CSV Headers detected:', headers);
-
-    // Common header mappings
-    const headerMappings = {
-      name: ['name', 'full name', 'fullname', 'contact name', 'display name', 'first name', 'fname', 'given name'],
-      email: ['email', 'email address', 'e-mail', 'mail', 'primary email', 'work email', 'personal email'],
-      phone: ['phone', 'phone number', 'mobile', 'cell', 'telephone', 'tel', 'mobile phone', 'work phone', 'home phone'],
-      organization: ['organization', 'company', 'org', 'business', 'employer', 'work', 'company name'],
-      role: ['role', 'title', 'job title', 'position', 'job', 'work title', 'designation'],
-      location: ['location', 'address', 'city', 'country', 'region', 'state'],
-      notes: ['notes', 'note', 'comments', 'description', 'memo', 'remarks']
-    };
-
-    // Find column indices for each field
-    const columnMapping: { [key: string]: number } = {};
+  // Enhanced contact validation
+  const validateContact = (contact: ParsedContact, rowNumber: number, allContacts: ParsedContact[]): ParsedContact => {
+    const errors: string[] = [];
     
-    Object.entries(headerMappings).forEach(([field, possibleHeaders]) => {
-      const headerIndex = headers.findIndex(header => 
-        possibleHeaders.some(possible => header.includes(possible))
-      );
-      if (headerIndex !== -1) {
-        columnMapping[field] = headerIndex;
+    // Name validation
+    if (!contact.name || contact.name.trim().length < 2) {
+      errors.push("Name must be at least 2 characters long");
+    }
+    
+    // Email validation
+    if (contact.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(contact.email)) {
+        errors.push("Invalid email format");
       }
-    });
+    }
+    
+    // Phone validation
+    if (contact.phone) {
+      const phoneDigits = contact.phone.replace(/\D/g, '');
+      if (phoneDigits.length < 10) {
+        errors.push("Phone number must have at least 10 digits");
+      }
+    }
+    
+    // Must have either email or phone
+    if (!contact.email && !contact.phone) {
+      errors.push("Contact must have either email or phone number");
+    }
+    
+    // Check for duplicates within the current import
+    const duplicateIndex = allContacts.findIndex((other, index) => 
+      index < rowNumber - 1 && areDuplicateContacts(contact, other)
+    );
+    
+    if (duplicateIndex !== -1) {
+      errors.push(`Duplicate of row ${duplicateIndex + 1}`);
+    }
+    
+    return {
+      ...contact,
+      _rowNumber: rowNumber,
+      _validationErrors: errors,
+      _isValid: errors.length === 0
+    };
+  };
 
-    console.log('Column mapping:', columnMapping);
-
-    const parsedContacts: ParsedContact[] = [];
-
-    // Process data rows
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+  // Enhanced CSV parsing with better error handling
+  const parseCSVAdvanced = (csvText: string): ParseResult => {
+    try {
+      // Use the utility function from lib/utils
+      const rawContacts = parseCSV(csvText);
       
-      // Skip empty rows
-      if (values.every(v => !v)) continue;
+      if (rawContacts.length === 0) {
+        throw new Error("No valid data rows found in CSV");
+      }
 
-      const contact: ParsedContact = {
-        name: '',
-        email: '',
-        phone: '',
-        organization: '',
-        role: '',
-        location: '',
-        notes: ''
-      };
+      // Convert to ParsedContact format and validate
+      const allContacts: ParsedContact[] = rawContacts.map((row, index) => ({
+        name: row.name || row.Name || row['Full Name'] || row['Contact Name'] || '',
+        email: row.email || row.Email || row['Email Address'] || '',
+        phone: row.phone || row.Phone || row['Phone Number'] || row.Mobile || '',
+        organization: row.organization || row.Organization || row.Company || '',
+        role: row.role || row.Role || row.Title || row['Job Title'] || '',
+        location: row.location || row.Location || row.Address || row.City || '',
+        notes: row.notes || row.Notes || row.Comments || ''
+      }));
 
-      // Extract values based on column mapping
-      Object.entries(columnMapping).forEach(([field, index]) => {
-        if (values[index]) {
-          contact[field as keyof ParsedContact] = values[index];
+      // Validate all contacts
+      const validatedContacts = allContacts.map((contact, index) => 
+        validateContact(contact, index + 1, allContacts)
+      );
+
+      // Separate valid and invalid contacts
+      const validContacts = validatedContacts.filter(contact => contact._isValid);
+      const rejectedContacts = validatedContacts.filter(contact => !contact._isValid);
+      
+      // Find duplicates among valid contacts
+      const duplicates: ParsedContact[] = [];
+      const uniqueContacts: ParsedContact[] = [];
+      
+      validContacts.forEach(contact => {
+        const isDuplicate = uniqueContacts.some(existing => 
+          areDuplicateContacts(contact, existing)
+        );
+        
+        if (isDuplicate) {
+          duplicates.push({
+            ...contact,
+            _validationErrors: [...(contact._validationErrors || []), "Duplicate contact"]
+          });
+        } else {
+          uniqueContacts.push(contact);
         }
       });
 
-      // If no name mapping found, try to construct from first few columns
-      if (!contact.name && values.length > 0) {
-        // Try to find a name in the first few columns
-        for (let j = 0; j < Math.min(3, values.length); j++) {
-          const value = values[j];
-          if (value && value.includes(' ') || (!contact.email && !value.includes('@'))) {
-            contact.name = value;
-            break;
-          }
-        }
-      }
-
-      // If no email mapping found, look for email pattern
-      if (!contact.email) {
-        const emailValue = values.find(v => v && v.includes('@') && v.includes('.'));
-        if (emailValue) {
-          contact.email = emailValue;
-        }
-      }
-
-      // If no phone mapping found, look for phone pattern
-      if (!contact.phone) {
-        const phoneValue = values.find(v => v && /[\d\-\(\)\+\s]{10,}/.test(v));
-        if (phoneValue) {
-          contact.phone = phoneValue;
-        }
-      }
-
-      // Only add contact if we have at least a name or email
-      if (contact.name || contact.email) {
-        // If no name but have email, use email as name
-        if (!contact.name && contact.email) {
-          contact.name = contact.email.split('@')[0];
-        }
-        parsedContacts.push(contact);
-      }
+      return {
+        validContacts: uniqueContacts,
+        rejectedContacts: [...rejectedContacts, ...duplicates],
+        duplicates,
+        totalProcessed: validatedContacts.length
+      };
+      
+    } catch (error) {
+      console.error('CSV parsing error:', error);
+      throw new Error(`Failed to parse CSV: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    return parsedContacts;
   };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -132,33 +153,41 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
 
     setFile(file);
     setIsProcessing(true);
+    setParseResult(null);
 
     try {
       const text = await file.text();
-      const parsedContacts = parseCSV(text);
       
-      console.log('Parsed contacts:', parsedContacts);
+      // Check if file is empty
+      if (!text.trim()) {
+        throw new Error("File is empty");
+      }
       
-      if (parsedContacts.length === 0) {
+      const result = parseCSVAdvanced(text);
+      
+      setParseResult(result);
+      
+      if (result.validContacts.length === 0) {
         toast({
-          title: "No contacts found",
-          description: "The CSV file doesn't contain any recognizable contact data.",
+          title: "No valid contacts found",
+          description: `All ${result.totalProcessed} contacts were rejected due to validation errors.`,
           variant: "destructive"
         });
       } else {
-        setContacts(parsedContacts);
         toast({
           title: "CSV parsed successfully",
-          description: `Found ${parsedContacts.length} contacts in the file.`
+          description: `Found ${result.validContacts.length} valid contacts${result.rejectedContacts.length > 0 ? `, ${result.rejectedContacts.length} rejected` : ''}.`
         });
       }
+      
     } catch (error) {
       console.error('Error parsing CSV:', error);
       toast({
         title: "Error parsing file",
-        description: "There was an error reading the CSV file. Please check the file format.",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive"
       });
+      setParseResult(null);
     } finally {
       setIsProcessing(false);
     }
@@ -172,13 +201,25 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
       'application/vnd.ms-excel': ['.xls'],
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
     },
-    multiple: false
+    multiple: false,
+    maxSize: 10 * 1024 * 1024 // 10MB limit
   });
 
   const handleImport = () => {
-    if (contacts.length > 0) {
-      onNext({ importedContacts: contacts });
+    if (parseResult && parseResult.validContacts.length > 0) {
+      // Remove validation metadata before importing
+      const cleanContacts = parseResult.validContacts.map(contact => {
+        const { _rowNumber, _validationErrors, _isValid, ...cleanContact } = contact;
+        return cleanContact;
+      });
+      onNext({ importedContacts: cleanContacts });
     }
+  };
+
+  const resetImport = () => {
+    setFile(null);
+    setParseResult(null);
+    setShowRejected(false);
   };
 
   return (
@@ -197,7 +238,10 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
           <div>
             <p className="text-lg mb-2">Drag & drop your CSV file here</p>
             <p className="text-sm text-muted-foreground mb-4">or click to browse files</p>
-            <Badge variant="secondary">Supports CSV, TXT, XLS, XLSX</Badge>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Badge variant="secondary">CSV, TXT, XLS, XLSX</Badge>
+              <Badge variant="secondary">Max 10MB</Badge>
+            </div>
           </div>
         )}
       </div>
@@ -207,81 +251,150 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
           <CardContent className="p-6">
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
-              <span>Processing file...</span>
+              <span>Processing and validating contacts...</span>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {file && !isProcessing && (
+      {file && !isProcessing && parseResult && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              File Information
+              Import Results
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <p><strong>File:</strong> {file.name}</p>
-              <p><strong>Size:</strong> {(file.size / 1024).toFixed(2)} KB</p>
-              <p><strong>Contacts found:</strong> {contacts.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {contacts.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              Preview Contacts ({contacts.length} found)
-            </CardTitle>
-            <CardDescription>
-              Review the contacts that will be imported. You can modify them after import.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-64 overflow-y-auto space-y-3">
-              {contacts.slice(0, 10).map((contact, index) => (
-                <div key={index} className="p-3 border rounded-lg">
-                  <div className="font-medium">{contact.name || 'No name'}</div>
-                  {contact.email && <div className="text-sm text-muted-foreground">{contact.email}</div>}
-                  {contact.phone && <div className="text-sm text-muted-foreground">{contact.phone}</div>}
-                  {contact.organization && <div className="text-sm text-muted-foreground">{contact.organization}</div>}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <span className="text-sm font-medium">Valid</span>
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">{parseResult.validContacts.length}</div>
                 </div>
-              ))}
-              {contacts.length > 10 && (
-                <div className="text-center text-sm text-muted-foreground">
-                  ... and {contacts.length - 10} more contacts
+                
+                <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <XCircle className="h-4 w-4 text-red-600" />
+                    <span className="text-sm font-medium">Rejected</span>
+                  </div>
+                  <div className="text-2xl font-bold text-red-600">{parseResult.rejectedContacts.length}</div>
+                </div>
+                
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    <span className="text-sm font-medium">Duplicates</span>
+                  </div>
+                  <div className="text-2xl font-bold text-yellow-600">{parseResult.duplicates.length}</div>
+                </div>
+                
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium">Total</span>
+                  </div>
+                  <div className="text-2xl font-bold text-blue-600">{parseResult.totalProcessed}</div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowRejected(!showRejected)}
+                  disabled={parseResult.rejectedContacts.length === 0}
+                >
+                  {showRejected ? 'Hide' : 'Show'} Rejected ({parseResult.rejectedContacts.length})
+                </Button>
+                <Button variant="outline" size="sm" onClick={resetImport}>
+                  Import Different File
+                </Button>
+              </div>
+
+              {showRejected && parseResult.rejectedContacts.length > 0 && (
+                <div className="border rounded-lg p-4 bg-red-50 dark:bg-red-900/10">
+                  <h4 className="font-medium text-red-800 dark:text-red-200 mb-3">Rejected Contacts</h4>
+                  <div className="max-h-64 overflow-y-auto space-y-2">
+                    {parseResult.rejectedContacts.map((contact, index) => (
+                      <div key={index} className="bg-white dark:bg-gray-800 p-3 rounded border">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <div className="font-medium">{contact.name || 'No name'}</div>
+                            {contact.email && <div className="text-sm text-gray-600">{contact.email}</div>}
+                            {contact.phone && <div className="text-sm text-gray-600">{contact.phone}</div>}
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            Row {contact._rowNumber}
+                          </Badge>
+                        </div>
+                        <div className="mt-2">
+                          {contact._validationErrors?.map((error, errorIndex) => (
+                            <div key={errorIndex} className="text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3" />
+                              {error}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {parseResult.validContacts.length > 0 && (
+                <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-900/10">
+                  <h4 className="font-medium text-green-800 dark:text-green-200 mb-3">
+                    Valid Contacts Preview ({parseResult.validContacts.length})
+                  </h4>
+                  <div className="max-h-64 overflow-y-auto space-y-2">
+                    {parseResult.validContacts.slice(0, 5).map((contact, index) => (
+                      <div key={index} className="bg-white dark:bg-gray-800 p-3 rounded border">
+                        <div className="font-medium">{contact.name}</div>
+                        {contact.email && <div className="text-sm text-gray-600">{contact.email}</div>}
+                        {contact.phone && <div className="text-sm text-gray-600">{contact.phone}</div>}
+                        {contact.organization && <div className="text-sm text-gray-600">{contact.organization}</div>}
+                      </div>
+                    ))}
+                    {parseResult.validContacts.length > 5 && (
+                      <div className="text-center text-sm text-gray-500 py-2">
+                        ... and {parseResult.validContacts.length - 5} more contacts
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
-            
-            <div className="mt-6 flex justify-end">
-              <Button onClick={handleImport} className="w-full sm:w-auto">
-                Import {contacts.length} Contact{contacts.length !== 1 ? 's' : ''}
-              </Button>
-            </div>
           </CardContent>
         </Card>
       )}
 
-      {contacts.length === 0 && file && !isProcessing && (
+      {parseResult && parseResult.validContacts.length === 0 && !isProcessing && (
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-center text-center">
-              <AlertCircle className="h-8 w-8 text-yellow-500 mr-3" />
+              <AlertCircle className="h-8 w-8 text-red-500 mr-3" />
               <div>
-                <p className="font-medium">No contacts detected</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Make sure your CSV has columns for names and emails. Common formats are supported.
+                <p className="font-medium text-red-800 dark:text-red-200">No valid contacts found</p>
+                <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                  All contacts in your file were rejected due to validation errors. 
+                  Please check the rejected contacts above and fix the issues in your CSV file.
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {parseResult && parseResult.validContacts.length > 0 && (
+        <div className="flex justify-end">
+          <Button onClick={handleImport} className="w-full sm:w-auto">
+            Import {parseResult.validContacts.length} Valid Contact{parseResult.validContacts.length !== 1 ? 's' : ''}
+          </Button>
+        </div>
       )}
     </div>
   );
