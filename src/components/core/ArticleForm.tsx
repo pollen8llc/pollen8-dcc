@@ -68,7 +68,12 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
       };
       
       if (mode === 'edit' && article) {
-        await updateArticle(article.id, sanitizedData);
+        // Fix: Pass the complete updated article data as a single argument
+        const updatedArticle = {
+          ...article,
+          ...sanitizedData
+        };
+        await updateArticle(updatedArticle);
         toast({
           title: "Success",
           description: "Article updated successfully",
