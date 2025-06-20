@@ -71,10 +71,10 @@ export function useTriggerWizard() {
     updateFormData,
     handleSubmit,
     frequencyOptions: [
+      { value: "onetime", label: "One Time" },
       { value: "daily", label: "Daily" },
-      { value: "weekly", label: "Weekly" },
       { value: "monthly", label: "Monthly" },
-      { value: "custom", label: "Custom" }
+      { value: "weekly", label: "Weekly" }
     ],
     priorityOptions: [
       { value: "low", label: "Low" },
