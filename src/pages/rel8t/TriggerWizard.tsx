@@ -1,110 +1,168 @@
 
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Step, Steps } from "@/components/ui/steps";
-import { useTriggerWizard, TriggerFormData } from "@/hooks/rel8t/useTriggerWizard";
-import { BasicInfoStep } from "@/components/rel8t/triggers/wizard-steps/BasicInfoStep";
-import { BehaviorStep } from "@/components/rel8t/triggers/wizard-steps/BehaviorStep";
-import { ScheduleStep } from "@/components/rel8t/triggers/wizard-steps/ScheduleStep";
-import { ReviewStep } from "@/components/rel8t/triggers/wizard-steps/ReviewStep";
-import { FormProvider, useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, ArrowLeft } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { useNavigate } from "react-router-dom";
 
 const TriggerWizard = () => {
   const navigate = useNavigate();
-  // Get trigger wizard state and functions
   const { 
-    currentStep, 
     formData, 
     updateFormData, 
-    navigateToStep, 
-    handleSubmit: submitTrigger,
-    handleNextStep
+    handleSubmit,
+    frequencyOptions,
+    priorityOptions
   } = useTriggerWizard();
 
-  // Initialize react-hook-form with our existing form data
-  const methods = useForm<TriggerFormData>({
-    defaultValues: formData,
-    mode: "onBlur" // Validate on blur instead of onChange to prevent rapid validations
-  });
-
-  // Update our custom state when form values change
-  useEffect(() => {
-    const subscription = methods.watch((values) => {
-      if (values) {
-        updateFormData(values as Partial<TriggerFormData>);
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [methods, updateFormData]);
-
-  // Handle form submission
-  const onSubmit = (data: TriggerFormData) => {
-    console.log("Form submitted with data:", data);
-    // Update our form data first
-    updateFormData(data);
-    // Then trigger the submission
-    submitTrigger();
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSubmit();
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-2xl">
         <Rel8OnlyNavigation />
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 sm:mt-6 mb-6 sm:mb-8 gap-4">
-          <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold truncate">Create Automation Trigger</h1>
+        <div className="flex items-center gap-4 mt-4 sm:mt-6 mb-6 sm:mb-8">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate("/rel8/triggers")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Create Trigger</h1>
             <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-              Set up automated actions based on specific events or schedules
+              Set up an automation trigger for your relationships
             </p>
           </div>
         </div>
 
-        <Card className="mb-6">
-          <CardContent className="p-4 sm:p-6">
-            <Steps currentStep={currentStep} className="mb-6 sm:mb-8">
-              <Step title="Basic Info" />
-              <Step title="Behavior" />
-              <Step title="Schedule" />
-              <Step title="Review" />
-            </Steps>
+        <Card>
+          <CardHeader>
+            <CardTitle>Trigger Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} className="space-y-6">
+              {/* Trigger Name */}
+              <div className="space-y-2">
+                <Label htmlFor="name">Trigger Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="e.g., Weekly Follow-up"
+                  value={formData.name}
+                  onChange={(e) => updateFormData({ name: e.target.value })}
+                  required
+                />
+              </div>
 
-            {/* Wrap everything in FormProvider */}
-            <FormProvider {...methods}>
-              <form onSubmit={methods.handleSubmit(onSubmit)}>
-                {currentStep === 1 && (
-                  <BasicInfoStep
-                    validateAndNext={async () => {
-                      const valid = await methods.trigger(['name']);
-                      if (valid) handleNextStep();
-                    }}
-                  />
-                )}
-                {currentStep === 2 && (
-                  <BehaviorStep
-                    validateAndNext={async () => {
-                      const valid = await methods.trigger(['condition', 'action']);
-                      if (valid) handleNextStep();
-                    }}
-                  />
-                )}
-                {currentStep === 3 && (
-                  <ScheduleStep
-                    validateAndNext={async () => {
-                      const valid = await methods.trigger(['executionDate']);
-                      if (valid) handleNextStep();
-                    }}
-                  />
-                )}
-                {currentStep === 4 && <ReviewStep />}
-              </form>
-            </FormProvider>
+              {/* Trigger Date */}
+              <div className="space-y-2">
+                <Label>Trigger Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.triggerDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.triggerDate ? (
+                        format(formData.triggerDate, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.triggerDate || undefined}
+                      onSelect={(date) => updateFormData({ triggerDate: date || null })}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              {/* Frequency */}
+              <div className="space-y-2">
+                <Label>Frequency</Label>
+                <Select
+                  value={formData.frequency}
+                  onValueChange={(value) => updateFormData({ frequency: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {frequencyOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Priority */}
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select
+                  value={formData.priority}
+                  onValueChange={(value) => updateFormData({ priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {priorityOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex gap-4 pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/rel8/triggers")}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={!formData.name || !formData.triggerDate}
+                >
+                  Create Trigger
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>

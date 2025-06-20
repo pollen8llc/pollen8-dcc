@@ -48,6 +48,7 @@ const RelationshipWizard = lazy(() => import("@/pages/rel8t/RelationshipWizard")
 const ImportContacts = lazy(() => import("@/pages/rel8t/ImportContacts"));
 const TriggerWizard = lazy(() => import("@/pages/rel8t/TriggerWizard"));
 const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
+const Triggers = lazy(() => import("@/pages/rel8t/Triggers"));
 
 // Modul8 pages
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
@@ -273,6 +274,16 @@ const AppRoutes = () => {
             <Route path="/rel8t/categories" element={
               <NonServiceProviderRoute>
                 <Categories />
+              </NonServiceProviderRoute>
+            } />
+            <Route path="/rel8/triggers" element={
+              <NonServiceProviderRoute>
+                <Triggers />
+              </NonServiceProviderRoute>
+            } />
+            <Route path="/rel8t/triggers" element={
+              <NonServiceProviderRoute>
+                <Triggers />
               </NonServiceProviderRoute>
             } />
             <Route path="/rel8/settings" element={

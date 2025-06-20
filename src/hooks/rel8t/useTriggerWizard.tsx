@@ -1,72 +1,48 @@
+
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { createTrigger, RecurrencePattern } from "@/services/rel8t/triggerService";
-import { TIME_TRIGGER_TYPES, TRIGGER_ACTIONS } from "@/services/rel8t/triggerService";
+import { createTrigger } from "@/services/rel8t/triggerService";
 
-export interface TriggerFormData {
+export interface SimpleTriggerFormData {
   name: string;
-  description: string;
-  isActive: boolean;
-  condition: string;
-  action: string;
-  executionDate: Date | null;
-  recurrenceType: string | null;
-  recurrencePattern: RecurrencePattern | null;
+  triggerDate: Date | null;
+  frequency: string;
+  priority: string;
 }
 
 export function useTriggerWizard() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<TriggerFormData>({
+  const [formData, setFormData] = useState<SimpleTriggerFormData>({
     name: "",
-    description: "",
-    isActive: true,
-    condition: TIME_TRIGGER_TYPES.DAILY,
-    action: TRIGGER_ACTIONS.SEND_EMAIL,
-    executionDate: new Date(),
-    recurrenceType: null,
-    recurrencePattern: null
+    triggerDate: new Date(),
+    frequency: "daily",
+    priority: "medium"
   });
 
   // Update form data with partial updates
-  const updateFormData = useCallback((data: Partial<TriggerFormData>) => {
+  const updateFormData = useCallback((data: Partial<SimpleTriggerFormData>) => {
     console.log("Updating form data:", data);
     setFormData(prev => ({ ...prev, ...data }));
   }, []);
-
-  // Move to next step
-  const handleNextStep = useCallback(() => {
-    console.log(`Moving from step ${currentStep} to ${currentStep + 1}`);
-    setCurrentStep(currentStep + 1);
-  }, [currentStep]);
-
-  // Move to previous step
-  const handlePreviousStep = useCallback(() => {
-    console.log(`Moving from step ${currentStep} to ${currentStep - 1}`);
-    setCurrentStep(Math.max(1, currentStep - 1));
-  }, [currentStep]);
-  
-  // Navigate to a specific step
-  const navigateToStep = useCallback((step: number) => {
-    console.log(`Directly navigating to step ${step} from ${currentStep}`);
-    setCurrentStep(step);
-  }, [currentStep]);
 
   // Submit the form data
   const handleSubmit = useCallback(async () => {
     try {
       console.log("Submitting trigger with data:", formData);
       
-      // Transform form data to the format expected by the API
+      // Transform simple form data to the format expected by the API
       const triggerData = {
         name: formData.name,
-        description: formData.description,
-        is_active: formData.isActive,
-        condition: formData.condition,
-        action: formData.action,
-        execution_time: formData.executionDate ? formData.executionDate.toISOString() : undefined,
-        recurrence_pattern: formData.recurrencePattern
+        description: `${formData.frequency} trigger with ${formData.priority} priority`,
+        is_active: true,
+        condition: formData.frequency,
+        action: "send_email",
+        execution_time: formData.triggerDate ? formData.triggerDate.toISOString() : undefined,
+        recurrence_pattern: {
+          type: formData.frequency,
+          startDate: formData.triggerDate ? formData.triggerDate.toISOString() : new Date().toISOString()
+        }
       };
       
       const result = await createTrigger(triggerData);
@@ -77,8 +53,8 @@ export function useTriggerWizard() {
           description: "Your automation trigger has been created."
         });
         
-        // Navigate to the Relationship Wizard after trigger creation
-        navigate("/rel8/wizard");
+        // Navigate back to the triggers page
+        navigate("/rel8/triggers");
       }
     } catch (error) {
       console.error("Error creating trigger:", error);
@@ -91,14 +67,19 @@ export function useTriggerWizard() {
   }, [formData, navigate]);
 
   return {
-    currentStep,
     formData,
-    handleNextStep,
-    handlePreviousStep,
     updateFormData,
     handleSubmit,
-    navigateToStep,
-    triggerTypes: TIME_TRIGGER_TYPES,
-    actionTypes: TRIGGER_ACTIONS
+    frequencyOptions: [
+      { value: "daily", label: "Daily" },
+      { value: "weekly", label: "Weekly" },
+      { value: "monthly", label: "Monthly" },
+      { value: "custom", label: "Custom" }
+    ],
+    priorityOptions: [
+      { value: "low", label: "Low" },
+      { value: "medium", label: "Medium" },
+      { value: "high", label: "High" }
+    ]
   };
 }

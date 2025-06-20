@@ -6,7 +6,7 @@ import {
   Building2, 
   Zap, 
   Upload,
-  BarChart3,
+  Calendar,
 } from "lucide-react";
 
 export function Rel8OnlyNavigation() {
@@ -15,8 +15,8 @@ export function Rel8OnlyNavigation() {
   const navItems = [
     {
       href: "/rel8",
-      label: "Dashboard",
-      icon: BarChart3,
+      label: "Relationships",
+      icon: Calendar,
       isActive: location.pathname === "/rel8"
     },
     {

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -50,7 +49,7 @@ const Dashboard = () => {
         <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-2 sm:mt-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">REL8 Dashboard</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Relationships</h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-1">
                 Manage your outreach and nurture your network
               </p>
