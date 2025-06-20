@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,10 +11,13 @@ import { CalendarIcon, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const TriggerWizard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
+  
   const { 
     formData, 
     updateFormData, 
@@ -24,9 +26,31 @@ const TriggerWizard = () => {
     priorityOptions
   } = useTriggerWizard();
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    handleSubmit();
+    const result = await handleSubmit();
+    
+    // If we successfully created a trigger and returnTo is 'relationship', 
+    // navigate to the relationship wizard
+    if (result && returnTo === 'relationship') {
+      navigate(`/rel8/wizard?triggerId=${result.id}`);
+    }
+  };
+
+  const handleBack = () => {
+    if (returnTo === 'relationship') {
+      navigate("/rel8/build-rapport");
+    } else {
+      navigate("/rel8/triggers");
+    }
+  };
+
+  const handleCancel = () => {
+    if (returnTo === 'relationship') {
+      navigate("/rel8/build-rapport");
+    } else {
+      navigate("/rel8/triggers");
+    }
   };
 
   return (
@@ -40,7 +64,7 @@ const TriggerWizard = () => {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate("/rel8/triggers")}
+            onClick={handleBack}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -149,7 +173,7 @@ const TriggerWizard = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/rel8/triggers")}
+                  onClick={handleCancel}
                   className="flex-1"
                 >
                   Cancel
@@ -159,7 +183,7 @@ const TriggerWizard = () => {
                   className="flex-1"
                   disabled={!formData.name || !formData.triggerDate}
                 >
-                  Create Trigger
+                  {returnTo === 'relationship' ? 'Create & Continue' : 'Create Trigger'}
                 </Button>
               </div>
             </form>

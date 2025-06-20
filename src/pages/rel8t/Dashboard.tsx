@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
-import { Calendar, Users, PlusCircle } from "lucide-react";
+import { Calendar, Users, Heart } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
@@ -34,9 +34,9 @@ const Dashboard = () => {
     queryFn: getCategories,
   });
 
-  // Handler for creating a new relationship
-  const handleCreateRelationship = () => {
-    navigate("/rel8/triggers/wizard");
+  // Handler for building rapport (renamed from handleCreateRelationship)
+  const handleBuildRapport = () => {
+    navigate("/rel8/build-rapport");
   };
   
   return (
@@ -56,12 +56,12 @@ const Dashboard = () => {
             </div>
             
             <Button 
-              onClick={handleCreateRelationship}
+              onClick={handleBuildRapport}
               className="flex items-center gap-2 w-full sm:w-auto"
               size="sm"
             >
-              <PlusCircle className="h-4 w-4" />
-              <span className="sm:inline">Create Plan</span>
+              <Heart className="h-4 w-4" />
+              <span className="sm:inline">Build Rapport</span>
             </Button>
           </div>
         </div>
@@ -126,11 +126,11 @@ const Dashboard = () => {
             <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
             <h3 className="text-lg font-medium">No outreach tasks</h3>
             <p className="text-muted-foreground mt-2 mb-4">
-              Create a relationship plan to start nurturing your network
+              Build rapport with your contacts to start nurturing your network
             </p>
-            <Button onClick={handleCreateRelationship}>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Create Relationship Plan
+            <Button onClick={handleBuildRapport}>
+              <Heart className="h-4 w-4 mr-2" />
+              Build Rapport
             </Button>
           </div>
         )}

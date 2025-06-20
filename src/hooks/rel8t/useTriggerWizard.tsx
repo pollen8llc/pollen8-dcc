@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -26,7 +25,7 @@ export function useTriggerWizard() {
     setFormData(prev => ({ ...prev, ...data }));
   }, []);
 
-  // Submit the form data
+  // Submit the form data and return the created trigger
   const handleSubmit = useCallback(async () => {
     try {
       console.log("Submitting trigger with data:", formData);
@@ -53,9 +52,10 @@ export function useTriggerWizard() {
           description: "Your automation trigger has been created."
         });
         
-        // Navigate back to the triggers page
-        navigate("/rel8/triggers");
+        return result; // Return the created trigger
       }
+      
+      return null;
     } catch (error) {
       console.error("Error creating trigger:", error);
       toast({
@@ -63,6 +63,7 @@ export function useTriggerWizard() {
         description: "There was an error creating your trigger. Please try again.",
         variant: "destructive"
       });
+      return null;
     }
   }, [formData, navigate]);
 

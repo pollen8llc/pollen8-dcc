@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +33,9 @@ const initialData: WizardData = {
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const triggerId = searchParams.get('triggerId');
+  
   const [step, setStep] = useState<WizardStep>("select-contacts");
   const [data, setData] = useState<WizardData>(initialData);
 
@@ -79,10 +81,10 @@ const RelationshipWizard = () => {
             variant="ghost" 
             size="sm" 
             className="mr-2" 
-            onClick={() => navigate("/rel8/dashboard")}
+            onClick={() => navigate(triggerId ? "/rel8/build-rapport" : "/rel8")}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
+            Back to {triggerId ? "Build Rapport" : "Dashboard"}
           </Button>
         </div>
         
@@ -92,9 +94,18 @@ const RelationshipWizard = () => {
           <div>
             <h1 className="text-2xl font-bold">{getStepTitle()}</h1>
             <p className="text-muted-foreground">
-              Create a plan to build relationships with contacts
+              {triggerId ? "Complete your relationship plan" : "Create a plan to build relationships with contacts"}
             </p>
           </div>
+          
+          {/* Display trigger info if we have a triggerId */}
+          {triggerId && (
+            <div className="ml-auto">
+              <Badge variant="outline" className="px-3 py-1 bg-primary/5">
+                Using selected trigger
+              </Badge>
+            </div>
+          )}
           
           <div className="flex gap-2 ml-auto">
             {step !== "select-contacts" && data.contacts.length > 0 && (
@@ -130,7 +141,7 @@ const RelationshipWizard = () => {
               />
             )}
 
-            {step === "select-triggers" && (
+            {step === "select-triggers" && !triggerId && (
               <SelectTriggersStep
                 onNext={handleSelectTriggersNext}
                 onPrevious={() => setStep("select-contacts")}
@@ -138,11 +149,23 @@ const RelationshipWizard = () => {
               />
             )}
             
+            {/* Skip trigger selection if we already have a triggerId */}
+            {step === "select-triggers" && triggerId && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  Trigger already selected. Proceeding to review...
+                </p>
+                {/* Auto-advance to review step */}
+                {setTimeout(() => setStep("review"), 100)}
+              </div>
+            )}
+            
             {step === "review" && (
               <ReviewSubmitStep
                 wizardData={data}
                 onSubmit={handleReviewSubmit}
-                onPrevious={() => setStep("select-triggers")}
+                onPrevious={() => setStep(triggerId ? "select-contacts" : "select-triggers")}
+                selectedTriggerId={triggerId}
               />
             )}
           </CardContent>
