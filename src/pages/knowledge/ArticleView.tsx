@@ -191,28 +191,70 @@ const ArticleView = () => {
             </div>
             
             {/* Article title */}
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4 text-white">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6 text-white leading-tight">
               {article.title}
             </h1>
             
             {/* Author and metadata */}
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-8">
               <AuthorCard author={article.author} minimal={true} />
             </div>
             
             {/* Article content */}
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-8 pb-8">
                 {article.content_type === ContentType.QUOTE ? (
-                  <blockquote className="border-l-4 border-primary pl-4 italic text-white">
+                  <blockquote className="border-l-4 border-primary pl-6 py-4 italic text-white">
                     <div 
-                      className="text-white [&_p]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_strong]:text-white [&_em]:text-white [&_li]:text-white [&_ul]:text-white [&_ol]:text-white [&_blockquote]:text-white [&_span]:text-white [&_div]:text-white [&_a]:text-[#00eada] [&_code]:text-white [&_pre]:text-white"
+                      className="text-white leading-relaxed
+                        [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6
+                        [&_h1]:text-white [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:mt-8 [&_h1]:mb-6 [&_h1:first-child]:mt-0
+                        [&_h2]:text-white [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h2]:mt-8 [&_h2]:mb-5
+                        [&_h3]:text-white [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:leading-tight [&_h3]:mt-6 [&_h3]:mb-4
+                        [&_h4]:text-white [&_h4]:text-lg [&_h4]:font-medium [&_h4]:leading-tight [&_h4]:mt-6 [&_h4]:mb-3
+                        [&_h5]:text-white [&_h5]:text-base [&_h5]:font-medium [&_h5]:leading-tight [&_h5]:mt-4 [&_h5]:mb-3
+                        [&_h6]:text-white [&_h6]:text-sm [&_h6]:font-medium [&_h6]:leading-tight [&_h6]:mt-4 [&_h6]:mb-2
+                        [&_strong]:text-white [&_strong]:font-semibold
+                        [&_em]:text-white [&_em]:italic
+                        [&_li]:text-white [&_li]:text-lg [&_li]:leading-relaxed [&_li]:mb-2
+                        [&_ul]:text-white [&_ul]:mb-6 [&_ul]:pl-6 [&_ul]:list-disc
+                        [&_ol]:text-white [&_ol]:mb-6 [&_ol]:pl-6 [&_ol]:list-decimal
+                        [&_blockquote]:text-white [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-6
+                        [&_span]:text-white
+                        [&_div]:text-white
+                        [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:opacity-80
+                        [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
+                        [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6
+                        [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6
+                        [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold
+                        [&_td]:text-white [&_td]:border [&_td]:border-gray-600 [&_td]:px-4 [&_td]:py-3"
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
                     />
                   </blockquote>
                 ) : article.content_type === ContentType.POLL && article.options ? (
-                  <div className="space-y-4">
-                    <div className="text-white [&_p]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_strong]:text-white [&_em]:text-white [&_li]:text-white [&_ul]:text-white [&_ol]:text-white [&_blockquote]:text-white [&_span]:text-white [&_div]:text-white [&_a]:text-[#00eada] [&_code]:text-white [&_pre]:text-white">
+                  <div className="space-y-6">
+                    <div className="text-white leading-relaxed
+                      [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6
+                      [&_h1]:text-white [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:mt-8 [&_h1]:mb-6 [&_h1:first-child]:mt-0
+                      [&_h2]:text-white [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h2]:mt-8 [&_h2]:mb-5
+                      [&_h3]:text-white [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:leading-tight [&_h3]:mt-6 [&_h3]:mb-4
+                      [&_h4]:text-white [&_h4]:text-lg [&_h4]:font-medium [&_h4]:leading-tight [&_h4]:mt-6 [&_h4]:mb-3
+                      [&_h5]:text-white [&_h5]:text-base [&_h5]:font-medium [&_h5]:leading-tight [&_h5]:mt-4 [&_h5]:mb-3
+                      [&_h6]:text-white [&_h6]:text-sm [&_h6]:font-medium [&_h6]:leading-tight [&_h6]:mt-4 [&_h6]:mb-2
+                      [&_strong]:text-white [&_strong]:font-semibold
+                      [&_em]:text-white [&_em]:italic
+                      [&_li]:text-white [&_li]:text-lg [&_li]:leading-relaxed [&_li]:mb-2
+                      [&_ul]:text-white [&_ul]:mb-6 [&_ul]:pl-6 [&_ul]:list-disc
+                      [&_ol]:text-white [&_ol]:mb-6 [&_ol]:pl-6 [&_ol]:list-decimal
+                      [&_blockquote]:text-white [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-6
+                      [&_span]:text-white
+                      [&_div]:text-white
+                      [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:opacity-80
+                      [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
+                      [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6
+                      [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6
+                      [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold
+                      [&_td]:text-white [&_td]:border [&_td]:border-gray-600 [&_td]:px-4 [&_td]:py-3">
                       <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                     </div>
                     <PollVoting 
@@ -223,14 +265,35 @@ const ArticleView = () => {
                   </div>
                 ) : (
                   <div 
-                    className="text-white [&_p]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_strong]:text-white [&_em]:text-white [&_li]:text-white [&_ul]:text-white [&_ol]:text-white [&_blockquote]:text-white [&_span]:text-white [&_div]:text-white [&_a]:text-[#00eada] [&_code]:text-white [&_pre]:text-white"
+                    className="text-white leading-relaxed
+                      [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6
+                      [&_h1]:text-white [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:mt-8 [&_h1]:mb-6 [&_h1:first-child]:mt-0
+                      [&_h2]:text-white [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h2]:mt-8 [&_h2]:mb-5
+                      [&_h3]:text-white [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:leading-tight [&_h3]:mt-6 [&_h3]:mb-4
+                      [&_h4]:text-white [&_h4]:text-lg [&_h4]:font-medium [&_h4]:leading-tight [&_h4]:mt-6 [&_h4]:mb-3
+                      [&_h5]:text-white [&_h5]:text-base [&_h5]:font-medium [&_h5]:leading-tight [&_h5]:mt-4 [&_h5]:mb-3
+                      [&_h6]:text-white [&_h6]:text-sm [&_h6]:font-medium [&_h6]:leading-tight [&_h6]:mt-4 [&_h6]:mb-2
+                      [&_strong]:text-white [&_strong]:font-semibold
+                      [&_em]:text-white [&_em]:italic
+                      [&_li]:text-white [&_li]:text-lg [&_li]:leading-relaxed [&_li]:mb-2
+                      [&_ul]:text-white [&_ul]:mb-6 [&_ul]:pl-6 [&_ul]:list-disc
+                      [&_ol]:text-white [&_ol]:mb-6 [&_ol]:pl-6 [&_ol]:list-decimal
+                      [&_blockquote]:text-white [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-6
+                      [&_span]:text-white
+                      [&_div]:text-white
+                      [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:opacity-80
+                      [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
+                      [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6
+                      [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6
+                      [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold
+                      [&_td]:text-white [&_td]:border [&_td]:border-gray-600 [&_td]:px-4 [&_td]:py-3"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
                   />
                 )}
                 
                 {/* Tags */}
                 {article.tags && article.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-6">
+                  <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-gray-700">
                     {article.tags.map(tag => (
                       <Badge 
                         key={tag} 
@@ -248,7 +311,7 @@ const ArticleView = () => {
             </Card>
             
             {/* Actions bar - Mobile optimized */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 mb-8">
               <VotingButtons
                 itemType="article"
                 itemId={article.id}
