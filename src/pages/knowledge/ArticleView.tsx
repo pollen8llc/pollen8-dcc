@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -195,7 +194,7 @@ const ArticleView = () => {
             </div>
             
             {/* Article title */}
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4 text-white">
               {article.title}
             </h1>
             
@@ -208,12 +207,12 @@ const ArticleView = () => {
             <Card>
               <CardContent className="pt-6">
                 {article.content_type === ContentType.QUOTE ? (
-                  <blockquote className="border-l-4 border-primary pl-4 italic">
+                  <blockquote className="border-l-4 border-primary pl-4 italic text-white">
                     <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                   </blockquote>
                 ) : article.content_type === ContentType.POLL && article.options ? (
                   <div className="space-y-4">
-                    <div className="prose dark:prose-invert max-w-none">
+                    <div className="prose dark:prose-invert max-w-none text-white">
                       <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                     </div>
                     <PollVoting 
@@ -224,7 +223,7 @@ const ArticleView = () => {
                   </div>
                 ) : (
                   <div 
-                    className="prose dark:prose-invert max-w-none"
+                    className="prose dark:prose-invert max-w-none text-white"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
                   />
                 )}
