@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Clock, Heart } from "lucide-react";
 import { getTriggers } from "@/services/rel8t/triggerService";
+import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 
 const BuildRapport = () => {
   const navigate = useNavigate();
+  const { setSelectedTrigger } = useRelationshipWizard();
   
   const { data: triggers = [] } = useQuery({
     queryKey: ["triggers"],
@@ -21,8 +23,9 @@ const BuildRapport = () => {
     navigate("/rel8/triggers/wizard?returnTo=relationship");
   };
 
-  const handleSelectTrigger = (triggerId: string) => {
-    navigate(`/rel8/wizard?triggerId=${triggerId}`);
+  const handleSelectTrigger = (trigger: any) => {
+    setSelectedTrigger(trigger);
+    navigate("/rel8/wizard");
   };
 
   return (
@@ -107,7 +110,7 @@ const BuildRapport = () => {
                       </div>
                       <Button
                         size="sm"
-                        onClick={() => handleSelectTrigger(trigger.id)}
+                        onClick={() => handleSelectTrigger(trigger)}
                       >
                         Choose
                       </Button>

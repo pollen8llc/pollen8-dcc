@@ -1,7 +1,9 @@
+
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { createTrigger } from "@/services/rel8t/triggerService";
+import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 
 export interface SimpleTriggerFormData {
   name: string;
@@ -12,6 +14,7 @@ export interface SimpleTriggerFormData {
 
 export function useTriggerWizard() {
   const navigate = useNavigate();
+  const { setSelectedTrigger } = useRelationshipWizard();
   const [formData, setFormData] = useState<SimpleTriggerFormData>({
     name: "",
     triggerDate: new Date(),
@@ -26,7 +29,7 @@ export function useTriggerWizard() {
   }, []);
 
   // Submit the form data and return the created trigger
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async (returnTo?: string) => {
     try {
       console.log("Submitting trigger with data:", formData);
       
@@ -52,6 +55,11 @@ export function useTriggerWizard() {
           description: "Your automation trigger has been created."
         });
         
+        // If returning to relationship wizard, store trigger in context
+        if (returnTo === 'relationship') {
+          setSelectedTrigger(result);
+        }
+        
         return result; // Return the created trigger
       }
       
@@ -65,7 +73,7 @@ export function useTriggerWizard() {
       });
       return null;
     }
-  }, [formData, navigate]);
+  }, [formData, setSelectedTrigger]);
 
   return {
     formData,

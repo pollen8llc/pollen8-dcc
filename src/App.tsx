@@ -1,12 +1,15 @@
 
 import React from 'react';
 import { UserProvider } from './contexts/UserContext';
+import { RelationshipWizardProvider } from './contexts/RelationshipWizardContext';
 import AppRoutes from './AppRoutes';
 
 function App() {
   return (
     <UserProvider>
-      <AppRoutes />
+      <RelationshipWizardProvider>
+        <AppRoutes />
+      </RelationshipWizardProvider>
     </UserProvider>
   );
 }

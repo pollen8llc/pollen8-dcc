@@ -28,12 +28,12 @@ const TriggerWizard = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await handleSubmit();
+    const result = await handleSubmit(returnTo || undefined);
     
     // If we successfully created a trigger and returnTo is 'relationship', 
     // navigate to the relationship wizard
     if (result && returnTo === 'relationship') {
-      navigate(`/rel8/wizard?triggerId=${result.id}`);
+      navigate("/rel8/wizard");
     }
   };
 
