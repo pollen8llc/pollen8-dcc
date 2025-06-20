@@ -179,7 +179,7 @@ export const Labr8NavigationDrawer: React.FC<Labr8NavigationDrawerProps> = ({
           {currentUser && currentUser.role === 'SERVICE_PROVIDER' ? (
             <>
               <div className="px-2 py-2 text-xs text-gray-400">
-                Signed in as {currentUser.first_name} {currentUser.last_name}
+                Signed in as {currentUser.name}
               </div>
               <Button
                 variant="outline"
