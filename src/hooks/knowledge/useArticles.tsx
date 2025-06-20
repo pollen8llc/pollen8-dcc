@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -27,8 +26,7 @@ export const useArticles = (params: UseArticlesParams = {}) => {
             id,
             first_name,
             last_name,
-            avatar_url,
-            role
+            avatar_url
           )
         `);
 
@@ -72,7 +70,7 @@ export const useArticles = (params: UseArticlesParams = {}) => {
           id: article.user_id,
           name: article.profiles ? `${article.profiles.first_name || ''} ${article.profiles.last_name || ''}`.trim() || 'Anonymous User' : 'Anonymous User',
           avatar_url: article.profiles?.avatar_url || null,
-          role: article.profiles?.role
+          role: undefined // We'll handle role separately if needed
         }
       })) as KnowledgeArticle[] || [];
     },
@@ -97,8 +95,7 @@ export const useArticle = (id: string | undefined) => {
             id,
             first_name,
             last_name,
-            avatar_url,
-            role
+            avatar_url
           )
         `)
         .eq('id', id)
@@ -117,7 +114,7 @@ export const useArticle = (id: string | undefined) => {
           id: data.user_id,
           name: data.profiles ? `${data.profiles.first_name || ''} ${data.profiles.last_name || ''}`.trim() || 'Anonymous User' : 'Anonymous User',
           avatar_url: data.profiles?.avatar_url || null,
-          role: data.profiles?.role
+          role: undefined
         }
       } as KnowledgeArticle;
     },
