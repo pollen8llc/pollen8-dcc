@@ -35,6 +35,7 @@ const ContentCreator = lazy(() => import("@/pages/knowledge/ContentCreator"));
 const PostWizard = lazy(() => import("@/pages/knowledge/PostWizard"));
 const ArticleView = lazy(() => import("@/pages/knowledge/ArticleView"));
 const ArticleEdit = lazy(() => import("@/pages/core/ArticleEdit"));
+const TagView = lazy(() => import("@/pages/core/TagView"));
 
 // REL8 pages
 const Rel8Dashboard = lazy(() => import("@/pages/rel8t/Dashboard"));
@@ -178,6 +179,13 @@ const AppRoutes = () => {
               <NonServiceProviderRoute>
                 <ProtectedRoute>
                   <TopicsPage />
+                </ProtectedRoute>
+              </NonServiceProviderRoute>
+            } />
+            <Route path="/knowledge/tags/:tag" element={
+              <NonServiceProviderRoute>
+                <ProtectedRoute>
+                  <TagView />
                 </ProtectedRoute>
               </NonServiceProviderRoute>
             } />

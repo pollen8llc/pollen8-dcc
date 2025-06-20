@@ -206,8 +206,8 @@ const ArticleView = () => {
                 {article.content_type === ContentType.QUOTE ? (
                   <blockquote className="border-l-4 border-primary pl-6 py-4 italic text-white">
                     <div 
-                      className="text-white leading-relaxed
-                        [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6
+                      className="text-white leading-relaxed prose prose-lg max-w-none
+                        [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6 [&_p]:font-normal
                         [&_h1]:text-white [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:mt-8 [&_h1]:mb-6 [&_h1:first-child]:mt-0
                         [&_h2]:text-white [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h2]:mt-8 [&_h2]:mb-5
                         [&_h3]:text-white [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:leading-tight [&_h3]:mt-6 [&_h3]:mb-4
@@ -222,19 +222,19 @@ const ArticleView = () => {
                         [&_blockquote]:text-white [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-6
                         [&_span]:text-white
                         [&_div]:text-white
-                        [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:opacity-80
-                        [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
-                        [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6
-                        [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6
-                        [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold
+                        [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:text-[#00c4b6] [&_a:hover]:no-underline
+                        [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+                        [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6 [&_pre]:border [&_pre]:border-gray-700
+                        [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6 [&_table]:border [&_table]:border-gray-600
+                        [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold [&_th]:bg-gray-800
                         [&_td]:text-white [&_td]:border [&_td]:border-gray-600 [&_td]:px-4 [&_td]:py-3"
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
                     />
                   </blockquote>
                 ) : article.content_type === ContentType.POLL && article.options ? (
                   <div className="space-y-6">
-                    <div className="text-white leading-relaxed
-                      [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6
+                    <div className="text-white leading-relaxed prose prose-lg max-w-none
+                      [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6 [&_p]:font-normal
                       [&_h1]:text-white [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:mt-8 [&_h1]:mb-6 [&_h1:first-child]:mt-0
                       [&_h2]:text-white [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h2]:mt-8 [&_h2]:mb-5
                       [&_h3]:text-white [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:leading-tight [&_h3]:mt-6 [&_h3]:mb-4
@@ -249,11 +249,11 @@ const ArticleView = () => {
                       [&_blockquote]:text-white [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-6
                       [&_span]:text-white
                       [&_div]:text-white
-                      [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:opacity-80
-                      [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
-                      [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6
-                      [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6
-                      [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold
+                      [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:text-[#00c4b6] [&_a:hover]:no-underline
+                      [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+                      [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6 [&_pre]:border [&_pre]:border-gray-700
+                      [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6 [&_table]:border [&_table]:border-gray-600
+                      [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold [&_th]:bg-gray-800
                       [&_td]:text-white [&_td]:border [&_td]:border-gray-600 [&_td]:px-4 [&_td]:py-3">
                       <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                     </div>
@@ -265,8 +265,8 @@ const ArticleView = () => {
                   </div>
                 ) : (
                   <div 
-                    className="text-white leading-relaxed
-                      [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6
+                    className="text-white leading-relaxed prose prose-lg max-w-none
+                      [&_p]:text-white [&_p]:text-lg [&_p]:leading-relaxed [&_p]:mb-6 [&_p]:font-normal
                       [&_h1]:text-white [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:mt-8 [&_h1]:mb-6 [&_h1:first-child]:mt-0
                       [&_h2]:text-white [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h2]:mt-8 [&_h2]:mb-5
                       [&_h3]:text-white [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:leading-tight [&_h3]:mt-6 [&_h3]:mb-4
@@ -281,11 +281,11 @@ const ArticleView = () => {
                       [&_blockquote]:text-white [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-6
                       [&_span]:text-white
                       [&_div]:text-white
-                      [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:opacity-80
-                      [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm
-                      [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6
-                      [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6
-                      [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold
+                      [&_a]:text-[#00eada] [&_a]:underline [&_a:hover]:text-[#00c4b6] [&_a:hover]:no-underline
+                      [&_code]:text-white [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+                      [&_pre]:text-white [&_pre]:bg-gray-800 [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:my-6 [&_pre]:border [&_pre]:border-gray-700
+                      [&_table]:text-white [&_table]:border-collapse [&_table]:w-full [&_table]:my-6 [&_table]:border [&_table]:border-gray-600
+                      [&_th]:text-white [&_th]:border [&_th]:border-gray-600 [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold [&_th]:bg-gray-800
                       [&_td]:text-white [&_td]:border [&_td]:border-gray-600 [&_td]:px-4 [&_td]:py-3"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
                   />
