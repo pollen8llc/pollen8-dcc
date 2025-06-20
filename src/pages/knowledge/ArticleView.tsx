@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,7 +15,8 @@ import {
   MessageSquare,
   Eye,
   Tag as TagIcon,
-  AlertTriangle
+  AlertTriangle,
+  MoreVertical
 } from 'lucide-react';
 
 // UI Components
@@ -24,6 +26,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Custom Components
 import { CommentSection } from '@/components/knowledge/CommentSection';
@@ -240,8 +248,8 @@ const ArticleView = () => {
               </CardContent>
             </Card>
             
-            {/* Actions bar */}
-            <div className="flex items-center justify-between mt-4 mb-8">
+            {/* Actions bar - Mobile optimized */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 mb-8">
               <VotingButtons
                 itemType="article"
                 itemId={article.id}
@@ -251,34 +259,78 @@ const ArticleView = () => {
                 showCount={true}
               />
               
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant={isArticleSaved(article.id) ? "secondary" : "outline"}
-                  size="sm"
-                  onClick={() => toggleSaveArticle(article.id)}
-                >
-                  <Bookmark className="h-4 w-4 mr-1" />
-                  {isArticleSaved(article.id) ? "Unsave" : "Save"}
-                </Button>
-                
-                <Button variant="outline" size="sm">
-                  <Share2 className="h-4 w-4 mr-1" />
-                  Share
-                </Button>
-                
-                {canEdit && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to={`/knowledge/article/${id}/edit`}>
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Link>
+              {/* Action buttons - responsive layout */}
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                {/* Primary actions - always visible */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={isArticleSaved(article.id) ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => toggleSaveArticle(article.id)}
+                    className="flex-shrink-0"
+                  >
+                    <Bookmark className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">
+                      {isArticleSaved(article.id) ? "Unsave" : "Save"}
+                    </span>
                   </Button>
-                )}
-                
-                {currentUser?.id === article.user_id && (
-                  <Button variant="destructive" size="sm" onClick={handleDeleteArticle} className="ml-2">
-                    Delete
+                  
+                  <Button variant="outline" size="sm" className="flex-shrink-0">
+                    <Share2 className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Share</span>
                   </Button>
+                </div>
+                
+                {/* Secondary actions - dropdown on mobile, inline on desktop */}
+                {(canEdit || currentUser?.id === article.user_id) && (
+                  <>
+                    {/* Desktop view */}
+                    <div className="hidden sm:flex items-center gap-2">
+                      {canEdit && (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/knowledge/article/${id}/edit`}>
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Link>
+                        </Button>
+                      )}
+                      
+                      {currentUser?.id === article.user_id && (
+                        <Button variant="destructive" size="sm" onClick={handleDeleteArticle}>
+                          Delete
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {/* Mobile view - dropdown */}
+                    <div className="flex sm:hidden">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {canEdit && (
+                            <DropdownMenuItem asChild>
+                              <Link to={`/knowledge/article/${id}/edit`} className="flex items-center">
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </Link>
+                            </DropdownMenuItem>
+                          )}
+                          {currentUser?.id === article.user_id && (
+                            <DropdownMenuItem 
+                              onClick={handleDeleteArticle}
+                              className="flex items-center text-destructive focus:text-destructive"
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </>
                 )}
               </div>
             </div>

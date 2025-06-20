@@ -107,6 +107,7 @@ const PostWizard = () => {
       
       if (currentStep === 1) {
         // Store form data and advance to next step
+        console.log('Storing form data for step 1:', data);
         setFormData(data);
         handleNext();
         return;
@@ -116,20 +117,20 @@ const PostWizard = () => {
       if (isSubmittingForm) return;
       setIsSubmittingForm(true);
 
-      // Final submission - merge stored data with current data
+      // Final submission - merge stored data with current data and add content type
       const finalData = {
         ...formData,
         ...data,
         content_type: getContentType()
       };
       
-      console.log('Final submission data:', finalData);
+      console.log('Final submission data with content type:', finalData);
       
       await createArticle(finalData);
       
       toast({
         title: "Success!",
-        description: "Your post has been published",
+        description: `Your ${postType} has been published`,
       });
       
       setTimeout(() => {
@@ -140,7 +141,7 @@ const PostWizard = () => {
       console.error('Error submitting post:', error);
       toast({
         title: "Error",
-        description: "There was a problem publishing your post",
+        description: `There was a problem publishing your ${postType}`,
         variant: "destructive"
       });
     } finally {

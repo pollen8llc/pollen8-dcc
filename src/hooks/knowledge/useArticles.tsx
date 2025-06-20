@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -107,6 +106,70 @@ export const useArticle = (id: string | undefined) => {
   });
 };
 
+// Helper function to transform form data based on content type
+const transformFormData = (data: any, contentType: ContentType) => {
+  console.log('Transforming form data:', { data, contentType });
+  
+  switch (contentType) {
+    case ContentType.QUOTE:
+      return {
+        title: data.quote || data.title,
+        content: formatQuoteContent(data.quote, data.author, data.context),
+        tags: data.tags || [],
+        content_type: contentType,
+        source: data.author
+      };
+      
+    case ContentType.POLL:
+      return {
+        title: data.question || data.title,
+        content: data.question || data.title,
+        tags: data.tags || [],
+        content_type: contentType,
+        options: {
+          options: data.options || [],
+          allowMultipleSelections: data.allowMultipleSelections || false,
+          duration: data.duration || "7"
+        }
+      };
+      
+    case ContentType.QUESTION:
+      return {
+        title: data.title,
+        content: data.content,
+        tags: data.tags || [],
+        content_type: contentType
+      };
+      
+    case ContentType.ARTICLE:
+    default:
+      return {
+        title: data.title,
+        content: data.content,
+        tags: data.tags || [],
+        content_type: contentType,
+        subtitle: data.subtitle
+      };
+  }
+};
+
+// Helper function to format quote content
+const formatQuoteContent = (quote: string, author: string, context?: string) => {
+  let formattedContent = `<blockquote class="border-l-4 border-primary pl-4 italic">"${quote}"`;
+  
+  if (author) {
+    formattedContent += `<footer class="text-sm text-muted-foreground mt-2">— ${author}</footer>`;
+  }
+  
+  formattedContent += `</blockquote>`;
+  
+  if (context) {
+    formattedContent += `<div class="mt-4"><h4 class="text-sm font-medium mb-2">Context:</h4><p>${context}</p></div>`;
+  }
+  
+  return formattedContent;
+};
+
 export const useArticleMutations = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -125,32 +188,44 @@ export const useArticleMutations = () => {
 
     try {
       setIsSubmitting(true);
+      console.log('Creating article with raw data:', data);
+      
+      // Transform the data based on content type
+      const transformedData = transformFormData(data, data.content_type);
+      console.log('Transformed data:', transformedData);
       
       const { data: article, error } = await supabase
         .from('knowledge_articles')
         .insert({
           user_id: currentUser.id,
-          title: data.title,
-          content: data.content,
-          tags: data.tags,
-          content_type: data.content_type || ContentType.ARTICLE
+          title: transformedData.title,
+          content: transformedData.content,
+          tags: transformedData.tags,
+          content_type: transformedData.content_type,
+          subtitle: transformedData.subtitle,
+          source: transformedData.source,
+          options: transformedData.options
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
       
       toast({
-        title: "Article created",
-        description: "Your article has been published successfully"
+        title: "Success!",
+        description: "Your content has been published successfully"
       });
 
       return article;
     } catch (error: any) {
+      console.error('Error in createArticle:', error);
       toast({
-        title: "Failed to create article",
+        title: "Failed to create content",
         description: error.message,
         variant: "destructive"
       });
