@@ -1,3 +1,4 @@
+
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, ArrowLeft } from "lucide-react";
+import { CalendarIcon, ArrowLeft, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
@@ -129,6 +130,21 @@ const TriggerWizard = () => {
                     />
                   </PopoverContent>
                 </Popover>
+              </div>
+
+              {/* Trigger Time */}
+              <div className="space-y-2">
+                <Label htmlFor="triggerTime">Trigger Time</Label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="triggerTime"
+                    type="time"
+                    value={formData.triggerTime || "09:00"}
+                    onChange={(e) => updateFormData({ triggerTime: e.target.value })}
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
               {/* Frequency */}

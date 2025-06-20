@@ -1,16 +1,13 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TriggersList } from "./TriggersList";
-import { EmailNotificationsList } from "./EmailNotificationsList";
 import { Trigger } from "@/services/rel8t/triggerService";
-import { EmailNotification } from "@/services/rel8t/emailService";
 
 interface TriggerTabsProps {
   activeTab: string;
   setActiveTab: (value: string) => void;
   filteredTriggers: Trigger[];
   isLoading: boolean;
-  emailNotifications: EmailNotification[];
   handleEditTrigger: (trigger: Trigger) => void;
   handleDeleteTrigger: (id: string) => void;
   handleToggleActive: (id: string, isActive: boolean) => void;
@@ -22,7 +19,6 @@ export function TriggerTabs({
   setActiveTab,
   filteredTriggers,
   isLoading,
-  emailNotifications,
   handleEditTrigger,
   handleDeleteTrigger,
   handleToggleActive,
@@ -34,7 +30,6 @@ export function TriggerTabs({
         <TabsTrigger value="active">Active Triggers</TabsTrigger>
         <TabsTrigger value="inactive">Inactive Triggers</TabsTrigger>
         <TabsTrigger value="all">All Triggers</TabsTrigger>
-        <TabsTrigger value="notifications">Email Notifications</TabsTrigger>
       </TabsList>
       <TabsContent value="active" className="space-y-4">
         <TriggersList
@@ -65,9 +60,6 @@ export function TriggerTabs({
           onToggleActive={handleToggleActive}
           renderIcon={renderIcon}
         />
-      </TabsContent>
-      <TabsContent value="notifications" className="space-y-4">
-        <EmailNotificationsList notifications={emailNotifications} />
       </TabsContent>
     </Tabs>
   );
