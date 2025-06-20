@@ -30,10 +30,13 @@ const TriggerWizard = () => {
     e.preventDefault();
     const result = await handleSubmit(returnTo || undefined);
     
-    // If we successfully created a trigger and returnTo is 'relationship', 
-    // navigate to the relationship wizard
-    if (result && returnTo === 'relationship') {
-      navigate("/rel8/wizard");
+    // Navigate based on returnTo parameter and success
+    if (result) {
+      if (returnTo === 'relationship') {
+        navigate("/rel8/wizard");
+      } else {
+        navigate("/rel8/triggers");
+      }
     }
   };
 

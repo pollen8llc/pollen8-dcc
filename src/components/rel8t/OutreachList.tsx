@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -268,7 +267,7 @@ const OutreachList = ({
                     className="text-green-500 border-green-500/20 hover:bg-green-500/10"
                   >
                     <CheckCircle2 className="h-4 w-4 mr-1" />
-                    Complete
+                    Mark Complete
                   </Button>
                 </div>
               )}
