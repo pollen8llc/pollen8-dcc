@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -20,7 +21,14 @@ export const useArticles = (params: UseArticlesParams = {}) => {
       
       let query = supabase
         .from('knowledge_articles')
-        .select('*');
+        .select(`
+          *,
+          profiles!inner(
+            first_name,
+            last_name,
+            avatar_url
+          )
+        `);
 
       // Apply filters
       if (params.searchQuery) {
@@ -60,8 +68,10 @@ export const useArticles = (params: UseArticlesParams = {}) => {
         ...article,
         author: {
           id: article.user_id,
-          name: 'User',
-          avatar_url: null
+          name: article.profiles ? 
+            `${article.profiles.first_name || ''} ${article.profiles.last_name || ''}`.trim() || 'Anonymous User' :
+            'Anonymous User',
+          avatar_url: article.profiles?.avatar_url || null
         }
       })) as KnowledgeArticle[] || [];
     },
@@ -80,7 +90,14 @@ export const useArticle = (id: string | undefined) => {
       
       const { data, error } = await supabase
         .from('knowledge_articles')
-        .select('*')
+        .select(`
+          *,
+          profiles!inner(
+            first_name,
+            last_name,
+            avatar_url
+          )
+        `)
         .eq('id', id)
         .maybeSingle();
         
@@ -95,8 +112,10 @@ export const useArticle = (id: string | undefined) => {
         ...data,
         author: {
           id: data.user_id,
-          name: 'User',
-          avatar_url: null
+          name: data.profiles ? 
+            `${data.profiles.first_name || ''} ${data.profiles.last_name || ''}`.trim() || 'Anonymous User' :
+            'Anonymous User',
+          avatar_url: data.profiles?.avatar_url || null
         }
       } as KnowledgeArticle;
     },
@@ -153,7 +172,6 @@ const transformFormData = (data: any, contentType: ContentType) => {
   }
 };
 
-// Helper function to format quote content
 const formatQuoteContent = (quote: string, author: string, context?: string) => {
   let formattedContent = `<blockquote class="border-l-4 border-primary pl-4 italic">"${quote}"`;
   
