@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -107,12 +108,12 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
   return (
     <Card 
       className={cn(
-        "cursor-pointer hover:shadow-md transition-all duration-200 border-border/50",
+        "cursor-pointer hover:shadow-md transition-all duration-200 border-border/50 h-full flex flex-col",
         className
       )}
       onClick={onClick}
     >
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 flex-shrink-0">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
@@ -127,28 +128,28 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
               </Badge>
             </div>
             
-            <h3 className="text-base sm:text-lg font-semibold line-clamp-2 mb-2">
+            <h3 className="text-base sm:text-lg font-semibold line-clamp-2 mb-2 min-h-[3rem]">
               {article.title}
             </h3>
             
-            <p className="text-muted-foreground text-sm line-clamp-3">
+            <p className="text-muted-foreground text-sm line-clamp-3 min-h-[4.5rem]">
               {truncateText(article.content)}
             </p>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 flex-1 flex flex-col">
         {/* Poll Voting UI for Polls */}
         {article.content_type === ContentType.POLL && article.pollData && (
-          <div className="mb-4">
+          <div className="mb-4 flex-shrink-0">
             <PollVoting pollId={article.id} pollData={article.pollData} />
           </div>
         )}
 
         {/* Tags */}
         {article.tags && article.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div className="flex flex-wrap gap-1 mb-3 flex-shrink-0">
             {article.tags.slice(0, 3).map((tag, index) => (
               <Badge key={index} variant="outline" className="text-xs">
                 {tag}
@@ -162,52 +163,54 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
           </div>
         )}
 
-        <Separator className="mb-3" />
+        <div className="mt-auto">
+          <Separator className="mb-3" />
 
-        {/* Bottom section */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-4">
-            {/* Author */}
-            {article.author && (
-              <div className="flex items-center gap-2">
-                <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
-                  <AvatarImage src={article.author.avatar_url} />
-                  <AvatarFallback className="text-xs">
-                    {getAuthorInitials(article.author.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs sm:text-sm">{article.author.name}</span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Stats */}
-            <div className="flex items-center gap-3 text-xs">
-              {article.view_count !== undefined && (
-                <div className="flex items-center gap-1">
-                  <Eye className="h-3 w-3" />
-                  <span>{article.view_count}</span>
-                </div>
-              )}
-              
-              {article.comment_count !== undefined && (
-                <div className="flex items-center gap-1">
-                  <MessageSquare className="h-3 w-3" />
-                  <span>{article.comment_count}</span>
+          {/* Bottom section */}
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-4">
+              {/* Author */}
+              {article.author && (
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
+                    <AvatarImage src={article.author.avatar_url} />
+                    <AvatarFallback className="text-xs">
+                      {getAuthorInitials(article.author.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs sm:text-sm truncate max-w-20">{article.author.name}</span>
                 </div>
               )}
             </div>
 
-            {/* Share button - hidden on mobile */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 hidden sm:flex"
-              onClick={handleShare}
-            >
-              <Share2 className="h-3 w-3" />
-            </Button>
+            <div className="flex items-center gap-3">
+              {/* Stats */}
+              <div className="flex items-center gap-3 text-xs">
+                {article.view_count !== undefined && (
+                  <div className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />
+                    <span>{article.view_count}</span>
+                  </div>
+                )}
+                
+                {article.comment_count !== undefined && (
+                  <div className="flex items-center gap-1">
+                    <MessageSquare className="h-3 w-3" />
+                    <span>{article.comment_count}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Share button - hidden on mobile */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 hidden sm:flex"
+                onClick={handleShare}
+              >
+                <Share2 className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
