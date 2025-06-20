@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -206,11 +205,14 @@ const ArticleView = () => {
               <CardContent className="pt-6">
                 {article.content_type === ContentType.QUOTE ? (
                   <blockquote className="border-l-4 border-primary pl-4 italic text-white">
-                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
+                    <div 
+                      className="text-white [&_p]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_strong]:text-white [&_em]:text-white [&_li]:text-white [&_ul]:text-white [&_ol]:text-white [&_blockquote]:text-white [&_span]:text-white [&_div]:text-white [&_a]:text-[#00eada] [&_code]:text-white [&_pre]:text-white"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
+                    />
                   </blockquote>
                 ) : article.content_type === ContentType.POLL && article.options ? (
                   <div className="space-y-4">
-                    <div className="prose dark:prose-invert max-w-none text-white">
+                    <div className="text-white [&_p]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_strong]:text-white [&_em]:text-white [&_li]:text-white [&_ul]:text-white [&_ol]:text-white [&_blockquote]:text-white [&_span]:text-white [&_div]:text-white [&_a]:text-[#00eada] [&_code]:text-white [&_pre]:text-white">
                       <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                     </div>
                     <PollVoting 
@@ -221,7 +223,7 @@ const ArticleView = () => {
                   </div>
                 ) : (
                   <div 
-                    className="prose dark:prose-invert max-w-none text-white"
+                    className="text-white [&_p]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_strong]:text-white [&_em]:text-white [&_li]:text-white [&_ul]:text-white [&_ol]:text-white [&_blockquote]:text-white [&_span]:text-white [&_div]:text-white [&_a]:text-[#00eada] [&_code]:text-white [&_pre]:text-white"
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} 
                   />
                 )}
