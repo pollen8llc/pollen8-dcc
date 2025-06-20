@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +23,7 @@ export const useArticles = (params: UseArticlesParams = {}) => {
         .from('knowledge_articles')
         .select(`
           *,
-          profiles!knowledge_articles_user_id_fkey (
+          profiles!inner (
             id,
             first_name,
             last_name,
@@ -91,7 +92,7 @@ export const useArticle = (id: string | undefined) => {
         .from('knowledge_articles')
         .select(`
           *,
-          profiles!knowledge_articles_user_id_fkey (
+          profiles!inner (
             id,
             first_name,
             last_name,
@@ -171,7 +172,6 @@ const transformFormData = (data: any, contentType: ContentType) => {
   }
 };
 
-// Helper function to format quote content
 const formatQuoteContent = (quote: string, author: string, context?: string) => {
   let formattedContent = `<blockquote class="border-l-4 border-primary pl-4 italic">"${quote}"`;
   
