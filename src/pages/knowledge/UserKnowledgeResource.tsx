@@ -28,7 +28,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MetricCard } from '@/components/rel8t/MetricCard';
-import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
 
 const UserKnowledgeResource = () => {
@@ -76,10 +75,8 @@ const UserKnowledgeResource = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
-        <CoreNavigation />
-        
         {/* Add Knowledge Navigation */}
-        <div className="mt-6 mb-6">
+        <div className="mb-6">
           <KnowledgeNavigation />
         </div>
         
@@ -87,7 +84,7 @@ const UserKnowledgeResource = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">My Knowledge Resources</h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-white mt-1">
               Track your contributions and manage your saved content
             </p>
           </div>
@@ -185,11 +182,11 @@ const UserKnowledgeResource = () => {
                         <div key={article.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <h4 className="font-medium text-white">{article.title}</h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-white">
                               {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
                             </p>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-4 text-sm text-white">
                             <span className="flex items-center gap-1">
                               <Eye className="h-3 w-3" />
                               {article.view_count || 0}
@@ -202,7 +199,7 @@ const UserKnowledgeResource = () => {
                         </div>
                       ))}
                       {(stats?.articles?.length || 0) === 0 && (
-                        <p className="text-center text-muted-foreground py-4">
+                        <p className="text-center text-white py-4">
                           No posts yet. Create your first post to get started!
                         </p>
                       )}
@@ -251,7 +248,7 @@ const UserKnowledgeResource = () => {
                 <div className="flex flex-col items-center justify-center">
                   <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2 text-white">No posts yet</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  <p className="text-white mb-6 max-w-md mx-auto">
                     Start sharing your knowledge by creating your first post!
                   </p>
                   <Button onClick={() => navigate('/knowledge/create')}>
@@ -301,7 +298,7 @@ const UserKnowledgeResource = () => {
                 <div className="flex flex-col items-center justify-center">
                   <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2 text-white">No saved articles</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  <p className="text-white mb-6 max-w-md mx-auto">
                     Save articles you find interesting to read them later!
                   </p>
                   <Button onClick={() => navigate('/knowledge')}>

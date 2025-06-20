@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -37,7 +38,6 @@ import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
 import { VotingButtons } from '@/components/knowledge/VotingButtons';
-import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 import { PollVoting } from '@/components/knowledge/PollVoting';
 
 // Mocks and types
@@ -171,8 +171,6 @@ const ArticleView = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
-        <CoreNavigation />
-        
         {/* Navigation */}
         <div className="mb-4 sm:mb-6">
           <Button variant="ghost" className="pl-0" asChild>
@@ -335,7 +333,7 @@ const ArticleView = () => {
             </div>
             
             {/* Stats bar */}
-            <div className="flex items-center text-sm text-muted-foreground justify-center mb-6 space-x-6">
+            <div className="flex items-center text-sm text-white justify-center mb-6 space-x-6">
               <div className="flex items-center">
                 <Eye className="h-4 w-4 mr-1" />
                 <span>{article.view_count} views</span>
@@ -377,7 +375,7 @@ const ArticleView = () => {
             {article.tags && article.tags.length > 0 && (
               <Card>
                 <CardContent className="pt-6">
-                  <h3 className="text-lg font-medium mb-3">Tags</h3>
+                  <h3 className="text-lg font-medium mb-3 text-white">Tags</h3>
                   <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-2">
                     {article.tags.map(tag => (
                       <Badge 
