@@ -126,7 +126,7 @@ const NextGenLabr8Dashboard: React.FC = () => {
     });
   };
 
-  const renderRequestCard = (request: any, showActions = true) => (
+  const renderRequestCard = (request: any) => (
     <div key={request.id} className="p-4 rounded-lg bg-white/80 border border-gray-200/50 hover:shadow-md transition-all">
       <div className="flex items-start justify-between">
         <div className="flex-1">
@@ -181,27 +181,95 @@ const NextGenLabr8Dashboard: React.FC = () => {
           </Badge>
         </div>
         
-        {showActions && (
-          <div className="flex flex-col items-end gap-2 ml-4">
-            <Button
-              onClick={() => handleCounterOffer(request)}
-              size="sm"
-              className="bg-[#00eada] hover:bg-[#00c4b8] text-black flex items-center gap-1"
-            >
-              <Reply className="h-4 w-4" />
-              Counter Offer
-            </Button>
-            <Button
-              onClick={() => {/* Navigate to detailed view */}}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-            >
-              <Eye className="h-4 w-4" />
-              View Details
-            </Button>
+        <div className="flex flex-col items-end gap-2 ml-4">
+          <Button
+            onClick={() => handleCounterOffer(request)}
+            size="sm"
+            className="bg-[#00eada] hover:bg-[#00c4b8] text-black flex items-center gap-1"
+          >
+            <Reply className="h-4 w-4" />
+            Counter Offer
+          </Button>
+          <Button
+            onClick={() => {/* Navigate to detailed view */}}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            <Eye className="h-4 w-4" />
+            View Details
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderProjectCard = (project: any) => (
+    <div key={project.id} className="p-4 rounded-lg bg-white/80 border border-gray-200/50 hover:shadow-md transition-all">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <h4 className="font-semibold text-gray-900 mb-2">{project.title}</h4>
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            {project.description?.substring(0, 150)}...
+          </p>
+          
+          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+            {project.organizer && (
+              <div className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                <span>{project.organizer.organization_name}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1">
+              <DollarSign className="h-4 w-4" />
+              {formatBudget(project.budget_range)}
+            </div>
           </div>
-        )}
+
+          {/* Scope and Terms Links */}
+          {(project.scope_details || project.terms) && (
+            <div className="flex gap-3 mb-3">
+              {project.scope_details && (
+                <a
+                  href={project.scope_details}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8]"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Scope Document
+                </a>
+              )}
+              {project.terms && (
+                <a
+                  href={project.terms}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8]"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Terms & Conditions
+                </a>
+              )}
+            </div>
+          )}
+          
+          <Badge className={`${getStatusColor(project.status)} font-medium`}>
+            {project.status?.replace('_', ' ') || 'pending'}
+          </Badge>
+        </div>
+        
+        <div className="flex flex-col items-end gap-2 ml-4">
+          <Button
+            onClick={() => {/* Navigate to project workspace */}}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            <Eye className="h-4 w-4" />
+            View Project
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -351,7 +419,7 @@ const NextGenLabr8Dashboard: React.FC = () => {
                         <p>No active projects</p>
                       </div>
                     ) : (
-                      activeProjects.slice(0, 3).map((project) => renderRequestCard(project, false))
+                      activeProjects.slice(0, 3).map(renderProjectCard)
                     )}
                   </TabsContent>
                   
@@ -362,7 +430,7 @@ const NextGenLabr8Dashboard: React.FC = () => {
                         <p>No completed projects yet</p>
                       </div>
                     ) : (
-                      completedProjects.slice(0, 3).map((project) => renderRequestCard(project, false))
+                      completedProjects.slice(0, 3).map(renderProjectCard)
                     )}
                   </TabsContent>
                 </Tabs>
