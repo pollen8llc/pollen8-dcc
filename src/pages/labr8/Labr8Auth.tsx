@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,8 +34,11 @@ const Labr8Auth = () => {
     if (!isLoading && currentUser) {
       // Check if user has SERVICE_PROVIDER role, if not redirect to main platform
       if (currentUser.role === 'SERVICE_PROVIDER') {
-        const redirectTo = searchParams.get("redirectTo") || "/labr8/dashboard";
-        navigate(redirectTo, { replace: true });
+        if (!currentUser.profile_complete) {
+          navigate("/labr8/setup", { replace: true });
+        } else {
+          navigate("/labr8/inbox", { replace: true });
+        }
       } else {
         navigate("/", { replace: true });
       }
@@ -66,8 +68,8 @@ const Labr8Auth = () => {
           description: "You have successfully signed in to LAB-R8.",
         });
         
-        const redirectTo = searchParams.get("redirectTo") || "/labr8/dashboard";
-        navigate(redirectTo, { replace: true });
+        // Navigate to inbox after successful login
+        navigate("/labr8/inbox", { replace: true });
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
@@ -95,7 +97,7 @@ const Labr8Auth = () => {
     }
 
     try {
-      const redirectUrl = `${window.location.origin}/labr8/dashboard`;
+      const redirectUrl = `${window.location.origin}/labr8/inbox`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -128,7 +130,7 @@ const Labr8Auth = () => {
             title: "Welcome to LAB-R8!",
             description: "Your service provider account has been created successfully.",
           });
-          navigate("/labr8/dashboard", { replace: true });
+          navigate("/labr8/setup", { replace: true });
         } else {
           setMessage("Please check your email and click the confirmation link to complete your LAB-R8 service provider registration.");
         }

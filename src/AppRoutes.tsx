@@ -36,18 +36,20 @@ const Labr8Auth = lazy(() => import('@/pages/labr8/Labr8Auth'));
 const Labr8Setup = lazy(() => import('@/pages/labr8/Labr8Setup'));
 const ProviderInbox = lazy(() => import('@/pages/labr8/ProviderInbox'));
 const ProjectWorkspace = lazy(() => import('@/pages/labr8/ProjectWorkspace'));
+const Labr8Landing = lazy(() => import('@/pages/labr8/Labr8Landing'));
 
 const AppRoutes = () => {
   return (
     <Suspense fallback={<LoadingSpinner size="lg" text="Loading..." />}>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<NonServiceProviderRoute><Index /></NonServiceProviderRoute>} />
+        <Route path="/" element={<Index />} />
         <Route path="/auth" element={<NonServiceProviderRoute><Auth /></NonServiceProviderRoute>} />
         
         {/* LAB-R8 Service Provider Routes */}
+        <Route path="/labr8" element={<Labr8Landing />} />
         <Route path="/labr8/auth" element={<Labr8Auth />} />
-        <Route path="/labr8/setup" element={<Labr8Setup />} />
+        <Route path="/labr8/setup" element={<ServiceProviderProtectedRoute><Labr8Setup /></ServiceProviderProtectedRoute>} />
         <Route path="/labr8/inbox" element={<ServiceProviderProtectedRoute><ProviderInbox /></ServiceProviderProtectedRoute>} />
         <Route path="/labr8/project" element={<ServiceProviderProtectedRoute><ProjectWorkspace /></ServiceProviderProtectedRoute>} />
         

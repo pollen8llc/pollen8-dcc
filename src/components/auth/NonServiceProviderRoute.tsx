@@ -20,9 +20,13 @@ const NonServiceProviderRoute = ({ children }: NonServiceProviderRouteProps) => 
     );
   }
 
-  // If user is a service provider, redirect to LAB-R8 dashboard
+  // If user is a service provider, redirect to LAB-R8 inbox (not dashboard)
   if (currentUser?.role === 'SERVICE_PROVIDER') {
-    return <Navigate to="/labr8/dashboard" replace />;
+    if (!currentUser.profile_complete) {
+      return <Navigate to="/labr8/setup" replace />;
+    } else {
+      return <Navigate to="/labr8/inbox" replace />;
+    }
   }
 
   // Allow access for all other users (including non-authenticated)

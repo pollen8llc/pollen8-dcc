@@ -11,25 +11,23 @@ const Index = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    if (!isLoading) {
-      if (currentUser) {
-        // If user is a service provider, redirect to LAB-R8
-        if (currentUser.role === 'SERVICE_PROVIDER') {
-          if (!currentUser.profile_complete) {
-            navigate("/labr8/setup", { replace: true });
-          } else {
-            navigate("/labr8/inbox", { replace: true });
-          }
-          return;
-        }
-        
-        // For other users, check if profile is complete before redirecting
+    if (!isLoading && currentUser) {
+      // If user is a service provider, redirect to LAB-R8
+      if (currentUser.role === 'SERVICE_PROVIDER') {
         if (!currentUser.profile_complete) {
-          navigate("/profile/setup", { replace: true });
+          navigate("/labr8/setup", { replace: true });
         } else {
-          // If user is logged in and profile is complete, redirect to knowledge resources
-          navigate("/knowledge/resources", { replace: true });
+          navigate("/labr8/inbox", { replace: true });
         }
+        return;
+      }
+      
+      // For other users, check if profile is complete before redirecting
+      if (!currentUser.profile_complete) {
+        navigate("/profile/setup", { replace: true });
+      } else {
+        // If user is logged in and profile is complete, redirect to knowledge resources
+        navigate("/knowledge/resources", { replace: true });
       }
     }
   }, [currentUser, isLoading, navigate]);
