@@ -60,6 +60,7 @@ import Labr8Dashboard from '@/pages/labr8/Labr8Dashboard';
 import GridLabr8Dashboard from '@/pages/labr8/GridLabr8Dashboard';
 import ModernLabr8Dashboard from '@/pages/labr8/ModernLabr8Dashboard';
 import EnhancedLabr8Dashboard from '@/pages/labr8/EnhancedLabr8Dashboard';
+import ClientDatabase from '@/pages/labr8/ClientDatabase';
 import ProviderInbox from '@/pages/labr8/ProviderInbox';
 import Labr8ProjectStatus from '@/pages/labr8/Labr8ProjectStatus';
 import Labr8RequestStatus from '@/pages/labr8/Labr8RequestStatus';

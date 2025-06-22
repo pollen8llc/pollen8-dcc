@@ -1,332 +1,319 @@
-import { useState, useEffect } from 'react';
-import { useSession } from '@/hooks/useSession';
-import { 
-  getUserServiceProvider,
-  getProviderServiceRequests,
-  getAvailableServiceRequestsForProvider 
-} from '@/services/modul8Service';
-import { ServiceProvider, ServiceRequest } from '@/types/modul8';
-import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import React from "react";
+import { useSession } from "@/hooks/useSession";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import StatsCard from "@/components/labr8/StatsCard";
+import RequestList from "@/components/labr8/RequestList";
+import ActivityFeed from "@/components/labr8/ActivityFeed";
+import { Labr8Navigation } from "@/components/labr8/Labr8Navigation";
 import { 
   Building2, 
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  ExternalLink
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
-import RequestCard from '@/components/labr8/RequestCard';
+  ExternalLink, 
+  AlertCircle, 
+  Clock, 
+  CheckCircle2, 
+  DollarSign,
+  TrendingUp,
+  Users,
+  Star,
+  Calendar,
+  MessageSquare,
+  FileText,
+  Zap,
+  Award,
+  Target
+} from "lucide-react";
+import { useLabr8Dashboard } from "@/hooks/useLabr8Dashboard";
+import { toast } from "@/hooks/use-toast";
 
-const EnhancedLabr8Dashboard = () => {
-  const { session } = useSession();
-  const navigate = useNavigate();
-  const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
-  const [assignedRequests, setAssignedRequests] = useState<ServiceRequest[]>([]);
-  const [incomingRequests, setIncomingRequests] = useState<ServiceRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+const EnhancedLabr8Dashboard: React.FC = () => {
+  const { session, logout } = useSession();
+  const {
+    loading,
+    error,
+    serviceProvider,
+    pendingRequests,
+    negotiatingRequests,
+    activeProjects,
+    completedProjects,
+    reload,
+  } = useLabr8Dashboard(session?.user?.id);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, [session?.user?.id]);
-
-  const loadDashboardData = async () => {
-    if (!session?.user?.id) return;
-
-    try {
-      setLoading(true);
-      console.log('Loading dashboard data for user:', session.user.id);
-
-      const provider = await getUserServiceProvider(session.user.id);
-      console.log('Service provider found:', provider);
-
-      if (!provider) {
-        console.log('No service provider found, redirecting to setup');
-        navigate('/labr8/setup');
-        return;
-      }
-      setServiceProvider(provider);
-
-      // Get requests assigned to this provider
-      const assigned = await getProviderServiceRequests(provider.id);
-      console.log('Assigned requests:', assigned);
-
-      // Get available requests for this provider (based on domain specializations)
-      const available = await getAvailableServiceRequestsForProvider(provider.id);
-      console.log('Available requests:', available);
-
-      setAssignedRequests(assigned);
-      setIncomingRequests(available);
-
-      // Debug: log status counts
-      console.log('Assigned (raw):', assigned.map(r => r.status));
-      console.log('Available (raw):', available.map(r => r.status));
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
+  React.useEffect(() => {
+    if (error)
       toast({
-        title: "Error",
-        description: "Failed to load dashboard data",
-        variant: "destructive"
+        title: "Error loading data",
+        description: error,
+        variant: "destructive",
       });
-    } finally {
-      setLoading(false);
-    }
+  }, [error]);
+
+  // Mock data for enhanced features
+  const financialData = {
+    monthlyRevenue: 15750,
+    yearlyRevenue: 189000,
+    pendingPayments: 4200,
+    averageProjectValue: 3500
   };
 
-  const handleRequestDeleted = () => {
-    // Reload the dashboard data after deletion
-    loadDashboardData();
+  const performanceData = {
+    clientSatisfaction: 4.8,
+    responseTime: "2.3 hrs",
+    completionRate: 94,
+    repeatClients: 78
   };
 
-  // Categorize requests more carefully
-  const pendingRequests = incomingRequests.filter(r => r.status === 'pending');
-  // Changed this line ↓
-  const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating' || r.status === 'assigned');
-  const activeProjects = assignedRequests.filter(r => ['agreed', 'in_progress'].includes(r.status));
-  const completedProjects = assignedRequests.filter(r => r.status === 'completed');
+  const recentClients = [
+    { id: 1, name: "Tech Startup Inc.", avatar: "", lastProject: "Web Development", status: "Active" },
+    { id: 2, name: "Marketing Agency", avatar: "", lastProject: "Brand Design", status: "Completed" },
+    { id: 3, name: "E-commerce Co.", avatar: "", lastProject: "Mobile App", status: "In Progress" }
+  ];
 
-  console.log('Request categories:', {
-    pending: pendingRequests.length,
-    negotiating: negotiatingRequests.length,
-    active: activeProjects.length,
-    completed: completedProjects.length
-  });
+  const upcomingDeadlines = [
+    { project: "Website Redesign", client: "Tech Startup Inc.", dueDate: "Tomorrow", priority: "high" },
+    { project: "Logo Design", client: "Marketing Agency", dueDate: "In 3 days", priority: "medium" },
+    { project: "App Testing", client: "E-commerce Co.", dueDate: "Next week", priority: "low" }
+  ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const displayName = serviceProvider?.business_name || "Loading...";
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-gray-50">
+      <Labr8Navigation notificationCount={8} unreadMessages={3} />
       
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="h-12 w-12 rounded-lg bg-[#00eada] flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-black" />
-            </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={serviceProvider?.logo_url} />
+              <AvatarFallback className="bg-[#00eada] text-black text-lg font-bold">
+                {displayName.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
             <div>
-              <h1 className="text-3xl font-bold">LAB-R8 Dashboard</h1>
-              <p className="text-muted-foreground">
-                Welcome back, {serviceProvider?.business_name}
-              </p>
+              <h1 className="text-3xl font-bold tracking-tight">Welcome back!</h1>
+              <p className="text-lg text-muted-foreground">{displayName}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                <span className="text-sm font-medium">{performanceData.clientSatisfaction}</span>
+                <span className="text-sm text-muted-foreground">({performanceData.repeatClients}% repeat clients)</span>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Debug Info - Remove this in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 p-4 bg-gray-100 rounded">
-            <p className="text-sm">Debug Info:</p>
-            <p className="text-xs">Provider ID: {serviceProvider?.id}</p>
-            <p className="text-xs">Domain Specializations: {serviceProvider?.domain_specializations?.join(', ') || 'None'}</p>
-            <p className="text-xs">Total Assigned: {assignedRequests.length}</p>
-            <p className="text-xs">Total Available: {incomingRequests.length}</p>
+          
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              View Calendar
+            </Button>
+            <Button className="bg-[#00eada] hover:bg-[#00eada]/90 text-black flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Quick Actions
+            </Button>
           </div>
-        )}
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Incoming Requests</p>
-                  <p className="text-2xl font-bold">{pendingRequests.length}</p>
-                </div>
-                <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <ExternalLink className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">In Discussion</p>
-                  <p className="text-2xl font-bold">{negotiatingRequests.length}</p>
-                </div>
-                <div className="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center">
-                  <AlertCircle className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Projects</p>
-                  <p className="text-2xl font-bold">{activeProjects.length}</p>
-                </div>
-                <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                  <p className="text-2xl font-bold">{completedProjects.length}</p>
-                </div>
-                <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Request Tabs */}
-        <Tabs defaultValue="incoming" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="incoming">
-              Incoming ({pendingRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="discussing">
-              Discussing ({negotiatingRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="active">
-              Active ({activeProjects.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed ({completedProjects.length})
-            </TabsTrigger>
-          </TabsList>
+        {/* Financial Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatsCard
+            label="Monthly Revenue"
+            value={`$${financialData.monthlyRevenue.toLocaleString()}`}
+            icon={<DollarSign className="h-6 w-6 text-green-600" />}
+            accentColor="bg-green-100"
+            change="+12%"
+          />
+          <StatsCard
+            label="Pending Payments"
+            value={`$${financialData.pendingPayments.toLocaleString()}`}
+            icon={<Clock className="h-6 w-6 text-orange-600" />}
+            accentColor="bg-orange-100"
+          />
+          <StatsCard
+            label="Active Projects"
+            value={activeProjects.length}
+            icon={<Target className="h-6 w-6 text-blue-600" />}
+            accentColor="bg-blue-100"
+          />
+          <StatsCard
+            label="Completion Rate"
+            value={`${performanceData.completionRate}%`}
+            icon={<Award className="h-6 w-6 text-purple-600" />}
+            accentColor="bg-purple-100"
+            change="+2%"
+          />
+        </div>
 
-          <TabsContent value="incoming" className="mt-6">
-            {pendingRequests.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <ExternalLink className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No Incoming Requests
-                  </h3>
-                  <p className="text-muted-foreground text-center">
-                    New service requests will appear here when organizers reach out to you.
-                  </p>
-                  {serviceProvider?.domain_specializations?.length === 0 && (
-                    <p className="text-sm text-orange-600 mt-2">
-                      Consider adding domain specializations to your profile to receive relevant requests.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {pendingRequests.map((request) => (
-                  <RequestCard 
-                    key={request.id} 
-                    request={request} 
-                    type="incoming" 
-                    onDelete={handleRequestDeleted}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Recent Requests & Projects */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="requests" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="requests">New Requests ({pendingRequests.length})</TabsTrigger>
+                    <TabsTrigger value="active">Active ({activeProjects.length})</TabsTrigger>
+                    <TabsTrigger value="completed">Completed ({completedProjects.length})</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="requests" className="mt-4">
+                    <RequestList
+                      type="incoming"
+                      requests={pendingRequests.slice(0, 5)}
+                      loading={loading}
+                      emptyLabel="No new requests"
+                      onDelete={reload}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="active" className="mt-4">
+                    <RequestList
+                      type="active"
+                      requests={activeProjects.slice(0, 5)}
+                      loading={loading}
+                      emptyLabel="No active projects"
+                      onDelete={reload}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="completed" className="mt-4">
+                    <RequestList
+                      type="completed"
+                      requests={completedProjects.slice(0, 5)}
+                      loading={loading}
+                      emptyLabel="No completed projects"
+                      onDelete={reload}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
 
-          <TabsContent value="discussing" className="mt-6">
-            {negotiatingRequests.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No Active Discussions
-                  </h3>
-                  <p className="text-muted-foreground text-center">
-                    Requests you're negotiating will appear here.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {negotiatingRequests.map((request) => (
-                  <RequestCard 
-                    key={request.id} 
-                    request={request} 
-                    type="incoming" 
-                    onDelete={handleRequestDeleted}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Performance Metrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Response Time</span>
+                    <span className="font-medium">{performanceData.responseTime}</span>
+                  </div>
+                  <Progress value={85} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Client Satisfaction</span>
+                    <span className="font-medium">{performanceData.clientSatisfaction}/5.0</span>
+                  </div>
+                  <Progress value={96} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Project Completion</span>
+                    <span className="font-medium">{performanceData.completionRate}%</span>
+                  </div>
+                  <Progress value={performanceData.completionRate} className="h-2" />
+                </div>
+              </CardContent>
+            </Card>
 
-          <TabsContent value="active" className="mt-6">
-            {activeProjects.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Clock className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No Active Projects
-                  </h3>
-                  <p className="text-muted-foreground text-center">
-                    Accepted projects that are in progress will appear here.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {activeProjects.map((request) => (
-                  <RequestCard 
-                    key={request.id} 
-                    request={request} 
-                    type="active" 
-                    onDelete={handleRequestDeleted}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+            {/* Recent Clients */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Recent Clients
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {recentClients.map((client) => (
+                    <div key={client.id} className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {client.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{client.name}</p>
+                        <p className="text-xs text-muted-foreground">{client.lastProject}</p>
+                      </div>
+                      <div className={`text-xs px-2 py-1 rounded-full ${
+                        client.status === 'Active' ? 'bg-green-100 text-green-700' :
+                        client.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {client.status}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-          <TabsContent value="completed" className="mt-6">
-            {completedProjects.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No Completed Projects
-                  </h3>
-                  <p className="text-muted-foreground text-center">
-                    Successfully completed projects will appear here.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {completedProjects.map((request) => (
-                  <RequestCard 
-                    key={request.id} 
-                    request={request} 
-                    type="completed" 
-                    onDelete={handleRequestDeleted}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            {/* Upcoming Deadlines */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Upcoming Deadlines
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {upcomingDeadlines.map((deadline, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${
+                        deadline.priority === 'high' ? 'bg-red-500' :
+                        deadline.priority === 'medium' ? 'bg-yellow-500' :
+                        'bg-green-500'
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{deadline.project}</p>
+                        <p className="text-xs text-muted-foreground">{deadline.client}</p>
+                        <p className="text-xs text-muted-foreground">{deadline.dueDate}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Activity Feed */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Activity Feed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ActivityFeed />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
