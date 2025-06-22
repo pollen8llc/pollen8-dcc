@@ -53,7 +53,13 @@ const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
 const Triggers = lazy(() => import("@/pages/rel8t/Triggers"));
 const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
 
-// Modul8 pages
+// Modern Modul8 pages (Clean URLs)
+const ModernModul8Dashboard = lazy(() => import("@/pages/modul8/ModernModul8Dashboard"));
+const ProviderDirectory = lazy(() => import("@/pages/modul8/ProviderDirectory"));
+const RequestWizard = lazy(() => import("@/pages/modul8/RequestWizard"));
+const ProjectStatusView = lazy(() => import("@/pages/modul8/ProjectStatusView"));
+
+// Legacy Modul8 pages
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
 const DomainProviders = lazy(() => import("@/pages/modul8/DomainProviders"));
 const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
@@ -62,7 +68,11 @@ const ProviderRequestPortal = lazy(() => import("@/pages/modul8/ProviderRequestP
 const ServiceRequestDetails = lazy(() => import("@/pages/modul8/ServiceRequestDetails"));
 const RequestStatus = lazy(() => import("./pages/modul8/RequestStatus"));
 
-// LAB-R8 pages
+// Modern LAB-R8 pages (Clean URLs)
+const ProviderInbox = lazy(() => import("@/pages/labr8/ProviderInbox"));
+const ProjectWorkspace = lazy(() => import("@/pages/labr8/ProjectWorkspace"));
+
+// Legacy LAB-R8 pages
 const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
 const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
@@ -70,11 +80,7 @@ const ModernLabr8Dashboard = lazy(() => import("@/pages/labr8/ModernLabr8Dashboa
 const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
 const Labr8ProjectDetails = lazy(() => import("@/pages/labr8/Labr8ProjectDetails"));
 const Labr8ProjectStatus = lazy(() => import("@/pages/labr8/Labr8ProjectStatus"));
-
-// Enhanced LAB-R8 dashboard
 const EnhancedLabr8Dashboard = lazy(() => import("@/pages/labr8/EnhancedLabr8Dashboard"));
-
-// Grid LAB-R8 dashboard and Fixed Request Status
 const GridLabr8Dashboard = lazy(() => import("@/pages/labr8/GridLabr8Dashboard"));
 const FixedRequestStatusPage = lazy(() => import("@/components/modul8/FixedRequestStatusPage"));
 
