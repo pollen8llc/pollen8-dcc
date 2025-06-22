@@ -97,7 +97,7 @@ const NextGenModul8Dashboard = () => {
 
   const domainActivity = DOMAIN_PAGES.slice(0, 6).map(domain => ({
     ...domain,
-    icon: domainIconMap[domain.title] || Building2, // Add fallback icon
+    icon: domainIconMap[domain.title] || Building2,
     activeProviders: Math.floor(Math.random() * 20) + 5,
     recentRequests: Math.floor(Math.random() * 8) + 1,
     avgRating: (4 + Math.random()).toFixed(1)
@@ -137,7 +137,7 @@ const NextGenModul8Dashboard = () => {
               Manage your service network and collaborations
             </p>
             <div className="flex items-center space-x-4 mt-3">
-              <Badge variant="teal" className="font-medium">
+              <Badge variant="outline" className="font-medium border-[#00eada] text-[#00eada]">
                 {enhancedMetrics.totalProjects} total projects
               </Badge>
               <Badge variant="outline">

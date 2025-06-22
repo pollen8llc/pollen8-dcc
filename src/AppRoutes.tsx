@@ -61,7 +61,6 @@ import Labr8Dashboard from '@/pages/labr8/Labr8Dashboard';
 import GridLabr8Dashboard from '@/pages/labr8/GridLabr8Dashboard';
 import ModernLabr8Dashboard from '@/pages/labr8/ModernLabr8Dashboard';
 import EnhancedLabr8Dashboard from '@/pages/labr8/EnhancedLabr8Dashboard';
-import NextGenLabr8Dashboard from '@/pages/labr8/NextGenLabr8Dashboard';
 import ClientDatabase from '@/pages/labr8/ClientDatabase';
 import Labr8ProjectStatus from '@/pages/labr8/Labr8ProjectStatus';
 import Labr8RequestStatus from '@/pages/labr8/Labr8RequestStatus';
@@ -210,11 +209,6 @@ const AppRoutes = () => {
       <Route path="/labr8/enhanced" element={
         <ServiceProviderProtectedRoute>
           <EnhancedLabr8Dashboard />
-        </ServiceProviderProtectedRoute>
-      } />
-      <Route path="/labr8/nextgen" element={
-        <ServiceProviderProtectedRoute>
-          <NextGenLabr8Dashboard />
         </ServiceProviderProtectedRoute>
       } />
       <Route path="/labr8/clients" element={
