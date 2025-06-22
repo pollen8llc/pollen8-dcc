@@ -67,7 +67,7 @@ export function useLabr8Dashboard(userId?: string) {
     loadData();
   };
 
-  // Categorization with logging
+  // Proper categorization based on status
   const pendingRequests = incomingRequests.filter(r => {
     const isPending = r.status === "pending";
     if (isPending) console.log('Pending request found:', r.title, r.id);
@@ -75,7 +75,7 @@ export function useLabr8Dashboard(userId?: string) {
   });
   
   const negotiatingRequests = assignedRequests.filter(r => {
-    const isNegotiating = r.status === "negotiating" || r.status === "assigned";
+    const isNegotiating = r.status === "negotiating";
     if (isNegotiating) console.log('Negotiating request found:', r.title, r.id);
     return isNegotiating;
   });

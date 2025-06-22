@@ -93,13 +93,25 @@ export const updateOrganizer = async (id: string, data: Partial<CreateOrganizerD
 };
 
 export const getUserOrganizer = async (userId: string): Promise<Organizer | null> => {
+  console.log('getUserOrganizer called with userId:', userId);
+  
   const { data, error } = await supabase
     .from('modul8_organizers')
     .select('*')
     .eq('user_id', userId)
     .maybeSingle();
   
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching organizer:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    console.log('No organizer found for user:', userId);
+    return null;
+  }
+  
+  console.log('Organizer found:', data);
   return data;
 };
 
@@ -200,6 +212,8 @@ export const deleteServiceRequest = async (id: string): Promise<void> => {
 };
 
 export const getOrganizerServiceRequests = async (organizerId: string): Promise<ServiceRequest[]> => {
+  console.log('Loading organizer service requests for organizer:', organizerId);
+  
   const { data, error } = await supabase
     .from('modul8_service_requests')
     .select(`

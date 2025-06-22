@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ServiceProviderProtectedRoute from '@/components/auth/ServiceProviderProtectedRoute';
@@ -122,21 +121,6 @@ const AppRoutes = () => {
           <Modul8Dashboard />
         </NonServiceProviderRoute>
       } />
-      <Route path="/modul8/modern" element={
-        <NonServiceProviderRoute>
-          <ModernModul8Dashboard />
-        </NonServiceProviderRoute>
-      } />
-      <Route path="/modul8/enhanced" element={
-        <NonServiceProviderRoute>
-          <EnhancedModul8Dashboard />
-        </NonServiceProviderRoute>
-      } />
-      <Route path="/modul8/nextgen" element={
-        <NonServiceProviderRoute>
-          <NextGenModul8Dashboard />
-        </NonServiceProviderRoute>
-      } />
       <Route path="/modul8/domain/:domainId" element={
         <NonServiceProviderRoute>
           <DomainProviders />
@@ -147,24 +131,9 @@ const AppRoutes = () => {
           <RequestWizard />
         </NonServiceProviderRoute>
       } />
-      <Route path="/modul8/request/form" element={
-        <NonServiceProviderRoute>
-          <ServiceRequestForm />
-        </NonServiceProviderRoute>
-      } />
       <Route path="/modul8/request/:requestId" element={
         <NonServiceProviderRoute>
           <ServiceRequestDetails />
-        </NonServiceProviderRoute>
-      } />
-      <Route path="/modul8/request/:requestId/status" element={
-        <NonServiceProviderRoute>
-          <RequestStatus />
-        </NonServiceProviderRoute>
-      } />
-      <Route path="/modul8/project/:projectId/status" element={
-        <NonServiceProviderRoute>
-          <ProjectStatusView />
         </NonServiceProviderRoute>
       } />
       <Route path="/modul8/providers" element={
@@ -196,41 +165,6 @@ const AppRoutes = () => {
           <Labr8Dashboard />
         </ServiceProviderProtectedRoute>
       } />
-      <Route path="/labr8/grid" element={
-        <ServiceProviderProtectedRoute>
-          <GridLabr8Dashboard />
-        </ServiceProviderProtectedRoute>
-      } />
-      <Route path="/labr8/modern" element={
-        <ServiceProviderProtectedRoute>
-          <ModernLabr8Dashboard />
-        </ServiceProviderProtectedRoute>
-      } />
-      <Route path="/labr8/enhanced" element={
-        <ServiceProviderProtectedRoute>
-          <EnhancedLabr8Dashboard />
-        </ServiceProviderProtectedRoute>
-      } />
-      <Route path="/labr8/clients" element={
-        <ServiceProviderProtectedRoute>
-          <ClientDatabase />
-        </ServiceProviderProtectedRoute>
-      } />
-      <Route path="/labr8/:providerId/:requestId/status" element={
-        <ServiceProviderProtectedRoute>
-          <Labr8ProjectStatus />
-        </ServiceProviderProtectedRoute>
-      } />
-      <Route path="/labr8/request/:requestId/status" element={
-        <ServiceProviderProtectedRoute>
-          <Labr8RequestStatus />
-        </ServiceProviderProtectedRoute>
-      } />
-      <Route path="/labr8/project/:projectId" element={
-        <ServiceProviderProtectedRoute>
-          <Labr8ProjectDetails />
-        </ServiceProviderProtectedRoute>
-      } />
       <Route path="/labr8/request/:requestId" element={
         <ServiceProviderProtectedRoute>
           <Labr8RequestDetails />
@@ -239,11 +173,6 @@ const AppRoutes = () => {
       <Route path="/labr8/projects/:projectId" element={
         <ServiceProviderProtectedRoute>
           <ProjectDetails />
-        </ServiceProviderProtectedRoute>
-      } />
-      <Route path="/labr8/workspace/:projectId" element={
-        <ServiceProviderProtectedRoute>
-          <ProjectWorkspace />
         </ServiceProviderProtectedRoute>
       } />
 
