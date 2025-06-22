@@ -66,10 +66,10 @@ const NegotiationFlow = ({
     setShowResponseForm(false);
   };
 
-  const handleResponseFormSubmit = (data: any) => {
+  const handleResponseFormSubmit = async (data: any): Promise<void> => {
     // Handle form submission logic here
     console.log('Proposal submitted:', data);
-    handleProposalUpdate();
+    await handleProposalUpdate();
   };
 
   const getStageNumber = (status: string) => {
