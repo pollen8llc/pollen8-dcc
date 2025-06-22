@@ -16,7 +16,7 @@ const ContactListPage = () => {
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ['contacts'],
-    queryFn: getContacts,
+    queryFn: () => getContacts(),
   });
 
   const filteredContacts = contacts.filter(contact =>
