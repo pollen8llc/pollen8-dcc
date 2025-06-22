@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSession } from '@/hooks/useSession';
+import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +24,7 @@ import {
 } from '@/services/modul8Service';
 
 const ProviderInbox = () => {
-  const { session } = useSession();
+  const { currentUser } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -34,16 +34,16 @@ const ProviderInbox = () => {
 
   useEffect(() => {
     loadInboxData();
-  }, [session?.user?.id]);
+  }, [currentUser?.id]);
 
   const loadInboxData = async () => {
-    if (!session?.user?.id) return;
+    if (!currentUser?.id) return;
 
     try {
       setIsLoading(true);
       
       // Get service provider profile
-      const provider = await getUserServiceProvider(session.user.id);
+      const provider = await getUserServiceProvider(currentUser.id);
       if (!provider) {
         navigate('/labr8/setup');
         return;

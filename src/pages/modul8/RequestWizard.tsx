@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Building, Send } from 'lucide-react';
-import { createServiceRequest } from '@/services/modul8Service';
+import { createServiceRequest, getUserOrganizer } from '@/services/modul8Service';
 
 const RequestWizard = () => {
   const { currentUser } = useUser();
@@ -20,7 +20,9 @@ const RequestWizard = () => {
   
   const [selectedProvider, setSelectedProvider] = useState<any>(null);
   const [selectedDomain, setSelectedDomain] = useState<any>(null);
+  const [organizer, setOrganizer] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -32,17 +34,53 @@ const RequestWizard = () => {
   });
 
   useEffect(() => {
-    // Retrieve data from sessionStorage
-    const storedProvider = sessionStorage.getItem('selectedProvider');
-    const storedDomain = sessionStorage.getItem('selectedDomain');
-    
-    if (storedProvider) {
-      setSelectedProvider(JSON.parse(storedProvider));
+    loadRequestWizardData();
+  }, [currentUser]);
+
+  const loadRequestWizardData = async () => {
+    if (!currentUser) return;
+
+    try {
+      // Check if user has organizer profile
+      const organizerProfile = await getUserOrganizer(currentUser.id);
+      if (!organizerProfile) {
+        toast({
+          title: "Setup Required",
+          description: "Please complete your organizer profile setup first",
+          variant: "destructive"
+        });
+        navigate('/modul8/setup/organizer');
+        return;
+      }
+      setOrganizer(organizerProfile);
+
+      // Retrieve data from sessionStorage
+      const storedProvider = sessionStorage.getItem('selectedProvider');
+      const storedDomain = sessionStorage.getItem('selectedDomain');
+      
+      if (storedProvider) {
+        setSelectedProvider(JSON.parse(storedProvider));
+      }
+      if (storedDomain) {
+        setSelectedDomain(JSON.parse(storedDomain));
+      }
+
+      if (!storedProvider || !storedDomain) {
+        navigate('/modul8');
+        return;
+      }
+    } catch (error) {
+      console.error('Error loading request wizard data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load request data",
+        variant: "destructive"
+      });
+      navigate('/modul8');
+    } finally {
+      setIsLoading(false);
     }
-    if (storedDomain) {
-      setSelectedDomain(JSON.parse(storedDomain));
-    }
-  }, []);
+  };
 
   const handleBack = () => {
     navigate('/modul8/directory');
@@ -58,7 +96,7 @@ const RequestWizard = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!currentUser || !selectedProvider || !selectedDomain) {
+    if (!currentUser || !selectedProvider || !selectedDomain || !organizer) {
       toast({
         title: "Error",
         description: "Missing required information. Please try again.",
@@ -70,7 +108,7 @@ const RequestWizard = () => {
     setIsSubmitting(true);
 
     try {
-      // Create the service request
+      // Create the service request using organizer ID (not user ID)
       const budgetRange = {
         min: formData.budgetMin ? parseInt(formData.budgetMin) : undefined,
         max: formData.budgetMax ? parseInt(formData.budgetMax) : undefined,
@@ -82,14 +120,14 @@ const RequestWizard = () => {
         : [];
 
       await createServiceRequest({
-        organizer_id: currentUser.id,
+        organizer_id: organizer.id, // Use organizer.id, not currentUser.id
         domain_page: selectedDomain.id,
         title: formData.title,
         description: formData.description,
         budget_range: budgetRange,
         timeline: formData.timeline,
         milestones,
-        service_provider_id: selectedProvider.id,
+        service_provider_id: null, // Start without assignment
         status: 'pending',
         engagement_status: 'none'
       });
@@ -100,7 +138,7 @@ const RequestWizard = () => {
 
       toast({
         title: "Request Sent",
-        description: "Your service request has been sent to the provider.",
+        description: "Your service request has been created successfully.",
       });
 
       // Navigate to status page
@@ -117,6 +155,19 @@ const RequestWizard = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!selectedProvider || !selectedDomain) {
     return (
@@ -161,35 +212,45 @@ const RequestWizard = () => {
           <div>
             <h1 className="text-3xl font-bold">Create Service Request</h1>
             <p className="text-muted-foreground mt-2">
-              Send a detailed request to your selected provider
+              Send a detailed request for the selected domain
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Provider Info */}
+          {/* Domain & Selection Info */}
           <div className="lg:col-span-1">
             <Card className="sticky top-4">
               <CardHeader>
-                <CardTitle className="text-lg">Selected Provider</CardTitle>
+                <CardTitle className="text-lg">Request Details</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={selectedProvider.logoUrl} />
-                    <AvatarFallback>
-                      <Building className="h-6 w-6" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-semibold">{selectedProvider.businessName}</h3>
-                    <p className="text-sm text-muted-foreground">{selectedProvider.tagline}</p>
-                  </div>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="font-medium mb-1">Domain:</p>
+                  <p className="text-sm text-muted-foreground">{selectedDomain.title}</p>
                 </div>
                 
-                <div className="text-sm">
-                  <p className="font-medium mb-1">Domain:</p>
-                  <p className="text-muted-foreground">{selectedDomain.title}</p>
+                <div>
+                  <p className="font-medium mb-1">Organization:</p>
+                  <p className="text-sm text-muted-foreground">
+                    {organizer?.organization_name || 'Your Organization'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-medium mb-1">Selected Provider:</p>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={selectedProvider.logoUrl} />
+                      <AvatarFallback>
+                        <Building className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{selectedProvider.businessName}</p>
+                      <p className="text-xs text-muted-foreground">{selectedProvider.tagline}</p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
