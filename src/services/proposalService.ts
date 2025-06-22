@@ -1,6 +1,7 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Proposal } from "@/types/modul8";
+
+export { Proposal } from "@/types/modul8";
 
 export const getProposalsByRequestId = async (serviceRequestId: string): Promise<Proposal[]> => {
   const { data, error } = await supabase
