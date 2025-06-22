@@ -19,7 +19,11 @@ export const createServiceProvider = async (data: CreateServiceProviderData): Pr
     .single();
   
   if (error) throw error;
-  return provider;
+  return {
+    ...provider,
+    services: provider.services as string[],
+    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+  } as ServiceProvider;
 };
 
 export const updateServiceProvider = async (id: string, data: Partial<CreateServiceProviderData>): Promise<ServiceProvider> => {
@@ -31,7 +35,11 @@ export const updateServiceProvider = async (id: string, data: Partial<CreateServ
     .single();
   
   if (error) throw error;
-  return provider;
+  return {
+    ...provider,
+    services: provider.services as string[],
+    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+  } as ServiceProvider;
 };
 
 export const getUserServiceProvider = async (userId: string): Promise<ServiceProvider | null> => {
@@ -42,7 +50,13 @@ export const getUserServiceProvider = async (userId: string): Promise<ServicePro
     .maybeSingle();
   
   if (error) throw error;
-  return data;
+  if (!data) return null;
+  
+  return {
+    ...data,
+    services: data.services as string[],
+    pricing_range: data.pricing_range as { min?: number; max?: number; currency: string; }
+  } as ServiceProvider;
 };
 
 export const createOrganizer = async (data: CreateOrganizerData): Promise<Organizer> => {
@@ -269,6 +283,9 @@ export const getAllServiceRequests = async (): Promise<ServiceRequest[]> => {
   })) as ServiceRequest[];
 };
 
+// Add missing function - alias for getAllServiceRequests for backward compatibility
+export const getServiceRequests = getAllServiceRequests;
+
 export const createProposal = async (data: CreateProposalData): Promise<Proposal> => {
   const { data: proposal, error } = await supabase
     .from('modul8_proposals')
@@ -277,7 +294,10 @@ export const createProposal = async (data: CreateProposalData): Promise<Proposal
     .single();
   
   if (error) throw error;
-  return proposal;
+  return {
+    ...proposal,
+    proposal_type: proposal.proposal_type as "initial" | "counter" | "revision"
+  } as Proposal;
 };
 
 export const getServiceRequestProposals = async (serviceRequestId: string): Promise<Proposal[]> => {
@@ -288,8 +308,15 @@ export const getServiceRequestProposals = async (serviceRequestId: string): Prom
     .order('created_at', { ascending: false });
   
   if (error) throw error;
-  return data || [];
+  return (data || []).map(proposal => ({
+    ...proposal,
+    proposal_type: proposal.proposal_type as "initial" | "counter" | "revision"
+  })) as Proposal[];
 };
+
+// Add missing function aliases
+export const getProposalsByRequestId = getServiceRequestProposals;
+export const getRequestProposals = getServiceRequestProposals;
 
 export const getServiceProviders = async (): Promise<ServiceProvider[]> => {
   const { data, error } = await supabase
@@ -298,7 +325,11 @@ export const getServiceProviders = async (): Promise<ServiceProvider[]> => {
     .order('created_at', { ascending: false });
   
   if (error) throw error;
-  return data || [];
+  return (data || []).map(provider => ({
+    ...provider,
+    services: provider.services as string[],
+    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+  })) as ServiceProvider[];
 };
 
 export const getServiceProviderById = async (id: string): Promise<ServiceProvider | null> => {
@@ -309,5 +340,45 @@ export const getServiceProviderById = async (id: string): Promise<ServiceProvide
     .maybeSingle();
   
   if (error) throw error;
-  return data;
+  if (!data) return null;
+  
+  return {
+    ...data,
+    services: data.services as string[],
+    pricing_range: data.pricing_range as { min?: number; max?: number; currency: string; }
+  } as ServiceProvider;
+};
+
+// Add missing functions
+export const getServiceProvidersByDomain = async (domainId: number): Promise<ServiceProvider[]> => {
+  const { data, error } = await supabase
+    .from('modul8_service_providers')
+    .select('*')
+    .contains('domain_specializations', [domainId])
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return (data || []).map(provider => ({
+    ...provider,
+    services: provider.services as string[],
+    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+  })) as ServiceProvider[];
+};
+
+export const assignServiceProvider = async (serviceRequestId: string, serviceProviderId: string): Promise<ServiceRequest> => {
+  const { error } = await supabase.rpc('assign_request_to_provider', {
+    p_service_request_id: serviceRequestId,
+    p_service_provider_id: serviceProviderId
+  });
+  
+  if (error) throw error;
+  
+  const updatedRequest = await getServiceRequestById(serviceRequestId);
+  if (!updatedRequest) throw new Error('Service request not found after assignment');
+  
+  return updatedRequest;
+};
+
+export const closeServiceRequest = async (id: string): Promise<ServiceRequest> => {
+  return await updateServiceRequest(id, { status: 'cancelled' });
 };
