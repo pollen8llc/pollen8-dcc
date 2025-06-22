@@ -33,7 +33,7 @@ const ProviderInbox = () => {
   const { session, logout } = useSession();
   const navigate = useNavigate();
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
-  const [providerAssignedRequests, setProviderAssignedRequests] = useState<ServiceRequest[]>([]);
+  const [assignedRequests, setAssignedRequests] = useState<ServiceRequest[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,7 +58,7 @@ const ProviderInbox = () => {
       // Load assigned requests (requests specifically assigned to this provider)
       const assigned = await getProviderServiceRequests(provider.id);
       console.log('Assigned requests loaded:', assigned);
-      setProviderAssignedRequests(assigned);
+      setAssignedRequests(assigned);
 
       // Load available requests (pending requests with no provider assigned)
       const available = await getAvailableServiceRequestsForProvider(provider.id);
@@ -117,12 +117,12 @@ const ProviderInbox = () => {
 
   // Categorize requests based on their status and assignment
   const pendingRequests = incomingRequests.filter(r => r.status === 'pending' && !r.service_provider_id);
-  const myAssignedRequests = providerAssignedRequests.filter(r => 
+  const assignedRequests = assignedRequests.filter(r => 
     r.status === 'assigned' || r.status === 'pending' && r.service_provider_id === serviceProvider?.id
   );
-  const negotiatingRequests = providerAssignedRequests.filter(r => r.status === 'negotiating');
-  const activeProjects = providerAssignedRequests.filter(r => ['agreed', 'in_progress'].includes(r.status));
-  const completedProjects = providerAssignedRequests.filter(r => r.status === 'completed');
+  const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating');
+  const activeProjects = assignedRequests.filter(r => ['agreed', 'in_progress'].includes(r.status));
+  const completedProjects = assignedRequests.filter(r => r.status === 'completed');
 
   if (loading) {
     return (
@@ -200,7 +200,7 @@ const ProviderInbox = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Assigned to You</p>
-                  <p className="text-2xl font-bold">{myAssignedRequests.length}</p>
+                  <p className="text-2xl font-bold">{assignedRequests.length}</p>
                 </div>
                 <div className="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center">
                   <Bell className="h-6 w-6 text-orange-600" />
@@ -242,7 +242,7 @@ const ProviderInbox = () => {
         <Tabs defaultValue="assigned" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="assigned">
-              Assigned ({myAssignedRequests.length})
+              Assigned ({assignedRequests.length})
             </TabsTrigger>
             <TabsTrigger value="market">
               Open Market ({pendingRequests.length})
@@ -256,7 +256,7 @@ const ProviderInbox = () => {
           </TabsList>
 
           <TabsContent value="assigned" className="mt-6">
-            {myAssignedRequests.length === 0 ? (
+            {assignedRequests.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Bell className="h-12 w-12 text-muted-foreground mb-4" />
@@ -270,7 +270,7 @@ const ProviderInbox = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {myAssignedRequests.map((request) => (
+                {assignedRequests.map((request) => (
                   <RequestCard 
                     key={request.id} 
                     request={request} 

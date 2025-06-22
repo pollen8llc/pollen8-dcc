@@ -30,7 +30,6 @@ const ProviderDirectory = lazy(() => import('@/pages/modul8/ProviderDirectory'))
 const RequestWizard = lazy(() => import('@/pages/modul8/RequestWizard'));
 const ProjectStatusView = lazy(() => import('@/pages/modul8/ProjectStatusView'));
 const OrganizerSetup = lazy(() => import('@/pages/modul8/OrganizerSetup'));
-const Labr8RequestStatus = lazy(() => import('@/pages/labr8/Labr8RequestStatus'));
 
 // LAB-R8 Pages
 const Labr8Auth = lazy(() => import('@/pages/labr8/Labr8Auth'));
@@ -53,8 +52,6 @@ const AppRoutes = () => {
         <Route path="/labr8/setup" element={<ServiceProviderProtectedRoute><Labr8Setup /></ServiceProviderProtectedRoute>} />
         <Route path="/labr8/inbox" element={<ServiceProviderProtectedRoute><ProviderInbox /></ServiceProviderProtectedRoute>} />
         <Route path="/labr8/project" element={<ServiceProviderProtectedRoute><ProjectWorkspace /></ServiceProviderProtectedRoute>} />
-        <Route path="/labr8/request/:requestId/status" element={<ServiceProviderProtectedRoute><Labr8RequestStatus /></ServiceProviderProtectedRoute>} />
-        <Route path="/labr8/:providerId/:requestId/status" element={<ServiceProviderProtectedRoute><Labr8RequestStatus /></ServiceProviderProtectedRoute>} />
         
         {/* Profile setup - accessible to all authenticated users */}
         <Route path="/profile/setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
@@ -71,7 +68,6 @@ const AppRoutes = () => {
         <Route path="/modul8/directory" element={<NonServiceProviderRoute><ProtectedRoute><ProviderDirectory /></ProtectedRoute></NonServiceProviderRoute>} />
         <Route path="/modul8/request" element={<NonServiceProviderRoute><ProtectedRoute><RequestWizard /></ProtectedRoute></NonServiceProviderRoute>} />
         <Route path="/modul8/status" element={<NonServiceProviderRoute><ProtectedRoute><ProjectStatusView /></ProtectedRoute></NonServiceProviderRoute>} />
-        <Route path="/modul8/request/:requestId/status" element={<NonServiceProviderRoute><ProtectedRoute><Labr8RequestStatus /></ProtectedRoute></NonServiceProviderRoute>} />
         <Route path="/modul8/setup/organizer" element={<NonServiceProviderRoute><ProtectedRoute><OrganizerSetup /></ProtectedRoute></NonServiceProviderRoute>} />
         
         {/* Admin routes */}
