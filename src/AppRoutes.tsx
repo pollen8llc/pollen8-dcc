@@ -42,6 +42,7 @@ import DebuggerDashboard from '@/pages/admin/DebuggerDashboard';
 import Modul8Dashboard from '@/pages/modul8/Modul8Dashboard';
 import ModernModul8Dashboard from '@/pages/modul8/ModernModul8Dashboard';
 import EnhancedModul8Dashboard from '@/pages/modul8/EnhancedModul8Dashboard';
+import NextGenModul8Dashboard from '@/pages/modul8/NextGenModul8Dashboard';
 import DomainProviders from '@/pages/modul8/DomainProviders';
 import RequestWizard from '@/pages/modul8/RequestWizard';
 import ServiceRequestForm from '@/pages/modul8/ServiceRequestForm';
@@ -60,6 +61,7 @@ import Labr8Dashboard from '@/pages/labr8/Labr8Dashboard';
 import GridLabr8Dashboard from '@/pages/labr8/GridLabr8Dashboard';
 import ModernLabr8Dashboard from '@/pages/labr8/ModernLabr8Dashboard';
 import EnhancedLabr8Dashboard from '@/pages/labr8/EnhancedLabr8Dashboard';
+import NextGenLabr8Dashboard from '@/pages/labr8/NextGenLabr8Dashboard';
 import ClientDatabase from '@/pages/labr8/ClientDatabase';
 import ProviderInbox from '@/pages/labr8/ProviderInbox';
 import Labr8ProjectStatus from '@/pages/labr8/Labr8ProjectStatus';
@@ -130,6 +132,11 @@ const AppRoutes = () => {
       <Route path="/modul8/enhanced" element={
         <NonServiceProviderRoute>
           <EnhancedModul8Dashboard />
+        </NonServiceProviderRoute>
+      } />
+      <Route path="/modul8/nextgen" element={
+        <NonServiceProviderRoute>
+          <NextGenModul8Dashboard />
         </NonServiceProviderRoute>
       } />
       <Route path="/modul8/domain/:domainId" element={
@@ -204,6 +211,16 @@ const AppRoutes = () => {
       <Route path="/labr8/enhanced" element={
         <ServiceProviderProtectedRoute>
           <EnhancedLabr8Dashboard />
+        </ServiceProviderProtectedRoute>
+      } />
+      <Route path="/labr8/nextgen" element={
+        <ServiceProviderProtectedRoute>
+          <NextGenLabr8Dashboard />
+        </ServiceProviderProtectedRoute>
+      } />
+      <Route path="/labr8/clients" element={
+        <ServiceProviderProtectedRoute>
+          <ClientDatabase />
         </ServiceProviderProtectedRoute>
       } />
       <Route path="/labr8/inbox" element={
