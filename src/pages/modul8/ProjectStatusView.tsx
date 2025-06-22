@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
@@ -20,8 +19,9 @@ import {
   Send
 } from 'lucide-react';
 import { 
-  getServiceRequestsByOrganizer,
-  updateServiceRequest
+  getOrganizerServiceRequests,
+  updateServiceRequest,
+  getUserOrganizer
 } from '@/services/modul8Service';
 import { 
   getServiceRequestComments,
@@ -39,6 +39,7 @@ const ProjectStatusView = () => {
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [organizer, setOrganizer] = useState(null);
 
   useEffect(() => {
     loadProjects();
@@ -54,7 +55,22 @@ const ProjectStatusView = () => {
     if (!currentUser) return;
     
     try {
-      const userProjects = await getServiceRequestsByOrganizer(currentUser.id);
+      // First get the organizer profile
+      const organizerProfile = await getUserOrganizer(currentUser.id);
+      if (!organizerProfile) {
+        toast({
+          title: "Setup Required",
+          description: "Please complete your organizer profile setup",
+          variant: "destructive"
+        });
+        navigate('/modul8/setup/organizer');
+        return;
+      }
+      
+      setOrganizer(organizerProfile);
+      
+      // Get service requests for this organizer
+      const userProjects = await getOrganizerServiceRequests(organizerProfile.id);
       setProjects(userProjects);
       
       // Auto-select the most recent active project
