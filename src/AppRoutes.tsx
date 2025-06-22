@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { ServiceProviderProtectedRoute } from '@/components/auth/ServiceProviderProtectedRoute';
-import { NonServiceProviderRoute } from '@/components/auth/NonServiceProviderRoute';
-import { Rel8ProtectedRoute } from '@/components/auth/Rel8ProtectedRoute';
+import ServiceProviderProtectedRoute from '@/components/auth/ServiceProviderProtectedRoute';
+import NonServiceProviderRoute from '@/components/auth/NonServiceProviderRoute';
+import Rel8ProtectedRoute from '@/components/auth/Rel8ProtectedRoute';
 
 // Import all pages
 import Index from '@/pages/Index';
