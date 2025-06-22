@@ -1,157 +1,257 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { ServiceRequest } from '@/types/modul8';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  DollarSign, 
+  Clock, 
+  FileText, 
+  Send,
+  X
+} from 'lucide-react';
+import { ServiceRequest, Proposal } from '@/types/modul8';
+import { createProposal } from '@/services/proposalService';
+import { useSession } from '@/hooks/useSession';
+import { toast } from '@/hooks/use-toast';
 
-interface ProviderResponseData {
-  quoteAmount: number;
-  timeline: string;
-  scopeDetails: string;
-  terms: string;
-  clarifications?: string;
-}
+const proposalSchema = z.object({
+  quote_amount: z.number().min(1, 'Quote amount is required'),
+  timeline: z.string().min(1, 'Timeline is required'),
+  scope_details: z.string().min(10, 'Please provide detailed scope information'),
+  terms: z.string().optional(),
+});
+
+type ProposalFormData = z.infer<typeof proposalSchema>;
 
 interface ProviderResponseFormProps {
   serviceRequest: ServiceRequest;
-  onSubmit: (data: ProviderResponseData) => void;
+  existingProposal?: Proposal;
+  proposalType?: 'initial' | 'counter' | 'revision';
+  onSubmit: (data: any) => void;
   onCancel: () => void;
-  isSubmitting?: boolean;
 }
 
-const ProviderResponseForm: React.FC<ProviderResponseFormProps> = ({
-  serviceRequest,
-  onSubmit,
-  onCancel,
-  isSubmitting = false
-}) => {
-  const [formData, setFormData] = useState<ProviderResponseData>({
-    quoteAmount: 0,
-    timeline: '',
-    scopeDetails: '',
-    terms: '',
-    clarifications: ''
+const ProviderResponseForm = ({ 
+  serviceRequest, 
+  existingProposal,
+  proposalType = 'initial',
+  onSubmit, 
+  onCancel 
+}: ProviderResponseFormProps) => {
+  const { session } = useSession();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch
+  } = useForm<ProposalFormData>({
+    resolver: zodResolver(proposalSchema),
+    defaultValues: {
+      quote_amount: existingProposal?.quote_amount || undefined,
+      timeline: existingProposal?.timeline || '',
+      scope_details: existingProposal?.scope_details || '',
+      terms: existingProposal?.terms || '',
+    }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const onFormSubmit = async (data: ProposalFormData) => {
+    if (!session?.user?.id) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to submit a proposal",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const proposalData = {
+        service_request_id: serviceRequest.id,
+        from_user_id: session.user.id,
+        proposal_type: proposalType,
+        quote_amount: data.quote_amount,
+        timeline: data.timeline,
+        scope_details: data.scope_details,
+        terms: data.terms || ''
+      };
+
+      await createProposal(proposalData);
+
+      toast({
+        title: "Proposal Submitted",
+        description: `Your ${proposalType} proposal has been submitted successfully`,
+      });
+
+      onSubmit(proposalData);
+    } catch (error) {
+      console.error('Error submitting proposal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit proposal. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const budgetRange = serviceRequest.budget_range;
-  const suggestedBudget = budgetRange?.min ? 
-    `$${budgetRange.min.toLocaleString()}${budgetRange.max ? ` - $${budgetRange.max.toLocaleString()}` : '+'}` 
-    : 'Not specified';
+  const getFormTitle = () => {
+    switch (proposalType) {
+      case 'counter':
+        return 'Submit Counter Offer';
+      case 'revision':
+        return 'Submit Revised Proposal';
+      default:
+        return 'Submit Proposal';
+    }
+  };
+
+  const getFormDescription = () => {
+    switch (proposalType) {
+      case 'counter':
+        return 'Update your proposal based on the organizer\'s feedback';
+      case 'revision':
+        return 'Revise your proposal with new terms';
+      default:
+        return 'Provide your proposal details for this project';
+    }
+  };
 
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className="border-2 border-[#00eada]/20">
       <CardHeader>
-        <CardTitle>Respond to Service Request</CardTitle>
-        <div className="text-sm text-muted-foreground">
-          <p><strong>Request:</strong> {serviceRequest.title}</p>
-          <p><strong>Client Budget:</strong> {suggestedBudget}</p>
-          <p><strong>Timeline:</strong> {serviceRequest.timeline || 'Not specified'}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-[#00eada]">
+              <Send className="h-5 w-5" />
+              {getFormTitle()}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              {getFormDescription()}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            className="h-8 w-8 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </CardHeader>
+      
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+          {/* Project Summary */}
+          <div className="bg-muted/20 p-4 rounded-lg">
+            <h4 className="font-medium mb-2">{serviceRequest.title}</h4>
+            <p className="text-sm text-muted-foreground">
+              {serviceRequest.description}
+            </p>
+          </div>
+
+          {/* Quote Amount */}
           <div className="space-y-2">
-            <Label htmlFor="quoteAmount">Your Quote ($) *</Label>
+            <Label htmlFor="quote_amount" className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-green-600" />
+              Quote Amount
+            </Label>
             <Input
-              id="quoteAmount"
+              id="quote_amount"
               type="number"
-              value={formData.quoteAmount}
-              onChange={(e) => setFormData(prev => ({ ...prev, quoteAmount: Number(e.target.value) }))}
-              placeholder="Enter your quote"
-              min="0"
-              required
+              step="0.01"
+              placeholder="Enter your quote amount"
+              {...register('quote_amount', { valueAsNumber: true })}
+              className={errors.quote_amount ? 'border-red-500' : ''}
             />
-            {budgetRange?.min && formData.quoteAmount > 0 && (
-              <div className="text-xs">
-                {formData.quoteAmount < budgetRange.min && (
-                  <Badge variant="secondary" className="text-orange-600">
-                    Below client's minimum budget
-                  </Badge>
-                )}
-                {budgetRange.max && formData.quoteAmount > budgetRange.max && (
-                  <Badge variant="secondary" className="text-red-600">
-                    Above client's maximum budget
-                  </Badge>
-                )}
-                {formData.quoteAmount >= budgetRange.min && 
-                 (!budgetRange.max || formData.quoteAmount <= budgetRange.max) && (
-                  <Badge variant="secondary" className="text-green-600">
-                    Within client's budget range
-                  </Badge>
-                )}
-              </div>
+            {errors.quote_amount && (
+              <p className="text-sm text-red-600">{errors.quote_amount.message}</p>
             )}
           </div>
 
+          {/* Timeline */}
           <div className="space-y-2">
-            <Label htmlFor="timeline">Estimated Timeline *</Label>
+            <Label htmlFor="timeline" className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-blue-600" />
+              Timeline
+            </Label>
             <Input
               id="timeline"
-              value={formData.timeline}
-              onChange={(e) => setFormData(prev => ({ ...prev, timeline: e.target.value }))}
-              placeholder="e.g., 2-3 weeks, Complete by July 30"
-              required
+              placeholder="e.g., 2-3 weeks, 1 month"
+              {...register('timeline')}
+              className={errors.timeline ? 'border-red-500' : ''}
             />
+            {errors.timeline && (
+              <p className="text-sm text-red-600">{errors.timeline.message}</p>
+            )}
           </div>
 
+          {/* Scope Details */}
           <div className="space-y-2">
-            <Label htmlFor="scopeDetails">Scope & Approach *</Label>
+            <Label htmlFor="scope_details" className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-purple-600" />
+              Scope & Approach
+            </Label>
             <Textarea
-              id="scopeDetails"
-              value={formData.scopeDetails}
-              onChange={(e) => setFormData(prev => ({ ...prev, scopeDetails: e.target.value }))}
-              placeholder="Describe your approach and what you will deliver..."
-              rows={4}
-              required
+              id="scope_details"
+              placeholder="Describe your approach, deliverables, and scope of work..."
+              rows={5}
+              {...register('scope_details')}
+              className={errors.scope_details ? 'border-red-500' : ''}
             />
+            {errors.scope_details && (
+              <p className="text-sm text-red-600">{errors.scope_details.message}</p>
+            )}
           </div>
 
+          {/* Terms */}
           <div className="space-y-2">
-            <Label htmlFor="terms">Terms & Conditions</Label>
+            <Label htmlFor="terms">Terms & Conditions (Optional)</Label>
             <Textarea
               id="terms"
-              value={formData.terms}
-              onChange={(e) => setFormData(prev => ({ ...prev, terms: e.target.value }))}
               placeholder="Payment terms, revision policy, etc..."
               rows={3}
+              {...register('terms')}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="clarifications">Questions or Clarifications</Label>
-            <Textarea
-              id="clarifications"
-              value={formData.clarifications}
-              onChange={(e) => setFormData(prev => ({ ...prev, clarifications: e.target.value }))}
-              placeholder="Any questions about the scope or requirements..."
-              rows={3}
-            />
-          </div>
+          {proposalType === 'counter' && existingProposal && (
+            <Alert>
+              <AlertDescription>
+                <strong>Previous proposal:</strong> ${existingProposal.quote_amount?.toLocaleString()} - {existingProposal.timeline}
+              </AlertDescription>
+            </Alert>
+          )}
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
+          {/* Submit Actions */}
+          <div className="flex gap-3 pt-4 border-t">
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
             >
-              {isSubmitting ? 'Sending...' : 'Send Proposal'}
+              {isSubmitting ? 'Submitting...' : `Submit ${proposalType === 'counter' ? 'Counter Offer' : 'Proposal'}`}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
+              Cancel
             </Button>
           </div>
         </form>

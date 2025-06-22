@@ -14,7 +14,7 @@ import {
   User,
   AlertTriangle
 } from 'lucide-react';
-import { getProposalsByRequestId } from '@/services/modul8Service';
+import { getProposalsByRequestId, updateProposalStatus } from '@/services/proposalService';
 import { toast } from '@/hooks/use-toast';
 import ProviderResponseForm from './ProviderResponseForm';
 import ProposalCard from './ProposalCard';
@@ -35,6 +35,8 @@ const NegotiationFlow = ({
   const [loading, setLoading] = useState(true);
   const [showContractModal, setShowContractModal] = useState(false);
   const [showResponseForm, setShowResponseForm] = useState(false);
+  const [showCounterForm, setShowCounterForm] = useState(false);
+  const [counterProposal, setCounterProposal] = useState<Proposal | null>(null);
 
   useEffect(() => {
     loadProposals();
@@ -58,6 +60,8 @@ const NegotiationFlow = ({
 
   const handleProposalUpdate = () => {
     setShowResponseForm(false);
+    setShowCounterForm(false);
+    setCounterProposal(null);
     loadProposals();
     onUpdate();
   };
@@ -66,10 +70,55 @@ const NegotiationFlow = ({
     setShowResponseForm(false);
   };
 
+  const handleCounterFormCancel = () => {
+    setShowCounterForm(false);
+    setCounterProposal(null);
+  };
+
   const handleResponseFormSubmit = (data: any) => {
-    // Handle form submission logic here
     console.log('Proposal submitted:', data);
     handleProposalUpdate();
+  };
+
+  const handleAcceptProposal = async (proposal: Proposal) => {
+    try {
+      await updateProposalStatus(proposal.id, 'accepted');
+      toast({
+        title: "Proposal Accepted",
+        description: "The proposal has been accepted successfully",
+      });
+      handleProposalUpdate();
+    } catch (error) {
+      console.error('Error accepting proposal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to accept proposal",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeclineProposal = async (proposal: Proposal) => {
+    try {
+      await updateProposalStatus(proposal.id, 'rejected');
+      toast({
+        title: "Proposal Declined",
+        description: "The proposal has been declined",
+      });
+      handleProposalUpdate();
+    } catch (error) {
+      console.error('Error declining proposal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to decline proposal",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCounterOffer = (proposal: Proposal) => {
+    setCounterProposal(proposal);
+    setShowCounterForm(true);
   };
 
   const getStageNumber = (status: string) => {
@@ -181,6 +230,9 @@ const NegotiationFlow = ({
                     <ProposalCard
                       key={proposal.id}
                       proposal={proposal}
+                      onAccept={() => handleAcceptProposal(proposal)}
+                      onDecline={() => handleDeclineProposal(proposal)}
+                      onCounter={() => handleCounterOffer(proposal)}
                       onUpdate={handleProposalUpdate}
                       isOrganizer={!isServiceProvider}
                     />
@@ -193,6 +245,24 @@ const NegotiationFlow = ({
                     No proposals found for this request.
                   </AlertDescription>
                 </Alert>
+              )}
+
+              {/* Counter Offer Form */}
+              {showCounterForm && counterProposal && (
+                <Card className="border-orange-200 bg-orange-50/50">
+                  <CardHeader>
+                    <CardTitle className="text-orange-800">Submit Counter Offer</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ProviderResponseForm
+                      serviceRequest={serviceRequest}
+                      existingProposal={counterProposal}
+                      proposalType="counter"
+                      onSubmit={handleResponseFormSubmit}
+                      onCancel={handleCounterFormCancel}
+                    />
+                  </CardContent>
+                </Card>
               )}
             </CardContent>
           </Card>
@@ -376,6 +446,28 @@ const NegotiationFlow = ({
       )}
     </div>
   );
+};
+
+const getStageNumber = (status: string) => {
+  switch (status) {
+    case 'pending': return 1;
+    case 'negotiating': return 2;
+    case 'agreed': return 3;
+    case 'in_progress': return 4;
+    case 'completed': return 5;
+    default: return 1;
+  }
+};
+
+const getStageTitle = (status: string) => {
+  switch (status) {
+    case 'pending': return 'Initiated';
+    case 'negotiating': return 'Proposal';
+    case 'agreed': return 'Agreement';
+    case 'in_progress': return 'Contract';
+    case 'completed': return 'Completed';
+    default: return 'Initiated';
+  }
 };
 
 export default NegotiationFlow;
