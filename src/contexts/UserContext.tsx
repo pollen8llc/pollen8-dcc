@@ -26,6 +26,8 @@ const UserContext = createContext<UserContextType>({
 });
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log('UserProvider: Initializing user context');
+  
   const { session, isLoading: sessionLoading, logout, recoverUserSession } = useSession();
   const { 
     currentUser, 
@@ -35,6 +37,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   } = useProfile(session);
 
   const { isAdmin, isOrganizer } = usePermissions(currentUser);
+
+  console.log('UserProvider: Session loading:', sessionLoading, 'Profile loading:', profileLoading);
+  console.log('UserProvider: Current user:', currentUser?.id, 'Session:', !!session);
 
   // Create profile if it doesn't exist yet
   React.useEffect(() => {
@@ -61,6 +66,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [currentUser, refreshUser]);
 
   const isLoading = sessionLoading || profileLoading;
+
+  console.log('UserProvider: Final loading state:', isLoading);
 
   return (
     <UserContext.Provider value={{ 
