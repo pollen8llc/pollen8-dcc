@@ -31,7 +31,12 @@ import {
   Building,
   AlertCircle,
   Eye,
-  Reply
+  Reply,
+  Plus,
+  Building2,
+  Globe,
+  BarChart3,
+  Briefcase
 } from "lucide-react";
 
 const Labr8Dashboard: React.FC = () => {
@@ -102,12 +107,12 @@ const Labr8Dashboard: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-blue-100 text-blue-800';
-      case 'negotiating': return 'bg-orange-100 text-orange-800';
-      case 'agreed': return 'bg-green-100 text-green-800';
-      case 'in_progress': return 'bg-purple-100 text-purple-800';
-      case 'completed': return 'bg-emerald-100 text-emerald-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      case 'negotiating': return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
+      case 'agreed': return 'bg-green-500/20 text-green-300 border-green-500/30';
+      case 'in_progress': return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+      case 'completed': return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
     }
   };
 
@@ -126,16 +131,35 @@ const Labr8Dashboard: React.FC = () => {
     });
   };
 
+  const handleViewDetails = (item: any) => {
+    // Navigate to detailed view with proper URL structure
+    if (item.status === 'completed' || item.status === 'in_progress') {
+      window.open(`/labr8/projects/${item.id}`, '_blank');
+    } else {
+      window.open(`/labr8/request/${item.id}`, '_blank');
+    }
+  };
+
+  const handleViewScope = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleViewTerms = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const renderRequestCard = (request: any) => (
-    <div key={request.id} className="p-4 rounded-lg bg-white/80 border border-gray-200/50 hover:shadow-md transition-all">
+    <div key={request.id} className="glass-card glass-morphism-hover p-6 space-y-4">
       <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h4 className="font-semibold text-gray-900 mb-2">{request.title}</h4>
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {request.description?.substring(0, 150)}...
-          </p>
+        <div className="flex-1 space-y-3">
+          <div>
+            <h4 className="font-semibold text-white text-lg mb-2">{request.title}</h4>
+            <p className="text-sm text-gray-300 line-clamp-2">
+              {request.description?.substring(0, 150)}...
+            </p>
+          </div>
           
-          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+          <div className="flex items-center gap-4 text-sm text-gray-400">
             {request.organizer && (
               <div className="flex items-center gap-2">
                 <Building className="h-4 w-4" />
@@ -144,39 +168,35 @@ const Labr8Dashboard: React.FC = () => {
             )}
             <div className="flex items-center gap-1">
               <DollarSign className="h-4 w-4" />
-              {formatBudget(request.budget_range)}
+              <span className="text-[#00eada]">{formatBudget(request.budget_range)}</span>
             </div>
           </div>
 
-          {/* Scope and Terms Links */}
+          {/* Clickable Document Links */}
           {(request.scope_details || request.terms) && (
-            <div className="flex gap-3 mb-3">
+            <div className="flex gap-3">
               {request.scope_details && (
-                <a
-                  href={request.scope_details}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8]"
+                <button
+                  onClick={() => handleViewScope(request.scope_details)}
+                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8] transition-colors"
                 >
                   <ExternalLink className="h-3 w-3" />
                   Scope Document
-                </a>
+                </button>
               )}
               {request.terms && (
-                <a
-                  href={request.terms}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8]"
+                <button
+                  onClick={() => handleViewTerms(request.terms)}
+                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8] transition-colors"
                 >
                   <ExternalLink className="h-3 w-3" />
                   Terms & Conditions
-                </a>
+                </button>
               )}
             </div>
           )}
           
-          <Badge className={`${getStatusColor(request.status)} font-medium`}>
+          <Badge className={`${getStatusColor(request.status)} font-medium border`}>
             {request.status?.replace('_', ' ') || 'pending'}
           </Badge>
         </div>
@@ -185,16 +205,16 @@ const Labr8Dashboard: React.FC = () => {
           <Button
             onClick={() => handleCounterOffer(request)}
             size="sm"
-            className="bg-[#00eada] hover:bg-[#00c4b8] text-black flex items-center gap-1"
+            className="bg-[#00eada] hover:bg-[#00c4b8] text-black flex items-center gap-1 font-medium"
           >
             <Reply className="h-4 w-4" />
             Counter Offer
           </Button>
           <Button
-            onClick={() => {/* Navigate to detailed view */}}
+            onClick={() => handleViewDetails(request)}
             variant="outline"
             size="sm"
-            className="flex items-center gap-1"
+            className="border-gray-600 text-gray-300 hover:bg-white/10 flex items-center gap-1"
           >
             <Eye className="h-4 w-4" />
             View Details
@@ -205,15 +225,17 @@ const Labr8Dashboard: React.FC = () => {
   );
 
   const renderProjectCard = (project: any) => (
-    <div key={project.id} className="p-4 rounded-lg bg-white/80 border border-gray-200/50 hover:shadow-md transition-all">
+    <div key={project.id} className="glass-card glass-morphism-hover p-6 space-y-4">
       <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h4 className="font-semibold text-gray-900 mb-2">{project.title}</h4>
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {project.description?.substring(0, 150)}...
-          </p>
+        <div className="flex-1 space-y-3">
+          <div>
+            <h4 className="font-semibold text-white text-lg mb-2">{project.title}</h4>
+            <p className="text-sm text-gray-300 line-clamp-2">
+              {project.description?.substring(0, 150)}...
+            </p>
+          </div>
           
-          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+          <div className="flex items-center gap-4 text-sm text-gray-400">
             {project.organizer && (
               <div className="flex items-center gap-2">
                 <Building className="h-4 w-4" />
@@ -222,49 +244,44 @@ const Labr8Dashboard: React.FC = () => {
             )}
             <div className="flex items-center gap-1">
               <DollarSign className="h-4 w-4" />
-              {formatBudget(project.budget_range)}
+              <span className="text-[#00eada]">{formatBudget(project.budget_range)}</span>
             </div>
           </div>
 
-          {/* Scope and Terms Links */}
+          {/* Clickable Document Links */}
           {(project.scope_details || project.terms) && (
-            <div className="flex gap-3 mb-3">
+            <div className="flex gap-3">
               {project.scope_details && (
-                <a
-                  href={project.scope_details}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8]"
+                <button
+                  onClick={() => handleViewScope(project.scope_details)}
+                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8] transition-colors"
                 >
                   <ExternalLink className="h-3 w-3" />
                   Scope Document
-                </a>
+                </button>
               )}
               {project.terms && (
-                <a
-                  href={project.terms}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8]"
+                <button
+                  onClick={() => handleViewTerms(project.terms)}
+                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8] transition-colors"
                 >
                   <ExternalLink className="h-3 w-3" />
                   Terms & Conditions
-                </a>
+                </button>
               )}
             </div>
           )}
           
-          <Badge className={`${getStatusColor(project.status)} font-medium`}>
+          <Badge className={`${getStatusColor(project.status)} font-medium border`}>
             {project.status?.replace('_', ' ') || 'pending'}
           </Badge>
         </div>
         
         <div className="flex flex-col items-end gap-2 ml-4">
           <Button
-            onClick={() => {/* Navigate to project workspace */}}
-            variant="outline"
+            onClick={() => handleViewDetails(project)}
+            className="bg-[#00eada] hover:bg-[#00c4b8] text-black flex items-center gap-1 font-medium"
             size="sm"
-            className="flex items-center gap-1"
           >
             <Eye className="h-4 w-4" />
             View Project
@@ -276,14 +293,14 @@ const Labr8Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <UnifiedHeader 
         platform="labr8" 
         user={session?.user}
@@ -296,20 +313,20 @@ const Labr8Dashboard: React.FC = () => {
         {/* Welcome Section */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex items-center space-x-4">
-            <Avatar className="h-16 w-16 border-4 border-white shadow-lg">
+            <Avatar className="h-16 w-16 border-4 border-[#00eada]/30 shadow-lg">
               <AvatarImage src={serviceProvider?.logo_url} />
-              <AvatarFallback className="bg-gradient-to-br from-[#00eada] to-[#00c4b8] text-white text-lg font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-[#00eada] to-[#00c4b8] text-black text-lg font-bold">
                 {displayName.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
-              <p className="text-lg text-gray-600">{displayName}</p>
+              <h1 className="text-3xl font-bold text-white">Provider Console</h1>
+              <p className="text-lg text-gray-300">{displayName}</p>
               <div className="flex items-center space-x-4 mt-2">
                 <div className="flex items-center space-x-1">
-                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                  <span className="font-semibold">{enhancedData.performance.clientSatisfaction}</span>
-                  <span className="text-sm text-gray-500">rating</span>
+                  <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                  <span className="font-semibold text-white">{enhancedData.performance.clientSatisfaction}</span>
+                  <span className="text-sm text-gray-400">rating</span>
                 </div>
                 <Badge variant="outline" className="font-medium border-[#00eada] text-[#00eada]">
                   {enhancedData.performance.repeatClients}% repeat clients
@@ -319,11 +336,11 @@ const Labr8Dashboard: React.FC = () => {
           </div>
           
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-white/10">
               <Calendar className="h-4 w-4" />
               Schedule
             </Button>
-            <Button className="bg-gradient-to-r from-[#00eada] to-[#00c4b8] hover:from-[#00c4b8] hover:to-[#00eada] text-white font-semibold flex items-center gap-2">
+            <Button className="bg-gradient-to-r from-[#00eada] to-[#00c4b8] hover:from-[#00c4b8] hover:to-[#00eada] text-black font-semibold flex items-center gap-2">
               <Zap className="h-4 w-4" />
               Quick Actions
             </Button>
@@ -332,76 +349,109 @@ const Labr8Dashboard: React.FC = () => {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <EnhancedStatsCard
-            title="Monthly Revenue"
-            value={`$${enhancedData.financial.monthlyRevenue.toLocaleString()}`}
-            change={{ value: "+18%", trend: "up", period: "last month" }}
-            icon={<DollarSign className="h-5 w-5 text-green-600" />}
-            variant="success"
-          />
-          <EnhancedStatsCard
-            title="Active Projects"
-            value={activeProjects.length}
-            change={{ value: "+3", trend: "up", period: "this week" }}
-            icon={<Target className="h-5 w-5 text-blue-600" />}
-          />
-          <EnhancedStatsCard
-            title="Response Time"
-            value={enhancedData.performance.responseTime}
-            change={{ value: "-0.5hrs", trend: "up", period: "avg" }}
-            icon={<Clock className="h-5 w-5 text-purple-600" />}
-          />
-          <EnhancedStatsCard
-            title="Client Satisfaction"
-            value={`${enhancedData.performance.clientSatisfaction}/5.0`}
-            change={{ value: "+0.2", trend: "up", period: "quarter" }}
-            icon={<Award className="h-5 w-5 text-yellow-600" />}
-            variant="success"
-          />
+          <Card className="glass-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Monthly Revenue</p>
+                  <p className="text-2xl font-bold text-white">${enhancedData.financial.monthlyRevenue.toLocaleString()}</p>
+                  <p className="text-xs text-green-400">+18% from last month</p>
+                </div>
+                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-green-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Active Projects</p>
+                  <p className="text-2xl font-bold text-white">{activeProjects.length}</p>
+                  <p className="text-xs text-blue-400">+3 this week</p>
+                </div>
+                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <Target className="h-6 w-6 text-blue-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Response Time</p>
+                  <p className="text-2xl font-bold text-white">{enhancedData.performance.responseTime}</p>
+                  <p className="text-xs text-purple-400">-0.5hrs avg</p>
+                </div>
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-purple-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Client Satisfaction</p>
+                  <p className="text-2xl font-bold text-white">{enhancedData.performance.clientSatisfaction}/5.0</p>
+                  <p className="text-xs text-yellow-400">+0.2 this quarter</p>
+                </div>
+                <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                  <Award className="h-6 w-6 text-yellow-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Project Pipeline */}
           <div className="lg:col-span-2">
-            <Card className="backdrop-blur-xl bg-white/60 border-gray-200/50">
+            <Card className="glass-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Activity className="h-5 w-5" />
                     Project Pipeline
                   </CardTitle>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
                     View All <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="incoming" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 mb-6">
-                    <TabsTrigger value="incoming" className="relative">
+                  <TabsList className="grid w-full grid-cols-4 mb-6 bg-gray-800/50 border-gray-700">
+                    <TabsTrigger value="incoming" className="relative text-gray-300 data-[state=active]:text-white data-[state=active]:bg-[#00eada]/20">
                       New Requests
                       {pendingRequests.length > 0 && (
-                        <Badge variant="destructive" className="ml-2 h-5 px-1.5 text-xs">
+                        <Badge variant="destructive" className="ml-2 h-5 px-1.5 text-xs bg-red-500/20 text-red-300">
                           {pendingRequests.length}
                         </Badge>
                       )}
                     </TabsTrigger>
-                    <TabsTrigger value="negotiating">
+                    <TabsTrigger value="negotiating" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-[#00eada]/20">
                       In Negotiation ({negotiatingRequests.length})
                     </TabsTrigger>
-                    <TabsTrigger value="active">
+                    <TabsTrigger value="active" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-[#00eada]/20">
                       Active ({activeProjects.length})
                     </TabsTrigger>
-                    <TabsTrigger value="completed">
+                    <TabsTrigger value="completed" className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-[#00eada]/20">
                       Completed ({completedProjects.length})
                     </TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="incoming" className="space-y-4">
                     {pendingRequests.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <div className="text-center py-8 text-gray-400">
+                        <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-500" />
                         <p>No new requests at the moment</p>
                       </div>
                     ) : (
@@ -411,8 +461,8 @@ const Labr8Dashboard: React.FC = () => {
                   
                   <TabsContent value="negotiating" className="space-y-4">
                     {negotiatingRequests.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <div className="text-center py-8 text-gray-400">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-500" />
                         <p>No ongoing negotiations</p>
                       </div>
                     ) : (
@@ -422,8 +472,8 @@ const Labr8Dashboard: React.FC = () => {
                   
                   <TabsContent value="active" className="space-y-4">
                     {activeProjects.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <Target className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <div className="text-center py-8 text-gray-400">
+                        <Target className="h-12 w-12 mx-auto mb-4 text-gray-500" />
                         <p>No active projects</p>
                       </div>
                     ) : (
@@ -433,8 +483,8 @@ const Labr8Dashboard: React.FC = () => {
                   
                   <TabsContent value="completed" className="space-y-4">
                     {completedProjects.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <div className="text-center py-8 text-gray-400">
+                        <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-gray-500" />
                         <p>No completed projects yet</p>
                       </div>
                     ) : (
@@ -449,9 +499,9 @@ const Labr8Dashboard: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Performance Metrics */}
-            <Card className="backdrop-blur-xl bg-white/60 border-gray-200/50">
+            <Card className="glass-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <TrendingUp className="h-5 w-5" />
                   Performance
                 </CardTitle>
@@ -459,34 +509,34 @@ const Labr8Dashboard: React.FC = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span>Project Completion</span>
-                    <span className="font-medium">{enhancedData.performance.completionRate}%</span>
+                    <span className="text-gray-400">Project Completion</span>
+                    <span className="font-medium text-white">{enhancedData.performance.completionRate}%</span>
                   </div>
-                  <Progress value={enhancedData.performance.completionRate} className="h-2" />
+                  <Progress value={enhancedData.performance.completionRate} className="h-2 bg-gray-700" />
                 </div>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span>Client Retention</span>
-                    <span className="font-medium">{enhancedData.performance.repeatClients}%</span>
+                    <span className="text-gray-400">Client Retention</span>
+                    <span className="font-medium text-white">{enhancedData.performance.repeatClients}%</span>
                   </div>
-                  <Progress value={enhancedData.performance.repeatClients} className="h-2" />
+                  <Progress value={enhancedData.performance.repeatClients} className="h-2 bg-gray-700" />
                 </div>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span>Response Quality</span>
-                    <span className="font-medium">98%</span>
+                    <span className="text-gray-400">Response Quality</span>
+                    <span className="font-medium text-white">98%</span>
                   </div>
-                  <Progress value={98} className="h-2" />
+                  <Progress value={98} className="h-2 bg-gray-700" />
                 </div>
               </CardContent>
             </Card>
 
             {/* Recent Activity */}
-            <Card className="backdrop-blur-xl bg-white/60 border-gray-200/50">
+            <Card className="glass-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <MessageSquare className="h-5 w-5" />
                   Recent Activity
                 </CardTitle>
@@ -494,11 +544,11 @@ const Labr8Dashboard: React.FC = () => {
               <CardContent>
                 <div className="space-y-3">
                   {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-2 rounded-lg hover:bg-white/50 transition-colors">
-                      <div className={`w-2 h-2 rounded-full mt-2 ${activity.urgent ? 'bg-red-500' : 'bg-[#00eada]'}`} />
+                    <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-white/5 transition-colors">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${activity.urgent ? 'bg-red-400' : 'bg-[#00eada]'}`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                        <p className="text-xs text-gray-500">{activity.time}</p>
+                        <p className="text-sm font-medium text-white">{activity.title}</p>
+                        <p className="text-xs text-gray-400">{activity.time}</p>
                       </div>
                     </div>
                   ))}
@@ -507,9 +557,9 @@ const Labr8Dashboard: React.FC = () => {
             </Card>
 
             {/* Quick Insights */}
-            <Card className="backdrop-blur-xl bg-white/60 border-gray-200/50">
+            <Card className="glass-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <Zap className="h-5 w-5" />
                   Quick Insights
                 </CardTitle>
@@ -519,10 +569,10 @@ const Labr8Dashboard: React.FC = () => {
                   {enhancedData.insights.map((insight, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">{insight.title}</p>
+                        <p className="text-sm font-medium text-gray-300">{insight.title}</p>
                         <p className="text-lg font-bold text-[#00eada]">{insight.value}</p>
                       </div>
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <TrendingUp className="h-4 w-4 text-green-400" />
                     </div>
                   ))}
                 </div>
@@ -534,9 +584,9 @@ const Labr8Dashboard: React.FC = () => {
 
       {/* Counter Offer Dialog */}
       <Dialog open={showCounterOffer} onOpenChange={setShowCounterOffer}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl glass-card border-gray-700">
           <DialogHeader>
-            <DialogTitle>Submit Counter Offer</DialogTitle>
+            <DialogTitle className="text-white">Submit Counter Offer</DialogTitle>
           </DialogHeader>
           {selectedRequest && (
             <CounterOfferForm
