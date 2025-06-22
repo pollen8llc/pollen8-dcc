@@ -116,15 +116,10 @@ const AppRoutes = () => {
               </NonServiceProviderRoute>
             } />
             
-            {/* Profile routes - Protected from service providers */}
-            <Route path="/profile" element={
+            {/* Profile routes - Protected from service providers - FIXED ORDER */}
+            <Route path="/profile/search" element={
               <NonServiceProviderRoute>
-                <Profile />
-              </NonServiceProviderRoute>
-            } />
-            <Route path="/profile/:userId" element={
-              <NonServiceProviderRoute>
-                <ProfilePage />
+                <ProfileSearchPage />
               </NonServiceProviderRoute>
             } />
             <Route path="/profile/edit" element={
@@ -137,9 +132,14 @@ const AppRoutes = () => {
                 <ProfileSetupPage />
               </NonServiceProviderRoute>
             } />
-            <Route path="/profile/search" element={
+            <Route path="/profile/:userId" element={
               <NonServiceProviderRoute>
-                <ProfileSearchPage />
+                <ProfilePage />
+              </NonServiceProviderRoute>
+            } />
+            <Route path="/profile" element={
+              <NonServiceProviderRoute>
+                <Profile />
               </NonServiceProviderRoute>
             } />
             
