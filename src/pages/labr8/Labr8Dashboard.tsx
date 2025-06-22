@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,12 +55,27 @@ const Labr8Dashboard: React.FC = () => {
   const [showCounterOffer, setShowCounterOffer] = useState(false);
 
   React.useEffect(() => {
-    if (error)
+    console.log('LAB-R8 Dashboard mounted with session:', session?.user?.id);
+    console.log('Dashboard data:', { 
+      loading, 
+      error, 
+      serviceProvider: serviceProvider?.business_name,
+      pendingCount: pendingRequests.length,
+      negotiatingCount: negotiatingRequests.length,
+      activeCount: activeProjects.length,
+      completedCount: completedProjects.length
+    });
+  }, [session, loading, error, serviceProvider, pendingRequests, negotiatingRequests, activeProjects, completedProjects]);
+
+  React.useEffect(() => {
+    if (error) {
+      console.error('Dashboard error:', error);
       toast({
         title: "Error loading data",
         description: error,
         variant: "destructive",
       });
+    }
   }, [error]);
 
   // Enhanced data for demonstration
@@ -117,11 +131,13 @@ const Labr8Dashboard: React.FC = () => {
   };
 
   const handleCounterOffer = (request: any) => {
+    console.log('Opening counter offer for request:', request.id);
     setSelectedRequest(request);
     setShowCounterOffer(true);
   };
 
   const handleCounterOfferSuccess = () => {
+    console.log('Counter offer submitted successfully');
     setShowCounterOffer(false);
     setSelectedRequest(null);
     reload();
@@ -132,6 +148,7 @@ const Labr8Dashboard: React.FC = () => {
   };
 
   const handleViewDetails = (item: any) => {
+    console.log('Viewing details for item:', item.id, item.status);
     // Navigate to detailed view with proper URL structure
     if (item.status === 'completed' || item.status === 'in_progress') {
       window.open(`/labr8/projects/${item.id}`, '_blank');
@@ -294,7 +311,51 @@ const Labr8Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada] mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading LAB-R8 Dashboard...</p>
+          {session?.user?.id && (
+            <p className="text-gray-400 text-sm mt-2">User ID: {session.user.id}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <AlertCircle className="h-16 w-16 text-red-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-300 mb-4">{error}</p>
+          <Button 
+            onClick={reload}
+            className="bg-[#00eada] hover:bg-[#00c4b8] text-black"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!serviceProvider) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Service Provider Profile Not Found</h2>
+          <p className="text-gray-300 mb-4">
+            You need to complete your service provider setup to access the LAB-R8 dashboard.
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/labr8/setup'}
+            className="bg-[#00eada] hover:bg-[#00c4b8] text-black"
+          >
+            Complete Setup
+          </Button>
+        </div>
       </div>
     );
   }
@@ -310,6 +371,15 @@ const Labr8Dashboard: React.FC = () => {
       />
       
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        {/* Debug Info in Development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="glass-card p-4 text-xs text-gray-400">
+            <strong>Debug Info:</strong> User: {session?.user?.id} | Provider: {serviceProvider?.id} | 
+            Pending: {pendingRequests.length} | Negotiating: {negotiatingRequests.length} | 
+            Active: {activeProjects.length} | Completed: {completedProjects.length}
+          </div>
+        )}
+
         {/* Welcome Section */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex items-center space-x-4">

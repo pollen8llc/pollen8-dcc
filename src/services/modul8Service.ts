@@ -42,14 +42,25 @@ export const updateServiceProvider = async (id: string, data: Partial<CreateServ
 };
 
 export const getUserServiceProvider = async (userId: string): Promise<ServiceProvider | null> => {
+  console.log('getUserServiceProvider called with userId:', userId);
+  
   const { data, error } = await supabase
     .from('modul8_service_providers')
     .select('*')
     .eq('user_id', userId)
     .maybeSingle();
   
-  if (error) throw error;
-  if (!data) return null;
+  if (error) {
+    console.error('Error fetching service provider:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    console.log('No service provider found for user:', userId);
+    return null;
+  }
+  
+  console.log('Service provider found:', data);
   
   return {
     ...data,
@@ -236,7 +247,7 @@ export const getProviderServiceRequests = async (providerId: string): Promise<Se
 };
 
 export const getAvailableServiceRequestsForProvider = async (providerId: string): Promise<ServiceRequest[]> => {
-  console.log('Loading available service requests (open market)');
+  console.log('Loading available service requests (open market) for provider:', providerId);
   
   const { data, error } = await supabase
     .from('modul8_service_requests')
