@@ -12,12 +12,12 @@ const Index = () => {
   
   useEffect(() => {
     if (!isLoading && currentUser) {
-      // If user is a service provider, redirect to LAB-R8
+      // If user is a service provider, redirect to LAB-R8 dashboard
       if (currentUser.role === 'SERVICE_PROVIDER') {
         if (!currentUser.profile_complete) {
           navigate("/labr8/setup", { replace: true });
         } else {
-          navigate("/labr8/inbox", { replace: true });
+          navigate("/labr8/nextgen", { replace: true });
         }
         return;
       }

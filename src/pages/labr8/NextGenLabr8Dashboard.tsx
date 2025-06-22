@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
 import { EnhancedStatsCard } from "@/components/shared/EnhancedStatsCard";
+import { CounterOfferForm } from "@/components/labr8/CounterOfferForm";
 import { useLabr8Dashboard } from "@/hooks/useLabr8Dashboard";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -24,7 +26,12 @@ import {
   Activity,
   Target,
   Award,
-  Zap
+  Zap,
+  ExternalLink,
+  Building,
+  AlertCircle,
+  Eye,
+  Reply
 } from "lucide-react";
 
 const NextGenLabr8Dashboard: React.FC = () => {
@@ -39,6 +46,9 @@ const NextGenLabr8Dashboard: React.FC = () => {
     completedProjects,
     reload,
   } = useLabr8Dashboard(session?.user?.id);
+
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [showCounterOffer, setShowCounterOffer] = useState(false);
 
   React.useEffect(() => {
     if (error)
@@ -78,6 +88,123 @@ const NextGenLabr8Dashboard: React.FC = () => {
   ];
 
   const displayName = serviceProvider?.business_name || "Your Business";
+
+  const formatBudget = (budget: any) => {
+    if (!budget || typeof budget !== 'object') return 'Budget TBD';
+    const { min, max, currency = 'USD' } = budget;
+    if (min && max) {
+      return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
+    } else if (min) {
+      return `From ${currency} ${min.toLocaleString()}`;
+    }
+    return 'Budget TBD';
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-blue-100 text-blue-800';
+      case 'negotiating': return 'bg-orange-100 text-orange-800';
+      case 'agreed': return 'bg-green-100 text-green-800';
+      case 'in_progress': return 'bg-purple-100 text-purple-800';
+      case 'completed': return 'bg-emerald-100 text-emerald-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleCounterOffer = (request: any) => {
+    setSelectedRequest(request);
+    setShowCounterOffer(true);
+  };
+
+  const handleCounterOfferSuccess = () => {
+    setShowCounterOffer(false);
+    setSelectedRequest(null);
+    reload();
+    toast({
+      title: "Counter Offer Submitted",
+      description: "Your counter offer has been sent to the client.",
+    });
+  };
+
+  const renderRequestCard = (request: any, showActions = true) => (
+    <div key={request.id} className="p-4 rounded-lg bg-white/80 border border-gray-200/50 hover:shadow-md transition-all">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <h4 className="font-semibold text-gray-900 mb-2">{request.title}</h4>
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            {request.description?.substring(0, 150)}...
+          </p>
+          
+          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+            {request.organizer && (
+              <div className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                <span>{request.organizer.organization_name}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1">
+              <DollarSign className="h-4 w-4" />
+              {formatBudget(request.budget_range)}
+            </div>
+          </div>
+
+          {/* Scope and Terms Links */}
+          {(request.scope_details || request.terms) && (
+            <div className="flex gap-3 mb-3">
+              {request.scope_details && (
+                <a
+                  href={request.scope_details}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8]"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Scope Document
+                </a>
+              )}
+              {request.terms && (
+                <a
+                  href={request.terms}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-[#00eada] hover:text-[#00c4b8]"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Terms & Conditions
+                </a>
+              )}
+            </div>
+          )}
+          
+          <Badge className={`${getStatusColor(request.status)} font-medium`}>
+            {request.status?.replace('_', ' ') || 'pending'}
+          </Badge>
+        </div>
+        
+        {showActions && (
+          <div className="flex flex-col items-end gap-2 ml-4">
+            <Button
+              onClick={() => handleCounterOffer(request)}
+              size="sm"
+              className="bg-[#00eada] hover:bg-[#00c4b8] text-black flex items-center gap-1"
+            >
+              <Reply className="h-4 w-4" />
+              Counter Offer
+            </Button>
+            <Button
+              onClick={() => {/* Navigate to detailed view */}}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              <Eye className="h-4 w-4" />
+              View Details
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -177,7 +304,7 @@ const NextGenLabr8Dashboard: React.FC = () => {
                 <Tabs defaultValue="incoming" className="w-full">
                   <TabsList className="grid w-full grid-cols-4 mb-6">
                     <TabsTrigger value="incoming" className="relative">
-                      Incoming
+                      New Requests
                       {pendingRequests.length > 0 && (
                         <Badge variant="destructive" className="ml-2 h-5 px-1.5 text-xs">
                           {pendingRequests.length}
@@ -185,7 +312,7 @@ const NextGenLabr8Dashboard: React.FC = () => {
                       )}
                     </TabsTrigger>
                     <TabsTrigger value="negotiating">
-                      Discussing ({negotiatingRequests.length})
+                      In Negotiation ({negotiatingRequests.length})
                     </TabsTrigger>
                     <TabsTrigger value="active">
                       Active ({activeProjects.length})
@@ -196,26 +323,48 @@ const NextGenLabr8Dashboard: React.FC = () => {
                   </TabsList>
                   
                   <TabsContent value="incoming" className="space-y-4">
-                    {pendingRequests.slice(0, 3).map((request) => (
-                      <div key={request.id} className="p-4 rounded-lg bg-white/80 border border-gray-200/50 hover:shadow-md transition-all">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900">{request.title}</h4>
-                            <p className="text-sm text-gray-600 mt-1">{request.description?.substring(0, 100)}...</p>
-                            <div className="flex items-center space-x-4 mt-3">
-                              <Badge variant="outline">New</Badge>
-                              <span className="text-xs text-gray-500">2 hours ago</span>
-                            </div>
-                          </div>
-                          <Button size="sm" className="bg-[#00eada] hover:bg-[#00c4b8] text-black">
-                            Respond
-                          </Button>
-                        </div>
+                    {pendingRequests.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p>No new requests at the moment</p>
                       </div>
-                    ))}
+                    ) : (
+                      pendingRequests.slice(0, 3).map(renderRequestCard)
+                    )}
                   </TabsContent>
                   
-                  {/* Add other tab contents here */}
+                  <TabsContent value="negotiating" className="space-y-4">
+                    {negotiatingRequests.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p>No ongoing negotiations</p>
+                      </div>
+                    ) : (
+                      negotiatingRequests.slice(0, 3).map(renderRequestCard)
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="active" className="space-y-4">
+                    {activeProjects.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Target className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p>No active projects</p>
+                      </div>
+                    ) : (
+                      activeProjects.slice(0, 3).map((project) => renderRequestCard(project, false))
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="completed" className="space-y-4">
+                    {completedProjects.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p>No completed projects yet</p>
+                      </div>
+                    ) : (
+                      completedProjects.slice(0, 3).map((project) => renderRequestCard(project, false))
+                    )}
+                  </TabsContent>
                 </Tabs>
               </CardContent>
             </Card>
@@ -306,6 +455,24 @@ const NextGenLabr8Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Counter Offer Dialog */}
+      <Dialog open={showCounterOffer} onOpenChange={setShowCounterOffer}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Submit Counter Offer</DialogTitle>
+          </DialogHeader>
+          {selectedRequest && (
+            <CounterOfferForm
+              serviceRequestId={selectedRequest.id}
+              fromUserId={session?.user?.id || ''}
+              originalProposal={selectedRequest}
+              onSuccess={handleCounterOfferSuccess}
+              onCancel={() => setShowCounterOffer(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
