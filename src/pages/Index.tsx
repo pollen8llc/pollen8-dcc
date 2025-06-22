@@ -12,13 +12,21 @@ const Index = () => {
   
   useEffect(() => {
     if (!isLoading && currentUser) {
-      // If user is a service provider, redirect to LAB-R8 dashboard
+      console.log('User found, redirecting based on role:', currentUser.role);
+      
+      // If user is a service provider, redirect to LAB-R8
       if (currentUser.role === 'SERVICE_PROVIDER') {
         if (!currentUser.profile_complete) {
           navigate("/labr8/setup", { replace: true });
         } else {
-          navigate("/labr8/dashboard", { replace: true });
+          navigate("/labr8/inbox", { replace: true });
         }
+        return;
+      }
+      
+      // If user is an organizer, redirect to Modul8
+      if (currentUser.role === 'ORGANIZER') {
+        navigate("/modul8", { replace: true });
         return;
       }
       
@@ -26,7 +34,7 @@ const Index = () => {
       if (!currentUser.profile_complete) {
         navigate("/profile/setup", { replace: true });
       } else {
-        // If user is logged in and profile is complete, redirect to knowledge resources
+        // Default redirect to knowledge resources for other roles
         navigate("/knowledge/resources", { replace: true });
       }
     }

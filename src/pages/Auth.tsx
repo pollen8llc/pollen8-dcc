@@ -33,6 +33,24 @@ const Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && currentUser) {
+      console.log('User already authenticated, redirecting based on role:', currentUser.role);
+      
+      // Role-based redirects
+      if (currentUser.role === 'SERVICE_PROVIDER') {
+        if (!currentUser.profile_complete) {
+          navigate("/labr8/setup", { replace: true });
+        } else {
+          navigate("/labr8/inbox", { replace: true });
+        }
+        return;
+      }
+      
+      if (currentUser.role === 'ORGANIZER') {
+        navigate("/modul8", { replace: true });
+        return;
+      }
+      
+      // Default redirect for other roles
       const redirectTo = searchParams.get("redirectTo") || "/knowledge/resources";
       navigate(redirectTo, { replace: true });
     }
@@ -61,8 +79,7 @@ const Auth = () => {
           description: "You have successfully signed in.",
         });
         
-        const redirectTo = searchParams.get("redirectTo") || "/knowledge/resources";
-        navigate(redirectTo, { replace: true });
+        // The redirect will be handled by the useEffect above once currentUser updates
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
@@ -115,7 +132,7 @@ const Auth = () => {
             title: "Account created!",
             description: "Welcome to the community!",
           });
-          navigate("/knowledge/resources", { replace: true });
+          // The redirect will be handled by the useEffect above once currentUser updates
         } else {
           setMessage("Please check your email and click the confirmation link to complete your registration.");
         }

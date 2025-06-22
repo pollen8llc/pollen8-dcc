@@ -83,7 +83,7 @@ export const useAuth = () => {
     createProfileIfNeeded();
   }, [session, currentUser, sessionLoading, profileLoading, createProfileIfNotExists, refreshUser, toast]);
 
-  // Profile completion check and service provider redirection
+  // Profile completion check and role-based redirection
   useEffect(() => {
     if (sessionLoading || profileLoading || !currentUser || profileCompletionChecked.current) return;
     
@@ -97,9 +97,9 @@ export const useAuth = () => {
     
     const checkProfileAndRedirect = async () => {
       try {
-        console.log("Checking profile completion for user:", currentUser.id);
+        console.log("Checking profile completion and role for user:", currentUser.id, currentUser.role);
         
-        // If user is a service provider, redirect to LABR8
+        // Role-based routing for SERVICE_PROVIDER
         if (currentUser.role === 'SERVICE_PROVIDER') {
           const { data, error } = await supabase
             .from('profiles')
@@ -116,13 +116,20 @@ export const useAuth = () => {
             console.log("Service provider profile incomplete, redirecting to LAB-R8 setup");
             navigate("/labr8/setup");
           } else {
-            console.log("Service provider profile complete, redirecting to LAB-R8 dashboard");
-            navigate("/labr8/dashboard");
+            console.log("Service provider profile complete, redirecting to LAB-R8 inbox");
+            navigate("/labr8/inbox");
           }
           return;
         }
         
-        // For non-service providers, check profile completion
+        // Role-based routing for ORGANIZER
+        if (currentUser.role === 'ORGANIZER') {
+          console.log("Organizer detected, redirecting to Modul8 dashboard");
+          navigate("/modul8");
+          return;
+        }
+        
+        // For other roles, check profile completion
         const { data, error } = await supabase
           .from('profiles')
           .select('profile_complete, first_name, last_name')
