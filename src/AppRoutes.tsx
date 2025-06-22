@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LoadingSpinner from '@/components/ui/loading-spinner';
@@ -10,18 +11,18 @@ import { UserRole } from '@/models/types';
 // Lazy load pages for better performance
 const Index = lazy(() => import('@/pages/Index'));
 const Auth = lazy(() => import('@/pages/Auth'));
-const ProfileSetup = lazy(() => import('@/pages/ProfileSetup'));
-const KnowledgeResources = lazy(() => import('@/pages/KnowledgeResources'));
-const UserManagement = lazy(() => import('@/pages/UserManagement'));
-const CommunityManagement = lazy(() => import('@/pages/CommunityManagement'));
-const CommunityCreation = lazy(() => import('@/pages/CommunityCreation'));
-const InviteManagement = lazy(() => import('@/pages/InviteManagement'));
-const UserProfile = lazy(() => import('@/pages/UserProfile'));
-const RMSPage = lazy(() => import('@/pages/RMSPage'));
-const QuestionPost = lazy(() => import('@/pages/QuestionPost'));
-const PollPost = lazy(() => import('@/pages/PollPost'));
-const ArticlePost = lazy(() => import('@/pages/ArticlePost'));
-const KnowledgeDetail = lazy(() => import('@/pages/KnowledgeDetail'));
+const ProfileSetup = lazy(() => import('@/pages/ProfileSetupPage'));
+const KnowledgeResources = lazy(() => import('@/pages/knowledge/KnowledgeBase'));
+const UserManagement = lazy(() => import('@/pages/admin/AdminDashboard'));
+const CommunityManagement = lazy(() => import('@/pages/admin/AdminDashboard'));
+const CommunityCreation = lazy(() => import('@/pages/admin/AdminDashboard'));
+const InviteManagement = lazy(() => import('@/pages/InvitesManagementPage'));
+const UserProfile = lazy(() => import('@/pages/ProfilePage'));
+const RMSPage = lazy(() => import('@/pages/rel8t/Dashboard'));
+const QuestionPost = lazy(() => import('@/pages/knowledge/PostWizard'));
+const PollPost = lazy(() => import('@/pages/knowledge/PostWizard'));
+const ArticlePost = lazy(() => import('@/pages/knowledge/PostWizard'));
+const KnowledgeDetail = lazy(() => import('@/pages/knowledge/ArticleView'));
 
 // Modul8 Pages
 const ModernModul8Dashboard = lazy(() => import('@/pages/modul8/ModernModul8Dashboard'));

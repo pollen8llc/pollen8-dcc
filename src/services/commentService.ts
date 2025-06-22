@@ -27,3 +27,40 @@ export const createServiceRequestComment = async (commentData: {
   if (error) throw error;
   return data;
 };
+
+export const updateServiceRequestStatus = async (
+  serviceRequestId: string,
+  status: string,
+  userId: string,
+  fromStatus?: string,
+  reason?: string
+) => {
+  // Update the service request status
+  const { error: updateError } = await supabase
+    .from('modul8_service_requests')
+    .update({ status })
+    .eq('id', serviceRequestId);
+
+  if (updateError) throw updateError;
+
+  // Log the status change
+  const { error: logError } = await supabase
+    .from('modul8_status_changes')
+    .insert({
+      service_request_id: serviceRequestId,
+      user_id: userId,
+      from_status: fromStatus,
+      to_status: status,
+      reason
+    });
+
+  if (logError) throw logError;
+
+  // Create a comment for the status change
+  await createServiceRequestComment({
+    service_request_id: serviceRequestId,
+    user_id: userId,
+    comment_type: 'status_change',
+    content: reason || `Status changed from ${fromStatus || 'unknown'} to ${status}`
+  });
+};

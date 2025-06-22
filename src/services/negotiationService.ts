@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceRequest, ServiceProvider, Proposal } from "@/types/modul8";
 import { 
@@ -55,12 +56,7 @@ export const createStructuredRequest = async (data: StructuredRequestData): Prom
     service_request_id: serviceRequest.id,
     user_id: data.organizerId,
     comment_type: 'general', // Use allowed comment type
-    content: `New service request: ${data.title}`,
-    metadata: {
-      request_type: 'structured',
-      milestones: data.milestones,
-      budget_range: budgetRange
-    }
+    content: `New service request: ${data.title} - Budget: $${data.budgetMin.toLocaleString()} - ${data.budgetMax.toLocaleString()}, Timeline: ${data.timeline}`
   });
 
   return serviceRequest;
@@ -93,13 +89,7 @@ export const submitProviderProposal = async (data: ProviderProposalData): Promis
     service_request_id: data.serviceRequestId,
     user_id: data.fromUserId,
     comment_type: 'general', // Use allowed comment type
-    content: commentContent,
-    metadata: {
-      proposal_id: proposal.id,
-      quote_amount: data.quoteAmount,
-      timeline: data.timeline,
-      proposal_type: 'structured'
-    }
+    content: commentContent
   });
 
   return proposal;
@@ -126,11 +116,7 @@ export const acceptProposal = async (
     service_request_id: serviceRequestId,
     user_id: userId,
     comment_type: 'status_change',
-    content: 'Proposal accepted! Ready to lock the deal.',
-    metadata: {
-      proposal_id: proposalId,
-      status_change: { from: 'negotiating', to: 'agreed' }
-    }
+    content: 'Proposal accepted! Ready to lock the deal.'
   });
 
   return updatedRequest;
@@ -162,12 +148,7 @@ export const declineProposal = async (
     service_request_id: serviceRequestId,
     user_id: userId,
     comment_type: 'status_change',
-    content,
-    metadata: {
-      proposal_id: proposalId,
-      status_change: { from: 'negotiating', to: 'declined' },
-      decline_reason: reason
-    }
+    content
   });
 
   return updatedRequest;
@@ -187,11 +168,7 @@ export const lockDeal = async (
     service_request_id: serviceRequestId,
     user_id: userId,
     comment_type: 'status_change',
-    content: 'Deal locked! Project is now active.',
-    metadata: {
-      status_change: { from: 'agreed', to: 'in_progress' },
-      deal_locked: true
-    }
+    content: 'Deal locked! Project is now active.'
   });
 
   return updatedRequest;
