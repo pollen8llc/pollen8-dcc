@@ -97,6 +97,18 @@ const DomainProviders: React.FC = () => {
     return 'Contact for pricing';
   };
 
+  const renderServiceBadges = (services: string[]) => {
+    if (!Array.isArray(services) || services.length === 0) {
+      return null;
+    }
+    
+    return services.slice(0, 3).map((service, index) => (
+      <Badge key={index} variant="outline" className="text-xs border-gray-600 text-gray-300">
+        {typeof service === 'string' ? service : 'Service'}
+      </Badge>
+    ));
+  };
+
   const renderProviderCard = (provider: ServiceProvider) => (
     <Card key={provider.id} className="glass-card glass-morphism-hover">
       <CardContent className="p-6">
@@ -121,11 +133,7 @@ const DomainProviders: React.FC = () => {
             </p>
             
             <div className="flex flex-wrap gap-2">
-              {provider.services && Array.isArray(provider.services) && provider.services.slice(0, 3).map((service, index) => (
-                <Badge key={index} variant="outline" className="text-xs border-gray-600 text-gray-300">
-                  {typeof service === 'string' ? service : service.name || 'Service'}
-                </Badge>
-              ))}
+              {renderServiceBadges(provider.services)}
             </div>
             
             <div className="flex items-center gap-4 text-sm text-gray-400">
