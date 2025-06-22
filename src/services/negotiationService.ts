@@ -38,6 +38,8 @@ export const createStructuredRequest = async (data: StructuredRequestData): Prom
     currency: 'USD'
   };
 
+  console.log('Creating structured request with service provider:', data.serviceProviderId);
+
   const serviceRequest = await createServiceRequest({
     organizer_id: data.organizerId,
     domain_page: data.domainPage,
@@ -45,20 +47,21 @@ export const createStructuredRequest = async (data: StructuredRequestData): Prom
     description: data.description,
     budget_range: budgetRange,
     timeline: data.timeline,
-    milestones: data.milestones, // Keep as string array to match the type
+    milestones: data.milestones,
     service_provider_id: data.serviceProviderId,
-    status: 'pending',
-    engagement_status: 'affiliated'
+    status: data.serviceProviderId ? 'assigned' : 'pending',
+    engagement_status: data.serviceProviderId ? 'affiliated' : 'none'
   });
 
   // Create initial comment with structured request details
   await createServiceRequestComment({
     service_request_id: serviceRequest.id,
     user_id: data.organizerId,
-    comment_type: 'general', // Use allowed comment type
+    comment_type: 'general',
     content: `New service request: ${data.title} - Budget: $${data.budgetMin.toLocaleString()} - ${data.budgetMax.toLocaleString()}, Timeline: ${data.timeline}`
   });
 
+  console.log('Structured request created successfully:', serviceRequest.id);
   return serviceRequest;
 };
 
@@ -88,7 +91,7 @@ export const submitProviderProposal = async (data: ProviderProposalData): Promis
   await createServiceRequestComment({
     service_request_id: data.serviceRequestId,
     user_id: data.fromUserId,
-    comment_type: 'general', // Use allowed comment type
+    comment_type: 'general',
     content: commentContent
   });
 
@@ -191,11 +194,10 @@ export const checkExistingRequest = async (
     .not('status', 'in', '(completed,cancelled,closed)')
     .order('created_at', { ascending: false })
     .limit(1)
-    .maybeSingle(); // Use maybeSingle instead of single to handle no results
+    .maybeSingle();
 
   if (error) throw error;
   
-  // Type assertion to handle the Json types from Supabase
   if (data) {
     return {
       ...data,
