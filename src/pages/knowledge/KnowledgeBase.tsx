@@ -26,7 +26,7 @@ const KnowledgeBase = () => {
   
   const { data: tags = [] } = useTags();
   
-  // Fetch articles with current filters
+  // Fetch articles with current filters - Fixed the hook usage
   const { data: articles = [], isLoading } = useArticles({
     searchQuery: searchQuery || undefined,
     tag: selectedTag || undefined,
@@ -70,7 +70,7 @@ const KnowledgeBase = () => {
   const hasActiveFilters = searchQuery || selectedTag || selectedType !== 'all' || sortBy !== 'newest';
 
   const handleArticleClick = (articleId: string) => {
-    navigate(`/knowledge/${articleId}`);
+    navigate(`/knowledge/article/${articleId}`);
   };
 
   return (
@@ -91,7 +91,7 @@ const KnowledgeBase = () => {
           
           <div className="flex gap-2 shrink-0">
             <Button asChild>
-              <Link to="/knowledge/post/article">
+              <Link to="/knowledge/create">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Content
               </Link>
@@ -262,7 +262,7 @@ const KnowledgeBase = () => {
                   }
                 </p>
                 <Button asChild>
-                  <Link to="/knowledge/post/article">
+                  <Link to="/knowledge/create">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Content
                   </Link>

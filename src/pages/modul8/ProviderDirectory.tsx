@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceProvider } from '@/types/modul8';
-import { getServiceProviders } from '@/services/modul8Service';
+import { getAllServiceProviders } from '@/services/modul8Service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +25,7 @@ const ProviderDirectory = () => {
   const loadProviders = async () => {
     try {
       setLoading(true);
-      const data = await getServiceProviders();
+      const data = await getAllServiceProviders();
       setProviders(data || []);
     } catch (error) {
       console.error('Error loading providers:', error);
