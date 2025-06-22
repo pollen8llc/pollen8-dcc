@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
-import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { useArticles } from '@/hooks/knowledge/useArticles';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -30,8 +31,6 @@ const CoreLandingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
   
-  const { useArticles } = useKnowledgeBase();
-  
   const { data: articles, isLoading: articlesLoading } = useArticles({ 
     searchQuery: debouncedSearch
   });
@@ -56,7 +55,7 @@ const CoreLandingPage = () => {
               <Search className="h-4 w-4" />
               Browse Topics
             </Button>
-            <Button className="flex items-center gap-2" onClick={() => navigate('/knowledge/create')}>
+            <Button className="flex items-center gap-2" onClick={() => navigate('/knowledge/post/question')}>
               <Plus className="h-4 w-4" />
               Ask Question
             </Button>
@@ -159,7 +158,7 @@ const CoreLandingPage = () => {
                 <p className="text-muted-foreground mb-4 max-w-md mx-auto">
                   Be the first to ask a question and start a discussion!
                 </p>
-                <Button onClick={() => navigate('/knowledge/create')}>
+                <Button onClick={() => navigate('/knowledge/post/question')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Ask a Question
                 </Button>
