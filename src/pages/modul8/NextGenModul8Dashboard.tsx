@@ -24,7 +24,13 @@ import {
   MessageSquare,
   Zap,
   BarChart3,
-  Globe
+  Globe,
+  Briefcase,
+  Code,
+  Megaphone,
+  Scale,
+  Camera,
+  Palette
 } from 'lucide-react';
 
 const NextGenModul8Dashboard = () => {
@@ -75,8 +81,23 @@ const NextGenModul8Dashboard = () => {
     providerSatisfaction: 4.7
   };
 
+  // Map icons to domain pages
+  const domainIconMap = {
+    'Web Development': Code,
+    'Marketing': Megaphone,
+    'Legal Services': Scale,
+    'Photography': Camera,
+    'Design': Palette,
+    'Business Consulting': Briefcase,
+    'Content Creation': Camera,
+    'Event Planning': Calendar,
+    'Financial Services': BarChart3,
+    'Health & Wellness': Target
+  };
+
   const domainActivity = DOMAIN_PAGES.slice(0, 6).map(domain => ({
     ...domain,
+    icon: domainIconMap[domain.title] || Building2, // Add fallback icon
     activeProviders: Math.floor(Math.random() * 20) + 5,
     recentRequests: Math.floor(Math.random() * 8) + 1,
     avgRating: (4 + Math.random()).toFixed(1)
@@ -189,7 +210,7 @@ const NextGenModul8Dashboard = () => {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {domainActivity.map((domain) => {
-                    const Icon = domain.icon || Building2;
+                    const Icon = domain.icon;
                     return (
                       <div
                         key={domain.id}
