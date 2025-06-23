@@ -1,140 +1,121 @@
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
-import { getContactCount, getCategories } from "@/services/rel8t/contactService";
-import { Calendar, Users, Heart } from "lucide-react";
-import OutreachList from "@/components/rel8t/OutreachList";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import React from 'react';
+import { useUser } from '@/contexts/UserContext';
+import { Navigate } from 'react-router-dom';
+import Navbar from '@/components/Navbar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Contact,
+  Users,
+  TrendingUp,
+  Settings,
+  Book,
+  Zap,
+  LayoutDashboard
+} from 'lucide-react';
 
 const Rel8tDashboard = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("outreach");
-  
-  // Get outreach status counts with shorter staleTime
-  const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 } } = useQuery({
-    queryKey: ["outreach-counts"],
-    queryFn: getOutreachStatusCounts,
-    staleTime: 1000 * 60, // 1 minute
-  });
-  
-  // Get contact count
-  const { data: contactCount = 0 } = useQuery({
-    queryKey: ["contact-count"],
-    queryFn: getContactCount,
-  });
+  const { currentUser, isLoading } = useUser();
 
-  // Get categories for filters
-  const { data: categories = [] } = useQuery({
-    queryKey: ["contact-categories"],
-    queryFn: getCategories,
-  });
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
+        </div>
+      </div>
+    );
+  }
 
-  // Handler for building rapport (renamed from handleCreateRelationship)
-  const handleBuildRapport = () => {
-    navigate("/rel8t/build-rapport");
-  };
-  
+  if (!currentUser) {
+    return <Navigate to="/auth" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <Rel8OnlyNavigation />
-        
-        <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-2 sm:mt-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Relationships</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                Manage your outreach and nurture your network
-              </p>
-            </div>
-            
-            <Button 
-              onClick={handleBuildRapport}
-              className="flex items-center gap-2 w-full sm:w-auto"
-              size="sm"
-            >
-              <Heart className="h-4 w-4" />
-              <span className="sm:inline">Build Rapport</span>
-            </Button>
-          </div>
-        </div>
-        
-        {/* Metrics cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming</CardTitle>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">REL8-T Dashboard</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-primary" />
-                <div className="text-xl sm:text-2xl font-bold">{outreachCounts.upcoming}</div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-destructive" />
-                <div className="text-xl sm:text-2xl font-bold">{outreachCounts.overdue}</div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Contacts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-primary" />
-                <div className="text-xl sm:text-2xl font-bold">{contactCount}</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Main content tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="mb-6">
-            <TabsTrigger value="outreach">Outreach Tasks</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="outreach">
-            <OutreachList />
-          </TabsContent>
-          
-          <TabsContent value="completed">
-            <OutreachList defaultTab="completed" showTabs={false} />
-          </TabsContent>
-        </Tabs>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center"><Contact className="mr-2 h-4 w-4" /> Contacts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Manage your contacts and relationships.</p>
+                  <Button variant="outline" className="mt-2 w-full" onClick={() => window.location.href = '/rel8t/contacts'}>
+                    View Contacts
+                  </Button>
+                </CardContent>
+              </Card>
 
-        {/* Add empty state with CTA if no outreach tasks exist */}
-        {outreachCounts.upcoming + outreachCounts.overdue === 0 && 
-          activeTab === "outreach" && (
-          <div className="text-center py-8 mt-6 border border-dashed rounded-lg">
-            <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-            <h3 className="text-lg font-medium">No outreach tasks</h3>
-            <p className="text-muted-foreground mt-2 mb-4">
-              Build rapport with your contacts to start nurturing your network
-            </p>
-            <Button onClick={handleBuildRapport}>
-              <Heart className="h-4 w-4 mr-2" />
-              Build Rapport
-            </Button>
-          </div>
-        )}
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center"><Users className="mr-2 h-4 w-4" /> Categories</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Organize your contacts into categories.</p>
+                  <Button variant="outline" className="mt-2 w-full" onClick={() => window.location.href = '/rel8t/categories'}>
+                    View Categories
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center"><Zap className="mr-2 h-4 w-4" /> Triggers</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Automate actions based on contact interactions.</p>
+                  <Button variant="outline" className="mt-2 w-full" onClick={() => window.location.href = '/rel8t/triggers'}>
+                    View Triggers
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center"><Book className="mr-2 h-4 w-4" /> Smart Engage</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Engage with your contacts in a smart way.</p>
+                  <Button variant="outline" className="mt-2 w-full" onClick={() => window.location.href = '/rel8t/smart-engage'}>
+                    View Smart Engage
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center"><TrendingUp className="mr-2 h-4 w-4" /> Build Rapport</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Build rapport with your contacts.</p>
+                  <Button variant="outline" className="mt-2 w-full" onClick={() => window.location.href = '/rel8t/build-rapport'}>
+                    View Rapport Tools
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center"><Settings className="mr-2 h-4 w-4" /> Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Configure your REL8-T settings.</p>
+                  <Button variant="outline" className="mt-2 w-full" onClick={() => window.location.href = '/settings'}>
+                    View Settings
+                  </Button>
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

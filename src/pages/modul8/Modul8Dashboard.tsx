@@ -1,5 +1,7 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { useUser } from '@/contexts/UserContext';
+import { Navigate } from 'react-router-dom';
+import Navbar from '@/components/Navbar';
 import { useSession } from "@/hooks/useSession";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,9 +90,10 @@ const DOMAIN_AREAS = [
   }
 ];
 
-const Modul8Dashboard: React.FC = () => {
+const Modul8Dashboard = () => {
   const { session, logout } = useSession();
   const navigate = useNavigate();
+  const { currentUser, isLoading } = useUser();
   const [organizer, setOrganizer] = useState<Organizer | null>(null);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,6 +158,25 @@ const Modul8Dashboard: React.FC = () => {
   const activeRequests = serviceRequests.filter(r => ['negotiating', 'agreed', 'in_progress'].includes(r.status));
   const completedRequests = serviceRequests.filter(r => r.status === 'completed');
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (currentUser.role === 'SERVICE_PROVIDER') {
+    return <Navigate to="/labr8/inbox" replace />;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -205,7 +227,8 @@ const Modul8Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-background">
+      <Navbar />
       <UnifiedHeader 
         platform="modul8" 
         user={session?.user}
