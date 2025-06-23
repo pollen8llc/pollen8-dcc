@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Building2, User } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import { PlatformNavigation } from '@/components/shared/PlatformNavigation';
 import { ServiceRequest } from '@/types/modul8';
 import { getServiceRequestById } from '@/services/modul8Service';
 import { useSession } from '@/hooks/useSession';
@@ -57,8 +57,11 @@ const ServiceRequestDetails = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
+      <div className="min-h-screen bg-background">
+        <PlatformNavigation platform="modul8" />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
+        </div>
       </div>
     );
   }
@@ -66,7 +69,7 @@ const ServiceRequestDetails = () => {
   if (!serviceRequest) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
+        <PlatformNavigation platform="modul8" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Service Request Not Found</h1>
@@ -81,7 +84,7 @@ const ServiceRequestDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <PlatformNavigation platform="modul8" />
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">

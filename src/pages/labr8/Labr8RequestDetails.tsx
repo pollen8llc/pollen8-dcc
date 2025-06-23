@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Building2, User, Clock, DollarSign } from 'lucide-react';
+import { PlatformNavigation } from '@/components/shared/PlatformNavigation';
 import { ServiceRequest } from '@/types/modul8';
 import { getServiceRequestById } from '@/services/modul8Service';
 import { useLabr8Dashboard } from '@/hooks/useLabr8Dashboard';
@@ -80,7 +81,8 @@ const Labr8RequestDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="min-h-screen bg-background">
+        <PlatformNavigation platform="labr8" />
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]" />
         </div>
@@ -90,10 +92,11 @@ const Labr8RequestDetails = () => {
 
   if (!serviceRequest) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="min-h-screen bg-background">
+        <PlatformNavigation platform="labr8" />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-2 text-white">Request Not Found</h2>
+            <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
             <Button onClick={() => navigate('/labr8/inbox')}>
               Back to Inbox
             </Button>
@@ -104,7 +107,9 @@ const Labr8RequestDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-background">
+      <PlatformNavigation platform="labr8" />
+      
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -112,13 +117,13 @@ const Labr8RequestDetails = () => {
             variant="outline"
             size="sm"
             onClick={() => navigate('/labr8/inbox')}
-            className="flex items-center gap-2 border-gray-600 text-gray-300 hover:bg-white/10"
+            className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Inbox
           </Button>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-white">{serviceRequest.title}</h1>
+            <h1 className="text-3xl font-bold">{serviceRequest.title}</h1>
             <div className="flex items-center gap-2 mt-2">
               <Badge className={`${getStatusColor(serviceRequest.status)} border`}>
                 <span className="font-medium">
@@ -129,7 +134,7 @@ const Labr8RequestDetails = () => {
                 <Building2 className="h-4 w-4 mr-1" />
                 Service Provider View
               </Badge>
-              <span className="text-gray-400 text-sm">
+              <span className="text-muted-foreground text-sm">
                 Created {new Date(serviceRequest.created_at).toLocaleDateString()}
               </span>
             </div>
@@ -140,9 +145,9 @@ const Labr8RequestDetails = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Client Info */}
-            <Card className="glass-card">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg text-white">Client</CardTitle>
+                <CardTitle className="text-lg">Client</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
@@ -150,15 +155,15 @@ const Labr8RequestDetails = () => {
                     <User className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-white">
+                    <div className="text-sm font-medium">
                       {serviceRequest.organizer?.organization_name || 'Client'}
                     </div>
-                    <div className="text-xs text-gray-400">Organizer</div>
+                    <div className="text-xs text-muted-foreground">Organizer</div>
                   </div>
                 </div>
                 
                 {serviceRequest.organizer?.description && (
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-muted-foreground">
                     {serviceRequest.organizer.description}
                   </p>
                 )}
@@ -166,13 +171,13 @@ const Labr8RequestDetails = () => {
             </Card>
 
             {/* Project Summary */}
-            <Card className="glass-card">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg text-white">Project Summary</CardTitle>
+                <CardTitle className="text-lg">Project Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {serviceRequest.budget_range?.min && (
-                  <div className="flex items-center gap-2 text-gray-300">
+                  <div className="flex items-center gap-2 text-foreground">
                     <DollarSign className="h-4 w-4 text-green-400" />
                     <span className="text-sm">
                       ${serviceRequest.budget_range.min.toLocaleString()}
@@ -184,15 +189,15 @@ const Labr8RequestDetails = () => {
                 )}
                 
                 {serviceRequest.timeline && (
-                  <div className="flex items-center gap-2 text-gray-300">
+                  <div className="flex items-center gap-2 text-foreground">
                     <Clock className="h-4 w-4 text-blue-400" />
                     <span className="text-sm">{serviceRequest.timeline}</span>
                   </div>
                 )}
                 
-                <div className="pt-2 border-t border-gray-600">
-                  <div className="text-xs text-gray-400 mb-1">Status</div>
-                  <div className="text-sm text-white capitalize">{serviceRequest.engagement_status}</div>
+                <div className="pt-2 border-t">
+                  <div className="text-xs text-muted-foreground mb-1">Status</div>
+                  <div className="text-sm font-medium capitalize">{serviceRequest.engagement_status}</div>
                 </div>
               </CardContent>
             </Card>
@@ -200,13 +205,15 @@ const Labr8RequestDetails = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="glass-card p-6">
-              <RequestThread 
-                serviceRequest={serviceRequest}
-                onUpdate={handleUpdate}
-                isServiceProvider={true}
-              />
-            </div>
+            <Card>
+              <CardContent className="p-6">
+                <RequestThread 
+                  serviceRequest={serviceRequest}
+                  onUpdate={handleUpdate}
+                  isServiceProvider={true}
+                />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

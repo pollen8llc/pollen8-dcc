@@ -188,6 +188,26 @@ const RequestThread: React.FC<RequestThreadProps> = ({
     }
   };
 
+  const getRequestStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'negotiating':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'agreed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'in_progress':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'completed':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'declined':
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   const canUserActOnProposal = (proposal: Proposal) => {
     if (!session?.user?.id) return false;
     
@@ -222,7 +242,7 @@ const RequestThread: React.FC<RequestThreadProps> = ({
             {serviceRequest.budget_range?.min && (
               <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/10 px-3 py-2 rounded-lg">
                 <DollarSign className="h-4 w-4 text-green-600" />
-                <span className="text-green-700">
+                <span className="text-green-700 font-medium">
                   ${serviceRequest.budget_range.min.toLocaleString()}
                   {serviceRequest.budget_range.max && 
                     ` - $${serviceRequest.budget_range.max.toLocaleString()}`
@@ -234,18 +254,20 @@ const RequestThread: React.FC<RequestThreadProps> = ({
             {serviceRequest.timeline && (
               <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 px-3 py-2 rounded-lg">
                 <Clock className="h-4 w-4 text-blue-600" />
-                <span className="text-blue-700">{serviceRequest.timeline}</span>
+                <span className="text-blue-700 font-medium">{serviceRequest.timeline}</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pt-2 border-t">
             <div className="flex items-center gap-2">
-              <Badge className={`${getStatusColor(serviceRequest.status)} border`}>
-                {getStatusIcon(serviceRequest.status)}
-                <span className="ml-1">
-                  {serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1)}
+              <Badge className={`${getRequestStatusColor(serviceRequest.status)} border font-medium`}>
+                <span>
+                  {serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1).replace('_', ' ')}
                 </span>
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {serviceRequest.engagement_status.charAt(0).toUpperCase() + serviceRequest.engagement_status.slice(1)}
               </Badge>
             </div>
             
@@ -256,140 +278,151 @@ const RequestThread: React.FC<RequestThreadProps> = ({
         </CardContent>
       </Card>
 
-      {/* Proposals */}
+      {/* Proposals Section */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Proposals & Negotiations</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Proposals & Negotiations</h3>
+          <Badge variant="outline" className="text-xs">
+            {proposals.length} proposal{proposals.length !== 1 ? 's' : ''}
+          </Badge>
+        </div>
         
         {proposals.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h4 className="text-lg font-medium text-gray-600 mb-2">No proposals yet</h4>
-              <p className="text-gray-500">Waiting for proposals to be submitted</p>
+              <p className="text-gray-500">Waiting for proposals to be submitted for this request</p>
             </CardContent>
           </Card>
         ) : (
-          proposals.map((proposal, index) => (
-            <Card key={proposal.id} className="border-l-4 border-l-blue-500">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={proposal.service_provider?.logo_url} />
-                        <AvatarFallback>
-                          <Building className="h-5 w-5" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-semibold">
-                          {proposal.service_provider?.business_name || 'Service Provider'}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {proposal.proposal_type.charAt(0).toUpperCase() + proposal.proposal_type.slice(1)} Proposal
-                          {index > 0 && ` (Round ${index + 1})`}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(proposal.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+          <div className="space-y-4">
+            {proposals.map((proposal, index) => (
+              <Card key={proposal.id} className="border-l-4 border-l-blue-500">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={proposal.service_provider?.logo_url} />
+                          <AvatarFallback>
+                            <Building className="h-5 w-5" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-semibold">
+                            {proposal.service_provider?.business_name || 'Service Provider'}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {proposal.proposal_type.charAt(0).toUpperCase() + proposal.proposal_type.slice(1)} Proposal
+                            {index > 0 && ` (Round ${index + 1})`}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(proposal.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <Badge className={`${getStatusColor(proposal.status)} border font-medium`}>
-                      {getStatusIcon(proposal.status)}
-                      <span className="ml-1">
-                        {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
-                      </span>
-                    </Badge>
-                  </div>
-
-                  <div className="flex flex-wrap gap-4">
-                    {proposal.quote_amount && (
-                      <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/10 px-3 py-2 rounded-lg">
-                        <DollarSign className="h-4 w-4 text-green-600" />
-                        <span className="font-semibold text-green-700">
-                          ${proposal.quote_amount.toLocaleString()}
+                      
+                      <Badge className={`${getStatusColor(proposal.status)} border font-medium`}>
+                        {getStatusIcon(proposal.status)}
+                        <span className="ml-1">
+                          {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
                         </span>
-                      </div>
-                    )}
-                    
-                    {proposal.timeline && (
-                      <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 px-3 py-2 rounded-lg">
-                        <Clock className="h-4 w-4 text-blue-600" />
-                        <span className="text-blue-700">{proposal.timeline}</span>
-                      </div>
-                    )}
-                  </div>
+                      </Badge>
+                    </div>
 
-                  {(proposal.scope_details || proposal.terms) && (
-                    <div className="flex gap-4">
-                      {proposal.scope_details && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(proposal.scope_details, '_blank')}
-                          className="text-[#00eada] border-[#00eada] hover:bg-[#00eada]/10"
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          View Scope
-                          <ExternalLink className="h-3 w-3 ml-1" />
-                        </Button>
+                    <div className="flex flex-wrap gap-4">
+                      {proposal.quote_amount && (
+                        <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/10 px-3 py-2 rounded-lg">
+                          <DollarSign className="h-4 w-4 text-green-600" />
+                          <span className="font-semibold text-green-700">
+                            ${proposal.quote_amount.toLocaleString()}
+                          </span>
+                        </div>
                       )}
                       
-                      {proposal.terms && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(proposal.terms, '_blank')}
-                          className="text-purple-600 border-purple-600 hover:bg-purple-600/10"
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          View Terms
-                          <ExternalLink className="h-3 w-3 ml-1" />
-                        </Button>
+                      {proposal.timeline && (
+                        <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 px-3 py-2 rounded-lg">
+                          <Clock className="h-4 w-4 text-blue-600" />
+                          <span className="text-blue-700">{proposal.timeline}</span>
+                        </div>
                       )}
                     </div>
-                  )}
 
-                  {canUserActOnProposal(proposal) && (
-                    <div className="flex flex-wrap gap-3 pt-4 border-t border-border/40">
-                      <Button
-                        onClick={() => handleAcceptProposal(proposal)}
-                        disabled={loading}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Accept
-                      </Button>
-                      <Button
-                        onClick={() => handleCounterProposal(proposal)}
-                        disabled={loading}
-                        variant="outline"
-                        className="border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10"
-                      >
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Counter
-                      </Button>
-                      <Button
-                        onClick={() => handleRejectProposal(proposal)}
-                        disabled={loading}
-                        variant="outline"
-                        className="border-red-500 text-red-600 hover:bg-red-50"
-                      >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Reject
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                    {(proposal.scope_details || proposal.terms) && (
+                      <div className="flex gap-4">
+                        {proposal.scope_details && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(proposal.scope_details, '_blank')}
+                            className="text-[#00eada] border-[#00eada] hover:bg-[#00eada]/10"
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            View Scope
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </Button>
+                        )}
+                        
+                        {proposal.terms && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(proposal.terms, '_blank')}
+                            className="text-purple-600 border-purple-600 hover:bg-purple-600/10"
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            View Terms
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {canUserActOnProposal(proposal) && (
+                      <Separator className="my-4" />
+                    )}
+
+                    {canUserActOnProposal(proposal) && (
+                      <div className="flex flex-wrap gap-3">
+                        <Button
+                          onClick={() => handleAcceptProposal(proposal)}
+                          disabled={loading}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Accept Proposal
+                        </Button>
+                        <Button
+                          onClick={() => handleCounterProposal(proposal)}
+                          disabled={loading}
+                          variant="outline"
+                          className="border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10"
+                        >
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Counter Offer
+                        </Button>
+                        <Button
+                          onClick={() => handleRejectProposal(proposal)}
+                          disabled={loading}
+                          variant="outline"
+                          className="border-red-500 text-red-600 hover:bg-red-50"
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Reject
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
 
