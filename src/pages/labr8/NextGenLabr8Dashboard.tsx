@@ -1,12 +1,18 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from "@/hooks/useSession";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Navbar from "@/components/Navbar";
 import { EnhancedStatsCard } from "@/components/shared/EnhancedStatsCard";
-import { getUserServiceProvider, getServiceProviderRequests } from "@/services/modul8Service";
+import { useLabr8Dashboard } from "@/hooks/useLabr8Dashboard";
+import { CounterOfferForm } from "@/components/labr8/CounterOfferForm";
 import { toast } from "@/hooks/use-toast";
 import {
   DollarSign,
@@ -187,7 +193,7 @@ const NextGenLabr8Dashboard: React.FC = () => {
             Counter Offer
           </Button>
           <Button
-            onClick={() => {/* Navigate to detailed view */}}
+            onClick={() => navigate(`/labr8/requests/${request.id}`)}
             variant="outline"
             size="sm"
             className="flex items-center gap-1"
@@ -257,7 +263,7 @@ const NextGenLabr8Dashboard: React.FC = () => {
         
         <div className="flex flex-col items-end gap-2 ml-4">
           <Button
-            onClick={() => {/* Navigate to project workspace */}}
+            onClick={() => navigate(`/labr8/requests/${project.id}`)}
             variant="outline"
             size="sm"
             className="flex items-center gap-1"
@@ -301,7 +307,7 @@ const NextGenLabr8Dashboard: React.FC = () => {
                   <span className="font-semibold">{enhancedData.performance.clientSatisfaction}</span>
                   <span className="text-sm text-gray-500">rating</span>
                 </div>
-                <Badge variant="teal" className="font-medium">
+                <Badge variant="outline" className="font-medium">
                   {enhancedData.performance.repeatClients}% repeat clients
                 </Badge>
               </div>

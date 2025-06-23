@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -6,10 +7,63 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, ArrowRight, Save, Send } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { RequestBasicsStep } from '@/components/modul8/wizard/RequestBasicsStep';
-import { ProjectDetailsStep } from '@/components/modul8/wizard/ProjectDetailsStep';
-import { BudgetTimelineStep } from '@/components/modul8/wizard/BudgetTimelineStep';
-import { ReviewSubmitStep } from '@/components/modul8/wizard/ReviewSubmitStep';
+import { toast } from '@/hooks/use-toast';
+
+// Simple placeholder components for the wizard steps
+const RequestBasicsStep = ({ onNext, initialData }: any) => (
+  <div className="space-y-4">
+    <h3 className="text-lg font-semibold">Request Basics</h3>
+    <p className="text-muted-foreground">Define the basic details of your service request.</p>
+    <Button onClick={() => onNext({ title: "Sample Request" })}>
+      Continue <ArrowRight className="ml-2 h-4 w-4" />
+    </Button>
+  </div>
+);
+
+const ProjectDetailsStep = ({ onNext, onBack, initialData }: any) => (
+  <div className="space-y-4">
+    <h3 className="text-lg font-semibold">Project Details</h3>
+    <p className="text-muted-foreground">Provide detailed information about your project.</p>
+    <div className="flex gap-2">
+      <Button variant="outline" onClick={onBack}>
+        <ArrowLeft className="mr-2 h-4 w-4" /> Back
+      </Button>
+      <Button onClick={() => onNext({ details: "Sample details" })}>
+        Continue <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
+    </div>
+  </div>
+);
+
+const BudgetTimelineStep = ({ onNext, onBack, initialData }: any) => (
+  <div className="space-y-4">
+    <h3 className="text-lg font-semibold">Budget & Timeline</h3>
+    <p className="text-muted-foreground">Set your budget range and timeline expectations.</p>
+    <div className="flex gap-2">
+      <Button variant="outline" onClick={onBack}>
+        <ArrowLeft className="mr-2 h-4 w-4" /> Back
+      </Button>
+      <Button onClick={() => onNext({ budget: 5000 })}>
+        Continue <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
+    </div>
+  </div>
+);
+
+const ReviewSubmitStep = ({ onSubmit, onBack, formData }: any) => (
+  <div className="space-y-4">
+    <h3 className="text-lg font-semibold">Review & Submit</h3>
+    <p className="text-muted-foreground">Review your request details before submitting.</p>
+    <div className="flex gap-2">
+      <Button variant="outline" onClick={onBack}>
+        <ArrowLeft className="mr-2 h-4 w-4" /> Back
+      </Button>
+      <Button onClick={onSubmit}>
+        Submit Request <Send className="ml-2 h-4 w-4" />
+      </Button>
+    </div>
+  </div>
+);
 
 const RequestWizard = () => {
   const { session, logout } = useSession();
