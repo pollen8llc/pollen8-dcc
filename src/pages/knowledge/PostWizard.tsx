@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -21,7 +20,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Steps } from '@/components/ui/steps';
-import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
 import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
@@ -168,8 +166,6 @@ const PostWizard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-6">
-        <CoreNavigation />
-        
         {/* Navigation */}
         <div className="mb-4 sm:mb-6">
           <Button variant="ghost" className="pl-0" onClick={handleBack}>

@@ -9,7 +9,6 @@ import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { Contact } from "@/services/rel8t/contactService";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 
@@ -82,7 +81,7 @@ const RelationshipWizard = () => {
   const handleReviewSubmit = () => {
     // Clear wizard data and redirect to the main rel8 dashboard
     clearWizardData();
-    navigate("/rel8");
+    navigate("/rel8t");
   };
 
   const getStepTitle = () => {
@@ -110,15 +109,13 @@ const RelationshipWizard = () => {
             className="mr-2" 
             onClick={() => {
               clearWizardData();
-              navigate(selectedTrigger ? "/rel8/build-rapport" : "/rel8");
+              navigate(selectedTrigger ? "/rel8t/build-rapport" : "/rel8t");
             }}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to {selectedTrigger ? "Build Rapport" : "Dashboard"}
           </Button>
         </div>
-        
-        <Rel8Navigation />
         
         <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
           <div>

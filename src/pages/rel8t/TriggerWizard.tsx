@@ -1,6 +1,4 @@
-
 import Navbar from "@/components/Navbar";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,26 +32,26 @@ const TriggerWizard = () => {
     // Navigate based on returnTo parameter and success
     if (result) {
       if (returnTo === 'relationship') {
-        navigate("/rel8/wizard");
+        navigate("/rel8t/wizard");
       } else {
-        navigate("/rel8/triggers");
+        navigate("/rel8t/triggers");
       }
     }
   };
 
   const handleBack = () => {
     if (returnTo === 'relationship') {
-      navigate("/rel8/build-rapport");
+      navigate("/rel8t/build-rapport");
     } else {
-      navigate("/rel8/triggers");
+      navigate("/rel8t/triggers");
     }
   };
 
   const handleCancel = () => {
     if (returnTo === 'relationship') {
-      navigate("/rel8/build-rapport");
+      navigate("/rel8t/build-rapport");
     } else {
-      navigate("/rel8/triggers");
+      navigate("/rel8t/triggers");
     }
   };
 
@@ -62,8 +60,6 @@ const TriggerWizard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-2xl">
-        <Rel8OnlyNavigation />
-        
         <div className="flex items-center gap-4 mt-4 sm:mt-6 mb-6 sm:mb-8">
           <Button 
             variant="ghost" 

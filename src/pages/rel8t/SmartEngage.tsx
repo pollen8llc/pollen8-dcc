@@ -1,6 +1,4 @@
-
 import Navbar from "@/components/Navbar";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Zap, Users, Calendar, Target } from "lucide-react";
@@ -11,8 +9,6 @@ const SmartEngage = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Rel8OnlyNavigation />
-        
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Smart Engage</h1>

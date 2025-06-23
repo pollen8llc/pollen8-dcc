@@ -1,8 +1,6 @@
-
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +18,12 @@ const BuildRapport = () => {
   });
 
   const handleCreateNewTrigger = () => {
-    navigate("/rel8/triggers/wizard?returnTo=relationship");
+    navigate("/rel8t/triggers/wizard?returnTo=relationship");
   };
 
   const handleSelectTrigger = (trigger: any) => {
     setSelectedTrigger(trigger);
-    navigate("/rel8/wizard");
+    navigate("/rel8t/wizard");
   };
 
   return (
@@ -33,13 +31,11 @@ const BuildRapport = () => {
       <Navbar />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <Rel8OnlyNavigation />
-        
         <div className="flex items-center gap-4 mt-4 sm:mt-6 mb-6 sm:mb-8">
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate("/rel8")}
+            onClick={() => navigate("/rel8t")}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -120,7 +116,7 @@ const BuildRapport = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate("/rel8/triggers")}
+                      onClick={() => navigate("/rel8t/triggers")}
                       className="w-full mt-3"
                     >
                       View All Triggers ({triggers.length})

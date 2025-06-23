@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { Navigate } from 'react-router-dom';
@@ -22,46 +23,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { Separator } from "@/components/ui/separator"
-import { ProjectList } from "@/components/labr8/ProjectList";
-import RequestList from "@/components/labr8/RequestList";
-import { ServiceRequest } from "@/types/modul8";
-import { Project } from "@/types/labr8";
-import { useLabr8Requests } from "@/hooks/useLabr8Requests";
-import { useLabr8Projects } from "@/hooks/useLabr8Projects";
 
 const Labr8Dashboard = () => {
   const { currentUser, isLoading } = useUser();
   const [copied, setCopied] = useState(false);
   const { toast } = useToast()
   const [date, setDate] = useState<Date | undefined>(new Date())
-  const [activeRequests, setActiveRequests] = useState<ServiceRequest[]>([]);
-  const [incomingRequests, setIncomingRequests] = useState<ServiceRequest[]>([]);
-  const [completedRequests, setCompletedRequests] = useState<ServiceRequest[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const {
-    requests: allRequests,
-    isLoading: isLoadingRequests,
-    error: requestsError,
-    mutate: mutateRequests,
-  } = useLabr8Requests();
-  const {
-    projects: allProjects,
-    isLoading: isLoadingProjects,
-    error: projectsError,
-    mutate: mutateProjects,
-  } = useLabr8Projects();
-
-  useEffect(() => {
-    if (allRequests) {
-      setIncomingRequests(allRequests.filter(r => r.status === 'pending' || r.status === 'negotiating'));
-      setActiveRequests(allRequests.filter(r => r.status === 'agreed'));
-      setCompletedRequests(allRequests.filter(r => r.status === 'completed' || r.status === 'cancelled'));
-    }
-  }, [allRequests]);
-
-  useEffect(() => {
-    setProjects(allProjects || []);
-  }, [allProjects]);
 
   const handleCopyClick = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -86,19 +53,9 @@ const Labr8Dashboard = () => {
   };
 
   const refreshData = async () => {
-    await mutateRequests();
-    await mutateProjects();
     toast({
       title: "Refreshing data",
       description: "Requests and projects are being reloaded..."
-    });
-  };
-
-  const handleDeleteRequest = async () => {
-    await mutateRequests();
-    toast({
-      title: "Request deleted",
-      description: "The request has been removed from your inbox."
     });
   };
 
@@ -198,7 +155,7 @@ const Labr8Dashboard = () => {
             </Card>
           </div>
 
-          {/* Middle Column - Incoming Requests */}
+          {/* Middle Column - Inbox */}
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">Inbox</h2>
@@ -208,39 +165,20 @@ const Labr8Dashboard = () => {
               </Button>
             </div>
 
-            <RequestList
-              title="Incoming Requests"
-              requests={incomingRequests}
-              type="incoming"
-              loading={isLoadingRequests}
-              emptyLabel="No new requests at this time."
-              onDelete={handleDeleteRequest}
-            />
-
-            <RequestList
-              title="Active Engagements"
-              requests={activeRequests}
-              type="active"
-              loading={isLoadingRequests}
-              emptyLabel="No active engagements at this time."
-              onDelete={handleDeleteRequest}
-            />
-
-            <RequestList
-              title="Completed Projects"
-              requests={completedRequests}
-              type="completed"
-              loading={isLoadingRequests}
-              emptyLabel="No completed projects to display."
-              onDelete={handleDeleteRequest}
-            />
-
-            <ProjectList
-              title="Current Projects"
-              projects={projects}
-              loading={isLoadingProjects}
-              emptyLabel="No projects to display."
-            />
+            <Card className="shadow-md">
+              <CardHeader>
+                <CardTitle>Service Requests & Projects</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <ClipboardList className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No active requests</h3>
+                  <p className="text-muted-foreground">
+                    Your service requests and projects will appear here.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

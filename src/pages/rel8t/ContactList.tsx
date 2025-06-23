@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Plus, Search } from 'lucide-react';
 import { getContacts } from '@/services/rel8t/contactService';
 import ContactList from '@/components/rel8t/ContactList';
-import { Rel8OnlyNavigation } from '@/components/rel8t/Rel8OnlyNavigation';
 
 const ContactListPage = () => {
   const navigate = useNavigate();
@@ -34,8 +33,6 @@ const ContactListPage = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <Rel8OnlyNavigation />
-        
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 mt-6">
           <div>
             <h1 className="text-2xl font-bold">Contacts</h1>

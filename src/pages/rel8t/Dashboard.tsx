@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +9,6 @@ import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
 import { Calendar, Users, Heart } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -37,7 +35,7 @@ const Dashboard = () => {
 
   // Handler for building rapport (renamed from handleCreateRelationship)
   const handleBuildRapport = () => {
-    navigate("/rel8/build-rapport");
+    navigate("/rel8t/build-rapport");
   };
   
   return (
@@ -45,8 +43,6 @@ const Dashboard = () => {
       <Navbar />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <Rel8OnlyNavigation />
-        
         <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-2 sm:mt-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="w-full sm:w-auto">

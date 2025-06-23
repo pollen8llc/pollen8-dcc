@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -49,7 +48,7 @@ const ImportContacts = () => {
         queryClient.invalidateQueries({ queryKey: ["contacts"] });
         
         // Navigate back to contacts page after successful import
-        navigate("/rel8/contacts");
+        navigate("/rel8t/contacts");
       } else {
         toast({
           title: "Import failed",

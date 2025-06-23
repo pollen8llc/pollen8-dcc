@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -11,7 +10,6 @@ import {
   BarChart3,
   ChevronLeft
 } from 'lucide-react';
-import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 const PostTypeSelector = () => {
   const navigate = useNavigate();
@@ -60,8 +58,6 @@ const PostTypeSelector = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
-        <CoreNavigation />
-        
         {/* Back button */}
         <div className="mb-6">
           <Button variant="ghost" onClick={() => navigate('/knowledge')} className="pl-0">
