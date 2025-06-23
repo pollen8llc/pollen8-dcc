@@ -31,7 +31,7 @@ const RequestList: React.FC<RequestListProps> = ({
         </CardContent>
       </Card>
     ) : requests.length > 0 ? (
-      <div className="grid gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {requests.map(r => (
           <RequestCard key={r.id} request={r} type={type} onDelete={onDelete} />
         ))}

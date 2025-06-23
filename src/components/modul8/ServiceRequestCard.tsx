@@ -82,6 +82,7 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({ request, onUpda
               <ServiceRequestActions 
                 request={request} 
                 onUpdate={onUpdate}
+                canDelete={true}
               />
             )}
           </div>
