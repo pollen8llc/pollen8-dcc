@@ -34,8 +34,8 @@ const Index = () => {
       if (!currentUser.profile_complete) {
         navigate("/profile/setup", { replace: true });
       } else {
-        // Default redirect to knowledge resources for other roles
-        navigate("/knowledge/resources", { replace: true });
+        // Default redirect to welcome dashboard for other roles
+        navigate("/welcome", { replace: true });
       }
     }
   }, [currentUser, isLoading, navigate]);

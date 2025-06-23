@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ServiceProviderProtectedRoute from '@/components/auth/ServiceProviderProtectedRoute';
@@ -7,6 +6,7 @@ import Rel8ProtectedRoute from '@/components/auth/Rel8ProtectedRoute';
 
 // Import all pages
 import Index from '@/pages/Index';
+import Welcome from '@/pages/Welcome';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import ProfileEditPage from '@/pages/ProfileEditPage';
@@ -84,6 +84,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<Index />} />
+      <Route path="/welcome" element={<Welcome />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/invite/:code" element={<InvitePage />} />
       <Route path="/onboarding" element={<Onboarding />} />
