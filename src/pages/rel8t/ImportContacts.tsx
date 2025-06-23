@@ -8,7 +8,6 @@ import { toast } from "@/hooks/use-toast";
 import { createContact } from "@/services/rel8t/contactService";
 import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -92,8 +91,6 @@ const ImportContacts = () => {
       <Navbar />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <Rel8OnlyNavigation />
-        
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
           <div>
             <h1 className="text-3xl font-bold">Import Contacts</h1>

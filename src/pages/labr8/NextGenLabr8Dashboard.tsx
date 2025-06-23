@@ -1,17 +1,12 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSession } from "@/hooks/useSession";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import Navbar from "@/components/Navbar";
 import { EnhancedStatsCard } from "@/components/shared/EnhancedStatsCard";
-import { CounterOfferForm } from "@/components/labr8/CounterOfferForm";
-import { useLabr8Dashboard } from "@/hooks/useLabr8Dashboard";
+import { getUserServiceProvider, getServiceProviderRequests } from "@/services/modul8Service";
 import { toast } from "@/hooks/use-toast";
 import {
   DollarSign,
@@ -36,6 +31,7 @@ import {
 
 const NextGenLabr8Dashboard: React.FC = () => {
   const { session, logout } = useSession();
+  const navigate = useNavigate();
   const {
     loading,
     error,
@@ -274,15 +270,17 @@ const NextGenLabr8Dashboard: React.FC = () => {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <UnifiedHeader 
-        platform="labr8" 
-        user={session?.user}
-        notificationCount={pendingRequests.length + 3}
-        unreadMessages={2}
-        onLogout={logout}
-      />
+      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {/* Welcome Section */}

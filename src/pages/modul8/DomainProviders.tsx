@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSession } from "@/hooks/useSession";
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import Navbar from "@/components/Navbar";
 import { getServiceProvidersByDomain, getUserOrganizer } from "@/services/modul8Service";
 import { ServiceProvider, Organizer } from "@/types/modul8";
 import { toast } from "@/hooks/use-toast";
@@ -212,13 +211,7 @@ const DomainProviders: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <UnifiedHeader 
-        platform="modul8" 
-        user={session?.user}
-        notificationCount={0}
-        unreadMessages={0}
-        onLogout={logout}
-      />
+      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         <div className="flex items-center gap-4 mb-6">

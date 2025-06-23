@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import Navbar from '@/components/Navbar';
 import { EnhancedStatsCard } from '@/components/shared/EnhancedStatsCard';
 import { getUserOrganizer, getOrganizerServiceRequests } from '@/services/modul8Service';
 import { DOMAIN_PAGES } from '@/types/modul8';
@@ -120,13 +119,7 @@ const NextGenModul8Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <UnifiedHeader 
-        platform="modul8" 
-        user={session?.user}
-        notificationCount={5}
-        unreadMessages={3}
-        onLogout={logout}
-      />
+      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {/* Welcome Section */}

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Building2, User, Clock, DollarSign } from 'lucide-react';
-import { MinimalNavigation } from '@/components/shared/MinimalNavigation';
+import Navbar from '@/components/Navbar';
 import { ServiceRequest } from '@/types/modul8';
 import { getServiceRequestById } from '@/services/modul8Service';
 import { useLabr8Dashboard } from '@/hooks/useLabr8Dashboard';
@@ -81,7 +81,7 @@ const Labr8RequestDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <MinimalNavigation platform="labr8" />
+        <Navbar />
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]" />
         </div>
@@ -92,7 +92,7 @@ const Labr8RequestDetails = () => {
   if (!serviceRequest) {
     return (
       <div className="min-h-screen bg-background">
-        <MinimalNavigation platform="labr8" />
+        <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
@@ -107,7 +107,7 @@ const Labr8RequestDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <MinimalNavigation platform="labr8" />
+      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
