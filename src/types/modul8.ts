@@ -154,15 +154,15 @@ export interface ProjectComment {
   updated_at: string;
 }
 
-// Domain pages constant
-export const DOMAIN_PAGES = {
-  1: { name: 'Technology & Development', description: 'Software development, web design, mobile apps' },
-  2: { name: 'Design & Creative', description: 'Graphic design, branding, content creation' },
-  3: { name: 'Marketing & Strategy', description: 'Digital marketing, SEO, business strategy' },
-  4: { name: 'Content & Writing', description: 'Copywriting, blogging, technical writing' },
-  5: { name: 'Business & Operations', description: 'Consulting, project management, operations' },
-  6: { name: 'Data & Analytics', description: 'Data analysis, research, business intelligence' }
-};
+// Domain pages constant - changed to array format
+export const DOMAIN_PAGES = [
+  { id: 1, title: 'Technology & Development', name: 'Technology & Development', description: 'Software development, web design, mobile apps' },
+  { id: 2, title: 'Design & Creative', name: 'Design & Creative', description: 'Graphic design, branding, content creation' },
+  { id: 3, title: 'Marketing & Strategy', name: 'Marketing & Strategy', description: 'Digital marketing, SEO, business strategy' },
+  { id: 4, title: 'Content & Writing', name: 'Content & Writing', description: 'Copywriting, blogging, technical writing' },
+  { id: 5, title: 'Business & Operations', name: 'Business & Operations', description: 'Consulting, project management, operations' },
+  { id: 6, title: 'Data & Analytics', name: 'Data & Analytics', description: 'Data analysis, research, business intelligence' }
+];
 
 // Create types
 export interface CreateServiceProviderData {
