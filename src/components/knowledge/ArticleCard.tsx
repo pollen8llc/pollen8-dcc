@@ -127,7 +127,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
               </Badge>
             </div>
             
-            <h3 className="text-base sm:text-lg font-semibold line-clamp-2 mb-2 text-white">
+            <h3 className="text-base sm:text-lg font-semibold line-clamp-2 mb-2">
               {article.title}
             </h3>
             
@@ -150,12 +150,12 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {article.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="tag" className="text-xs">
+              <Badge key={index} variant="outline" className="text-xs">
                 {tag}
               </Badge>
             ))}
             {article.tags.length > 3 && (
-              <Badge variant="tag" className="text-xs">
+              <Badge variant="outline" className="text-xs">
                 +{article.tags.length - 3} more
               </Badge>
             )}
@@ -176,7 +176,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
                     {getAuthorInitials(article.author.name)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-xs sm:text-sm text-white">{article.author.name}</span>
+                <span className="text-xs sm:text-sm">{article.author.name}</span>
               </div>
             )}
           </div>
@@ -203,7 +203,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 hidden sm:flex hover:text-[#00eada]"
+              className="h-8 w-8 p-0 hidden sm:flex"
               onClick={handleShare}
             >
               <Share2 className="h-3 w-3" />

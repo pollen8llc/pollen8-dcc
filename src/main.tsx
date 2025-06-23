@@ -1,29 +1,21 @@
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import App from './App.tsx';
-import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter as Router } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
+import App from "./App.tsx";
+import "./index.css";
+import "./globals.css";
+import { UserProvider } from "./contexts/UserContext";
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
-    },
-  },
-});
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-        <Toaster />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </React.StrictMode>,
+    <Router>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <UserProvider>
+          <App />
+        </UserProvider>
+      </ThemeProvider>
+    </Router>
+  </React.StrictMode>
 );

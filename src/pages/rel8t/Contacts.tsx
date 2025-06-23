@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { getContacts, deleteMultipleContacts, getCategories } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 
@@ -137,6 +138,8 @@ const Contacts = () => {
       
       <div className="flex flex-col flex-1 overflow-hidden">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 flex-shrink-0">
+          <Rel8OnlyNavigation />
+          
           <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-4">
             <div className="w-full sm:w-auto">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Contacts</h1>

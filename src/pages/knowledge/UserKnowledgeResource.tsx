@@ -18,18 +18,17 @@ import {
   Bookmark,
   TrendingUp,
   Calendar,
-  PlusCircle,
-  Tag as TagIcon
+  PlusCircle
 } from 'lucide-react';
 
 // UI Components
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MetricCard } from '@/components/rel8t/MetricCard';
-import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
+import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -43,7 +42,7 @@ const UserKnowledgeResource = () => {
         <Navbar />
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4 text-white">Please log in to view your knowledge resources</h1>
+            <h1 className="text-2xl font-bold mb-4">Please log in to view your knowledge resources</h1>
             <Button onClick={() => navigate('/auth')}>Log In</Button>
           </div>
         </div>
@@ -59,11 +58,11 @@ const UserKnowledgeResource = () => {
   }) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-white">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-white">{value}</div>
+        <div className="text-2xl font-bold">{value}</div>
         {description && (
           <p className="text-xs text-muted-foreground">{description}</p>
         )}
@@ -76,16 +75,13 @@ const UserKnowledgeResource = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
-        {/* Add Knowledge Navigation */}
-        <div className="mb-6">
-          <KnowledgeNavigation />
-        </div>
+        <CoreNavigation />
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 mt-6">
           <div>
-            <h1 className="text-3xl font-bold text-white">My Knowledge Resources</h1>
-            <p className="text-white mt-1">
+            <h1 className="text-3xl font-bold">My Knowledge Resources</h1>
+            <p className="text-muted-foreground mt-1">
               Track your contributions and manage your saved content
             </p>
           </div>
@@ -99,9 +95,9 @@ const UserKnowledgeResource = () => {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="overview" className="text-white">Overview</TabsTrigger>
-            <TabsTrigger value="my-posts" className="text-white">My Posts</TabsTrigger>
-            <TabsTrigger value="saved" className="text-white">Saved Articles</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="my-posts">My Posts</TabsTrigger>
+            <TabsTrigger value="saved">Saved Articles</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -153,7 +149,7 @@ const UserKnowledgeResource = () => {
                 {/* Content Type Breakdown */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white">
+                    <CardTitle className="flex items-center gap-2">
                       <BarChart3 className="h-5 w-5" />
                       Content Breakdown
                     </CardTitle>
@@ -172,7 +168,7 @@ const UserKnowledgeResource = () => {
                 {/* Recent Activity */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-white">
+                    <CardTitle className="flex items-center gap-2">
                       <TrendingUp className="h-5 w-5" />
                       Recent Activity
                     </CardTitle>
@@ -180,18 +176,14 @@ const UserKnowledgeResource = () => {
                   <CardContent>
                     <div className="space-y-4">
                       {stats?.articles?.slice(0, 3).map((article) => (
-                        <div 
-                          key={article.id} 
-                          className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/20 transition-colors"
-                          onClick={() => navigate(`/knowledge/article/${article.id}`)}
-                        >
+                        <div key={article.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
-                            <h4 className="font-medium text-white">{article.title}</h4>
-                            <p className="text-sm text-white">
+                            <h4 className="font-medium">{article.title}</h4>
+                            <p className="text-sm text-muted-foreground">
                               {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
                             </p>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-white">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Eye className="h-3 w-3" />
                               {article.view_count || 0}
@@ -204,7 +196,7 @@ const UserKnowledgeResource = () => {
                         </div>
                       ))}
                       {(stats?.articles?.length || 0) === 0 && (
-                        <p className="text-center text-white py-4">
+                        <p className="text-center text-muted-foreground py-4">
                           No posts yet. Create your first post to get started!
                         </p>
                       )}
@@ -218,7 +210,7 @@ const UserKnowledgeResource = () => {
           {/* My Posts Tab */}
           <TabsContent value="my-posts" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-white">My Posts ({stats?.totalArticles || 0})</h2>
+              <h2 className="text-xl font-semibold">My Posts ({stats?.totalArticles || 0})</h2>
               <Button onClick={() => navigate('/knowledge/create')}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create New Post
@@ -234,62 +226,26 @@ const UserKnowledgeResource = () => {
             ) : ((stats && Array.isArray(stats.articles) ? stats.articles.length : 0) > 0) ? (
               <div className="space-y-4">
                 {(stats?.articles || []).map((article) => (
-                  <Card key={article.id} className="transition-shadow hover:shadow-md cursor-pointer" onClick={() => navigate(`/knowledge/article/${article.id}`)}>
-                    <CardHeader>
-                      <CardTitle className="text-xl hover:text-[#00eada] transition-colors text-white">
-                        {article.title}
-                      </CardTitle>
-                      <div className="flex flex-wrap gap-2">
-                        {article.tags?.map(t => (
-                          <Badge 
-                            key={t} 
-                            variant="tag"
-                          >
-                            <TagIcon className="h-3 w-3 mr-1" />
-                            {t}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent>
-                      <p className="text-muted-foreground line-clamp-2">
-                        {article.content?.replace(/<[^>]*>?/gm, '').substring(0, 150)}...
-                      </p>
-                    </CardContent>
-                    
-                    <CardFooter className="flex justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center">
-                          <ThumbsUp className="h-4 w-4 mr-1" />
-                          <span>{article.vote_count || 0}</span>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          <span>0</span>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <Eye className="h-4 w-4 mr-1" />
-                          <span>{article.view_count}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span>{formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}</span>
-                      </div>
-                    </CardFooter>
-                  </Card>
+                  <ArticleCard
+                    key={article.id}
+                    article={{
+                      ...article,
+                      author: {
+                        id: currentUser.id,
+                        name: currentUser.email || 'Unknown User',
+                        avatar_url: undefined
+                      }
+                    } as KnowledgeArticle}
+                    onClick={() => navigate(`/knowledge/${article.id}`)}
+                  />
                 ))}
               </div>
             ) : (
               <Card className="p-8 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2 text-white">No posts yet</h3>
-                  <p className="text-white mb-6 max-w-md mx-auto">
+                  <h3 className="text-lg font-medium mb-2">No posts yet</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     Start sharing your knowledge by creating your first post!
                   </p>
                   <Button onClick={() => navigate('/knowledge/create')}>
@@ -304,7 +260,7 @@ const UserKnowledgeResource = () => {
           {/* Saved Articles Tab */}
           <TabsContent value="saved" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-white">Saved Articles ({savedArticles?.length || 0})</h2>
+              <h2 className="text-xl font-semibold">Saved Articles ({savedArticles?.length || 0})</h2>
               <Button variant="outline" onClick={() => navigate('/knowledge')}>
                 <BookOpen className="mr-2 h-4 w-4" />
                 Browse Knowledge Base
@@ -320,62 +276,26 @@ const UserKnowledgeResource = () => {
             ) : (savedArticles?.length || 0) > 0 ? (
               <div className="space-y-4">
                 {savedArticles?.map((article) => (
-                  <Card key={article.id} className="transition-shadow hover:shadow-md cursor-pointer" onClick={() => navigate(`/knowledge/article/${article.id}`)}>
-                    <CardHeader>
-                      <CardTitle className="text-xl hover:text-[#00eada] transition-colors text-white">
-                        {article.title}
-                      </CardTitle>
-                      <div className="flex flex-wrap gap-2">
-                        {article.tags?.map(t => (
-                          <Badge 
-                            key={t} 
-                            variant="tag"
-                          >
-                            <TagIcon className="h-3 w-3 mr-1" />
-                            {t}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent>
-                      <p className="text-muted-foreground line-clamp-2">
-                        {article.content?.replace(/<[^>]*>?/gm, '').substring(0, 150)}...
-                      </p>
-                    </CardContent>
-                    
-                    <CardFooter className="flex justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center">
-                          <ThumbsUp className="h-4 w-4 mr-1" />
-                          <span>{article.vote_count || 0}</span>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          <span>0</span>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <Eye className="h-4 w-4 mr-1" />
-                          <span>{article.view_count}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span>{formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}</span>
-                      </div>
-                    </CardFooter>
-                  </Card>
+                  <ArticleCard
+                    key={article.id}
+                    article={{
+                      ...article,
+                      author: {
+                        id: article.author?.id || article.user_id,
+                        name: article.author?.name || 'Unknown User',
+                        avatar_url: article.author?.avatar_url
+                      }
+                    } as KnowledgeArticle}
+                    onClick={() => navigate(`/knowledge/${article.id}`)}
+                  />
                 ))}
               </div>
             ) : (
               <Card className="p-8 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2 text-white">No saved articles</h3>
-                  <p className="text-white mb-6 max-w-md mx-auto">
+                  <h3 className="text-lg font-medium mb-2">No saved articles</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     Save articles you find interesting to read them later!
                   </p>
                   <Button onClick={() => navigate('/knowledge')}>

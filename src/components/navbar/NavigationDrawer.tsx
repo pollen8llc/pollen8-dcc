@@ -23,10 +23,14 @@ import {
   Tag,
   ContactIcon,
   LayoutDashboard,
+  Grid3x3,
+  CalendarClock,
+  Import,
+  Bell,
+  Folder,
   PlusCircle,
   UserSearch,
-  Building2,
-  Bell
+  Building2
 } from "lucide-react";
 
 interface NavigationDrawerProps {
@@ -64,11 +68,11 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
     console.log("Notifications clicked");
     onOpenChange(false);
   };
+  // do not change NavigationDrawer.tsx unless specifically specified
 
   // Check user roles safely
   const isAdmin = currentUser?.role === 'ADMIN';
   const isOrganizer = currentUser?.role === 'ORGANIZER' || isAdmin;
-  const isServiceProvider = currentUser?.role === 'SERVICE_PROVIDER';
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -94,6 +98,15 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
+                  onClick={() => handleNavigation("/welcome")}
+                >
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
                   onClick={() => handleNavigation("/profile")}
                 >
                   <UserIcon className="mr-2 h-4 w-4" />
@@ -103,19 +116,10 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 <Button
                   variant="ghost"
                   className="justify-start"
-                  onClick={() => handleNavigation("/profiles/search")}
+                  onClick={() => handleNavigation("/profile/search")}
                 >
                   <UserSearch className="mr-2 h-4 w-4" />
                   Find Profiles
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/settings")}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
                 </Button>
 
                 <Button
@@ -127,42 +131,20 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   Notifications
                 </Button>
 
-                {/* Platform-specific sections */}
-                {!isServiceProvider && (
-                  <>
-                    <Separator className="my-2" />
-                    <p className="px-4 py-2 text-sm font-medium opacity-70">
-                      Modul8
-                    </p>
+                {/* Modul8 Section */}
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  Modul8
+                </p>
 
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/modul8")}
-                    >
-                      <Building2 className="mr-2 h-4 w-4" />
-                      Ecosystem Hub
-                    </Button>
-                  </>
-                )}
-
-                {isServiceProvider && (
-                  <>
-                    <Separator className="my-2" />
-                    <p className="px-4 py-2 text-sm font-medium opacity-70">
-                      LAB-R8
-                    </p>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/labr8/inbox")}
-                    >
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Button>
-                  </>
-                )}
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/modul8")}
+                >
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Ecosystem Hub
+                </Button>
 
                 {/* Knowledge Section */}
                 <Separator className="my-2" />
@@ -197,47 +179,92 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   Create Article
                 </Button>
 
-                {/* REL8-T Section */}
-                <Separator className="my-2" />
-                <p className="px-4 py-2 text-sm font-medium opacity-70">
-                  REL8-T
-                </p>
+                {/* Organizer Section */}
+                {isOrganizer && (
+                  <>
+                    <Separator className="my-2" />
+                    <p className="px-4 py-2 text-sm font-medium opacity-70">
+                      REL8
+                    </p>
 
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/rel8t")}
-                >
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Button>
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8")}
+                    >
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Button>
 
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/contacts")}
-                >
-                  <ContactIcon className="mr-2 h-4 w-4" />
-                  Contacts
-                </Button>
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/contacts")}
+                    >
+                      <ContactIcon className="mr-2 h-4 w-4" />
+                      Contacts
+                    </Button>
 
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/categories")}
-                >
-                  <Tag className="mr-2 h-4 w-4" />
-                  Categories
-                </Button>
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/relationships")}
+                    >
+                      <CalendarClock className="mr-2 h-4 w-4" />
+                      Relationships
+                    </Button>
 
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/rel8t/triggers")}
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Triggers
-                </Button>
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/groups")}
+                    >
+                      <Grid3x3 className="mr-2 h-4 w-4" />
+                      Groups
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/categories")}
+                    >
+                      <Tag className="mr-2 h-4 w-4" />
+                      Categories
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/rel8/settings")}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Button>
+
+                    <Separator className="my-2" />
+                    <p className="px-4 py-2 text-sm font-medium opacity-70">
+                      Organizer
+                    </p>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/organizer")}
+                    >
+                      <Folder className="mr-2 h-4 w-4" />
+                      Organizer Dashboard
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={() => handleNavigation("/invites")}
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      Manage Invites
+                    </Button>
+                  </>
+                )}
 
                 {/* Admin Section */}
                 {isAdmin && (
@@ -266,27 +293,19 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                     </Button>
                   </>
                 )}
-
-                {/* Organizer Section */}
-                {isOrganizer && (
-                  <>
-                    <Separator className="my-2" />
-                    <p className="px-4 py-2 text-sm font-medium opacity-70">
-                      Organizer Tools
-                    </p>
-
-                    <Button
-                      variant="ghost"
-                      className="justify-start"
-                      onClick={() => handleNavigation("/invites")}
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      Manage Invites
-                    </Button>
-                  </>
-                )}
               </>
             )}
+
+            <Separator className="my-2" />
+
+            <Button
+              variant="ghost"
+              className="justify-start"
+              onClick={() => handleNavigation("/docs")}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Documentation
+            </Button>
           </nav>
         </div>
 

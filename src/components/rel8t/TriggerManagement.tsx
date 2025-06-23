@@ -18,6 +18,7 @@ export function TriggerManagement() {
     triggers,
     emailStats,
     triggerStats,
+    emailNotifications,
     filteredTriggers,
     isLoading,
     handleEditTrigger,
@@ -41,6 +42,7 @@ export function TriggerManagement() {
         setActiveTab={setActiveTab}
         filteredTriggers={filteredTriggers}
         isLoading={isLoading}
+        emailNotifications={emailNotifications}
         handleEditTrigger={handleEditTrigger}
         handleDeleteTrigger={handleDeleteTrigger}
         handleToggleActive={handleToggleActive}

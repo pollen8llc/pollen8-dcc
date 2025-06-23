@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button';
 import { ServiceRequest } from '@/types/modul8';
 import { DollarSign, Clock, Users, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useSession } from '@/hooks/useSession';
-import ServiceRequestActions from './ServiceRequestActions';
 
 interface ServiceRequestCardProps {
   request: ServiceRequest;
@@ -16,7 +14,6 @@ interface ServiceRequestCardProps {
 
 const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({ request, onUpdate }) => {
   const navigate = useNavigate();
-  const { session } = useSession();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -61,30 +58,18 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({ request, onUpda
     return 'Budget: TBD';
   };
 
-  // Check if current user is the organizer who created this request
-  const isOwner = session?.user?.id && request.organizer?.user_id === session.user.id;
-
   return (
     <Card className="h-full hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
           <CardTitle className="text-lg line-clamp-2">{request.title}</CardTitle>
-          <div className="flex items-center gap-2">
-            <div className="flex flex-col gap-1">
-              <Badge className={getStatusColor(request.status)} variant="secondary">
-                {request.status}
-              </Badge>
-              <Badge className={getEngagementColor(request.engagement_status)} variant="outline">
-                {request.engagement_status}
-              </Badge>
-            </div>
-            {isOwner && (
-              <ServiceRequestActions 
-                request={request} 
-                onUpdate={onUpdate}
-                canDelete={true}
-              />
-            )}
+          <div className="flex flex-col gap-1">
+            <Badge className={getStatusColor(request.status)} variant="secondary">
+              {request.status}
+            </Badge>
+            <Badge className={getEngagementColor(request.engagement_status)} variant="outline">
+              {request.engagement_status}
+            </Badge>
           </div>
         </div>
       </CardHeader>

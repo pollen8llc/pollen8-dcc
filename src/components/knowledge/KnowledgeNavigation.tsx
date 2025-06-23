@@ -6,8 +6,7 @@ import {
   FileText,
   Tag,
   PlusCircle,
-  Search,
-  User
+  Search
 } from "lucide-react";
 
 export function KnowledgeNavigation() {
@@ -27,12 +26,6 @@ export function KnowledgeNavigation() {
       isActive: location.pathname === "/knowledge/topics" || location.pathname.startsWith("/knowledge/tags/")
     },
     {
-      href: "/knowledge/my-resources",
-      label: "My Resources",
-      icon: User,
-      isActive: location.pathname === "/knowledge/my-resources"
-    },
-    {
       href: "/knowledge/create",
       label: "Create",
       icon: PlusCircle,
@@ -50,9 +43,9 @@ export function KnowledgeNavigation() {
             to={item.href}
             className={cn(
               "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
-              "hover:bg-background hover:text-[#00eada] hover:shadow-sm",
+              "hover:bg-background hover:text-foreground hover:shadow-sm",
               item.isActive
-                ? "bg-background text-[#00eada] shadow-sm"
+                ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground"
             )}
           >

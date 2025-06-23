@@ -4,106 +4,159 @@ import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileText, AlertCircle, RotateCcw } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { CSVParser, ParsedCSVData } from '@/utils/csvParser';
-import { VCardParser } from '@/utils/vCardParser';
-import { ColumnDetector, ColumnMapping } from '@/utils/columnDetector';
-import { DataNormalizer, NormalizedContact, ValidationResult } from '@/utils/dataNormalizer';
-import { ColumnMappingStep } from './ColumnMappingStep';
-import { ContactPreviewStep } from './ContactPreviewStep';
 
 interface ImportContactsStepProps {
-  onNext: (data: { importedContacts: NormalizedContact[] }) => void;
+  onNext: (data: { importedContacts: any[] }) => void;
 }
 
-type ImportStep = 'upload' | 'mapping' | 'preview';
-
-interface ProcessedData {
-  validContacts: NormalizedContact[];
-  rejectedContacts: { contact: NormalizedContact; validation: ValidationResult; rowNumber: number }[];
-  duplicateContacts: { contact: NormalizedContact; duplicateOf: number; rowNumber: number }[];
+interface ParsedContact {
+  name: string;
+  email?: string;
+  phone?: string;
+  organization?: string;
+  role?: string;
+  location?: string;
+  notes?: string;
 }
 
 export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }) => {
-  const [currentStep, setCurrentStep] = useState<ImportStep>('upload');
   const [file, setFile] = useState<File | null>(null);
-  const [csvData, setCsvData] = useState<ParsedCSVData | null>(null);
-  const [mappings, setMappings] = useState<ColumnMapping[]>([]);
-  const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
+  const [contacts, setContacts] = useState<ParsedContact[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const uploadedFile = acceptedFiles[0];
-    if (!uploadedFile) return;
+  // Enhanced CSV parsing function
+  const parseCSV = (csvText: string): ParsedContact[] => {
+    const lines = csvText.split('\n').filter(line => line.trim());
+    if (lines.length === 0) return [];
 
-    // File size check (10MB limit)
-    if (uploadedFile.size > 10 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please upload a file smaller than 10MB.",
-        variant: "destructive"
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
+    console.log('CSV Headers detected:', headers);
+
+    // Common header mappings
+    const headerMappings = {
+      name: ['name', 'full name', 'fullname', 'contact name', 'display name', 'first name', 'fname', 'given name'],
+      email: ['email', 'email address', 'e-mail', 'mail', 'primary email', 'work email', 'personal email'],
+      phone: ['phone', 'phone number', 'mobile', 'cell', 'telephone', 'tel', 'mobile phone', 'work phone', 'home phone'],
+      organization: ['organization', 'company', 'org', 'business', 'employer', 'work', 'company name'],
+      role: ['role', 'title', 'job title', 'position', 'job', 'work title', 'designation'],
+      location: ['location', 'address', 'city', 'country', 'region', 'state'],
+      notes: ['notes', 'note', 'comments', 'description', 'memo', 'remarks']
+    };
+
+    // Find column indices for each field
+    const columnMapping: { [key: string]: number } = {};
+    
+    Object.entries(headerMappings).forEach(([field, possibleHeaders]) => {
+      const headerIndex = headers.findIndex(header => 
+        possibleHeaders.some(possible => header.includes(possible))
+      );
+      if (headerIndex !== -1) {
+        columnMapping[field] = headerIndex;
+      }
+    });
+
+    console.log('Column mapping:', columnMapping);
+
+    const parsedContacts: ParsedContact[] = [];
+
+    // Process data rows
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      
+      // Skip empty rows
+      if (values.every(v => !v)) continue;
+
+      const contact: ParsedContact = {
+        name: '',
+        email: '',
+        phone: '',
+        organization: '',
+        role: '',
+        location: '',
+        notes: ''
+      };
+
+      // Extract values based on column mapping
+      Object.entries(columnMapping).forEach(([field, index]) => {
+        if (values[index]) {
+          contact[field as keyof ParsedContact] = values[index];
+        }
       });
-      return;
+
+      // If no name mapping found, try to construct from first few columns
+      if (!contact.name && values.length > 0) {
+        // Try to find a name in the first few columns
+        for (let j = 0; j < Math.min(3, values.length); j++) {
+          const value = values[j];
+          if (value && value.includes(' ') || (!contact.email && !value.includes('@'))) {
+            contact.name = value;
+            break;
+          }
+        }
+      }
+
+      // If no email mapping found, look for email pattern
+      if (!contact.email) {
+        const emailValue = values.find(v => v && v.includes('@') && v.includes('.'));
+        if (emailValue) {
+          contact.email = emailValue;
+        }
+      }
+
+      // If no phone mapping found, look for phone pattern
+      if (!contact.phone) {
+        const phoneValue = values.find(v => v && /[\d\-\(\)\+\s]{10,}/.test(v));
+        if (phoneValue) {
+          contact.phone = phoneValue;
+        }
+      }
+
+      // Only add contact if we have at least a name or email
+      if (contact.name || contact.email) {
+        // If no name but have email, use email as name
+        if (!contact.name && contact.email) {
+          contact.name = contact.email.split('@')[0];
+        }
+        parsedContacts.push(contact);
+      }
     }
 
-    setFile(uploadedFile);
+    return parsedContacts;
+  };
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
+
+    setFile(file);
     setIsProcessing(true);
 
     try {
-      let parsed: ParsedCSVData;
-
-      // Check if it's a vCard file
-      if (uploadedFile.name.toLowerCase().endsWith('.vcf')) {
-        const content = await uploadedFile.text();
-        const vCardContacts = VCardParser.parseVCard(content);
-        
-        if (vCardContacts.length === 0) {
-          toast({
-            title: "Invalid vCard file",
-            description: "No valid contacts found in the vCard file.",
-            variant: "destructive"
-          });
-          return;
-        }
-
-        // Convert vCard to CSV format for processing
-        const csvContent = VCardParser.convertToCSVFormat(vCardContacts);
-        parsed = CSVParser.parseText(csvContent, { skipEmptyLines: true });
-      } else {
-        // Parse as CSV
-        parsed = await CSVParser.parseFile(uploadedFile, {
-          skipEmptyLines: true,
-          maxFileSize: 10 * 1024 * 1024
-        });
-      }
-
-      if (parsed.headers.length === 0 || parsed.rows.length === 0) {
+      const text = await file.text();
+      const parsedContacts = parseCSV(text);
+      
+      console.log('Parsed contacts:', parsedContacts);
+      
+      if (parsedContacts.length === 0) {
         toast({
-          title: "Invalid file",
-          description: "The file appears to be empty or has no valid data.",
+          title: "No contacts found",
+          description: "The CSV file doesn't contain any recognizable contact data.",
           variant: "destructive"
         });
-        return;
+      } else {
+        setContacts(parsedContacts);
+        toast({
+          title: "CSV parsed successfully",
+          description: `Found ${parsedContacts.length} contacts in the file.`
+        });
       }
-
-      setCsvData(parsed);
-
-      // Auto-detect column mappings
-      const detection = ColumnDetector.detectColumns(parsed.headers);
-      setMappings(detection.mappings);
-
-      toast({
-        title: "File processed successfully",
-        description: `Found ${parsed.headers.length} columns and ${parsed.rows.length} rows. ${detection.mappings.length} columns auto-mapped.`
-      });
-
-      setCurrentStep('mapping');
     } catch (error) {
-      console.error('Error parsing file:', error);
+      console.error('Error parsing CSV:', error);
       toast({
         title: "Error parsing file",
-        description: "There was an error reading the file. Please check the file format.",
+        description: "There was an error reading the CSV file. Please check the file format.",
         variant: "destructive"
       });
     } finally {
@@ -116,130 +169,18 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
     accept: {
       'text/csv': ['.csv'],
       'text/plain': ['.txt'],
-      'text/vcard': ['.vcf'],
       'application/vnd.ms-excel': ['.xls'],
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
     },
     multiple: false
   });
 
-  const handleMappingNext = () => {
-    if (!csvData) return;
-
-    setIsProcessing(true);
-
-    try {
-      // Process contacts with current mappings
-      const validContacts: NormalizedContact[] = [];
-      const rejectedContacts: { contact: NormalizedContact; validation: ValidationResult; rowNumber: number }[] = [];
-      const duplicateContacts: { contact: NormalizedContact; duplicateOf: number; rowNumber: number }[] = [];
-      const contactHashes = new Map<string, number>();
-
-      csvData.rows.forEach((row, rowIndex) => {
-        // Map row data to fields
-        const rawContact: { [key: string]: string } = {};
-        mappings.forEach(mapping => {
-          if (row[mapping.sourceIndex]) {
-            rawContact[mapping.targetField] = row[mapping.sourceIndex];
-          }
-        });
-
-        // Normalize contact data
-        const normalizedContact = DataNormalizer.normalizeContact(rawContact);
-        
-        // Validate contact
-        const validation = DataNormalizer.validateContact(normalizedContact);
-        
-        if (!validation.isValid) {
-          rejectedContacts.push({
-            contact: normalizedContact,
-            validation,
-            rowNumber: rowIndex + 2 // +2 because row 0 is headers and we want 1-based indexing
-          });
-          return;
-        }
-
-        // Check for duplicates
-        const contactHash = DataNormalizer.generateContactHash(normalizedContact);
-        const existingIndex = contactHashes.get(contactHash);
-        
-        if (existingIndex !== undefined) {
-          duplicateContacts.push({
-            contact: normalizedContact,
-            duplicateOf: existingIndex + 2,
-            rowNumber: rowIndex + 2
-          });
-          return;
-        }
-
-        // Add to valid contacts
-        contactHashes.set(contactHash, rowIndex);
-        validContacts.push(normalizedContact);
-      });
-
-      setProcessedData({
-        validContacts,
-        rejectedContacts,
-        duplicateContacts
-      });
-
-      toast({
-        title: "Contacts processed",
-        description: `${validContacts.length} valid, ${rejectedContacts.length} rejected, ${duplicateContacts.length} duplicates found.`
-      });
-
-      setCurrentStep('preview');
-    } catch (error) {
-      console.error('Error processing contacts:', error);
-      toast({
-        title: "Processing error",
-        description: "There was an error processing the contacts.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   const handleImport = () => {
-    if (processedData && processedData.validContacts.length > 0) {
-      onNext({ importedContacts: processedData.validContacts });
+    if (contacts.length > 0) {
+      onNext({ importedContacts: contacts });
     }
   };
 
-  const handleReset = () => {
-    setCurrentStep('upload');
-    setFile(null);
-    setCsvData(null);
-    setMappings([]);
-    setProcessedData(null);
-  };
-
-  if (currentStep === 'mapping' && csvData) {
-    return (
-      <ColumnMappingStep
-        headers={csvData.headers}
-        mappings={mappings}
-        onMappingChange={setMappings}
-        onNext={handleMappingNext}
-        onBack={() => setCurrentStep('upload')}
-      />
-    );
-  }
-
-  if (currentStep === 'preview' && processedData) {
-    return (
-      <ContactPreviewStep
-        validContacts={processedData.validContacts}
-        rejectedContacts={processedData.rejectedContacts}
-        duplicateContacts={processedData.duplicateContacts}
-        onImport={handleImport}
-        onBack={() => setCurrentStep('mapping')}
-      />
-    );
-  }
-
-  // Upload step
   return (
     <div className="space-y-6">
       <div
@@ -251,12 +192,12 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
         <input {...getInputProps()} />
         <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         {isDragActive ? (
-          <p className="text-lg">Drop your file here...</p>
+          <p className="text-lg">Drop your CSV file here...</p>
         ) : (
           <div>
-            <p className="text-lg mb-2">Drag & drop your contact file here</p>
+            <p className="text-lg mb-2">Drag & drop your CSV file here</p>
             <p className="text-sm text-muted-foreground mb-4">or click to browse files</p>
-            <Badge variant="secondary">Supports CSV, TXT, vCard (.vcf), XLS, XLSX (max 10MB)</Badge>
+            <Badge variant="secondary">Supports CSV, TXT, XLS, XLSX</Badge>
           </div>
         )}
       </div>
@@ -272,7 +213,7 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
         </Card>
       )}
 
-      {file && !isProcessing && currentStep === 'upload' && (
+      {file && !isProcessing && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -281,35 +222,61 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2">
               <p><strong>File:</strong> {file.name}</p>
               <p><strong>Size:</strong> {(file.size / 1024).toFixed(2)} KB</p>
-              <p><strong>Type:</strong> {file.name.toLowerCase().endsWith('.vcf') ? 'vCard' : 'CSV'}</p>
-              {csvData && (
-                <>
-                  <p><strong>Columns:</strong> {csvData.headers.length}</p>
-                  <p><strong>Rows:</strong> {csvData.rows.length}</p>
-                  <p><strong>Delimiter:</strong> {csvData.delimiter === '\t' ? 'Tab' : csvData.delimiter}</p>
-                </>
-              )}
+              <p><strong>Contacts found:</strong> {contacts.length}</p>
             </div>
-            <Button onClick={handleReset} variant="outline" className="mr-2">
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Upload Different File
-            </Button>
           </CardContent>
         </Card>
       )}
 
-      {!file && !isProcessing && (
+      {contacts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              Preview Contacts ({contacts.length} found)
+            </CardTitle>
+            <CardDescription>
+              Review the contacts that will be imported. You can modify them after import.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-64 overflow-y-auto space-y-3">
+              {contacts.slice(0, 10).map((contact, index) => (
+                <div key={index} className="p-3 border rounded-lg">
+                  <div className="font-medium">{contact.name || 'No name'}</div>
+                  {contact.email && <div className="text-sm text-muted-foreground">{contact.email}</div>}
+                  {contact.phone && <div className="text-sm text-muted-foreground">{contact.phone}</div>}
+                  {contact.organization && <div className="text-sm text-muted-foreground">{contact.organization}</div>}
+                </div>
+              ))}
+              {contacts.length > 10 && (
+                <div className="text-center text-sm text-muted-foreground">
+                  ... and {contacts.length - 10} more contacts
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <Button onClick={handleImport} className="w-full sm:w-auto">
+                Import {contacts.length} Contact{contacts.length !== 1 ? 's' : ''}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {contacts.length === 0 && file && !isProcessing && (
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-center text-center">
-              <AlertCircle className="h-8 w-8 text-blue-500 mr-3" />
+              <AlertCircle className="h-8 w-8 text-yellow-500 mr-3" />
               <div>
-                <p className="font-medium">Advanced Contact Processing</p>
+                <p className="font-medium">No contacts detected</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Supports CSV, vCard, and Excel formats with intelligent column detection and data validation.
+                  Make sure your CSV has columns for names and emails. Common formats are supported.
                 </p>
               </div>
             </div>

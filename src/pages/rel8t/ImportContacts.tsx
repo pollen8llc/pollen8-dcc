@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -6,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Mail, Smartphone } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { createContact } from "@/services/rel8t/contactService";
-import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -17,47 +18,34 @@ const ImportContacts = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeImportSource, setActiveImportSource] = useState("csv");
 
-  const handleImportComplete = async (importedContacts: NormalizedContact[]) => {
+  const handleImportComplete = async (importedContacts: any[]) => {
     setIsProcessing(true);
     let successCount = 0;
     let errorCount = 0;
-    const errors: string[] = [];
 
     try {
       for (const contact of importedContacts) {
         try {
-          // Transform normalized contact to service contact format
-          const serviceContact = DataNormalizer.transformToServiceContact(contact);
-          await createContact(serviceContact);
+          await createContact(contact);
           successCount++;
-        } catch (error: any) {
+        } catch (error) {
           errorCount++;
-          errors.push(`Failed to import ${contact.name}: ${error.message}`);
-          console.error('Error importing contact:', contact.name, error);
+          // Optionally, log or collect errors for user feedback
         }
       }
 
-      if (successCount > 0) {
-        toast({
-          title: "Contacts imported successfully",
-          description: `Successfully imported ${successCount} contacts.${errorCount ? ` ${errorCount} failed.` : ""}`
-        });
-        
-        // Invalidate contacts query to refresh the contacts list
-        queryClient.invalidateQueries({ queryKey: ["contacts"] });
-        
-        // Navigate back to contacts page after successful import
-        navigate("/rel8t/contacts");
-      } else {
-        toast({
-          title: "Import failed",
-          description: "No contacts were successfully imported. Please check your data and try again.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Contacts imported",
+        description: `Successfully imported ${successCount} contacts.${errorCount ? ` ${errorCount} failed.` : ""}`
+      });
       
-    } catch (error: any) {
-      console.error('Import process error:', error);
+      // Invalidate contacts query to refresh the contacts list
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      
+      // Navigate back to contacts page after successful import
+      navigate("/rel8/contacts");
+      
+    } catch (error) {
       toast({
         title: "Import failed",
         description: "An error occurred during the import process.",
@@ -77,20 +65,13 @@ const ImportContacts = () => {
     });
   };
 
-  const handlePhoneContactsImport = () => {
-    // Switch to CSV tab for phone contacts
-    setActiveImportSource("csv");
-    toast({
-      title: "Phone Contacts Import",
-      description: "Use the CSV import above to upload your exported phone contacts file (CSV or vCard format)."
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <Rel8OnlyNavigation />
+        
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
           <div>
             <h1 className="text-3xl font-bold">Import Contacts</h1>
@@ -100,7 +81,7 @@ const ImportContacts = () => {
         
         <Tabs defaultValue="csv" value={activeImportSource} onValueChange={setActiveImportSource}>
           <TabsList className="grid grid-cols-4 mb-6">
-            <TabsTrigger value="csv">Files (CSV/vCard)</TabsTrigger>
+            <TabsTrigger value="csv">CSV File</TabsTrigger>
             <TabsTrigger value="gmail">Gmail</TabsTrigger>
             <TabsTrigger value="outlook">Outlook</TabsTrigger>
             <TabsTrigger value="phone">Phone Contacts</TabsTrigger>
@@ -109,20 +90,13 @@ const ImportContacts = () => {
           <TabsContent value="csv">
             <Card>
               <CardHeader>
-                <CardTitle>File Import</CardTitle>
-                <CardDescription>Import contacts from CSV, vCard, or Excel files</CardDescription>
+                <CardTitle>CSV Import</CardTitle>
+                <CardDescription>Import contacts from a CSV file</CardDescription>
               </CardHeader>
               <CardContent>
-                {isProcessing ? (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
-                    <span>Importing contacts...</span>
-                  </div>
-                ) : (
-                  <ImportContactsStep 
-                    onNext={(data) => handleImportComplete(data.importedContacts)}
-                  />
-                )}
+                <ImportContactsStep 
+                  onNext={(data) => handleImportComplete(data.importedContacts)}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -178,24 +152,22 @@ const ImportContacts = () => {
               <CardContent className="space-y-4">
                 <div className="bg-muted/50 rounded-lg p-6 text-center">
                   <Smartphone className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="font-medium text-lg mb-2">Import Phone Contacts</h3>
+                  <h3 className="font-medium text-lg mb-2">Connect to Phone</h3>
                   <p className="text-muted-foreground mb-4">
                     Export your contacts from your device and upload them here
                   </p>
                   <div className="space-y-4">
-                    <div className="text-sm text-left bg-blue-50 p-4 rounded-lg">
-                      <p className="font-medium mb-2">Instructions:</p>
-                      <ol className="list-decimal list-inside space-y-1">
-                        <li>Export contacts from your phone as a vCard (.vcf) or CSV file</li>
-                        <li>On iPhone: Contacts → Export vCard</li>
-                        <li>On Android: Contacts → Settings → Export</li>
+                    <p className="text-sm">
+                      Instructions:
+                      <ol className="list-decimal list-inside text-left mt-2">
+                        <li>Export contacts from your phone as a vCard or CSV file</li>
                         <li>Email the file to yourself or save to cloud storage</li>
                         <li>Download the file to this device</li>
-                        <li>Upload using the file import above</li>
+                        <li>Upload the file below</li>
                       </ol>
-                    </div>
-                    <Button onClick={handlePhoneContactsImport}>
-                      Go to File Import
+                    </p>
+                    <Button onClick={() => setActiveImportSource("csv")}>
+                      Upload Phone Contacts
                     </Button>
                   </div>
                 </div>

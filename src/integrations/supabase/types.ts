@@ -229,94 +229,6 @@ export type Database = {
         }
         Relationships: []
       }
-      cross_platform_activity_log: {
-        Row: {
-          activity_data: Json | null
-          activity_type: string
-          created_at: string
-          id: string
-          platform: string
-          service_request_id: string
-          user_id: string
-        }
-        Insert: {
-          activity_data?: Json | null
-          activity_type: string
-          created_at?: string
-          id?: string
-          platform: string
-          service_request_id: string
-          user_id: string
-        }
-        Update: {
-          activity_data?: Json | null
-          activity_type?: string
-          created_at?: string
-          id?: string
-          platform?: string
-          service_request_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cross_platform_activity_log_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      cross_platform_notifications: {
-        Row: {
-          created_at: string
-          data: Json | null
-          id: string
-          message: string
-          notification_type: string
-          platform_context: string
-          read_at: string | null
-          recipient_id: string
-          sender_id: string | null
-          service_request_id: string | null
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          data?: Json | null
-          id?: string
-          message: string
-          notification_type: string
-          platform_context: string
-          read_at?: string | null
-          recipient_id: string
-          sender_id?: string | null
-          service_request_id?: string | null
-          title: string
-        }
-        Update: {
-          created_at?: string
-          data?: Json | null
-          id?: string
-          message?: string
-          notification_type?: string
-          platform_context?: string
-          read_at?: string | null
-          recipient_id?: string
-          sender_id?: string | null
-          service_request_id?: string | null
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cross_platform_notifications_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       invites: {
         Row: {
           code: string
@@ -691,53 +603,6 @@ export type Database = {
           },
         ]
       }
-      modul8_negotiation_status: {
-        Row: {
-          created_at: string
-          current_status: string
-          id: string
-          organizer_id: string
-          previous_status: string | null
-          service_provider_id: string | null
-          service_request_id: string
-          status_data: Json | null
-          updated_at: string
-          updated_by: string
-        }
-        Insert: {
-          created_at?: string
-          current_status?: string
-          id?: string
-          organizer_id: string
-          previous_status?: string | null
-          service_provider_id?: string | null
-          service_request_id: string
-          status_data?: Json | null
-          updated_at?: string
-          updated_by: string
-        }
-        Update: {
-          created_at?: string
-          current_status?: string
-          id?: string
-          organizer_id?: string
-          previous_status?: string | null
-          service_provider_id?: string | null
-          service_request_id?: string
-          status_data?: Json | null
-          updated_at?: string
-          updated_by?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_negotiation_status_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       modul8_notifications: {
         Row: {
           created_at: string
@@ -803,334 +668,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      modul8_project_comments: {
-        Row: {
-          attachments: Json | null
-          comment_type: string
-          content: string
-          created_at: string
-          id: string
-          metadata: Json | null
-          service_request_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          attachments?: Json | null
-          comment_type?: string
-          content: string
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          service_request_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          attachments?: Json | null
-          comment_type?: string
-          content?: string
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          service_request_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_project_comments_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      modul8_project_completions: {
-        Row: {
-          completion_notes: string | null
-          confirmed_at: string | null
-          confirmed_by: string | null
-          deliverables: Json | null
-          id: string
-          organizer_id: string
-          service_provider_id: string
-          service_request_id: string
-          status: string
-          submitted_at: string
-        }
-        Insert: {
-          completion_notes?: string | null
-          confirmed_at?: string | null
-          confirmed_by?: string | null
-          deliverables?: Json | null
-          id?: string
-          organizer_id: string
-          service_provider_id: string
-          service_request_id: string
-          status?: string
-          submitted_at?: string
-        }
-        Update: {
-          completion_notes?: string | null
-          confirmed_at?: string | null
-          confirmed_by?: string | null
-          deliverables?: Json | null
-          id?: string
-          organizer_id?: string
-          service_provider_id?: string
-          service_request_id?: string
-          status?: string
-          submitted_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_project_completions_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      modul8_project_milestones: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          description: string | null
-          due_date: string | null
-          id: string
-          order_index: number | null
-          service_request_id: string
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          id?: string
-          order_index?: number | null
-          service_request_id: string
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          id?: string
-          order_index?: number | null
-          service_request_id?: string
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_project_milestones_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      modul8_project_ratings: {
-        Row: {
-          completion_id: string
-          created_at: string
-          feedback: string | null
-          id: string
-          organizer_id: string
-          rating: number
-          service_provider_id: string
-          service_request_id: string
-        }
-        Insert: {
-          completion_id: string
-          created_at?: string
-          feedback?: string | null
-          id?: string
-          organizer_id: string
-          rating: number
-          service_provider_id: string
-          service_request_id: string
-        }
-        Update: {
-          completion_id?: string
-          created_at?: string
-          feedback?: string | null
-          id?: string
-          organizer_id?: string
-          rating?: number
-          service_provider_id?: string
-          service_request_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_project_ratings_completion_id_fkey"
-            columns: ["completion_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_project_completions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "modul8_project_ratings_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      modul8_project_revisions: {
-        Row: {
-          attachments: Json | null
-          created_at: string
-          description: string
-          id: string
-          organizer_id: string
-          revision_type: string
-          service_provider_id: string
-          service_request_id: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          attachments?: Json | null
-          created_at?: string
-          description: string
-          id?: string
-          organizer_id: string
-          revision_type: string
-          service_provider_id: string
-          service_request_id: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          attachments?: Json | null
-          created_at?: string
-          description?: string
-          id?: string
-          organizer_id?: string
-          revision_type?: string
-          service_provider_id?: string
-          service_request_id?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_project_revisions_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      modul8_proposal_threads: {
-        Row: {
-          created_at: string
-          id: string
-          organizer_id: string
-          service_provider_id: string
-          service_request_id: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          organizer_id: string
-          service_provider_id: string
-          service_request_id: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          organizer_id?: string
-          service_provider_id?: string
-          service_request_id?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_proposal_threads_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      modul8_proposal_versions: {
-        Row: {
-          change_notes: string | null
-          created_at: string
-          created_by: string
-          id: string
-          proposal_id: string
-          quote_amount: number | null
-          scope_details: string | null
-          terms: string | null
-          thread_id: string
-          timeline: string | null
-          version_number: number
-        }
-        Insert: {
-          change_notes?: string | null
-          created_at?: string
-          created_by: string
-          id?: string
-          proposal_id: string
-          quote_amount?: number | null
-          scope_details?: string | null
-          terms?: string | null
-          thread_id: string
-          timeline?: string | null
-          version_number?: number
-        }
-        Update: {
-          change_notes?: string | null
-          created_at?: string
-          created_by?: string
-          id?: string
-          proposal_id?: string
-          quote_amount?: number | null
-          scope_details?: string | null
-          terms?: string | null
-          thread_id?: string
-          timeline?: string | null
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_proposal_versions_proposal_id_fkey"
-            columns: ["proposal_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_proposals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "modul8_proposal_versions_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_proposal_threads"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       modul8_proposals: {
         Row: {
@@ -1227,47 +764,6 @@ export type Database = {
         }
         Relationships: []
       }
-      modul8_service_request_comments: {
-        Row: {
-          comment_type: string
-          content: string
-          created_at: string
-          id: string
-          metadata: Json | null
-          service_request_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          comment_type?: string
-          content: string
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          service_request_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          comment_type?: string
-          content?: string
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          service_request_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_service_request_comments_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       modul8_service_requests: {
         Row: {
           budget_range: Json | null
@@ -1278,7 +774,6 @@ export type Database = {
           id: string
           milestones: Json | null
           organizer_id: string
-          project_progress: number | null
           service_provider_id: string | null
           status: string | null
           timeline: string | null
@@ -1294,7 +789,6 @@ export type Database = {
           id?: string
           milestones?: Json | null
           organizer_id: string
-          project_progress?: number | null
           service_provider_id?: string | null
           status?: string | null
           timeline?: string | null
@@ -1310,7 +804,6 @@ export type Database = {
           id?: string
           milestones?: Json | null
           organizer_id?: string
-          project_progress?: number | null
           service_provider_id?: string | null
           status?: string | null
           timeline?: string | null
@@ -1330,44 +823,6 @@ export type Database = {
             columns: ["service_provider_id"]
             isOneToOne: false
             referencedRelation: "modul8_service_providers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      modul8_status_changes: {
-        Row: {
-          created_at: string
-          from_status: string | null
-          id: string
-          reason: string | null
-          service_request_id: string
-          to_status: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          from_status?: string | null
-          id?: string
-          reason?: string | null
-          service_request_id: string
-          to_status: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          from_status?: string | null
-          id?: string
-          reason?: string | null
-          service_request_id?: string
-          to_status?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modul8_status_changes_service_request_id_fkey"
-            columns: ["service_request_id"]
-            isOneToOne: false
-            referencedRelation: "modul8_service_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -2077,10 +1532,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      assign_request_to_provider: {
-        Args: { p_service_request_id: string; p_service_provider_id: string }
-        Returns: boolean
-      }
       can_access_profile: {
         Args: { profile_user_id: string }
         Returns: boolean

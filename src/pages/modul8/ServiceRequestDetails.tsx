@@ -1,20 +1,18 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Building2, User, Clock, DollarSign } from 'lucide-react';
+import { ArrowLeft, Building2, User } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { ServiceRequest } from '@/types/modul8';
-import { getServiceRequestById } from '@/services/modul8Service';
-import { useSession } from '@/hooks/useSession';
-import RequestThread from '@/components/shared/RequestThread';
-import ServiceRequestActions from '@/components/modul8/ServiceRequestActions';
+import { getServiceRequests } from '@/services/modul8Service';
+import NegotiationFlow from '@/components/modul8/NegotiationFlow';
 import { toast } from '@/hooks/use-toast';
 
 const ServiceRequestDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { session } = useSession();
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +24,10 @@ const ServiceRequestDetails = () => {
     if (!id) return;
     
     try {
-      const request = await getServiceRequestById(id);
+      // For now, we'll get all requests and find the one we need
+      // In a real app, you'd have a getServiceRequestById function
+      const requests = await getServiceRequests();
+      const request = requests.find(r => r.id === id);
       
       if (!request) {
         toast({
@@ -51,15 +52,10 @@ const ServiceRequestDetails = () => {
     }
   };
 
-  const isOwner = session?.user?.id && serviceRequest?.organizer?.user_id === session.user.id;
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
-        </div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
       </div>
     );
   }
@@ -85,8 +81,8 @@ const ServiceRequestDetails = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-4 mb-8">
             <Button
               variant="outline"
               size="sm"
@@ -96,50 +92,38 @@ const ServiceRequestDetails = () => {
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Button>
-            
-            {isOwner && (
-              <ServiceRequestActions 
-                request={serviceRequest} 
-                onUpdate={() => {
-                  loadServiceRequest();
-                  if (serviceRequest.status === 'cancelled') {
-                    setTimeout(() => navigate('/modul8'), 1000);
-                  }
-                }}
-              />
-            )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Left Sidebar - User Profile Cards */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Organizer Profile Card */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2">
+              <NegotiationFlow 
+                serviceRequest={serviceRequest} 
+                onUpdate={loadServiceRequest}
+              />
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Organizer Info */}
               {serviceRequest.organizer && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Building2 className="h-5 w-5" />
-                      Organizer
+                      Organization
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Building2 className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{serviceRequest.organizer.organization_name}</h3>
-                          <p className="text-sm text-muted-foreground">Client</p>
-                        </div>
-                      </div>
+                    <div className="space-y-2">
+                      <h3 className="font-medium">{serviceRequest.organizer.organization_name}</h3>
                       {serviceRequest.organizer.description && (
                         <p className="text-sm text-muted-foreground">
                           {serviceRequest.organizer.description}
                         </p>
                       )}
                       {serviceRequest.organizer.focus_areas && serviceRequest.organizer.focus_areas.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1 mt-2">
                           {serviceRequest.organizer.focus_areas.map((area, index) => (
                             <span 
                               key={index}
@@ -155,7 +139,7 @@ const ServiceRequestDetails = () => {
                 </Card>
               )}
 
-              {/* Service Provider Profile Card */}
+              {/* Service Provider Info */}
               {serviceRequest.service_provider && (
                 <Card>
                   <CardHeader>
@@ -165,23 +149,15 @@ const ServiceRequestDetails = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                          <User className="h-6 w-6 text-green-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{serviceRequest.service_provider.business_name}</h3>
-                          <p className="text-sm text-muted-foreground">Provider</p>
-                        </div>
-                      </div>
+                    <div className="space-y-2">
+                      <h3 className="font-medium">{serviceRequest.service_provider.business_name}</h3>
                       {serviceRequest.service_provider.tagline && (
                         <p className="text-sm text-muted-foreground">
                           {serviceRequest.service_provider.tagline}
                         </p>
                       )}
                       {serviceRequest.service_provider.tags && serviceRequest.service_provider.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1 mt-2">
                           {serviceRequest.service_provider.tags.map((tag, index) => (
                             <span 
                               key={index}
@@ -197,60 +173,30 @@ const ServiceRequestDetails = () => {
                 </Card>
               )}
 
-              {/* Project Details Summary */}
+              {/* Request Status */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Project Summary</CardTitle>
+                  <CardTitle>Status</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {serviceRequest.budget_range?.min && (
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">
-                          ${serviceRequest.budget_range.min.toLocaleString()}
-                          {serviceRequest.budget_range.max && 
-                            ` - $${serviceRequest.budget_range.max.toLocaleString()}`
-                          }
-                        </span>
-                      </div>
-                    )}
-                    
-                    {serviceRequest.timeline && (
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">{serviceRequest.timeline}</span>
-                      </div>
-                    )}
-                    
-                    <div className="pt-2 border-t">
-                      <div className="text-xs text-muted-foreground mb-1">Status</div>
-                      <div className="text-sm font-medium capitalize">{serviceRequest.status.replace('_', ' ')}</div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Request Status:</span>
+                      <span className="text-sm font-medium capitalize">{serviceRequest.status}</span>
                     </div>
-                    
-                    <div>
-                      <div className="text-xs text-muted-foreground mb-1">Engagement</div>
-                      <div className="text-sm font-medium capitalize">{serviceRequest.engagement_status}</div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Engagement:</span>
+                      <span className="text-sm font-medium capitalize">{serviceRequest.engagement_status}</span>
                     </div>
-                    
-                    <div>
-                      <div className="text-xs text-muted-foreground mb-1">Created</div>
-                      <div className="text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Created:</span>
+                      <span className="text-sm">
                         {new Date(serviceRequest.created_at).toLocaleDateString()}
-                      </div>
+                      </span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-
-            {/* Main Content - Request Thread */}
-            <div className="lg:col-span-3">
-              <RequestThread 
-                serviceRequest={serviceRequest} 
-                onUpdate={loadServiceRequest}
-                isServiceProvider={false}
-              />
             </div>
           </div>
         </div>

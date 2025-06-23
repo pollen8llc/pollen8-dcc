@@ -11,31 +11,25 @@ const Index = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    if (!isLoading && currentUser) {
-      console.log('User found, redirecting based on role:', currentUser.role);
-      
-      // If user is a service provider, redirect to LAB-R8
-      if (currentUser.role === 'SERVICE_PROVIDER') {
-        if (!currentUser.profile_complete) {
-          navigate("/labr8/setup", { replace: true });
-        } else {
-          navigate("/labr8/inbox", { replace: true });
+    if (!isLoading) {
+      if (currentUser) {
+        // If user is a service provider, redirect to LAB-R8
+        if (currentUser.role === 'SERVICE_PROVIDER') {
+          if (!currentUser.profile_complete) {
+            navigate("/labr8/setup", { replace: true });
+          } else {
+            navigate("/labr8/dashboard", { replace: true });
+          }
+          return;
         }
-        return;
-      }
-      
-      // If user is an organizer, redirect to Modul8
-      if (currentUser.role === 'ORGANIZER') {
-        navigate("/modul8", { replace: true });
-        return;
-      }
-      
-      // For other users, check if profile is complete before redirecting
-      if (!currentUser.profile_complete) {
-        navigate("/profile/setup", { replace: true });
-      } else {
-        // Default redirect to welcome dashboard for other roles
-        navigate("/welcome", { replace: true });
+        
+        // For other users, check if profile is complete before redirecting
+        if (!currentUser.profile_complete) {
+          navigate("/profile/setup", { replace: true });
+        } else {
+          // If user is logged in and profile is complete, redirect to knowledge resources
+          navigate("/knowledge/resources", { replace: true });
+        }
       }
     }
   }, [currentUser, isLoading, navigate]);

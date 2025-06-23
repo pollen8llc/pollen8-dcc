@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import Navbar from "@/components/Navbar";
+import { Shell } from "@/components/layout/Shell";
+import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface EmailFormData {
@@ -71,10 +73,10 @@ const EmailTest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
+    <Shell>
       <div className="container mx-auto px-4 py-8">
+        <Rel8Navigation />
+        
         <div className="mt-6 mb-8">
           <h1 className="text-3xl font-bold">Email Testing</h1>
           <p className="text-muted-foreground mt-1">
@@ -146,7 +148,7 @@ const EmailTest = () => {
           </form>
         </Card>
       </div>
-    </div>
+    </Shell>
   );
 };
 

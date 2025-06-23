@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -20,6 +21,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Steps } from '@/components/ui/steps';
+import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
 import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
@@ -105,7 +107,6 @@ const PostWizard = () => {
       
       if (currentStep === 1) {
         // Store form data and advance to next step
-        console.log('Storing form data for step 1:', data);
         setFormData(data);
         handleNext();
         return;
@@ -115,20 +116,20 @@ const PostWizard = () => {
       if (isSubmittingForm) return;
       setIsSubmittingForm(true);
 
-      // Final submission - merge stored data with current data and add content type
+      // Final submission - merge stored data with current data
       const finalData = {
         ...formData,
         ...data,
         content_type: getContentType()
       };
       
-      console.log('Final submission data with content type:', finalData);
+      console.log('Final submission data:', finalData);
       
       await createArticle(finalData);
       
       toast({
         title: "Success!",
-        description: `Your ${postType} has been published`,
+        description: "Your post has been published",
       });
       
       setTimeout(() => {
@@ -139,7 +140,7 @@ const PostWizard = () => {
       console.error('Error submitting post:', error);
       toast({
         title: "Error",
-        description: `There was a problem publishing your ${postType}`,
+        description: "There was a problem publishing your post",
         variant: "destructive"
       });
     } finally {
@@ -166,6 +167,8 @@ const PostWizard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-6">
+        <CoreNavigation />
+        
         {/* Navigation */}
         <div className="mb-4 sm:mb-6">
           <Button variant="ghost" className="pl-0" onClick={handleBack}>

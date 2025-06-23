@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -129,7 +130,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-white">
+        <h2 className="text-2xl font-semibold">
           {isLoading ? 'Comments' : `${comments?.length || 0} ${comments?.length === 1 ? 'Comment' : 'Comments'}`}
         </h2>
       </div>
@@ -159,7 +160,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                       <AvatarFallback>{getInitials(comment.author?.name)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium text-white">{comment.author?.name || 'Unknown User'}</p>
+                      <p className="font-medium">{comment.author?.name || 'Unknown User'}</p>
                       <p className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                       </p>
@@ -199,7 +200,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
               </CardHeader>
               
               <CardContent>
-                <div className="text-white [&_p]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white [&_strong]:text-white [&_em]:text-white [&_li]:text-white [&_ul]:text-white [&_ol]:text-white [&_blockquote]:text-white [&_span]:text-white [&_div]:text-white [&_a]:text-[#00eada] [&_code]:text-white [&_pre]:text-white">
+                <div className="prose dark:prose-invert max-w-none">
                   {comment.content}
                 </div>
               </CardContent>
@@ -239,7 +240,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       {/* New Comment Form */}
       {currentUser ? (
         <div className="mt-8">
-          <h3 className="text-lg font-medium mb-4 text-white">Add a Comment</h3>
+          <h3 className="text-lg font-medium mb-4">Add a Comment</h3>
           <form onSubmit={handleCommentSubmit}>
             <Textarea
               placeholder="Write your comment here..."
@@ -266,7 +267,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
         </div>
       ) : (
         <div className="mt-8 text-center p-6 bg-muted/30 rounded-lg">
-          <p className="mb-4 text-white">You need to be logged in to comment.</p>
+          <p className="mb-4">You need to be logged in to comment.</p>
           <Button asChild>
             <Link to="/auth">Sign In to Comment</Link>
           </Button>

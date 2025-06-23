@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -44,7 +45,7 @@ interface OutreachListProps {
 const OutreachList = ({ 
   maxItems, 
   showTabs = true, 
-  defaultTab = "upcoming", 
+  defaultTab = "today", 
   className = "" 
 }: OutreachListProps) => {
   const [activeTab, setActiveTab] = useState<OutreachFilterTab>(defaultTab);
@@ -125,13 +126,14 @@ const OutreachList = ({
     <div className={className}>
       {showTabs && (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterTab)}>
-          <TabsList className="grid grid-cols-3 mb-6">
+          <TabsList className="grid grid-cols-4 mb-6">
+            <TabsTrigger value="today">Today</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
             <TabsTrigger value="overdue">Overdue</TabsTrigger>
             <TabsTrigger value="completed">Completed</TabsTrigger>
           </TabsList>
           
-          {(["upcoming", "overdue", "completed"] as OutreachFilterTab[]).map(tab => (
+          {(["today", "upcoming", "overdue", "completed"] as OutreachFilterTab[]).map(tab => (
             <TabsContent key={tab} value={tab} className="mt-0">
               {renderOutreachContent()}
             </TabsContent>
@@ -267,7 +269,7 @@ const OutreachList = ({
                     className="text-green-500 border-green-500/20 hover:bg-green-500/10"
                   >
                     <CheckCircle2 className="h-4 w-4 mr-1" />
-                    Mark Complete
+                    Complete
                   </Button>
                 </div>
               )}

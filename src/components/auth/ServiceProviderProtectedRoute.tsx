@@ -30,6 +30,11 @@ const ServiceProviderProtectedRoute = ({ children }: ServiceProviderProtectedRou
     return <Navigate to="/labr8/auth" replace />;
   }
 
+  // Check if profile is complete, redirect to setup if not
+  if (!currentUser.profile_complete) {
+    return <Navigate to="/labr8/setup" replace />;
+  }
+
   return <>{children}</>;
 };
 

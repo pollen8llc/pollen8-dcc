@@ -1,17 +1,32 @@
 
-import React from 'react';
-import { UserProvider } from './contexts/UserContext';
-import { RelationshipWizardProvider } from './contexts/RelationshipWizardContext';
-import AppRoutes from './AppRoutes';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AppRoutes from "./AppRoutes";
+import ErrorBoundary from "./components/ErrorBoundary";
 
-function App() {
-  return (
-    <UserProvider>
-      <RelationshipWizardProvider>
+// Create a new query client with increased stale time for better performance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60000, // 1 minute
+      retry: 1,
+      refetchOnWindowFocus: false
+    },
+  },
+});
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <ErrorBoundary>
         <AppRoutes />
-      </RelationshipWizardProvider>
-    </UserProvider>
-  );
-}
+      </ErrorBoundary>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

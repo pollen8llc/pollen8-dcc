@@ -1,20 +1,19 @@
-
 export interface ServiceProvider {
   id: string;
   user_id: string;
   business_name: string;
+  logo_url?: string;
   tagline?: string;
   description?: string;
   services: string[];
-  tags?: string[];
-  pricing_range?: {
+  tags: string[];
+  pricing_range: {
     min?: number;
     max?: number;
     currency: string;
   };
-  portfolio_links?: string[];
-  logo_url?: string;
-  domain_specializations?: number[];
+  portfolio_links: string[];
+  domain_specializations: number[];
   created_at: string;
   updated_at: string;
 }
@@ -23,9 +22,9 @@ export interface Organizer {
   id: string;
   user_id: string;
   organization_name: string;
-  description?: string;
-  focus_areas?: string[];
   logo_url?: string;
+  description?: string;
+  focus_areas: string[];
   created_at: string;
   updated_at: string;
 }
@@ -34,23 +33,22 @@ export interface ServiceRequest {
   id: string;
   organizer_id: string;
   service_provider_id?: string;
+  domain_page: number;
   title: string;
   description?: string;
-  budget_range?: {
+  budget_range: {
     min?: number;
     max?: number;
     currency: string;
   };
   timeline?: string;
-  milestones?: string[];
-  status: 'pending' | 'negotiating' | 'agreed' | 'in_progress' | 'completed' | 'cancelled' | 'declined' | 'revision_requested' | 'pending_review' | 'pending_completion';
-  engagement_status: 'none' | 'pending' | 'negotiating' | 'affiliated' | 'active' | 'completed';
-  domain_page: number;
-  project_progress?: number;
+  milestones: string[];
+  status: 'pending' | 'negotiating' | 'agreed' | 'completed' | 'cancelled';
+  engagement_status: 'none' | 'negotiating' | 'affiliated';
   created_at: string;
   updated_at: string;
-  organizer?: Organizer;
   service_provider?: ServiceProvider;
+  organizer?: Organizer;
 }
 
 export interface Proposal {
@@ -60,114 +58,50 @@ export interface Proposal {
   proposal_type: 'initial' | 'counter' | 'revision';
   quote_amount?: number;
   timeline?: string;
-  scope_details?: string; // URL to scope document
-  terms?: string; // URL to terms document
-  status: 'pending' | 'accepted' | 'rejected';
+  scope_details?: string;
+  terms?: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'countered';
   created_at: string;
-  service_provider?: ServiceProvider;
 }
 
-export interface ProposalThread {
+export interface Deal {
   id: string;
   service_request_id: string;
   organizer_id: string;
   service_provider_id: string;
-  status: 'active' | 'closed';
+  final_amount: number;
+  deal_terms: any;
+  deel_contract_url?: string;
+  status: 'pending' | 'signed' | 'completed' | 'cancelled';
   created_at: string;
-  updated_at: string;
-}
-
-export interface ProposalVersion {
-  id: string;
-  thread_id: string;
-  proposal_id: string;
-  version_number: number;
-  created_by: string;
-  quote_amount?: number;
-  timeline?: string;
-  scope_details?: string; // URL to scope document
-  terms?: string; // URL to terms document
-  change_notes?: string;
-  created_at: string;
-}
-
-// Project-related interfaces
-export interface ProjectRevision {
-  id: string;
-  service_request_id: string;
-  organizer_id: string;
-  service_provider_id: string;
-  revision_type: 'requested' | 'response';
-  description: string;
-  status: 'pending' | 'addressed' | 'closed';
-  attachments?: string[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ProjectCompletion {
-  id: string;
-  service_request_id: string;
-  service_provider_id: string;
-  organizer_id: string;
-  completion_notes?: string;
-  deliverables: string[];
-  status: 'submitted' | 'confirmed' | 'rejected';
-  submitted_at: string;
-  confirmed_at?: string;
-  confirmed_by?: string;
-}
-
-export interface ProjectRating {
-  id: string;
-  service_request_id: string;
-  organizer_id: string;
-  service_provider_id: string;
-  completion_id: string;
-  rating: number;
-  feedback?: string;
-  created_at: string;
-}
-
-export interface ProjectMilestone {
-  id: string;
-  service_request_id: string;
-  title: string;
-  description?: string;
-  due_date?: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  order_index: number;
-  created_at: string;
-  updated_at: string;
   completed_at?: string;
 }
 
-export interface ProjectComment {
+export interface Notification {
   id: string;
-  service_request_id: string;
   user_id: string;
-  content: string;
-  comment_type: 'comment' | 'status_update' | 'milestone_update';
-  metadata?: Record<string, any>;
-  attachments?: string[];
+  type: 'service_request' | 'proposal_update' | 'deal_locked';
+  title: string;
+  message: string;
+  data: any;
+  read_at?: string;
   created_at: string;
-  updated_at: string;
 }
 
-// Domain pages constant - changed to array format
-export const DOMAIN_PAGES = [
-  { id: 1, title: 'Technology & Development', name: 'Technology & Development', description: 'Software development, web design, mobile apps' },
-  { id: 2, title: 'Design & Creative', name: 'Design & Creative', description: 'Graphic design, branding, content creation' },
-  { id: 3, title: 'Marketing & Strategy', name: 'Marketing & Strategy', description: 'Digital marketing, SEO, business strategy' },
-  { id: 4, title: 'Content & Writing', name: 'Content & Writing', description: 'Copywriting, blogging, technical writing' },
-  { id: 5, title: 'Business & Operations', name: 'Business & Operations', description: 'Consulting, project management, operations' },
-  { id: 6, title: 'Data & Analytics', name: 'Data & Analytics', description: 'Data analysis, research, business intelligence' }
-];
+export interface Engagement {
+  id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  service_request_id?: string;
+  engagement_type: 'view_profile' | 'engage' | 'proposal_sent';
+  created_at: string;
+}
 
-// Create types
+// Database insert/update types
 export interface CreateServiceProviderData {
   user_id: string;
   business_name: string;
+  logo_url?: string;
   tagline?: string;
   description?: string;
   services?: string[];
@@ -175,33 +109,32 @@ export interface CreateServiceProviderData {
   pricing_range?: {
     min?: number;
     max?: number;
-    currency: string;
+    currency?: string;
   };
   portfolio_links?: string[];
-  logo_url?: string;
   domain_specializations?: number[];
 }
 
 export interface CreateOrganizerData {
   user_id: string;
   organization_name: string;
+  logo_url?: string;
   description?: string;
   focus_areas?: string[];
-  logo_url?: string;
 }
 
 export interface CreateServiceRequestData {
   organizer_id: string;
+  domain_page: number;
   title: string;
   description?: string;
   budget_range?: {
     min?: number;
     max?: number;
-    currency: string;
+    currency?: string;
   };
   timeline?: string;
   milestones?: string[];
-  domain_page: number;
 }
 
 export interface CreateProposalData {
@@ -210,67 +143,26 @@ export interface CreateProposalData {
   proposal_type: 'initial' | 'counter' | 'revision';
   quote_amount?: number;
   timeline?: string;
-  scope_details?: string; // URL to scope document
-  terms?: string; // URL to terms document
-}
-
-export interface CreateProposalThreadData {
-  service_request_id: string;
-  organizer_id: string;
-  service_provider_id: string;
-}
-
-export interface CreateProposalVersionData {
-  thread_id: string;
-  proposal_id: string;
-  version_number: number;
-  created_by: string;
-  quote_amount?: number;
-  timeline?: string;
   scope_details?: string;
   terms?: string;
-  change_notes?: string;
 }
 
-export interface CreateProjectRevisionData {
+export interface CreateDealData {
   service_request_id: string;
   organizer_id: string;
   service_provider_id: string;
-  revision_type: 'requested' | 'response';
-  description: string;
-  attachments?: string[];
+  final_amount: number;
+  deal_terms: any;
+  deel_contract_url?: string;
 }
 
-export interface CreateProjectCompletionData {
-  service_request_id: string;
-  service_provider_id: string;
-  organizer_id: string;
-  completion_notes?: string;
-  deliverables?: string[];
-}
-
-export interface CreateProjectRatingData {
-  service_request_id: string;
-  organizer_id: string;
-  service_provider_id: string;
-  completion_id: string;
-  rating: number;
-  feedback?: string;
-}
-
-export interface CreateProjectMilestoneData {
-  service_request_id: string;
-  title: string;
-  description?: string;
-  due_date?: string;
-  order_index: number;
-}
-
-export interface CreateProjectCommentData {
-  service_request_id: string;
-  user_id: string;
-  content: string;
-  comment_type: 'comment' | 'status_update' | 'milestone_update';
-  metadata?: Record<string, any>;
-  attachments?: string[];
-}
+export const DOMAIN_PAGES = [
+  { id: 1, title: 'Fundraising & Sponsorship', description: 'Grant writing, donor management, sponsorship acquisition' },
+  { id: 2, title: 'Event Production & Logistics', description: 'Event planning, venue management, logistics coordination' },
+  { id: 3, title: 'Legal & Compliance', description: 'Legal services, compliance management, contract review' },
+  { id: 4, title: 'Marketing & Communications', description: 'Brand development, content creation, PR campaigns' },
+  { id: 5, title: 'Technology & Digital Infrastructure', description: 'Website development, CRM setup, digital tools' },
+  { id: 6, title: 'Vendor & Marketplace Management', description: 'Vendor relations, marketplace development, supply chain' },
+  { id: 7, title: 'Partnership Development & Collaboration', description: 'Strategic partnerships, collaboration frameworks' },
+  { id: 8, title: 'Community Engagement & Relationship Management', description: 'Member engagement, relationship building, community growth' }
+];

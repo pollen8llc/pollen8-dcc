@@ -33,21 +33,15 @@ const Labr8Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && currentUser) {
-      console.log('User already authenticated for LAB-R8, checking role:', currentUser.role);
-      
-      // Check if user has SERVICE_PROVIDER role
+      // Check if user has SERVICE_PROVIDER role, if not redirect to main platform
       if (currentUser.role === 'SERVICE_PROVIDER') {
-        if (!currentUser.profile_complete) {
-          navigate("/labr8/setup", { replace: true });
-        } else {
-          navigate("/labr8/inbox", { replace: true });
-        }
+        const redirectTo = searchParams.get("redirectTo") || "/labr8/dashboard";
+        navigate(redirectTo, { replace: true });
       } else {
-        // Redirect non-service providers to main platform
         navigate("/", { replace: true });
       }
     }
-  }, [currentUser, isLoading, navigate]);
+  }, [currentUser, isLoading, navigate, searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,11 +62,12 @@ const Labr8Auth = () => {
 
       if (data.user) {
         toast({
-          title: "Welcome back to LAB-R8!",
-          description: "You have successfully signed in.",
+          title: "Welcome back!",
+          description: "You have successfully signed in to LAB-R8.",
         });
         
-        // The redirect will be handled by the useEffect above once currentUser updates
+        const redirectTo = searchParams.get("redirectTo") || "/labr8/dashboard";
+        navigate(redirectTo, { replace: true });
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
@@ -100,7 +95,7 @@ const Labr8Auth = () => {
     }
 
     try {
-      const redirectUrl = `${window.location.origin}/labr8/inbox`;
+      const redirectUrl = `${window.location.origin}/labr8/dashboard`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -133,7 +128,7 @@ const Labr8Auth = () => {
             title: "Welcome to LAB-R8!",
             description: "Your service provider account has been created successfully.",
           });
-          navigate("/labr8/setup", { replace: true });
+          navigate("/labr8/dashboard", { replace: true });
         } else {
           setMessage("Please check your email and click the confirmation link to complete your LAB-R8 service provider registration.");
         }

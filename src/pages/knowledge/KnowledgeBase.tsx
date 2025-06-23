@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, BookOpen, MessageSquare, Quote, HelpCircle, BarChart3 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useTags } from '@/hooks/knowledge/useTags';
-import { useArticles } from '@/hooks/knowledge/useArticles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +14,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
 import { ContentType } from '@/models/knowledgeTypes';
-import LoadingSpinner from '@/components/ui/loading-spinner';
 
 const KnowledgeBase = () => {
   const navigate = useNavigate();
@@ -24,9 +22,10 @@ const KnowledgeBase = () => {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
   
+  const { useArticles } = useKnowledgeBase();
   const { data: tags = [] } = useTags();
   
-  // Fetch articles with current filters - Fixed the hook usage
+  // Fetch articles with current filters
   const { data: articles = [], isLoading } = useArticles({
     searchQuery: searchQuery || undefined,
     tag: selectedTag || undefined,
@@ -83,7 +82,7 @@ const KnowledgeBase = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 mt-6">
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate text-white">Knowledge Base</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Knowledge Base</h1>
             <p className="text-sm sm:text-base text-muted-foreground">
               Discover, share, and contribute to our collective knowledge
             </p>
@@ -99,58 +98,56 @@ const KnowledgeBase = () => {
           </div>
         </div>
 
-        {/* Stats Cards - Only show when not loading */}
-        {!isLoading && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <BookOpen className="h-4 w-4 text-blue-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{articleStats.articles}</p>
-                    <p className="text-xs text-muted-foreground">Articles</p>
-                  </div>
+        {/* Stats Cards - Removed Total Count */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <BookOpen className="h-4 w-4 text-blue-600" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.articles}</p>
+                  <p className="text-xs text-muted-foreground">Articles</p>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <HelpCircle className="h-4 w-4 text-green-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{articleStats.questions}</p>
-                    <p className="text-xs text-muted-foreground">Questions</p>
-                  </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <HelpCircle className="h-4 w-4 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.questions}</p>
+                  <p className="text-xs text-muted-foreground">Questions</p>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Quote className="h-4 w-4 text-purple-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{articleStats.quotes}</p>
-                    <p className="text-xs text-muted-foreground">Quotes</p>
-                  </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <Quote className="h-4 w-4 text-purple-600" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.quotes}</p>
+                  <p className="text-xs text-muted-foreground">Quotes</p>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <BarChart3 className="h-4 w-4 text-orange-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{articleStats.polls}</p>
-                    <p className="text-xs text-muted-foreground">Polls</p>
-                  </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-2">
+                <BarChart3 className="h-4 w-4 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold">{articleStats.polls}</p>
+                  <p className="text-xs text-muted-foreground">Polls</p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Search and Filters */}
         <Card className="mb-6">
@@ -210,7 +207,7 @@ const KnowledgeBase = () => {
               {/* Top 10 Tags with Pulse Functionality */}
               {topTags.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium mb-3 text-white">Popular Tags</h3>
+                  <h3 className="text-sm font-medium mb-3">Popular Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     <Badge
                       variant={selectedTag === '' ? 'default' : 'secondary'}
@@ -247,14 +244,25 @@ const KnowledgeBase = () => {
         {/* Content Area */}
         <div className="space-y-6">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <LoadingSpinner size="lg" text="Loading knowledge base..." />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-6">
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-3 bg-muted rounded w-1/2"></div>
+                      <div className="h-20 bg-muted rounded"></div>
+                      <div className="h-3 bg-muted rounded w-1/4"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           ) : articles.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
                 <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2 text-white">No content found</h3>
+                <h3 className="text-lg font-semibold mb-2">No content found</h3>
                 <p className="text-muted-foreground mb-4">
                   {hasActiveFilters 
                     ? "Try adjusting your filters or search terms"
