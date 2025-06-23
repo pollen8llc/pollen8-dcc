@@ -110,7 +110,7 @@ const Labr8RequestDetails = () => {
     <div className="min-h-screen bg-background">
       <PlatformNavigation platform="labr8" />
       
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Button
@@ -123,8 +123,7 @@ const Labr8RequestDetails = () => {
             Back to Inbox
           </Button>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold">{serviceRequest.title}</h1>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2">
               <Badge className={`${getStatusColor(serviceRequest.status)} border`}>
                 <span className="font-medium">
                   {serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1)}
@@ -142,33 +141,91 @@ const Labr8RequestDetails = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
+          {/* Left Sidebar - User Profile Cards */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Client Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Client</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                  <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">
-                      {serviceRequest.organizer?.organization_name || 'Client'}
+            {/* Organizer Profile Card */}
+            {serviceRequest.organizer && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Client
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{serviceRequest.organizer.organization_name}</h3>
+                        <p className="text-sm text-muted-foreground">Organizer</p>
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">Organizer</div>
+                    {serviceRequest.organizer.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {serviceRequest.organizer.description}
+                      </p>
+                    )}
+                    {serviceRequest.organizer.focus_areas && serviceRequest.organizer.focus_areas.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {serviceRequest.organizer.focus_areas.map((area, index) => (
+                          <span 
+                            key={index}
+                            className="text-xs bg-muted px-2 py-1 rounded"
+                          >
+                            {area}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-                
-                {serviceRequest.organizer?.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {serviceRequest.organizer.description}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Service Provider Profile Card */}
+            {serviceRequest.service_provider && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    You (Service Provider)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <Building2 className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{serviceRequest.service_provider.business_name}</h3>
+                        <p className="text-sm text-muted-foreground">Provider</p>
+                      </div>
+                    </div>
+                    {serviceRequest.service_provider.tagline && (
+                      <p className="text-sm text-muted-foreground">
+                        {serviceRequest.service_provider.tagline}
+                      </p>
+                    )}
+                    {serviceRequest.service_provider.tags && serviceRequest.service_provider.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {serviceRequest.service_provider.tags.map((tag, index) => (
+                          <span 
+                            key={index}
+                            className="text-xs bg-[#00eada]/10 text-[#00eada] px-2 py-1 rounded"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Project Summary */}
             <Card>
@@ -203,17 +260,13 @@ const Labr8RequestDetails = () => {
             </Card>
           </div>
 
-          {/* Main Content */}
+          {/* Main Content - Request Thread */}
           <div className="lg:col-span-3">
-            <Card>
-              <CardContent className="p-6">
-                <RequestThread 
-                  serviceRequest={serviceRequest}
-                  onUpdate={handleUpdate}
-                  isServiceProvider={true}
-                />
-              </CardContent>
-            </Card>
+            <RequestThread 
+              serviceRequest={serviceRequest}
+              onUpdate={handleUpdate}
+              isServiceProvider={true}
+            />
           </div>
         </div>
       </div>

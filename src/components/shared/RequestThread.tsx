@@ -17,13 +17,15 @@ import {
   MessageSquare,
   Building,
   ExternalLink,
-  User
+  User,
+  Handshake
 } from 'lucide-react';
 import { ServiceRequest, Proposal, ServiceProvider } from '@/types/modul8';
 import { 
   getServiceRequestProposals,
   createCounterProposal,
-  updateProposalStatus
+  updateProposalStatus,
+  updateServiceRequest
 } from '@/services/modul8Service';
 import { useSession } from '@/hooks/useSession';
 import { toast } from '@/hooks/use-toast';
@@ -75,6 +77,10 @@ const RequestThread: React.FC<RequestThreadProps> = ({
     setLoading(true);
     try {
       await updateProposalStatus(proposal.id, 'accepted');
+      await updateServiceRequest(serviceRequest.id, { 
+        status: 'agreed',
+        engagement_status: 'active' 
+      });
       toast({
         title: "Proposal Accepted",
         description: "The proposal has been accepted successfully"
@@ -99,9 +105,13 @@ const RequestThread: React.FC<RequestThreadProps> = ({
     setLoading(true);
     try {
       await updateProposalStatus(proposal.id, 'rejected');
+      await updateServiceRequest(serviceRequest.id, { 
+        status: 'declined',
+        engagement_status: 'none' 
+      });
       toast({
-        title: "Proposal Rejected",
-        description: "The proposal has been rejected"
+        title: "Request Rejected",
+        description: "The entire request has been cancelled"
       });
       onUpdate();
       loadProposals();
@@ -143,6 +153,11 @@ const RequestThread: React.FC<RequestThreadProps> = ({
         },
         session.user.id
       );
+      
+      await updateServiceRequest(serviceRequest.id, { 
+        status: 'negotiating',
+        engagement_status: 'negotiating' 
+      });
       
       toast({
         title: "Counter Proposal Submitted",
@@ -188,105 +203,68 @@ const RequestThread: React.FC<RequestThreadProps> = ({
     }
   };
 
-  const getRequestStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'negotiating':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'agreed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'in_progress':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'completed':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'declined':
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
   const canUserActOnProposal = (proposal: Proposal) => {
     if (!session?.user?.id) return false;
-    
-    // Users can't act on their own proposals
     if (proposal.from_user_id === session.user.id) return false;
-    
-    // Can only act on pending proposals
     if (proposal.status !== 'pending') return false;
-    
     return true;
   };
 
+  const isActiveProject = serviceRequest.status === 'agreed' && proposals.some(p => p.status === 'accepted');
+
   return (
     <div className="space-y-6">
-      {/* Project Details Card */}
-      <Card className="border-l-4 border-l-[#00eada]">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-[#00eada]" />
-            Project Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="font-semibold text-lg">{serviceRequest.title}</h3>
-            {serviceRequest.description && (
-              <p className="text-muted-foreground mt-2">{serviceRequest.description}</p>
-            )}
-          </div>
-          
-          <div className="flex flex-wrap gap-4">
-            {serviceRequest.budget_range?.min && (
-              <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/10 px-3 py-2 rounded-lg">
-                <DollarSign className="h-4 w-4 text-green-600" />
-                <span className="text-green-700 font-medium">
-                  ${serviceRequest.budget_range.min.toLocaleString()}
-                  {serviceRequest.budget_range.max && 
-                    ` - $${serviceRequest.budget_range.max.toLocaleString()}`
-                  }
-                </span>
-              </div>
-            )}
-            
-            {serviceRequest.timeline && (
-              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 px-3 py-2 rounded-lg">
-                <Clock className="h-4 w-4 text-blue-600" />
-                <span className="text-blue-700 font-medium">{serviceRequest.timeline}</span>
-              </div>
-            )}
-          </div>
+      {/* Request Title */}
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">{serviceRequest.title}</h2>
+        {serviceRequest.description && (
+          <p className="text-muted-foreground">{serviceRequest.description}</p>
+        )}
+      </div>
 
-          <div className="flex items-center justify-between pt-2 border-t">
-            <div className="flex items-center gap-2">
-              <Badge className={`${getRequestStatusColor(serviceRequest.status)} border font-medium`}>
-                <span>
-                  {serviceRequest.status.charAt(0).toUpperCase() + serviceRequest.status.slice(1).replace('_', ' ')}
-                </span>
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                {serviceRequest.engagement_status.charAt(0).toUpperCase() + serviceRequest.engagement_status.slice(1)}
-              </Badge>
+      {/* Active Project Card - Shows when proposal is accepted */}
+      {isActiveProject && (
+        <Card className="border-2 border-green-500 bg-green-50 dark:bg-green-900/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-700">
+              <Handshake className="h-5 w-5" />
+              Active Project
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center">
+              <p className="text-green-700 font-medium mb-4">
+                Congratulations! The proposal has been accepted and this is now an active project.
+              </p>
+              
+              <div className="flex justify-center gap-4">
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => window.open('https://deel.com', '_blank')}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Proceed with Deel
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="border-gray-400 text-gray-700 hover:bg-gray-50"
+                  onClick={() => {
+                    toast({
+                      title: "Continuing Informally",
+                      description: "You can continue working together without formal contracts"
+                    });
+                  }}
+                >
+                  Continue Without Deel
+                </Button>
+              </div>
             </div>
-            
-            <div className="text-sm text-muted-foreground">
-              Created {new Date(serviceRequest.created_at).toLocaleDateString()}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Proposals Section */}
+      {/* Stacked Negotiation Cards */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Proposals & Negotiations</h3>
-          <Badge variant="outline" className="text-xs">
-            {proposals.length} proposal{proposals.length !== 1 ? 's' : ''}
-          </Badge>
-        </div>
-        
         {proposals.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
@@ -297,131 +275,146 @@ const RequestThread: React.FC<RequestThreadProps> = ({
           </Card>
         ) : (
           <div className="space-y-4">
-            {proposals.map((proposal, index) => (
-              <Card key={proposal.id} className="border-l-4 border-l-blue-500">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={proposal.service_provider?.logo_url} />
-                          <AvatarFallback>
-                            <Building className="h-5 w-5" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-semibold">
-                            {proposal.service_provider?.business_name || 'Service Provider'}
+            {proposals.map((proposal, index) => {
+              const isInitialRequest = index === 0;
+              const roundNumber = index + 1;
+              
+              return (
+                <Card 
+                  key={proposal.id} 
+                  className={`${isInitialRequest ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-purple-500'} relative`}
+                >
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={proposal.service_provider?.logo_url} />
+                            <AvatarFallback>
+                              <Building className="h-5 w-5" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-semibold">
+                              {proposal.service_provider?.business_name || 'Service Provider'}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {isInitialRequest ? 'Initial Request' : `Negotiation Round ${roundNumber}`}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(proposal.created_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {proposal.proposal_type.charAt(0).toUpperCase() + proposal.proposal_type.slice(1)} Proposal
-                            {index > 0 && ` (Round ${index + 1})`}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(proposal.created_at).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          {!isInitialRequest && (
+                            <Badge variant="outline" className="text-xs">
+                              Round {roundNumber}
+                            </Badge>
+                          )}
+                          <Badge className={`${getStatusColor(proposal.status)} border font-medium`}>
+                            {getStatusIcon(proposal.status)}
+                            <span className="ml-1">
+                              {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
+                            </span>
+                          </Badge>
                         </div>
                       </div>
-                      
-                      <Badge className={`${getStatusColor(proposal.status)} border font-medium`}>
-                        {getStatusIcon(proposal.status)}
-                        <span className="ml-1">
-                          {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
-                        </span>
-                      </Badge>
-                    </div>
 
-                    <div className="flex flex-wrap gap-4">
-                      {proposal.quote_amount && (
-                        <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/10 px-3 py-2 rounded-lg">
-                          <DollarSign className="h-4 w-4 text-green-600" />
-                          <span className="font-semibold text-green-700">
-                            ${proposal.quote_amount.toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {proposal.timeline && (
-                        <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 px-3 py-2 rounded-lg">
-                          <Clock className="h-4 w-4 text-blue-600" />
-                          <span className="text-blue-700">{proposal.timeline}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {(proposal.scope_details || proposal.terms) && (
-                      <div className="flex gap-4">
-                        {proposal.scope_details && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(proposal.scope_details, '_blank')}
-                            className="text-[#00eada] border-[#00eada] hover:bg-[#00eada]/10"
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            View Scope
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </Button>
+                      <div className="flex flex-wrap gap-4">
+                        {proposal.quote_amount && (
+                          <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/10 px-3 py-2 rounded-lg">
+                            <DollarSign className="h-4 w-4 text-green-600" />
+                            <span className="font-semibold text-green-700">
+                              ${proposal.quote_amount.toLocaleString()}
+                            </span>
+                          </div>
                         )}
                         
-                        {proposal.terms && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(proposal.terms, '_blank')}
-                            className="text-purple-600 border-purple-600 hover:bg-purple-600/10"
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            View Terms
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </Button>
+                        {proposal.timeline && (
+                          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 px-3 py-2 rounded-lg">
+                            <Clock className="h-4 w-4 text-blue-600" />
+                            <span className="text-blue-700">{proposal.timeline}</span>
+                          </div>
                         )}
                       </div>
-                    )}
 
-                    {canUserActOnProposal(proposal) && (
-                      <Separator className="my-4" />
-                    )}
+                      {(proposal.scope_details || proposal.terms) && (
+                        <div className="flex gap-4">
+                          {proposal.scope_details && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(proposal.scope_details, '_blank')}
+                              className="text-[#00eada] border-[#00eada] hover:bg-[#00eada]/10"
+                            >
+                              <FileText className="h-4 w-4 mr-2" />
+                              Scope Document
+                              <ExternalLink className="h-3 w-3 ml-1" />
+                            </Button>
+                          )}
+                          
+                          {proposal.terms && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(proposal.terms, '_blank')}
+                              className="text-purple-600 border-purple-600 hover:bg-purple-600/10"
+                            >
+                              <FileText className="h-4 w-4 mr-2" />
+                              Terms Document
+                              <ExternalLink className="h-3 w-3 ml-1" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
 
-                    {canUserActOnProposal(proposal) && (
-                      <div className="flex flex-wrap gap-3">
-                        <Button
-                          onClick={() => handleAcceptProposal(proposal)}
-                          disabled={loading}
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Accept Proposal
-                        </Button>
-                        <Button
-                          onClick={() => handleCounterProposal(proposal)}
-                          disabled={loading}
-                          variant="outline"
-                          className="border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10"
-                        >
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Counter Offer
-                        </Button>
-                        <Button
-                          onClick={() => handleRejectProposal(proposal)}
-                          disabled={loading}
-                          variant="outline"
-                          className="border-red-500 text-red-600 hover:bg-red-50"
-                        >
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Reject
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      {canUserActOnProposal(proposal) && (
+                        <>
+                          <Separator className="my-4" />
+                          <div className="flex flex-wrap gap-3">
+                            <Button
+                              onClick={() => handleAcceptProposal(proposal)}
+                              disabled={loading}
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Accept Proposal
+                            </Button>
+                            <Button
+                              onClick={() => handleCounterProposal(proposal)}
+                              disabled={loading}
+                              variant="outline"
+                              className="border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10"
+                            >
+                              <MessageSquare className="h-4 w-4 mr-2" />
+                              Counter Offer
+                            </Button>
+                            {isInitialRequest && (
+                              <Button
+                                onClick={() => handleRejectProposal(proposal)}
+                                disabled={loading}
+                                variant="outline"
+                                className="border-red-500 text-red-600 hover:bg-red-50"
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Reject & Cancel Request
+                              </Button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>

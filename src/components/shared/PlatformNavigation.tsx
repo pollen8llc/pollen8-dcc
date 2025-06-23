@@ -24,12 +24,11 @@ import {
   Settings,
   LogOut,
   Bell,
-  MessageSquare,
-  FolderOpen,
   LayoutDashboard,
   FileText,
   Users,
-  TrendingUp
+  TrendingUp,
+  FolderOpen
 } from 'lucide-react';
 
 interface PlatformNavigationProps {
@@ -120,7 +119,86 @@ export const PlatformNavigation: React.FC<PlatformNavigationProps> = ({
 
   return (
     <nav className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 ${className}`}>
-      <div className="flex h-14 items-center px-4 max-w-7xl mx-auto">
+      <div className="flex h-16 items-center px-4 max-w-7xl mx-auto">
+        {/* Mobile hamburger menu */}
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="sm" className="md:hidden mr-4">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+            <div className="flex flex-col gap-4 mt-4">
+              <div className="text-lg font-semibold" style={{ color: config.color }}>
+                {config.name}
+              </div>
+              
+              <div className="space-y-2">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                        item.isActive
+                          ? 'bg-accent text-accent-foreground font-semibold'
+                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="border-t pt-4 space-y-2">
+                <Link
+                  to="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  <Home className="h-4 w-4" />
+                  <span>Main Platform</span>
+                </Link>
+                
+                {currentUser && (
+                  <>
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <User className="h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                    <Link
+                      to="/settings"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full text-left"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
         {/* Logo */}
         <Link to={config.homeRoute} className="mr-6 flex items-center space-x-2">
           <div className="text-2xl font-bold" style={{ color: config.color }}>
@@ -157,7 +235,7 @@ export const PlatformNavigation: React.FC<PlatformNavigationProps> = ({
           {/* Platform switcher */}
           <Button variant="outline" size="sm" onClick={() => navigate('/')}>
             <Home className="h-4 w-4 mr-2" />
-            Main Platform
+            <span className="hidden sm:inline">Main Platform</span>
           </Button>
 
           {/* Notifications */}
@@ -202,85 +280,6 @@ export const PlatformNavigation: React.FC<PlatformNavigationProps> = ({
               Sign In
             </Button>
           )}
-
-          {/* Mobile menu */}
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="md:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[350px]">
-              <div className="flex flex-col gap-4 mt-4">
-                <div className="text-lg font-semibold" style={{ color: config.color }}>
-                  {config.name}
-                </div>
-                
-                <div className="space-y-2">
-                  {navItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.href}
-                        to={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                          item.isActive
-                            ? 'bg-accent text-accent-foreground font-semibold'
-                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-
-                <div className="border-t pt-4 space-y-2">
-                  <Link
-                    to="/"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <Home className="h-4 w-4" />
-                    <span>Main Platform</span>
-                  </Link>
-                  
-                  {currentUser && (
-                    <>
-                      <Link
-                        to="/profile"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                      >
-                        <User className="h-4 w-4" />
-                        <span>Profile</span>
-                      </Link>
-                      <Link
-                        to="/settings"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                      >
-                        <Settings className="h-4 w-4" />
-                        <span>Settings</span>
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          handleLogout();
-                        }}
-                        className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full text-left"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span>Sign Out</span>
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
     </nav>
