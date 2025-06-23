@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ServiceProviderProtectedRoute from '@/components/auth/ServiceProviderProtectedRoute';
@@ -131,7 +132,7 @@ const AppRoutes = () => {
           <RequestWizard />
         </NonServiceProviderRoute>
       } />
-      <Route path="/modul8/request/:requestId" element={
+      <Route path="/modul8/request/:id" element={
         <NonServiceProviderRoute>
           <ServiceRequestDetails />
         </NonServiceProviderRoute>
@@ -160,7 +161,7 @@ const AppRoutes = () => {
           <Labr8Setup />
         </ServiceProviderProtectedRoute>
       } />
-      <Route path="/labr8/dashboard" element={
+      <Route path="/labr8/inbox" element={
         <ServiceProviderProtectedRoute>
           <Labr8Dashboard />
         </ServiceProviderProtectedRoute>
