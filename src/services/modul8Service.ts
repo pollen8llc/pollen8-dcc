@@ -327,10 +327,7 @@ export const createProposal = async (data: CreateProposalData): Promise<Proposal
       proposal_type: data.proposal_type || 'initial',
       status: 'pending'
     })
-    .select(`
-      *,
-      service_provider:modul8_service_providers(*)
-    `)
+    .select('*')
     .single();
   
   if (error) {
@@ -414,9 +411,7 @@ export const getServiceRequestProposals = async (serviceRequestId: string): Prom
     .from('modul8_proposals')
     .select(`
       *,
-      service_provider:from_user_id(
-        modul8_service_providers(*)
-      )
+      service_provider:modul8_service_providers!inner(*)
     `)
     .eq('service_request_id', serviceRequestId)
     .order('created_at', { ascending: true });
@@ -431,7 +426,9 @@ export const getServiceRequestProposals = async (serviceRequestId: string): Prom
   return (data || []).map(proposal => ({
     ...proposal,
     proposal_type: proposal.proposal_type as 'initial' | 'counter' | 'revision',
-    service_provider: proposal.service_provider?.[0] || undefined
+    service_provider: Array.isArray(proposal.service_provider) 
+      ? proposal.service_provider[0] 
+      : proposal.service_provider
   })) as (Proposal & { service_provider?: ServiceProvider })[];
 };
 
