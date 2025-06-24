@@ -372,7 +372,7 @@ export const assignServiceProvider = async (requestId: string, providerId: strin
 export const closeServiceRequest = async (requestId: string): Promise<void> => {
   const { error } = await supabase
     .from('modul8_service_requests')
-    .update({ status: 'closed' })
+    .update({ status: 'cancelled' })
     .eq('id', requestId);
   
   if (error) throw error;
