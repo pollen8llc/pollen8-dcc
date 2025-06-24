@@ -2,22 +2,22 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { getServiceRequestById, getUserServiceProvider, updateServiceRequest } from '@/services/modul8Service';
+import { getServiceRequestById, getUserOrganizer, updateServiceRequest } from '@/services/modul8Service';
 import { getProposalsByRequestId, createProposal, updateProposalStatus } from '@/services/proposalService';
-import { ServiceRequest, ServiceProvider, Proposal } from '@/types/modul8';
+import { ServiceRequest, Organizer, Proposal } from '@/types/modul8';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import UnifiedStatusCard from '@/components/shared/UnifiedStatusCard';
 import { toast } from '@/hooks/use-toast';
 
-const Labr8RequestDetails = () => {
+const Modul8RequestDetails = () => {
   const { requestId } = useParams<{ requestId: string }>();
   const navigate = useNavigate();
   const { session } = useSession();
   
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
-  const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
+  const [organizer, setOrganizer] = useState<Organizer | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,18 +33,18 @@ const Labr8RequestDetails = () => {
     try {
       setLoading(true);
       
-      // Load service provider to verify identity
-      const providerData = await getUserServiceProvider(session.user.id);
-      if (!providerData) {
+      // Load organizer to verify ownership
+      const organizerData = await getUserOrganizer(session.user.id);
+      if (!organizerData) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to view this request",
           variant: "destructive"
         });
-        navigate('/labr8/dashboard');
+        navigate('/modul8/dashboard');
         return;
       }
-      setServiceProvider(providerData);
+      setOrganizer(organizerData);
       
       // Load request data
       const requestData = await getServiceRequestById(requestId);
@@ -54,18 +54,18 @@ const Labr8RequestDetails = () => {
           description: "The requested service request could not be found",
           variant: "destructive"
         });
-        navigate('/labr8/dashboard');
+        navigate('/modul8/dashboard');
         return;
       }
       
-      // Verify access (either assigned to this provider or available to all)
-      if (requestData.service_provider_id && requestData.service_provider_id !== providerData.id) {
+      // Verify ownership
+      if (requestData.organizer_id !== organizerData.id) {
         toast({
           title: "Access Denied",
-          description: "This request is assigned to another provider",
+          description: "You don't have permission to view this request",
           variant: "destructive"
         });
-        navigate('/labr8/dashboard');
+        navigate('/modul8/dashboard');
         return;
       }
       
@@ -82,7 +82,7 @@ const Labr8RequestDetails = () => {
         description: "Failed to load request data",
         variant: "destructive"
       });
-      navigate('/labr8/dashboard');
+      navigate('/modul8/dashboard');
     } finally {
       setLoading(false);
     }
@@ -104,32 +104,22 @@ const Labr8RequestDetails = () => {
         
         toast({
           title: "Counter Offer Submitted",
-          description: "Your counter offer has been sent to the organizer",
+          description: "Your counter offer has been sent to the service provider",
         });
-      } else if (action === 'accept') {
-        await updateProposalStatus(proposalId, 'accepted');
+      } else {
+        await updateProposalStatus(proposalId, action === 'accept' ? 'accepted' : 'rejected');
         
-        // Update service request status
-        await updateServiceRequest(requestId!, {
-          status: 'in_progress',
-          engagement_status: 'affiliated'
-        });
-        
-        toast({
-          title: "Proposal Accepted",
-          description: "You have accepted the proposal and can now begin work",
-        });
-      } else if (action === 'reject') {
-        await updateProposalStatus(proposalId, 'rejected');
-        
-        // Update service request status
-        await updateServiceRequest(requestId!, {
-          status: 'declined'
-        });
+        if (action === 'accept') {
+          // Update service request status
+          await updateServiceRequest(requestId!, {
+            status: 'agreed',
+            engagement_status: 'affiliated'
+          });
+        }
         
         toast({
-          title: "Request Declined",
-          description: "You have declined this service request",
+          title: action === 'accept' ? "Proposal Accepted" : "Proposal Rejected",
+          description: `The proposal has been ${action}ed`,
         });
       }
       
@@ -199,7 +189,7 @@ const Labr8RequestDetails = () => {
       actions.push({
         id: proposal.id,
         type: 'proposal',
-        actor: proposal.from_user_id === session?.user?.id ? 'provider' : 'organizer',
+        actor: proposal.from_user_id === session?.user?.id ? 'organizer' : 'provider',
         timestamp: proposal.created_at,
         message: proposal.proposal_type === 'counter' ? 'Submitted counter offer' : 'Submitted proposal',
         proposal: proposal
@@ -227,7 +217,7 @@ const Labr8RequestDetails = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Request Not Found</h1>
-            <Button onClick={() => navigate('/labr8/dashboard')}>
+            <Button onClick={() => navigate('/modul8/dashboard')}>
               Back to Dashboard
             </Button>
           </div>
@@ -245,7 +235,7 @@ const Labr8RequestDetails = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/labr8/dashboard')}
+            onClick={() => navigate('/modul8/dashboard')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -256,7 +246,7 @@ const Labr8RequestDetails = () => {
         <UnifiedStatusCard
           serviceRequest={serviceRequest}
           actions={generateStatusActions()}
-          currentUserRole="provider"
+          currentUserRole="organizer"
           onProposalAction={handleProposalAction}
           onStatusChange={handleStatusChange}
           onComment={handleComment}
@@ -267,4 +257,4 @@ const Labr8RequestDetails = () => {
   );
 };
 
-export default Labr8RequestDetails;
+export default Modul8RequestDetails;

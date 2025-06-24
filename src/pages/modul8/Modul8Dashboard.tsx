@@ -98,7 +98,7 @@ const Modul8Dashboard = () => {
               <Card 
                 key={page.id}
                 className="cursor-pointer transition-all hover:shadow-md hover:bg-muted/50 group"
-                onClick={() => navigate(`/modul8/domain/${page.id}`)}
+                onClick={() => navigate(`/modul8/dashboard/directory/${page.id}`)}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-3">
@@ -124,7 +124,7 @@ const Modul8Dashboard = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button 
-                onClick={() => navigate('/modul8/request/new')}
+                onClick={() => navigate('/modul8/dashboard/request/new')}
                 className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black h-12"
               >
                 <Plus className="h-4 w-4" />
@@ -132,7 +132,7 @@ const Modul8Dashboard = () => {
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => navigate('/modul8/setup/provider')}
+                onClick={() => navigate('/labr8/setup')}
                 className="flex items-center gap-2 h-12"
               >
                 <Building2 className="h-4 w-4" />
@@ -140,7 +140,7 @@ const Modul8Dashboard = () => {
               </Button>
               <Button 
                 variant="outline"
-                onClick={() => {/* View all providers */}}
+                onClick={() => navigate('/modul8/dashboard/directory/1')}
                 className="flex items-center gap-2 h-12"
               >
                 <Users className="h-4 w-4" />
@@ -179,7 +179,7 @@ const Modul8Dashboard = () => {
                     Start building your ecosystem by requesting services from providers
                   </p>
                   <Button 
-                    onClick={() => navigate('/modul8/request/new')}
+                    onClick={() => navigate('/modul8/dashboard/request/new')}
                     className="flex items-center gap-2 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
                   >
                     <Plus className="h-4 w-4" />
@@ -190,11 +190,28 @@ const Modul8Dashboard = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredRequests.map((request) => (
-                  <ServiceRequestCard 
-                    key={request.id} 
-                    request={request}
-                    onUpdate={loadOrganizerData}
-                  />
+                  <Card 
+                    key={request.id}
+                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => navigate(`/modul8/dashboard/request/${request.id}`)}
+                  >
+                    <CardHeader>
+                      <CardTitle className="text-lg">{request.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {request.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                          {request.description}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          {request.status.replace('_', ' ').toUpperCase()}
+                        </span>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
