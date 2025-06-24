@@ -3,7 +3,7 @@ export interface ServiceRequest {
   id: string;
   title: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'negotiating' | 'agreed';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'negotiating' | 'agreed' | 'declined';
   requester_id: string;
   provider_id?: string;
   service_provider_id?: string;
@@ -31,6 +31,7 @@ export interface ServiceProvider {
   pricing_range?: any;
   portfolio_links?: string[];
   tags?: string[];
+  tagline?: string;
   domain_specializations?: number[];
   created_at: string;
   updated_at: string;

@@ -10,6 +10,7 @@ export interface UserProfile {
   email: string;
   first_name?: string;
   last_name?: string;
+  name: string; // Computed property
   avatar_url?: string;
   role: UserRole;
   bio?: string;
@@ -47,11 +48,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           .single();
 
         if (profile) {
+          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email;
+          
           setCurrentUser({
             id: profile.id,
             email: profile.email,
             first_name: profile.first_name,
             last_name: profile.last_name,
+            name: fullName,
             avatar_url: profile.avatar_url,
             role: (profile.role || 'member') as UserRole,
             bio: profile.bio,

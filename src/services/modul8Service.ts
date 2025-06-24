@@ -55,3 +55,18 @@ export const getProjectDetails = async (id: string): Promise<ServiceRequest | nu
   // Placeholder implementation
   return null;
 };
+
+export const getProviderServiceRequests = async (providerId: string): Promise<ServiceRequest[]> => {
+  // Placeholder implementation
+  return [];
+};
+
+export const getAvailableServiceRequestsForProvider = async (providerId: string): Promise<ServiceRequest[]> => {
+  // Placeholder implementation
+  return [];
+};
+
+export const createProposal = async (data: Partial<Proposal>): Promise<Proposal> => {
+  // Placeholder implementation
+  throw new Error('Service not implemented');
+};
