@@ -1,162 +1,226 @@
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { useUser } from '@/contexts/UserContext';
-import Home from '@/pages/Index';
-import Login from '@/pages/Auth';
-import Dashboard from '@/pages/rel8t/Dashboard';
-import Discover from '@/pages/ProfileSearchPage';
-import Community from '@/components/community/NotFoundState';
-import Settings from '@/pages/Settings';
-import InviteCreate from '@/pages/InvitesManagementPage';
-import InviteAccept from '@/pages/InvitePage';
-import KnowledgeHub from '@/pages/knowledge/KnowledgeBase';
-import RMSDashboard from '@/pages/rel8t/Dashboard';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import LoadingSpinner from '@/components/ui/loading-spinner';
-import ProfilePage from '@/pages/ProfilePage';
+import ServiceProviderProtectedRoute from '@/components/auth/ServiceProviderProtectedRoute';
+import NonServiceProviderRoute from '@/components/auth/NonServiceProviderRoute';
+import Rel8ProtectedRoute from '@/components/auth/Rel8ProtectedRoute';
+
+// Import all pages
+import Index from '@/pages/Index';
+import Auth from '@/pages/Auth';
+import Profile from '@/pages/Profile';
 import ProfileEditPage from '@/pages/ProfileEditPage';
 import ProfileSetupPage from '@/pages/ProfileSetupPage';
+import Settings from '@/pages/Settings';
+import NotFound from '@/pages/NotFound';
+import ProfilePage from '@/pages/ProfilePage';
+import ProfileSearchPage from '@/pages/ProfileSearchPage';
+import InvitePage from '@/pages/InvitePage';
+import InvitesManagementPage from '@/pages/InvitesManagementPage';
+import Onboarding from '@/pages/Onboarding';
 
-// LAB-R8 Components
+// Knowledge Base
+import KnowledgeBase from '@/pages/knowledge/KnowledgeBase';
+import ArticleView from '@/pages/knowledge/ArticleView';
+import ContentCreator from '@/pages/knowledge/ContentCreator';
+import PostWizard from '@/pages/knowledge/PostWizard';
+import TopicsPage from '@/pages/knowledge/TopicsPage';
+import UserKnowledgeResource from '@/pages/knowledge/UserKnowledgeResource';
+
+// Core Knowledge
+import CoreLandingPage from '@/pages/core/CoreLandingPage';
+import ArticleCreate from '@/pages/core/ArticleCreate';
+import ArticleEdit from '@/pages/core/ArticleEdit';
+import TagView from '@/pages/core/TagView';
+import CoreArticleView from '@/pages/core/ArticleView';
+
+// Admin
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import DebuggerDashboard from '@/pages/admin/DebuggerDashboard';
+
+// Modul8 (Organizer) pages
+import Modul8Dashboard from '@/pages/modul8/Modul8Dashboard';
+import ModernModul8Dashboard from '@/pages/modul8/ModernModul8Dashboard';
+import EnhancedModul8Dashboard from '@/pages/modul8/EnhancedModul8Dashboard';
+import NextGenModul8Dashboard from '@/pages/modul8/NextGenModul8Dashboard';
+import DomainProviders from '@/pages/modul8/DomainProviders';
+import RequestWizard from '@/pages/modul8/RequestWizard';
+import ServiceRequestForm from '@/pages/modul8/ServiceRequestForm';
+import ServiceRequestDetails from '@/pages/modul8/ServiceRequestDetails';
+import RequestStatus from '@/pages/modul8/RequestStatus';
+import ProjectStatusView from '@/pages/modul8/ProjectStatusView';
+import ProviderDirectory from '@/pages/modul8/ProviderDirectory';
+import ProviderRequestPortal from '@/pages/modul8/ProviderRequestPortal';
+import OrganizerSetup from '@/pages/modul8/OrganizerSetup';
+
+// LAB-R8 (Service Provider) pages
+import Labr8Landing from '@/pages/labr8/Labr8Landing';
 import Labr8Auth from '@/pages/labr8/Labr8Auth';
 import Labr8Setup from '@/pages/labr8/Labr8Setup';
-import ProviderInbox from '@/pages/labr8/ProviderInbox';
+import Labr8Dashboard from '@/pages/labr8/Labr8Dashboard';
+import GridLabr8Dashboard from '@/pages/labr8/GridLabr8Dashboard';
 import ModernLabr8Dashboard from '@/pages/labr8/ModernLabr8Dashboard';
+import EnhancedLabr8Dashboard from '@/pages/labr8/EnhancedLabr8Dashboard';
+import ClientDatabase from '@/pages/labr8/ClientDatabase';
+import Labr8ProjectStatus from '@/pages/labr8/Labr8ProjectStatus';
+import Labr8RequestStatus from '@/pages/labr8/Labr8RequestStatus';
+import Labr8ProjectDetails from '@/pages/labr8/Labr8ProjectDetails';
+import Labr8RequestDetails from '@/pages/labr8/Labr8RequestDetails';
+import ProjectDetails from '@/pages/labr8/ProjectDetails';
+import ProjectWorkspace from '@/pages/labr8/ProjectWorkspace';
 
-// MODUL-8 Components  
-import DomainProviders from '@/pages/modul8/DomainProviders';
-import Modul8Dashboard from '@/pages/modul8/Modul8Dashboard';
+// REL8-T pages
+import ContactCreate from '@/pages/rel8t/ContactCreate';
+import ContactView from '@/pages/rel8t/ContactView';
+import Categories from '@/pages/rel8t/Categories';
+import ContactList from '@/pages/rel8t/ContactList';
+import Triggers from '@/pages/rel8t/Triggers';
+import SmartEngage from '@/pages/rel8t/SmartEngage';
+import BuildRapport from '@/pages/rel8t/BuildRapport';
+import Rel8tDashboard from '@/pages/rel8t/Rel8tDashboard';
 
 const AppRoutes = () => {
-  const { isLoading } = useUser();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <LoadingSpinner size="lg" text="Loading..." />
-      </div>
-    );
-  }
-
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/auth" element={<Login />} />
-      
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/discover" element={
-        <ProtectedRoute>
-          <Discover />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/community/:id" element={
-        <ProtectedRoute>
-          <Community />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/profile/setup" element={
-        <ProtectedRoute>
-          <ProfileSetupPage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/profile/:userId" element={
-        <ProtectedRoute>
-          <ProfilePage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/profile/edit" element={
-        <ProtectedRoute>
-          <ProfileEditPage />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/settings" element={
-        <ProtectedRoute>
-          <Settings />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/invite/create" element={
-        <ProtectedRoute>
-          <InviteCreate />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/invite/:linkId" element={<InviteAccept />} />
-      
-      {/* Knowledge Hub Routes */}
-      <Route path="/knowledge/*" element={
-        <ProtectedRoute>
-          <KnowledgeHub />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/knowledge/resources" element={
-        <ProtectedRoute>
-          <KnowledgeHub />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/rms/*" element={
-        <ProtectedRoute>
-          <RMSDashboard />
-        </ProtectedRoute>
-      } />
+      {/* Public routes */}
+      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/invite/:code" element={<InvitePage />} />
+      <Route path="/onboarding" element={<Onboarding />} />
 
-      {/* LAB-R8 Routes */}
-      <Route path="/labr8/auth" element={<Labr8Auth />} />
-      <Route path="/labr8/setup" element={
-        <ProtectedRoute>
-          <Labr8Setup />
-        </ProtectedRoute>
-      } />
-      <Route path="/labr8/inbox" element={
-        <ProtectedRoute>
-          <ProviderInbox />
-        </ProtectedRoute>
-      } />
-      <Route path="/labr8/dashboard" element={
-        <ProtectedRoute>
-          <ModernLabr8Dashboard />
-        </ProtectedRoute>
-      } />
+      {/* Profile routes */}
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/profile/edit" element={<ProfileEditPage />} />
+      <Route path="/profile/setup" element={<ProfileSetupPage />} />
+      <Route path="/profile/:userId" element={<ProfilePage />} />
+      <Route path="/profiles/search" element={<ProfileSearchPage />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/invites" element={<InvitesManagementPage />} />
 
-      {/* MODUL-8 Routes */}
+      {/* Knowledge Base routes */}
+      <Route path="/knowledge" element={<KnowledgeBase />} />
+      <Route path="/knowledge/resources" element={<UserKnowledgeResource />} />
+      <Route path="/knowledge/articles/:id" element={<ArticleView />} />
+      <Route path="/knowledge/create" element={<ContentCreator />} />
+      <Route path="/knowledge/wizard" element={<PostWizard />} />
+      <Route path="/knowledge/topics" element={<TopicsPage />} />
+
+      {/* Core Knowledge routes */}
+      <Route path="/core" element={<CoreLandingPage />} />
+      <Route path="/core/articles/create" element={<ArticleCreate />} />
+      <Route path="/core/articles/:id/edit" element={<ArticleEdit />} />
+      <Route path="/core/articles/:id" element={<CoreArticleView />} />
+      <Route path="/core/tags/:tagName" element={<TagView />} />
+
+      {/* Admin routes */}
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/debugger" element={<DebuggerDashboard />} />
+
+      {/* Modul8 (Organizer) routes - Protected */}
       <Route path="/modul8" element={
-        <ProtectedRoute>
+        <NonServiceProviderRoute>
           <Modul8Dashboard />
-        </ProtectedRoute>
+        </NonServiceProviderRoute>
       } />
       <Route path="/modul8/domain/:domainId" element={
-        <ProtectedRoute>
+        <NonServiceProviderRoute>
           <DomainProviders />
-        </ProtectedRoute>
+        </NonServiceProviderRoute>
+      } />
+      <Route path="/modul8/request/create" element={
+        <NonServiceProviderRoute>
+          <RequestWizard />
+        </NonServiceProviderRoute>
+      } />
+      <Route path="/modul8/request/:id" element={
+        <NonServiceProviderRoute>
+          <ServiceRequestDetails />
+        </NonServiceProviderRoute>
+      } />
+      <Route path="/modul8/providers" element={
+        <NonServiceProviderRoute>
+          <ProviderDirectory />
+        </NonServiceProviderRoute>
+      } />
+      <Route path="/modul8/providers/:providerId" element={
+        <NonServiceProviderRoute>
+          <ProviderRequestPortal />
+        </NonServiceProviderRoute>
+      } />
+      <Route path="/modul8/setup" element={
+        <NonServiceProviderRoute>
+          <OrganizerSetup />
+        </NonServiceProviderRoute>
       } />
 
-      <Route path="/admin/*" element={
-        <ProtectedRoute>
-          <AdminDashboard />
-        </ProtectedRoute>
+      {/* LAB-R8 (Service Provider) routes */}
+      <Route path="/labr8" element={<Labr8Landing />} />
+      <Route path="/labr8/auth" element={<Labr8Auth />} />
+      <Route path="/labr8/setup" element={
+        <ServiceProviderProtectedRoute>
+          <Labr8Setup />
+        </ServiceProviderProtectedRoute>
+      } />
+      <Route path="/labr8/inbox" element={
+        <ServiceProviderProtectedRoute>
+          <Labr8Dashboard />
+        </ServiceProviderProtectedRoute>
+      } />
+      <Route path="/labr8/request/:requestId" element={
+        <ServiceProviderProtectedRoute>
+          <Labr8RequestDetails />
+        </ServiceProviderProtectedRoute>
+      } />
+      <Route path="/labr8/projects/:projectId" element={
+        <ServiceProviderProtectedRoute>
+          <ProjectDetails />
+        </ServiceProviderProtectedRoute>
       } />
 
-      {/* Catch-all route for 404 */}
-      <Route path="*" element={
-        <div className="flex flex-col items-center justify-center h-screen">
-          <h1 className="text-2xl font-bold mb-4">Page Not Found</h1>
-          <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
-        </div>
+      {/* REL8-T routes - Protected */}
+      <Route path="/rel8t" element={
+        <Rel8ProtectedRoute>
+          <Rel8tDashboard />
+        </Rel8ProtectedRoute>
       } />
+      <Route path="/rel8t/contacts" element={
+        <Rel8ProtectedRoute>
+          <ContactList />
+        </Rel8ProtectedRoute>
+      } />
+      <Route path="/rel8t/contacts/create" element={
+        <Rel8ProtectedRoute>
+          <ContactCreate />
+        </Rel8ProtectedRoute>
+      } />
+      <Route path="/rel8t/contacts/:id" element={
+        <Rel8ProtectedRoute>
+          <ContactView />
+        </Rel8ProtectedRoute>
+      } />
+      <Route path="/rel8t/categories" element={
+        <Rel8ProtectedRoute>
+          <Categories />
+        </Rel8ProtectedRoute>
+      } />
+      <Route path="/rel8t/triggers" element={
+        <Rel8ProtectedRoute>
+          <Triggers />
+        </Rel8ProtectedRoute>
+      } />
+      <Route path="/rel8t/smart-engage" element={
+        <Rel8ProtectedRoute>
+          <SmartEngage />
+        </Rel8ProtectedRoute>
+      } />
+      <Route path="/rel8t/build-rapport" element={
+        <Rel8ProtectedRoute>
+          <BuildRapport />
+        </Rel8ProtectedRoute>
+      } />
+
+      {/* 404 Not Found */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

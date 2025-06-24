@@ -1,120 +1,185 @@
-
-import React from 'react';
-import { ServiceRequest } from '@/types/modul8';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  MessageSquare,
-  Edit3
-} from 'lucide-react';
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { MoreVertical, X, Archive } from 'lucide-react';
+import { ServiceRequest } from '@/types/modul8';
+import { closeServiceRequest, deleteServiceRequest } from '@/services/modul8Service';
+import { toast } from '@/hooks/use-toast';
 
 interface ServiceRequestActionsProps {
   request: ServiceRequest;
-  onAccept?: (requestId: string) => void;
-  onDecline?: (requestId: string) => void;
-  onNegotiate?: (requestId: string) => void;
-  onMessage?: (requestId: string) => void;
-  onEdit?: (requestId: string) => void;
-  onUpdate?: () => void;
-  isServiceProvider?: boolean;
-  isOrganizer?: boolean;
+  onUpdate: () => void;
+  canDelete?: boolean;
 }
 
-const ServiceRequestActions: React.FC<ServiceRequestActionsProps> = ({
-  request,
-  onAccept,
-  onDecline,
-  onNegotiate,
-  onMessage,
-  onEdit,
-  isServiceProvider,
-  isOrganizer
+const ServiceRequestActions: React.FC<ServiceRequestActionsProps> = ({ 
+  request, 
+  onUpdate,
+  canDelete = true
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      case 'negotiating': return 'bg-purple-100 text-purple-800';
-      case 'agreed': return 'bg-green-100 text-green-800';
-      case 'declined': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleClose = async () => {
+    setLoading(true);
+    try {
+      await closeServiceRequest(request.id);
+      toast({
+        title: "Success",
+        description: "Service request has been closed"
+      });
+      onUpdate();
+    } catch (error) {
+      console.error('Error closing request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to close service request",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setShowCloseDialog(false);
     }
   };
 
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await deleteServiceRequest(request.id);
+      toast({
+        title: "Success",
+        description: "Service request has been deleted"
+      });
+      onUpdate();
+    } catch (error) {
+      console.error('Error deleting request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete service request",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
+  // Can close unless already cancelled/completed
+  const canCloseRequest = request.status !== 'cancelled' && request.status !== 'completed';
+
+  // Allow delete if: 
+  // a) permitted by parent (organizer) AND 
+  //    - (never engaged AND not assigned) OR 
+  //    - status is "cancelled"
+  const canDeleteRequest =
+    canDelete && (
+      (request.engagement_status === 'none' && !request.service_provider_id) ||
+      request.status === 'cancelled'
+    );
+
+  if (!canCloseRequest && !canDeleteRequest) {
+    return null;
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Badge className={getStatusColor(request.status)}>
-          {request.status.toUpperCase()}
-        </Badge>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {isServiceProvider && request.status === 'pending' && (
-          <>
-            {onAccept && (
-              <Button 
-                size="sm" 
-                onClick={() => onAccept(request.id)}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="h-4 w-4 mr-1" />
-                Accept
-              </Button>
-            )}
-            
-            {onNegotiate && (
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => onNegotiate(request.id)}
-              >
-                <Clock className="h-4 w-4 mr-1" />
-                Negotiate
-              </Button>
-            )}
-            
-            {onDecline && (
-              <Button 
-                size="sm" 
-                variant="destructive"
-                onClick={() => onDecline(request.id)}
-              >
-                <XCircle className="h-4 w-4 mr-1" />
-                Decline
-              </Button>
-            )}
-          </>
-        )}
-
-        {isOrganizer && onEdit && (
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => onEdit(request.id)}
-          >
-            <Edit3 className="h-4 w-4 mr-1" />
-            Edit Request
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <MoreVertical className="h-4 w-4" />
           </Button>
-        )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {canCloseRequest && (
+            <DropdownMenuItem onClick={() => setShowCloseDialog(true)}>
+              <Archive className="h-4 w-4 mr-2" />
+              Close Request
+            </DropdownMenuItem>
+          )}
+          {canDeleteRequest && (
+            <DropdownMenuItem 
+              onClick={() => setShowDeleteDialog(true)}
+              className="text-destructive focus:text-destructive"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Delete Request
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-        {onMessage && (
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => onMessage(request.id)}
-          >
-            <MessageSquare className="h-4 w-4 mr-1" />
-            Message
-          </Button>
-        )}
-      </div>
-    </div>
+      {/* Close Confirmation Dialog */}
+      <AlertDialog open={showCloseDialog} onOpenChange={setShowCloseDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close Service Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to close "{request.title}"? This will mark the request as cancelled 
+              but keep it for historical records. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleClose}
+              disabled={loading}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              {loading ? 'Closing...' : 'Close Request'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Service Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              {request.status === 'cancelled' ? (
+                <>
+                  Are you sure you want to permanently delete the cancelled request "{request.title}"?
+                  This will completely remove the request and cannot be undone.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to permanently delete "{request.title}"? This will completely 
+                  remove the request and cannot be undone. This is only possible because there has been 
+                  no engagement yet.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={loading}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {loading ? 'Deleting...' : 'Delete Request'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

@@ -33,7 +33,7 @@ const ProfileSetupWizard = () => {
     defaultValues: {
       firstName: currentUser?.name?.split(' ')[0] || '',
       lastName: currentUser?.name?.split(' ').slice(1).join(' ') || '',
-      avatarUrl: '',
+      avatarUrl: currentUser?.imageUrl || '',
       avatar: null,
       bio: currentUser?.bio || '',
       location: '',
@@ -125,7 +125,7 @@ const ProfileSetupWizard = () => {
 
       // Refresh user data and navigate to profile
       await refreshUser();
-      navigate(`/profile/${currentUser?.id}`);
+      navigate("/profile");
     } catch (error) {
       console.error("Error saving profile:", error);
     }

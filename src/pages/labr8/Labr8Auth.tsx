@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,7 +33,9 @@ const Labr8Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && currentUser) {
-      // Check if user has SERVICE_PROVIDER role, if not redirect to main platform
+      console.log('User already authenticated for LAB-R8, checking role:', currentUser.role);
+      
+      // Check if user has SERVICE_PROVIDER role
       if (currentUser.role === 'SERVICE_PROVIDER') {
         if (!currentUser.profile_complete) {
           navigate("/labr8/setup", { replace: true });
@@ -40,10 +43,11 @@ const Labr8Auth = () => {
           navigate("/labr8/inbox", { replace: true });
         }
       } else {
+        // Redirect non-service providers to main platform
         navigate("/", { replace: true });
       }
     }
-  }, [currentUser, isLoading, navigate, searchParams]);
+  }, [currentUser, isLoading, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,12 +68,11 @@ const Labr8Auth = () => {
 
       if (data.user) {
         toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in to LAB-R8.",
+          title: "Welcome back to LAB-R8!",
+          description: "You have successfully signed in.",
         });
         
-        // Navigate to inbox after successful login
-        navigate("/labr8/inbox", { replace: true });
+        // The redirect will be handled by the useEffect above once currentUser updates
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");

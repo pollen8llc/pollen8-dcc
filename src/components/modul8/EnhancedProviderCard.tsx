@@ -1,114 +1,130 @@
 
 import React from 'react';
-import { ServiceProvider } from '@/types/modul8';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Star, MapPin, ExternalLink } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  Star, 
+  MapPin, 
+  ExternalLink, 
+  MessageSquare,
+  Building
+} from 'lucide-react';
+import { ServiceProvider } from '@/types/modul8';
 
 interface EnhancedProviderCardProps {
   provider: ServiceProvider;
-  onSelect?: (provider: ServiceProvider) => void;
-  onEngage?: (providerId: string) => Promise<void>;
-  onViewProfile?: (providerId: string) => void;
+  onEngage: (providerId: string) => void;
+  onViewProfile: (providerId: string) => void;
   hasExistingRequest?: boolean;
+  className?: string;
 }
 
-const EnhancedProviderCard: React.FC<EnhancedProviderCardProps> = ({ 
-  provider, 
-  onSelect,
+const EnhancedProviderCard: React.FC<EnhancedProviderCardProps> = ({
+  provider,
   onEngage,
   onViewProfile,
-  hasExistingRequest
+  hasExistingRequest = false,
+  className = ''
 }) => {
-  const handleSelect = () => {
-    if (onSelect) {
-      onSelect(provider);
+  const formatPricing = (pricing: any) => {
+    if (!pricing || typeof pricing !== 'object') return 'Contact for pricing';
+    const { min, max, currency = 'USD' } = pricing;
+    if (min && max) {
+      return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
+    } else if (min) {
+      return `From ${currency} ${min.toLocaleString()}`;
     }
-  };
-
-  const handleEngage = async () => {
-    if (onEngage) {
-      await onEngage(provider.id);
-    }
-  };
-
-  const handleViewProfile = () => {
-    if (onViewProfile) {
-      onViewProfile(provider.id);
-    }
+    return 'Contact for pricing';
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            {provider.logo_url && (
-              <img 
-                src={provider.logo_url} 
-                alt={provider.business_name}
-                className="w-12 h-12 rounded-lg object-cover"
-              />
+    <Card className={`hover:shadow-md transition-shadow ${className}`}>
+      <CardContent className="p-6">
+        <div className="flex items-start gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={provider.logo_url} alt={provider.business_name} />
+            <AvatarFallback>
+              <Building className="h-8 w-8" />
+            </AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="font-semibold text-lg line-clamp-1">
+                  {provider.business_name}
+                </h3>
+                {provider.tagline && (
+                  <p className="text-sm text-muted-foreground line-clamp-1">
+                    {provider.tagline}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground ml-2">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span>4.8</span>
+              </div>
+            </div>
+
+            {provider.description && (
+              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                {provider.description}
+              </p>
             )}
-            <div>
-              <h3 className="font-semibold text-lg">{provider.business_name}</h3>
-              {provider.tagline && (
-                <p className="text-sm text-muted-foreground">{provider.tagline}</p>
+
+            <div className="flex flex-wrap gap-2 mb-3">
+              {provider.services && Array.isArray(provider.services) && 
+               provider.services.slice(0, 3).map((service: any, index: number) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  {typeof service === 'string' ? service : service.name || 'Service'}
+                </Badge>
+              ))}
+              {provider.services && Array.isArray(provider.services) && 
+               provider.services.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{provider.services.length - 3} more
+                </Badge>
               )}
             </div>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm">4.8</span>
+
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-4 text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  <span>Remote</span>
+                </div>
+                <span className="font-medium">
+                  {formatPricing(provider.pricing_range)}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {provider.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {provider.description}
-          </p>
-        )}
-        
-        {provider.tags && provider.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {provider.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {provider.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{provider.tags.length - 3} more
-              </Badge>
-            )}
-          </div>
-        )}
-        
-        <div className="flex items-center justify-between pt-2">
-          <div className="text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 inline mr-1" />
-            Remote
-          </div>
-          
-          <div className="flex gap-2">
-            {onEngage && (
-              <Button 
-                size="sm" 
-                onClick={handleEngage}
-                disabled={hasExistingRequest}
-              >
-                {hasExistingRequest ? 'Already Engaged' : 'Engage'}
-              </Button>
-            )}
-            
-            <Button size="sm" variant="outline" onClick={handleViewProfile || handleSelect}>
-              View Profile
-              <ExternalLink className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
+
+        <div className="flex gap-2 mt-4 pt-4 border-t border-border/40">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onViewProfile(provider.id)}
+            className="flex items-center gap-1"
+          >
+            <ExternalLink className="h-3 w-3" />
+            View Profile
+          </Button>
+          <Button
+            onClick={() => onEngage(provider.id)}
+            size="sm"
+            className={`flex items-center gap-1 flex-1 ${
+              hasExistingRequest 
+                ? 'bg-orange-500 hover:bg-orange-600' 
+                : 'bg-[#00eada] hover:bg-[#00eada]/90'
+            } text-black`}
+          >
+            <MessageSquare className="h-3 w-3" />
+            {hasExistingRequest ? 'Continue Discussion' : 'Engage'}
+          </Button>
         </div>
       </CardContent>
     </Card>

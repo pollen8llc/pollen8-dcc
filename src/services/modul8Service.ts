@@ -1,97 +1,501 @@
+import { supabase } from "@/integrations/supabase/client";
+import { 
+  ServiceProvider, 
+  ServiceRequest, 
+  Organizer,
+  Proposal,
+  CreateServiceProviderData,
+  CreateOrganizerData,
+  CreateServiceRequestData,
+  CreateProposalData
+} from "@/types/modul8";
 
-import { ServiceRequest, ServiceProvider, Organizer, Proposal, CreateOrganizerData, CreateServiceProviderData } from '@/types/modul8';
-
-export const createServiceRequest = async (data: Partial<ServiceRequest>): Promise<ServiceRequest> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
+export const createServiceProvider = async (data: CreateServiceProviderData): Promise<ServiceProvider> => {
+  const { data: provider, error } = await supabase
+    .from('modul8_service_providers')
+    .insert(data)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return {
+    ...provider,
+    services: Array.isArray(provider.services) ? provider.services : [],
+    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+  } as ServiceProvider;
 };
 
-export const getServiceRequests = async (): Promise<ServiceRequest[]> => {
-  // Placeholder implementation
-  return [];
-};
-
-export const getServiceRequestById = async (id: string): Promise<ServiceRequest | null> => {
-  // Placeholder implementation
-  return null;
-};
-
-export const updateServiceRequest = async (id: string, data: Partial<ServiceRequest>): Promise<ServiceRequest> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
-};
-
-export const deleteServiceRequest = async (id: string): Promise<void> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
+export const updateServiceProvider = async (id: string, data: Partial<CreateServiceProviderData>): Promise<ServiceProvider> => {
+  const { data: provider, error } = await supabase
+    .from('modul8_service_providers')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return {
+    ...provider,
+    services: Array.isArray(provider.services) ? provider.services : [],
+    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+  } as ServiceProvider;
 };
 
 export const getUserServiceProvider = async (userId: string): Promise<ServiceProvider | null> => {
-  // Placeholder implementation
-  return null;
-};
-
-export const getUserOrganizer = async (userId: string): Promise<Organizer | null> => {
-  // Placeholder implementation
-  return null;
-};
-
-export const getProposalsByRequestId = async (requestId: string): Promise<Proposal[]> => {
-  // Placeholder implementation
-  return [];
-};
-
-export const getRequestProposals = async (requestId: string): Promise<Proposal[]> => {
-  // Placeholder implementation
-  return [];
-};
-
-export const assignServiceProvider = async (requestId: string, providerId: string): Promise<void> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
-};
-
-export const getProjectDetails = async (id: string): Promise<ServiceRequest | null> => {
-  // Placeholder implementation
-  return null;
-};
-
-export const getProviderServiceRequests = async (providerId: string): Promise<ServiceRequest[]> => {
-  // Placeholder implementation
-  return [];
-};
-
-export const getAvailableServiceRequestsForProvider = async (providerId: string): Promise<ServiceRequest[]> => {
-  // Placeholder implementation
-  return [];
-};
-
-export const createProposal = async (data: Partial<Proposal>): Promise<Proposal> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
-};
-
-export const createServiceProvider = async (data: CreateServiceProviderData): Promise<ServiceProvider> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
-};
-
-export const getOrganizerServiceRequests = async (organizerId: string): Promise<ServiceRequest[]> => {
-  // Placeholder implementation
-  return [];
-};
-
-export const getServiceProvidersByDomain = async (domainId: number): Promise<ServiceProvider[]> => {
-  // Placeholder implementation
-  return [];
-};
-
-export const getServiceProviderById = async (id: string): Promise<ServiceProvider | null> => {
-  // Placeholder implementation
-  return null;
+  console.log('getUserServiceProvider called with userId:', userId);
+  
+  const { data, error } = await supabase
+    .from('modul8_service_providers')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error fetching service provider:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    console.log('No service provider found for user:', userId);
+    return null;
+  }
+  
+  console.log('Service provider found:', data);
+  
+  return {
+    ...data,
+    services: Array.isArray(data.services) ? data.services : [],
+    pricing_range: data.pricing_range as { min?: number; max?: number; currency: string; }
+  } as ServiceProvider;
 };
 
 export const createOrganizer = async (data: CreateOrganizerData): Promise<Organizer> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
+  const { data: organizer, error } = await supabase
+    .from('modul8_organizers')
+    .insert(data)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return organizer;
+};
+
+export const updateOrganizer = async (id: string, data: Partial<CreateOrganizerData>): Promise<Organizer> => {
+  const { data: organizer, error } = await supabase
+    .from('modul8_organizers')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return organizer;
+};
+
+export const getUserOrganizer = async (userId: string): Promise<Organizer | null> => {
+  console.log('getUserOrganizer called with userId:', userId);
+  
+  const { data, error } = await supabase
+    .from('modul8_organizers')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error fetching organizer:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    console.log('No organizer found for user:', userId);
+    return null;
+  }
+  
+  console.log('Organizer found:', data);
+  return data;
+};
+
+export const createServiceRequest = async (data: CreateServiceRequestData & { 
+  service_provider_id?: string;
+  status?: string;
+  engagement_status?: string;
+}): Promise<ServiceRequest> => {
+  console.log('Creating service request with data:', data);
+  
+  const { data: request, error } = await supabase
+    .from('modul8_service_requests')
+    .insert(data)
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .single();
+  
+  if (error) throw error;
+  
+  // If assigned to a specific provider, use the assignment function
+  if (data.service_provider_id) {
+    console.log('Assigning request to provider:', data.service_provider_id);
+    const { error: assignError } = await supabase.rpc('assign_request_to_provider', {
+      p_service_request_id: request.id,
+      p_service_provider_id: data.service_provider_id
+    });
+    
+    if (assignError) {
+      console.error('Error assigning request to provider:', assignError);
+    } else {
+      console.log('Successfully assigned request to provider');
+    }
+  }
+  
+  return {
+    ...request,
+    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+    milestones: request.milestones as string[]
+  } as ServiceRequest;
+};
+
+export const updateServiceRequest = async (
+  id: string, 
+  data: Partial<ServiceRequest>
+): Promise<ServiceRequest> => {
+  const { data: request, error } = await supabase
+    .from('modul8_service_requests')
+    .update(data)
+    .eq('id', id)
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .single();
+  
+  if (error) throw error;
+  
+  return {
+    ...request,
+    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+    milestones: request.milestones as string[]
+  } as ServiceRequest;
+};
+
+export const getServiceRequestById = async (id: string): Promise<ServiceRequest | null> => {
+  console.log('getServiceRequestById called with id:', id);
+  
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .eq('id', id)
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error fetching service request:', error);
+    throw error;
+  }
+  
+  if (!data) {
+    console.log('No service request found with id:', id);
+    return null;
+  }
+  
+  console.log('Service request found:', data);
+  
+  return {
+    ...data,
+    budget_range: data.budget_range as { min?: number; max?: number; currency: string; },
+    milestones: data.milestones as string[]
+  } as ServiceRequest;
+};
+
+export const deleteServiceRequest = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('modul8_service_requests')
+    .delete()
+    .eq('id', id);
+  
+  if (error) throw error;
+};
+
+export const getOrganizerServiceRequests = async (organizerId: string): Promise<ServiceRequest[]> => {
+  console.log('Loading organizer service requests for organizer:', organizerId);
+  
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .eq('organizer_id', organizerId)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  
+  return (data || []).map(request => ({
+    ...request,
+    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+    milestones: request.milestones as string[]
+  })) as ServiceRequest[];
+};
+
+export const getProviderServiceRequests = async (providerId: string): Promise<ServiceRequest[]> => {
+  console.log('Loading provider service requests for provider:', providerId);
+  
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .eq('service_provider_id', providerId)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error loading provider requests:', error);
+    throw error;
+  }
+  
+  console.log('Provider requests loaded:', data?.length || 0, 'requests');
+  
+  return (data || []).map(request => ({
+    ...request,
+    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+    milestones: request.milestones as string[]
+  })) as ServiceRequest[];
+};
+
+export const getAvailableServiceRequestsForProvider = async (providerId: string): Promise<ServiceRequest[]> => {
+  console.log('Loading available service requests (open market) for provider:', providerId);
+  
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .is('service_provider_id', null)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error loading available requests:', error);
+    throw error;
+  }
+  
+  console.log('Available requests loaded:', data?.length || 0, 'requests');
+  
+  return (data || []).map(request => ({
+    ...request,
+    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+    milestones: request.milestones as string[]
+  })) as ServiceRequest[];
+};
+
+export const getAllServiceRequests = async (): Promise<ServiceRequest[]> => {
+  const { data, error } = await supabase
+    .from('modul8_service_requests')
+    .select(`
+      *,
+      service_provider:modul8_service_providers(*),
+      organizer:modul8_organizers(*)
+    `)
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  
+  return (data || []).map(request => ({
+    ...request,
+    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+    milestones: request.milestones as string[]
+  })) as ServiceRequest[];
+};
+
+export const createProposal = async (data: CreateProposalData): Promise<Proposal> => {
+  console.log('Creating proposal with data:', data);
+  
+  const { data: proposal, error } = await supabase
+    .from('modul8_proposals')
+    .insert({
+      ...data,
+      proposal_type: data.proposal_type || 'initial',
+      status: 'pending'
+    })
+    .select('*')
+    .single();
+  
+  if (error) {
+    console.error('Error creating proposal:', error);
+    throw error;
+  }
+  
+  console.log('Proposal created successfully:', proposal);
+  
+  return {
+    ...proposal,
+    proposal_type: proposal.proposal_type as 'initial' | 'counter' | 'revision'
+  } as Proposal;
+};
+
+export const createCounterProposal = async (
+  originalProposal: Proposal,
+  counterData: {
+    quote_amount?: number;
+    timeline?: string;
+    scope_url?: string;
+    terms_url?: string;
+  },
+  fromUserId: string
+): Promise<Proposal> => {
+  console.log('Creating counter proposal for proposal:', originalProposal.id);
+  
+  const counterProposalData: CreateProposalData = {
+    service_request_id: originalProposal.service_request_id,
+    from_user_id: fromUserId,
+    proposal_type: 'counter',
+    quote_amount: counterData.quote_amount,
+    timeline: counterData.timeline,
+    scope_details: counterData.scope_url,
+    terms: counterData.terms_url
+  };
+  
+  return await createProposal(counterProposalData);
+};
+
+export const updateProposalStatus = async (
+  proposalId: string,
+  status: 'accepted' | 'rejected' | 'pending'
+): Promise<void> => {
+  console.log('Updating proposal status:', proposalId, status);
+  
+  const { error } = await supabase
+    .from('modul8_proposals')
+    .update({ status })
+    .eq('id', proposalId);
+  
+  if (error) {
+    console.error('Error updating proposal status:', error);
+    throw error;
+  }
+  
+  // If proposal is accepted, update the service request status
+  if (status === 'accepted') {
+    const { data: proposal } = await supabase
+      .from('modul8_proposals')
+      .select('service_request_id')
+      .eq('id', proposalId)
+      .single();
+    
+    if (proposal) {
+      await supabase
+        .from('modul8_service_requests')
+        .update({ 
+          status: 'agreed',
+          engagement_status: 'active'
+        })
+        .eq('id', proposal.service_request_id);
+    }
+  }
+};
+
+export const getServiceRequestProposals = async (serviceRequestId: string): Promise<(Proposal & { service_provider?: ServiceProvider })[]> => {
+  console.log('Loading proposals for service request:', serviceRequestId);
+  
+  const { data, error } = await supabase
+    .from('modul8_proposals')
+    .select(`
+      *,
+      service_provider:modul8_service_providers!inner(*)
+    `)
+    .eq('service_request_id', serviceRequestId)
+    .order('created_at', { ascending: true });
+  
+  if (error) {
+    console.error('Error loading proposals:', error);
+    throw error;
+  }
+  
+  console.log('Proposals loaded:', data?.length || 0);
+  
+  return (data || []).map(proposal => ({
+    ...proposal,
+    proposal_type: proposal.proposal_type as 'initial' | 'counter' | 'revision',
+    service_provider: Array.isArray(proposal.service_provider) 
+      ? proposal.service_provider[0] 
+      : proposal.service_provider
+  })) as (Proposal & { service_provider?: ServiceProvider })[];
+};
+
+export const getServiceProviders = async (): Promise<ServiceProvider[]> => {
+  const { data, error } = await supabase
+    .from('modul8_service_providers')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return (data || []).map(provider => ({
+    ...provider,
+    services: Array.isArray(provider.services) ? provider.services : [],
+    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+  })) as ServiceProvider[];
+};
+
+export const getServiceProviderById = async (id: string): Promise<ServiceProvider | null> => {
+  const { data, error } = await supabase
+    .from('modul8_service_providers')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  
+  if (error) throw error;
+  if (!data) return null;
+  
+  return {
+    ...data,
+    services: Array.isArray(data.services) ? data.services : [],
+    pricing_range: data.pricing_range as { min?: number; max?: number; currency: string; }
+  } as ServiceProvider;
+};
+
+export const getServiceProvidersByDomain = async (domainId: number): Promise<ServiceProvider[]> => {
+  const { data, error } = await supabase
+    .from('modul8_service_providers')
+    .select('*')
+    .contains('domain_specializations', [domainId])
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return (data || []).map(provider => ({
+    ...provider,
+    services: Array.isArray(provider.services) ? provider.services : [],
+    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+  })) as ServiceProvider[];
+};
+
+export const getRequestProposals = getServiceRequestProposals;
+export const getProposalsByRequestId = getServiceRequestProposals;
+export const getServiceRequests = getAllServiceRequests;
+
+export const assignServiceProvider = async (requestId: string, providerId: string): Promise<void> => {
+  const { error } = await supabase.rpc('assign_request_to_provider', {
+    p_service_request_id: requestId,
+    p_service_provider_id: providerId
+  });
+  
+  if (error) throw error;
+};
+
+export const closeServiceRequest = async (requestId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('modul8_service_requests')
+    .update({ status: 'closed' })
+    .eq('id', requestId);
+  
+  if (error) throw error;
 };

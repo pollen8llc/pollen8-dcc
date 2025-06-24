@@ -1,137 +1,77 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
-import { UserRole } from '@/models/types';
-
-export interface UserProfile {
-  id: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  name: string; // Computed property
-  avatar_url?: string;
-  role: UserRole;
-  bio: string; // Make required to match User type
-  location?: string;
-  interests?: string[];
-  imageUrl: string; // Make this required to match User type
-  communities: string[]; // Make required to match User type
-  managedCommunities: string[]; // Make required to match User type
-  profile_complete?: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import React, { createContext, useContext, useCallback } from 'react';
+import { useSession } from '@/hooks/useSession';
+import { useProfile } from '@/hooks/useProfile';
+import { User } from '@/models/types';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface UserContextType {
-  currentUser: UserProfile | null;
+  currentUser: User | null;
   isLoading: boolean;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  recoverUserSession: () => Promise<boolean>;
+  isAdmin: () => boolean;
+  isOrganizer: (communityId?: string) => boolean;
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType>({
+  currentUser: null,
+  isLoading: true,
+  logout: async () => {},
+  refreshUser: async () => {},
+  recoverUserSession: async () => false,
+  isAdmin: () => false,
+  isOrganizer: () => false
+});
 
-export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { session, isLoading: sessionLoading, logout, recoverUserSession } = useSession();
+  const { 
+    currentUser, 
+    isLoading: profileLoading, 
+    refreshUser, 
+    createProfileIfNotExists 
+  } = useProfile(session);
 
-  const refreshUser = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
+  const { isAdmin, isOrganizer } = usePermissions(currentUser);
 
-        if (profile) {
-          const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email;
-          
-          // Get user role from user_roles table
-          let userRole = UserRole.MEMBER; // Default role
-          
-          try {
-            const { data: userRoles } = await supabase
-              .from('user_roles')
-              .select(`
-                role_id,
-                roles:role_id (
-                  name
-                )
-              `)
-              .eq('user_id', user.id);
-
-            if (userRoles && userRoles.length > 0) {
-              // Check for admin role first
-              const hasAdminRole = userRoles.some(r => r.roles && r.roles.name === 'ADMIN');
-              if (hasAdminRole) {
-                userRole = UserRole.ADMIN;
-              } else {
-                // Check for service provider role
-                const hasServiceProviderRole = userRoles.some(r => 
-                  r.roles && r.roles.name === 'SERVICE_PROVIDER'
-                );
-                if (hasServiceProviderRole) {
-                  userRole = UserRole.SERVICE_PROVIDER;
-                } else {
-                  // Check for organizer role
-                  const hasOrganizerRole = userRoles.some(r => r.roles && r.roles.name === 'ORGANIZER');
-                  if (hasOrganizerRole) {
-                    userRole = UserRole.ORGANIZER;
-                  }
-                }
-              }
-            }
-          } catch (roleErr) {
-            console.error("Error fetching user roles:", roleErr);
-          }
-          
-          const defaultImageUrl = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
-          
-          setCurrentUser({
-            id: profile.id,
-            email: profile.email,
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            name: fullName,
-            avatar_url: profile.avatar_url,
-            role: userRole,
-            bio: profile.bio || '', // Ensure bio is always a string
-            location: profile.location,
-            interests: profile.interests || [],
-            imageUrl: profile.avatar_url || defaultImageUrl,
-            communities: [],
-            managedCommunities: [],
-            profile_complete: profile.profile_complete,
-            created_at: profile.created_at,
-            updated_at: profile.updated_at
-          });
-        }
-      } else {
-        setCurrentUser(null);
-      }
-    } catch (error) {
-      console.error('Error fetching user:', error);
-      setCurrentUser(null);
-    } finally {
-      setIsLoading(false);
+  // Create profile if it doesn't exist yet
+  React.useEffect(() => {
+    if (session && !profileLoading && !currentUser) {
+      console.log("Session exists but no profile found, attempting to create");
+      createProfileIfNotExists();
     }
-  };
+  }, [session, currentUser, profileLoading, createProfileIfNotExists]);
 
-  useEffect(() => {
-    refreshUser();
+  // Listen for role change events via localStorage
+  React.useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'should_refresh_user_role' && e.newValue === 'true' && currentUser) {
+        console.log("Role change detected via localStorage, refreshing user data");
+        refreshUser();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [currentUser, refreshUser]);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      refreshUser();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const isLoading = sessionLoading || profileLoading;
 
   return (
-    <UserContext.Provider value={{ currentUser, isLoading, refreshUser }}>
+    <UserContext.Provider value={{ 
+      currentUser, 
+      isLoading,
+      logout,
+      refreshUser,
+      recoverUserSession,
+      isAdmin,
+      isOrganizer
+    }}>
       {children}
     </UserContext.Provider>
   );

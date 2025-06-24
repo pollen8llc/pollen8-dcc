@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
@@ -153,7 +152,7 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
         onComplete();
       } else {
         // Navigate based on mode
-        navigate(`/profile/${currentUser.id}`);
+        navigate('/profile');
       }
       
     } catch (error: any) {
@@ -251,7 +250,7 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
       </CardContent>
       
       <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={() => currentUser && navigate(`/profile/${currentUser.id}`)}>
+        <Button variant="outline" onClick={() => navigate('/profile')}>
           Cancel
         </Button>
         <Button 

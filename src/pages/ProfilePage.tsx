@@ -9,15 +9,15 @@ import DesktopProfileView from "@/components/profile/DesktopProfileView";
 import { useNavigate } from "react-router-dom";
 
 const ProfilePage: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const { id } = useParams<{ id: string }>();
   const { currentUser, isLoading } = useUser();
   const { profile, getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<any>(null);
   const navigate = useNavigate();
 
   // Determine which profile to show
-  const profileId = userId || currentUser?.id;
-  const isOwnProfile = !userId || userId === currentUser?.id;
+  const profileId = id || currentUser?.id;
+  const isOwnProfile = !id || id === currentUser?.id;
 
   // Fetch profile data
   React.useEffect(() => {
