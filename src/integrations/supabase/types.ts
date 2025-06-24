@@ -1079,6 +1079,10 @@ export type Database = {
           created_at: string
           id: string
           is_locked: boolean
+          negotiated_budget_range: Json | null
+          negotiated_description: string | null
+          negotiated_timeline: string | null
+          negotiated_title: string | null
           notes: string | null
           request_id: string
           responded_at: string | null
@@ -1096,6 +1100,10 @@ export type Database = {
           created_at?: string
           id?: string
           is_locked?: boolean
+          negotiated_budget_range?: Json | null
+          negotiated_description?: string | null
+          negotiated_timeline?: string | null
+          negotiated_title?: string | null
           notes?: string | null
           request_id: string
           responded_at?: string | null
@@ -1113,6 +1121,10 @@ export type Database = {
           created_at?: string
           id?: string
           is_locked?: boolean
+          negotiated_budget_range?: Json | null
+          negotiated_description?: string | null
+          negotiated_timeline?: string | null
+          negotiated_title?: string | null
           notes?: string | null
           request_id?: string
           responded_at?: string | null

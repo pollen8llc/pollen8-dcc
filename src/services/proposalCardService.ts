@@ -19,7 +19,10 @@ export const getProposalCards = async (requestId: string): Promise<ProposalCard[
   return (data || []).map(card => ({
     ...card,
     asset_links: Array.isArray(card.asset_links) ? card.asset_links : [],
-    negotiated_budget_range: card.negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined
+    negotiated_budget_range: (card as any).negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined,
+    negotiated_title: (card as any).negotiated_title as string | undefined,
+    negotiated_description: (card as any).negotiated_description as string | undefined,
+    negotiated_timeline: (card as any).negotiated_timeline as string | undefined
   })) as ProposalCard[];
 };
 
@@ -51,7 +54,10 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
   return {
     ...card,
     asset_links: Array.isArray(card.asset_links) ? card.asset_links : [],
-    negotiated_budget_range: card.negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined
+    negotiated_budget_range: (card as any).negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined,
+    negotiated_title: (card as any).negotiated_title as string | undefined,
+    negotiated_description: (card as any).negotiated_description as string | undefined,
+    negotiated_timeline: (card as any).negotiated_timeline as string | undefined
   } as ProposalCard;
 };
 
