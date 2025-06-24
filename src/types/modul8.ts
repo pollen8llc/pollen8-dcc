@@ -19,6 +19,9 @@ export interface ServiceRequest {
   project_progress?: number;
   organizer?: Organizer;
   service_provider?: ServiceProvider;
+  organizer_id?: string;
+  domain_page?: number;
+  engagement_status?: string;
 }
 
 export interface ServiceProvider {
@@ -97,6 +100,33 @@ export interface ProjectDetails {
   updated_at: string;
 }
 
+export interface ProjectRevision {
+  id: string;
+  service_request_id: string;
+  revision_type: string;
+  description: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectCompletion {
+  id: string;
+  service_request_id: string;
+  status: 'submitted' | 'confirmed';
+  completion_notes?: string;
+  submitted_at: string;
+  confirmed_at?: string;
+}
+
+export interface ProjectRating {
+  id: string;
+  service_request_id: string;
+  rating: number;
+  feedback?: string;
+  created_at: string;
+}
+
 export interface NegotiationStatus {
   id: string;
   service_request_id: string;
@@ -143,7 +173,15 @@ export interface ProjectComment {
   updated_at: string;
 }
 
-export const DOMAIN_PAGES = {
+export const DOMAIN_PAGES = [
+  { id: 1, name: 'Web Development' },
+  { id: 2, name: 'Mobile App Development' },
+  { id: 3, name: 'Design & Branding' },
+  { id: 4, name: 'Digital Marketing' },
+  { id: 5, name: 'Content Creation' }
+];
+
+export const DOMAIN_PAGES_MAP = {
   1: 'Web Development',
   2: 'Mobile App Development',
   3: 'Design & Branding',

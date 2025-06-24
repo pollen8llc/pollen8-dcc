@@ -75,3 +75,18 @@ export const createServiceProvider = async (data: any): Promise<any> => {
   // Placeholder implementation
   throw new Error('Service not implemented');
 };
+
+export const getOrganizerServiceRequests = async (organizerId: string): Promise<ServiceRequest[]> => {
+  // Placeholder implementation
+  return [];
+};
+
+export const getServiceProvidersByDomain = async (domainId: number): Promise<ServiceProvider[]> => {
+  // Placeholder implementation
+  return [];
+};
+
+export const getServiceProviderById = async (id: string): Promise<ServiceProvider | null> => {
+  // Placeholder implementation
+  return null;
+};

@@ -15,7 +15,7 @@ export interface UserProfile {
   bio?: string;
   location?: string;
   interests?: string[];
-  imageUrl?: string;
+  imageUrl: string; // Make this required to match User type
   communities?: string[];
   managedCommunities?: string[];
   profile_complete?: boolean;
@@ -88,6 +88,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             console.error("Error fetching user roles:", roleErr);
           }
           
+          const defaultImageUrl = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+          
           setCurrentUser({
             id: profile.id,
             email: profile.email,
@@ -99,7 +101,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             bio: profile.bio,
             location: profile.location,
             interests: profile.interests || [],
-            imageUrl: profile.avatar_url,
+            imageUrl: profile.avatar_url || defaultImageUrl,
             communities: [],
             managedCommunities: [],
             profile_complete: profile.profile_complete,

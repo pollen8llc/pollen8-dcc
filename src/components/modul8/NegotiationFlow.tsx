@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ServiceRequest } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,14 +16,18 @@ import ProviderResponseForm from './ProviderResponseForm';
 
 interface NegotiationFlowProps {
   serviceRequest: ServiceRequest;
-  currentUserId: string;
+  currentUserId?: string;
   onStatusChange?: (newStatus: string) => void;
+  onUpdate?: () => void;
+  isServiceProvider?: boolean;
 }
 
 const NegotiationFlow: React.FC<NegotiationFlowProps> = ({ 
   serviceRequest, 
   currentUserId,
-  onStatusChange 
+  onStatusChange,
+  onUpdate,
+  isServiceProvider
 }) => {
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
@@ -47,6 +52,9 @@ const NegotiationFlow: React.FC<NegotiationFlowProps> = ({
   const handleProviderResponse = (data: any) => {
     console.log('Provider response submitted:', data);
     setShowResponseForm(false);
+    if (onUpdate) {
+      onUpdate();
+    }
     // Handle the response submission
   };
 

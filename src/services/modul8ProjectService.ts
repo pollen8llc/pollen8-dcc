@@ -1,22 +1,27 @@
 
-import { ProjectDetails, ServiceRequest } from '@/types/modul8';
-
-export const createProject = async (data: Partial<ProjectDetails>): Promise<ProjectDetails> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
-};
-
-export const getProjects = async (): Promise<ProjectDetails[]> => {
-  // Placeholder implementation
-  return [];
-};
-
-export const updateProject = async (id: string, data: Partial<ProjectDetails>): Promise<ProjectDetails> => {
-  // Placeholder implementation
-  throw new Error('Service not implemented');
-};
+import { ServiceRequest, ProjectRevision, ProjectCompletion, ProjectRating } from '@/types/modul8';
 
 export const getServiceProviderProjects = async (providerId: string): Promise<ServiceRequest[]> => {
   // Placeholder implementation
   return [];
+};
+
+export const getProjectRevisions = async (projectId: string): Promise<ProjectRevision[]> => {
+  // Placeholder implementation
+  return [];
+};
+
+export const getProjectCompletion = async (projectId: string): Promise<ProjectCompletion | null> => {
+  // Placeholder implementation
+  return null;
+};
+
+export const getProjectRating = async (projectId: string): Promise<ProjectRating | null> => {
+  // Placeholder implementation
+  return null;
+};
+
+export const createProjectRevision = async (data: Partial<ProjectRevision>): Promise<ProjectRevision> => {
+  // Placeholder implementation
+  throw new Error('Service not implemented');
 };
