@@ -1,81 +1,23 @@
 
-import React, { createContext, useContext, useCallback } from 'react';
-import { useSession } from '@/hooks/useSession';
-import { useProfile } from '@/hooks/useProfile';
-import { User } from '@/models/types';
-import { usePermissions } from '@/hooks/usePermissions';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
 
-interface UserContextType {
-  currentUser: User | null;
-  isLoading: boolean;
-  logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
-  recoverUserSession: () => Promise<boolean>;
-  isAdmin: () => boolean;
-  isOrganizer: (communityId?: string) => boolean;
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  profile_complete: boolean;
 }
 
-const UserContext = createContext<UserContextType>({
-  currentUser: null,
-  isLoading: true,
-  logout: async () => {},
-  refreshUser: async () => {},
-  recoverUserSession: async () => false,
-  isAdmin: () => false,
-  isOrganizer: () => false
-});
+interface UserContextType {
+  currentUser: UserProfile | null;
+  isLoading: boolean;
+  refreshUser: () => Promise<void>;
+}
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { session, isLoading: sessionLoading, logout, recoverUserSession } = useSession();
-  const { 
-    currentUser, 
-    isLoading: profileLoading, 
-    refreshUser, 
-    createProfileIfNotExists 
-  } = useProfile(session);
-
-  const { isAdmin, isOrganizer } = usePermissions(currentUser);
-
-  // Create profile if it doesn't exist yet
-  React.useEffect(() => {
-    if (session && !profileLoading && !currentUser) {
-      console.log("Session exists but no profile found, attempting to create");
-      createProfileIfNotExists();
-    }
-  }, [session, currentUser, profileLoading, createProfileIfNotExists]);
-
-  // Listen for role change events via localStorage
-  React.useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'should_refresh_user_role' && e.newValue === 'true' && currentUser) {
-        console.log("Role change detected via localStorage, refreshing user data");
-        refreshUser();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [currentUser, refreshUser]);
-
-  const isLoading = sessionLoading || profileLoading;
-
-  return (
-    <UserContext.Provider value={{ 
-      currentUser, 
-      isLoading,
-      logout,
-      refreshUser,
-      recoverUserSession,
-      isAdmin,
-      isOrganizer
-    }}>
-      {children}
-    </UserContext.Provider>
-  );
-};
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const useUser = () => {
   const context = useContext(UserContext);
@@ -83,4 +25,89 @@ export const useUser = () => {
     throw new Error('useUser must be used within a UserProvider');
   }
   return context;
+};
+
+interface UserProviderProps {
+  children: ReactNode;
+}
+
+export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchUserProfile = async (user: User) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+
+      return {
+        id: user.id,
+        name: profile?.first_name && profile?.last_name 
+          ? `${profile.first_name} ${profile.last_name}`.trim()
+          : profile?.email || user.email || '',
+        email: profile?.email || user.email || '',
+        role: 'USER', // Default role
+        profile_complete: profile?.profile_complete || false
+      };
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      return null;
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const userProfile = await fetchUserProfile(user);
+        setCurrentUser(userProfile);
+      } else {
+        setCurrentUser(null);
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+      setCurrentUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const userProfile = await fetchUserProfile(session.user);
+          setCurrentUser(userProfile);
+        } else if (event === 'SIGNED_OUT') {
+          setCurrentUser(null);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return (
+    <UserContext.Provider
+      value={{
+        currentUser,
+        isLoading,
+        refreshUser
+      }}
+    >
+      {children}
+    </UserContext.Provider>
+  );
 };
