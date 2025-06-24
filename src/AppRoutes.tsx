@@ -2,22 +2,22 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
-import Home from '@/pages/Index';
-import Login from '@/pages/Auth';
-import Dashboard from '@/pages/rel8t/Dashboard';
-import Discover from '@/pages/ProfileSearchPage';
-import Community from '@/components/community/NotFoundState';
-import Settings from '@/pages/Settings';
-import InviteCreate from '@/pages/InvitesManagementPage';
-import InviteAccept from '@/pages/InvitePage';
-import KnowledgeHub from '@/pages/knowledge/KnowledgeBase';
-import RMSDashboard from '@/pages/rel8t/Dashboard';
+import { Home } from '@/pages/Index';
+import { Login } from '@/pages/Auth';
+import { Dashboard } from '@/pages/rel8t/Dashboard';
+import { Discover } from '@/pages/ProfileSearchPage';
+import { Community } from '@/pages/community/NotFoundState';
+import { Settings } from '@/pages/Settings';
+import { InviteCreate } from '@/pages/InvitesManagementPage';
+import { InviteAccept } from '@/pages/InvitePage';
+import { KnowledgeHub } from '@/pages/knowledge/KnowledgeBase';
+import { RMSDashboard } from '@/pages/rel8t/Dashboard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminRoute from '@/components/auth/AdminRoute';
+import { AdminDashboard } from '@/pages/admin/AdminDashboard';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import ProfilePage from '@/pages/ProfilePage';
 import ProfileEditPage from '@/pages/ProfileEditPage';
-import ProfileSetupPage from '@/pages/ProfileSetupPage';
 
 const AppRoutes = () => {
   const { isLoading } = useUser();
@@ -50,12 +50,6 @@ const AppRoutes = () => {
       <Route path="/community/:id" element={
         <ProtectedRoute>
           <Community />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/profile/setup" element={
-        <ProtectedRoute>
-          <ProfileSetupPage />
         </ProtectedRoute>
       } />
       
@@ -98,9 +92,9 @@ const AppRoutes = () => {
       } />
 
       <Route path="/admin/*" element={
-        <ProtectedRoute>
+        <AdminRoute>
           <AdminDashboard />
-        </ProtectedRoute>
+        </AdminRoute>
       } />
     </Routes>
   );
