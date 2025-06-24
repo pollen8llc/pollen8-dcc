@@ -1,196 +1,144 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSession } from '@/hooks/useSession';
-import {
-  getServiceRequestWithNegotiationStatus,
-  subscribeToCrossPlatformUpdates,
-  handleProposalWithCrossPlatform,
-  createCrossPlatformNotification,
-  getCrossPlatformNotifications,
-  markNotificationAsRead,
-  NegotiationStatus,
-  ActivityLogEntry,
-  CrossPlatformNotification
-} from '@/services/crossPlatformService';
-import { ServiceRequest } from '@/types/modul8';
-import { toast } from '@/hooks/use-toast';
-
-interface UseCrossPlatformNegotiationReturn {
-  serviceRequest: ServiceRequest | null;
-  negotiationStatus: NegotiationStatus | null;
-  activityLog: ActivityLogEntry[];
-  notifications: CrossPlatformNotification[];
-  loading: boolean;
-  error: string | null;
-  
-  // Actions
-  refreshData: () => Promise<void>;
-  handleProposal: (action: 'submit' | 'accept' | 'decline' | 'counter', details?: any) => Promise<void>;
-  sendNotification: (recipientId: string, title: string, message: string, platform: 'modul8' | 'labr8') => Promise<void>;
-  markAsRead: (notificationId: string) => Promise<void>;
+interface NegotiationStatus {
+  id: string;
+  request_id: string;
+  current_status: string;
+  previous_status?: string;
+  updated_at: string;
+  updated_by: string;
 }
 
-export const useCrossPlatformNegotiation = (
-  serviceRequestId: string
-): UseCrossPlatformNegotiationReturn => {
-  const { session } = useSession();
-  const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
+interface ActivityLog {
+  id: string;
+  request_id: string;
+  activity_type: string;
+  description?: string;
+  created_at: string;
+  created_by: string;
+}
+
+interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
+export const useCrossPlatformNegotiation = (requestId: string) => {
   const [negotiationStatus, setNegotiationStatus] = useState<NegotiationStatus | null>(null);
-  const [activityLog, setActivityLog] = useState<ActivityLogEntry[]>([]);
-  const [notifications, setNotifications] = useState<CrossPlatformNotification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const refreshData = useCallback(async () => {
-    if (!serviceRequestId || !session?.user?.id) return;
-
+  const refreshData = async () => {
+    if (!requestId) return;
+    
+    setIsLoading(true);
     try {
-      setLoading(true);
-      setError(null);
+      // Fetch negotiation status
+      const { data: statusData } = await supabase
+        .from('negotiation_status')
+        .select('*')
+        .eq('request_id', requestId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (statusData) {
+        setNegotiationStatus(statusData);
+      }
 
-      const [requestData, userNotifications] = await Promise.all([
-        getServiceRequestWithNegotiationStatus(serviceRequestId),
-        getCrossPlatformNotifications(session.user.id)
-      ]);
+      // Fetch activity log
+      const { data: activityData } = await supabase
+        .from('activity_log')
+        .select('*')
+        .eq('request_id', requestId)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      
+      if (activityData) {
+        setActivityLog(activityData);
+      }
 
-      setServiceRequest(requestData.serviceRequest);
-      setNegotiationStatus(requestData.negotiationStatus);
-      setActivityLog(requestData.activityLog);
-      setNotifications(userNotifications.filter(n => n.service_request_id === serviceRequestId));
-    } catch (err) {
-      console.error('Error loading cross-platform data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load data');
-      toast({
-        title: "Error",
-        description: "Failed to load negotiation data",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [serviceRequestId, session?.user?.id]);
-
-  const handleProposal = useCallback(async (
-    action: 'submit' | 'accept' | 'decline' | 'counter',
-    details?: any
-  ) => {
-    if (!session?.user?.id || !serviceRequestId) return;
-
-    try {
-      await handleProposalWithCrossPlatform(action, {
-        service_request_id: serviceRequestId,
-        user_id: session.user.id,
-        details
-      });
-
-      toast({
-        title: "Success",
-        description: `Proposal ${action} completed successfully`,
-      });
-
-      await refreshData();
-    } catch (err) {
-      console.error(`Error handling proposal ${action}:`, err);
-      toast({
-        title: "Error",
-        description: `Failed to ${action} proposal`,
-        variant: "destructive"
-      });
-    }
-  }, [session?.user?.id, serviceRequestId, refreshData]);
-
-  const sendNotification = useCallback(async (
-    recipientId: string,
-    title: string,
-    message: string,
-    platform: 'modul8' | 'labr8'
-  ) => {
-    if (!session?.user?.id) return;
-
-    try {
-      await createCrossPlatformNotification({
-        recipient_id: recipientId,
-        sender_id: session.user.id,
-        service_request_id: serviceRequestId,
-        notification_type: 'message',
-        title,
-        message,
-        platform_context: platform
-      });
-
-      toast({
-        title: "Notification sent",
-        description: "Your message has been delivered"
-      });
-    } catch (err) {
-      console.error('Error sending notification:', err);
-      toast({
-        title: "Error",
-        description: "Failed to send notification",
-        variant: "destructive"
-      });
-    }
-  }, [session?.user?.id, serviceRequestId]);
-
-  const markAsRead = useCallback(async (notificationId: string) => {
-    try {
-      await markNotificationAsRead(notificationId);
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId 
-            ? { ...n, read_at: new Date().toISOString() }
-            : n
-        )
-      );
-    } catch (err) {
-      console.error('Error marking notification as read:', err);
-    }
-  }, []);
-
-  // Set up real-time subscriptions
-  useEffect(() => {
-    if (!serviceRequestId) return;
-
-    const unsubscribe = subscribeToCrossPlatformUpdates(serviceRequestId, {
-      onNegotiationStatusChange: (status) => {
-        setNegotiationStatus(status);
-        toast({
-          title: "Status Updated",
-          description: `Negotiation status changed to: ${status.current_status}`
-        });
-      },
-      onActivityLog: (activity) => {
-        setActivityLog(prev => [...prev, activity]);
-      },
-      onNotification: (notification) => {
-        if (notification.recipient_id === session?.user?.id) {
-          setNotifications(prev => [notification, ...prev]);
-          toast({
-            title: notification.title,
-            description: notification.message
-          });
+      // Fetch notifications for current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: notificationData } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('read', false)
+          .order('created_at', { ascending: false });
+        
+        if (notificationData) {
+          setNotifications(notificationData);
         }
       }
-    });
+    } catch (error) {
+      console.error('Error refreshing negotiation data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return unsubscribe;
-  }, [serviceRequestId, session?.user?.id]);
+  const handleProposal = async (proposalData: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('proposals')
+        .insert(proposalData)
+        .select()
+        .single();
 
-  // Initial data load
+      if (error) throw error;
+
+      // Log activity
+      await supabase
+        .from('activity_log')
+        .insert({
+          request_id: requestId,
+          activity_type: 'proposal_submitted',
+          description: 'New proposal submitted',
+          created_by: (await supabase.auth.getUser()).data.user?.id
+        });
+
+      await refreshData();
+      return data;
+    } catch (error) {
+      console.error('Error handling proposal:', error);
+      throw error;
+    }
+  };
+
+  const sendNotification = async (userId: string, title: string, message: string) => {
+    try {
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: userId,
+          title,
+          message,
+          read: false
+        });
+    } catch (error) {
+      console.error('Error sending notification:', error);
+    }
+  };
+
   useEffect(() => {
     refreshData();
-  }, [refreshData]);
+  }, [requestId]);
 
   return {
-    serviceRequest,
     negotiationStatus,
     activityLog,
     notifications,
-    loading,
-    error,
+    isLoading,
     refreshData,
     handleProposal,
-    sendNotification,
-    markAsRead
+    sendNotification
   };
 };
