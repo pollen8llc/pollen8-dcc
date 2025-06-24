@@ -18,7 +18,7 @@ const ProfileSetupPage: React.FC = () => {
     defaultValues: {
       firstName: currentUser?.name?.split(' ')[0] || '',
       lastName: currentUser?.name?.split(' ').slice(1).join(' ') || '',
-      avatarUrl: currentUser?.imageUrl || '',
+      avatarUrl: '',
       avatar: null,
       bio: currentUser?.bio || '',
       location: '',
@@ -31,11 +31,11 @@ const ProfileSetupPage: React.FC = () => {
   const handleComplete = async () => {
     try {
       await refreshUser();
-      navigate('/profile');
+      navigate(`/profile/${currentUser?.id}`);
     } catch (error) {
       console.error("Error refreshing user after profile setup:", error);
       // Still navigate even if refresh fails
-      navigate('/profile');
+      navigate(`/profile/${currentUser?.id}`);
     }
   };
 

@@ -7,16 +7,17 @@ import { Login } from '@/pages/login';
 import { Dashboard } from '@/pages/dashboard';
 import { Discover } from '@/pages/discover';
 import { Community } from '@/pages/community';
-import { Profile } from '@/pages/profile';
 import { Settings } from '@/pages/settings';
 import { InviteCreate } from '@/pages/invite-create';
 import { InviteAccept } from '@/pages/invite-accept';
 import { KnowledgeHub } from '@/pages/knowledge-hub';
 import { RMSDashboard } from '@/pages/rms/dashboard';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { AdminRoute } from '@/components/auth/AdminRoute';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import AdminRoute from '@/components/auth/AdminRoute';
 import { AdminDashboard } from '@/pages/admin/dashboard';
 import LoadingSpinner from '@/components/ui/loading-spinner';
+import ProfilePage from '@/pages/ProfilePage';
+import ProfileEditPage from '@/pages/ProfileEditPage';
 
 const AppRoutes = () => {
   const { isLoading } = useUser();
@@ -52,9 +53,15 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      <Route path="/profile" element={
+      <Route path="/profile/:userId" element={
         <ProtectedRoute>
-          <Profile />
+          <ProfilePage />
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/profile/edit" element={
+        <ProtectedRoute>
+          <ProfileEditPage />
         </ProtectedRoute>
       } />
       

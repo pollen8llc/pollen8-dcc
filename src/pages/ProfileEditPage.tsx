@@ -108,7 +108,7 @@ const ProfileEditPage: React.FC = () => {
             <UnifiedProfileForm 
               mode="edit" 
               existingData={profileData}
-              onComplete={() => navigate(`/profile`)}
+              onComplete={() => navigate(`/profile/${currentUser.id}`)}
             />
           </FormProvider>
         </div>

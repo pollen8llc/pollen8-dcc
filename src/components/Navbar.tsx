@@ -103,7 +103,7 @@ const Navbar = () => {
                         </div>
                       </div>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <DropdownMenuItem onClick={() => navigate(`/profile/${currentUser.id}`)}>
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </DropdownMenuItem>
@@ -184,7 +184,7 @@ const Navbar = () => {
                     variant="ghost"
                     className="w-full justify-start"
                     onClick={() => {
-                      navigate('/profile');
+                      navigate(`/profile/${currentUser.id}`);
                       setIsMobileMenuOpen(false);
                     }}
                   >
