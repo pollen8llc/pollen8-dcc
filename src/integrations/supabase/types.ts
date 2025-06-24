@@ -1037,6 +1037,110 @@ export type Database = {
           },
         ]
       }
+      modul8_proposal_card_responses: {
+        Row: {
+          card_id: string
+          created_at: string
+          id: string
+          responded_by: string
+          response_notes: string | null
+          response_type: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          id?: string
+          responded_by: string
+          response_notes?: string | null
+          response_type: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          id?: string
+          responded_by?: string
+          response_notes?: string | null
+          response_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_proposal_card_responses_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_proposal_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_proposal_cards: {
+        Row: {
+          asset_links: Json | null
+          card_number: number
+          created_at: string
+          id: string
+          is_locked: boolean
+          notes: string | null
+          request_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_to_card_id: string | null
+          scope_link: string | null
+          status: string
+          submitted_by: string
+          terms_link: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_links?: Json | null
+          card_number: number
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          notes?: string | null
+          request_id: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_to_card_id?: string | null
+          scope_link?: string | null
+          status?: string
+          submitted_by: string
+          terms_link?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_links?: Json | null
+          card_number?: number
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          notes?: string | null
+          request_id?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_to_card_id?: string | null
+          scope_link?: string | null
+          status?: string
+          submitted_by?: string
+          terms_link?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_proposal_cards_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_proposal_cards_response_to_card_id_fkey"
+            columns: ["response_to_card_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_proposal_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modul8_proposal_threads: {
         Row: {
           created_at: string
@@ -1173,6 +1277,44 @@ export type Database = {
           {
             foreignKeyName: "modul8_proposals_service_request_id_fkey"
             columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modul8_request_comments: {
+        Row: {
+          attachment_links: Json | null
+          content: string
+          created_at: string
+          id: string
+          request_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachment_links?: Json | null
+          content: string
+          created_at?: string
+          id?: string
+          request_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachment_links?: Json | null
+          content?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_request_comments_request_id_fkey"
+            columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "modul8_service_requests"
             referencedColumns: ["id"]

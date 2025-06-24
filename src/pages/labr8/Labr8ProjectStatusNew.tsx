@@ -6,31 +6,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { 
   ArrowLeft, 
   Building, 
   User, 
   Calendar,
-  DollarSign,
-  Trash2,
-  AlertTriangle
+  DollarSign
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProposalCardThread from '@/components/modul8/ProposalCardThread';
 import { ServiceRequest } from '@/types/modul8';
-import { getServiceRequestById, deleteServiceRequest, getUserOrganizer } from '@/services/modul8Service';
+import { getServiceRequestById, getUserServiceProvider } from '@/services/modul8Service';
 import { toast } from '@/hooks/use-toast';
 
-const Modul8RequestDetails = () => {
+const Labr8ProjectStatusNew = () => {
   const { requestId } = useParams<{ requestId: string }>();
   const navigate = useNavigate();
   const { session } = useSession();
 
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
-  const [organizerData, setOrganizerData] = useState(null);
+  const [serviceProvider, setServiceProvider] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -41,9 +37,9 @@ const Modul8RequestDetails = () => {
     
     setLoading(true);
     try {
-      const [requestData, organizer] = await Promise.all([
+      const [requestData, provider] = await Promise.all([
         getServiceRequestById(requestId),
-        getUserOrganizer(session.user.id)
+        getUserServiceProvider(session.user.id)
       ]);
 
       if (!requestData) {
@@ -52,17 +48,17 @@ const Modul8RequestDetails = () => {
           description: "The service request could not be found",
           variant: "destructive"
         });
-        navigate('/modul8/dashboard');
+        navigate('/labr8/dashboard');
         return;
       }
 
-      if (!organizer) {
-        navigate('/modul8/setup/organizer');
+      if (!provider) {
+        navigate('/labr8/setup');
         return;
       }
 
       setServiceRequest(requestData);
-      setOrganizerData(organizer);
+      setServiceProvider(provider);
     } catch (error) {
       console.error('Error loading request:', error);
       toast({
@@ -70,32 +66,9 @@ const Modul8RequestDetails = () => {
         description: "Failed to load request details",
         variant: "destructive"
       });
-      navigate('/modul8/dashboard');
+      navigate('/labr8/dashboard');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDeleteRequest = async () => {
-    if (!requestId) return;
-    
-    setDeleting(true);
-    try {
-      await deleteServiceRequest(requestId);
-      toast({
-        title: "Request Deleted",
-        description: "The service request has been deleted successfully"
-      });
-      navigate('/modul8/dashboard');
-    } catch (error) {
-      console.error('Error deleting request:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete request",
-        variant: "destructive"
-      });
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -136,7 +109,7 @@ const Modul8RequestDetails = () => {
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
-            <Button onClick={() => navigate('/modul8/dashboard')}>
+            <Button onClick={() => navigate('/labr8/dashboard')}>
               Back to Dashboard
             </Button>
           </div>
@@ -155,7 +128,7 @@ const Modul8RequestDetails = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/modul8/dashboard')}
+            onClick={() => navigate('/labr8/dashboard')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -168,41 +141,15 @@ const Modul8RequestDetails = () => {
               <Badge className={`${getStatusColor(serviceRequest.status)} border font-medium`}>
                 {serviceRequest.status.replace('_', ' ').toUpperCase()}
               </Badge>
+              <Badge className="bg-blue-100 text-blue-800 border border-blue-200">
+                <Building className="h-4 w-4 mr-1" />
+                Service Provider View
+              </Badge>
               <span className="text-muted-foreground text-sm">
                 Created {new Date(serviceRequest.created_at).toLocaleDateString()}
               </span>
             </div>
           </div>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Request
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  Delete Service Request?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the service request and all associated proposal cards and comments.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteRequest}
-                  disabled={deleting}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  {deleting ? "Deleting..." : "Delete Request"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -260,29 +207,27 @@ const Modul8RequestDetails = () => {
                   </Avatar>
                   <div className="flex-1">
                     <div className="text-sm font-medium">
-                      {serviceRequest.organizer?.organization_name || 'Your Organization'}
+                      {serviceRequest.organizer?.organization_name || 'Client'}
                     </div>
-                    <div className="text-xs text-muted-foreground">Client</div>
+                    <div className="text-xs text-muted-foreground">Organizer</div>
                   </div>
                 </div>
 
                 {/* Service Provider */}
-                {serviceRequest.service_provider && (
-                  <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={serviceRequest.service_provider.logo_url} />
-                      <AvatarFallback>
-                        <Building className="h-5 w-5" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">
-                        {serviceRequest.service_provider.business_name}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Service Provider</div>
+                <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={serviceProvider?.logo_url} />
+                    <AvatarFallback>
+                      <Building className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">
+                      {serviceProvider?.business_name || 'Your Business'}
                     </div>
+                    <div className="text-xs text-muted-foreground">Service Provider (You)</div>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -291,7 +236,7 @@ const Modul8RequestDetails = () => {
           <div className="lg:col-span-3">
             <ProposalCardThread 
               requestId={serviceRequest.id}
-              isServiceProvider={false}
+              isServiceProvider={true}
             />
           </div>
         </div>
@@ -300,4 +245,4 @@ const Modul8RequestDetails = () => {
   );
 };
 
-export default Modul8RequestDetails;
+export default Labr8ProjectStatusNew;
