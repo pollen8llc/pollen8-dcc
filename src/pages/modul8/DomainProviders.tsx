@@ -28,18 +28,16 @@ const DomainProviders = () => {
 
   const domainName = domainId ? DOMAIN_PAGES_MAP[parseInt(domainId)] : 'Unknown Domain';
 
-  const { data: initialProviders, isLoading, refetch } = useQuery(
-    ['domainProviders', domainId],
-    () => getServiceProvidersByDomain(parseInt(domainId!)),
-    {
-      enabled: !!domainId,
-      retry: false
-    }
-  );
+  const { data: initialProviders, isLoading, refetch } = useQuery({
+    queryKey: ['domainProviders', domainId],
+    queryFn: () => getServiceProvidersByDomain(parseInt(domainId!)),
+    enabled: !!domainId,
+    retry: false
+  });
 
   useEffect(() => {
     if (initialProviders) {
-      setProviders(initialProviders);
+      setProviders(initialProviders as ServiceProvider[]);
       setLoading(false);
     }
   }, [initialProviders]);
@@ -74,12 +72,12 @@ const DomainProviders = () => {
 
       // Create new service request
       const requestData = {
-        title: `Service Request for ${providers.find(p => p.id === providerId)?.business_name}`,
+        title: `Service Request for ${providers?.find(p => p.id === providerId)?.business_name}`,
         description: "Initial engagement request",
         organizer_id: userOrganizer.id,
         service_provider_id: providerId,
         status: 'pending' as const,
-        domain_page: parseInt(domainId)
+        domain_page: parseInt(domainId!)
       };
 
       await createServiceRequest(requestData);
