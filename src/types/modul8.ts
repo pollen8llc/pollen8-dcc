@@ -1,4 +1,3 @@
-
 export interface ServiceRequest {
   id: string;
   title: string;
@@ -178,22 +177,24 @@ export interface ProjectComment {
 }
 
 export interface CreateOrganizerData {
+  user_id: string;
   organization_name: string;
-  description: string;
+  description?: string;
   logo_url?: string;
   focus_areas: string[];
 }
 
 export interface CreateServiceProviderData {
+  user_id: string;
   business_name: string;
-  description: string;
+  description?: string;
   logo_url?: string;
   tagline?: string;
-  domain_specializations: number[];
+  domain_specializations?: number[];
   services: any[];
-  pricing_range: any;
-  portfolio_links: string[];
-  tags: string[];
+  pricing_range?: any;
+  portfolio_links?: string[];
+  tags?: string[];
 }
 
 export const DOMAIN_PAGES = [
