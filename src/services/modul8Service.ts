@@ -1,5 +1,5 @@
 
-import { ServiceRequest, ServiceProvider, Organizer, Proposal } from '@/types/modul8';
+import { ServiceRequest, ServiceProvider, Organizer, Proposal, CreateOrganizerData, CreateServiceProviderData } from '@/types/modul8';
 
 export const createServiceRequest = async (data: Partial<ServiceRequest>): Promise<ServiceRequest> => {
   // Placeholder implementation
@@ -71,7 +71,7 @@ export const createProposal = async (data: Partial<Proposal>): Promise<Proposal>
   throw new Error('Service not implemented');
 };
 
-export const createServiceProvider = async (data: any): Promise<any> => {
+export const createServiceProvider = async (data: CreateServiceProviderData): Promise<ServiceProvider> => {
   // Placeholder implementation
   throw new Error('Service not implemented');
 };
@@ -89,4 +89,9 @@ export const getServiceProvidersByDomain = async (domainId: number): Promise<Ser
 export const getServiceProviderById = async (id: string): Promise<ServiceProvider | null> => {
   // Placeholder implementation
   return null;
+};
+
+export const createOrganizer = async (data: CreateOrganizerData): Promise<Organizer> => {
+  // Placeholder implementation
+  throw new Error('Service not implemented');
 };

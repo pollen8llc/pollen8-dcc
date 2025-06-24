@@ -9,15 +9,33 @@ import { Star, MapPin, ExternalLink } from 'lucide-react';
 interface EnhancedProviderCardProps {
   provider: ServiceProvider;
   onSelect?: (provider: ServiceProvider) => void;
+  onEngage?: (providerId: string) => Promise<void>;
+  onViewProfile?: (providerId: string) => void;
+  hasExistingRequest?: boolean;
 }
 
 const EnhancedProviderCard: React.FC<EnhancedProviderCardProps> = ({ 
   provider, 
-  onSelect 
+  onSelect,
+  onEngage,
+  onViewProfile,
+  hasExistingRequest
 }) => {
   const handleSelect = () => {
     if (onSelect) {
       onSelect(provider);
+    }
+  };
+
+  const handleEngage = async () => {
+    if (onEngage) {
+      await onEngage(provider.id);
+    }
+  };
+
+  const handleViewProfile = () => {
+    if (onViewProfile) {
+      onViewProfile(provider.id);
     }
   };
 
@@ -75,10 +93,22 @@ const EnhancedProviderCard: React.FC<EnhancedProviderCardProps> = ({
             Remote
           </div>
           
-          <Button size="sm" onClick={handleSelect}>
-            View Profile
-            <ExternalLink className="h-4 w-4 ml-1" />
-          </Button>
+          <div className="flex gap-2">
+            {onEngage && (
+              <Button 
+                size="sm" 
+                onClick={handleEngage}
+                disabled={hasExistingRequest}
+              >
+                {hasExistingRequest ? 'Already Engaged' : 'Engage'}
+              </Button>
+            )}
+            
+            <Button size="sm" variant="outline" onClick={handleViewProfile || handleSelect}>
+              View Profile
+              <ExternalLink className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -11,13 +11,15 @@ interface ServiceRequestCardProps {
   onView?: (request: ServiceRequest) => void;
   onEdit?: (request: ServiceRequest) => void;
   onDelete?: (request: ServiceRequest) => void;
+  onUpdate?: () => Promise<void>;
 }
 
 const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
   request,
   onView,
   onEdit,
-  onDelete
+  onDelete,
+  onUpdate
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -25,7 +27,16 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
       case 'in_progress': return 'bg-blue-100 text-blue-800';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'negotiating': return 'bg-purple-100 text-purple-800';
+      case 'agreed': return 'bg-green-100 text-green-800';
+      case 'declined': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (onUpdate) {
+      await onUpdate();
     }
   };
 
@@ -81,6 +92,11 @@ const ServiceRequestCard: React.FC<ServiceRequestCardProps> = ({
           {onEdit && (
             <Button size="sm" variant="outline" onClick={() => onEdit(request)}>
               Edit
+            </Button>
+          )}
+          {onUpdate && (
+            <Button size="sm" variant="outline" onClick={handleUpdate}>
+              Update
             </Button>
           )}
           {onDelete && (

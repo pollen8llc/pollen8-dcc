@@ -12,7 +12,7 @@ export interface UserProfile {
   name: string; // Computed property
   avatar_url?: string;
   role: UserRole;
-  bio?: string;
+  bio: string; // Make required to match User type
   location?: string;
   interests?: string[];
   imageUrl: string; // Make this required to match User type
@@ -98,7 +98,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             name: fullName,
             avatar_url: profile.avatar_url,
             role: userRole,
-            bio: profile.bio,
+            bio: profile.bio || '', // Ensure bio is always a string
             location: profile.location,
             interests: profile.interests || [],
             imageUrl: profile.avatar_url || defaultImageUrl,

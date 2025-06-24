@@ -3,7 +3,7 @@ export interface ServiceRequest {
   id: string;
   title: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'negotiating' | 'agreed' | 'declined';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'negotiating' | 'agreed' | 'declined' | 'assigned' | 'pending_review';
   requester_id: string;
   provider_id?: string;
   service_provider_id?: string;
@@ -115,6 +115,7 @@ export interface ProjectCompletion {
   service_request_id: string;
   status: 'submitted' | 'confirmed';
   completion_notes?: string;
+  deliverables?: string[];
   submitted_at: string;
   confirmed_at?: string;
 }
@@ -173,12 +174,31 @@ export interface ProjectComment {
   updated_at: string;
 }
 
+export interface CreateOrganizerData {
+  organization_name: string;
+  description: string;
+  logo_url?: string;
+  focus_areas: string[];
+}
+
+export interface CreateServiceProviderData {
+  business_name: string;
+  description: string;
+  logo_url?: string;
+  tagline?: string;
+  domain_specializations: number[];
+  services: any[];
+  pricing_range: any;
+  portfolio_links: string[];
+  tags: string[];
+}
+
 export const DOMAIN_PAGES = [
-  { id: 1, name: 'Web Development' },
-  { id: 2, name: 'Mobile App Development' },
-  { id: 3, name: 'Design & Branding' },
-  { id: 4, name: 'Digital Marketing' },
-  { id: 5, name: 'Content Creation' }
+  { id: 1, name: 'Web Development', title: 'Web Development', description: 'Custom websites and web applications' },
+  { id: 2, name: 'Mobile App Development', title: 'Mobile App Development', description: 'iOS and Android mobile applications' },
+  { id: 3, name: 'Design & Branding', title: 'Design & Branding', description: 'Visual design and brand identity' },
+  { id: 4, name: 'Digital Marketing', title: 'Digital Marketing', description: 'Online marketing and social media' },
+  { id: 5, name: 'Content Creation', title: 'Content Creation', description: 'Writing, video, and multimedia content' }
 ];
 
 export const DOMAIN_PAGES_MAP = {
