@@ -226,7 +226,12 @@ export const getProviderServiceRequests = async (serviceProviderId: string): Pro
   }
 
   console.log('Provider service requests found:', data?.length || 0);
-  return data || [];
+  
+  return (data || []).map(request => ({
+    ...request,
+    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+    milestones: request.milestones as string[]
+  })) as ServiceRequest[];
 };
 
 export const getAvailableServiceRequestsForProvider = async (providerId: string): Promise<ServiceRequest[]> => {
