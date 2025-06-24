@@ -103,8 +103,11 @@ export interface ProjectDetails {
 export interface ProjectRevision {
   id: string;
   service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
   revision_type: string;
   description: string;
+  attachments?: any[];
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;

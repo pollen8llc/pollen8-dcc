@@ -18,6 +18,7 @@ interface ServiceRequestActionsProps {
   onNegotiate?: (requestId: string) => void;
   onMessage?: (requestId: string) => void;
   onEdit?: (requestId: string) => void;
+  onUpdate?: () => void;
   isServiceProvider?: boolean;
   isOrganizer?: boolean;
 }

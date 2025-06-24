@@ -16,8 +16,8 @@ export interface UserProfile {
   location?: string;
   interests?: string[];
   imageUrl: string; // Make this required to match User type
-  communities?: string[];
-  managedCommunities?: string[];
+  communities: string[]; // Make required to match User type
+  managedCommunities: string[]; // Make required to match User type
   profile_complete?: boolean;
   created_at: string;
   updated_at: string;
