@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ProposalCard, 
@@ -19,7 +18,8 @@ export const getProposalCards = async (requestId: string): Promise<ProposalCard[
   if (error) throw error;
   return (data || []).map(card => ({
     ...card,
-    asset_links: Array.isArray(card.asset_links) ? card.asset_links : []
+    asset_links: Array.isArray(card.asset_links) ? card.asset_links : [],
+    negotiated_budget_range: card.negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined
   })) as ProposalCard[];
 };
 
@@ -50,7 +50,8 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
   if (error) throw error;
   return {
     ...card,
-    asset_links: Array.isArray(card.asset_links) ? card.asset_links : []
+    asset_links: Array.isArray(card.asset_links) ? card.asset_links : [],
+    negotiated_budget_range: card.negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined
   } as ProposalCard;
 };
 
@@ -72,7 +73,6 @@ export const createCounterProposal = async (
   originalCardId: string, 
   counterData: Omit<CreateProposalCardData, 'response_to_card_id'>
 ): Promise<ProposalCard> => {
-  // First get the original card to extract data
   const { data: originalCard, error: fetchError } = await supabase
     .from('modul8_proposal_cards')
     .select('*')
@@ -81,7 +81,6 @@ export const createCounterProposal = async (
 
   if (fetchError) throw fetchError;
 
-  // Create counter proposal
   const counterProposal = await createProposalCard({
     ...counterData,
     request_id: originalCard.request_id,
@@ -99,7 +98,7 @@ export const cancelProposalCard = async (cardId: string): Promise<void> => {
       updated_at: new Date().toISOString()
     })
     .eq('id', cardId)
-    .eq('is_locked', false); // Only allow cancellation of unlocked cards
+    .eq('is_locked', false);
 
   if (error) throw error;
 };

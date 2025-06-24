@@ -10,11 +10,36 @@ export interface ProposalCard {
   scope_link?: string;
   terms_link?: string;
   asset_links: string[];
+  negotiated_title?: string;
+  negotiated_description?: string;
+  negotiated_budget_range?: {
+    min?: number;
+    max?: number;
+    currency: string;
+  };
+  negotiated_timeline?: string;
   is_locked: boolean;
   created_at: string;
   updated_at: string;
   responded_at?: string;
   responded_by?: string;
+}
+
+export interface CreateProposalCardData {
+  request_id: string;
+  notes?: string;
+  scope_link?: string;
+  terms_link?: string;
+  asset_links?: string[];
+  response_to_card_id?: string;
+  negotiated_title?: string;
+  negotiated_description?: string;
+  negotiated_budget_range?: {
+    min?: number;
+    max?: number;
+    currency: string;
+  };
+  negotiated_timeline?: string;
 }
 
 export interface ProposalCardResponse {
@@ -34,15 +59,6 @@ export interface RequestComment {
   attachment_links: string[];
   created_at: string;
   updated_at: string;
-}
-
-export interface CreateProposalCardData {
-  request_id: string;
-  response_to_card_id?: string;
-  notes?: string;
-  scope_link?: string;
-  terms_link?: string;
-  asset_links?: string[];
 }
 
 export interface CreateProposalResponseData {

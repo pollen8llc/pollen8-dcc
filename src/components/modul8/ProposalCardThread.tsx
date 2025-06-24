@@ -32,6 +32,8 @@ import {
   createRequestComment
 } from '@/services/proposalCardService';
 import { ProposalCard, RequestComment } from '@/types/proposalCards';
+import { getServiceRequestById } from '@/services/modul8Service';
+import { ServiceRequest } from '@/types/modul8';
 
 interface ProposalCardThreadProps {
   requestId: string;
@@ -45,6 +47,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   const { session } = useSession();
   const [proposalCards, setProposalCards] = useState<ProposalCard[]>([]);
   const [comments, setComments] = useState<RequestComment[]>([]);
+  const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   
@@ -55,6 +58,13 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   const [proposalTerms, setProposalTerms] = useState('');
   const [newComment, setNewComment] = useState('');
   
+  // Negotiated request details
+  const [negotiatedTitle, setNegotiatedTitle] = useState('');
+  const [negotiatedDescription, setNegotiatedDescription] = useState('');
+  const [negotiatedBudgetMin, setNegotiatedBudgetMin] = useState<number | ''>('');
+  const [negotiatedBudgetMax, setNegotiatedBudgetMax] = useState<number | ''>('');
+  const [negotiatedTimeline, setNegotiatedTimeline] = useState('');
+  
   useEffect(() => {
     loadThreadData();
   }, [requestId]);
@@ -64,13 +74,24 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
     
     try {
       setLoading(true);
-      const [cardsData, commentsData] = await Promise.all([
+      const [cardsData, commentsData, requestData] = await Promise.all([
         getProposalCards(requestId),
-        getRequestComments(requestId)
+        getRequestComments(requestId),
+        getServiceRequestById(requestId)
       ]);
       
       setProposalCards(cardsData);
       setComments(commentsData);
+      setServiceRequest(requestData);
+      
+      // Initialize negotiated fields with current request data
+      if (requestData) {
+        setNegotiatedTitle(requestData.title || '');
+        setNegotiatedDescription(requestData.description || '');
+        setNegotiatedBudgetMin(requestData.budget_range?.min || '');
+        setNegotiatedBudgetMax(requestData.budget_range?.max || '');
+        setNegotiatedTimeline(requestData.timeline || '');
+      }
     } catch (error) {
       console.error('Error loading thread data:', error);
       toast({
@@ -84,10 +105,10 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   };
 
   const handleSubmitProposal = async () => {
-    if (!proposalNotes.trim()) {
+    if (!proposalNotes.trim() || !negotiatedTitle.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please provide proposal notes",
+        description: "Please provide proposal notes and project title",
         variant: "destructive"
       });
       return;
@@ -100,7 +121,15 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         notes: proposalNotes,
         scope_link: proposalScope || undefined,
         terms_link: proposalTerms || undefined,
-        asset_links: []
+        asset_links: [],
+        negotiated_title: negotiatedTitle,
+        negotiated_description: negotiatedDescription,
+        negotiated_budget_range: {
+          min: negotiatedBudgetMin ? Number(negotiatedBudgetMin) : undefined,
+          max: negotiatedBudgetMax ? Number(negotiatedBudgetMax) : undefined,
+          currency: 'USD'
+        },
+        negotiated_timeline: negotiatedTimeline
       });
 
       toast({
@@ -131,7 +160,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       setSubmitting(true);
       
       if (responseType === 'counter') {
-        // For counter proposals, we'll create a new card
         setShowProposalForm(true);
         return;
       }
@@ -192,12 +220,12 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
 
   const getCardStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'accepted': return 'bg-green-50 text-green-700 border-green-200';
-      case 'rejected': return 'bg-red-50 text-red-700 border-red-200';
-      case 'countered': return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'cancelled': return 'bg-gray-50 text-gray-700 border-gray-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+      case 'pending': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'accepted': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'countered': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+      case 'cancelled': return 'bg-muted/20 text-muted-foreground border-muted/30';
+      default: return 'bg-muted/20 text-muted-foreground border-muted/30';
     }
   };
 
@@ -214,7 +242,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00eada]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -222,29 +250,29 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   return (
     <div className="space-y-6">
       {/* Proposal Cards Timeline */}
-      <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+      <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-black text-gray-900 flex items-center gap-2">
-            <FileText className="h-5 w-5 text-[#00eada]" />
+          <CardTitle className="text-xl font-black text-foreground flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
             Proposal Timeline
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {proposalCards.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
               <p className="text-lg font-medium">No proposals yet</p>
               <p className="text-sm">The proposal timeline will appear here as cards are created.</p>
             </div>
           ) : (
             <div className="space-y-4">
               {proposalCards.map((card, index) => (
-                <Card key={card.id} className="border-l-4 border-l-[#00eada] bg-gradient-to-r from-white to-gray-50/30">
+                <Card key={card.id} className="border-l-4 border-l-primary bg-card/80">
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
-                          <Badge className="bg-[#00eada]/10 text-[#00eada] font-bold px-3 py-1">
+                          <Badge className="bg-primary/10 text-primary font-bold px-3 py-1">
                             Card #{card.card_number}
                           </Badge>
                           <Badge className={`${getCardStatusColor(card.status)} font-semibold border px-3 py-1 flex items-center gap-1`}>
@@ -252,19 +280,59 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                             {card.status.toUpperCase()}
                           </Badge>
                           {card.response_to_card_id && (
-                            <Badge variant="outline" className="text-orange-600 border-orange-200">
+                            <Badge variant="outline" className="text-orange-400 border-orange-500/30">
                               Counter Proposal
                             </Badge>
                           )}
                         </div>
                         
-                        {card.notes && (
-                          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                            <p className="text-sm text-gray-700 leading-relaxed">{card.notes}</p>
+                        {/* Show negotiated request details if they exist */}
+                        {(card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline) && (
+                          <div className="bg-muted/20 rounded-lg p-4 mb-4 border border-border/30">
+                            <h4 className="text-sm font-semibold text-foreground mb-3">Proposed Project Details:</h4>
+                            {card.negotiated_title && (
+                              <div className="mb-2">
+                                <span className="text-xs font-medium text-muted-foreground">Title: </span>
+                                <span className="text-sm text-foreground">{card.negotiated_title}</span>
+                              </div>
+                            )}
+                            {card.negotiated_description && (
+                              <div className="mb-2">
+                                <span className="text-xs font-medium text-muted-foreground">Description: </span>
+                                <span className="text-sm text-foreground">{card.negotiated_description}</span>
+                              </div>
+                            )}
+                            {card.negotiated_budget_range && (
+                              <div className="mb-2">
+                                <span className="text-xs font-medium text-muted-foreground">Budget: </span>
+                                <span className="text-sm text-foreground">
+                                  {card.negotiated_budget_range.min && card.negotiated_budget_range.max 
+                                    ? `$${card.negotiated_budget_range.min.toLocaleString()} - $${card.negotiated_budget_range.max.toLocaleString()}`
+                                    : card.negotiated_budget_range.min 
+                                    ? `From $${card.negotiated_budget_range.min.toLocaleString()}`
+                                    : card.negotiated_budget_range.max 
+                                    ? `Up to $${card.negotiated_budget_range.max.toLocaleString()}`
+                                    : 'Budget TBD'
+                                  }
+                                </span>
+                              </div>
+                            )}
+                            {card.negotiated_timeline && (
+                              <div>
+                                <span className="text-xs font-medium text-muted-foreground">Timeline: </span>
+                                <span className="text-sm text-foreground">{card.negotiated_timeline}</span>
+                              </div>
+                            )}
                           </div>
                         )}
                         
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                        {card.notes && (
+                          <div className="bg-muted/10 rounded-lg p-4 mb-4 border border-border/20">
+                            <p className="text-sm text-foreground leading-relaxed">{card.notes}</p>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <User className="h-4 w-4" />
                             {card.submitted_by === session?.user?.id ? 'You' : 'Other Party'}
@@ -272,14 +340,14 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                           <span>{new Date(card.created_at).toLocaleDateString()}</span>
                           {card.scope_link && (
                             <a href={card.scope_link} target="_blank" rel="noopener noreferrer" 
-                               className="text-[#00eada] hover:underline flex items-center gap-1">
+                               className="text-primary hover:underline flex items-center gap-1">
                               <Paperclip className="h-4 w-4" />
                               Scope
                             </a>
                           )}
                           {card.terms_link && (
                             <a href={card.terms_link} target="_blank" rel="noopener noreferrer" 
-                               className="text-[#00eada] hover:underline flex items-center gap-1">
+                               className="text-primary hover:underline flex items-center gap-1">
                               <FileText className="h-4 w-4" />
                               Terms
                             </a>
@@ -290,7 +358,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                     
                     {/* Response Actions */}
                     {card.status === 'pending' && card.submitted_by !== session?.user?.id && !card.is_locked && (
-                      <div className="flex gap-2 pt-4 border-t border-gray-100">
+                      <div className="flex gap-2 pt-4 border-t border-border/30">
                         <Button
                           onClick={() => handleRespondToCard(card.id, 'accept')}
                           size="sm"
@@ -304,7 +372,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                           onClick={() => handleRespondToCard(card.id, 'reject')}
                           size="sm"
                           variant="outline"
-                          className="border-red-200 text-red-600 hover:bg-red-50"
+                          className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                           disabled={submitting}
                         >
                           <XCircle className="h-4 w-4 mr-1" />
@@ -331,66 +399,150 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
 
       {/* New Proposal Form */}
       {(showProposalForm || (isServiceProvider && proposalCards.length === 1)) && (
-        <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+        <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-xl font-black text-gray-900 flex items-center gap-2">
-              <Send className="h-5 w-5 text-[#00eada]" />
+            <CardTitle className="text-xl font-black text-foreground flex items-center gap-2">
+              <Send className="h-5 w-5 text-primary" />
               {proposalCards.length === 1 ? 'Submit Your Proposal' : 'Submit Counter Proposal'}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="proposal-notes" className="text-sm font-semibold text-gray-700">
-                Proposal Details *
-              </Label>
-              <Textarea
-                id="proposal-notes"
-                placeholder="Describe your proposal, approach, and key details..."
-                value={proposalNotes}
-                onChange={(e) => setProposalNotes(e.target.value)}
-                className="mt-2 min-h-[120px]"
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="space-y-6">
+            {/* Project Details Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground border-b border-border/30 pb-2">
+                Project Details
+              </h3>
+              
               <div>
-                <Label htmlFor="scope-link" className="text-sm font-semibold text-gray-700">
-                  Scope Document (Optional)
+                <Label htmlFor="negotiated-title" className="text-sm font-semibold text-foreground">
+                  Project Title *
                 </Label>
                 <Input
-                  id="scope-link"
-                  type="url"
-                  placeholder="https://docs.google.com/document/..."
-                  value={proposalScope}
-                  onChange={(e) => setProposalScope(e.target.value)}
-                  className="mt-2"
+                  id="negotiated-title"
+                  value={negotiatedTitle}
+                  onChange={(e) => setNegotiatedTitle(e.target.value)}
+                  className="mt-2 bg-background border-border"
                 />
               </div>
               
               <div>
-                <Label htmlFor="terms-link" className="text-sm font-semibold text-gray-700">
-                  Terms Document (Optional)
+                <Label htmlFor="negotiated-description" className="text-sm font-semibold text-foreground">
+                  Project Description
+                </Label>
+                <Textarea
+                  id="negotiated-description"
+                  placeholder="Describe the project requirements and scope..."
+                  value={negotiatedDescription}
+                  onChange={(e) => setNegotiatedDescription(e.target.value)}
+                  className="mt-2 min-h-[100px] bg-background border-border"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="budget-min" className="text-sm font-semibold text-foreground">
+                    Budget Min ($)
+                  </Label>
+                  <Input
+                    id="budget-min"
+                    type="number"
+                    placeholder="5000"
+                    value={negotiatedBudgetMin}
+                    onChange={(e) => setNegotiatedBudgetMin(e.target.value ? Number(e.target.value) : '')}
+                    className="mt-2 bg-background border-border"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="budget-max" className="text-sm font-semibold text-foreground">
+                    Budget Max ($)
+                  </Label>
+                  <Input
+                    id="budget-max"
+                    type="number"
+                    placeholder="10000"
+                    value={negotiatedBudgetMax}
+                    onChange={(e) => setNegotiatedBudgetMax(e.target.value ? Number(e.target.value) : '')}
+                    className="mt-2 bg-background border-border"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="negotiated-timeline" className="text-sm font-semibold text-foreground">
+                  Timeline
                 </Label>
                 <Input
-                  id="terms-link"
-                  type="url"
-                  placeholder="https://docs.google.com/document/..."
-                  value={proposalTerms}
-                  onChange={(e) => setProposalTerms(e.target.value)}
-                  className="mt-2"
+                  id="negotiated-timeline"
+                  placeholder="e.g., 2-3 weeks, 1 month"
+                  value={negotiatedTimeline}
+                  onChange={(e) => setNegotiatedTimeline(e.target.value)}
+                  className="mt-2 bg-background border-border"
                 />
+              </div>
+            </div>
+
+            <Separator className="bg-border/30" />
+
+            {/* Proposal Details Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground border-b border-border/30 pb-2">
+                Proposal Details
+              </h3>
+              
+              <div>
+                <Label htmlFor="proposal-notes" className="text-sm font-semibold text-foreground">
+                  Proposal Notes *
+                </Label>
+                <Textarea
+                  id="proposal-notes"
+                  placeholder="Describe your approach, methodology, and key points..."
+                  value={proposalNotes}
+                  onChange={(e) => setProposalNotes(e.target.value)}
+                  className="mt-2 min-h-[120px] bg-background border-border"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="scope-link" className="text-sm font-semibold text-foreground">
+                    Scope Document (Optional)
+                  </Label>
+                  <Input
+                    id="scope-link"
+                    type="url"
+                    placeholder="https://docs.google.com/document/..."
+                    value={proposalScope}
+                    onChange={(e) => setProposalScope(e.target.value)}
+                    className="mt-2 bg-background border-border"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="terms-link" className="text-sm font-semibold text-foreground">
+                    Terms Document (Optional)
+                  </Label>
+                  <Input
+                    id="terms-link"
+                    type="url"
+                    placeholder="https://docs.google.com/document/..."
+                    value={proposalTerms}
+                    onChange={(e) => setProposalTerms(e.target.value)}
+                    className="mt-2 bg-background border-border"
+                  />
+                </div>
               </div>
             </div>
             
             <div className="flex gap-3 pt-4">
               <Button
                 onClick={handleSubmitProposal}
-                disabled={submitting || !proposalNotes.trim()}
-                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-semibold"
+                disabled={submitting || !proposalNotes.trim() || !negotiatedTitle.trim()}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
               >
                 {submitting ? (
                   <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black" />
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground" />
                     Submitting...
                   </div>
                 ) : (
@@ -404,6 +556,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                 onClick={() => setShowProposalForm(false)}
                 variant="outline"
                 disabled={submitting}
+                className="border-border hover:bg-muted/50"
               >
                 Cancel
               </Button>
@@ -417,7 +570,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         <div className="flex justify-center">
           <Button
             onClick={() => setShowProposalForm(true)}
-            className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-semibold"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
           >
             <Send className="h-4 w-4 mr-2" />
             Submit New Proposal
@@ -426,10 +579,10 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       )}
 
       {/* Comments Section */}
-      <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+      <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-black text-gray-900 flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-[#00eada]" />
+          <CardTitle className="text-xl font-black text-foreground flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
             Project Discussion
           </CardTitle>
         </CardHeader>
@@ -437,28 +590,28 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
           {/* Comments List */}
           <div className="space-y-4 max-h-96 overflow-y-auto">
             {comments.length === 0 ? (
-              <div className="text-center py-6 text-gray-500">
-                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+              <div className="text-center py-6 text-muted-foreground">
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
                 <p className="text-sm">No comments yet. Start the discussion!</p>
               </div>
             ) : (
               comments.map((comment) => (
-                <div key={comment.id} className="flex gap-3 p-4 bg-gray-50 rounded-lg">
+                <div key={comment.id} className="flex gap-3 p-4 bg-muted/10 rounded-lg border border-border/20">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-[#00eada]/20 text-[#00eada]">
+                    <AvatarFallback className="bg-primary/20 text-primary">
                       <User className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-semibold text-gray-900">
+                      <span className="text-sm font-semibold text-foreground">
                         {comment.user_id === session?.user?.id ? 'You' : 'Other Party'}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         {new Date(comment.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700 leading-relaxed">{comment.content}</p>
+                    <p className="text-sm text-foreground leading-relaxed">{comment.content}</p>
                   </div>
                 </div>
               ))
@@ -466,24 +619,24 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
           </div>
           
           {/* New Comment Form */}
-          <Separator />
+          <Separator className="bg-border/30" />
           <div className="space-y-3">
             <Textarea
               placeholder="Add a comment to the discussion..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="min-h-[80px]"
+              className="min-h-[80px] bg-background border-border"
             />
             <div className="flex justify-end">
               <Button
                 onClick={handleAddComment}
                 disabled={submitting || !newComment.trim()}
                 size="sm"
-                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-semibold"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
               >
                 {submitting ? (
                   <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-black" />
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary-foreground" />
                     Adding...
                   </div>
                 ) : (
