@@ -9,6 +9,12 @@ interface UserProfile {
   email: string;
   role: string;
   profile_complete: boolean;
+  imageUrl?: string;
+  bio?: string;
+  location?: string;
+  interests?: string[];
+  communities?: string[];
+  managedCommunities?: string[];
 }
 
 interface UserContextType {
@@ -55,7 +61,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           : profile?.email || user.email || '',
         email: profile?.email || user.email || '',
         role: 'USER', // Default role
-        profile_complete: profile?.profile_complete || false
+        profile_complete: profile?.profile_complete || false,
+        imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+        bio: profile?.bio || '',
+        location: profile?.location || '',
+        interests: profile?.interests || [],
+        communities: [],
+        managedCommunities: []
       };
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
