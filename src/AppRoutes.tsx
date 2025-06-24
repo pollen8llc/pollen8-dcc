@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -5,7 +6,6 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ServiceProviderProtectedRoute from "@/components/auth/ServiceProviderProtectedRoute";
 import NonServiceProviderRoute from "@/components/auth/NonServiceProviderRoute";
-import Rel8ProtectedRoute from "@/components/auth/Rel8ProtectedRoute";
 
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
@@ -357,11 +357,12 @@ const AppRoutes = () => {
           <Route path="/modul8/dashboard/request/:requestId" element={<Modul8RequestDetails />} />
           <Route path="/modul8/setup/organizer" element={<OrganizerSetup />} />
 
-          {/* Labr8 Routes */}
-          <Route path="/labr8" element={<ServiceProviderProtectedRoute><Labr8Dashboard /></ServiceProviderProtectedRoute>} />
-          <Route path="/labr8/dashboard" element={<ServiceProviderProtectedRoute><Labr8Dashboard /></ServiceProviderProtectedRoute>} />
-          <Route path="/labr8/dashboard/request/:requestId" element={<ServiceProviderProtectedRoute><Labr8ProjectStatusNew /></ServiceProviderProtectedRoute>} />
+          {/* Labr8 Routes - Updated */}
+          <Route path="/labr8" element={<Labr8Landing />} />
+          <Route path="/labr8/auth" element={<Labr8Auth />} />
           <Route path="/labr8/setup" element={<ServiceProviderSetup />} />
+          <Route path="/labr8/dashboard" element={<ServiceProviderProtectedRoute><Labr8Dashboard /></ServiceProviderProtectedRoute>} />
+          <Route path="/labr8/dashboard/request/:requestId" element={<ServiceProviderProtectedRoute><Labr8RequestDetails /></ServiceProviderProtectedRoute>} />
 
           {/* Documentation and 404 - Accessible to all */}
           <Route path="/docs" element={

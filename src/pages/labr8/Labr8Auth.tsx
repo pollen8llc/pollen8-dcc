@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +38,7 @@ const Labr8Auth = () => {
         if (!currentUser.profile_complete) {
           navigate("/labr8/setup", { replace: true });
         } else {
-          navigate("/labr8/inbox", { replace: true });
+          navigate("/labr8/dashboard", { replace: true }); // Fixed redirect path
         }
       } else {
         navigate("/", { replace: true });
@@ -68,8 +69,8 @@ const Labr8Auth = () => {
           description: "You have successfully signed in to LAB-R8.",
         });
         
-        // Navigate to inbox after successful login
-        navigate("/labr8/inbox", { replace: true });
+        // Navigate to dashboard after successful login
+        navigate("/labr8/dashboard", { replace: true }); // Fixed redirect path
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
@@ -97,7 +98,7 @@ const Labr8Auth = () => {
     }
 
     try {
-      const redirectUrl = `${window.location.origin}/labr8/inbox`;
+      const redirectUrl = `${window.location.origin}/labr8/dashboard`; // Fixed redirect URL
       
       const { data, error } = await supabase.auth.signUp({
         email,
