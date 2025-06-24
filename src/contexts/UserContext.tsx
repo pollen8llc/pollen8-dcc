@@ -2,8 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
-
-export type UserRole = 'admin' | 'organizer' | 'service_provider' | 'member';
+import { UserRole } from '@/models/types';
 
 export interface UserProfile {
   id: string;
@@ -50,6 +49,45 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         if (profile) {
           const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email;
           
+          // Get user role from user_roles table
+          let userRole = UserRole.MEMBER; // Default role
+          
+          try {
+            const { data: userRoles } = await supabase
+              .from('user_roles')
+              .select(`
+                role_id,
+                roles:role_id (
+                  name
+                )
+              `)
+              .eq('user_id', user.id);
+
+            if (userRoles && userRoles.length > 0) {
+              // Check for admin role first
+              const hasAdminRole = userRoles.some(r => r.roles && r.roles.name === 'ADMIN');
+              if (hasAdminRole) {
+                userRole = UserRole.ADMIN;
+              } else {
+                // Check for service provider role
+                const hasServiceProviderRole = userRoles.some(r => 
+                  r.roles && r.roles.name === 'SERVICE_PROVIDER'
+                );
+                if (hasServiceProviderRole) {
+                  userRole = UserRole.SERVICE_PROVIDER;
+                } else {
+                  // Check for organizer role
+                  const hasOrganizerRole = userRoles.some(r => r.roles && r.roles.name === 'ORGANIZER');
+                  if (hasOrganizerRole) {
+                    userRole = UserRole.ORGANIZER;
+                  }
+                }
+              }
+            }
+          } catch (roleErr) {
+            console.error("Error fetching user roles:", roleErr);
+          }
+          
           setCurrentUser({
             id: profile.id,
             email: profile.email,
@@ -57,7 +95,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             last_name: profile.last_name,
             name: fullName,
             avatar_url: profile.avatar_url,
-            role: (profile.role || 'member') as UserRole,
+            role: userRole,
             bio: profile.bio,
             location: profile.location,
             interests: profile.interests || [],

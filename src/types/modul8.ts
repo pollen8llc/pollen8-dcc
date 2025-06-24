@@ -142,3 +142,11 @@ export interface ProjectComment {
   created_at: string;
   updated_at: string;
 }
+
+export const DOMAIN_PAGES = {
+  1: 'Web Development',
+  2: 'Mobile App Development',
+  3: 'Design & Branding',
+  4: 'Digital Marketing',
+  5: 'Content Creation'
+} as const;

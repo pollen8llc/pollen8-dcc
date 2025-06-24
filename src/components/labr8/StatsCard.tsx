@@ -6,17 +6,28 @@ interface StatsCardProps {
   title: string;
   value: string | number;
   description?: string;
+  label?: string;
+  icon?: React.ReactNode;
+  accentColor?: string;
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ title, value, description }) => {
+const StatsCard: React.FC<StatsCardProps> = ({ 
+  title, 
+  value, 
+  description, 
+  label, 
+  icon, 
+  accentColor 
+}) => {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title || label}</CardTitle>
+        {icon}
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        {description && <p className="text-muted-foreground">{description}</p>}
+        {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </CardContent>
     </Card>
   );

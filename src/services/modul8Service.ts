@@ -70,3 +70,8 @@ export const createProposal = async (data: Partial<Proposal>): Promise<Proposal>
   // Placeholder implementation
   throw new Error('Service not implemented');
 };
+
+export const createServiceProvider = async (data: any): Promise<any> => {
+  // Placeholder implementation
+  throw new Error('Service not implemented');
+};

@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { UserRole } from "@/models/types";
 import { Shell } from "@/components/layout/Shell";
 import LandingPage from "./LandingPage";
 import LoadingSpinner from "@/components/ui/loading-spinner";
@@ -13,7 +14,7 @@ const Index = () => {
   useEffect(() => {
     if (!isLoading && currentUser) {
       // If user is a service provider, redirect to LAB-R8
-      if (currentUser.role === 'SERVICE_PROVIDER') {
+      if (currentUser.role === UserRole.SERVICE_PROVIDER) {
         if (!currentUser.profile_complete) {
           navigate("/labr8/setup", { replace: true });
         } else {
