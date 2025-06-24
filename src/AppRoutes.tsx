@@ -1,156 +1,179 @@
 
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { Suspense, lazy } from "react";
-import LoadingSpinner from "@/components/ui/loading-spinner";
+import { Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Toaster } from "@/components/ui/toaster";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import ServiceProviderRoute from "@/components/auth/ServiceProviderRoute";
-import NonServiceProviderRoute from "@/components/auth/NonServiceProviderRoute";
 
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
-const LandingPage = lazy(() => import("@/pages/LandingPage"));
-const AuthPage = lazy(() => import("@/pages/AuthPage"));
-const ProfileSetup = lazy(() => import("@/pages/ProfileSetup"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const ProfileEditPage = lazy(() => import("@/pages/ProfileEditPage"));
+const ProfileSetupPage = lazy(() => import("@/pages/ProfileSetupPage"));
+const ProfileSearchPage = lazy(() => import("@/pages/ProfileSearchPage"));
+const Documentation = lazy(() => import("@/pages/Documentation"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const Onboarding = lazy(() => import("@/pages/Onboarding"));
+const DotConnectorDashboard = lazy(() => import("@/pages/DotConnectorDashboard"));
+const OrganizerDashboard = lazy(() => import("@/pages/OrganizerDashboard"));
+const InvitesManagementPage = lazy(() => import("@/pages/InvitesManagementPage"));
+const InvitePage = lazy(() => import("@/pages/InvitePage"));
 
-// Modul8 components (Organizers)
+// Admin pages
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
+const DebuggerDashboard = lazy(() => import("@/pages/admin/DebuggerDashboard"));
+
+// Knowledge base pages
+const KnowledgeBase = lazy(() => import("@/pages/knowledge/KnowledgeBase"));
+const UserKnowledgeResource = lazy(() => import("@/pages/knowledge/UserKnowledgeResource"));
+const TopicsPage = lazy(() => import("@/pages/knowledge/TopicsPage"));
+const ContentCreator = lazy(() => import("@/pages/knowledge/ContentCreator"));
+const PostWizard = lazy(() => import("@/pages/knowledge/PostWizard"));
+const ArticleView = lazy(() => import("@/pages/knowledge/ArticleView"));
+const ArticleEdit = lazy(() => import("@/pages/core/ArticleEdit"));
+
+// REL8 pages
+const Rel8Dashboard = lazy(() => import("@/pages/rel8t/Dashboard"));
+const Contacts = lazy(() => import("@/pages/rel8t/Contacts"));
+const ContactCreate = lazy(() => import("@/pages/rel8t/ContactCreate"));
+const ContactEdit = lazy(() => import("@/pages/rel8t/ContactEdit"));
+const Relationships = lazy(() => import("@/pages/rel8t/Relationships"));
+const Categories = lazy(() => import("@/pages/rel8t/Categories"));
+const Rel8Settings = lazy(() => import("@/pages/rel8t/Settings"));
+const RelationshipWizard = lazy(() => import("@/pages/rel8t/RelationshipWizard"));
+const ImportContacts = lazy(() => import("@/pages/rel8t/ImportContacts"));
+const TriggerWizard = lazy(() => import("@/pages/rel8t/TriggerWizard"));
+const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
+
+// Modul8 pages
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
-const DomainDirectory = lazy(() => import("@/pages/modul8/DomainDirectory"));
+const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
+const OrganizerSetup = lazy(() => import("@/pages/modul8/setup/OrganizerSetup"));
 const ServiceRequestForm = lazy(() => import("@/pages/modul8/ServiceRequestForm"));
-const Modul8RequestDetails = lazy(() => import("@/pages/modul8/Modul8RequestDetails"));
+const ServiceRequestDetails = lazy(() => import("@/pages/modul8/ServiceRequestDetails"));
 
-// LAB-R8 components (Service Providers)
+// LABR8 pages
+const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
+const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
 const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
-const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
 
-// Knowledge Base
-const KnowledgeBase = lazy(() => import("@/pages/KnowledgeBase"));
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+  </div>
+);
 
-const AppRoutes = () => {
-  const { isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <LoadingSpinner size="lg" text="Loading..." />
-      </div>
-    );
-  }
-
+function AppRoutes() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-screen">
-        <LoadingSpinner size="lg" text="Loading..." />
-      </div>
-    }>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<Index />} />
-        <Route path="/landing" element={<LandingPage />} />
-        <Route path="/auth" element={<AuthPage />} />
-        
-        {/* Profile setup route */}
-        <Route 
-          path="/profile/setup" 
-          element={
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/welcome" element={<DotConnectorDashboard />} />
+          
+          {/* Profile routes */}
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/profile/edit" element={<ProfileEditPage />} />
+          <Route path="/profile/setup" element={<ProfileSetupPage />} />
+          <Route path="/profile/search" element={<ProfileSearchPage />} />
+          
+          {/* Organizer routes */}
+          <Route path="/organizer" element={<OrganizerDashboard />} />
+          <Route path="/invites" element={<InvitesManagementPage />} />
+          <Route path="/invite/:code" element={<InvitePage />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/debugger" element={<DebuggerDashboard />} />
+          
+          {/* Knowledge base routes - Protected */}
+          <Route path="/knowledge" element={
             <ProtectedRoute>
-              <ProfileSetup />
+              <KnowledgeBase />
             </ProtectedRoute>
-          } 
-        />
+          } />
+          <Route path="/knowledge/resources" element={
+            <ProtectedRoute>
+              <UserKnowledgeResource />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/topics" element={
+            <ProtectedRoute>
+              <TopicsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/create" element={
+            <ProtectedRoute>
+              <ContentCreator />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/create/:type" element={
+            <ProtectedRoute>
+              <PostWizard />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/article/:id" element={
+            <ProtectedRoute>
+              <ArticleView />
+            </ProtectedRoute>
+          } />
+          <Route path="/knowledge/article/:id/edit" element={
+            <ProtectedRoute>
+              <ArticleEdit />
+            </ProtectedRoute>
+          } />
+          
+          {/* REL8 routes */}
+          <Route path="/rel8" element={<Rel8Dashboard />} />
+          <Route path="/rel8t" element={<Rel8Dashboard />} />
+          <Route path="/rel8/contacts" element={<Contacts />} />
+          <Route path="/rel8t/contacts" element={<Contacts />} />
+          <Route path="/rel8/contacts/create" element={<ContactCreate />} />
+          <Route path="/rel8t/contacts/create" element={<ContactCreate />} />
+          <Route path="/rel8/contacts/:id/edit" element={<ContactEdit />} />
+          <Route path="/rel8t/contacts/:id/edit" element={<ContactEdit />} />
+          <Route path="/rel8/relationships" element={<Relationships />} />
+          <Route path="/rel8t/relationships" element={<Relationships />} />
+          <Route path="/rel8/categories" element={<Categories />} />
+          <Route path="/rel8t/categories" element={<Categories />} />
+          <Route path="/rel8/settings" element={<Rel8Settings />} />
+          <Route path="/rel8t/settings" element={<Rel8Settings />} />
+          <Route path="/rel8/wizard" element={<RelationshipWizard />} />
+          <Route path="/rel8t/wizard" element={<RelationshipWizard />} />
+          <Route path="/rel8/import" element={<ImportContacts />} />
+          <Route path="/rel8t/import" element={<ImportContacts />} />
+          <Route path="/rel8/triggers/wizard" element={<TriggerWizard />} />
+          <Route path="/rel8t/triggers/wizard" element={<TriggerWizard />} />
+          <Route path="/rel8/test-email" element={<EmailTest />} />
+          <Route path="/rel8t/test-email" element={<EmailTest />} />
 
-        {/* Knowledge Base - accessible to all authenticated users */}
-        <Route 
-          path="/knowledge/*" 
-          element={
-            <ProtectedRoute>
-              <NonServiceProviderRoute>
-                <KnowledgeBase />
-              </NonServiceProviderRoute>
-            </ProtectedRoute>
-          } 
-        />
-
-        {/* LAB-R8 Routes (Service Providers Only) */}
-        <Route 
-          path="/labr8/setup" 
-          element={
-            <ProtectedRoute>
-              <ServiceProviderRoute>
-                <Labr8Setup />
-              </ServiceProviderRoute>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/labr8/dashboard" 
-          element={
-            <ProtectedRoute>
-              <ServiceProviderRoute>
-                <Labr8Dashboard />
-              </ServiceProviderRoute>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/labr8/dashboard/request/:requestId" 
-          element={
-            <ProtectedRoute>
-              <ServiceProviderRoute>
-                <Labr8RequestDetails />
-              </ServiceProviderRoute>
-            </ProtectedRoute>
-          } 
-        />
-
-        {/* Modul8 Routes (Non-Service Providers) */}
-        <Route 
-          path="/modul8/dashboard" 
-          element={
-            <ProtectedRoute>
-              <NonServiceProviderRoute>
-                <Modul8Dashboard />
-              </NonServiceProviderRoute>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/modul8/dashboard/directory/:domainId" 
-          element={
-            <ProtectedRoute>
-              <NonServiceProviderRoute>
-                <DomainDirectory />
-              </NonServiceProviderRoute>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/modul8/dashboard/request/new" 
-          element={
-            <ProtectedRoute>
-              <NonServiceProviderRoute>
-                <ServiceRequestForm />
-              </NonServiceProviderRoute>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/modul8/dashboard/request/:requestId" 
-          element={
-            <ProtectedRoute>
-              <NonServiceProviderRoute>
-                <Modul8RequestDetails />
-              </NonServiceProviderRoute>
-            </ProtectedRoute>
-          } 
-        />
-
-        {/* Fallback redirect */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+          {/* Modul8 routes */}
+          <Route path="/modul8" element={<Modul8Dashboard />} />
+          <Route path="/modul8/setup/provider" element={<ServiceProviderSetup />} />
+          <Route path="/modul8/setup/organizer" element={<OrganizerSetup />} />
+          <Route path="/modul8/request/new" element={<ServiceRequestForm />} />
+          <Route path="/modul8/request/:id" element={<ServiceRequestDetails />} />
+          
+          {/* LABR8 routes */}
+          <Route path="/labr8" element={<Labr8Landing />} />
+          <Route path="/labr8/setup" element={<Labr8Setup />} />
+          <Route path="/labr8/dashboard" element={<Labr8Dashboard />} />
+          <Route path="/labr8/request/:id" element={<Labr8RequestDetails />} />
+          
+          <Route path="/docs" element={<Documentation />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+      <Toaster />
+    </ErrorBoundary>
   );
-};
+}
 
 export default AppRoutes;
