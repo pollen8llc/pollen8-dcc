@@ -1,19 +1,28 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ServiceRequest } from '@/types/modul8';
 
 interface NegotiationTimelineProps {
-  serviceRequestId: string;
+  serviceRequest?: ServiceRequest;
+  serviceRequestId?: string;
+  className?: string;
 }
 
-const NegotiationTimeline: React.FC<NegotiationTimelineProps> = ({ serviceRequestId }) => {
+const NegotiationTimeline: React.FC<NegotiationTimelineProps> = ({ 
+  serviceRequest, 
+  serviceRequestId, 
+  className 
+}) => {
+  const requestId = serviceRequest?.id || serviceRequestId;
+  
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Negotiation Timeline</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Timeline for service request: {serviceRequestId}</p>
+        <p>Timeline for service request: {requestId}</p>
         <p>Negotiation timeline functionality coming soon...</p>
       </CardContent>
     </Card>

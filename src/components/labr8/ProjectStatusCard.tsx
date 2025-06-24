@@ -1,22 +1,23 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ServiceRequest } from '@/types/modul8';
 
 interface ProjectStatusCardProps {
-  title: string;
-  status: string;
-  progress?: number;
+  project: ServiceRequest;
+  onComplete?: () => void;
+  onRefresh?: () => void;
 }
 
-const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({ title, status, progress }) => {
+const ProjectStatusCard: React.FC<ProjectStatusCardProps> = ({ project, onComplete, onRefresh }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>{project.title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Status: {status}</p>
-        {progress !== undefined && <p>Progress: {progress}%</p>}
+        <p>Status: {project.status}</p>
+        {project.project_progress !== undefined && <p>Progress: {project.project_progress}%</p>}
       </CardContent>
     </Card>
   );
