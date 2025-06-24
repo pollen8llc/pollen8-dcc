@@ -1,23 +1,38 @@
-
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
-import { getUserServiceProvider, getServiceRequests } from '@/services/modul8Service';
+import { 
+  getUserServiceProvider,
+  getProviderServiceRequests,
+  getAvailableServiceRequestsForProvider 
+} from '@/services/modul8Service';
 import { ServiceProvider, ServiceRequest } from '@/types/modul8';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Briefcase, MessageSquare, CheckCircle, DollarSign, Clock, Users } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Building2, 
+  ExternalLink,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Users,
+  Building,
+  DollarSign,
+  Calendar,
+  LogOut
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import LoadingSpinner from '@/components/ui/loading-spinner';
 
 const Labr8Dashboard = () => {
-  const { session } = useSession();
+  const { session, logout } = useSession();
   const navigate = useNavigate();
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
-  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
+  const [assignedRequests, setAssignedRequests] = useState<ServiceRequest[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,22 +41,25 @@ const Labr8Dashboard = () => {
 
   const loadProviderData = async () => {
     if (!session?.user?.id) return;
-    
+
     try {
+      setLoading(true);
+      
       const provider = await getUserServiceProvider(session.user.id);
       if (!provider) {
         navigate('/labr8/setup');
         return;
       }
-      
       setServiceProvider(provider);
+
+      // Load assigned requests (requests sent to this provider)
+      const assigned = await getProviderServiceRequests(provider.id);
+      setAssignedRequests(assigned);
+
+      // Load available requests (new incoming requests)
+      const available = await getAvailableServiceRequestsForProvider(provider.id);
+      setIncomingRequests(available);
       
-      // Load all service requests and filter by provider's specializations
-      const allRequests = await getServiceRequests();
-      const relevantRequests = allRequests.filter(request => 
-        provider.domain_specializations.includes(request.domain_page)
-      );
-      setServiceRequests(relevantRequests);
     } catch (error) {
       console.error('Error loading provider data:', error);
       toast({
@@ -54,68 +72,141 @@ const Labr8Dashboard = () => {
     }
   };
 
-  const getRequestsByStatus = (status: string) => {
-    return serviceRequests.filter(request => {
-      switch (status) {
-        case 'available':
-          return request.engagement_status === 'none' && request.status === 'pending';
-        case 'negotiating':
-          return request.engagement_status === 'negotiating';
-        case 'active':
-          return request.engagement_status === 'affiliated';
-        default:
-          return false;
-      }
-    });
-  };
-
-  const handleEngageRequest = (requestId: string) => {
-    navigate(`/labr8/request/${requestId}`);
-  };
-
   const formatBudget = (budget: any) => {
-    if (!budget || typeof budget !== 'object') return 'Budget: TBD';
+    if (!budget || typeof budget !== 'object') return 'Budget TBD';
     const { min, max, currency = 'USD' } = budget;
     if (min && max) {
       return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
     } else if (min) {
-      return `${currency} ${min.toLocaleString()}+`;
+      return `From ${currency} ${min.toLocaleString()}`;
     } else if (max) {
       return `Up to ${currency} ${max.toLocaleString()}`;
     }
-    return 'Budget: TBD';
+    return 'Budget TBD';
   };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-blue-100 text-blue-800';
+      case 'negotiating': return 'bg-orange-100 text-orange-800';
+      case 'agreed': return 'bg-green-100 text-green-800';
+      case 'declined': return 'bg-red-100 text-red-800';
+      case 'in_progress': return 'bg-purple-100 text-purple-800';
+      case 'completed': return 'bg-emerald-100 text-emerald-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleViewRequest = (request: ServiceRequest) => {
+    // Navigate to the new negotiation flow status page
+    if (request.service_provider_id) {
+      navigate(`/labr8/${request.service_provider_id}/${request.id}/status`);
+    } else {
+      navigate(`/labr8/request/${request.id}/status`);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/labr8');
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to log out",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Categorize requests
+  const pendingRequests = incomingRequests.filter(r => r.status === 'pending');
+  const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating');
+  const activeProjects = assignedRequests.filter(r => ['agreed', 'in_progress'].includes(r.status));
+  const completedProjects = assignedRequests.filter(r => r.status === 'completed');
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <LoadingSpinner size="lg" text="Loading LAB-R8 Dashboard..." />
-        </div>
-      </div>
-    );
-  }
-
-  if (!serviceProvider) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Service Provider Profile Not Found</h1>
-            <Button onClick={() => navigate('/labr8/setup')}>
-              Create Profile
-            </Button>
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]"></div>
           </div>
         </div>
       </div>
     );
   }
 
-  const availableRequests = getRequestsByStatus('available');
-  const negotiatingRequests = getRequestsByStatus('negotiating');
-  const activeRequests = getRequestsByStatus('active');
+  const RequestCard = ({ request }: { request: ServiceRequest }) => (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-lg font-semibold line-clamp-1">{request.title}</h3>
+              <Badge className={`${getStatusColor(request.status)} font-medium`}>
+                {request.status?.replace('_', ' ') || 'pending'}
+              </Badge>
+            </div>
+            
+            {request.description && (
+              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                {request.description}
+              </p>
+            )}
+            
+            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+              {request.organizer && (
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={request.organizer.logo_url} />
+                    <AvatarFallback>
+                      <Building className="h-3 w-3" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="line-clamp-1">{request.organizer.organization_name}</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <DollarSign className="h-4 w-4" />
+                {formatBudget(request.budget_range)}
+              </div>
+              {request.timeline && (
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {request.timeline}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-muted-foreground">
+            Received {new Date(request.created_at).toLocaleDateString()}
+          </span>
+          <Button
+            onClick={() => handleViewRequest(request)}
+            size="sm"
+            className="bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+          >
+            {request.status === 'pending' ? 'Respond' : 
+             request.status === 'negotiating' ? 'Continue' :
+             request.status === 'agreed' ? 'View Agreement' : 'View Request'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,214 +215,188 @@ const Labr8Dashboard = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">LAB-R8 Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, {serviceProvider.business_name}</p>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-lg bg-[#00eada] flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-black" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">LAB-R8 Dashboard</h1>
+                <p className="text-muted-foreground">
+                  Welcome back, {serviceProvider?.business_name}
+                </p>
+              </div>
             </div>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              Notifications
+            <Button 
+              onClick={handleLogout}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
             </Button>
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Available Requests</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{availableRequests.length}</div>
-              <p className="text-xs text-muted-foreground">New opportunities</p>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">New Requests</p>
+                  <p className="text-2xl font-bold">{pendingRequests.length}</p>
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <ExternalLink className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">In Negotiation</CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{negotiatingRequests.length}</div>
-              <p className="text-xs text-muted-foreground">Active discussions</p>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">In Discussion</p>
+                  <p className="text-2xl font-bold">{negotiatingRequests.length}</p>
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                  <AlertCircle className="h-6 w-6 text-orange-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{activeRequests.length}</div>
-              <p className="text-xs text-muted-foreground">Ongoing work</p>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Active Projects</p>
+                  <p className="text-2xl font-bold">{activeProjects.length}</p>
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">--</div>
-              <p className="text-xs text-muted-foreground">This month</p>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                  <p className="text-2xl font-bold">{completedProjects.length}</p>
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="available" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="available">
-              Available Requests ({availableRequests.length})
+        {/* Request Tabs */}
+        <Tabs defaultValue="incoming" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="incoming">
+              Incoming ({pendingRequests.length})
+            </TabsTrigger>
+            <TabsTrigger value="discussing">
+              Discussing ({negotiatingRequests.length})
             </TabsTrigger>
             <TabsTrigger value="active">
-              My Negotiations ({negotiatingRequests.length})
+              Active ({activeProjects.length})
             </TabsTrigger>
-            <TabsTrigger value="projects">
-              Active Projects ({activeRequests.length})
+            <TabsTrigger value="completed">
+              Completed ({completedProjects.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="available" className="space-y-4">
-            {availableRequests.length === 0 ? (
+          <TabsContent value="incoming" className="mt-6">
+            {pendingRequests.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Briefcase className="h-12 w-12 text-muted-foreground mb-4" />
+                  <ExternalLink className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No available requests
+                    No Incoming Requests
                   </h3>
                   <p className="text-muted-foreground text-center">
-                    New service requests from organizers matching your specializations will appear here
+                    New service requests will appear here when organizers reach out to you.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {availableRequests.map((request) => (
-                  <Card key={request.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start gap-2">
-                        <CardTitle className="text-lg line-clamp-2">{request.title}</CardTitle>
-                        <Badge variant="secondary">New</Badge>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-4">
-                      {request.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-3">
-                          {request.description}
-                        </p>
-                      )}
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">{formatBudget(request.budget_range)}</span>
-                        </div>
-                        
-                        {request.timeline && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{request.timeline}</span>
-                          </div>
-                        )}
-                        
-                        {request.organizer && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{request.organizer.organization_name}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex gap-2 pt-2">
-                        <Button 
-                          className="flex-1 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
-                          onClick={() => handleEngageRequest(request.id)}
-                        >
-                          Engage
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="grid gap-4">
+                {pendingRequests.map((request) => (
+                  <RequestCard key={request.id} request={request} />
                 ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="active" className="space-y-4">
+          <TabsContent value="discussing" className="mt-6">
             {negotiatingRequests.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
+                  <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No active negotiations
+                    No Active Discussions
                   </h3>
                   <p className="text-muted-foreground text-center">
-                    Requests you've engaged with will appear here for negotiation
+                    Requests you're negotiating will appear here.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-4">
+              <div className="grid gap-4">
                 {negotiatingRequests.map((request) => (
-                  <Card key={request.id}>
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold mb-2">{request.title}</h3>
-                          <p className="text-muted-foreground mb-4">{request.description}</p>
-                          <div className="flex gap-4 text-sm text-muted-foreground">
-                            <span>{formatBudget(request.budget_range)}</span>
-                            {request.timeline && <span>Timeline: {request.timeline}</span>}
-                          </div>
-                        </div>
-                        <Button onClick={() => handleEngageRequest(request.id)}>
-                          Continue Negotiation
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <RequestCard key={request.id} request={request} />
                 ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="projects" className="space-y-4">
-            {activeRequests.length === 0 ? (
+          <TabsContent value="active" className="mt-6">
+            {activeProjects.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <CheckCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                  <Clock className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No active projects
+                    No Active Projects
                   </h3>
                   <p className="text-muted-foreground text-center">
-                    Agreed partnerships and active projects will appear here
+                    Accepted projects that are in progress will appear here.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-4">
-                {activeRequests.map((request) => (
-                  <Card key={request.id}>
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold mb-2">{request.title}</h3>
-                          <p className="text-muted-foreground mb-4">{request.description}</p>
-                          <Badge className="bg-green-100 text-green-800">Active Project</Badge>
-                        </div>
-                        <Button onClick={() => handleEngageRequest(request.id)}>
-                          View Project
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="grid gap-4">
+                {activeProjects.map((request) => (
+                  <RequestCard key={request.id} request={request} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="completed" className="mt-6">
+            {completedProjects.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <CheckCircle2 className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                    No Completed Projects
+                  </h3>
+                  <p className="text-muted-foreground text-center">
+                    Successfully completed projects will appear here.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {completedProjects.map((request) => (
+                  <RequestCard key={request.id} request={request} />
                 ))}
               </div>
             )}

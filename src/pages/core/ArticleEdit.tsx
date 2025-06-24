@@ -71,7 +71,7 @@ const ArticleEdit: React.FC = () => {
             <p className="text-red-500">You don't have permission to edit this article. Only the author or organizers can edit articles.</p>
             <Button 
               className="mt-4"
-              onClick={() => navigate(`/knowledge/${id}`)}
+              onClick={() => navigate(`/knowledge/article/${id}`)}
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               View Article

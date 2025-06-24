@@ -4,11 +4,9 @@ import { cn } from "@/lib/utils";
 import { 
   Users, 
   Building2, 
-  Heart, 
   Zap, 
   Upload,
-  BarChart3,
-  FolderOpen
+  Calendar,
 } from "lucide-react";
 
 export function Rel8OnlyNavigation() {
@@ -17,15 +15,9 @@ export function Rel8OnlyNavigation() {
   const navItems = [
     {
       href: "/rel8",
-      label: "Dashboard",
-      icon: BarChart3,
-      isActive: location.pathname === "/rel8"
-    },
-    {
-      href: "/rel8/relationships",
       label: "Relationships",
-      icon: Heart,
-      isActive: location.pathname.startsWith("/rel8/relationships") || location.pathname === "/rel8/wizard"
+      icon: Calendar,
+      isActive: location.pathname === "/rel8"
     },
     {
       href: "/rel8/contacts",

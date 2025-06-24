@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +11,7 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
 import { Trigger } from "@/services/rel8t/triggerService";
+import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 
 type WizardStep = 
   | "select-contacts" 
@@ -34,12 +34,40 @@ const initialData: WizardData = {
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
+  const { selectedTrigger, clearWizardData } = useRelationshipWizard();
+  
   const [step, setStep] = useState<WizardStep>("select-contacts");
   const [data, setData] = useState<WizardData>(initialData);
 
+  // Initialize wizard data with selected trigger from context
+  useEffect(() => {
+    if (selectedTrigger) {
+      setData(prev => ({ 
+        ...prev, 
+        triggers: [selectedTrigger],
+        priority: selectedTrigger.recurrence_pattern?.priority || 'medium'
+      }));
+      // Skip trigger selection step and go to contacts first
+      setStep("select-contacts");
+    }
+  }, [selectedTrigger]);
+
+  // Auto-advance to review step when we have a selected trigger
+  useEffect(() => {
+    if (step === "select-triggers" && selectedTrigger) {
+      const timer = setTimeout(() => setStep("review"), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [step, selectedTrigger]);
+
   const handleSelectContactsNext = (stepData: { contacts: Contact[] }) => {
     setData(prev => ({ ...prev, contacts: stepData.contacts }));
-    setStep("select-triggers");
+    // If we have a selected trigger, skip triggers step and go to review
+    if (selectedTrigger) {
+      setStep("review");
+    } else {
+      setStep("select-triggers");
+    }
   };
 
   const handleSelectTriggersNext = (stepData: { triggers: Trigger[], priority: 'low' | 'medium' | 'high' }) => {
@@ -52,8 +80,9 @@ const RelationshipWizard = () => {
   };
 
   const handleReviewSubmit = () => {
-    // Redirect to the relationships page after successful submission
-    navigate("/rel8/relationships");
+    // Clear wizard data and redirect to the main rel8 dashboard
+    clearWizardData();
+    navigate("/rel8");
   };
 
   const getStepTitle = () => {
@@ -79,10 +108,13 @@ const RelationshipWizard = () => {
             variant="ghost" 
             size="sm" 
             className="mr-2" 
-            onClick={() => navigate("/rel8/dashboard")}
+            onClick={() => {
+              clearWizardData();
+              navigate(selectedTrigger ? "/rel8/build-rapport" : "/rel8");
+            }}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Dashboard
+            Back to {selectedTrigger ? "Build Rapport" : "Dashboard"}
           </Button>
         </div>
         
@@ -92,9 +124,18 @@ const RelationshipWizard = () => {
           <div>
             <h1 className="text-2xl font-bold">{getStepTitle()}</h1>
             <p className="text-muted-foreground">
-              Create a plan to build relationships with contacts
+              {selectedTrigger ? "Complete your relationship plan" : "Create a plan to build relationships with contacts"}
             </p>
           </div>
+          
+          {/* Display trigger info if we have a selected trigger */}
+          {selectedTrigger && (
+            <div className="ml-auto">
+              <Badge variant="outline" className="px-3 py-1 bg-primary/5">
+                Using selected trigger: {selectedTrigger.name}
+              </Badge>
+            </div>
+          )}
           
           <div className="flex gap-2 ml-auto">
             {step !== "select-contacts" && data.contacts.length > 0 && (
@@ -130,7 +171,7 @@ const RelationshipWizard = () => {
               />
             )}
 
-            {step === "select-triggers" && (
+            {step === "select-triggers" && !selectedTrigger && (
               <SelectTriggersStep
                 onNext={handleSelectTriggersNext}
                 onPrevious={() => setStep("select-contacts")}
@@ -138,11 +179,20 @@ const RelationshipWizard = () => {
               />
             )}
             
+            {/* Skip trigger selection if we already have a selected trigger */}
+            {step === "select-triggers" && selectedTrigger && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  Trigger already selected. Proceeding to review...
+                </p>
+              </div>
+            )}
+            
             {step === "review" && (
               <ReviewSubmitStep
                 wizardData={data}
                 onSubmit={handleReviewSubmit}
-                onPrevious={() => setStep("select-triggers")}
+                onPrevious={() => setStep(selectedTrigger ? "select-contacts" : "select-triggers")}
               />
             )}
           </CardContent>

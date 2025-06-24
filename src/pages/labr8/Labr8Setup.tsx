@@ -1,91 +1,153 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSession } from '@/hooks/useSession';
-import { createServiceProvider } from '@/services/modul8Service';
-import { updateUserRole } from '@/services/roleService';
-import { DOMAIN_PAGES } from '@/types/modul8';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { X, Plus, ArrowLeft } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import { toast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@/contexts/UserContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Upload, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { createServiceProvider } from "@/services/modul8Service";
+import { DOMAIN_PAGES } from "@/types/modul8";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const Labr8Setup = () => {
-  const { session } = useSession();
-  const navigate = useNavigate();
+  const [businessName, setBusinessName] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [description, setDescription] = useState("");
+  const [services, setServices] = useState<string[]>([]);
+  const [serviceInput, setServiceInput] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [portfolioLinks, setPortfolioLinks] = useState<string[]>([]);
+  const [portfolioInput, setPortfolioInput] = useState("");
+  const [domainSpecializations, setDomainSpecializations] = useState<number[]>([]);
+  const [pricingMin, setPricingMin] = useState("");
+  const [pricingMax, setPricingMax] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    business_name: '',
-    tagline: '',
-    description: '',
-    domain_specializations: [] as number[],
-    services: [] as string[],
-    tags: [] as string[],
-    pricing_range: {
-      min: '',
-      max: '',
-      currency: 'USD'
-    },
-    portfolio_links: [] as string[]
-  });
   
-  const [newService, setNewService] = useState('');
-  const [newTag, setNewTag] = useState('');
-  const [newPortfolioLink, setNewPortfolioLink] = useState('');
+  const navigate = useNavigate();
+  const { currentUser, refreshUser } = useUser();
+  const { toast } = useToast();
+
+  const handleAddService = () => {
+    if (serviceInput.trim() && !services.includes(serviceInput.trim())) {
+      setServices([...services, serviceInput.trim()]);
+      setServiceInput("");
+    }
+  };
+
+  const handleRemoveService = (service: string) => {
+    setServices(services.filter(s => s !== service));
+  };
+
+  const handleAddTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  };
+
+  const handleAddPortfolioLink = () => {
+    if (portfolioInput.trim() && !portfolioLinks.includes(portfolioInput.trim())) {
+      setPortfolioLinks([...portfolioLinks, portfolioInput.trim()]);
+      setPortfolioInput("");
+    }
+  };
+
+  const handleRemovePortfolioLink = (link: string) => {
+    setPortfolioLinks(portfolioLinks.filter(l => l !== link));
+  };
+
+  const handleDomainToggle = (domainId: number) => {
+    if (domainSpecializations.includes(domainId)) {
+      setDomainSpecializations(domainSpecializations.filter(id => id !== domainId));
+    } else {
+      setDomainSpecializations([...domainSpecializations, domainId]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session?.user?.id) return;
-    
-    if (formData.domain_specializations.length === 0) {
-      toast({
-        title: "Error",
-        description: "Please select at least one domain specialization",
-        variant: "destructive"
-      });
-      return;
-    }
-    
+    if (!currentUser) return;
+
     setLoading(true);
     try {
+      // Ensure user has SERVICE_PROVIDER role before creating profile
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select(`
+          role_id,
+          roles:role_id (name)
+        `)
+        .eq('user_id', currentUser.id);
+
+      const hasServiceProviderRole = userRoles?.some(ur => 
+        ur.roles && ur.roles.name === 'SERVICE_PROVIDER'
+      );
+
+      if (!hasServiceProviderRole) {
+        console.log('Assigning SERVICE_PROVIDER role to user');
+        const { error: roleError } = await supabase.rpc('update_user_role', {
+          p_user_id: currentUser.id,
+          p_role_name: 'SERVICE_PROVIDER',
+          p_assigner_id: currentUser.id
+        });
+
+        if (roleError) {
+          console.error('Error assigning SERVICE_PROVIDER role:', roleError);
+          throw new Error('Failed to assign service provider role');
+        }
+
+        // Refresh user data to reflect new role
+        await refreshUser();
+      }
+
       const pricingRange = {
-        min: formData.pricing_range.min ? parseFloat(formData.pricing_range.min) : undefined,
-        max: formData.pricing_range.max ? parseFloat(formData.pricing_range.max) : undefined,
-        currency: formData.pricing_range.currency
+        min: pricingMin ? parseInt(pricingMin) : undefined,
+        max: pricingMax ? parseInt(pricingMax) : undefined,
+        currency: 'USD'
       };
 
       await createServiceProvider({
-        user_id: session.user.id,
-        business_name: formData.business_name,
-        tagline: formData.tagline || undefined,
-        description: formData.description || undefined,
-        services: formData.services,
-        tags: formData.tags,
+        user_id: currentUser.id,
+        business_name: businessName,
+        tagline: tagline || undefined,
+        description: description || undefined,
+        services: services,
+        tags: tags,
         pricing_range: pricingRange,
-        portfolio_links: formData.portfolio_links,
-        domain_specializations: formData.domain_specializations
+        portfolio_links: portfolioLinks,
+        domain_specializations: domainSpecializations,
+        logo_url: logoUrl || undefined
       });
 
-      // Update user role to SERVICE_PROVIDER
-      await updateUserRole(session.user.id, 'SERVICE_PROVIDER');
-      
+      // Update profile completion status
+      await supabase
+        .from('profiles')
+        .update({ profile_complete: true })
+        .eq('id', currentUser.id);
+
       toast({
-        title: "Success!",
-        description: "Your LABR8 profile has been created successfully."
+        title: "Profile Created!",
+        description: "Your LAB-R8 service provider profile has been created successfully.",
       });
-      
-      navigate('/labr8/dashboard');
-    } catch (error) {
+
+      navigate("/labr8/inbox");
+    } catch (error: any) {
       console.error('Error creating service provider profile:', error);
       toast({
         title: "Error",
-        description: "Failed to create your profile. Please try again.",
+        description: error.message || "Failed to create profile. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -93,85 +155,40 @@ const Labr8Setup = () => {
     }
   };
 
-  const toggleDomain = (domainId: number) => {
-    setFormData(prev => ({
-      ...prev,
-      domain_specializations: prev.domain_specializations.includes(domainId)
-        ? prev.domain_specializations.filter(id => id !== domainId)
-        : [...prev.domain_specializations, domainId]
-    }));
-  };
-
-  const addService = () => {
-    if (newService.trim() && !formData.services.includes(newService.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        services: [...prev.services, newService.trim()]
-      }));
-      setNewService('');
-    }
-  };
-
-  const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }));
-      setNewTag('');
-    }
-  };
-
-  const addPortfolioLink = () => {
-    if (newPortfolioLink.trim() && !formData.portfolio_links.includes(newPortfolioLink.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        portfolio_links: [...prev.portfolio_links, newPortfolioLink.trim()]
-      }));
-      setNewPortfolioLink('');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/labr8')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </div>
-
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">
-              Create Your LABR8 Profile
-            </h1>
-            <p className="text-muted-foreground">
-              Set up your service provider profile to start receiving partnership opportunities
+            <div className="flex items-center justify-center mb-4">
+              <div className="h-16 w-16 rounded-lg bg-[#00eada] flex items-center justify-center">
+                <Building2 className="h-8 w-8 text-black" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-[#00eada] mb-2">LAB-R8 Setup</h1>
+            <p className="text-lg text-muted-foreground">
+              Complete your service provider profile to start receiving requests
             </p>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Service Provider Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Basic Information</CardTitle>
+                <CardDescription>
+                  Tell us about your business and what you offer
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="business_name">Business/Organization Name *</Label>
+                  <Label htmlFor="businessName">Business Name *</Label>
                   <Input
-                    id="business_name"
-                    value={formData.business_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, business_name: e.target.value }))}
-                    placeholder="Your business or organization name"
+                    id="businessName"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    placeholder="Your Business Name"
                     required
                   />
                 </div>
@@ -180,9 +197,9 @@ const Labr8Setup = () => {
                   <Label htmlFor="tagline">Tagline</Label>
                   <Input
                     id="tagline"
-                    value={formData.tagline}
-                    onChange={(e) => setFormData(prev => ({ ...prev, tagline: e.target.value }))}
-                    placeholder="A brief tagline describing your expertise"
+                    value={tagline}
+                    onChange={(e) => setTagline(e.target.value)}
+                    placeholder="A brief description of what you do"
                   />
                 </div>
 
@@ -190,183 +207,192 @@ const Labr8Setup = () => {
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Describe your services and expertise..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Detailed description of your services and expertise"
                     rows={4}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Domain Specializations *</Label>
-                  <p className="text-sm text-muted-foreground">Select the domains where you offer services</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {DOMAIN_PAGES.map((domain) => (
-                      <div key={domain.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`domain-${domain.id}`}
-                          checked={formData.domain_specializations.includes(domain.id)}
-                          onCheckedChange={() => toggleDomain(domain.id)}
-                        />
-                        <Label 
-                          htmlFor={`domain-${domain.id}`} 
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {domain.title}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
+                  <Label htmlFor="logoUrl">Logo URL</Label>
+                  <Input
+                    id="logoUrl"
+                    value={logoUrl}
+                    onChange={(e) => setLogoUrl(e.target.value)}
+                    placeholder="https://example.com/logo.png"
+                  />
                 </div>
+              </CardContent>
+            </Card>
 
+            {/* Services */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Services</CardTitle>
+                <CardDescription>
+                  What services do you provide?
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={serviceInput}
+                    onChange={(e) => setServiceInput(e.target.value)}
+                    placeholder="Add a service"
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddService())}
+                  />
+                  <Button type="button" onClick={handleAddService}>Add</Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {services.map((service) => (
+                    <Badge key={service} variant="secondary" className="flex items-center gap-1">
+                      {service}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveService(service)} />
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tags */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Tags</CardTitle>
+                <CardDescription>
+                  Add tags to help clients find you
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    placeholder="Add a tag"
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                  />
+                  <Button type="button" onClick={handleAddTag}>Add</Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="flex items-center gap-1">
+                      {tag}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveTag(tag)} />
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Portfolio Links */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Portfolio Links</CardTitle>
+                <CardDescription>
+                  Share examples of your work
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={portfolioInput}
+                    onChange={(e) => setPortfolioInput(e.target.value)}
+                    placeholder="https://example.com/portfolio"
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddPortfolioLink())}
+                  />
+                  <Button type="button" onClick={handleAddPortfolioLink}>Add</Button>
+                </div>
                 <div className="space-y-2">
-                  <Label>Services Offered</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newService}
-                      onChange={(e) => setNewService(e.target.value)}
-                      placeholder="e.g., Web Development, Grant Writing"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addService())}
-                    />
-                    <Button type="button" variant="outline" onClick={addService}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  {formData.services.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {formData.services.map((service, index) => (
-                        <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                          {service}
-                          <X 
-                            className="h-3 w-3 cursor-pointer" 
-                            onClick={() => setFormData(prev => ({
-                              ...prev,
-                              services: prev.services.filter((_, i) => i !== index)
-                            }))}
-                          />
-                        </Badge>
-                      ))}
+                  {portfolioLinks.map((link) => (
+                    <div key={link} className="flex items-center justify-between p-2 bg-muted rounded">
+                      <span className="text-sm">{link}</span>
+                      <X className="h-4 w-4 cursor-pointer" onClick={() => handleRemovePortfolioLink(link)} />
                     </div>
-                  )}
+                  ))}
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="space-y-2">
-                  <Label>Skills & Tags</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      placeholder="e.g., React, Nonprofit, Design"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    />
-                    <Button type="button" variant="outline" onClick={addTag}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  {formData.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {formData.tags.map((tag, index) => (
-                        <Badge key={index} variant="outline" className="flex items-center gap-1">
-                          {tag}
-                          <X 
-                            className="h-3 w-3 cursor-pointer" 
-                            onClick={() => setFormData(prev => ({
-                              ...prev,
-                              tags: prev.tags.filter((_, i) => i !== index)
-                            }))}
-                          />
-                        </Badge>
-                      ))}
+            {/* Domain Specializations */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Domain Specializations</CardTitle>
+                <CardDescription>
+                  Select the domains where you have expertise
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {DOMAIN_PAGES.map((domain) => (
+                    <div
+                      key={domain.id}
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        domainSpecializations.includes(domain.id)
+                          ? 'bg-[#00eada]/10 border-[#00eada]'
+                          : 'border-border hover:border-[#00eada]/50'
+                      }`}
+                      onClick={() => handleDomainToggle(domain.id)}
+                    >
+                      <h3 className="font-medium mb-1">{domain.title}</h3>
+                      <p className="text-sm text-muted-foreground">{domain.description}</p>
                     </div>
-                  )}
+                  ))}
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="space-y-2">
-                  <Label>Pricing Range (Optional)</Label>
-                  <div className="grid grid-cols-3 gap-2">
+            {/* Pricing */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Pricing Range</CardTitle>
+                <CardDescription>
+                  Optional: Set your general pricing range
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="pricingMin">Minimum (USD)</Label>
                     <Input
+                      id="pricingMin"
                       type="number"
-                      placeholder="Min rate"
-                      value={formData.pricing_range.min}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        pricing_range: { ...prev.pricing_range, min: e.target.value }
-                      }))}
+                      value={pricingMin}
+                      onChange={(e) => setPricingMin(e.target.value)}
+                      placeholder="1000"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pricingMax">Maximum (USD)</Label>
                     <Input
+                      id="pricingMax"
                       type="number"
-                      placeholder="Max rate"
-                      value={formData.pricing_range.max}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        pricing_range: { ...prev.pricing_range, max: e.target.value }
-                      }))}
-                    />
-                    <Input
-                      value={formData.pricing_range.currency}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        pricing_range: { ...prev.pricing_range, currency: e.target.value }
-                      }))}
-                      placeholder="USD"
+                      value={pricingMax}
+                      onChange={(e) => setPricingMax(e.target.value)}
+                      placeholder="10000"
                     />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="space-y-2">
-                  <Label>Portfolio Links</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newPortfolioLink}
-                      onChange={(e) => setNewPortfolioLink(e.target.value)}
-                      placeholder="https://your-portfolio.com"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addPortfolioLink())}
-                    />
-                    <Button type="button" variant="outline" onClick={addPortfolioLink}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
+            {/* Submit */}
+            <div className="flex justify-center">
+              <Button 
+                type="submit" 
+                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black px-8 py-3 text-lg"
+                disabled={loading || !businessName}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <LoadingSpinner size="sm" />
+                    Creating Profile...
                   </div>
-                  
-                  {formData.portfolio_links.length > 0 && (
-                    <div className="space-y-2 mt-3">
-                      {formData.portfolio_links.map((link, index) => (
-                        <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded">
-                          <span className="text-sm flex-1">{link}</span>
-                          <X 
-                            className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" 
-                            onClick={() => setFormData(prev => ({
-                              ...prev,
-                              portfolio_links: prev.portfolio_links.filter((_, i) => i !== index)
-                            }))}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => navigate('/labr8')}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={loading || !formData.business_name.trim() || formData.domain_specializations.length === 0}
-                    className="flex-1 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
-                  >
-                    {loading ? 'Creating Profile...' : 'Create Profile'}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                ) : (
+                  "Complete Setup"
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

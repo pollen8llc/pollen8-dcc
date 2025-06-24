@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -83,10 +82,10 @@ const OrganizerDashboard = () => {
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-sm text-muted-foreground mb-4">
-                  Configure your organizer settings and preferences
+                  Configure your account settings and preferences
                 </p>
                 <Button asChild className="w-full">
-                  <Link to="/rel8/settings">Go to Settings</Link>
+                  <Link to="/settings">Account Settings</Link>
                 </Button>
               </CardContent>
             </Card>

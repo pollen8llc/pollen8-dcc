@@ -7,12 +7,15 @@ import { ArrowLeft, Building2, User } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { ServiceRequest } from '@/types/modul8';
 import { getServiceRequests } from '@/services/modul8Service';
+import { useSession } from '@/hooks/useSession';
 import NegotiationFlow from '@/components/modul8/NegotiationFlow';
+import ServiceRequestActions from '@/components/modul8/ServiceRequestActions';
 import { toast } from '@/hooks/use-toast';
 
 const ServiceRequestDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { session } = useSession();
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -52,6 +55,9 @@ const ServiceRequestDetails = () => {
     }
   };
 
+  // Check if current user is the organizer who created this request
+  const isOwner = session?.user?.id && serviceRequest?.organizer?.user_id === session.user.id;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -82,7 +88,7 @@ const ServiceRequestDetails = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center justify-between mb-8">
             <Button
               variant="outline"
               size="sm"
@@ -92,6 +98,19 @@ const ServiceRequestDetails = () => {
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Button>
+            
+            {isOwner && (
+              <ServiceRequestActions 
+                request={serviceRequest} 
+                onUpdate={() => {
+                  loadServiceRequest();
+                  // If request was deleted, go back to dashboard
+                  if (serviceRequest.status === 'cancelled') {
+                    setTimeout(() => navigate('/modul8'), 1000);
+                  }
+                }}
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

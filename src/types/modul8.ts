@@ -43,12 +43,99 @@ export interface ServiceRequest {
   };
   timeline?: string;
   milestones: string[];
-  status: 'pending' | 'negotiating' | 'agreed' | 'completed' | 'cancelled';
+  status: 'pending' | 'negotiating' | 'agreed' | 'in_progress' | 'pending_review' | 'revision_requested' | 'pending_completion' | 'completed' | 'cancelled' | 'closed' | 'assigned' | 'declined';
   engagement_status: 'none' | 'negotiating' | 'affiliated';
+  project_progress?: number;
   created_at: string;
   updated_at: string;
   service_provider?: ServiceProvider;
   organizer?: Organizer;
+}
+
+export interface ProposalThread {
+  id: string;
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  status: 'active' | 'closed' | 'completed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProposalVersion {
+  id: string;
+  thread_id: string;
+  proposal_id: string;
+  version_number: number;
+  quote_amount?: number;
+  timeline?: string;
+  scope_details?: string;
+  terms?: string;
+  change_notes?: string;
+  created_by: string;
+  created_at: string;
+}
+
+export interface ProjectComment {
+  id: string;
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'comment' | 'status_update' | 'deliverable' | 'milestone';
+  content: string;
+  attachments: string[];
+  metadata: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectRevision {
+  id: string;
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  revision_type: 'requested' | 'response';
+  description: string;
+  attachments: string[];
+  status: 'pending' | 'addressed' | 'accepted';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectCompletion {
+  id: string;
+  service_request_id: string;
+  service_provider_id: string;
+  organizer_id: string;
+  completion_notes?: string;
+  deliverables: string[];
+  submitted_at: string;
+  confirmed_at?: string;
+  confirmed_by?: string;
+  status: 'submitted' | 'confirmed' | 'rejected';
+}
+
+export interface ProjectRating {
+  id: string;
+  service_request_id: string;
+  completion_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  rating: number;
+  feedback?: string;
+  created_at: string;
+}
+
+export interface ProjectMilestone {
+  id: string;
+  service_request_id: string;
+  title: string;
+  description?: string;
+  due_date?: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'overdue';
+  completed_at?: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Proposal {
@@ -60,7 +147,7 @@ export interface Proposal {
   timeline?: string;
   scope_details?: string;
   terms?: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'countered';
+  status: 'pending' | 'accepted' | 'rejected' | 'submitted' | 'countered';
   created_at: string;
 }
 
@@ -154,6 +241,104 @@ export interface CreateDealData {
   final_amount: number;
   deal_terms: any;
   deel_contract_url?: string;
+}
+
+export interface CreateProjectRevisionData {
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  revision_type: 'requested' | 'response';
+  description: string;
+  attachments?: string[];
+}
+
+export interface CreateProjectCompletionData {
+  service_request_id: string;
+  service_provider_id: string;
+  organizer_id: string;
+  completion_notes?: string;
+  deliverables?: string[];
+}
+
+export interface CreateProjectRatingData {
+  service_request_id: string;
+  completion_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+  rating: number;
+  feedback?: string;
+}
+
+export interface CreateProjectMilestoneData {
+  service_request_id: string;
+  title: string;
+  description?: string;
+  due_date?: string;
+  order_index?: number;
+}
+
+export interface CreateProposalThreadData {
+  service_request_id: string;
+  organizer_id: string;
+  service_provider_id: string;
+}
+
+export interface CreateProposalVersionData {
+  thread_id: string;
+  proposal_id: string;
+  version_number: number;
+  quote_amount?: number;
+  timeline?: string;
+  scope_details?: string;
+  terms?: string;
+  change_notes?: string;
+  created_by: string;
+}
+
+export interface CreateProjectCommentData {
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'comment' | 'status_update' | 'deliverable' | 'milestone';
+  content: string;
+  attachments?: string[];
+  metadata?: any;
+}
+
+export interface CreateServiceRequestCommentData {
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'general' | 'status_change' | 'system_notification';
+  content: string;
+  metadata?: any;
+}
+
+export interface CreateStatusChangeData {
+  service_request_id: string;
+  user_id: string;
+  from_status?: string;
+  to_status: string;
+  reason?: string;
+}
+
+export interface ServiceRequestComment {
+  id: string;
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'general' | 'status_change' | 'system_notification';
+  content: string;
+  metadata: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StatusChange {
+  id: string;
+  service_request_id: string;
+  user_id: string;
+  from_status?: string;
+  to_status: string;
+  reason?: string;
+  created_at: string;
 }
 
 export const DOMAIN_PAGES = [

@@ -1,12 +1,11 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import UserMenuDropdown from '@/components/navbar/UserMenuDropdown';
 import { NavigationDrawer } from '@/components/navbar/NavigationDrawer';
 import { Labr8NavigationDrawer } from '@/components/navbar/Labr8NavigationDrawer';
-import { Modul8NavigationDrawer } from '@/components/navbar/Modul8NavigationDrawer';
 import { Menu } from 'lucide-react';
 
 const navigationItems = [
@@ -20,15 +19,10 @@ const navigationItems = [
 const Navbar = () => {
   const { currentUser, logout } = useUser();
   const navigate = useNavigate();
-  const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Check if user is a service provider
   const isServiceProvider = currentUser?.role === 'SERVICE_PROVIDER';
-  
-  // Determine which navigation drawer to show based on current route
-  const isLabr8Route = location.pathname.startsWith('/labr8');
-  const isModul8Route = location.pathname.startsWith('/modul8');
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -49,29 +43,22 @@ const Navbar = () => {
           )}
         </Link>
         
-        {/* Navigation Drawers - Show appropriate drawer based on route */}
-        {isLabr8Route ? (
+        {/* Navigation Drawers */}
+        {isServiceProvider ? (
           <Labr8NavigationDrawer 
             open={drawerOpen}
             onOpenChange={setDrawerOpen}
             currentUser={currentUser}
             logout={logout}
           />
-        ) : isModul8Route ? (
-          <Modul8NavigationDrawer 
-            open={drawerOpen}
-            onOpenChange={setDrawerOpen}
-            currentUser={currentUser}
-            logout={logout}
-          />
-        ) : !isServiceProvider ? (
+        ) : (
           <NavigationDrawer 
             open={drawerOpen}
             onOpenChange={setDrawerOpen}
             currentUser={currentUser}
             logout={logout}
           />
-        ) : null}
+        )}
         
         <div className="flex items-center space-x-2">
           {currentUser ? (
@@ -86,16 +73,14 @@ const Navbar = () => {
             </Button>
           )}
           
-          {/* Menu button for drawer - show for all routes that have a drawer */}
-          {(isLabr8Route || isModul8Route || (!isServiceProvider && !isLabr8Route && !isModul8Route)) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDrawerOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
+          {/* Menu button for drawer */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setDrawerOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </nav>
