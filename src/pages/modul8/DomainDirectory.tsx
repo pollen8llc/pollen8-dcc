@@ -137,13 +137,13 @@ const DomainDirectory = () => {
                       </p>
                     )}
                     
-                    {provider.services && provider.services.length > 0 && (
+                    {provider.services && Array.isArray(provider.services) && provider.services.length > 0 && (
                       <div>
                         <h4 className="text-sm font-medium mb-2">Services</h4>
                         <div className="flex flex-wrap gap-1">
-                          {provider.services.slice(0, 3).map((service, index) => (
+                          {provider.services.slice(0, 3).map((service: any, index: number) => (
                             <Badge key={index} variant="secondary" className="text-xs">
-                              {typeof service === 'string' ? service : service.name}
+                              {typeof service === 'string' ? service : service?.name || 'Service'}
                             </Badge>
                           ))}
                           {provider.services.length > 3 && (

@@ -65,3 +65,27 @@ export const deleteServiceRequestComment = async (commentId: string): Promise<vo
 
   if (error) throw error;
 };
+
+export const updateServiceRequestStatus = async (
+  serviceRequestId: string,
+  status: string,
+  userId: string,
+  previousStatus: string,
+  reason: string
+): Promise<void> => {
+  // Update the service request status
+  const { error: updateError } = await supabase
+    .from('modul8_service_requests')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', serviceRequestId);
+
+  if (updateError) throw updateError;
+
+  // Create a status change comment
+  await createServiceRequestComment({
+    service_request_id: serviceRequestId,
+    user_id: userId,
+    comment_type: 'status_change',
+    content: `Status changed from ${previousStatus} to ${status}: ${reason}`
+  });
+};
