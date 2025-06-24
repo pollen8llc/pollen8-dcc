@@ -66,6 +66,7 @@ const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
 const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
+const Labr8ProjectStatusNew = lazy(() => import("@/pages/labr8/Labr8ProjectStatusNew"));
 
 // Loading component
 const AppLoadingSpinner = () => (
