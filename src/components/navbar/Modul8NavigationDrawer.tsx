@@ -266,7 +266,7 @@ export const Modul8NavigationDrawer: React.FC<Modul8NavigationDrawerProps> = ({
         <div className="border-t pt-4 flex flex-col gap-2">
           {currentUser && (
             <div className="px-4 py-2 text-sm">
-              <p className="font-medium">{currentUser.username}</p>
+              <p className="font-medium">{currentUser.name}</p>
               <p className="text-xs text-muted-foreground">Ecosystem Organizer</p>
             </div>
           )}
