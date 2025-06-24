@@ -34,12 +34,15 @@ const ServiceRequestForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const domainId = parseInt(searchParams.get('domain') || '1');
+  const providerId = searchParams.get('providerId');
   
   const [loading, setLoading] = useState(false);
   const [organizerData, setOrganizerData] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(null);
 
   useEffect(() => {
     loadOrganizerData();
+    loadSelectedProvider();
   }, [session?.user?.id]);
 
   const loadOrganizerData = async () => {
@@ -62,6 +65,17 @@ const ServiceRequestForm = () => {
     }
   };
 
+  const loadSelectedProvider = () => {
+    try {
+      const providerData = sessionStorage.getItem('selectedProvider');
+      if (providerData) {
+        setSelectedProvider(JSON.parse(providerData));
+      }
+    } catch (error) {
+      console.error('Error loading selected provider:', error);
+    }
+  };
+
   const handleSubmit = async (formData: any) => {
     if (!organizerData) return;
     
@@ -76,16 +90,22 @@ const ServiceRequestForm = () => {
         description: formData.description,
         budget_range: budgetRange,
         timeline: formData.expectedCompletion,
-        milestones: [] // Start with empty milestones
+        milestones: [], // Start with empty milestones
+        service_provider_id: providerId || undefined,
+        status: providerId ? 'assigned' : 'pending',
+        engagement_status: providerId ? 'affiliated' : 'none'
       });
+      
+      // Clear selected provider from session
+      sessionStorage.removeItem('selectedProvider');
       
       toast({
         title: "Request Created!",
-        description: "Your service request has been created and is now available to service providers."
+        description: "Your service request has been created and sent to the provider."
       });
       
-      // Navigate to the request status page
-      navigate(`/modul8/request/${serviceRequest.id}/status`);
+      // Navigate to the request details page
+      navigate(`/modul8/dashboard/request/${serviceRequest.id}`);
     } catch (error) {
       console.error('Error creating service request:', error);
       toast({
@@ -110,7 +130,7 @@ const ServiceRequestForm = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate('/modul8')}
+              onClick={() => navigate('/modul8/dashboard')}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -125,6 +145,13 @@ const ServiceRequestForm = () => {
             <p className="text-muted-foreground">
               {currentDomain?.title} • {currentDomain?.description}
             </p>
+            {selectedProvider && (
+              <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                <p className="text-sm">
+                  <span className="font-medium">Selected Provider:</span> {selectedProvider.business_name}
+                </p>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground mt-2">
               Post your request and connect with qualified service providers
             </p>
@@ -132,7 +159,7 @@ const ServiceRequestForm = () => {
 
           <SimplifiedRequestForm
             onSubmit={handleSubmit}
-            onCancel={() => navigate('/modul8')}
+            onCancel={() => navigate('/modul8/dashboard')}
             isSubmitting={loading}
           />
         </div>

@@ -1,66 +1,67 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const getServiceRequestComments = async (serviceRequestId: string) => {
+export interface CreateServiceRequestCommentData {
+  service_request_id: string;
+  user_id: string;
+  comment_type: 'general' | 'status_change';
+  content: string;
+  metadata?: Record<string, any>;
+}
+
+export interface ServiceRequestComment {
+  id: string;
+  service_request_id: string;
+  user_id: string;
+  comment_type: string;
+  content: string;
+  metadata?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export const createServiceRequestComment = async (data: CreateServiceRequestCommentData): Promise<ServiceRequestComment> => {
+  const { data: comment, error } = await supabase
+    .from('modul8_service_request_comments')
+    .insert(data)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return comment as ServiceRequestComment;
+};
+
+export const getServiceRequestComments = async (serviceRequestId: string): Promise<ServiceRequestComment[]> => {
   const { data, error } = await supabase
     .from('modul8_service_request_comments')
     .select('*')
     .eq('service_request_id', serviceRequestId)
     .order('created_at', { ascending: true });
-  
+
   if (error) throw error;
-  return data || [];
+  return (data || []) as ServiceRequestComment[];
 };
 
-export const createServiceRequestComment = async (commentData: {
-  service_request_id: string;
-  user_id: string;
-  comment_type: string;
-  content: string;
-}) => {
-  const { data, error } = await supabase
+export const updateServiceRequestComment = async (
+  commentId: string, 
+  content: string
+): Promise<ServiceRequestComment> => {
+  const { data: comment, error } = await supabase
     .from('modul8_service_request_comments')
-    .insert(commentData)
+    .update({ content, updated_at: new Date().toISOString() })
+    .eq('id', commentId)
     .select()
     .single();
-  
+
   if (error) throw error;
-  return data;
+  return comment as ServiceRequestComment;
 };
 
-export const updateServiceRequestStatus = async (
-  serviceRequestId: string,
-  status: string,
-  userId: string,
-  fromStatus?: string,
-  reason?: string
-) => {
-  // Update the service request status
-  const { error: updateError } = await supabase
-    .from('modul8_service_requests')
-    .update({ status })
-    .eq('id', serviceRequestId);
+export const deleteServiceRequestComment = async (commentId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('modul8_service_request_comments')
+    .delete()
+    .eq('id', commentId);
 
-  if (updateError) throw updateError;
-
-  // Log the status change
-  const { error: logError } = await supabase
-    .from('modul8_status_changes')
-    .insert({
-      service_request_id: serviceRequestId,
-      user_id: userId,
-      from_status: fromStatus,
-      to_status: status,
-      reason
-    });
-
-  if (logError) throw logError;
-
-  // Create a comment for the status change
-  await createServiceRequestComment({
-    service_request_id: serviceRequestId,
-    user_id: userId,
-    comment_type: 'status_change',
-    content: reason || `Status changed from ${fromStatus || 'unknown'} to ${status}`
-  });
+  if (error) throw error;
 };

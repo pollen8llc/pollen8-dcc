@@ -53,30 +53,20 @@ const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
 const Triggers = lazy(() => import("@/pages/rel8t/Triggers"));
 const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
 
-// Modul8 pages
+// Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
-const DomainProviders = lazy(() => import("@/pages/modul8/DomainProviders"));
+const DomainDirectory = lazy(() => import("@/pages/modul8/DomainDirectory"));
+const ServiceRequestForm = lazy(() => import("@/pages/modul8/ServiceRequestForm"));
+const Modul8RequestDetails = lazy(() => import("@/pages/modul8/Modul8RequestDetails"));
 const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
 const OrganizerSetup = lazy(() => import("@/pages/modul8/setup/OrganizerSetup"));
-const ProviderRequestPortal = lazy(() => import("@/pages/modul8/ProviderRequestPortal"));
-const ServiceRequestDetails = lazy(() => import("@/pages/modul8/ServiceRequestDetails"));
-const RequestStatus = lazy(() => import("./pages/modul8/RequestStatus"));
 
-// LAB-R8 pages
+// LAB-R8 pages - Updated for new flow
 const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
 const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
-const ModernLabr8Dashboard = lazy(() => import("@/pages/labr8/ModernLabr8Dashboard"));
-const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
-const Labr8ProjectDetails = lazy(() => import("@/pages/labr8/Labr8ProjectDetails"));
-const Labr8ProjectStatus = lazy(() => import("@/pages/labr8/Labr8ProjectStatus"));
-
-// Enhanced LAB-R8 dashboard
-const EnhancedLabr8Dashboard = lazy(() => import("@/pages/labr8/EnhancedLabr8Dashboard"));
-
-// Grid LAB-R8 dashboard and Fixed Request Status
-const GridLabr8Dashboard = lazy(() => import("@/pages/labr8/GridLabr8Dashboard"));
-const FixedRequestStatusPage = lazy(() => import("@/components/modul8/FixedRequestStatusPage"));
+const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
+const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
 
 // Loading component
 const AppLoadingSpinner = () => (
@@ -359,15 +349,33 @@ const AppRoutes = () => {
               </NonServiceProviderRoute>
             } />
 
-            {/* Modul8 routes - Protected from service providers */}
-            <Route path="/modul8" element={
+            {/* Modul8 routes - Organizer Flow */}
+            <Route path="/modul8/dashboard" element={
               <NonServiceProviderRoute>
-                <Modul8Dashboard />
+                <ProtectedRoute>
+                  <Modul8Dashboard />
+                </ProtectedRoute>
               </NonServiceProviderRoute>
             } />
-            <Route path="/modul8/domain/:domainId" element={
+            <Route path="/modul8/dashboard/directory" element={
               <NonServiceProviderRoute>
-                <DomainProviders />
+                <ProtectedRoute>
+                  <DomainDirectory />
+                </ProtectedRoute>
+              </NonServiceProviderRoute>
+            } />
+            <Route path="/modul8/dashboard/request/new" element={
+              <NonServiceProviderRoute>
+                <ProtectedRoute>
+                  <ServiceRequestForm />
+                </ProtectedRoute>
+              </NonServiceProviderRoute>
+            } />
+            <Route path="/modul8/dashboard/request/:requestId" element={
+              <NonServiceProviderRoute>
+                <ProtectedRoute>
+                  <Modul8RequestDetails />
+                </ProtectedRoute>
               </NonServiceProviderRoute>
             } />
             <Route path="/modul8/setup/provider" element={
@@ -380,23 +388,8 @@ const AppRoutes = () => {
                 <OrganizerSetup />
               </NonServiceProviderRoute>
             } />
-            <Route path="/modul8/provider/:providerId/request" element={
-              <NonServiceProviderRoute>
-                <ProviderRequestPortal />
-              </NonServiceProviderRoute>
-            } />
-            <Route path="/modul8/request/:id" element={
-              <NonServiceProviderRoute>
-                <ServiceRequestDetails />
-              </NonServiceProviderRoute>
-            } />
-            <Route path="/modul8/provider/:providerId/:requestId/status" element={
-              <NonServiceProviderRoute>
-                <RequestStatus />
-              </NonServiceProviderRoute>
-            } />
             
-            {/* LAB-R8 Routes */}
+            {/* LAB-R8 Routes - Service Provider Flow */}
             <Route path="/labr8" element={<Labr8Landing />} />
             <Route path="/labr8/auth" element={<Labr8Auth />} />
             <Route
@@ -411,57 +404,18 @@ const AppRoutes = () => {
               path="/labr8/dashboard"
               element={
                 <ServiceProviderProtectedRoute>
-                  <GridLabr8Dashboard />
+                  <Labr8Dashboard />
                 </ServiceProviderProtectedRoute>
               }
             />
             <Route
-              path="/labr8/enhanced"
+              path="/labr8/dashboard/request/:requestId"
               element={
                 <ServiceProviderProtectedRoute>
-                  <EnhancedLabr8Dashboard />
+                  <Labr8RequestDetails />
                 </ServiceProviderProtectedRoute>
               }
             />
-            <Route
-              path="/labr8/project/:id"
-              element={
-                <ServiceProviderProtectedRoute>
-                  <Labr8ProjectDetails />
-                </ServiceProviderProtectedRoute>
-              }
-            />
-            <Route
-              path="/labr8/project/:id/status"
-              element={
-                <ServiceProviderProtectedRoute>
-                  <Labr8ProjectStatus />
-                </ServiceProviderProtectedRoute>
-              }
-            />
-            <Route
-              path="/labr8/:providerId/:requestId/status"
-              element={
-                <ServiceProviderProtectedRoute>
-                  <FixedRequestStatusPage />
-                </ServiceProviderProtectedRoute>
-              }
-            />
-            <Route
-              path="/labr8/request/:requestId/status"
-              element={
-                <ServiceProviderProtectedRoute>
-                  <FixedRequestStatusPage />
-                </ServiceProviderProtectedRoute>
-              }
-            />
-
-            {/* Update status page routes to use fixed version */}
-            <Route path="/modul8/request/:requestId/status" element={
-              <NonServiceProviderRoute>
-                <FixedRequestStatusPage />
-              </NonServiceProviderRoute>
-            } />
 
             {/* Documentation and 404 - Accessible to all */}
             <Route path="/docs" element={
