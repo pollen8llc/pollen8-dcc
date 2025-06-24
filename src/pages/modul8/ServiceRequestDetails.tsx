@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Building2, User } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { ServiceRequest } from '@/types/modul8';
-import { getServiceRequestById } from '@/services/modul8Service';
+import { getServiceRequests } from '@/services/modul8Service';
 import { useSession } from '@/hooks/useSession';
-import RequestThread from '@/components/shared/RequestThread';
+import NegotiationFlow from '@/components/modul8/NegotiationFlow';
 import ServiceRequestActions from '@/components/modul8/ServiceRequestActions';
 import { toast } from '@/hooks/use-toast';
 
@@ -27,7 +27,10 @@ const ServiceRequestDetails = () => {
     if (!id) return;
     
     try {
-      const request = await getServiceRequestById(id);
+      // For now, we'll get all requests and find the one we need
+      // In a real app, you'd have a getServiceRequestById function
+      const requests = await getServiceRequests();
+      const request = requests.find(r => r.id === id);
       
       if (!request) {
         toast({
@@ -113,10 +116,9 @@ const ServiceRequestDetails = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <RequestThread 
+              <NegotiationFlow 
                 serviceRequest={serviceRequest} 
                 onUpdate={loadServiceRequest}
-                isServiceProvider={false}
               />
             </div>
 
@@ -190,15 +192,15 @@ const ServiceRequestDetails = () => {
                 </Card>
               )}
 
-              {/* Request Metadata */}
+              {/* Request Status */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Request Details</CardTitle>
+                  <CardTitle>Status</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Status:</span>
+                      <span className="text-sm text-muted-foreground">Request Status:</span>
                       <span className="text-sm font-medium capitalize">{serviceRequest.status}</span>
                     </div>
                     <div className="flex justify-between">

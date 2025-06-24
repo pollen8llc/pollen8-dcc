@@ -12,8 +12,6 @@ const Index = () => {
   
   useEffect(() => {
     if (!isLoading && currentUser) {
-      console.log('User found, redirecting based on role:', currentUser.role);
-      
       // If user is a service provider, redirect to LAB-R8
       if (currentUser.role === 'SERVICE_PROVIDER') {
         if (!currentUser.profile_complete) {
@@ -24,17 +22,11 @@ const Index = () => {
         return;
       }
       
-      // If user is an organizer, redirect to Modul8
-      if (currentUser.role === 'ORGANIZER') {
-        navigate("/modul8", { replace: true });
-        return;
-      }
-      
       // For other users, check if profile is complete before redirecting
       if (!currentUser.profile_complete) {
         navigate("/profile/setup", { replace: true });
       } else {
-        // Default redirect to knowledge resources for other roles
+        // If user is logged in and profile is complete, redirect to knowledge resources
         navigate("/knowledge/resources", { replace: true });
       }
     }

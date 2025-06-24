@@ -8,7 +8,6 @@ interface StatsCardProps {
   icon?: React.ReactNode;
   accentColor?: string;
   trailing?: React.ReactNode;
-  change?: string;
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -17,7 +16,6 @@ const StatsCard: React.FC<StatsCardProps> = ({
   icon,
   accentColor,
   trailing,
-  change,
 }) => (
   <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-[#00eada]/20 transition-all duration-300">
     <CardContent className="p-6 flex flex-col gap-2 h-full">
@@ -33,18 +31,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
       </div>
       <div className="flex items-end justify-between flex-1">
         <span className="text-3xl font-bold tracking-tight">{value}</span>
-        <div className="flex flex-col items-end gap-1">
-          {change && (
-            <span className={`text-sm font-medium ${
-              change.startsWith('+') ? 'text-green-600' : 
-              change.startsWith('-') ? 'text-red-600' : 
-              'text-gray-600'
-            }`}>
-              {change}
-            </span>
-          )}
-          {trailing}
-        </div>
+        {trailing}
       </div>
     </CardContent>
   </Card>
