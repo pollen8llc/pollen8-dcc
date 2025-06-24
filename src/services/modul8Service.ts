@@ -208,31 +208,25 @@ export const getOrganizerServiceRequests = async (organizerId: string): Promise<
   })) as ServiceRequest[];
 };
 
-export const getProviderServiceRequests = async (providerId: string): Promise<ServiceRequest[]> => {
-  console.log('Loading provider service requests for provider:', providerId);
+export const getProviderServiceRequests = async (serviceProviderId: string): Promise<ServiceRequest[]> => {
+  console.log('Getting service requests for provider:', serviceProviderId);
   
   const { data, error } = await supabase
     .from('modul8_service_requests')
     .select(`
       *,
-      service_provider:modul8_service_providers(*),
       organizer:modul8_organizers(*)
     `)
-    .eq('service_provider_id', providerId)
+    .eq('service_provider_id', serviceProviderId)
     .order('created_at', { ascending: false });
-  
+
   if (error) {
-    console.error('Error loading provider requests:', error);
+    console.error('Error fetching provider service requests:', error);
     throw error;
   }
-  
-  console.log('Provider requests loaded:', data?.length || 0, 'requests');
-  
-  return (data || []).map(request => ({
-    ...request,
-    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[]
-  })) as ServiceRequest[];
+
+  console.log('Provider service requests found:', data?.length || 0);
+  return data || [];
 };
 
 export const getAvailableServiceRequestsForProvider = async (providerId: string): Promise<ServiceRequest[]> => {

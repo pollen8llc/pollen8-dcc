@@ -65,29 +65,28 @@ const ModernLabr8Dashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-[#00eada] flex items-center justify-center shadow-lg">
-              <Building2 className="h-8 w-8 text-black" />
+            <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+              <Building2 className="h-8 w-8 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-4xl font-black tracking-tight">LAB-R8 Dashboard</h1>
+              <h1 className="text-4xl font-black tracking-tight text-foreground">LAB-R8 Dashboard</h1>
               <p className="text-lg text-muted-foreground">
                 Welcome back, {displayName}
               </p>
             </div>
           </div>
           <div className="flex gap-2">
-            {/* New logout button (matches design, modul8-style, shadcn/ui) */}
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="flex items-center gap-2 border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10 transition"
+              className="flex items-center gap-2 border-primary text-primary hover:bg-primary/10 transition"
             >
               <LogOut className="h-4 w-4" />
               Logout
             </Button>
             <Button
               onClick={reload}
-              className="rounded-xl bg-[#00eada] hover:bg-[#00eada]/80 px-6 py-2 font-semibold text-black shadow transition border border-[#00eada]/30"
+              className="rounded-xl bg-primary hover:bg-primary/80 px-6 py-2 font-semibold text-primary-foreground shadow transition border border-primary/30"
             >
               Refresh
             </Button>
@@ -99,33 +98,33 @@ const ModernLabr8Dashboard: React.FC = () => {
           <StatsCard
             label="Incoming"
             value={pendingRequests.length}
-            icon={<ExternalLink className="h-6 w-6 text-blue-600" />}
-            accentColor="bg-blue-100"
+            icon={<ExternalLink className="h-6 w-6 text-blue-400" />}
+            accentColor="bg-blue-500/20"
           />
           <StatsCard
             label="In Discussion"
             value={negotiatingRequests.length}
-            icon={<AlertCircle className="h-6 w-6 text-orange-600" />}
-            accentColor="bg-orange-100"
+            icon={<AlertCircle className="h-6 w-6 text-orange-400" />}
+            accentColor="bg-orange-500/20"
           />
           <StatsCard
             label="Active"
             value={activeProjects.length}
-            icon={<Clock className="h-6 w-6 text-purple-600" />}
-            accentColor="bg-purple-100"
+            icon={<Clock className="h-6 w-6 text-purple-400" />}
+            accentColor="bg-purple-500/20"
           />
           <StatsCard
             label="Completed"
             value={completedProjects.length}
-            icon={<CheckCircle2 className="h-6 w-6 text-green-600" />}
-            accentColor="bg-green-100"
+            icon={<CheckCircle2 className="h-6 w-6 text-green-400" />}
+            accentColor="bg-green-500/20"
           />
         </div>
 
         {/* Request Management Tabs */}
-        <div className="bg-background/95 backdrop-blur-sm rounded-2xl p-6 border-border/40">
+        <div className="bg-card/60 backdrop-blur-sm rounded-2xl p-6 border border-border/40">
           <Tabs defaultValue="incoming" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 rounded-xl border mb-6">
+            <TabsList className="grid w-full grid-cols-4 rounded-xl border mb-6 bg-muted/20">
               <TabsTrigger value="incoming">Incoming ({pendingRequests.length})</TabsTrigger>
               <TabsTrigger value="discussing">Discussing ({negotiatingRequests.length})</TabsTrigger>
               <TabsTrigger value="active">Active ({activeProjects.length})</TabsTrigger>
@@ -172,7 +171,7 @@ const ModernLabr8Dashboard: React.FC = () => {
 
         {/* Recent Activity */}
         <div className="mt-12">
-          <h2 className="text-xl font-extrabold mb-4">Recent Activity</h2>
+          <h2 className="text-xl font-extrabold mb-4 text-foreground">Recent Activity</h2>
           <ActivityFeed />
         </div>
       </div>

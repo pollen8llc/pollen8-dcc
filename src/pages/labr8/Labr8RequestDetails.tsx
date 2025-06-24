@@ -75,19 +75,21 @@ const Labr8RequestDetails = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'assigned':
+        return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
       case 'negotiating':
-        return 'bg-orange-50 text-orange-700 border-orange-200';
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
       case 'agreed':
-        return 'bg-green-50 text-green-700 border-green-200';
+        return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'in_progress':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
+        return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
       case 'completed':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
       case 'cancelled':
-        return 'bg-red-50 text-red-700 border-red-200';
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'bg-muted/20 text-muted-foreground border-muted/30';
     }
   };
 
@@ -96,7 +98,7 @@ const Labr8RequestDetails = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]" />
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary" />
         </div>
       </div>
     );
@@ -108,7 +110,7 @@ const Labr8RequestDetails = () => {
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
+            <h2 className="text-2xl font-semibold mb-2 text-foreground">Request Not Found</h2>
             <Button onClick={() => navigate('/labr8/dashboard')}>
               Back to Dashboard
             </Button>
@@ -119,7 +121,7 @@ const Labr8RequestDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -129,23 +131,23 @@ const Labr8RequestDetails = () => {
             variant="outline"
             size="sm"
             onClick={() => navigate('/labr8/dashboard')}
-            className="flex items-center gap-2 border-gray-300 hover:border-[#00eada] hover:text-[#00eada]"
+            className="flex items-center gap-2 border-border hover:border-primary hover:text-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Button>
           
           <div className="flex-1">
-            <h1 className="text-3xl font-black text-gray-900">{serviceRequest.title}</h1>
+            <h1 className="text-3xl font-black text-foreground">{serviceRequest.title}</h1>
             <div className="flex items-center gap-3 mt-2">
               <Badge className={`${getStatusColor(serviceRequest.status)} border font-semibold px-3 py-1`}>
                 {serviceRequest.status.replace('_', ' ').toUpperCase()}
               </Badge>
-              <Badge className="bg-[#00eada]/10 text-[#00eada] border border-[#00eada]/20 font-semibold">
+              <Badge className="bg-primary/10 text-primary border border-primary/20 font-semibold">
                 <Building className="h-4 w-4 mr-1" />
                 Service Provider View
               </Badge>
-              <span className="text-gray-500 text-sm">
+              <span className="text-muted-foreground text-sm">
                 Created {new Date(serviceRequest.created_at).toLocaleDateString()}
               </span>
             </div>
@@ -156,24 +158,24 @@ const Labr8RequestDetails = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Project Details */}
-            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-gray-900">Project Details</CardTitle>
+                <CardTitle className="text-lg font-bold text-foreground">Project Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {serviceRequest.description && (
                   <div>
-                    <div className="text-sm font-semibold text-gray-700 mb-2">Description</div>
-                    <div className="text-sm text-gray-600 leading-relaxed">
+                    <div className="text-sm font-semibold text-muted-foreground mb-2">Description</div>
+                    <div className="text-sm text-muted-foreground leading-relaxed">
                       {serviceRequest.description}
                     </div>
                   </div>
                 )}
 
                 {serviceRequest.budget_range?.min && (
-                  <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
-                    <DollarSign className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">
+                  <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                    <DollarSign className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">
                       ${serviceRequest.budget_range.min.toLocaleString()}
                       {serviceRequest.budget_range.max && 
                         ` - $${serviceRequest.budget_range.max.toLocaleString()}`
@@ -183,49 +185,49 @@ const Labr8RequestDetails = () => {
                 )}
                 
                 {serviceRequest.timeline && (
-                  <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-                    <Calendar className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-800">{serviceRequest.timeline}</span>
+                  <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <Calendar className="h-4 w-4 text-blue-400" />
+                    <span className="text-sm font-medium text-blue-400">{serviceRequest.timeline}</span>
                   </div>
                 )}
               </CardContent>
             </Card>
 
             {/* Participants */}
-            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-gray-900">Participants</CardTitle>
+                <CardTitle className="text-lg font-bold text-foreground">Participants</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Organizer */}
-                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                <div className="flex items-center gap-3 p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={serviceRequest.organizer?.logo_url} />
-                    <AvatarFallback className="bg-blue-200 text-blue-700">
+                    <AvatarFallback className="bg-blue-500/20 text-blue-400">
                       <Building className="h-6 w-6" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="text-sm font-bold text-blue-900">
+                    <div className="text-sm font-bold text-blue-400">
                       {serviceRequest.organizer?.organization_name || 'Client'}
                     </div>
-                    <div className="text-xs text-blue-600 font-medium">Organizer</div>
+                    <div className="text-xs text-blue-400/70 font-medium">Organizer</div>
                   </div>
                 </div>
 
                 {/* Service Provider */}
-                <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-[#00eada]/10 to-[#00eada]/20 rounded-xl border border-[#00eada]/30">
+                <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-xl border border-primary/30">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={serviceProvider?.logo_url} />
-                    <AvatarFallback className="bg-[#00eada]/20 text-[#00eada]">
+                    <AvatarFallback className="bg-primary/20 text-primary">
                       <Building className="h-6 w-6" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="text-sm font-bold text-gray-900">
+                    <div className="text-sm font-bold text-foreground">
                       {serviceProvider?.business_name || 'Your Business'}
                     </div>
-                    <div className="text-xs text-[#00eada] font-bold">Service Provider (You)</div>
+                    <div className="text-xs text-primary font-bold">Service Provider (You)</div>
                   </div>
                 </div>
               </CardContent>
