@@ -148,7 +148,9 @@ const Labr8RequestDetails = () => {
     if (!serviceRequest) return;
     
     try {
-      await updateServiceRequest(serviceRequest.id, { status: newStatus });
+      await updateServiceRequest(serviceRequest.id, { 
+        status: newStatus as ServiceRequest['status'] 
+      });
       toast({
         title: "Status Updated",
         description: `Project status changed to ${newStatus}`,

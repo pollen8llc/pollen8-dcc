@@ -1,6 +1,8 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Proposal, CreateProposalData } from "@/types/modul8";
+
+// Export the Proposal type for use in other files
+export type { Proposal };
 
 export const createProposal = async (data: CreateProposalData): Promise<Proposal> => {
   const { data: proposal, error } = await supabase
