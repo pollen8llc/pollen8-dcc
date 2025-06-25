@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { respondToProposalCard, createCounterProposalFromCard } from '@/services/proposalCardService';
-import { CreateProposalResponseData, CreateProposalCardData } from '@/types/proposalCards';
-import { CheckCircle, XCircle, MessageSquare, Loader2 } from 'lucide-react';
+import { respondToProposalCard } from '@/services/proposalCardService';
+import { CreateProposalResponseData } from '@/types/proposalCards';
+import { CheckCircle, XCircle, MessageSquare, Loader2, Clock, Users } from 'lucide-react';
+import { useSession } from '@/hooks/useSession';
+import { useProposalCardResponses } from '@/hooks/useProposalCardResponses';
 
 interface ProposalCardActionsProps {
   cardId: string;
@@ -21,7 +23,9 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   showCounterOption = true,
   onCounterClick
 }) => {
+  const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
+  const { acceptResponses, hasMutualAcceptance, hasAnyAcceptance } = useProposalCardResponses(cardId);
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
     if (isLocked) {
@@ -29,6 +33,17 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
         title: "Action Not Available",
         description: "This proposal card has already been responded to.",
         variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if current user already responded with this type
+    const currentUserResponse = acceptResponses.find(r => r.responded_by === session?.user?.id);
+    if (currentUserResponse && responseType === 'accept') {
+      toast({
+        title: "Already Responded",
+        description: "You have already accepted this proposal.",
+        variant: "default"
       });
       return;
     }
@@ -44,7 +59,9 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
       await respondToProposalCard(responseData);
 
       const actionMessages = {
-        accept: "Proposal accepted successfully! Waiting for the other party's response.",
+        accept: hasAnyAcceptance 
+          ? "Proposal accepted! Both parties have now accepted - deal confirmation is being processed."
+          : "Proposal accepted successfully! Waiting for the other party's response.",
         reject: "Proposal rejected. The other party has been notified.",
         cancel: "Proposal cancelled successfully."
       };
@@ -86,6 +103,27 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
         This proposal has been responded to
       </div>
     );
+  }
+
+  // Show acceptance status if there are any acceptances
+  if (hasAnyAcceptance) {
+    const currentUserAccepted = acceptResponses.some(r => r.responded_by === session?.user?.id);
+    
+    if (hasMutualAcceptance) {
+      return (
+        <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold">
+          <Users className="h-4 w-4" />
+          Both parties have accepted - Creating final confirmation...
+        </div>
+      );
+    } else if (currentUserAccepted) {
+      return (
+        <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
+          <Clock className="h-4 w-4" />
+          Awaiting other party's response...
+        </div>
+      );
+    }
   }
 
   return (

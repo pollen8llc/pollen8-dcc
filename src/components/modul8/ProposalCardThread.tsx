@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +36,10 @@ import {
 } from '@/services/proposalCardService';
 import { ProposalCard, RequestComment } from '@/types/proposalCards';
 import { ServiceRequest } from '@/types/modul8';
+import { ProposalCardActions } from './ProposalCardActions';
+import { ProposalCardStatus } from './ProposalCardStatus';
+import { DeelIntegrationButton } from './DeelIntegrationButton';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProposalCardThreadProps {
   requestId: string;
@@ -63,7 +66,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   const [proposalTerms, setProposalTerms] = useState('');
   const [newComment, setNewComment] = useState('');
   
-  // Initial request response state - Fix: Only based on proposal cards, not service request status
+  // Initial request response state
   const [initialRequestResponded, setInitialRequestResponded] = useState(false);
   
   // Negotiated request details
@@ -75,6 +78,50 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
 
   useEffect(() => {
     loadThreadData();
+
+    // Set up real-time subscription for proposal cards
+    const channel = supabase
+      .channel('proposal-cards-thread')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'modul8_proposal_cards',
+          filter: `request_id=eq.${requestId}`
+        },
+        () => {
+          loadThreadData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'modul8_proposal_card_responses'
+        },
+        () => {
+          loadThreadData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'modul8_request_comments',
+          filter: `request_id=eq.${requestId}`
+        },
+        () => {
+          loadThreadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [requestId]);
 
   const loadThreadData = async () => {
@@ -94,7 +141,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       setProposalCards(cardsData);
       setComments(commentsData);
       
-      // Fix: Only check if there are proposal cards - don't check service request status
       const hasProposalCards = cardsData.length > 0;
       setInitialRequestResponded(hasProposalCards);
       
@@ -125,7 +171,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       setSubmitting(true);
       
       if (responseType === 'counter') {
-        // Reset negotiated fields to original request values and show form
         setNegotiatedTitle(serviceRequest.title || '');
         setNegotiatedDescription(serviceRequest.description || '');
         setNegotiatedBudgetMin(serviceRequest.budget_range?.min || '');
@@ -137,7 +182,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         return;
       }
 
-      // Handle accept/reject by creating a comment
       const content = responseType === 'accept' 
         ? 'Initial request accepted as proposed.' 
         : 'Initial request declined.';
@@ -181,7 +225,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       setSubmitting(true);
       
       if (counteringCardId) {
-        // Creating a counter proposal
         await createCounterProposalFromCard(counteringCardId, {
           request_id: requestId,
           notes: proposalNotes,
@@ -203,7 +246,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
           description: "Your counter proposal has been submitted successfully"
         });
       } else {
-        // Creating a new proposal
         await createProposalCard({
           request_id: requestId,
           notes: proposalNotes,
@@ -226,7 +268,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         });
       }
 
-      // Reset form and reload data
       setProposalNotes('');
       setProposalScope('');
       setProposalTerms('');
@@ -250,7 +291,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       setSubmitting(true);
       
       if (responseType === 'counter') {
-        // Pre-populate form with card data for counter-proposal
         const card = proposalCards.find(c => c.id === cardId);
         if (card) {
           setNegotiatedTitle(card.negotiated_title || '');
@@ -318,29 +358,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       });
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const getCardStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'accepted': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'countered': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-      case 'cancelled': return 'bg-muted/20 text-muted-foreground border-muted/30';
-      case 'final_confirmation': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-      default: return 'bg-muted/20 text-muted-foreground border-muted/30';
-    }
-  };
-
-  const getCardStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending': return <Clock className="h-4 w-4" />;
-      case 'accepted': return <CheckCircle className="h-4 w-4" />;
-      case 'rejected': return <XCircle className="h-4 w-4" />;
-      case 'countered': return <ArrowRight className="h-4 w-4" />;
-      case 'final_confirmation': return <Star className="h-4 w-4" />;
-      default: return <Clock className="h-4 w-4" />;
     }
   };
 
@@ -420,7 +437,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             </div>
           </div>
           
-          {/* Response Actions for Initial Request - Fix: Show when service provider and not responded */}
           {!initialRequestResponded && isServiceProvider && (
             <div className="flex gap-2 pt-4 border-t border-gray-700 mt-4">
               <Button
@@ -482,10 +498,12 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                           <Badge className="bg-primary/10 text-primary font-bold px-3 py-1">
                             Card #{index + 2}
                           </Badge>
-                          <Badge className={`${getCardStatusColor(card.status)} font-semibold border px-3 py-1 flex items-center gap-1`}>
-                            {getCardStatusIcon(card.status)}
-                            {card.status === 'final_confirmation' ? 'DEAL CONFIRMED' : card.status.toUpperCase()}
-                          </Badge>
+                          <ProposalCardStatus
+                            cardId={card.id}
+                            cardStatus={card.status}
+                            submittedBy={card.submitted_by}
+                            isLocked={card.is_locked}
+                          />
                           {card.response_to_card_id && (
                             <Badge variant="outline" className="text-orange-400 border-orange-500/30">
                               Counter Proposal
@@ -563,51 +581,27 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                       </div>
                     </div>
                     
-                    {/* Final Confirmation DEEL Button */}
+                    {/* Final Confirmation DEEL Integration */}
                     {card.status === 'final_confirmation' && (
-                      <div className="flex justify-center pt-4 border-t border-gray-700">
-                        <Button
-                          onClick={() => window.open('https://deel.com', '_blank')}
-                          size="lg"
-                          className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold px-8 py-3"
-                        >
-                          <ExternalLink className="h-5 w-5 mr-2" />
-                          Complete Deal with DEEL
-                        </Button>
-                      </div>
+                      <DeelIntegrationButton
+                        projectTitle={card.negotiated_title}
+                        projectDescription={card.negotiated_description}
+                        budgetRange={card.negotiated_budget_range}
+                        timeline={card.negotiated_timeline}
+                        organizerName={serviceRequest.organizer?.organization_name}
+                        serviceProviderName="Service Provider" // TODO: Get actual service provider name
+                      />
                     )}
                     
                     {/* Response Actions */}
                     {card.status === 'pending' && card.submitted_by !== session?.user?.id && !card.is_locked && (
-                      <div className="flex gap-2 pt-4 border-t border-gray-700">
-                        <Button
-                          onClick={() => handleRespondToCard(card.id, 'accept')}
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                          disabled={submitting}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Accept
-                        </Button>
-                        <Button
-                          onClick={() => handleRespondToCard(card.id, 'reject')}
-                          size="sm"
-                          variant="outline"
-                          className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-                          disabled={submitting}
-                        >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Reject
-                        </Button>
-                        <Button
-                          onClick={() => handleRespondToCard(card.id, 'counter')}
-                          size="sm"
-                          className="bg-orange-600 hover:bg-orange-700 text-white"
-                          disabled={submitting}
-                        >
-                          <ArrowRight className="h-4 w-4 mr-1" />
-                          Counter
-                        </Button>
+                      <div className="pt-4 border-t border-gray-700">
+                        <ProposalCardActions
+                          cardId={card.id}
+                          isLocked={card.is_locked}
+                          onActionComplete={loadThreadData}
+                          onCounterClick={() => handleRespondToCard(card.id, 'counter')}
+                        />
                       </div>
                     )}
                   </CardContent>
