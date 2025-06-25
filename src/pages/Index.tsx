@@ -17,7 +17,7 @@ const Index = () => {
         if (!currentUser.profile_complete) {
           navigate("/labr8/setup", { replace: true });
         } else {
-          navigate("/labr8/inbox", { replace: true });
+          navigate("/labr8/dashboard", { replace: true });
         }
         return;
       }

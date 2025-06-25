@@ -362,6 +362,7 @@ const AppRoutes = () => {
           <Route path="/labr8/auth" element={<Labr8Auth />} />
           <Route path="/labr8/setup" element={<ServiceProviderSetup />} />
           <Route path="/labr8/dashboard" element={<ServiceProviderProtectedRoute><Labr8Dashboard /></ServiceProviderProtectedRoute>} />
+          <Route path="/labr8/inbox" element={<ServiceProviderProtectedRoute><Labr8Dashboard /></ServiceProviderProtectedRoute>} />
           <Route path="/labr8/dashboard/request/:requestId" element={<ServiceProviderProtectedRoute><Labr8RequestDetails /></ServiceProviderProtectedRoute>} />
 
           {/* Documentation and 404 - Accessible to all */}
