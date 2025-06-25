@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,6 +59,9 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   const [proposalTerms, setProposalTerms] = useState('');
   const [newComment, setNewComment] = useState('');
   
+  // Initial request response state
+  const [initialRequestResponded, setInitialRequestResponded] = useState(false);
+  
   // Negotiated request details
   const [negotiatedTitle, setNegotiatedTitle] = useState('');
   const [negotiatedDescription, setNegotiatedDescription] = useState('');
@@ -84,6 +86,10 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       setProposalCards(cardsData);
       setComments(commentsData);
       
+      // Check if initial request has been responded to
+      const hasResponse = cardsData.length > 0 || serviceRequest.status !== 'pending';
+      setInitialRequestResponded(hasResponse);
+      
       // Initialize negotiated fields with current request data
       if (serviceRequest) {
         setNegotiatedTitle(serviceRequest.title || '');
@@ -101,6 +107,52 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInitialRequestResponse = async (responseType: 'accept' | 'reject' | 'counter') => {
+    try {
+      setSubmitting(true);
+      
+      if (responseType === 'counter') {
+        // Reset negotiated fields to original request values and show form
+        setNegotiatedTitle(serviceRequest.title || '');
+        setNegotiatedDescription(serviceRequest.description || '');
+        setNegotiatedBudgetMin(serviceRequest.budget_range?.min || '');
+        setNegotiatedBudgetMax(serviceRequest.budget_range?.max || '');
+        setNegotiatedTimeline(serviceRequest.timeline || '');
+        setShowProposalForm(true);
+        setInitialRequestResponded(true);
+        return;
+      }
+
+      // Handle accept/reject by creating a comment
+      const content = responseType === 'accept' 
+        ? 'Initial request accepted as proposed.' 
+        : 'Initial request declined.';
+
+      await createRequestComment({
+        request_id: requestId,
+        content,
+        attachment_links: []
+      });
+
+      toast({
+        title: responseType === 'accept' ? "Request Accepted" : "Request Declined",
+        description: `The initial request has been ${responseType}ed successfully`
+      });
+
+      setInitialRequestResponded(true);
+      await loadThreadData();
+    } catch (error) {
+      console.error('Error responding to initial request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to respond to initial request",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -314,6 +366,40 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
               </div>
             </div>
           </div>
+          
+          {/* Response Actions for Initial Request */}
+          {!initialRequestResponded && isServiceProvider && (
+            <div className="flex gap-2 pt-4 border-t border-gray-700 mt-4">
+              <Button
+                onClick={() => handleInitialRequestResponse('accept')}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                disabled={submitting}
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Accept
+              </Button>
+              <Button
+                onClick={() => handleInitialRequestResponse('reject')}
+                size="sm"
+                variant="outline"
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                disabled={submitting}
+              >
+                <XCircle className="h-4 w-4 mr-1" />
+                Reject
+              </Button>
+              <Button
+                onClick={() => handleInitialRequestResponse('counter')}
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+                disabled={submitting}
+              >
+                <ArrowRight className="h-4 w-4 mr-1" />
+                Counter
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -465,13 +551,13 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         </CardContent>
       </Card>
 
-      {/* New Proposal Form */}
-      {(showProposalForm || (isServiceProvider && proposalCards.length === 0)) && (
+      {/* New Proposal Form - Only shown when explicitly triggered */}
+      {showProposalForm && (
         <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800">
           <CardHeader className="pb-4">
             <CardTitle className="text-xl font-black text-white flex items-center gap-2">
               <Send className="h-5 w-5 text-primary" />
-              {proposalCards.length === 0 ? 'Submit Your Proposal' : 'Submit Counter Proposal'}
+              {proposalCards.length === 0 ? 'Submit Your Counter Proposal' : 'Submit Counter Proposal'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -631,19 +717,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Show Proposal Button for Service Providers */}
-      {isServiceProvider && !showProposalForm && proposalCards.length > 0 && (
-        <div className="flex justify-center">
-          <Button
-            onClick={() => setShowProposalForm(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
-          >
-            <Send className="h-4 w-4 mr-2" />
-            Submit New Proposal
-          </Button>
-        </div>
       )}
 
       {/* Comments Section */}
