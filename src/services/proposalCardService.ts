@@ -89,6 +89,17 @@ export const createCounterProposalFromCard = async (
 
   if (fetchError) throw fetchError;
 
+  // Safely cast the asset_links and negotiated fields with proper type checking
+  const safeAssetLinks = Array.isArray(originalCard.asset_links) 
+    ? originalCard.asset_links as string[]
+    : [];
+
+  const safeBudgetRange = originalCard.negotiated_budget_range && 
+    typeof originalCard.negotiated_budget_range === 'object' &&
+    !Array.isArray(originalCard.negotiated_budget_range)
+    ? originalCard.negotiated_budget_range as { min?: number; max?: number; currency: string; }
+    : undefined;
+
   // Create counter proposal with data from original card as fallback
   const counterProposal = await createProposalCard({
     request_id: originalCard.request_id,
@@ -96,11 +107,11 @@ export const createCounterProposalFromCard = async (
     notes: counterData.notes || originalCard.notes,
     scope_link: counterData.scope_link || originalCard.scope_link,
     terms_link: counterData.terms_link || originalCard.terms_link,
-    asset_links: counterData.asset_links || originalCard.asset_links || [],
-    negotiated_title: counterData.negotiated_title || originalCard.negotiated_title,
-    negotiated_description: counterData.negotiated_description || originalCard.negotiated_description,
-    negotiated_budget_range: counterData.negotiated_budget_range || originalCard.negotiated_budget_range,
-    negotiated_timeline: counterData.negotiated_timeline || originalCard.negotiated_timeline
+    asset_links: counterData.asset_links || safeAssetLinks,
+    negotiated_title: counterData.negotiated_title || (originalCard.negotiated_title as string | undefined),
+    negotiated_description: counterData.negotiated_description || (originalCard.negotiated_description as string | undefined),
+    negotiated_budget_range: counterData.negotiated_budget_range || safeBudgetRange,
+    negotiated_timeline: counterData.negotiated_timeline || (originalCard.negotiated_timeline as string | undefined)
   });
 
   // Mark the original card as countered
