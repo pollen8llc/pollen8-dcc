@@ -2337,6 +2337,14 @@ export type Database = {
         Args: { viewer_id: string; profile_id: string; max_depth?: number }
         Returns: boolean
       }
+      is_organizer: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      is_service_provider: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       log_audit_action: {
         Args: {
           action_name: string

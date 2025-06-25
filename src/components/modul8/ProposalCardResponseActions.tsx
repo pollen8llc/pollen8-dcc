@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -98,10 +99,13 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
           <Sparkles className="h-4 w-4" />
           Both parties have accepted - seal the deal
         </div>
-        <div className="deel-integration-container w-full">
+        <div className="deel-integration-container w-full relative">
+          <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500 via-teal-500 to-blue-500 p-[2px] animate-spin">
+            <div className="w-full h-full bg-white rounded-lg"></div>
+          </div>
           <Button
             onClick={() => window.open('https://app.deel.com/login', '_blank')}
-            className="w-full bg-white hover:bg-gray-50 text-black font-bold text-lg py-6 border-0"
+            className="relative w-full bg-white hover:bg-gray-50 text-black font-bold text-lg py-6 border-0 rounded-lg z-10"
             size="lg"
           >
             DEEL
