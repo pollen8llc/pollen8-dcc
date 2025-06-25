@@ -7,11 +7,20 @@ import { supabase } from '@/integrations/supabase/client';
 export const useProposalCardResponses = (cardId: string) => {
   const [responses, setResponses] = useState<ProposalCardResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDeelCard, setShowDeelCard] = useState(false);
 
   const loadResponses = async () => {
     try {
       const data = await getProposalCardResponses(cardId);
       setResponses(data);
+      
+      // Check for mutual acceptance
+      const acceptResponses = data.filter(r => r.response_type === 'accept');
+      const uniqueResponders = new Set(acceptResponses.map(r => r.responded_by));
+      
+      if (uniqueResponders.size >= 2) {
+        setShowDeelCard(true);
+      }
     } catch (error) {
       console.error('Error loading responses:', error);
     } finally {
@@ -54,6 +63,7 @@ export const useProposalCardResponses = (cardId: string) => {
     acceptResponses,
     hasMutualAcceptance,
     hasAnyAcceptance,
+    showDeelCard,
     refresh: loadResponses
   };
 };
