@@ -91,12 +91,21 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     return null;
   }
 
-  // Show mutual acceptance status with celebration
+  // Show mutual acceptance status with celebration and DEEL button
   if (hasMutualAcceptance) {
     return (
-      <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold animate-pulse">
-        <Sparkles className="h-4 w-4" />
-        Both parties have accepted - Creating final confirmation...
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold animate-pulse">
+          <Sparkles className="h-4 w-4" />
+          Both parties have accepted - seal the deal
+        </div>
+        <Button
+          onClick={() => window.open('https://app.deel.com/login', '_blank')}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+          size="sm"
+        >
+          DEEL
+        </Button>
       </div>
     );
   }
