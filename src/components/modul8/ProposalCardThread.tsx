@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -68,7 +69,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   const [negotiatedBudgetMin, setNegotiatedBudgetMin] = useState<number | ''>('');
   const [negotiatedBudgetMax, setNegotiatedBudgetMax] = useState<number | ''>('');
   const [negotiatedTimeline, setNegotiatedTimeline] = useState('');
-  
+
   useEffect(() => {
     loadThreadData();
   }, [requestId]);
@@ -427,7 +428,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <Badge className="bg-primary/10 text-primary font-bold px-3 py-1">
-                            Card #{card.card_number + 1}
+                            Card #{index + 2}
                           </Badge>
                           <Badge className={`${getCardStatusColor(card.status)} font-semibold border px-3 py-1 flex items-center gap-1`}>
                             {getCardStatusIcon(card.status)}
