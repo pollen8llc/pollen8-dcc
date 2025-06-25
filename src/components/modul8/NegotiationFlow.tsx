@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ServiceRequest, Proposal } from '@/types/modul8';
+import { ServiceRequest } from '@/types/modul8';
+import { ProposalCard as ProposalCardType } from '@/types/proposalCards';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,7 @@ import {
   User,
   AlertTriangle
 } from 'lucide-react';
-import { getProposalsByRequestId, updateProposalStatus } from '@/services/proposalService';
+import { getProposalCards } from '@/services/proposalCardService';
 import { toast } from '@/hooks/use-toast';
 import ProviderResponseForm from './ProviderResponseForm';
 import { ProposalCard } from './ProposalCard';
@@ -31,26 +32,26 @@ const NegotiationFlow = ({
   onUpdate, 
   isServiceProvider = false 
 }: NegotiationFlowProps) => {
-  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [proposalCards, setProposalCards] = useState<ProposalCardType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showContractModal, setShowContractModal] = useState(false);
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [showCounterForm, setShowCounterForm] = useState(false);
-  const [counterProposal, setCounterProposal] = useState<Proposal | null>(null);
+  const [counterProposal, setCounterProposal] = useState<ProposalCardType | null>(null);
 
   useEffect(() => {
-    loadProposals();
+    loadProposalCards();
   }, [serviceRequest.id]);
 
-  const loadProposals = async () => {
+  const loadProposalCards = async () => {
     try {
-      const proposalData = await getProposalsByRequestId(serviceRequest.id);
-      setProposals(proposalData || []);
+      const cardData = await getProposalCards(serviceRequest.id);
+      setProposalCards(cardData || []);
     } catch (error) {
-      console.error('Error loading proposals:', error);
+      console.error('Error loading proposal cards:', error);
       toast({
         title: "Error",
-        description: "Failed to load proposals",
+        description: "Failed to load proposal cards",
         variant: "destructive"
       });
     } finally {
@@ -62,7 +63,7 @@ const NegotiationFlow = ({
     setShowResponseForm(false);
     setShowCounterForm(false);
     setCounterProposal(null);
-    loadProposals();
+    loadProposalCards();
     onUpdate();
   };
 
@@ -80,43 +81,7 @@ const NegotiationFlow = ({
     handleProposalUpdate();
   };
 
-  const handleAcceptProposal = async (proposal: Proposal) => {
-    try {
-      await updateProposalStatus(proposal.id, 'accepted');
-      toast({
-        title: "Proposal Accepted",
-        description: "The proposal has been accepted successfully",
-      });
-      handleProposalUpdate();
-    } catch (error) {
-      console.error('Error accepting proposal:', error);
-      toast({
-        title: "Error",
-        description: "Failed to accept proposal",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleDeclineProposal = async (proposal: Proposal) => {
-    try {
-      await updateProposalStatus(proposal.id, 'rejected');
-      toast({
-        title: "Proposal Declined",
-        description: "The proposal has been declined",
-      });
-      handleProposalUpdate();
-    } catch (error) {
-      console.error('Error declining proposal:', error);
-      toast({
-        title: "Error",
-        description: "Failed to decline proposal",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleCounterOffer = (proposal: Proposal) => {
+  const handleCounterOffer = (proposal: ProposalCardType) => {
     setCounterProposal(proposal);
     setShowCounterForm(true);
   };
@@ -223,13 +188,13 @@ const NegotiationFlow = ({
             </CardHeader>
             <CardContent className="space-y-4">
               {loading ? (
-                <div className="text-center py-4">Loading proposals...</div>
-              ) : proposals.length > 0 ? (
+                <div className="text-center py-4">Loading proposal cards...</div>
+              ) : proposalCards.length > 0 ? (
                 <div className="space-y-4">
-                  {proposals.map((proposal) => (
+                  {proposalCards.map((card) => (
                     <ProposalCard
-                      key={proposal.id}
-                      card={proposal}
+                      key={card.id}
+                      card={card}
                       onActionComplete={handleProposalUpdate}
                     />
                   ))}
@@ -238,7 +203,7 @@ const NegotiationFlow = ({
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    No proposals found for this request.
+                    No proposal cards found for this request.
                   </AlertDescription>
                 </Alert>
               )}
@@ -282,14 +247,14 @@ const NegotiationFlow = ({
                   Both parties have agreed to the terms. Ready to create the contract.
                 </p>
                 
-                {proposals.length > 0 && (
+                {proposalCards.length > 0 && (
                   <div className="bg-white dark:bg-gray-800 p-3 rounded border">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">
-                        Agreed Amount: ${proposals[0]?.quote_amount?.toLocaleString()}
+                        Agreed Amount: ${proposalCards.find(c => c.status === 'final_confirmation')?.negotiated_budget_range?.min?.toLocaleString() || 'TBD'}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        Timeline: {proposals[0]?.timeline}
+                        Timeline: {proposalCards.find(c => c.status === 'final_confirmation')?.negotiated_timeline || 'TBD'}
                       </span>
                     </div>
                   </div>
@@ -435,7 +400,7 @@ const NegotiationFlow = ({
         <ContractCreationModal
           isOpen={showContractModal}
           serviceRequest={serviceRequest}
-          proposal={proposals.find(p => p.status === 'accepted')}
+          proposal={proposalCards.find(c => c.status === 'accepted' || c.status === 'final_confirmation')}
           onClose={() => setShowContractModal(false)}
           onCreateContract={handleProposalUpdate}
         />
