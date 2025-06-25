@@ -81,8 +81,8 @@ const NegotiationFlow = ({
     handleProposalUpdate();
   };
 
-  const handleCounterOffer = (proposal: ProposalCardType) => {
-    setCounterProposal(proposal);
+  const handleCounterOffer = (proposalCard: ProposalCardType) => {
+    setCounterProposal(proposalCard);
     setShowCounterForm(true);
   };
 
@@ -196,6 +196,7 @@ const NegotiationFlow = ({
                       key={card.id}
                       card={card}
                       onActionComplete={handleProposalUpdate}
+                      onCounterClick={() => handleCounterOffer(card)}
                     />
                   ))}
                 </div>
@@ -407,28 +408,6 @@ const NegotiationFlow = ({
       )}
     </div>
   );
-};
-
-const getStageNumber = (status: string) => {
-  switch (status) {
-    case 'pending': return 1;
-    case 'negotiating': return 2;
-    case 'agreed': return 3;
-    case 'in_progress': return 4;
-    case 'completed': return 5;
-    default: return 1;
-  }
-};
-
-const getStageTitle = (status: string) => {
-  switch (status) {
-    case 'pending': return 'Initiated';
-    case 'negotiating': return 'Proposal';
-    case 'agreed': return 'Agreement';
-    case 'in_progress': return 'Contract';
-    case 'completed': return 'Completed';
-    default: return 'Initiated';
-  }
 };
 
 export default NegotiationFlow;
