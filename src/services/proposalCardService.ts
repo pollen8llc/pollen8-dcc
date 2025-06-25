@@ -63,68 +63,91 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
 };
 
 export const respondToProposalCard = async (data: CreateProposalResponseData): Promise<ProposalCardResponse> => {
-  const { data: response, error } = await supabase
-    .from('modul8_proposal_card_responses')
-    .insert({
-      ...data,
-      responded_by: (await supabase.auth.getUser()).data.user?.id
-    })
-    .select()
-    .single();
+  try {
+    console.log('Responding to proposal card:', { cardId: data.card_id, responseType: data.response_type });
+    
+    const { data: response, error } = await supabase
+      .from('modul8_proposal_card_responses')
+      .insert({
+        ...data,
+        responded_by: (await supabase.auth.getUser()).data.user?.id
+      })
+      .select()
+      .single();
 
-  if (error) throw error;
-  return response as ProposalCardResponse;
+    if (error) {
+      console.error('Error responding to proposal card:', error);
+      throw new Error(`Failed to ${data.response_type} proposal: ${error.message}`);
+    }
+
+    console.log('Proposal card response created successfully:', response);
+    return response as ProposalCardResponse;
+  } catch (error) {
+    console.error('Error in respondToProposalCard:', error);
+    throw error;
+  }
 };
 
 export const createCounterProposalFromCard = async (
   originalCardId: string, 
   counterData: Omit<CreateProposalCardData, 'response_to_card_id'>
 ): Promise<ProposalCard> => {
-  // Get the original card details
-  const { data: originalCard, error: fetchError } = await supabase
-    .from('modul8_proposal_cards')
-    .select('*')
-    .eq('id', originalCardId)
-    .single();
+  try {
+    console.log('Creating counter proposal from card:', originalCardId);
+    
+    // Get the original card details
+    const { data: originalCard, error: fetchError } = await supabase
+      .from('modul8_proposal_cards')
+      .select('*')
+      .eq('id', originalCardId)
+      .single();
 
-  if (fetchError) throw fetchError;
+    if (fetchError) {
+      console.error('Error fetching original card:', fetchError);
+      throw new Error(`Failed to fetch original proposal: ${fetchError.message}`);
+    }
 
-  // Safely cast the asset_links and negotiated fields with proper type checking
-  const safeAssetLinks = Array.isArray(originalCard.asset_links) 
-    ? originalCard.asset_links as string[]
-    : [];
+    // Safely cast the asset_links and negotiated fields with proper type checking
+    const safeAssetLinks = Array.isArray(originalCard.asset_links) 
+      ? originalCard.asset_links as string[]
+      : [];
 
-  const safeBudgetRange = originalCard.negotiated_budget_range && 
-    typeof originalCard.negotiated_budget_range === 'object' &&
-    !Array.isArray(originalCard.negotiated_budget_range)
-    ? originalCard.negotiated_budget_range as { min?: number; max?: number; currency: string; }
-    : undefined;
+    const safeBudgetRange = originalCard.negotiated_budget_range && 
+      typeof originalCard.negotiated_budget_range === 'object' &&
+      !Array.isArray(originalCard.negotiated_budget_range)
+      ? originalCard.negotiated_budget_range as { min?: number; max?: number; currency: string; }
+      : undefined;
 
-  // Create counter proposal with data from original card as fallback
-  const counterProposal = await createProposalCard({
-    request_id: originalCard.request_id,
-    response_to_card_id: originalCardId,
-    notes: counterData.notes || originalCard.notes,
-    scope_link: counterData.scope_link || originalCard.scope_link,
-    terms_link: counterData.terms_link || originalCard.terms_link,
-    asset_links: counterData.asset_links || safeAssetLinks,
-    negotiated_title: counterData.negotiated_title || (originalCard.negotiated_title as string | undefined),
-    negotiated_description: counterData.negotiated_description || (originalCard.negotiated_description as string | undefined),
-    negotiated_budget_range: counterData.negotiated_budget_range || safeBudgetRange,
-    negotiated_timeline: counterData.negotiated_timeline || (originalCard.negotiated_timeline as string | undefined)
-  });
+    // Create counter proposal with data from original card as fallback
+    const counterProposal = await createProposalCard({
+      request_id: originalCard.request_id,
+      response_to_card_id: originalCardId,
+      notes: counterData.notes || originalCard.notes,
+      scope_link: counterData.scope_link || originalCard.scope_link,
+      terms_link: counterData.terms_link || originalCard.terms_link,
+      asset_links: counterData.asset_links || safeAssetLinks,
+      negotiated_title: counterData.negotiated_title || (originalCard.negotiated_title as string | undefined),
+      negotiated_description: counterData.negotiated_description || (originalCard.negotiated_description as string | undefined),
+      negotiated_budget_range: counterData.negotiated_budget_range || safeBudgetRange,
+      negotiated_timeline: counterData.negotiated_timeline || (originalCard.negotiated_timeline as string | undefined)
+    });
 
-  // Mark the original card as countered
-  await supabase
-    .from('modul8_proposal_cards')
-    .update({ 
-      status: 'countered',
-      is_locked: true,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', originalCardId);
+    // Mark the original card as countered
+    await supabase
+      .from('modul8_proposal_cards')
+      .update({ 
+        status: 'countered',
+        is_locked: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', originalCardId);
 
-  return counterProposal;
+    console.log('Counter proposal created successfully:', counterProposal.id);
+    return counterProposal;
+  } catch (error) {
+    console.error('Error in createCounterProposalFromCard:', error);
+    throw error;
+  }
 };
 
 export const checkMutualAcceptance = async (cardId: string): Promise<boolean> => {
