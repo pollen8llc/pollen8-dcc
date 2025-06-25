@@ -9,9 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   ArrowLeft, 
   Building, 
-  User, 
-  Calendar,
-  DollarSign
+  User
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProposalCardThread from '@/components/modul8/ProposalCardThread';
@@ -155,45 +153,8 @@ const Labr8RequestDetails = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
+          {/* Sidebar - Only Participants */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Project Details */}
-            <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-foreground">Project Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {serviceRequest.description && (
-                  <div>
-                    <div className="text-sm font-semibold text-muted-foreground mb-2">Description</div>
-                    <div className="text-sm text-muted-foreground leading-relaxed">
-                      {serviceRequest.description}
-                    </div>
-                  </div>
-                )}
-
-                {serviceRequest.budget_range?.min && (
-                  <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                    <DollarSign className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium text-primary">
-                      ${serviceRequest.budget_range.min.toLocaleString()}
-                      {serviceRequest.budget_range.max && 
-                        ` - $${serviceRequest.budget_range.max.toLocaleString()}`
-                      }
-                    </span>
-                  </div>
-                )}
-                
-                {serviceRequest.timeline && (
-                  <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                    <Calendar className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm font-medium text-blue-400">{serviceRequest.timeline}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Participants */}
             <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-bold text-foreground">Participants</CardTitle>
@@ -239,6 +200,7 @@ const Labr8RequestDetails = () => {
             <ProposalCardThread 
               requestId={serviceRequest.id}
               isServiceProvider={true}
+              serviceRequest={serviceRequest}
             />
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +19,9 @@ import {
   Building,
   User,
   Send,
-  Paperclip
+  Paperclip,
+  Calendar,
+  PlayCircle
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { 
@@ -32,22 +33,22 @@ import {
   createRequestComment
 } from '@/services/proposalCardService';
 import { ProposalCard, RequestComment } from '@/types/proposalCards';
-import { getServiceRequestById } from '@/services/modul8Service';
 import { ServiceRequest } from '@/types/modul8';
 
 interface ProposalCardThreadProps {
   requestId: string;
   isServiceProvider?: boolean;
+  serviceRequest: ServiceRequest;
 }
 
 const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({ 
   requestId, 
-  isServiceProvider = false 
+  isServiceProvider = false,
+  serviceRequest
 }) => {
   const { session } = useSession();
   const [proposalCards, setProposalCards] = useState<ProposalCard[]>([]);
   const [comments, setComments] = useState<RequestComment[]>([]);
-  const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   
@@ -74,23 +75,21 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
     
     try {
       setLoading(true);
-      const [cardsData, commentsData, requestData] = await Promise.all([
+      const [cardsData, commentsData] = await Promise.all([
         getProposalCards(requestId),
-        getRequestComments(requestId),
-        getServiceRequestById(requestId)
+        getRequestComments(requestId)
       ]);
       
       setProposalCards(cardsData);
       setComments(commentsData);
-      setServiceRequest(requestData);
       
       // Initialize negotiated fields with current request data
-      if (requestData) {
-        setNegotiatedTitle(requestData.title || '');
-        setNegotiatedDescription(requestData.description || '');
-        setNegotiatedBudgetMin(requestData.budget_range?.min || '');
-        setNegotiatedBudgetMax(requestData.budget_range?.max || '');
-        setNegotiatedTimeline(requestData.timeline || '');
+      if (serviceRequest) {
+        setNegotiatedTitle(serviceRequest.title || '');
+        setNegotiatedDescription(serviceRequest.description || '');
+        setNegotiatedBudgetMin(serviceRequest.budget_range?.min || '');
+        setNegotiatedBudgetMax(serviceRequest.budget_range?.max || '');
+        setNegotiatedTimeline(serviceRequest.timeline || '');
       }
     } catch (error) {
       console.error('Error loading thread data:', error);
@@ -249,6 +248,55 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Initial Request Card */}
+      <Card className="border-l-4 border-l-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Badge className="bg-emerald-500/20 text-emerald-600 border-emerald-500/30 font-bold px-3 py-1 flex items-center gap-1">
+              <PlayCircle className="h-4 w-4" />
+              INITIAL REQUEST
+            </Badge>
+            <span className="text-sm text-muted-foreground">
+              Created {new Date(serviceRequest.created_at).toLocaleDateString()}
+            </span>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xl font-bold text-foreground mb-2">{serviceRequest.title}</h3>
+              {serviceRequest.description && (
+                <p className="text-muted-foreground leading-relaxed">{serviceRequest.description}</p>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {serviceRequest.budget_range && (serviceRequest.budget_range.min || serviceRequest.budget_range.max) && (
+                <div className="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                  <DollarSign className="h-4 w-4 text-emerald-600" />
+                  <span className="text-sm font-medium text-emerald-600">
+                    {serviceRequest.budget_range.min && serviceRequest.budget_range.max 
+                      ? `$${serviceRequest.budget_range.min.toLocaleString()} - $${serviceRequest.budget_range.max.toLocaleString()}`
+                      : serviceRequest.budget_range.min 
+                      ? `From $${serviceRequest.budget_range.min.toLocaleString()}`
+                      : serviceRequest.budget_range.max 
+                      ? `Up to $${serviceRequest.budget_range.max.toLocaleString()}`
+                      : 'Budget TBD'
+                    }
+                  </span>
+                </div>
+              )}
+              
+              {serviceRequest.timeline && (
+                <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-600">{serviceRequest.timeline}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Proposal Cards Timeline */}
       <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
         <CardHeader className="pb-4">
@@ -398,12 +446,12 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       </Card>
 
       {/* New Proposal Form */}
-      {(showProposalForm || (isServiceProvider && proposalCards.length === 1)) && (
+      {(showProposalForm || (isServiceProvider && proposalCards.length === 0)) && (
         <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-xl font-black text-foreground flex items-center gap-2">
               <Send className="h-5 w-5 text-primary" />
-              {proposalCards.length === 1 ? 'Submit Your Proposal' : 'Submit Counter Proposal'}
+              {proposalCards.length === 0 ? 'Submit Your Proposal' : 'Submit Counter Proposal'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -566,7 +614,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       )}
 
       {/* Show Proposal Button for Service Providers */}
-      {isServiceProvider && !showProposalForm && proposalCards.length > 1 && (
+      {isServiceProvider && !showProposalForm && proposalCards.length > 0 && (
         <div className="flex justify-center">
           <Button
             onClick={() => setShowProposalForm(true)}
