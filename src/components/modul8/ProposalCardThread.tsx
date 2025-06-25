@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,7 +59,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   const [proposalTerms, setProposalTerms] = useState('');
   const [newComment, setNewComment] = useState('');
   
-  // Initial request response state
+  // Initial request response state - Fix: Only based on proposal cards, not service request status
   const [initialRequestResponded, setInitialRequestResponded] = useState(false);
   
   // Negotiated request details
@@ -84,12 +83,18 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         getRequestComments(requestId)
       ]);
       
+      console.log('Loaded proposal cards:', cardsData);
+      console.log('Service request status:', serviceRequest.status);
+      console.log('Is service provider:', isServiceProvider);
+      
       setProposalCards(cardsData);
       setComments(commentsData);
       
-      // Check if initial request has been responded to
-      const hasResponse = cardsData.length > 0 || serviceRequest.status !== 'pending';
-      setInitialRequestResponded(hasResponse);
+      // Fix: Only check if there are proposal cards - don't check service request status
+      const hasProposalCards = cardsData.length > 0;
+      setInitialRequestResponded(hasProposalCards);
+      
+      console.log('Initial request responded:', hasProposalCards);
       
       // Initialize negotiated fields with current request data
       if (serviceRequest) {
@@ -368,7 +373,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             </div>
           </div>
           
-          {/* Response Actions for Initial Request */}
+          {/* Response Actions for Initial Request - Fix: Show when service provider and not responded */}
           {!initialRequestResponded && isServiceProvider && (
             <div className="flex gap-2 pt-4 border-t border-gray-700 mt-4">
               <Button
