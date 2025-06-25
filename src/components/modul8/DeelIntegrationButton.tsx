@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, FileContract, Sparkles } from 'lucide-react';
+import { ExternalLink, FileText, Sparkles } from 'lucide-react';
 
 interface DeelIntegrationButtonProps {
   projectTitle?: string;
@@ -59,7 +59,7 @@ export const DeelIntegrationButton: React.FC<DeelIntegrationButtonProps> = ({
         size="lg"
         className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold px-8 py-3 text-lg"
       >
-        <FileContract className="h-5 w-5 mr-2" />
+        <FileText className="h-5 w-5 mr-2" />
         Create Contract with DEEL
         <ExternalLink className="h-4 w-4 ml-2" />
       </Button>
