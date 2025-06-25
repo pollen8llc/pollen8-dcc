@@ -17,7 +17,7 @@ import {
 import { getProposalsByRequestId, updateProposalStatus } from '@/services/proposalService';
 import { toast } from '@/hooks/use-toast';
 import ProviderResponseForm from './ProviderResponseForm';
-import ProposalCard from './ProposalCard';
+import { ProposalCard } from './ProposalCard';
 import ContractCreationModal from './ContractCreationModal';
 
 interface NegotiationFlowProps {
@@ -229,12 +229,8 @@ const NegotiationFlow = ({
                   {proposals.map((proposal) => (
                     <ProposalCard
                       key={proposal.id}
-                      proposal={proposal}
-                      onAccept={() => handleAcceptProposal(proposal)}
-                      onDecline={() => handleDeclineProposal(proposal)}
-                      onCounter={() => handleCounterOffer(proposal)}
-                      onUpdate={handleProposalUpdate}
-                      isOrganizer={!isServiceProvider}
+                      card={proposal}
+                      onActionComplete={handleProposalUpdate}
                     />
                   ))}
                 </div>
