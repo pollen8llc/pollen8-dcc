@@ -105,27 +105,30 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // Show acceptance status if there are any acceptances
-  if (hasAnyAcceptance) {
-    const currentUserAccepted = acceptResponses.some(r => r.responded_by === session?.user?.id);
-    
-    if (hasMutualAcceptance) {
-      return (
-        <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold">
-          <Users className="h-4 w-4" />
-          Both parties have accepted - Creating final confirmation...
-        </div>
-      );
-    } else if (currentUserAccepted) {
-      return (
-        <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
-          <Clock className="h-4 w-4" />
-          Awaiting other party's response...
-        </div>
-      );
-    }
+  // Show mutual acceptance confirmation
+  if (hasMutualAcceptance) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold">
+        <Users className="h-4 w-4" />
+        Both parties have accepted - Creating final confirmation...
+      </div>
+    );
   }
 
+  // Check if current user has already accepted
+  const currentUserAccepted = acceptResponses.some(r => r.responded_by === session?.user?.id);
+  
+  // If current user already accepted, show waiting message
+  if (currentUserAccepted) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
+        <Clock className="h-4 w-4" />
+        Awaiting other party's response...
+      </div>
+    );
+  }
+
+  // Show action buttons (either no acceptance yet, or they accepted but current user hasn't)
   return (
     <div className="flex gap-2 flex-wrap">
       <Button

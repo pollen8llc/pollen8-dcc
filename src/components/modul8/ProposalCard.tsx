@@ -1,208 +1,167 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ProposalCard as ProposalCardType } from '@/types/proposalCards';
+import { ProposalCardActions } from './ProposalCardActions';
+import { ProposalCardStatus } from './ProposalCardStatus';
+import { DeelIntegrationButton } from './DeelIntegrationButton';
+import { AnimatedBorder } from './AnimatedBorder';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DollarSign, 
-  Clock, 
-  FileText, 
-  CheckCircle,
-  XCircle,
-  MessageSquare,
-  Building,
-  ExternalLink
-} from 'lucide-react';
-import { Proposal, ServiceProvider } from '@/types/modul8';
+import { User, Clock, ExternalLink } from 'lucide-react';
 
 interface ProposalCardProps {
-  proposal: Proposal & { service_provider?: ServiceProvider };
-  onAccept?: () => void;
-  onDecline?: () => void;
-  onCounter?: () => void;
-  onUpdate?: () => void;
-  isOrganizer?: boolean;
-  className?: string;
+  card: ProposalCardType;
+  onActionComplete: () => void;
+  onCounterClick?: () => void;
+  showCounterOption?: boolean;
 }
 
-const ProposalCard: React.FC<ProposalCardProps> = ({
-  proposal,
-  onAccept,
-  onDecline,
-  onCounter,
-  onUpdate,
-  isOrganizer = false,
-  className = ''
+export const ProposalCard: React.FC<ProposalCardProps> = ({
+  card,
+  onActionComplete,
+  onCounterClick,
+  showCounterOption = true
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'accepted':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'countered':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    }
+  const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD'
+    }).format(amount);
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'accepted':
-        return <CheckCircle className="h-3 w-3" />;
-      case 'rejected':
-        return <XCircle className="h-3 w-3" />;
-      case 'countered':
-        return <MessageSquare className="h-3 w-3" />;
-      default:
-        return <Clock className="h-3 w-3" />;
-    }
-  };
-
-  const renderTextWithLinks = (text: string) => {
-    if (!text) return text;
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const parts = text.split(urlRegex);
-    
-    return parts.map((part, index) => {
-      if (urlRegex.test(part)) {
-        return (
-          <a
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[#00eada] hover:text-[#00eada]/80 underline"
-          >
-            {part.length > 50 ? `${part.substring(0, 50)}...` : part}
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        );
-      }
-      return part;
-    });
-  };
+  const CardWrapper = card.status === 'final_confirmation' 
+    ? ({ children }: { children: React.ReactNode }) => (
+        <AnimatedBorder>
+          {children}
+        </AnimatedBorder>
+      )
+    : ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
   return (
-    <Card className={`${className} border-l-4 border-l-[#00eada]`}>
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              {proposal.service_provider && (
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={proposal.service_provider.logo_url} />
-                  <AvatarFallback>
-                    <Building className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-              )}
-              <div>
-                <div className="font-semibold">
-                  {proposal.service_provider?.business_name || 'Service Provider'}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {new Date(proposal.created_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </div>
-              </div>
+    <CardWrapper>
+      <Card className={`mb-4 ${card.status === 'final_confirmation' ? 'bg-gradient-to-br from-emerald-500/5 to-green-500/5' : ''}`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                Card #{card.card_number}
+              </Badge>
+              <ProposalCardStatus
+                cardId={card.id}
+                cardStatus={card.status}
+                submittedBy={card.submitted_by}
+                isLocked={card.is_locked}
+              />
             </div>
-            
-            <Badge className={`${getStatusColor(proposal.status)} border font-medium`}>
-              {getStatusIcon(proposal.status)}
-              <span className="ml-1">
-                {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
-              </span>
-            </Badge>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              {new Date(card.created_at).toLocaleDateString()}
+            </div>
           </div>
+        </CardHeader>
 
-          {/* Proposal Details */}
-          <div className="space-y-3">
-            {/* Quote and Timeline */}
-            <div className="flex flex-wrap gap-4">
-              {proposal.quote_amount && (
-                <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/10 px-3 py-2 rounded-lg">
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                  <span className="font-semibold text-green-700">
-                    ${proposal.quote_amount.toLocaleString()}
-                  </span>
+        <CardContent className="space-y-4">
+          {/* Negotiated Details */}
+          {(card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline) && (
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm">Proposal Details</h4>
+              
+              {card.negotiated_title && (
+                <div>
+                  <span className="text-xs font-medium text-muted-foreground">Title:</span>
+                  <p className="text-sm">{card.negotiated_title}</p>
                 </div>
               )}
               
-              {proposal.timeline && (
-                <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 px-3 py-2 rounded-lg">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                  <span className="text-blue-700">{proposal.timeline}</span>
+              {card.negotiated_description && (
+                <div>
+                  <span className="text-xs font-medium text-muted-foreground">Description:</span>
+                  <p className="text-sm">{card.negotiated_description}</p>
+                </div>
+              )}
+              
+              {card.negotiated_budget_range && (
+                <div>
+                  <span className="text-xs font-medium text-muted-foreground">Budget:</span>
+                  <p className="text-sm font-semibold text-green-600">
+                    {card.negotiated_budget_range.min && card.negotiated_budget_range.max
+                      ? `${formatCurrency(card.negotiated_budget_range.min, card.negotiated_budget_range.currency)} - ${formatCurrency(card.negotiated_budget_range.max, card.negotiated_budget_range.currency)}`
+                      : card.negotiated_budget_range.min
+                      ? `From ${formatCurrency(card.negotiated_budget_range.min, card.negotiated_budget_range.currency)}`
+                      : card.negotiated_budget_range.max
+                      ? `Up to ${formatCurrency(card.negotiated_budget_range.max, card.negotiated_budget_range.currency)}`
+                      : 'Budget TBD'}
+                  </p>
+                </div>
+              )}
+              
+              {card.negotiated_timeline && (
+                <div>
+                  <span className="text-xs font-medium text-muted-foreground">Timeline:</span>
+                  <p className="text-sm">{card.negotiated_timeline}</p>
                 </div>
               )}
             </div>
+          )}
 
-            {/* Scope Details */}
-            {proposal.scope_details && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-[#00eada]" />
-                  <span className="font-medium text-sm">Scope & Approach</span>
-                </div>
-                <div className="bg-muted/20 p-3 rounded-lg text-sm leading-relaxed">
-                  {renderTextWithLinks(proposal.scope_details)}
-                </div>
-              </div>
-            )}
-
-            {/* Terms */}
-            {proposal.terms && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-purple-600" />
-                  <span className="font-medium text-sm">Terms & Conditions</span>
-                </div>
-                <div className="bg-muted/20 p-3 rounded-lg text-sm leading-relaxed">
-                  {renderTextWithLinks(proposal.terms)}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Actions */}
-          {isOrganizer && proposal.status === 'pending' && (
-            <div className="flex flex-wrap gap-3 pt-4 border-t border-border/40">
-              <Button
-                onClick={onAccept}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Accept Proposal
-              </Button>
-              <Button
-                onClick={onCounter}
-                variant="outline"
-                className="border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Counter Offer
-              </Button>
-              <Button
-                onClick={onDecline}
-                variant="outline"
-                className="border-red-500 text-red-600 hover:bg-red-50"
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Decline
-              </Button>
+          {/* Notes */}
+          {card.notes && (
+            <div>
+              <span className="text-xs font-medium text-muted-foreground">Notes:</span>
+              <p className="text-sm mt-1">{card.notes}</p>
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* External Links */}
+          {(card.scope_link || card.terms_link) && (
+            <div className="space-y-2">
+              {card.scope_link && (
+                <a
+                  href={card.scope_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  View Scope Document
+                </a>
+              )}
+              {card.terms_link && (
+                <a
+                  href={card.terms_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  View Terms Document
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* DEEL Integration for Final Confirmation */}
+          {card.status === 'final_confirmation' && (
+            <DeelIntegrationButton
+              projectTitle={card.negotiated_title}
+              projectDescription={card.negotiated_description}
+              budgetRange={card.negotiated_budget_range}
+              timeline={card.negotiated_timeline}
+            />
+          )}
+
+          {/* Actions */}
+          {card.status !== 'final_confirmation' && (
+            <ProposalCardActions
+              cardId={card.id}
+              isLocked={card.is_locked}
+              onActionComplete={onActionComplete}
+              showCounterOption={showCounterOption}
+              onCounterClick={onCounterClick}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </CardWrapper>
   );
 };
-
-export default ProposalCard;
