@@ -25,7 +25,7 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
-  const { acceptResponses, hasMutualAcceptance, hasAnyAcceptance } = useProposalCardResponses(cardId);
+  const { acceptResponses, hasMutualAcceptance, hasAnyAcceptance, hasCurrentUserResponded } = useProposalCardResponses(cardId);
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
     if (isLocked) {
@@ -37,12 +37,11 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
       return;
     }
 
-    // Check if current user already responded with this type
-    const currentUserResponse = acceptResponses.find(r => r.responded_by === session?.user?.id);
-    if (currentUserResponse && responseType === 'accept') {
+    // Prevent duplicate responses
+    if (hasCurrentUserResponded && responseType === 'accept') {
       toast({
         title: "Already Responded",
-        description: "You have already accepted this proposal.",
+        description: "You have already responded to this proposal.",
         variant: "default"
       });
       return;
@@ -105,43 +104,29 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // Show acceptance status if there are any acceptances
-  if (hasAnyAcceptance) {
-    const currentUserAccepted = acceptResponses.some(r => r.responded_by === session?.user?.id);
-    
-    if (hasMutualAcceptance) {
-      return (
-        <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold">
-          <Users className="h-4 w-4" />
-          Both parties have accepted - Creating final confirmation...
-        </div>
-      );
-    } else if (currentUserAccepted) {
-      return (
-        <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
-          <Clock className="h-4 w-4" />
-          Awaiting other party's response...
-        </div>
-      );
-    }
+  // Show mutual acceptance status
+  if (hasMutualAcceptance) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold">
+        <Users className="h-4 w-4" />
+        Both parties have accepted - Creating final confirmation...
+      </div>
+    );
   }
 
+  // If current user has responded, hide buttons (spam prevention)
+  if (hasCurrentUserResponded) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
+        <Clock className="h-4 w-4" />
+        Awaiting other party's response...
+      </div>
+    );
+  }
+
+  // Show buttons in correct order: Reject, Counter, Accept
   return (
     <div className="flex gap-2 flex-wrap">
-      <Button
-        onClick={() => handleResponse('accept')}
-        disabled={loading !== null}
-        className="bg-green-600 hover:bg-green-700 text-white"
-        size="sm"
-      >
-        {loading === 'accept' ? (
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-        ) : (
-          <CheckCircle className="h-4 w-4 mr-2" />
-        )}
-        {loading === 'accept' ? 'Accepting...' : 'Accept'}
-      </Button>
-
       <Button
         onClick={() => handleResponse('reject')}
         disabled={loading !== null}
@@ -167,6 +152,20 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
           Counter Proposal
         </Button>
       )}
+
+      <Button
+        onClick={() => handleResponse('accept')}
+        disabled={loading !== null}
+        className="bg-green-600 hover:bg-green-700 text-white"
+        size="sm"
+      >
+        {loading === 'accept' ? (
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+        ) : (
+          <CheckCircle className="h-4 w-4 mr-2" />
+        )}
+        {loading === 'accept' ? 'Accepting...' : 'Accept'}
+      </Button>
     </div>
   );
 };

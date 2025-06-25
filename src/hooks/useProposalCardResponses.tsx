@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { getProposalCardResponses } from '@/services/proposalCardService';
 import { ProposalCardResponse } from '@/types/proposalCards';
 import { supabase } from '@/integrations/supabase/client';
+import { useSession } from '@/hooks/useSession';
 
 export const useProposalCardResponses = (cardId: string) => {
+  const { session } = useSession();
   const [responses, setResponses] = useState<ProposalCardResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,6 +49,9 @@ export const useProposalCardResponses = (cardId: string) => {
   const acceptResponses = responses.filter(r => r.response_type === 'accept');
   const hasMutualAcceptance = acceptResponses.length >= 2;
   const hasAnyAcceptance = acceptResponses.length > 0;
+  
+  // Check if current user has already responded
+  const hasCurrentUserResponded = responses.some(r => r.responded_by === session?.user?.id);
 
   return {
     responses,
@@ -54,6 +59,7 @@ export const useProposalCardResponses = (cardId: string) => {
     acceptResponses,
     hasMutualAcceptance,
     hasAnyAcceptance,
+    hasCurrentUserResponded,
     refresh: loadResponses
   };
 };

@@ -293,6 +293,54 @@
   animation: teal-simple-pulse 2s ease-in-out infinite;
 }
 
+/* DEEL Integration Button - Royal Blue, White, Teal Animated Border */
+.deel-integration-container {
+  position: relative;
+}
+
+.deel-integration-container::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 0.75rem;
+  padding: 3px;
+  background: linear-gradient(
+    45deg,
+    #224 76% 48%, /* royal blue */
+    #ffffff,      /* white */
+    #00eada,      /* teal */
+    #224 76% 48%  /* royal blue */
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  background-size: 300% 300%;
+  animation: deel-border-animation 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes deel-border-animation {
+  0% {
+    background-position: 0% 50%;
+    box-shadow: 0 0 20px rgba(34, 100, 100, 0.3), 0 0 40px rgba(0, 234, 218, 0.2);
+  }
+  33% {
+    background-position: 50% 50%;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2);
+  }
+  66% {
+    background-position: 100% 50%;
+    box-shadow: 0 0 20px rgba(0, 234, 218, 0.3), 0 0 40px rgba(0, 234, 218, 0.2);
+  }
+  100% {
+    background-position: 0% 50%;
+    box-shadow: 0 0 20px rgba(34, 100, 100, 0.3), 0 0 40px rgba(0, 234, 218, 0.2);
+  }
+}
+
 @keyframes teal-pulse {
   0% {
     background-position: 0% 50%;

@@ -19,7 +19,7 @@ export const ProposalCardStatus: React.FC<ProposalCardStatusProps> = ({
   isLocked
 }) => {
   const { session } = useSession();
-  const { acceptResponses, hasMutualAcceptance, hasAnyAcceptance, loading } = useProposalCardResponses(cardId);
+  const { acceptResponses, hasMutualAcceptance, hasAnyAcceptance, hasCurrentUserResponded, loading } = useProposalCardResponses(cardId);
 
   if (loading) {
     return <Badge variant="outline" className="animate-pulse">Loading...</Badge>;
@@ -45,21 +45,30 @@ export const ProposalCardStatus: React.FC<ProposalCardStatusProps> = ({
         </Badge>
       );
     } else {
-      // Single acceptance - show awaiting response
+      // Single acceptance - show correct badge based on who accepted
       const currentUserAccepted = acceptResponses.some(r => r.responded_by === session?.user?.id);
       
-      return (
-        <div className="flex items-center gap-2">
-          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-semibold px-3 py-1 flex items-center gap-1">
+      if (currentUserAccepted) {
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-semibold px-3 py-1 flex items-center gap-1">
+              <CheckCircle className="h-4 w-4" />
+              YOU ACCEPTED
+            </Badge>
+            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 font-semibold px-3 py-1 flex items-center gap-1 animate-pulse">
+              <Clock className="h-4 w-4" />
+              AWAITING RESPONSE
+            </Badge>
+          </div>
+        );
+      } else {
+        return (
+          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-semibold px-3 py-1 flex items-center gap-1">
             <CheckCircle className="h-4 w-4" />
-            {currentUserAccepted ? 'YOU ACCEPTED' : 'THEY ACCEPTED'}
+            THEY ACCEPTED
           </Badge>
-          <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 font-semibold px-3 py-1 flex items-center gap-1 animate-pulse">
-            <Clock className="h-4 w-4" />
-            AWAITING RESPONSE
-          </Badge>
-        </div>
-      );
+        );
+      }
     }
   }
 
