@@ -52,9 +52,17 @@ export const useProposalCardResponsesData = (cardIds: string[]) => {
           table: 'modul8_proposal_card_responses'
         },
         (payload) => {
+          // Type-safe access to payload properties
+          let affectedCardId: string | null = null;
+          
+          if (payload.new && typeof payload.new === 'object' && 'card_id' in payload.new) {
+            affectedCardId = payload.new.card_id as string;
+          } else if (payload.old && typeof payload.old === 'object' && 'card_id' in payload.old) {
+            affectedCardId = payload.old.card_id as string;
+          }
+          
           // Only reload if the change affects one of our cards
-          const affectedCardId = payload.new?.card_id || payload.old?.card_id;
-          if (cardIds.includes(affectedCardId)) {
+          if (affectedCardId && cardIds.includes(affectedCardId)) {
             loadAllResponses();
           }
         }
