@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,14 +22,16 @@ import {
   Send,
   Paperclip,
   Calendar,
-  PlayCircle
+  PlayCircle,
+  ExternalLink,
+  Star
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { 
   getProposalCards, 
   createProposalCard, 
   respondToProposalCard,
-  createCounterProposal,
+  createCounterProposalFromCard,
   getRequestComments,
   createRequestComment
 } from '@/services/proposalCardService';
@@ -54,6 +57,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   
   // Form states
   const [showProposalForm, setShowProposalForm] = useState(false);
+  const [counteringCardId, setCounteringCardId] = useState<string | null>(null);
   const [proposalNotes, setProposalNotes] = useState('');
   const [proposalScope, setProposalScope] = useState('');
   const [proposalTerms, setProposalTerms] = useState('');
@@ -127,6 +131,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         setNegotiatedBudgetMin(serviceRequest.budget_range?.min || '');
         setNegotiatedBudgetMax(serviceRequest.budget_range?.max || '');
         setNegotiatedTimeline(serviceRequest.timeline || '');
+        setCounteringCardId(null);
         setShowProposalForm(true);
         setInitialRequestResponded(true);
         return;
@@ -174,32 +179,59 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
 
     try {
       setSubmitting(true);
-      await createProposalCard({
-        request_id: requestId,
-        notes: proposalNotes,
-        scope_link: proposalScope || undefined,
-        terms_link: proposalTerms || undefined,
-        asset_links: [],
-        negotiated_title: negotiatedTitle,
-        negotiated_description: negotiatedDescription,
-        negotiated_budget_range: {
-          min: negotiatedBudgetMin ? Number(negotiatedBudgetMin) : undefined,
-          max: negotiatedBudgetMax ? Number(negotiatedBudgetMax) : undefined,
-          currency: 'USD'
-        },
-        negotiated_timeline: negotiatedTimeline
-      });
+      
+      if (counteringCardId) {
+        // Creating a counter proposal
+        await createCounterProposalFromCard(counteringCardId, {
+          request_id: requestId,
+          notes: proposalNotes,
+          scope_link: proposalScope || undefined,
+          terms_link: proposalTerms || undefined,
+          asset_links: [],
+          negotiated_title: negotiatedTitle,
+          negotiated_description: negotiatedDescription,
+          negotiated_budget_range: {
+            min: negotiatedBudgetMin ? Number(negotiatedBudgetMin) : undefined,
+            max: negotiatedBudgetMax ? Number(negotiatedBudgetMax) : undefined,
+            currency: 'USD'
+          },
+          negotiated_timeline: negotiatedTimeline
+        });
+        
+        toast({
+          title: "Counter Proposal Submitted",
+          description: "Your counter proposal has been submitted successfully"
+        });
+      } else {
+        // Creating a new proposal
+        await createProposalCard({
+          request_id: requestId,
+          notes: proposalNotes,
+          scope_link: proposalScope || undefined,
+          terms_link: proposalTerms || undefined,
+          asset_links: [],
+          negotiated_title: negotiatedTitle,
+          negotiated_description: negotiatedDescription,
+          negotiated_budget_range: {
+            min: negotiatedBudgetMin ? Number(negotiatedBudgetMin) : undefined,
+            max: negotiatedBudgetMax ? Number(negotiatedBudgetMax) : undefined,
+            currency: 'USD'
+          },
+          negotiated_timeline: negotiatedTimeline
+        });
 
-      toast({
-        title: "Proposal Submitted",
-        description: "Your proposal has been submitted successfully"
-      });
+        toast({
+          title: "Proposal Submitted",
+          description: "Your proposal has been submitted successfully"
+        });
+      }
 
       // Reset form and reload data
       setProposalNotes('');
       setProposalScope('');
       setProposalTerms('');
       setShowProposalForm(false);
+      setCounteringCardId(null);
       await loadThreadData();
     } catch (error) {
       console.error('Error submitting proposal:', error);
@@ -218,6 +250,19 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       setSubmitting(true);
       
       if (responseType === 'counter') {
+        // Pre-populate form with card data for counter-proposal
+        const card = proposalCards.find(c => c.id === cardId);
+        if (card) {
+          setNegotiatedTitle(card.negotiated_title || '');
+          setNegotiatedDescription(card.negotiated_description || '');
+          setNegotiatedBudgetMin(card.negotiated_budget_range?.min || '');
+          setNegotiatedBudgetMax(card.negotiated_budget_range?.max || '');
+          setNegotiatedTimeline(card.negotiated_timeline || '');
+          setProposalNotes(card.notes || '');
+          setProposalScope(card.scope_link || '');
+          setProposalTerms(card.terms_link || '');
+        }
+        setCounteringCardId(cardId);
         setShowProposalForm(true);
         return;
       }
@@ -283,6 +328,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
       case 'countered': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
       case 'cancelled': return 'bg-muted/20 text-muted-foreground border-muted/30';
+      case 'final_confirmation': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
       default: return 'bg-muted/20 text-muted-foreground border-muted/30';
     }
   };
@@ -293,6 +339,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       case 'accepted': return <CheckCircle className="h-4 w-4" />;
       case 'rejected': return <XCircle className="h-4 w-4" />;
       case 'countered': return <ArrowRight className="h-4 w-4" />;
+      case 'final_confirmation': return <Star className="h-4 w-4" />;
       default: return <Clock className="h-4 w-4" />;
     }
   };
@@ -437,7 +484,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                           </Badge>
                           <Badge className={`${getCardStatusColor(card.status)} font-semibold border px-3 py-1 flex items-center gap-1`}>
                             {getCardStatusIcon(card.status)}
-                            {card.status.toUpperCase()}
+                            {card.status === 'final_confirmation' ? 'DEAL CONFIRMED' : card.status.toUpperCase()}
                           </Badge>
                           {card.response_to_card_id && (
                             <Badge variant="outline" className="text-orange-400 border-orange-500/30">
@@ -516,6 +563,20 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                       </div>
                     </div>
                     
+                    {/* Final Confirmation DEEL Button */}
+                    {card.status === 'final_confirmation' && (
+                      <div className="flex justify-center pt-4 border-t border-gray-700">
+                        <Button
+                          onClick={() => window.open('https://deel.com', '_blank')}
+                          size="lg"
+                          className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold px-8 py-3"
+                        >
+                          <ExternalLink className="h-5 w-5 mr-2" />
+                          Complete Deal with DEEL
+                        </Button>
+                      </div>
+                    )}
+                    
                     {/* Response Actions */}
                     {card.status === 'pending' && card.submitted_by !== session?.user?.id && !card.is_locked && (
                       <div className="flex gap-2 pt-4 border-t border-gray-700">
@@ -563,7 +624,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
           <CardHeader className="pb-4">
             <CardTitle className="text-xl font-black text-white flex items-center gap-2">
               <Send className="h-5 w-5 text-primary" />
-              {proposalCards.length === 0 ? 'Submit Your Counter Proposal' : 'Submit Counter Proposal'}
+              {counteringCardId ? 'Submit Counter Proposal' : (proposalCards.length === 0 ? 'Submit Your Counter Proposal' : 'Submit Counter Proposal')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -708,12 +769,15 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Submit Proposal
+                    Submit {counteringCardId ? 'Counter ' : ''}Proposal
                   </>
                 )}
               </Button>
               <Button
-                onClick={() => setShowProposalForm(false)}
+                onClick={() => {
+                  setShowProposalForm(false);
+                  setCounteringCardId(null);
+                }}
                 variant="outline"
                 disabled={submitting}
                 className="border-gray-700 hover:bg-gray-800 text-white"

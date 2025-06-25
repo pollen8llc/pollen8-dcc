@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ProposalCard, 
@@ -75,10 +76,11 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
   return response as ProposalCardResponse;
 };
 
-export const createCounterProposal = async (
+export const createCounterProposalFromCard = async (
   originalCardId: string, 
   counterData: Omit<CreateProposalCardData, 'response_to_card_id'>
 ): Promise<ProposalCard> => {
+  // Get the original card details
   const { data: originalCard, error: fetchError } = await supabase
     .from('modul8_proposal_cards')
     .select('*')
@@ -87,13 +89,45 @@ export const createCounterProposal = async (
 
   if (fetchError) throw fetchError;
 
+  // Create counter proposal with data from original card as fallback
   const counterProposal = await createProposalCard({
-    ...counterData,
     request_id: originalCard.request_id,
-    response_to_card_id: originalCardId
+    response_to_card_id: originalCardId,
+    notes: counterData.notes || originalCard.notes,
+    scope_link: counterData.scope_link || originalCard.scope_link,
+    terms_link: counterData.terms_link || originalCard.terms_link,
+    asset_links: counterData.asset_links || originalCard.asset_links || [],
+    negotiated_title: counterData.negotiated_title || originalCard.negotiated_title,
+    negotiated_description: counterData.negotiated_description || originalCard.negotiated_description,
+    negotiated_budget_range: counterData.negotiated_budget_range || originalCard.negotiated_budget_range,
+    negotiated_timeline: counterData.negotiated_timeline || originalCard.negotiated_timeline
   });
 
+  // Mark the original card as countered
+  await supabase
+    .from('modul8_proposal_cards')
+    .update({ 
+      status: 'countered',
+      is_locked: true,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', originalCardId);
+
   return counterProposal;
+};
+
+export const checkMutualAcceptance = async (cardId: string): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('modul8_proposal_card_responses')
+    .select('responded_by')
+    .eq('card_id', cardId)
+    .eq('response_type', 'accept');
+
+  if (error) throw error;
+  
+  // Check if we have responses from two different users
+  const uniqueResponders = new Set(data?.map(r => r.responded_by) || []);
+  return uniqueResponders.size >= 2;
 };
 
 export const cancelProposalCard = async (cardId: string): Promise<void> => {

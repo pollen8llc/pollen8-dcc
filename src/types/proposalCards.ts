@@ -5,7 +5,7 @@ export interface ProposalCard {
   submitted_by: string;
   response_to_card_id?: string;
   card_number: number;
-  status: 'pending' | 'accepted' | 'rejected' | 'countered' | 'cancelled';
+  status: 'pending' | 'accepted' | 'rejected' | 'countered' | 'cancelled' | 'final_confirmation';
   notes?: string;
   scope_link?: string;
   terms_link?: string;
