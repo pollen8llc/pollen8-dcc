@@ -1,85 +1,714 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    /* Overriding with the new dark theme palette by default */
+    --background: 215 25% 8%;
+    --foreground: 0 0% 100%;
+    
+    --card: 215 25% 10%;
+    --card-foreground: 0 0% 100%;
+ 
+    --popover: 215 25% 10%;
+    --popover-foreground: 0 0% 100%;
+ 
+    --primary: 174 100% 46%;
+    --primary-foreground: 0 0% 0%;
+ 
+    --secondary: 215 25% 16%;
+    --secondary-foreground: 0 0% 100%;
+ 
+    --muted: 215 25% 12%;
+    --muted-foreground: 0 0% 70%;
+ 
+    --accent: 174 100% 46%;
+    --accent-foreground: 0 0% 0%;
+ 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 215 25% 18%;
+    --input: 215 25% 18%;
+    --ring: 174 100% 46%;
+ 
+    --radius: 1rem;
+    
+    /* Royal Blue Colors */
+    --royal-blue-50: 223 100% 97%;
+    --royal-blue-100: 224 100% 93%;
+    --royal-blue-200: 223 100% 86%;
+    --royal-blue-300: 223 96% 78%;
+    --royal-blue-400: 223 94% 67%;
+    --royal-blue-500: 224 89% 60%;
+    --royal-blue-600: 224 76% 48%;
+    --royal-blue-700: 226 71% 40%;
+    --royal-blue-800: 226 67% 33%;
+    --royal-blue-900: 224 64% 28%;
+    --royal-blue-950: 226 67% 18%;
   }
-
+ 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    /* Same values as root to ensure dark mode consistently applies */
+    --background: 215 25% 8%;
+    --foreground: 0 0% 100%;
+ 
+    --card: 215 25% 10%;
+    --card-foreground: 0 0% 100%;
+ 
+    --popover: 215 25% 10%;
+    --popover-foreground: 0 0% 100%;
+ 
+    --primary: 174 100% 46%;
+    --primary-foreground: 0 0% 0%;
+ 
+    --secondary: 215 25% 16%;
+    --secondary-foreground: 0 0% 100%;
+ 
+    --muted: 215 25% 12%;
+    --muted-foreground: 0 0% 70%;
+ 
+    --accent: 174 100% 46%;
+    --accent-foreground: 0 0% 0%;
+ 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+ 
+    --border: 215 25% 18%;
+    --input: 215 25% 18%;
+    --ring: 174 100% 46%;
+    
+    /* Royal Blue Colors - Dark Mode */
+    --royal-blue-50: 226 67% 10%;
+    --royal-blue-100: 226 67% 15%;
+    --royal-blue-200: 226 64% 20%;
+    --royal-blue-300: 224 64% 25%;
+    --royal-blue-400: 224 62% 30%;
+    --royal-blue-500: 224 65% 40%;
+    --royal-blue-600: 224 76% 48%;
+    --royal-blue-700: 224 80% 60%;
+    --royal-blue-800: 224 90% 70%;
+    --royal-blue-900: 223 95% 85%;
+    --royal-blue-950: 223 100% 95%;
   }
 }
-
+ 
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Force dark mode for the entire application */
+  :root {
+    color-scheme: dark;
+  }
+  
+  html {
+    @apply dark;
+    scroll-behavior: smooth;
   }
 }
 
-@layer utilities {
-  @keyframes gradient {
-    0%, 100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
+/* Override Tailwind's h-full utility */
+.h-full {
+  height: auto !important;
+}
+
+/* TinyMCE Editor Dark Mode styles */
+.tox-tinymce {
+  border-radius: 1rem;
+}
+
+.dark .tox .tox-toolbar__group,
+.dark .tox .tox-toolbar,
+.dark .tox .tox-edit-area__iframe,
+.dark .tox .tox-statusbar,
+.dark .tox .tox-menubar,
+.dark .tox .tox-toolbar-overlord {
+  background-color: hsl(215 25% 10%) !important;
+  border-color: hsl(215 25% 18%) !important;
+}
+
+.dark .tox .tox-tbtn svg,
+.dark .tox .tox-tbtn,
+.dark .tox .tox-mbtn,
+.dark .tox .tox-statusbar a,
+.dark .tox .tox-statusbar__path-item,
+.dark .tox .tox-statusbar__wordcount,
+.dark .tox .tox-statusbar__text-container {
+  color: hsl(0 0% 100%) !important;
+}
+
+.dark .tox .tox-tbtn:hover svg,
+.dark .tox .tox-mbtn:hover {
+  color: #00eada !important;
+}
+
+/* Card Styles */
+.dashboard-card {
+  @apply rounded-2xl border border-border/30 bg-card shadow-lg transition-all duration-300 h-full flex flex-col;
+}
+
+.dashboard-card-hover {
+  @apply hover:border-[#00eada]/20 hover:shadow-[#00eada]/5;
+}
+
+/* Glassmorphism effect for cards */
+.glass-card {
+  @apply backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20 transition-all duration-300;
+}
+
+/* New utilities for glassmorphism */
+.glass-morphism {
+  @apply backdrop-blur-md bg-white/5 border border-white/10 shadow-lg;
+}
+
+.glass-morphism-hover {
+  @apply hover:shadow-[#00eada]/10 hover:border-[#00eada]/20 transition-all duration-300;
+}
+
+.text-with-shadow {
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Admin gradient border animation */
+.admin-profile-border {
+  position: relative;
+  padding: 3px; /* Creates space for the gradient border */
+}
+
+.admin-profile-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px; /* Border thickness */
+  background: linear-gradient(
+    45deg, 
+    #00eada, 
+    #33C3F0, 
+    #62E1FB, 
+    #00eada
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  background-size: 300% 300%;
+  animation: gradient-rotate 3s linear infinite;
+}
+
+/* Admin Premium Border - Instagram-like rainbow gradient for admin profiles */
+.admin-premium-border {
+  position: relative;
+  border: none !important;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.admin-premium-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  pointer-events: none; /* Fix the click-through issue */
+  background: linear-gradient(
+    45deg,
+    #33C3F0,
+    #00eada,
+    #33C3F0, 
+    #62E1FB,
+    #33C3F0
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  background-size: 200% 200%;
+  animation: teal-pulse 3s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+/* New Admin Gradient Border with purple, pink and teal */
+.admin-gradient-premium-border {
+  position: relative;
+  border: none !important;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.admin-gradient-premium-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    45deg,
+    #9b87f5, /* purple */
+    #D946EF, /* pink */
+    #00eada, /* teal */
+    #9b87f5  /* purple */
+  );
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  background-size: 200% 200%;
+  animation: gradient-pulse 3s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+/* Knowledge base tag styles */
+.knowledge-tag-border {
+  position: relative;
+  border: none !important;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.knowledge-tag-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: #00eada; /* teal */
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: teal-simple-pulse 2s ease-in-out infinite;
+}
+
+@keyframes teal-pulse {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.7;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.7;
+  }
+}
+
+@keyframes gradient-pulse {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.7;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.7;
+  }
+}
+
+@keyframes teal-simple-pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes rainbow-rotate {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 300% 300%;
+  }
+}
+
+@keyframes gradient-rotate {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+/* For larger avatars with more pronounced effect */
+.admin-avatar-border {
+  position: relative;
+  padding: 3px;
+}
+
+.admin-avatar-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    45deg,
+    #00eada,
+    #33C3F0,
+    #62E1FB,
+    #00eada
+  );
+  background-size: 300% 300%;
+  animation: gradient-rotate 3s linear infinite;
+  z-index: -1;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-[#00eada] text-black font-medium hover:bg-[#00eada]/90 rounded-xl transition-colors;
+}
+
+.btn-outline {
+  @apply bg-transparent border border-[#00eada] text-[#00eada] hover:bg-[#00eada]/10 rounded-xl transition-colors;
+}
+
+.btn-ghost {
+  @apply bg-transparent text-white hover:bg-white/10 rounded-xl transition-colors;
+}
+
+/* Glass effect for cards */
+.glass {
+  @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl;
+}
+
+/* Mobile-responsive headings and icons */
+h1 {
+  @apply text-xl sm:text-2xl md:text-3xl font-bold;
+}
+
+h2 {
+  @apply text-lg sm:text-xl md:text-2xl font-semibold;
+}
+
+h3 {
+  @apply text-base sm:text-lg md:text-xl font-medium;
+}
+
+h4 {
+  @apply text-sm sm:text-base md:text-lg font-medium;
+}
+
+h5 {
+  @apply text-sm sm:text-base font-medium;
+}
+
+h6 {
+  @apply text-xs sm:text-sm font-medium;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .container {
+    @apply px-3;
   }
   
-  .animate-gradient {
-    animation: gradient 3s ease-in-out infinite;
+  .card {
+    @apply rounded-lg shadow-sm;
   }
+  
+  /* Ensure buttons are touch-friendly on mobile */
+  button {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Scale icons appropriately */
+  .lucide {
+    @apply h-4 w-4;
+  }
+}
+
+@media (min-width: 641px) {
+  .lucide {
+    @apply h-5 w-5;
+  }
+}
+
+/* Improvements for app-like feel */
+.card {
+  @apply transition-all duration-200;
+}
+
+button {
+  @apply transition-all duration-200;
+}
+
+/* Input focus styles */
+input:focus, textarea:focus, select:focus {
+  @apply ring-opacity-50;
+}
+
+/* Chart coloring */
+.recharts-cartesian-axis-tick text {
+  @apply fill-foreground/70;
+}
+
+.recharts-cartesian-grid line {
+  @apply stroke-border/30;
+}
+
+.recharts-tooltip-cursor {
+  @apply fill-muted stroke-border/50;
+}
+
+.recharts-default-tooltip {
+  @apply bg-popover border border-border text-foreground rounded-xl !important;
+}
+
+/* Animation classes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+
+@keyframes plexusFade {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.2; }
+}
+
+@keyframes plexusMove {
+  0% { transform: translateX(-5px) translateY(-5px); }
+  50% { transform: translateX(5px) translateY(5px); }
+  100% { transform: translateX(-5px) translateY(-5px); }
+}
+
+/* Plexus background static version (will use Canvas for animated version) */
+.plexus-background {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, #111820 0%, #0c131a 100%);
+  overflow: hidden;
+}
+
+.plexus-background::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  background-image: 
+    radial-gradient(#00eada33 1px, transparent 1px),
+    radial-gradient(#00eada22 1px, transparent 1px);
+  background-size: 50px 50px, 100px 100px;
+  background-position: 0 0, 25px 25px;
+  animation: plexusMove 20s infinite linear alternate, plexusFade 10s infinite ease-in-out;
+}
+
+.plexus-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to bottom right, #00eada05 1px, transparent 1px),
+    linear-gradient(to top right, #00eada05 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: plexusFade 8s infinite ease-in-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: pulse 4s ease-in-out infinite;
+}
+
+/* Staggered animations */
+.animate-fade-in:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.animate-fade-in:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.animate-fade-in:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* Modern container styles */
+.container-fluid {
+  @apply max-w-[1920px] mx-auto px-4;
+}
+
+/* Card hover effects */
+.card-hover-effect {
+  @apply transition-all duration-300 hover:shadow-lg hover:shadow-[#00eada]/5 hover:border-[#00eada]/20;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border/50 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-border;
+}
+
+/* Gradient styles */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#00eada] to-[#00eada]/70;
+}
+
+.gradient-border {
+  @apply border border-transparent bg-origin-border relative;
+  background-clip: padding-box, border-box;
+  background-image: 
+    linear-gradient(to bottom, hsl(215 25% 10%), hsl(215 25% 10%)), 
+    linear-gradient(to bottom, #00eada20, #00eada05);
+}
+
+/* Modern card styles */
+.feature-card {
+  @apply p-6 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm transition-all duration-300;
+  @apply hover:border-[#00eada]/20 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Add required field indicator */
+.required::after {
+  content: "*";
+  color: #e11d48; /* text-red-600 */
+  margin-left: 0.25rem;
+}
+
+/* Instagram-style animated gradient border for admin profile cards */
+.admin-gradient-border {
+  position: relative;
+  z-index: 1;
+}
+.admin-gradient-border::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 1.25rem; /* match card rounding */
+  padding: 0;
+  background: conic-gradient(
+    #00eada 0deg, #ee2a7b 120deg, #6228d7 240deg, #00eada 360deg
+  );
+  animation: admin-gradient-rotate 6s linear infinite, admin-gradient-pulse 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+.admin-gradient-border > * {
+  position: relative;
+  z-index: 3;
+}
+@keyframes admin-gradient-rotate {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+@keyframes admin-gradient-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,234,218,0.5), 0 0 0 0 rgba(238,42,123,0.3), 0 0 0 0 rgba(98,40,215,0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 16px 4px rgba(0,234,218,0.7), 0 0 24px 8px rgba(238,42,123,0.4), 0 0 32px 12px rgba(98,40,215,0.4); transform: scale(1.03); }
+}
+
+/* Link styling updates */
+a {
+  @apply text-[#00eada] hover:text-[#00eada]/80 transition-colors;
+}
+
+/* Button link overrides */
+.btn-link {
+  @apply text-[#00eada] hover:text-[#00eada]/80 hover:underline;
+}
+
+/* Navigation link colors */
+nav a {
+  @apply text-white hover:text-[#00eada] transition-colors;
+}
+
+/* Active navigation links */
+nav a.active,
+nav a[aria-current="page"] {
+  @apply text-[#00eada];
+}
+
+/* Breadcrumb link colors */
+.breadcrumb a {
+  @apply text-[#00eada] hover:text-[#00eada]/80;
+}
+
+/* Dropdown menu links */
+.dropdown-menu a {
+  @apply text-white hover:text-[#00eada] hover:bg-muted;
+}
+
+/* Card title links */
+.card-title a {
+  @apply text-white hover:text-[#00eada];
+}
+
+/* Ensure button text remains proper colors */
+button {
+  @apply text-inherit;
+}
+
+button a {
+  @apply text-inherit hover:text-inherit;
+}
+
+/* Override for specific UI components that should maintain their colors */
+.ui-select-content a,
+.ui-dropdown-content a,
+.ui-popover-content a {
+  @apply text-foreground hover:text-foreground;
 }
