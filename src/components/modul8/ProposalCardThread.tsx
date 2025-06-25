@@ -40,6 +40,7 @@ import { ProposalCardActions } from './ProposalCardActions';
 import { ProposalCardStatus } from './ProposalCardStatus';
 import { DeelIntegrationButton } from './DeelIntegrationButton';
 import { supabase } from '@/integrations/supabase/client';
+import { useProposalCardResponses } from '@/hooks/useProposalCardResponses';
 
 interface ProposalCardThreadProps {
   requestId: string;
@@ -489,124 +490,132 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {proposalCards.map((card, index) => (
-                <Card key={card.id} className="border-l-4 border-l-primary bg-gray-900/80 backdrop-blur-sm border-gray-800">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          <Badge className="bg-primary/10 text-primary font-bold px-3 py-1">
-                            Card #{index + 2}
-                          </Badge>
-                          <ProposalCardStatus
-                            cardId={card.id}
-                            cardStatus={card.status}
-                            submittedBy={card.submitted_by}
-                            isLocked={card.is_locked}
+              {proposalCards.map((card, index) => {
+                const CardWithResponsesHook = ({ card, index }: { card: ProposalCard, index: number }) => {
+                  const { hasCurrentUserResponded } = useProposalCardResponses(card.id);
+                  
+                  return (
+                    <Card key={card.id} className="border-l-4 border-l-primary bg-gray-900/80 backdrop-blur-sm border-gray-800">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Badge className="bg-primary/10 text-primary font-bold px-3 py-1">
+                                Card #{index + 2}
+                              </Badge>
+                              <ProposalCardStatus
+                                cardId={card.id}
+                                cardStatus={card.status}
+                                submittedBy={card.submitted_by}
+                                isLocked={card.is_locked}
+                              />
+                              {card.response_to_card_id && (
+                                <Badge variant="outline" className="text-orange-400 border-orange-500/30">
+                                  Counter Proposal
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* Show negotiated request details if they exist */}
+                            {(card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline) && (
+                              <div className="bg-gray-800/50 rounded-lg p-4 mb-4 border border-gray-700">
+                                <h4 className="text-sm font-semibold text-white mb-3">Proposed Project Details:</h4>
+                                {card.negotiated_title && (
+                                  <div className="mb-2">
+                                    <span className="text-xs font-medium text-gray-400">Title: </span>
+                                    <span className="text-sm text-gray-300">{card.negotiated_title}</span>
+                                  </div>
+                                )}
+                                {card.negotiated_description && (
+                                  <div className="mb-2">
+                                    <span className="text-xs font-medium text-gray-400">Description: </span>
+                                    <span className="text-sm text-gray-300">{card.negotiated_description}</span>
+                                  </div>
+                                )}
+                                {card.negotiated_budget_range && (
+                                  <div className="mb-2">
+                                    <span className="text-xs font-medium text-gray-400">Budget: </span>
+                                    <span className="text-sm text-gray-300">
+                                      {card.negotiated_budget_range.min && card.negotiated_budget_range.max 
+                                        ? `$${card.negotiated_budget_range.min.toLocaleString()} - $${card.negotiated_budget_range.max.toLocaleString()}`
+                                        : card.negotiated_budget_range.min 
+                                        ? `From $${card.negotiated_budget_range.min.toLocaleString()}`
+                                        : card.negotiated_budget_range.max 
+                                        ? `Up to $${card.negotiated_budget_range.max.toLocaleString()}`
+                                        : 'Budget TBD'
+                                      }
+                                    </span>
+                                  </div>
+                                )}
+                                {card.negotiated_timeline && (
+                                  <div>
+                                    <span className="text-xs font-medium text-gray-400">Timeline: </span>
+                                    <span className="text-sm text-gray-300">{card.negotiated_timeline}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            {card.notes && (
+                              <div className="bg-gray-800/30 rounded-lg p-4 mb-4 border border-gray-700">
+                                <p className="text-sm text-gray-300 leading-relaxed">{card.notes}</p>
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                              <span className="flex items-center gap-1">
+                                <User className="h-4 w-4" />
+                                {card.submitted_by === session?.user?.id ? 'You' : 'Other Party'}
+                              </span>
+                              <span>{new Date(card.created_at).toLocaleDateString()}</span>
+                              {card.scope_link && (
+                                <a href={card.scope_link} target="_blank" rel="noopener noreferrer" 
+                                   className="text-primary hover:underline flex items-center gap-1">
+                                  <Paperclip className="h-4 w-4" />
+                                  Scope
+                                </a>
+                              )}
+                              {card.terms_link && (
+                                <a href={card.terms_link} target="_blank" rel="noopener noreferrer" 
+                                   className="text-primary hover:underline flex items-center gap-1">
+                                  <FileText className="h-4 w-4" />
+                                  Terms
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Final Confirmation DEEL Integration */}
+                        {card.status === 'final_confirmation' && (
+                          <DeelIntegrationButton
+                            projectTitle={card.negotiated_title}
+                            projectDescription={card.negotiated_description}
+                            budgetRange={card.negotiated_budget_range}
+                            timeline={card.negotiated_timeline}
+                            organizerName={serviceRequest.organizer?.organization_name}
+                            serviceProviderName="Service Provider" // TODO: Get actual service provider name
                           />
-                          {card.response_to_card_id && (
-                            <Badge variant="outline" className="text-orange-400 border-orange-500/30">
-                              Counter Proposal
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {/* Show negotiated request details if they exist */}
-                        {(card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline) && (
-                          <div className="bg-gray-800/50 rounded-lg p-4 mb-4 border border-gray-700">
-                            <h4 className="text-sm font-semibold text-white mb-3">Proposed Project Details:</h4>
-                            {card.negotiated_title && (
-                              <div className="mb-2">
-                                <span className="text-xs font-medium text-gray-400">Title: </span>
-                                <span className="text-sm text-gray-300">{card.negotiated_title}</span>
-                              </div>
-                            )}
-                            {card.negotiated_description && (
-                              <div className="mb-2">
-                                <span className="text-xs font-medium text-gray-400">Description: </span>
-                                <span className="text-sm text-gray-300">{card.negotiated_description}</span>
-                              </div>
-                            )}
-                            {card.negotiated_budget_range && (
-                              <div className="mb-2">
-                                <span className="text-xs font-medium text-gray-400">Budget: </span>
-                                <span className="text-sm text-gray-300">
-                                  {card.negotiated_budget_range.min && card.negotiated_budget_range.max 
-                                    ? `$${card.negotiated_budget_range.min.toLocaleString()} - $${card.negotiated_budget_range.max.toLocaleString()}`
-                                    : card.negotiated_budget_range.min 
-                                    ? `From $${card.negotiated_budget_range.min.toLocaleString()}`
-                                    : card.negotiated_budget_range.max 
-                                    ? `Up to $${card.negotiated_budget_range.max.toLocaleString()}`
-                                    : 'Budget TBD'
-                                  }
-                                </span>
-                              </div>
-                            )}
-                            {card.negotiated_timeline && (
-                              <div>
-                                <span className="text-xs font-medium text-gray-400">Timeline: </span>
-                                <span className="text-sm text-gray-300">{card.negotiated_timeline}</span>
-                              </div>
-                            )}
-                          </div>
                         )}
                         
-                        {card.notes && (
-                          <div className="bg-gray-800/30 rounded-lg p-4 mb-4 border border-gray-700">
-                            <p className="text-sm text-gray-300 leading-relaxed">{card.notes}</p>
+                        {/* Response Actions - Show for cards where current user hasn't responded and they didn't submit it */}
+                        {card.submitted_by !== session?.user?.id && !hasCurrentUserResponded && (
+                          <div className="pt-4 border-t border-gray-700">
+                            <ProposalCardActions
+                              cardId={card.id}
+                              isLocked={false} // Always allow actions, let ProposalCardActions handle the logic
+                              onActionComplete={loadThreadData}
+                              onCounterClick={() => handleRespondToCard(card.id, 'counter')}
+                            />
                           </div>
                         )}
-                        
-                        <div className="flex items-center gap-4 text-sm text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <User className="h-4 w-4" />
-                            {card.submitted_by === session?.user?.id ? 'You' : 'Other Party'}
-                          </span>
-                          <span>{new Date(card.created_at).toLocaleDateString()}</span>
-                          {card.scope_link && (
-                            <a href={card.scope_link} target="_blank" rel="noopener noreferrer" 
-                               className="text-primary hover:underline flex items-center gap-1">
-                              <Paperclip className="h-4 w-4" />
-                              Scope
-                            </a>
-                          )}
-                          {card.terms_link && (
-                            <a href={card.terms_link} target="_blank" rel="noopener noreferrer" 
-                               className="text-primary hover:underline flex items-center gap-1">
-                              <FileText className="h-4 w-4" />
-                              Terms
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Final Confirmation DEEL Integration */}
-                    {card.status === 'final_confirmation' && (
-                      <DeelIntegrationButton
-                        projectTitle={card.negotiated_title}
-                        projectDescription={card.negotiated_description}
-                        budgetRange={card.negotiated_budget_range}
-                        timeline={card.negotiated_timeline}
-                        organizerName={serviceRequest.organizer?.organization_name}
-                        serviceProviderName="Service Provider" // TODO: Get actual service provider name
-                      />
-                    )}
-                    
-                    {/* Response Actions */}
-                    {card.status === 'pending' && card.submitted_by !== session?.user?.id && !card.is_locked && (
-                      <div className="pt-4 border-t border-gray-700">
-                        <ProposalCardActions
-                          cardId={card.id}
-                          isLocked={card.is_locked}
-                          onActionComplete={loadThreadData}
-                          onCounterClick={() => handleRespondToCard(card.id, 'counter')}
-                        />
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                      </CardContent>
+                    </Card>
+                  );
+                };
+                
+                return <CardWithResponsesHook key={card.id} card={card} index={index} />;
+              })}
             </div>
           )}
         </CardContent>
