@@ -28,25 +28,6 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   const { acceptResponses, hasMutualAcceptance, hasAnyAcceptance, hasCurrentUserResponded } = useProposalCardResponses(cardId);
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
-    if (isLocked) {
-      toast({
-        title: "Action Not Available",
-        description: "This proposal card has already been responded to.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Prevent duplicate responses
-    if (hasCurrentUserResponded && responseType === 'accept') {
-      toast({
-        title: "Already Responded",
-        description: "You have already responded to this proposal.",
-        variant: "default"
-      });
-      return;
-    }
-
     setLoading(responseType);
     
     try {
@@ -95,16 +76,7 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     }
   };
 
-  if (isLocked) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <CheckCircle className="h-4 w-4" />
-        This proposal has been responded to
-      </div>
-    );
-  }
-
-  // Show mutual acceptance status
+  // Show mutual acceptance status - this takes priority
   if (hasMutualAcceptance) {
     return (
       <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold">
@@ -114,8 +86,20 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // If current user has responded, hide buttons (spam prevention)
-  if (hasCurrentUserResponded) {
+  // Check if card is truly locked (both parties responded or cancelled/rejected)
+  const isTrulyLocked = isLocked && (hasMutualAcceptance || (!hasAnyAcceptance && hasCurrentUserResponded));
+
+  if (isTrulyLocked) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <CheckCircle className="h-4 w-4" />
+        This proposal has been responded to
+      </div>
+    );
+  }
+
+  // Show "awaiting response" only when current user has responded but no mutual acceptance yet
+  if (hasCurrentUserResponded && !hasMutualAcceptance) {
     return (
       <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
         <Clock className="h-4 w-4" />
@@ -124,7 +108,8 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // Show buttons in correct order: Reject, Counter, Accept
+  // Show action buttons in the correct order: Reject, Counter, Accept
+  // This handles both initial proposals and "THEY ACCEPTED" scenarios
   return (
     <div className="flex gap-2 flex-wrap">
       <Button
