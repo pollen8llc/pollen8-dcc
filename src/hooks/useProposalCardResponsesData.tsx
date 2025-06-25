@@ -81,6 +81,21 @@ export const useProposalCardResponsesData = (cardIds: string[]) => {
     const hasAnyAcceptance = acceptResponses.length > 0;
     const hasCurrentUserResponded = responses.some(r => r.responded_by === session?.user?.id);
 
+    // Debug logging for each card
+    console.log(`Card ${cardId} response data:`, {
+      totalResponses: responses.length,
+      acceptResponses: acceptResponses.length,
+      hasMutualAcceptance,
+      hasAnyAcceptance,
+      hasCurrentUserResponded,
+      currentUserId: session?.user?.id,
+      responseDetails: responses.map(r => ({
+        respondedBy: r.responded_by,
+        responseType: r.response_type,
+        isCurrentUser: r.responded_by === session?.user?.id
+      }))
+    });
+
     return {
       responses,
       acceptResponses,

@@ -36,6 +36,20 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
+  const currentUserId = session?.user?.id;
+
+  // Debug logging
+  console.log('ProposalCardResponseActions Debug:', {
+    cardId,
+    submittedBy,
+    currentUserId,
+    isCurrentUserSubmitter: submittedBy === currentUserId,
+    hasMutualAcceptance,
+    hasAnyAcceptance,
+    hasCurrentUserResponded,
+    responses: responses.length,
+    acceptResponses: acceptResponses.length
+  });
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
     setLoading(responseType);
@@ -87,12 +101,14 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
   };
 
   // Don't show actions for cards submitted by current user
-  if (submittedBy === session?.user?.id) {
+  if (submittedBy === currentUserId) {
+    console.log('Hiding buttons: Current user is the submitter');
     return null;
   }
 
   // Show mutual acceptance status with celebration and DEEL button
   if (hasMutualAcceptance) {
+    console.log('Showing DEEL button: Mutual acceptance achieved');
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold animate-pulse">
@@ -116,7 +132,8 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
   }
 
   // PRIORITY: "THEY ACCEPTED" scenario - show buttons when someone else accepted but current user hasn't responded
-  if (hasAnyAcceptance && !hasCurrentUserResponded && !hasMutualAcceptance) {
+  if (hasAnyAcceptance && !hasCurrentUserResponded) {
+    console.log('Showing "they accepted" buttons: Other party accepted, current user hasn\'t responded');
     return (
       <div className="space-y-2">
         <div className="text-sm text-orange-400 font-medium animate-pulse">
@@ -169,6 +186,7 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
 
   // Show "awaiting response" when current user has responded but no mutual acceptance yet
   if (hasCurrentUserResponded && !hasMutualAcceptance) {
+    console.log('Showing awaiting response: Current user responded, waiting for other party');
     return (
       <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
         <Clock className="h-4 w-4" />
@@ -177,10 +195,9 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     );
   }
 
-  // Check if card is truly locked
-  const isTrulyLocked = isLocked && (hasMutualAcceptance || (!hasAnyAcceptance && hasCurrentUserResponded));
-
-  if (isTrulyLocked) {
+  // Check if card is truly locked (both parties responded or cancelled/rejected)
+  if (isLocked && (hasMutualAcceptance || hasCurrentUserResponded)) {
+    console.log('Showing locked status: Card is locked and user has responded');
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <CheckCircle className="h-4 w-4" />
@@ -189,7 +206,8 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     );
   }
 
-  // Default: Show action buttons for new proposals
+  // Default: Show action buttons for new proposals where current user hasn't responded
+  console.log('Showing default action buttons: Fresh proposal, no responses from current user');
   return (
     <div className="flex gap-2 flex-wrap">
       <Button
