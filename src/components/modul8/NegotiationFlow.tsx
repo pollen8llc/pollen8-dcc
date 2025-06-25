@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ServiceRequest } from '@/types/modul8';
-import { ProposalCard as ProposalCardType } from '@/types/proposalCards';
+import { ServiceRequest, Proposal } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,10 +14,10 @@ import {
   User,
   AlertTriangle
 } from 'lucide-react';
-import { getProposalCards } from '@/services/proposalCardService';
+import { getProposalsByRequestId, updateProposalStatus } from '@/services/proposalService';
 import { toast } from '@/hooks/use-toast';
 import ProviderResponseForm from './ProviderResponseForm';
-import { ProposalCard } from './ProposalCard';
+import ProposalCard from './ProposalCard';
 import ContractCreationModal from './ContractCreationModal';
 
 interface NegotiationFlowProps {
@@ -32,26 +31,26 @@ const NegotiationFlow = ({
   onUpdate, 
   isServiceProvider = false 
 }: NegotiationFlowProps) => {
-  const [proposalCards, setProposalCards] = useState<ProposalCardType[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showContractModal, setShowContractModal] = useState(false);
   const [showResponseForm, setShowResponseForm] = useState(false);
   const [showCounterForm, setShowCounterForm] = useState(false);
-  const [counterProposal, setCounterProposal] = useState<ProposalCardType | null>(null);
+  const [counterProposal, setCounterProposal] = useState<Proposal | null>(null);
 
   useEffect(() => {
-    loadProposalCards();
+    loadProposals();
   }, [serviceRequest.id]);
 
-  const loadProposalCards = async () => {
+  const loadProposals = async () => {
     try {
-      const cardData = await getProposalCards(serviceRequest.id);
-      setProposalCards(cardData || []);
+      const proposalData = await getProposalsByRequestId(serviceRequest.id);
+      setProposals(proposalData || []);
     } catch (error) {
-      console.error('Error loading proposal cards:', error);
+      console.error('Error loading proposals:', error);
       toast({
         title: "Error",
-        description: "Failed to load proposal cards",
+        description: "Failed to load proposals",
         variant: "destructive"
       });
     } finally {
@@ -63,7 +62,7 @@ const NegotiationFlow = ({
     setShowResponseForm(false);
     setShowCounterForm(false);
     setCounterProposal(null);
-    loadProposalCards();
+    loadProposals();
     onUpdate();
   };
 
@@ -81,8 +80,44 @@ const NegotiationFlow = ({
     handleProposalUpdate();
   };
 
-  const handleCounterOffer = (proposalCard: ProposalCardType) => {
-    setCounterProposal(proposalCard);
+  const handleAcceptProposal = async (proposal: Proposal) => {
+    try {
+      await updateProposalStatus(proposal.id, 'accepted');
+      toast({
+        title: "Proposal Accepted",
+        description: "The proposal has been accepted successfully",
+      });
+      handleProposalUpdate();
+    } catch (error) {
+      console.error('Error accepting proposal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to accept proposal",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeclineProposal = async (proposal: Proposal) => {
+    try {
+      await updateProposalStatus(proposal.id, 'rejected');
+      toast({
+        title: "Proposal Declined",
+        description: "The proposal has been declined",
+      });
+      handleProposalUpdate();
+    } catch (error) {
+      console.error('Error declining proposal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to decline proposal",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCounterOffer = (proposal: Proposal) => {
+    setCounterProposal(proposal);
     setShowCounterForm(true);
   };
 
@@ -188,15 +223,18 @@ const NegotiationFlow = ({
             </CardHeader>
             <CardContent className="space-y-4">
               {loading ? (
-                <div className="text-center py-4">Loading proposal cards...</div>
-              ) : proposalCards.length > 0 ? (
+                <div className="text-center py-4">Loading proposals...</div>
+              ) : proposals.length > 0 ? (
                 <div className="space-y-4">
-                  {proposalCards.map((card) => (
+                  {proposals.map((proposal) => (
                     <ProposalCard
-                      key={card.id}
-                      card={card}
-                      onActionComplete={handleProposalUpdate}
-                      onCounterClick={() => handleCounterOffer(card)}
+                      key={proposal.id}
+                      proposal={proposal}
+                      onAccept={() => handleAcceptProposal(proposal)}
+                      onDecline={() => handleDeclineProposal(proposal)}
+                      onCounter={() => handleCounterOffer(proposal)}
+                      onUpdate={handleProposalUpdate}
+                      isOrganizer={!isServiceProvider}
                     />
                   ))}
                 </div>
@@ -204,7 +242,7 @@ const NegotiationFlow = ({
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    No proposal cards found for this request.
+                    No proposals found for this request.
                   </AlertDescription>
                 </Alert>
               )}
@@ -248,14 +286,14 @@ const NegotiationFlow = ({
                   Both parties have agreed to the terms. Ready to create the contract.
                 </p>
                 
-                {proposalCards.length > 0 && (
+                {proposals.length > 0 && (
                   <div className="bg-white dark:bg-gray-800 p-3 rounded border">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">
-                        Agreed Amount: ${proposalCards.find(c => c.status === 'final_confirmation')?.negotiated_budget_range?.min?.toLocaleString() || 'TBD'}
+                        Agreed Amount: ${proposals[0]?.quote_amount?.toLocaleString()}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        Timeline: {proposalCards.find(c => c.status === 'final_confirmation')?.negotiated_timeline || 'TBD'}
+                        Timeline: {proposals[0]?.timeline}
                       </span>
                     </div>
                   </div>
@@ -401,13 +439,35 @@ const NegotiationFlow = ({
         <ContractCreationModal
           isOpen={showContractModal}
           serviceRequest={serviceRequest}
-          proposal={proposalCards.find(c => c.status === 'accepted' || c.status === 'final_confirmation')}
+          proposal={proposals.find(p => p.status === 'accepted')}
           onClose={() => setShowContractModal(false)}
           onCreateContract={handleProposalUpdate}
         />
       )}
     </div>
   );
+};
+
+const getStageNumber = (status: string) => {
+  switch (status) {
+    case 'pending': return 1;
+    case 'negotiating': return 2;
+    case 'agreed': return 3;
+    case 'in_progress': return 4;
+    case 'completed': return 5;
+    default: return 1;
+  }
+};
+
+const getStageTitle = (status: string) => {
+  switch (status) {
+    case 'pending': return 'Initiated';
+    case 'negotiating': return 'Proposal';
+    case 'agreed': return 'Agreement';
+    case 'in_progress': return 'Contract';
+    case 'completed': return 'Completed';
+    default: return 'Initiated';
+  }
 };
 
 export default NegotiationFlow;
