@@ -48,7 +48,10 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     hasAnyAcceptance,
     hasCurrentUserResponded,
     responses: responses.length,
-    acceptResponses: acceptResponses.length
+    acceptResponses: acceptResponses.length,
+    // Add more detailed info about who accepted
+    acceptedBy: acceptResponses.map(r => r.responded_by),
+    currentUserInAcceptList: acceptResponses.some(r => r.responded_by === currentUserId)
   });
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
@@ -131,8 +134,12 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     );
   }
 
-  // PRIORITY: "THEY ACCEPTED" scenario - show buttons when someone else accepted but current user hasn't responded
-  if (hasAnyAcceptance && !hasCurrentUserResponded) {
+  // CRITICAL FIX: "THEY ACCEPTED" scenario - show buttons when someone else accepted but current user hasn't responded
+  // Check if there's any acceptance AND the current user is NOT in the accept list AND hasn't responded at all
+  const currentUserAccepted = acceptResponses.some(r => r.responded_by === currentUserId);
+  const shouldShowTheyAcceptedButtons = hasAnyAcceptance && !currentUserAccepted && !hasCurrentUserResponded;
+  
+  if (shouldShowTheyAcceptedButtons) {
     console.log('Showing "they accepted" buttons: Other party accepted, current user hasn\'t responded');
     return (
       <div className="space-y-2">
