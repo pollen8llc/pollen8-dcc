@@ -153,45 +153,8 @@ const Labr8ProjectStatusNew = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
+          {/* Sidebar - Only Participants */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Project Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Project Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {serviceRequest.description && (
-                  <div>
-                    <div className="text-sm font-medium mb-2">Description</div>
-                    <div className="text-sm text-muted-foreground">
-                      {serviceRequest.description}
-                    </div>
-                  </div>
-                )}
-
-                {serviceRequest.budget_range?.min && (
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">
-                      ${serviceRequest.budget_range.min.toLocaleString()}
-                      {serviceRequest.budget_range.max && 
-                        ` - $${serviceRequest.budget_range.max.toLocaleString()}`
-                      }
-                    </span>
-                  </div>
-                )}
-                
-                {serviceRequest.timeline && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm">{serviceRequest.timeline}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Participants */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Participants</CardTitle>
@@ -237,6 +200,7 @@ const Labr8ProjectStatusNew = () => {
             <ProposalCardThread 
               requestId={serviceRequest.id}
               isServiceProvider={true}
+              serviceRequest={serviceRequest}
             />
           </div>
         </div>
