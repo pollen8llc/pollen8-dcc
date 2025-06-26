@@ -2,7 +2,7 @@
 import React from 'react';
 import { ProposalCard } from '@/types/proposalCards';
 import { AgreementCard } from './AgreementCard';
-import { ProposalCardNew } from './ProposalCardNew';
+import ProposalCardNew from './ProposalCardNew';
 
 interface ProposalCardRendererProps {
   card: ProposalCard;

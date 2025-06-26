@@ -129,7 +129,12 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
   return {
     ...request,
     budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[]
+    milestones: request.milestones as string[],
+    service_provider: request.service_provider ? {
+      ...request.service_provider,
+      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
+      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+    } : undefined
   } as ServiceRequest;
 };
 
@@ -153,7 +158,12 @@ export const updateServiceRequest = async (
   return {
     ...request,
     budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[]
+    milestones: request.milestones as string[],
+    service_provider: request.service_provider ? {
+      ...request.service_provider,
+      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
+      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+    } : undefined
   } as ServiceRequest;
 };
 
@@ -175,7 +185,12 @@ export const getServiceRequestById = async (id: string): Promise<ServiceRequest 
   return {
     ...data,
     budget_range: data.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: data.milestones as string[]
+    milestones: data.milestones as string[],
+    service_provider: data.service_provider ? {
+      ...data.service_provider,
+      services: Array.isArray(data.service_provider.services) ? data.service_provider.services : [],
+      pricing_range: data.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+    } : undefined
   } as ServiceRequest;
 };
 
@@ -204,7 +219,12 @@ export const getOrganizerServiceRequests = async (organizerId: string): Promise<
   return (data || []).map(request => ({
     ...request,
     budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[]
+    milestones: request.milestones as string[],
+    service_provider: request.service_provider ? {
+      ...request.service_provider,
+      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
+      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+    } : undefined
   })) as ServiceRequest[];
 };
 
@@ -258,7 +278,12 @@ export const getAvailableServiceRequestsForProvider = async (providerId: string)
   return (data || []).map(request => ({
     ...request,
     budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[]
+    milestones: request.milestones as string[],
+    service_provider: request.service_provider ? {
+      ...request.service_provider,
+      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
+      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+    } : undefined
   })) as ServiceRequest[];
 };
 
@@ -277,7 +302,12 @@ export const getAllServiceRequests = async (): Promise<ServiceRequest[]> => {
   return (data || []).map(request => ({
     ...request,
     budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[]
+    milestones: request.milestones as string[],
+    service_provider: request.service_provider ? {
+      ...request.service_provider,
+      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
+      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+    } : undefined
   })) as ServiceRequest[];
 };
 
