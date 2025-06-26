@@ -19,7 +19,7 @@ export const ProposalCardStatus: React.FC<ProposalCardStatusProps> = ({
   isLocked
 }) => {
   const { session } = useSession();
-  const { acceptResponses, hasCurrentUserResponded, loading } = useProposalCardResponses(cardId);
+  const { acceptResponses, hasAnyAcceptance, hasCurrentUserResponded, loading } = useProposalCardResponses(cardId);
 
   if (loading) {
     return <Badge variant="outline" className="animate-pulse">Loading...</Badge>;
@@ -36,7 +36,7 @@ export const ProposalCardStatus: React.FC<ProposalCardStatusProps> = ({
   }
 
   // Show acceptance status for accepted cards
-  if (cardStatus === 'accepted' && acceptResponses.length > 0) {
+  if (cardStatus === 'accepted' && hasAnyAcceptance) {
     const currentUserAccepted = acceptResponses.some(r => r.responded_by === session?.user?.id);
     
     if (currentUserAccepted) {

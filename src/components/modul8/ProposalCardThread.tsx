@@ -38,7 +38,7 @@ import { ProposalCard, RequestComment } from '@/types/proposalCards';
 import { ServiceRequest } from '@/types/modul8';
 import { ProposalCardStatus } from './ProposalCardStatus';
 import { DeelIntegrationButton } from './DeelIntegrationButton';
-import { ProposalActionHandler } from './ProposalActionHandler';
+import { ProposalCardResponseActions } from './ProposalCardResponseActions';
 import { supabase } from '@/integrations/supabase/client';
 import { useProposalCardResponsesData } from '@/hooks/useProposalCardResponsesData';
 
@@ -192,7 +192,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       const content = responseType === 'accept' 
         ? 'Initial request accepted as proposed.' 
         : 'Initial request declined.';
-      
+
       await createRequestComment({
         request_id: requestId,
         content,
@@ -605,15 +605,18 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                         </div>
                       )}
                       
-                      {/* Response Actions - Updated to use ProposalActionHandler */}
+                      {/* Response Actions */}
                       <div className="pt-4 border-t border-gray-700">
-                        <ProposalActionHandler
-                          card={card}
-                          serviceRequest={serviceRequest}
-                          onAccept={() => {}} // TODO: Implement proper handlers
-                          onReject={() => {}}
-                          onCounter={() => {}}
-                          onCancel={() => {}}
+                        <ProposalCardResponseActions
+                          cardId={card.id}
+                          cardStatus={card.status}
+                          isLocked={card.is_locked}
+                          submittedBy={card.submitted_by}
+                          responses={responses}
+                          acceptResponses={acceptResponses}
+                          hasCurrentUserResponded={hasCurrentUserResponded}
+                          onActionComplete={handleActionComplete}
+                          onCounterClick={() => handleRespondToCard(card.id, 'counter')}
                         />
                       </div>
                     </CardContent>

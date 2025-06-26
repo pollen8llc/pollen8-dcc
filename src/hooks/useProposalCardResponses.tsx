@@ -46,14 +46,19 @@ export const useProposalCardResponses = (cardId: string) => {
     };
   }, [cardId]);
 
-  // Simplified response analysis - status-based approach
   const acceptResponses = responses.filter(r => r.response_type === 'accept');
+  const hasMutualAcceptance = acceptResponses.length >= 2;
+  const hasAnyAcceptance = acceptResponses.length > 0;
+  
+  // Check if current user has already responded
   const hasCurrentUserResponded = responses.some(r => r.responded_by === session?.user?.id);
 
   return {
     responses,
     loading,
     acceptResponses,
+    hasMutualAcceptance,
+    hasAnyAcceptance,
     hasCurrentUserResponded,
     refresh: loadResponses
   };
