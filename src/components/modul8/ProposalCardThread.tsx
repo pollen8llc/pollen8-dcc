@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Plus, MessageSquare, CheckCircle, AlertTriangle } from 'lucide-react';
 import { ProposalCard } from '@/types/proposalCards';
 import { ServiceRequest } from '@/types/modul8';
-import { getProposalCardsByRequestId, createProposalCard } from '@/services/proposalCardService';
+import { getProposalCards, createProposalCard } from '@/services/proposalCardService';
 import { ProposalCardRenderer } from './ProposalCardRenderer';
 import StructuredProposalForm from './StructuredProposalForm';
 import { useSession } from '@/hooks/useSession';
@@ -40,7 +40,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
     setLoading(true);
     try {
       console.log('🔄 Loading proposal cards for request:', requestId);
-      const cards = await getProposalCardsByRequestId(requestId);
+      const cards = await getProposalCards(requestId);
       console.log('📥 Loaded proposal cards:', cards);
       setProposalCards(cards);
     } catch (error) {
@@ -185,7 +185,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                 setShowProposalForm(false);
                 setIsCounterProposal(false);
               }}
-              isServiceProvider={isServiceProvider}
               isCounterProposal={isCounterProposal}
             />
           </CardContent>
@@ -205,7 +204,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
           proposalCards.map((card) => (
             <ProposalCardRenderer
               key={card.id}
-              proposal={card}
+              card={card}
               onActionComplete={loadProposalCards}
               showCounterOption={statusInfo.canCreateProposal}
               onCounterClick={() => handleCounterProposal(card.id)}

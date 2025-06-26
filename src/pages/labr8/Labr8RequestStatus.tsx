@@ -1,12 +1,16 @@
 
 import Navbar from '@/components/Navbar';
-import RequestStatusPage from '@/components/modul8/RequestStatusPage';
 
 const Labr8RequestStatus = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <RequestStatusPage />
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-2">Request Status</h2>
+          <p className="text-muted-foreground">This page is no longer in use. Please use the dashboard.</p>
+        </div>
+      </div>
     </div>
   );
 };
