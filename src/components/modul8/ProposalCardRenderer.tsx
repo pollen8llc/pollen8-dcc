@@ -22,11 +22,10 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
     return <AgreementCard card={card} />;
   }
 
-  // Render regular proposal cards
+  // Render regular proposal cards - ProposalCardNew doesn't need onActionComplete
   return (
     <ProposalCardNew
       card={card}
-      onActionComplete={onActionComplete}
       showCounterOption={showCounterOption}
       onCounterClick={onCounterClick}
     />
