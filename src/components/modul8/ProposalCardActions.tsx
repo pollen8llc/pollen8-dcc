@@ -14,6 +14,7 @@ interface ProposalCardActionsProps {
   onActionComplete: () => void;
   showCounterOption?: boolean;
   onCounterClick?: () => void;
+  hasCounterResponse?: boolean; // New prop to indicate if there's a counter response
 }
 
 export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
@@ -21,7 +22,8 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   isLocked,
   onActionComplete,
   showCounterOption = true,
-  onCounterClick
+  onCounterClick,
+  hasCounterResponse = false
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
@@ -75,6 +77,16 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
       onCounterClick();
     }
   };
+
+  // Hide buttons if there's a counter response to this card
+  if (hasCounterResponse) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <MessageSquare className="h-4 w-4" />
+        Counter proposal submitted - see response below
+      </div>
+    );
+  }
 
   // Show mutual acceptance status - this takes priority
   if (hasMutualAcceptance) {

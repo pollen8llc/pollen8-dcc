@@ -9,14 +9,21 @@ interface ProposalCardRendererProps {
   onActionComplete: () => void;
   showCounterOption?: boolean;
   onCounterClick?: () => void;
+  allCards?: ProposalCard[]; // New prop to pass all cards for checking counter responses
 }
 
 export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
   card,
   onActionComplete,
   showCounterOption,
-  onCounterClick
+  onCounterClick,
+  allCards = []
 }) => {
+  // Check if there's a counter response to this card
+  const hasCounterResponse = allCards.some(
+    otherCard => otherCard.response_to_card_id === card.id
+  );
+
   // Render agreement cards with special component
   if (card.status === 'agreement') {
     return <AgreementCard card={card} />;
@@ -26,6 +33,7 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
   return (
     <ProposalCardNew
       card={card}
+      hasCounterResponse={hasCounterResponse}
     />
   );
 };
