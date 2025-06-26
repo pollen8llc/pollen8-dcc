@@ -1,253 +1,250 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { 
-  User, 
-  Building, 
-  FileText, 
-  DollarSign, 
-  Calendar, 
-  Link as LinkIcon,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  MessageSquare,
-  Sparkles
-} from 'lucide-react';
 import { ProposalCard } from '@/types/proposalCards';
 import { ProposalCardActions } from './ProposalCardActions';
+import { 
+  DollarSign, 
+  Clock, 
+  FileText, 
+  Link as LinkIcon,
+  User,
+  Calendar,
+  MessageSquare
+} from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
-import { formatDistanceToNow } from 'date-fns';
 
 interface ProposalCardNewProps {
-  proposal: ProposalCard;
-  isServiceProvider: boolean;
-  onCounterClick: () => void;
-  onActionComplete: () => void;
+  card: ProposalCard;
+  hasCounterResponse?: boolean;
 }
 
-const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
-  proposal,
-  isServiceProvider,
-  onCounterClick,
-  onActionComplete
+const ProposalCardNew: React.FC<ProposalCardNewProps> = ({ 
+  card,
+  hasCounterResponse = false 
 }) => {
   const { session } = useSession();
-  const currentUserId = session?.user?.id;
+  const [showCounter, setShowCounter] = useState(false);
 
-  const getCardIcon = () => {
-    switch (proposal.status) {
-      case 'agreement':
-        return <Sparkles className="h-5 w-5 text-yellow-500" />;
+  const getStatusColor = (status: string) => {
+    switch (status) {
       case 'accepted':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return 'bg-green-100 text-green-800 border-green-200';
       case 'rejected':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return 'bg-red-100 text-red-800 border-red-200';
       case 'countered':
-        return <MessageSquare className="h-5 w-5 text-blue-500" />;
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'cancelled':
-        return <XCircle className="h-5 w-5 text-gray-500" />;
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
-        return <FileText className="h-5 w-5 text-gray-500" />;
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     }
   };
 
-  const getStatusColor = () => {
-    switch (proposal.status) {
-      case 'agreement':
-        return 'bg-gradient-to-r from-yellow-100 to-green-100 text-yellow-800 border-yellow-200';
+  const getStatusText = () => {
+    switch (card.status) {
       case 'accepted':
-        return 'bg-green-50 text-green-700 border-green-200';
+        return 'Accepted';
       case 'rejected':
-        return 'bg-red-50 text-red-700 border-red-200';
+        return 'Rejected';
       case 'countered':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
+        return 'Countered';
       case 'cancelled':
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-      case 'pending':
-        return 'bg-orange-50 text-orange-700 border-orange-200';
+        return 'Cancelled';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
+        return 'Pending';
     }
   };
 
-  const getCardTitle = () => {
-    if (proposal.status === 'agreement') {
-      return `🎉 AGREEMENT REACHED - Card #${proposal.card_number}`;
-    }
-    return `Proposal Card #${proposal.card_number}`;
+  const hasNegotiatedTerms = () => {
+    return card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline;
   };
 
-  const isOwnProposal = proposal.submitted_by === currentUserId;
+  const isOwnCard = () => {
+    return session?.user?.id === card.submitted_by;
+  };
+
+  const getCardBorderColor = () => {
+    switch (card.status) {
+      case 'accepted':
+        return 'border-green-200';
+      case 'rejected':
+        return 'border-red-200';
+      case 'countered':
+        return 'border-blue-200';
+      case 'cancelled':
+        return 'border-gray-200';
+      default:
+        return 'border-yellow-200';
+    }
+  };
+
+  const handleActionComplete = () => {
+    // Refresh or update the card state
+    window.location.reload(); // Simple refresh for now
+  };
+
+  const handleCounterClick = () => {
+    setShowCounter(true);
+  };
 
   return (
-    <Card className={`transition-all duration-200 hover:shadow-md ${
-      proposal.status === 'agreement' ? 'ring-2 ring-yellow-200 bg-gradient-to-br from-yellow-50 to-green-50' : ''
-    }`}>
+    <Card className={`mb-4 ${getCardBorderColor()}`}>
       <CardHeader className="pb-4">
-        <div className="flex items-start justify-between">
+        <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
-            {getCardIcon()}
-            <div>
-              <CardTitle className="text-lg">{getCardTitle()}</CardTitle>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge className={`${getStatusColor()} border font-medium`}>
-                  {proposal.status === 'agreement' ? 'AGREEMENT' : proposal.status.toUpperCase()}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  {formatDistanceToNow(new Date(proposal.created_at), { addSuffix: true })}
-                </span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                Card #{card.card_number}
+              </Badge>
+              <Badge className={getStatusColor(card.status)}>
+                {getStatusText()}
+              </Badge>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
-                {isOwnProposal ? (
-                  <User className="h-4 w-4" />
-                ) : (
-                  <Building className="h-4 w-4" />
-                )}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-muted-foreground">
-              {isOwnProposal ? 'You' : (isServiceProvider ? 'Client' : 'Service Provider')}
-            </span>
+          <div className="text-right text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {new Date(card.created_at).toLocaleDateString()}
+            </div>
+            {card.responded_at && (
+              <div className="flex items-center gap-1 mt-1">
+                <MessageSquare className="h-3 w-3" />
+                Responded {new Date(card.responded_at).toLocaleDateString()}
+              </div>
+            )}
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Negotiated Title */}
-        {proposal.negotiated_title && (
-          <div>
-            <h4 className="font-semibold text-sm text-muted-foreground mb-1">Project Title</h4>
-            <p className="font-medium">{proposal.negotiated_title}</p>
-          </div>
-        )}
+        {/* Negotiated Terms Section */}
+        {hasNegotiatedTerms() && (
+          <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+            <h4 className="font-medium text-sm flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Proposed Terms
+            </h4>
+            
+            <div className="space-y-3">
+              {card.negotiated_title && (
+                <div>
+                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Title</h5>
+                  <p className="text-sm">{card.negotiated_title}</p>
+                </div>
+              )}
+              
+              {card.negotiated_description && (
+                <div>
+                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Description</h5>
+                  <p className="text-sm">{card.negotiated_description}</p>
+                </div>
+              )}
 
-        {/* Negotiated Description */}
-        {proposal.negotiated_description && (
-          <div>
-            <h4 className="font-semibold text-sm text-muted-foreground mb-1">Project Description</h4>
-            <p className="text-sm leading-relaxed">{proposal.negotiated_description}</p>
-          </div>
-        )}
+              {card.negotiated_budget_range && (
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">
+                    {card.negotiated_budget_range.min && card.negotiated_budget_range.max 
+                      ? `${card.negotiated_budget_range.currency} ${card.negotiated_budget_range.min.toLocaleString()} - ${card.negotiated_budget_range.max.toLocaleString()}`
+                      : card.negotiated_budget_range.min 
+                        ? `${card.negotiated_budget_range.currency} ${card.negotiated_budget_range.min.toLocaleString()}+`
+                        : `Budget in ${card.negotiated_budget_range.currency}`
+                    }
+                  </span>
+                </div>
+              )}
 
-        {/* Budget Range */}
-        {proposal.negotiated_budget_range && (
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-green-600" />
-            <span className="text-sm text-muted-foreground">Budget:</span>
-            <span className="font-medium">
-              {proposal.negotiated_budget_range.min && proposal.negotiated_budget_range.max
-                ? `${proposal.negotiated_budget_range.currency} ${proposal.negotiated_budget_range.min} - ${proposal.negotiated_budget_range.max}`
-                : proposal.negotiated_budget_range.min
-                ? `${proposal.negotiated_budget_range.currency} ${proposal.negotiated_budget_range.min}+`
-                : `${proposal.negotiated_budget_range.currency} TBD`
-              }
-            </span>
-          </div>
-        )}
-
-        {/* Timeline */}
-        {proposal.negotiated_timeline && (
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-blue-600" />
-            <span className="text-sm text-muted-foreground">Timeline:</span>
-            <span className="font-medium">{proposal.negotiated_timeline}</span>
-          </div>
-        )}
-
-        {/* Links */}
-        {(proposal.scope_link || proposal.terms_link || (proposal.asset_links && proposal.asset_links.length > 0)) && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <h4 className="font-semibold text-sm text-muted-foreground">Attachments & Links</h4>
-              <div className="space-y-1">
-                {proposal.scope_link && (
-                  <a
-                    href={proposal.scope_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline"
-                  >
-                    <LinkIcon className="h-3 w-3" />
-                    Scope Document
-                  </a>
-                )}
-                {proposal.terms_link && (
-                  <a
-                    href={proposal.terms_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline"
-                  >
-                    <LinkIcon className="h-3 w-3" />
-                    Terms Document
-                  </a>
-                )}
-                {proposal.asset_links && proposal.asset_links.map((link, index) => (
-                  <a
-                    key={index}
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline"
-                  >
-                    <LinkIcon className="h-3 w-3" />
-                    Asset Link {index + 1}
-                  </a>
-                ))}
-              </div>
+              {card.negotiated_timeline && (
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm">{card.negotiated_timeline}</span>
+                </div>
+              )}
             </div>
-          </>
+          </div>
         )}
 
-        {/* Notes */}
-        {proposal.notes && (
-          <>
-            <Separator />
-            <div>
-              <h4 className="font-semibold text-sm text-muted-foreground mb-1">Notes</h4>
-              <p className="text-sm leading-relaxed">{proposal.notes}</p>
-            </div>
-          </>
+        {/* Notes Section */}
+        {card.notes && (
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Notes
+            </h4>
+            <p className="text-sm text-muted-foreground bg-muted/30 p-3 rounded">
+              {card.notes}
+            </p>
+          </div>
         )}
 
-        {/* Agreement Message */}
-        {proposal.status === 'agreement' && (
-          <>
-            <Separator />
-            <div className="bg-gradient-to-r from-yellow-100 to-green-100 p-4 rounded-lg border border-yellow-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-5 w-5 text-yellow-600" />
-                <span className="font-semibold text-yellow-800">Agreement Reached!</span>
-              </div>
-              <p className="text-sm text-yellow-700">
-                Both parties have accepted this proposal. Ready to proceed with contract execution via DEEL.
-              </p>
+        {/* Asset Links */}
+        {card.asset_links && card.asset_links.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm flex items-center gap-2">
+              <LinkIcon className="h-4 w-4" />
+              Attachments
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {card.asset_links.map((link, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(link, '_blank')}
+                  className="text-xs"
+                >
+                  <LinkIcon className="h-3 w-3 mr-1" />
+                  Attachment {index + 1}
+                </Button>
+              ))}
             </div>
-          </>
+          </div>
+        )}
+
+        {/* Scope and Terms Links */}
+        {(card.scope_link || card.terms_link) && (
+          <div className="flex gap-2">
+            {card.scope_link && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(card.scope_link, '_blank')}
+                className="text-xs"
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                View Scope
+              </Button>
+            )}
+            {card.terms_link && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(card.terms_link, '_blank')}
+                className="text-xs"
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                View Terms
+              </Button>
+            )}
+          </div>
         )}
 
         {/* Action Buttons */}
-        {proposal.status !== 'agreement' && (
-          <>
-            <Separator />
+        {!isOwnCard() && (
+          <div className="pt-2 border-t">
             <ProposalCardActions
-              cardId={proposal.id}
-              isLocked={proposal.is_locked}
-              onActionComplete={onActionComplete}
-              onCounterClick={onCounterClick}
+              cardId={card.id}
+              isLocked={card.is_locked}
+              onActionComplete={handleActionComplete}
+              showCounterOption={true}
+              onCounterClick={handleCounterClick}
+              hasCounterResponse={hasCounterResponse}
             />
-          </>
+          </div>
         )}
       </CardContent>
     </Card>
