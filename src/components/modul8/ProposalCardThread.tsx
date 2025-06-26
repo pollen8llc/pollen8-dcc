@@ -38,7 +38,7 @@ import { ProposalCard, RequestComment } from '@/types/proposalCards';
 import { ServiceRequest } from '@/types/modul8';
 import { ProposalCardStatus } from './ProposalCardStatus';
 import { DeelIntegrationButton } from './DeelIntegrationButton';
-import { ProposalCardResponseActions } from './ProposalCardResponseActions';
+import { ProposalActionHandler } from './ProposalActionHandler';
 import { supabase } from '@/integrations/supabase/client';
 import { useProposalCardResponsesData } from '@/hooks/useProposalCardResponsesData';
 
@@ -192,7 +192,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       const content = responseType === 'accept' 
         ? 'Initial request accepted as proposed.' 
         : 'Initial request declined.';
-
+      
       await createRequestComment({
         request_id: requestId,
         content,
@@ -605,18 +605,15 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                         </div>
                       )}
                       
-                      {/* Response Actions */}
+                      {/* Response Actions - Updated to use ProposalActionHandler */}
                       <div className="pt-4 border-t border-gray-700">
-                        <ProposalCardResponseActions
-                          cardId={card.id}
-                          cardStatus={card.status}
-                          isLocked={card.is_locked}
-                          submittedBy={card.submitted_by}
-                          responses={responses}
-                          acceptResponses={acceptResponses}
-                          hasCurrentUserResponded={hasCurrentUserResponded}
-                          onActionComplete={handleActionComplete}
-                          onCounterClick={() => handleRespondToCard(card.id, 'counter')}
+                        <ProposalActionHandler
+                          card={card}
+                          serviceRequest={serviceRequest}
+                          onAccept={() => {}} // TODO: Implement proper handlers
+                          onReject={() => {}}
+                          onCounter={() => {}}
+                          onCancel={() => {}}
                         />
                       </div>
                     </CardContent>
