@@ -27,7 +27,7 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
-  const { responses } = useProposalCardResponses(cardId);
+  const { responses, loading: responsesLoading } = useProposalCardResponses(cardId);
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
     console.log(`🔥 STARTING RESPONSE: ${responseType} for card ${cardId}`);
@@ -93,11 +93,23 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     isLocked,
     responsesCount: responses.length,
     hasCounterResponse,
-    currentUserId: session?.user?.id
+    currentUserId: session?.user?.id,
+    responsesLoading
   });
 
-  // SIMPLIFIED LOGIC: If there are any responses at all, hide the buttons
+  // If still loading responses, show loading state
+  if (responsesLoading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading...
+      </div>
+    );
+  }
+
+  // CORE LOGIC: If there are ANY responses at all, hide the buttons
   if (responses.length > 0) {
+    console.log(`🚫 Hiding buttons - found ${responses.length} responses for card ${cardId}`);
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Clock className="h-4 w-4" />
@@ -117,6 +129,7 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   }
 
   // Show action buttons for fresh proposals that need responses
+  console.log(`✅ Showing buttons for card ${cardId} - no responses found`);
   return (
     <div className="flex gap-2 flex-wrap">
       <Button
