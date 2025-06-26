@@ -7,7 +7,7 @@ import { useProposalCardResponses } from '@/hooks/useProposalCardResponses';
 
 interface ProposalCardStatusProps {
   cardId: string;
-  cardStatus: string;
+  cardStatus: 'pending' | 'accepted' | 'rejected' | 'countered' | 'cancelled' | 'final_confirmation' | 'agreement';
   submittedBy: string;
   isLocked: boolean;
 }
@@ -19,56 +19,46 @@ export const ProposalCardStatus: React.FC<ProposalCardStatusProps> = ({
   isLocked
 }) => {
   const { session } = useSession();
-  const { acceptResponses, hasMutualAcceptance, hasAnyAcceptance, hasCurrentUserResponded, loading } = useProposalCardResponses(cardId);
+  const { acceptResponses, hasAnyAcceptance, hasCurrentUserResponded, loading } = useProposalCardResponses(cardId);
 
   if (loading) {
     return <Badge variant="outline" className="animate-pulse">Loading...</Badge>;
   }
 
-  // Final confirmation card
-  if (cardStatus === 'final_confirmation') {
+  // Agreement card status
+  if (cardStatus === 'agreement') {
     return (
       <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-bold px-3 py-1 flex items-center gap-1">
-        <Star className="h-4 w-4" />
-        DEAL CONFIRMED
+        <Star className="h-4 w-4 fill-current" />
+        AGREEMENT REACHED
       </Badge>
     );
   }
 
-  // Show mutual acceptance status for accepted cards
+  // Show acceptance status for accepted cards
   if (cardStatus === 'accepted' && hasAnyAcceptance) {
-    if (hasMutualAcceptance) {
+    const currentUserAccepted = acceptResponses.some(r => r.responded_by === session?.user?.id);
+    
+    if (currentUserAccepted) {
       return (
-        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-bold px-3 py-1 flex items-center gap-1">
-          <Users className="h-4 w-4" />
-          MUTUALLY ACCEPTED
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-semibold px-3 py-1 flex items-center gap-1">
+            <CheckCircle className="h-4 w-4" />
+            YOU ACCEPTED
+          </Badge>
+          <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 font-semibold px-3 py-1 flex items-center gap-1 animate-pulse">
+            <Clock className="h-4 w-4" />
+            AWAITING RESPONSE
+          </Badge>
+        </div>
       );
     } else {
-      // Single acceptance - show correct badge based on who accepted
-      const currentUserAccepted = acceptResponses.some(r => r.responded_by === session?.user?.id);
-      
-      if (currentUserAccepted) {
-        return (
-          <div className="flex items-center gap-2">
-            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-semibold px-3 py-1 flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              YOU ACCEPTED
-            </Badge>
-            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 font-semibold px-3 py-1 flex items-center gap-1 animate-pulse">
-              <Clock className="h-4 w-4" />
-              AWAITING RESPONSE
-            </Badge>
-          </div>
-        );
-      } else {
-        return (
-          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-semibold px-3 py-1 flex items-center gap-1">
-            <CheckCircle className="h-4 w-4" />
-            THEY ACCEPTED
-          </Badge>
-        );
-      }
+      return (
+        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-semibold px-3 py-1 flex items-center gap-1">
+          <CheckCircle className="h-4 w-4" />
+          THEY ACCEPTED
+        </Badge>
+      );
     }
   }
 

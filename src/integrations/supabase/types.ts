@@ -1430,6 +1430,7 @@ export type Database = {
           domain_page: number
           engagement_status: string | null
           id: string
+          is_agreement_locked: boolean | null
           milestones: Json | null
           organizer_id: string
           project_progress: number | null
@@ -1446,6 +1447,7 @@ export type Database = {
           domain_page: number
           engagement_status?: string | null
           id?: string
+          is_agreement_locked?: boolean | null
           milestones?: Json | null
           organizer_id: string
           project_progress?: number | null
@@ -1462,6 +1464,7 @@ export type Database = {
           domain_page?: number
           engagement_status?: string | null
           id?: string
+          is_agreement_locked?: boolean | null
           milestones?: Json | null
           organizer_id?: string
           project_progress?: number | null

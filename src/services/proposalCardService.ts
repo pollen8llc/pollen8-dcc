@@ -28,6 +28,19 @@ export const getProposalCards = async (requestId: string): Promise<ProposalCard[
 };
 
 export const createProposalCard = async (data: CreateProposalCardData): Promise<ProposalCard> => {
+  // First check if the request is locked due to an agreement
+  const { data: serviceRequest, error: requestError } = await supabase
+    .from('modul8_service_requests')
+    .select('is_agreement_locked')
+    .eq('id', data.request_id)
+    .single();
+
+  if (requestError) throw requestError;
+  
+  if (serviceRequest?.is_agreement_locked) {
+    throw new Error('Cannot create new proposals - an agreement has already been reached for this request.');
+  }
+
   // Get the next card number for this request
   const { data: existingCards } = await supabase
     .from('modul8_proposal_cards')
