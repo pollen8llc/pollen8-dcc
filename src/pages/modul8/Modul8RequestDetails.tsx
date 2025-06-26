@@ -10,7 +10,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { 
   ArrowLeft, 
   Building, 
-  User, 
   Trash2,
   AlertTriangle
 } from 'lucide-react';
@@ -166,6 +165,10 @@ const Modul8RequestDetails = () => {
               <Badge className={`${getStatusColor(serviceRequest.status)} border font-medium`}>
                 {serviceRequest.status.replace('_', ' ').toUpperCase()}
               </Badge>
+              <Badge className="bg-blue-100 text-blue-800 border border-blue-200">
+                <Building className="h-4 w-4 mr-1" />
+                Client View
+              </Badge>
               <span className="text-muted-foreground text-sm">
                 Created {new Date(serviceRequest.created_at).toLocaleDateString()}
               </span>
@@ -223,7 +226,7 @@ const Modul8RequestDetails = () => {
                     <div className="text-sm font-medium">
                       {serviceRequest.organizer?.organization_name || 'Your Organization'}
                     </div>
-                    <div className="text-xs text-muted-foreground">Client</div>
+                    <div className="text-xs text-muted-foreground">Client (You)</div>
                   </div>
                 </div>
 

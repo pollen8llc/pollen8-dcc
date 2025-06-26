@@ -14,7 +14,6 @@ interface ProposalCardActionsProps {
   onActionComplete: () => void;
   showCounterOption?: boolean;
   onCounterClick?: () => void;
-  hasCounterResponse?: boolean;
 }
 
 export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
@@ -22,17 +21,14 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   isLocked,
   onActionComplete,
   showCounterOption = true,
-  onCounterClick,
-  hasCounterResponse = false
+  onCounterClick
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
-  const { responses, loading: responsesLoading, refresh } = useProposalCardResponses(cardId);
+  const { responses, loading: responsesLoading } = useProposalCardResponses(cardId);
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
     console.log(`🔥 STARTING RESPONSE: ${responseType} for card ${cardId}`);
-    console.log('Current user ID:', session?.user?.id);
-    console.log('Current responses before action:', responses);
     
     setLoading(responseType);
     
@@ -58,26 +54,11 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
         variant: "default"
       });
 
-      console.log('🔄 Manually refreshing responses data...');
-      await refresh(); // Manually refresh the responses
-      
-      console.log('🔄 Calling onActionComplete to refresh parent data...');
+      console.log('🔄 Calling onActionComplete to refresh data...');
       onActionComplete();
-      
-      // Force a small delay to ensure real-time updates have processed
-      setTimeout(() => {
-        console.log('🔄 Final refresh after delay...');
-        refresh();
-      }, 1000);
       
     } catch (error) {
       console.error(`❌ Error ${responseType}ing proposal:`, error);
-      console.error('Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        cardId,
-        responseType,
-        userId: session?.user?.id
-      });
       
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -103,7 +84,6 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   console.log(`🔍 ProposalCardActions for card ${cardId}:`, {
     isLocked,
     responsesCount: responses.length,
-    hasCounterResponse,
     currentUserId: session?.user?.id,
     responsesLoading,
     responses: responses.map(r => ({
