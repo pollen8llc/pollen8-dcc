@@ -14,7 +14,7 @@ interface ProposalCardActionsProps {
   onActionComplete: () => void;
   showCounterOption?: boolean;
   onCounterClick?: () => void;
-  hasCounterResponse?: boolean; // New prop to indicate if there's a counter response
+  hasCounterResponse?: boolean;
 }
 
 export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
@@ -78,17 +78,7 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     }
   };
 
-  // Hide buttons if there's a counter response to this card
-  if (hasCounterResponse) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <MessageSquare className="h-4 w-4" />
-        Counter proposal submitted - see response below
-      </div>
-    );
-  }
-
-  // Show mutual acceptance status - this takes priority
+  // PRIORITY 1: Show mutual acceptance status (highest priority)
   if (hasMutualAcceptance) {
     return (
       <div className="flex items-center gap-2 text-sm text-emerald-400 font-semibold">
@@ -98,8 +88,38 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // PRIORITY CHECK: "THEY ACCEPTED" scenario - show buttons when someone else accepted but current user hasn't responded
-  if (hasAnyAcceptance && !hasCurrentUserResponded && !hasMutualAcceptance) {
+  // PRIORITY 2: Hide buttons if there's a counter response to this card
+  if (hasCounterResponse) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <MessageSquare className="h-4 w-4" />
+        Counter proposal submitted - see response below
+      </div>
+    );
+  }
+
+  // PRIORITY 3: Hide buttons if card is locked (final status reached)
+  if (isLocked) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <CheckCircle className="h-4 w-4" />
+        This proposal has been responded to
+      </div>
+    );
+  }
+
+  // PRIORITY 4: Hide buttons if current user has already responded
+  if (hasCurrentUserResponded) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
+        <Clock className="h-4 w-4" />
+        Awaiting other party's response...
+      </div>
+    );
+  }
+
+  // PRIORITY 5: Show special state when other party accepted but current user hasn't responded
+  if (hasAnyAcceptance && !hasCurrentUserResponded) {
     return (
       <div className="flex gap-2 flex-wrap">
         <Button
@@ -145,29 +165,7 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // Show "awaiting response" when current user has responded but no mutual acceptance yet
-  if (hasCurrentUserResponded && !hasMutualAcceptance) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
-        <Clock className="h-4 w-4" />
-        Awaiting other party's response...
-      </div>
-    );
-  }
-
-  // Check if card is truly locked (both parties responded or cancelled/rejected)
-  const isTrulyLocked = isLocked && (hasMutualAcceptance || (!hasAnyAcceptance && hasCurrentUserResponded));
-
-  if (isTrulyLocked) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <CheckCircle className="h-4 w-4" />
-        This proposal has been responded to
-      </div>
-    );
-  }
-
-  // Default: Show action buttons for new proposals
+  // DEFAULT: Show action buttons for fresh proposals that need responses
   return (
     <div className="flex gap-2 flex-wrap">
       <Button
