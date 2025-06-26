@@ -22,12 +22,10 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
     return <AgreementCard card={card} />;
   }
 
-  // Render regular proposal cards - ProposalCardNew doesn't need onActionComplete
+  // Render regular proposal cards - ProposalCardNew has its own prop structure
   return (
     <ProposalCardNew
       card={card}
-      showCounterOption={showCounterOption}
-      onCounterClick={onCounterClick}
     />
   );
 };
