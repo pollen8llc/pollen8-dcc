@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -58,11 +59,11 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
   };
 
   const hasNegotiatedTerms = () => {
-    return card.negotiated_terms && Object.keys(card.negotiated_terms).length > 0;
+    return card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline;
   };
 
   const isOwnCard = () => {
-    return session?.user?.id === card.owner_id;
+    return session?.user?.id === card.submitted_by;
   };
 
   const getCardBorderColor = () => {
@@ -98,7 +99,7 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
               <Badge variant="outline" className="text-xs">
                 Card #{card.card_number}
               </Badge>
-              <Badge className={getStatusColor()}>
+              <Badge className={getStatusColor(card.status)}>
                 {getStatusText()}
               </Badge>
             </div>
@@ -128,7 +129,42 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
               Proposed Terms
             </h4>
             
-            {/* ... keep existing code (negotiated terms display) */}
+            <div className="space-y-3">
+              {card.negotiated_title && (
+                <div>
+                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Title</h5>
+                  <p className="text-sm">{card.negotiated_title}</p>
+                </div>
+              )}
+              
+              {card.negotiated_description && (
+                <div>
+                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Description</h5>
+                  <p className="text-sm">{card.negotiated_description}</p>
+                </div>
+              )}
+
+              {card.negotiated_budget_range && (
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">
+                    {card.negotiated_budget_range.min && card.negotiated_budget_range.max 
+                      ? `${card.negotiated_budget_range.currency} ${card.negotiated_budget_range.min.toLocaleString()} - ${card.negotiated_budget_range.max.toLocaleString()}`
+                      : card.negotiated_budget_range.min 
+                        ? `${card.negotiated_budget_range.currency} ${card.negotiated_budget_range.min.toLocaleString()}+`
+                        : `Budget in ${card.negotiated_budget_range.currency}`
+                    }
+                  </span>
+                </div>
+              )}
+
+              {card.negotiated_timeline && (
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm">{card.negotiated_timeline}</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
