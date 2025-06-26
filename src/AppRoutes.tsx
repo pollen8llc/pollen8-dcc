@@ -57,7 +57,7 @@ const Modul8Projects = lazy(() => import("@/pages/modul8/Modul8Projects"));
 const Modul8Partners = lazy(() => import("@/pages/modul8/Modul8Partners"));
 const DomainDirectory = lazy(() => import("@/pages/modul8/DomainDirectory"));
 const ServiceRequestForm = lazy(() => import("@/pages/modul8/ServiceRequestForm"));
-const Modul8RequestDetails = lazy(() => import("@/pages/modul8/Modul8RequestDetails"));
+const Modul8RequestDetailsNew = lazy(() => import("@/pages/modul8/Modul8RequestDetailsNew"));
 const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
 const OrganizerSetup = lazy(() => import("@/pages/modul8/setup/OrganizerSetup"));
 
@@ -357,7 +357,7 @@ const AppRoutes = () => {
           <Route path="/modul8/partners" element={<Modul8Partners />} />
           <Route path="/modul8/dashboard/directory" element={<DomainDirectory />} />
           <Route path="/modul8/dashboard/request/new" element={<ServiceRequestForm />} />
-          <Route path="/modul8/dashboard/request/:requestId" element={<Modul8RequestDetails />} />
+          <Route path="/modul8/dashboard/request/:requestId" element={<Modul8RequestDetailsNew />} />
           <Route path="/modul8/setup/organizer" element={<OrganizerSetup />} />
 
           {/* Labr8 Routes - Updated */}
