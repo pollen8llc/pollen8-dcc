@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -54,6 +53,8 @@ const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
 
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
+const Modul8Projects = lazy(() => import("@/pages/modul8/Modul8Projects"));
+const Modul8Partners = lazy(() => import("@/pages/modul8/Modul8Partners"));
 const DomainDirectory = lazy(() => import("@/pages/modul8/DomainDirectory"));
 const ServiceRequestForm = lazy(() => import("@/pages/modul8/ServiceRequestForm"));
 const Modul8RequestDetails = lazy(() => import("@/pages/modul8/Modul8RequestDetails"));
@@ -352,6 +353,8 @@ const AppRoutes = () => {
           {/* Modul8 Routes */}
           <Route path="/modul8" element={<Modul8Dashboard />} />
           <Route path="/modul8/dashboard" element={<Modul8Dashboard />} />
+          <Route path="/modul8/projects" element={<Modul8Projects />} />
+          <Route path="/modul8/partners" element={<Modul8Partners />} />
           <Route path="/modul8/dashboard/directory" element={<DomainDirectory />} />
           <Route path="/modul8/dashboard/request/new" element={<ServiceRequestForm />} />
           <Route path="/modul8/dashboard/request/:requestId" element={<Modul8RequestDetails />} />

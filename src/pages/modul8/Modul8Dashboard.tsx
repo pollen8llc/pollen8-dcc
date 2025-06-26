@@ -2,12 +2,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { getUserOrganizer, getOrganizerServiceRequests } from '@/services/modul8Service';
-import { ServiceRequest, DOMAIN_PAGES } from '@/types/modul8';
+import { getUserOrganizer } from '@/services/modul8Service';
+import { DOMAIN_PAGES } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Building2, Clock, DollarSign } from 'lucide-react';
+import { Plus, Building2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { toast } from '@/hooks/use-toast';
 
@@ -16,7 +15,6 @@ const Modul8Dashboard = () => {
   const navigate = useNavigate();
   
   const [organizerData, setOrganizerData] = useState(null);
-  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,9 +31,7 @@ const Modul8Dashboard = () => {
         return;
       }
       
-      const requests = await getOrganizerServiceRequests(organizer.id);
       setOrganizerData(organizer);
-      setServiceRequests(requests);
     } catch (error) {
       console.error('Error loading data:', error);
       toast({
@@ -50,22 +46,6 @@ const Modul8Dashboard = () => {
 
   const handleDomainClick = (domainId: number) => {
     navigate(`/modul8/dashboard/directory?domain=${domainId}`);
-  };
-
-  const handleRequestClick = (requestId: string) => {
-    navigate(`/modul8/dashboard/request/${requestId}`);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'negotiating': return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'agreed': return 'bg-green-50 text-green-700 border-green-200';
-      case 'in_progress': return 'bg-purple-50 text-purple-700 border-purple-200';
-      case 'completed': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'cancelled': return 'bg-red-50 text-red-700 border-red-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
   };
 
   if (loading) {
@@ -89,17 +69,33 @@ const Modul8Dashboard = () => {
                 Connect with service providers across specialized domains
               </p>
             </div>
-            <Button
-              onClick={() => navigate('/modul8/dashboard/request/new')}
-              className="bg-[#00eada] hover:bg-[#00eada]/90 text-black flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              New Request
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => navigate('/modul8/projects')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                View Projects
+              </Button>
+              <Button
+                onClick={() => navigate('/modul8/partners')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                Manage Partners
+              </Button>
+              <Button
+                onClick={() => navigate('/modul8/dashboard/request/new')}
+                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                New Request
+              </Button>
+            </div>
           </div>
 
-          {/* Domain Cards */}
-          <div className="mb-12">
+          {/* Service Domains */}
+          <div>
             <h2 className="text-2xl font-semibold mb-6">Service Domains</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {DOMAIN_PAGES.map((domain) => (
@@ -124,86 +120,6 @@ const Modul8Dashboard = () => {
                 </Card>
               ))}
             </div>
-          </div>
-
-          {/* Active Projects */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-6">Your Projects</h2>
-            {serviceRequests.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    No projects yet
-                  </h3>
-                  <p className="text-muted-foreground text-center mb-4">
-                    Start by creating your first service request
-                  </p>
-                  <Button
-                    onClick={() => navigate('/modul8/dashboard/request/new')}
-                    className="bg-[#00eada] hover:bg-[#00eada]/90 text-black"
-                  >
-                    Create Request
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {serviceRequests.map((request) => (
-                  <Card
-                    key={request.id}
-                    className="hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => handleRequestClick(request.id)}
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg line-clamp-1">
-                          {request.title}
-                        </CardTitle>
-                        <Badge className={`${getStatusColor(request.status)} font-medium`} variant="outline">
-                          {request.status.replace('_', ' ').toUpperCase()}
-                        </Badge>
-                      </div>
-                      {request.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {request.description}
-                        </p>
-                      )}
-                    </CardHeader>
-                    
-                    <CardContent>
-                      <div className="space-y-2 text-sm">
-                        {request.budget_range && (
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
-                            <span>
-                              {request.budget_range.min && request.budget_range.max
-                                ? `$${request.budget_range.min.toLocaleString()} - $${request.budget_range.max.toLocaleString()}`
-                                : request.budget_range.min
-                                ? `From $${request.budget_range.min.toLocaleString()}`
-                                : 'Contact for pricing'
-                              }
-                            </span>
-                          </div>
-                        )}
-                        {request.timeline && (
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>{request.timeline}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-xs">
-                            Created {new Date(request.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
