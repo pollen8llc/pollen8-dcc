@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -78,13 +77,21 @@ const Modul8Partners = () => {
     navigate(`/modul8/dashboard/request/new?provider=${providerId}`);
   };
 
+  const getServiceDisplayName = (service: any): string => {
+    if (typeof service === 'string') {
+      return service;
+    }
+    if (service && typeof service === 'object') {
+      return service.name || service.title || 'Service';
+    }
+    return 'Service';
+  };
+
   const filteredProviders = allProviders.filter(provider =>
     provider.business_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     provider.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     provider.services.some(service => 
-      typeof service === 'string' 
-        ? service.toLowerCase().includes(searchTerm.toLowerCase())
-        : service.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      getServiceDisplayName(service).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -138,7 +145,7 @@ const Modul8Partners = () => {
               <div className="flex flex-wrap gap-1">
                 {provider.services.slice(0, 3).map((service, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
-                    {typeof service === 'string' ? service : service.name || 'Service'}
+                    {getServiceDisplayName(service)}
                   </Badge>
                 ))}
                 {provider.services.length > 3 && (
