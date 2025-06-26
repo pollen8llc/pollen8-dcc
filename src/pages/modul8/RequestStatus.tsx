@@ -2,7 +2,7 @@
 import Navbar from '@/components/Navbar';
 import RequestStatusPage from '@/components/modul8/RequestStatusPage';
 
-const Labr8RequestStatus = () => {
+const RequestStatus = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -11,4 +11,4 @@ const Labr8RequestStatus = () => {
   );
 };
 
-export default Labr8RequestStatus;
+export default RequestStatus;
