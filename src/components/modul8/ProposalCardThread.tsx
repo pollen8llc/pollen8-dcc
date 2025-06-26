@@ -64,14 +64,14 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       const proposalData = {
         request_id: requestId,
         submitted_by: session.user.id,
-        negotiated_title: data.negotiated_title,
-        negotiated_description: data.negotiated_description,
-        negotiated_budget_range: data.negotiated_budget_range,
-        negotiated_timeline: data.negotiated_timeline,
-        notes: data.notes,
-        asset_links: data.asset_links || [],
-        scope_link: data.scope_link,
-        terms_link: data.terms_link,
+        negotiated_title: data.title,
+        negotiated_description: data.description,
+        negotiated_budget_range: { min: data.budgetMin, max: data.budgetMax },
+        negotiated_timeline: data.timeline,
+        notes: data.milestones?.join('\n') || '',
+        asset_links: [],
+        scope_link: null,
+        terms_link: null,
         response_to_card_id: isCounterProposal ? data.response_to_card_id : null
       };
 
@@ -185,7 +185,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                 setShowProposalForm(false);
                 setIsCounterProposal(false);
               }}
-              isCounterProposal={isCounterProposal}
             />
           </CardContent>
         </Card>
