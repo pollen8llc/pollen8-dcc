@@ -6,15 +6,20 @@ import { RequestHeader as SharedRequestHeader } from '@/components/shared/Reques
 interface RequestHeaderProps {
   serviceRequest: ServiceRequest;
   onBack: () => void;
+  currentUserRole?: 'organizer' | 'service_provider' | 'viewer';
 }
 
-const RequestHeader: React.FC<RequestHeaderProps> = ({ serviceRequest, onBack }) => {
+const RequestHeader: React.FC<RequestHeaderProps> = ({ 
+  serviceRequest, 
+  onBack, 
+  currentUserRole = 'organizer' 
+}) => {
   return (
     <SharedRequestHeader 
       serviceRequest={serviceRequest}
       onBack={onBack}
-      platformLabel="LAB-R8 Negotiation Flow"
-      showServiceProviderBadge={true}
+      platformLabel="MODUL-8 Project Management"
+      showServiceProviderBadge={currentUserRole === 'service_provider'}
     />
   );
 };
