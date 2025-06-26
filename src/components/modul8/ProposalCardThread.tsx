@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,7 +65,11 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         submitted_by: session.user.id,
         negotiated_title: data.title,
         negotiated_description: data.description,
-        negotiated_budget_range: { min: data.budgetMin, max: data.budgetMax },
+        negotiated_budget_range: { 
+          min: data.budgetMin, 
+          max: data.budgetMax, 
+          currency: 'USD' 
+        },
         negotiated_timeline: data.timeline,
         notes: data.milestones?.join('\n') || '',
         asset_links: [],
