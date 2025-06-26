@@ -32,10 +32,8 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
   // Render regular proposal cards - ProposalCardNew has its own prop structure
   return (
     <ProposalCardNew
-      proposal={card}
-      isServiceProvider={false}
-      onCounterClick={onCounterClick || (() => {})}
-      onActionComplete={onActionComplete}
+      card={card}
+      hasCounterResponse={hasCounterResponse}
     />
   );
 };
