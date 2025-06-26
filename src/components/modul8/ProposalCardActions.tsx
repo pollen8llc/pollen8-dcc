@@ -27,11 +27,12 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
-  const { responses, loading: responsesLoading } = useProposalCardResponses(cardId);
+  const { responses, loading: responsesLoading, refresh } = useProposalCardResponses(cardId);
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
     console.log(`🔥 STARTING RESPONSE: ${responseType} for card ${cardId}`);
     console.log('Current user ID:', session?.user?.id);
+    console.log('Current responses before action:', responses);
     
     setLoading(responseType);
     
@@ -57,8 +58,18 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
         variant: "default"
       });
 
-      console.log('🔄 Calling onActionComplete to refresh data...');
+      console.log('🔄 Manually refreshing responses data...');
+      await refresh(); // Manually refresh the responses
+      
+      console.log('🔄 Calling onActionComplete to refresh parent data...');
       onActionComplete();
+      
+      // Force a small delay to ensure real-time updates have processed
+      setTimeout(() => {
+        console.log('🔄 Final refresh after delay...');
+        refresh();
+      }, 1000);
+      
     } catch (error) {
       console.error(`❌ Error ${responseType}ing proposal:`, error);
       console.error('Error details:', {
@@ -94,11 +105,18 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     responsesCount: responses.length,
     hasCounterResponse,
     currentUserId: session?.user?.id,
-    responsesLoading
+    responsesLoading,
+    responses: responses.map(r => ({
+      id: r.id,
+      response_type: r.response_type,
+      responded_by: r.responded_by,
+      created_at: r.created_at
+    }))
   });
 
   // If still loading responses, show loading state
   if (responsesLoading) {
+    console.log(`⏳ Still loading responses for card ${cardId}`);
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -109,17 +127,19 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
 
   // CORE LOGIC: If there are ANY responses at all, hide the buttons
   if (responses.length > 0) {
-    console.log(`🚫 Hiding buttons - found ${responses.length} responses for card ${cardId}`);
+    console.log(`🚫 HIDING BUTTONS - found ${responses.length} responses for card ${cardId}:`, 
+      responses.map(r => `${r.response_type} by ${r.responded_by}`));
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Clock className="h-4 w-4" />
-        This proposal has been responded to
+        This proposal has been responded to ({responses.length} response{responses.length > 1 ? 's' : ''})
       </div>
     );
   }
 
   // If card is locked (final status reached), hide buttons
   if (isLocked) {
+    console.log(`🔒 Card ${cardId} is locked`);
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <CheckCircle className="h-4 w-4" />
@@ -129,7 +149,7 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   }
 
   // Show action buttons for fresh proposals that need responses
-  console.log(`✅ Showing buttons for card ${cardId} - no responses found`);
+  console.log(`✅ SHOWING BUTTONS for card ${cardId} - no responses found, not locked`);
   return (
     <div className="flex gap-2 flex-wrap">
       <Button
