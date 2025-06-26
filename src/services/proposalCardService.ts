@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ProposalCard, 
@@ -77,26 +76,79 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
 
 export const respondToProposalCard = async (data: CreateProposalResponseData): Promise<ProposalCardResponse> => {
   try {
-    console.log('Responding to proposal card:', { cardId: data.card_id, responseType: data.response_type });
+    console.log('🔥 respondToProposalCard called with:', data);
+    
+    // Get current user
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      console.error('❌ Auth error:', userError);
+      throw new Error('User not authenticated');
+    }
+    
+    console.log('👤 Current user:', userData.user.id);
+    
+    // Check if user has already responded to this card
+    const { data: existingResponse, error: checkError } = await supabase
+      .from('modul8_proposal_card_responses')
+      .select('*')
+      .eq('card_id', data.card_id)
+      .eq('responded_by', userData.user.id)
+      .single();
+    
+    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found (expected)
+      console.error('❌ Error checking existing responses:', checkError);
+      throw new Error(`Error checking existing responses: ${checkError.message}`);
+    }
+    
+    if (existingResponse) {
+      console.log('⚠️ User has already responded to this card:', existingResponse);
+      throw new Error('You have already responded to this proposal');
+    }
+    
+    // Insert the response
+    const responsePayload = {
+      ...data,
+      responded_by: userData.user.id
+    };
+    
+    console.log('📝 Inserting response payload:', responsePayload);
     
     const { data: response, error } = await supabase
       .from('modul8_proposal_card_responses')
-      .insert({
-        ...data,
-        responded_by: (await supabase.auth.getUser()).data.user?.id
-      })
+      .insert(responsePayload)
       .select()
       .single();
 
     if (error) {
-      console.error('Error responding to proposal card:', error);
+      console.error('❌ Error inserting response:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
       throw new Error(`Failed to ${data.response_type} proposal: ${error.message}`);
     }
 
-    console.log('Proposal card response created successfully:', response);
+    console.log('✅ Response created successfully:', response);
+    
+    // Verify the response was actually created by fetching it back
+    const { data: verifyResponse, error: verifyError } = await supabase
+      .from('modul8_proposal_card_responses')
+      .select('*')
+      .eq('id', response.id)
+      .single();
+    
+    if (verifyError) {
+      console.error('❌ Error verifying response creation:', verifyError);
+    } else {
+      console.log('✅ Response verified in database:', verifyResponse);
+    }
+    
     return response as ProposalCardResponse;
   } catch (error) {
-    console.error('Error in respondToProposalCard:', error);
+    console.error('❌ Comprehensive error in respondToProposalCard:', error);
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
     throw error;
   }
 };
@@ -223,12 +275,19 @@ export const createRequestComment = async (data: CreateCommentData): Promise<Req
 };
 
 export const getProposalCardResponses = async (cardId: string): Promise<ProposalCardResponse[]> => {
+  console.log('🔍 Fetching responses for card:', cardId);
+  
   const { data, error } = await supabase
     .from('modul8_proposal_card_responses')
     .select('*')
     .eq('card_id', cardId)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('❌ Error fetching responses:', error);
+    throw error;
+  }
+  
+  console.log('📊 Found responses:', data?.length || 0, data);
   return data as ProposalCardResponse[];
 };

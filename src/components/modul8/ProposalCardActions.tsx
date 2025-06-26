@@ -30,6 +30,10 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   const { acceptResponses, hasMutualAcceptance, hasAnyAcceptance, hasCurrentUserResponded } = useProposalCardResponses(cardId);
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
+    console.log(`🔥 STARTING RESPONSE: ${responseType} for card ${cardId}`);
+    console.log('Current user ID:', session?.user?.id);
+    console.log('Current responses data:', { acceptResponses, hasMutualAcceptance, hasAnyAcceptance, hasCurrentUserResponded });
+    
     setLoading(responseType);
     
     try {
@@ -38,7 +42,9 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
         response_type: responseType
       };
 
-      await respondToProposalCard(responseData);
+      console.log('🚀 Calling respondToProposalCard with:', responseData);
+      const result = await respondToProposalCard(responseData);
+      console.log('✅ Response created successfully:', result);
 
       const actionMessages = {
         accept: hasAnyAcceptance 
@@ -54,9 +60,16 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
         variant: "default"
       });
 
+      console.log('🔄 Calling onActionComplete to refresh data...');
       onActionComplete();
     } catch (error) {
-      console.error(`Error ${responseType}ing proposal:`, error);
+      console.error(`❌ Error ${responseType}ing proposal:`, error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        cardId,
+        responseType,
+        userId: session?.user?.id
+      });
       
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -77,6 +90,17 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
       onCounterClick();
     }
   };
+
+  // Debug logging for current state
+  console.log(`🔍 ProposalCardActions for card ${cardId}:`, {
+    isLocked,
+    hasMutualAcceptance,
+    hasAnyAcceptance,
+    hasCurrentUserResponded,
+    hasCounterResponse,
+    acceptResponsesCount: acceptResponses.length,
+    currentUserId: session?.user?.id
+  });
 
   // PRIORITY 1: Show mutual acceptance status (highest priority)
   if (hasMutualAcceptance) {
