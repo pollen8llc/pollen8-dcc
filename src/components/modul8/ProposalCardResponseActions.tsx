@@ -83,8 +83,8 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     }
   };
 
-  // Blanket check: Don't show actions if card has been responded to
-  if (responses.length > 0 || cardStatus !== 'pending') {
+  // Blanket check: Don't show actions if card has been responded to or is not pending
+  if (responses.length > 0 || (cardStatus as string) !== 'pending') {
     return null;
   }
 
