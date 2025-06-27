@@ -29,15 +29,6 @@ export const AgreementCard: React.FC<AgreementCardProps> = ({ card }) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="text-center">
-          <p className="text-lg font-semibold text-emerald-800 dark:text-emerald-200 mb-2">
-            🎉 Both parties have accepted the proposal!
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {card.notes}
-          </p>
-        </div>
-
         {/* Agreement Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg">
           {card.negotiated_title && (
@@ -67,33 +58,38 @@ export const AgreementCard: React.FC<AgreementCardProps> = ({ card }) => {
               <p className="text-sm">{card.negotiated_timeline}</p>
             </div>
           )}
+          
+          {card.notes && (
+            <div className="md:col-span-2">
+              <h4 className="font-semibold text-sm text-muted-foreground mb-1">Details</h4>
+              <p className="text-sm">{card.notes}</p>
+            </div>
+          )}
         </div>
 
-        {/* DEEL Integration */}
-        <div className="space-y-3">
-          <div className="text-center">
-            <p className="text-lg font-semibold text-emerald-800 dark:text-emerald-200 mb-2">
-              Ready to seal the deal? 
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Create your contract and get started with DEEL
-            </p>
-          </div>
+        {/* Clickable CTA with Rainbow Border */}
+        <div 
+          onClick={handleDeelClick}
+          className="relative cursor-pointer group"
+        >
+          {/* Animated Rainbow Border */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 via-purple-600 via-blue-600 via-green-600 to-yellow-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-x"></div>
           
-          <div className="deel-integration-container w-full relative">
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500 via-teal-500 to-blue-500 p-[2px] animate-pulse">
-              <div className="w-full h-full bg-white dark:bg-gray-900 rounded-lg"></div>
-            </div>
-            <Button
-              onClick={handleDeelClick}
-              className="relative w-full bg-white hover:bg-gray-50 text-black font-bold text-xl py-8 border-0 rounded-lg z-10 shadow-lg"
-              size="lg"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">DEEL</span>
-                <ExternalLink className="h-5 w-5" />
+          {/* Main Content */}
+          <div className="relative bg-white dark:bg-gray-900 rounded-lg p-6 transition-transform duration-200 group-hover:scale-[1.02]">
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-200 mb-2">
+                🎉 Ready to Create Your Contract?
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Click here to finalize your agreement with DEEL
+              </p>
+              
+              <div className="inline-flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+                <span>DEEL</span>
+                <ExternalLink className="h-6 w-6 text-blue-600" />
               </div>
-            </Button>
+            </div>
           </div>
         </div>
 
