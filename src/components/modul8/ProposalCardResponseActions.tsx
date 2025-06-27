@@ -83,11 +83,6 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     }
   };
 
-  // Blanket check: Don't show actions if card has been responded to or is not pending
-  if (responses.length > 0 || (cardStatus as string) !== 'pending') {
-    return null;
-  }
-
   // Don't show actions for agreement cards - they handle their own UI
   if (cardStatus === 'agreement') {
     return null;
@@ -103,10 +98,11 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     );
   }
 
-  // Show "they accepted, waiting for you" when other party accepted but current user hasn't responded
+  // Check if other party has accepted but current user hasn't responded
   const otherPartyAccepted = acceptResponses.some(r => r.responded_by !== currentUserId);
   const currentUserAccepted = acceptResponses.some(r => r.responded_by === currentUserId);
   
+  // Show "they accepted, waiting for you" when other party accepted but current user hasn't responded
   if (otherPartyAccepted && !hasCurrentUserResponded) {
     return (
       <div className="space-y-2">
@@ -168,48 +164,53 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     );
   }
 
-  // Default: Show action buttons for fresh proposals
-  return (
-    <div className="flex gap-2 flex-wrap">
-      <Button
-        onClick={() => handleResponse('reject')}
-        disabled={loading !== null}
-        variant="destructive"
-        size="sm"
-      >
-        {loading === 'reject' ? (
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-        ) : (
-          <XCircle className="h-4 w-4 mr-2" />
-        )}
-        {loading === 'reject' ? 'Rejecting...' : 'Reject'}
-      </Button>
-
-      {showCounterOption && (
+  // For pending cards that haven't been responded to, check if it's not their own card
+  if ((cardStatus as string) === 'pending' && submittedBy !== currentUserId) {
+    return (
+      <div className="flex gap-2 flex-wrap">
         <Button
-          onClick={handleCounterProposal}
+          onClick={() => handleResponse('reject')}
           disabled={loading !== null}
-          variant="outline"
+          variant="destructive"
           size="sm"
         >
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Counter Proposal
+          {loading === 'reject' ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <XCircle className="h-4 w-4 mr-2" />
+          )}
+          {loading === 'reject' ? 'Rejecting...' : 'Reject'}
         </Button>
-      )}
 
-      <Button
-        onClick={() => handleResponse('accept')}
-        disabled={loading !== null}
-        className="bg-green-600 hover:bg-green-700 text-white"
-        size="sm"
-      >
-        {loading === 'accept' ? (
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-        ) : (
-          <CheckCircle className="h-4 w-4 mr-2" />
+        {showCounterOption && (
+          <Button
+            onClick={handleCounterProposal}
+            disabled={loading !== null}
+            variant="outline"
+            size="sm"
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Counter Proposal
+          </Button>
         )}
-        {loading === 'accept' ? 'Accepting...' : 'Accept'}
-      </Button>
-    </div>
-  );
+
+        <Button
+          onClick={() => handleResponse('accept')}
+          disabled={loading !== null}
+          className="bg-green-600 hover:bg-green-700 text-white"
+          size="sm"
+        >
+          {loading === 'accept' ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <CheckCircle className="h-4 w-4 mr-2" />
+          )}
+          {loading === 'accept' ? 'Accepting...' : 'Accept'}
+        </Button>
+      </div>
+    );
+  }
+
+  // No actions to show
+  return null;
 };
