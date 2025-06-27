@@ -192,7 +192,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       const content = responseType === 'accept' 
         ? 'Initial request accepted as proposed.' 
         : 'Initial request declined.';
-
+      
       await createRequestComment({
         request_id: requestId,
         content,
@@ -501,7 +501,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                           <div className="flex items-center gap-3 mb-3">
                             <Badge className={`${card.status === 'final_confirmation' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-primary/10 text-primary'} font-bold px-3 py-1 flex items-center gap-1`}>
                               {card.status === 'final_confirmation' && <Sparkles className="h-4 w-4" />}
-                              Card #{index + 2}
+                              Card #{card.card_number}
                             </Badge>
                             <ProposalCardStatus
                               cardId={card.id}
