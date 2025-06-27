@@ -243,6 +243,7 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
               showCounterOption={true}
               onCounterClick={handleCounterClick}
               hasCounterResponse={hasCounterResponse}
+              submittedBy={card.submitted_by}
             />
           </div>
         )}
