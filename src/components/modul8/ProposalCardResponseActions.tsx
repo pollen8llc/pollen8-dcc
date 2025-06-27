@@ -83,8 +83,8 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     }
   };
 
-  // Don't show actions for cards submitted by current user
-  if (submittedBy === currentUserId) {
+  // Blanket check: Don't show actions if card has been responded to
+  if (responses.length > 0 || cardStatus !== 'pending') {
     return null;
   }
 
