@@ -1,12 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { getUserOrganizer, createServiceRequest } from '@/services/modul8Service';
 import { DOMAIN_PAGES } from '@/types/modul8';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import CompactHeader from '@/components/modul8/CompactHeader';
 import SimplifiedRequestForm from '@/components/modul8/SimplifiedRequestForm';
 import { toast } from '@/hooks/use-toast';
 
@@ -124,37 +122,32 @@ const ServiceRequestForm = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-4 mb-8">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/modul8/dashboard')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Button>
-          </div>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="max-w-4xl mx-auto animate-fade-in">
+          <CompactHeader
+            title="Create Service Request"
+            subtitle={`${currentDomain?.title} • ${currentDomain?.description}`}
+            showBackButton={true}
+            onBack={() => navigate('/modul8/dashboard')}
+            backLabel="Back to Dashboard"
+          />
 
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">
-              Create Service Request
-            </h1>
-            <p className="text-muted-foreground">
-              {currentDomain?.title} • {currentDomain?.description}
-            </p>
-            {selectedProvider && (
-              <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm">
-                  <span className="font-medium">Selected Provider:</span> {selectedProvider.business_name}
-                </p>
-              </div>
-            )}
-            <p className="text-sm text-muted-foreground mt-2">
-              Post your request and connect with qualified service providers
-            </p>
+          {selectedProvider && (
+            <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-[#00eada]/5 border border-[#00eada]/20 rounded-lg">
+              <p className="text-xs sm:text-sm">
+                <span className="font-medium text-[#00eada]">Selected Provider:</span> {selectedProvider.business_name}
+              </p>
+            </div>
+          )}
+
+          <div className="text-center mb-4 sm:mb-6">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#00eada]/30"></div>
+              <p className="text-xs sm:text-sm text-muted-foreground px-3">
+                Post your request and connect with qualified service providers
+              </p>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#00eada]/30"></div>
+            </div>
           </div>
 
           <SimplifiedRequestForm

@@ -6,8 +6,9 @@ import { getUserOrganizer } from '@/services/modul8Service';
 import { DOMAIN_PAGES } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Building2 } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import CompactHeader from '@/components/modul8/CompactHeader';
 import { toast } from '@/hooks/use-toast';
 
 const Modul8Dashboard = () => {
@@ -56,64 +57,63 @@ const Modul8Dashboard = () => {
     );
   }
 
+  const headerActions = (
+    <>
+      <Button
+        onClick={() => navigate('/modul8/projects')}
+        variant="outline"
+        size="sm"
+        className="text-sm border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-md hover:shadow-[#00eada]/20"
+      >
+        View Projects
+      </Button>
+      <Button
+        onClick={() => navigate('/modul8/partners')}
+        className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-sm hover:shadow-lg hover:shadow-[#00eada]/30 transition-all duration-200 hover:scale-[1.02]"
+      >
+        Manage Partners
+      </Button>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Modul8 Dashboard</h1>
-              <p className="text-muted-foreground">
-                Connect with service providers across specialized domains
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => navigate('/modul8/projects')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                View Projects
-              </Button>
-              <Button
-                onClick={() => navigate('/modul8/partners')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                Manage Partners
-              </Button>
-              <Button
-                onClick={() => navigate('/modul8/dashboard/request/new')}
-                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                New Request
-              </Button>
-            </div>
-          </div>
+          <CompactHeader
+            title="Modul8 Dashboard"
+            subtitle="Connect with service providers across specialized domains"
+            actions={headerActions}
+          />
 
           {/* Service Domains */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-6">Service Domains</h2>
+          <div className="animate-fade-in">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold">Service Domains</h2>
+              <div className="h-px flex-1 bg-gradient-to-r from-[#00eada]/30 to-transparent"></div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {DOMAIN_PAGES.map((domain) => (
+              {DOMAIN_PAGES.map((domain, index) => (
                 <Card
                   key={domain.id}
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  className="group hover:shadow-lg hover:shadow-[#00eada]/10 transition-all duration-200 cursor-pointer border-l-2 border-l-transparent hover:border-l-[#00eada] hover:scale-[1.02]"
                   onClick={() => handleDomainClick(domain.id)}
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-[#00eada]" />
-                      <CardTitle className="text-sm font-medium">
+                      <div className="p-2 rounded-lg bg-[#00eada]/10 group-hover:bg-[#00eada]/20 transition-colors duration-200">
+                        <Building2 className="h-4 w-4 text-[#00eada] group-hover:scale-110 transition-transform duration-200" />
+                      </div>
+                      <CardTitle className="text-xs sm:text-sm font-medium group-hover:text-[#00eada] transition-colors duration-200">
                         {domain.title}
                       </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
+                    <p className="text-xs text-muted-foreground line-clamp-2 group-hover:text-muted-foreground/80 transition-colors duration-200">
                       {domain.description}
                     </p>
                   </CardContent>

@@ -37,7 +37,7 @@ import {
 import { ProposalCard, RequestComment } from '@/types/proposalCards';
 import { ServiceRequest } from '@/types/modul8';
 import { ProposalCardStatus } from './ProposalCardStatus';
-import { DeelIntegrationButton } from './DeelIntegrationButton';
+import { AgreementCard } from './AgreementCard';
 import { ProposalCardResponseActions } from './ProposalCardResponseActions';
 import { supabase } from '@/integrations/supabase/client';
 import { useProposalCardResponsesData } from '@/hooks/useProposalCardResponsesData';
@@ -493,6 +493,13 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                   hasCurrentUserResponded
                 } = responseData;
                 
+                // Check if this card should display as an agreement
+                if (card.status === 'final_confirmation') {
+                  return (
+                    <AgreementCard key={card.id} card={card} />
+                  );
+                }
+                
                 return (
                   <Card key={card.id} className={`border-l-4 ${card.status === 'final_confirmation' ? 'border-l-yellow-500 bg-gradient-to-r from-yellow-900/20 to-gray-900/80' : 'border-l-primary bg-gray-900/80'} backdrop-blur-sm border-gray-800`}>
                     <CardContent className="p-6">
@@ -512,11 +519,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                             {card.response_to_card_id && (
                               <Badge variant="outline" className="text-orange-400 border-orange-500/30">
                                 Counter Proposal
-                              </Badge>
-                            )}
-                            {card.status === 'final_confirmation' && (
-                              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 animate-pulse">
-                                🎉 DEAL CONFIRMED
                               </Badge>
                             )}
                           </div>
@@ -590,20 +592,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                           </div>
                         </div>
                       </div>
-                      
-                      {/* Final Confirmation DEEL Integration */}
-                      {card.status === 'final_confirmation' && (
-                        <div className="mb-4">
-                          <DeelIntegrationButton
-                            projectTitle={card.negotiated_title}
-                            projectDescription={card.negotiated_description}
-                            budgetRange={card.negotiated_budget_range}
-                            timeline={card.negotiated_timeline}
-                            organizerName={serviceRequest.organizer?.organization_name}
-                            serviceProviderName="Service Provider" // TODO: Get actual service provider name
-                          />
-                        </div>
-                      )}
                       
                       {/* Response Actions */}
                       <div className="pt-4 border-t border-gray-700">
