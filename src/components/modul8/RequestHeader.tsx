@@ -15,15 +15,12 @@ const RequestHeader: React.FC<RequestHeaderProps> = ({
   currentUserRole = 'organizer' 
 }) => {
   return (
-    <div className="mb-4 sm:mb-6">
-      <SharedRequestHeader 
-        serviceRequest={serviceRequest}
-        onBack={onBack}
-        platformLabel="MODUL-8 Project Management"
-        showServiceProviderBadge={currentUserRole === 'service_provider'}
-        compact={true}
-      />
-    </div>
+    <SharedRequestHeader 
+      serviceRequest={serviceRequest}
+      onBack={onBack}
+      platformLabel="MODUL-8 Project Management"
+      showServiceProviderBadge={currentUserRole === 'service_provider'}
+    />
   );
 };
 

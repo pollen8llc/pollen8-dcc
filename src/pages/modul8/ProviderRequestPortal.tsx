@@ -1,13 +1,14 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { getUserOrganizer, createServiceRequest, getServiceProviderById } from '@/services/modul8Service';
 import { ServiceProvider } from '@/types/modul8';
 import Navbar from '@/components/Navbar';
-import CompactHeader from '@/components/modul8/CompactHeader';
 import SimplifiedRequestForm from '@/components/modul8/SimplifiedRequestForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Building } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 
@@ -124,7 +125,7 @@ const ProviderRequestPortal = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]" />
           </div>
@@ -137,39 +138,42 @@ const ProviderRequestPortal = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="max-w-4xl mx-auto animate-fade-in">
-          <CompactHeader
-            title="Send Service Request"
-            showBackButton={true}
-            onBack={() => navigate('/modul8')}
-            backLabel="Back to Dashboard"
-          />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/modul8')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </div>
 
           {/* Service Provider Info Card */}
           {serviceProvider && (
-            <Card className="mb-3 sm:mb-4 border-l-2 border-l-[#00eada]/30 hover:border-l-[#00eada] transition-all duration-200">
-              <CardHeader className="pb-2 sm:pb-3">
+            <Card className="mb-8">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-3">
-                  <div className="p-1 rounded-lg bg-[#00eada]/10">
-                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-                      <AvatarImage src={serviceProvider.logo_url} />
-                      <AvatarFallback>
-                        <Building className="h-4 w-4 sm:h-5 sm:w-5 text-[#00eada]" />
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={serviceProvider.logo_url} />
+                    <AvatarFallback>
+                      <Building className="h-6 w-6" />
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <h2 className="text-sm sm:text-base font-bold">{serviceProvider.business_name}</h2>
+                    <h2 className="text-xl font-bold">{serviceProvider.business_name}</h2>
                     {serviceProvider.tagline && (
-                      <p className="text-xs sm:text-sm text-muted-foreground">{serviceProvider.tagline}</p>
+                      <p className="text-muted-foreground">{serviceProvider.tagline}</p>
                     )}
                   </div>
                 </CardTitle>
               </CardHeader>
               {serviceProvider.description && (
                 <CardContent className="pt-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground">{serviceProvider.description}</p>
+                  <p className="text-muted-foreground">{serviceProvider.description}</p>
                 </CardContent>
               )}
             </Card>
