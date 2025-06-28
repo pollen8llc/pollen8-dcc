@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -139,7 +138,7 @@ const ProviderRequestPortal = () => {
       <Navbar />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto animate-fade-in">
           <CompactHeader
             title="Send Service Request"
             showBackButton={true}
@@ -149,15 +148,17 @@ const ProviderRequestPortal = () => {
 
           {/* Service Provider Info Card */}
           {serviceProvider && (
-            <Card className="mb-3 sm:mb-4">
+            <Card className="mb-3 sm:mb-4 border-l-2 border-l-[#00eada]/30 hover:border-l-[#00eada] transition-all duration-200">
               <CardHeader className="pb-2 sm:pb-3">
                 <CardTitle className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-                    <AvatarImage src={serviceProvider.logo_url} />
-                    <AvatarFallback>
-                      <Building className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="p-1 rounded-lg bg-[#00eada]/10">
+                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                      <AvatarImage src={serviceProvider.logo_url} />
+                      <AvatarFallback>
+                        <Building className="h-4 w-4 sm:h-5 sm:w-5 text-[#00eada]" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                   <div>
                     <h2 className="text-sm sm:text-base font-bold">{serviceProvider.business_name}</h2>
                     {serviceProvider.tagline && (

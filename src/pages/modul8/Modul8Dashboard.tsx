@@ -63,13 +63,13 @@ const Modul8Dashboard = () => {
         onClick={() => navigate('/modul8/projects')}
         variant="outline"
         size="sm"
-        className="text-sm"
+        className="text-sm border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-md hover:shadow-[#00eada]/20"
       >
         View Projects
       </Button>
       <Button
         onClick={() => navigate('/modul8/partners')}
-        className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-sm"
+        className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-sm hover:shadow-lg hover:shadow-[#00eada]/30 transition-all duration-200 hover:scale-[1.02]"
       >
         Manage Partners
       </Button>
@@ -89,25 +89,31 @@ const Modul8Dashboard = () => {
           />
 
           {/* Service Domains */}
-          <div>
-            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Service Domains</h2>
+          <div className="animate-fade-in">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold">Service Domains</h2>
+              <div className="h-px flex-1 bg-gradient-to-r from-[#00eada]/30 to-transparent"></div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {DOMAIN_PAGES.map((domain) => (
+              {DOMAIN_PAGES.map((domain, index) => (
                 <Card
                   key={domain.id}
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  className="group hover:shadow-lg hover:shadow-[#00eada]/10 transition-all duration-200 cursor-pointer border-l-2 border-l-transparent hover:border-l-[#00eada] hover:scale-[1.02]"
                   onClick={() => handleDomainClick(domain.id)}
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-[#00eada]" />
-                      <CardTitle className="text-xs sm:text-sm font-medium">
+                      <div className="p-2 rounded-lg bg-[#00eada]/10 group-hover:bg-[#00eada]/20 transition-colors duration-200">
+                        <Building2 className="h-4 w-4 text-[#00eada] group-hover:scale-110 transition-transform duration-200" />
+                      </div>
+                      <CardTitle className="text-xs sm:text-sm font-medium group-hover:text-[#00eada] transition-colors duration-200">
                         {domain.title}
                       </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
+                    <p className="text-xs text-muted-foreground line-clamp-2 group-hover:text-muted-foreground/80 transition-colors duration-200">
                       {domain.description}
                     </p>
                   </CardContent>

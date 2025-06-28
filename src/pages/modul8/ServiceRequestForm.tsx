@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -124,7 +123,7 @@ const ServiceRequestForm = () => {
       <Navbar />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto animate-fade-in">
           <CompactHeader
             title="Create Service Request"
             subtitle={`${currentDomain?.title} • ${currentDomain?.description}`}
@@ -134,17 +133,21 @@ const ServiceRequestForm = () => {
           />
 
           {selectedProvider && (
-            <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
+            <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-[#00eada]/5 border border-[#00eada]/20 rounded-lg">
               <p className="text-xs sm:text-sm">
-                <span className="font-medium">Selected Provider:</span> {selectedProvider.business_name}
+                <span className="font-medium text-[#00eada]">Selected Provider:</span> {selectedProvider.business_name}
               </p>
             </div>
           )}
 
           <div className="text-center mb-4 sm:mb-6">
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Post your request and connect with qualified service providers
-            </p>
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#00eada]/30"></div>
+              <p className="text-xs sm:text-sm text-muted-foreground px-3">
+                Post your request and connect with qualified service providers
+              </p>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#00eada]/30"></div>
+            </div>
           </div>
 
           <SimplifiedRequestForm
