@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -124,7 +125,7 @@ const ProviderRequestPortal = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#00eada]" />
           </div>
@@ -137,7 +138,7 @@ const ProviderRequestPortal = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="max-w-4xl mx-auto">
           <CompactHeader
             title="Send Service Request"
@@ -148,26 +149,26 @@ const ProviderRequestPortal = () => {
 
           {/* Service Provider Info Card */}
           {serviceProvider && (
-            <Card className="mb-4 sm:mb-6">
-              <CardHeader className="pb-3">
+            <Card className="mb-3 sm:mb-4">
+              <CardHeader className="pb-2 sm:pb-3">
                 <CardTitle className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                     <AvatarImage src={serviceProvider.logo_url} />
                     <AvatarFallback>
-                      <Building className="h-5 w-5 sm:h-6 sm:w-6" />
+                      <Building className="h-4 w-4 sm:h-5 sm:w-5" />
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className="text-base sm:text-xl font-bold">{serviceProvider.business_name}</h2>
+                    <h2 className="text-sm sm:text-base font-bold">{serviceProvider.business_name}</h2>
                     {serviceProvider.tagline && (
-                      <p className="text-sm text-muted-foreground">{serviceProvider.tagline}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{serviceProvider.tagline}</p>
                     )}
                   </div>
                 </CardTitle>
               </CardHeader>
               {serviceProvider.description && (
                 <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground">{serviceProvider.description}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{serviceProvider.description}</p>
                 </CardContent>
               )}
             </Card>

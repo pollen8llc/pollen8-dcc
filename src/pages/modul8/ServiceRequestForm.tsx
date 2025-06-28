@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
@@ -122,7 +123,7 @@ const ServiceRequestForm = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="max-w-4xl mx-auto">
           <CompactHeader
             title="Create Service Request"
@@ -133,15 +134,15 @@ const ServiceRequestForm = () => {
           />
 
           {selectedProvider && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-muted/50 rounded-lg">
-              <p className="text-sm">
+            <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
+              <p className="text-xs sm:text-sm">
                 <span className="font-medium">Selected Provider:</span> {selectedProvider.business_name}
               </p>
             </div>
           )}
 
-          <div className="text-center mb-6 sm:mb-8">
-            <p className="text-sm text-muted-foreground">
+          <div className="text-center mb-4 sm:mb-6">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Post your request and connect with qualified service providers
             </p>
           </div>

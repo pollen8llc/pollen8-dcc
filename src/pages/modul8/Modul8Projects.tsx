@@ -77,7 +77,7 @@ const Modul8Projects = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="max-w-7xl mx-auto">
           <CompactHeader
             title="Your Projects"
@@ -91,31 +91,31 @@ const Modul8Projects = () => {
           <div>
             {serviceRequests.length === 0 ? (
               <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-base font-semibold text-muted-foreground mb-2">
+                <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12">
+                  <Building2 className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
+                  <h3 className="text-sm sm:text-base font-semibold text-muted-foreground mb-2">
                     No projects yet
                   </h3>
-                  <p className="text-sm text-muted-foreground text-center mb-4">
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center mb-3 sm:mb-4">
                     Start by exploring service providers and engaging with them
                   </p>
                   <Button
                     onClick={() => navigate('/modul8/partners')}
-                    className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-sm"
+                    className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-xs sm:text-sm"
                   >
                     Browse Providers
                   </Button>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {serviceRequests.map((request) => (
                   <Card
                     key={request.id}
                     className="hover:shadow-lg transition-shadow cursor-pointer"
                     onClick={() => handleRequestClick(request.id)}
                   >
-                    <CardHeader className="pb-3">
+                    <CardHeader className="pb-2 sm:pb-3">
                       <div className="flex items-start justify-between gap-2">
                         <CardTitle className="text-sm sm:text-base line-clamp-1">
                           {request.title}
@@ -132,7 +132,7 @@ const Modul8Projects = () => {
                     </CardHeader>
                     
                     <CardContent>
-                      <div className="space-y-2 text-xs sm:text-sm">
+                      <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                         {request.budget_range && (
                           <div className="flex items-center gap-2">
                             <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
