@@ -7,8 +7,9 @@ import { ServiceRequest } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Building2, Clock, DollarSign, ArrowLeft } from 'lucide-react';
+import { Building2, Clock, DollarSign } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import CompactHeader from '@/components/modul8/CompactHeader';
 import { toast } from '@/hooks/use-toast';
 
 const Modul8Projects = () => {
@@ -76,34 +77,15 @@ const Modul8Projects = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => navigate('/modul8/dashboard')}
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Dashboard
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold mb-2">Your Projects</h1>
-                <p className="text-muted-foreground">
-                  Manage and track all your service requests
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={() => navigate('/modul8/dashboard/request/new')}
-              className="bg-[#00eada] hover:bg-[#00eada]/90 text-black flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              New Request
-            </Button>
-          </div>
+          <CompactHeader
+            title="Your Projects"
+            subtitle="Manage and track all your service requests"
+            showBackButton={true}
+            onBack={() => navigate('/modul8/dashboard')}
+            backLabel="Back to Dashboard"
+          />
 
           {/* Projects List */}
           <div>
@@ -111,49 +93,49 @@ const Modul8Projects = () => {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                  <h3 className="text-base font-semibold text-muted-foreground mb-2">
                     No projects yet
                   </h3>
-                  <p className="text-muted-foreground text-center mb-4">
-                    Start by creating your first service request
+                  <p className="text-sm text-muted-foreground text-center mb-4">
+                    Start by exploring service providers and engaging with them
                   </p>
                   <Button
-                    onClick={() => navigate('/modul8/dashboard/request/new')}
-                    className="bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+                    onClick={() => navigate('/modul8/partners')}
+                    className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-sm"
                   >
-                    Create Request
+                    Browse Providers
                   </Button>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {serviceRequests.map((request) => (
                   <Card
                     key={request.id}
                     className="hover:shadow-lg transition-shadow cursor-pointer"
                     onClick={() => handleRequestClick(request.id)}
                   >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg line-clamp-1">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-sm sm:text-base line-clamp-1">
                           {request.title}
                         </CardTitle>
-                        <Badge className={`${getStatusColor(request.status)} font-medium`} variant="outline">
+                        <Badge className={`${getStatusColor(request.status)} font-medium text-xs`} variant="outline">
                           {request.status.replace('_', ' ').toUpperCase()}
                         </Badge>
                       </div>
                       {request.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                           {request.description}
                         </p>
                       )}
                     </CardHeader>
                     
                     <CardContent>
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-2 text-xs sm:text-sm">
                         {request.budget_range && (
                           <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                             <span>
                               {request.budget_range.min && request.budget_range.max
                                 ? `$${request.budget_range.min.toLocaleString()} - $${request.budget_range.max.toLocaleString()}`
@@ -166,12 +148,12 @@ const Modul8Projects = () => {
                         )}
                         {request.timeline && (
                           <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                             <span>{request.timeline}</span>
                           </div>
                         )}
                         <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                           <span className="text-xs">
                             Created {new Date(request.created_at).toLocaleDateString()}
                           </span>

@@ -6,8 +6,9 @@ import { getUserOrganizer } from '@/services/modul8Service';
 import { DOMAIN_PAGES } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Building2 } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import CompactHeader from '@/components/modul8/CompactHeader';
 import { toast } from '@/hooks/use-toast';
 
 const Modul8Dashboard = () => {
@@ -56,47 +57,40 @@ const Modul8Dashboard = () => {
     );
   }
 
+  const headerActions = (
+    <>
+      <Button
+        onClick={() => navigate('/modul8/projects')}
+        variant="outline"
+        size="sm"
+        className="text-sm"
+      >
+        View Projects
+      </Button>
+      <Button
+        onClick={() => navigate('/modul8/partners')}
+        className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-sm"
+      >
+        Manage Partners
+      </Button>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Modul8 Dashboard</h1>
-              <p className="text-muted-foreground">
-                Connect with service providers across specialized domains
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => navigate('/modul8/projects')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                View Projects
-              </Button>
-              <Button
-                onClick={() => navigate('/modul8/partners')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                Manage Partners
-              </Button>
-              <Button
-                onClick={() => navigate('/modul8/dashboard/request/new')}
-                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                New Request
-              </Button>
-            </div>
-          </div>
+          <CompactHeader
+            title="Modul8 Dashboard"
+            subtitle="Connect with service providers across specialized domains"
+            actions={headerActions}
+          />
 
           {/* Service Domains */}
           <div>
-            <h2 className="text-2xl font-semibold mb-6">Service Domains</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Service Domains</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {DOMAIN_PAGES.map((domain) => (
                 <Card
@@ -106,8 +100,8 @@ const Modul8Dashboard = () => {
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-[#00eada]" />
-                      <CardTitle className="text-sm font-medium">
+                      <Building2 className="h-4 w-4 text-[#00eada]" />
+                      <CardTitle className="text-xs sm:text-sm font-medium">
                         {domain.title}
                       </CardTitle>
                     </div>
