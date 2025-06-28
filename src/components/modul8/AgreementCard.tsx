@@ -28,6 +28,7 @@ export const AgreementCard: React.FC<AgreementCardProps> = ({ card }) => {
           </Badge>
         </div>
       </CardHeader>
+      
       <CardContent className="space-y-6">
         {/* Agreement Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg">
@@ -73,22 +74,23 @@ export const AgreementCard: React.FC<AgreementCardProps> = ({ card }) => {
           className="relative cursor-pointer group"
         >
           {/* Animated Rainbow Border */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 via-purple-600 via-blue-600 via-green-600 to-yellow-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-x"></div>
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 via-purple-600 via-blue-600 via-green-600 to-yellow-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
           
           {/* Main Content */}
-          <div className="relative bg-white dark:bg-gray-900 rounded-lg p-6 transition-transform duration-200 group-hover:scale-[1.02]">
+          <div className="relative bg-white dark:bg-gray-900 rounded-lg p-6 transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl">
             <div className="text-center">
               <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-200 mb-2">
-                🎉 Ready to Create Your Contract?
+                🎉 Create Your Contract Now
               </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Click here to finalize your agreement with DEEL
-              </p>
               
-              <div className="inline-flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+              <div className="inline-flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent group-hover:from-teal-600 group-hover:to-blue-600 transition-all duration-300">
                 <span>DEEL</span>
-                <ExternalLink className="h-6 w-6 text-blue-600" />
+                <ExternalLink className="h-6 w-6 text-blue-600 group-hover:text-teal-600 transition-colors duration-300 group-hover:scale-110" />
               </div>
+              
+              <p className="text-sm text-muted-foreground mt-2 group-hover:text-foreground transition-colors duration-300">
+                Click to proceed with contract execution
+              </p>
             </div>
           </div>
         </div>
