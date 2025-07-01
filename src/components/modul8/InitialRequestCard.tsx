@@ -32,10 +32,10 @@ export const InitialRequestCard: React.FC<InitialRequestCardProps> = ({
   onResponse
 }) => {
   return (
-    <Card className="border border-gray-800 bg-gray-900/80 backdrop-blur-sm">
+    <Card className="border-l-4 border-l-emerald-500 bg-gray-900/80 backdrop-blur-sm border-gray-800">
       <CardContent className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Badge className="bg-[#00eada]/20 text-[#00eada] border-[#00eada]/30 font-bold px-3 py-1 flex items-center gap-1">
+          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-bold px-3 py-1 flex items-center gap-1">
             <PlayCircle className="h-4 w-4" />
             Card #1
           </Badge>
@@ -46,7 +46,7 @@ export const InitialRequestCard: React.FC<InitialRequestCardProps> = ({
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Avatar className="h-6 w-6">
               <AvatarImage src={serviceRequest.organizer?.logo_url} />
-              <AvatarFallback className="bg-[#00eada]/20 text-[#00eada]">
+              <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
                 <Building className="h-3 w-3" />
               </AvatarFallback>
             </Avatar>
@@ -71,9 +71,9 @@ export const InitialRequestCard: React.FC<InitialRequestCardProps> = ({
             <h4 className="text-sm font-semibold text-white mb-3">Proposed Project Details:</h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 p-3 bg-[#00eada]/10 rounded-lg border border-[#00eada]/20">
-                <DollarSign className="h-4 w-4 text-[#00eada]" />
-                <span className="text-sm font-medium text-[#00eada]">
+              <div className="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                <DollarSign className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm font-medium text-emerald-400">
                   Budget: {serviceRequest.budget_range && (serviceRequest.budget_range.min || serviceRequest.budget_range.max) 
                     ? (serviceRequest.budget_range.min && serviceRequest.budget_range.max 
                       ? `$${serviceRequest.budget_range.min.toLocaleString()} - $${serviceRequest.budget_range.max.toLocaleString()}`
@@ -102,7 +102,7 @@ export const InitialRequestCard: React.FC<InitialRequestCardProps> = ({
             <Button
               onClick={() => onResponse('accept')}
               size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white border-0"
+              className="bg-green-600 hover:bg-green-700 text-white"
               disabled={submitting}
             >
               <CheckCircle className="h-4 w-4 mr-1" />
@@ -112,7 +112,7 @@ export const InitialRequestCard: React.FC<InitialRequestCardProps> = ({
               onClick={() => onResponse('reject')}
               size="sm"
               variant="outline"
-              className="border-gray-700 bg-gray-800 text-red-400 hover:text-red-300 hover:bg-gray-700"
+              className="border-red-500/30 text-red-400 hover:bg-red-500/10"
               disabled={submitting}
             >
               <XCircle className="h-4 w-4 mr-1" />
@@ -121,7 +121,7 @@ export const InitialRequestCard: React.FC<InitialRequestCardProps> = ({
             <Button
               onClick={() => onResponse('counter')}
               size="sm"
-              className="bg-orange-600 hover:bg-orange-700 text-white border-0"
+              className="bg-orange-600 hover:bg-orange-700 text-white"
               disabled={submitting}
             >
               <ArrowRight className="h-4 w-4 mr-1" />
