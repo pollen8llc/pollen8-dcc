@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ProposalCard, 
@@ -18,6 +19,7 @@ export const getProposalCards = async (requestId: string): Promise<ProposalCard[
   if (error) throw error;
   return (data || []).map(card => ({
     ...card,
+    status: card.status as ProposalCard['status'], // Explicit type assertion
     asset_links: Array.isArray(card.asset_links) ? card.asset_links : [],
     negotiated_budget_range: (card as any).negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined,
     negotiated_title: (card as any).negotiated_title as string | undefined,
