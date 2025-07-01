@@ -29,7 +29,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
     <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl font-black text-white flex items-center gap-2">
-          <MessageSquare className="h-5 w-5 text-primary" />
+          <MessageSquare className="h-5 w-5 text-[#00eada]" />
           Project Discussion
         </CardTitle>
       </CardHeader>
@@ -45,7 +45,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
             comments.map((comment) => (
               <div key={comment.id} className="flex gap-3 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary/20 text-primary">
+                  <AvatarFallback className="bg-[#00eada]/20 text-[#00eada]">
                     <User className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
@@ -79,11 +79,11 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
               onClick={onAddComment}
               disabled={submitting || !newComment.trim()}
               size="sm"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+              className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-semibold border-0"
             >
               {submitting ? (
                 <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary-foreground" />
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-black" />
                   Adding...
                 </div>
               ) : (

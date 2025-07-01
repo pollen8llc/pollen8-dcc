@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, FileText, Sparkles } from 'lucide-react';
+import { ExternalLink, FileText } from 'lucide-react';
 
 interface DeelIntegrationButtonProps {
   projectTitle?: string;
@@ -43,12 +43,10 @@ export const DeelIntegrationButton: React.FC<DeelIntegrationButtonProps> = ({
   };
 
   return (
-    <div className="deel-integration-container relative">
-      <div className="flex flex-col items-center gap-4 p-6 bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-lg border border-emerald-500/20">
-        <div className="flex items-center gap-2 text-emerald-400">
-          <Sparkles className="h-5 w-5" />
+    <div className="admin-premium-border">
+      <div className="flex flex-col items-center gap-4 p-6 bg-gray-900/80 backdrop-blur-sm rounded-lg">
+        <div className="flex items-center gap-2 text-[#00eada]">
           <span className="font-semibold">Deal Confirmed!</span>
-          <Sparkles className="h-5 w-5" />
         </div>
         
         <p className="text-sm text-gray-300 text-center">
@@ -58,7 +56,7 @@ export const DeelIntegrationButton: React.FC<DeelIntegrationButtonProps> = ({
         <Button
           onClick={handleDeelIntegration}
           size="lg"
-          className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold px-8 py-3 text-lg"
+          className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-bold px-8 py-3 text-lg border-0"
         >
           <FileText className="h-5 w-5 mr-2" />
           Create Contract with DEEL

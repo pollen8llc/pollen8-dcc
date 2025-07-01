@@ -21,7 +21,7 @@ export const ProposalTimeline: React.FC<ProposalTimelineProps> = ({
     <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl font-black text-white flex items-center gap-2">
-          <FileText className="h-5 w-5 text-primary" />
+          <FileText className="h-5 w-5 text-[#00eada]" />
           Proposal Timeline
         </CardTitle>
       </CardHeader>
