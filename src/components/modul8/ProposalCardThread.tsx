@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -495,20 +494,20 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                 } = responseData;
                 
                 // Check if this card should display as an agreement
-                if (card.status === 'agreement') {
+                if (card.status === 'final_confirmation') {
                   return (
                     <AgreementCard key={card.id} card={card} />
                   );
                 }
                 
                 return (
-                  <Card key={card.id} className={`border-l-4 ${card.status === 'agreement' ? 'border-l-yellow-500 bg-gradient-to-r from-yellow-900/20 to-gray-900/80' : 'border-l-primary bg-gray-900/80'} backdrop-blur-sm border-gray-800`}>
+                  <Card key={card.id} className={`border-l-4 ${card.status === 'final_confirmation' ? 'border-l-yellow-500 bg-gradient-to-r from-yellow-900/20 to-gray-900/80' : 'border-l-primary bg-gray-900/80'} backdrop-blur-sm border-gray-800`}>
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <Badge className={`${card.status === 'agreement' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-primary/10 text-primary'} font-bold px-3 py-1 flex items-center gap-1`}>
-                              {card.status === 'agreement' && <Sparkles className="h-4 w-4" />}
+                            <Badge className={`${card.status === 'final_confirmation' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-primary/10 text-primary'} font-bold px-3 py-1 flex items-center gap-1`}>
+                              {card.status === 'final_confirmation' && <Sparkles className="h-4 w-4" />}
                               Card #{card.card_number}
                             </Badge>
                             <ProposalCardStatus
