@@ -339,7 +339,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00eada]"></div>
       </div>
     );
   }
@@ -367,7 +367,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800">
           <CardHeader className="pb-4">
             <CardTitle className="text-xl font-black text-white flex items-center gap-2">
-              <Send className="h-5 w-5 text-primary" />
+              <Send className="h-5 w-5 text-[#00eada]" />
               {counteringCardId ? 'Submit Counter Proposal' : (proposalCards.length === 0 ? 'Submit Your Counter Proposal' : 'Submit Counter Proposal')}
             </CardTitle>
           </CardHeader>
@@ -503,11 +503,11 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
               <Button
                 onClick={handleSubmitProposal}
                 disabled={submitting || !proposalNotes.trim() || !negotiatedTitle.trim()}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-semibold border-0"
               >
                 {submitting ? (
                   <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground" />
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black" />
                     Submitting...
                   </div>
                 ) : (
@@ -524,7 +524,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                 }}
                 variant="outline"
                 disabled={submitting}
-                className="border-gray-700 hover:bg-gray-800 text-white"
+                className="border-gray-700 bg-gray-800 hover:bg-gray-700 text-white"
               >
                 Cancel
               </Button>
