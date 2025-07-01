@@ -2,11 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Send } from 'lucide-react';
+import { 
+  MessageSquare, 
+  FileText, 
+  DollarSign, 
+  Clock, 
+  CheckCircle, 
+  XCircle,
+  ArrowRight,
+  Building,
+  User,
+  Send,
+  Paperclip,
+  Calendar,
+  PlayCircle,
+  ExternalLink,
+  Star,
+  Sparkles
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { 
   getProposalCards, 
@@ -17,11 +36,11 @@ import {
 } from '@/services/proposalCardService';
 import { ProposalCard, RequestComment } from '@/types/proposalCards';
 import { ServiceRequest } from '@/types/modul8';
+import { ProposalCardStatus } from './ProposalCardStatus';
+import { AgreementCard } from './AgreementCard';
+import { ProposalCardResponseActions } from './ProposalCardResponseActions';
 import { supabase } from '@/integrations/supabase/client';
 import { useProposalCardResponsesData } from '@/hooks/useProposalCardResponsesData';
-import { InitialRequestCard } from './InitialRequestCard';
-import { ProposalTimeline } from './ProposalTimeline';
-import { CommentsSection } from './CommentsSection';
 
 interface ProposalCardThreadProps {
   requestId: string;
@@ -347,20 +366,255 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   return (
     <div className="space-y-6">
       {/* Initial Request Card */}
-      <InitialRequestCard
-        serviceRequest={serviceRequest}
-        initialRequestResponded={initialRequestResponded}
-        isServiceProvider={isServiceProvider}
-        submitting={submitting}
-        onResponse={handleInitialRequestResponse}
-      />
+      <Card className="border-l-4 border-l-emerald-500 bg-gray-900/80 backdrop-blur-sm border-gray-800">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-bold px-3 py-1 flex items-center gap-1">
+              <PlayCircle className="h-4 w-4" />
+              Card #1
+            </Badge>
+            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 font-bold px-3 py-1 flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              INITIAL REQUEST
+            </Badge>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <Avatar className="h-6 w-6">
+                <AvatarImage src={serviceRequest.organizer?.logo_url} />
+                <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
+                  <Building className="h-3 w-3" />
+                </AvatarFallback>
+              </Avatar>
+              <span className="font-medium text-gray-300">
+                {serviceRequest.organizer?.organization_name || 'Client'}
+              </span>
+              <span className="text-gray-500">
+                {new Date(serviceRequest.created_at).toLocaleDateString()} at {new Date(serviceRequest.created_at).toLocaleTimeString()}
+              </span>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">{serviceRequest.title}</h3>
+              {serviceRequest.description && (
+                <p className="text-gray-300 leading-relaxed">{serviceRequest.description}</p>
+              )}
+            </div>
+            
+            <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+              <h4 className="text-sm font-semibold text-white mb-3">Proposed Project Details:</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                  <DollarSign className="h-4 w-4 text-emerald-400" />
+                  <span className="text-sm font-medium text-emerald-400">
+                    Budget: {serviceRequest.budget_range && (serviceRequest.budget_range.min || serviceRequest.budget_range.max) 
+                      ? (serviceRequest.budget_range.min && serviceRequest.budget_range.max 
+                        ? `$${serviceRequest.budget_range.min.toLocaleString()} - $${serviceRequest.budget_range.max.toLocaleString()}`
+                        : serviceRequest.budget_range.min 
+                        ? `From $${serviceRequest.budget_range.min.toLocaleString()}`
+                        : serviceRequest.budget_range.max 
+                        ? `Up to $${serviceRequest.budget_range.max.toLocaleString()}`
+                        : 'Budget TBD')
+                      : 'Budget TBD'
+                    }
+                  </span>
+                </div>
+                
+                {serviceRequest.timeline && (
+                  <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <Calendar className="h-4 w-4 text-blue-400" />
+                    <span className="text-sm font-medium text-blue-400">{serviceRequest.timeline}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {!initialRequestResponded && isServiceProvider && (
+            <div className="flex gap-2 pt-4 border-t border-gray-700 mt-4">
+              <Button
+                onClick={() => handleInitialRequestResponse('accept')}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                disabled={submitting}
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Accept
+              </Button>
+              <Button
+                onClick={() => handleInitialRequestResponse('reject')}
+                size="sm"
+                variant="outline"
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                disabled={submitting}
+              >
+                <XCircle className="h-4 w-4 mr-1" />
+                Reject
+              </Button>
+              <Button
+                onClick={() => handleInitialRequestResponse('counter')}
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+                disabled={submitting}
+              >
+                <ArrowRight className="h-4 w-4 mr-1" />
+                Counter
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Proposal Cards Timeline */}
-      <ProposalTimeline
-        proposalCards={proposalCards}
-        onActionComplete={handleActionComplete}
-        onCounterClick={(cardId) => handleRespondToCard(cardId, 'counter')}
-      />
+      <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-black text-white flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            Proposal Timeline
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {proposalCards.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              <FileText className="h-12 w-12 mx-auto mb-4 text-gray-600" />
+              <p className="text-lg font-medium">No proposals yet</p>
+              <p className="text-sm">The proposal timeline will appear here as cards are created.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {proposalCards.map((card, index) => {
+                const responseData = getCardResponseData(card.id);
+                const {
+                  responses,
+                  acceptResponses,
+                  hasMutualAcceptance,
+                  hasAnyAcceptance,
+                  hasCurrentUserResponded
+                } = responseData;
+                
+                // Check if this card should display as an agreement
+                if (card.status === 'final_confirmation') {
+                  return (
+                    <AgreementCard key={card.id} card={card} />
+                  );
+                }
+                
+                return (
+                  <Card key={card.id} className={`border-l-4 ${card.status === 'final_confirmation' ? 'border-l-yellow-500 bg-gradient-to-r from-yellow-900/20 to-gray-900/80' : 'border-l-primary bg-gray-900/80'} backdrop-blur-sm border-gray-800`}>
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Badge className={`${card.status === 'final_confirmation' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-primary/10 text-primary'} font-bold px-3 py-1 flex items-center gap-1`}>
+                              {card.status === 'final_confirmation' && <Sparkles className="h-4 w-4" />}
+                              Card #{card.card_number}
+                            </Badge>
+                            <ProposalCardStatus
+                              cardId={card.id}
+                              cardStatus={card.status}
+                              submittedBy={card.submitted_by}
+                              isLocked={card.is_locked}
+                            />
+                            {card.response_to_card_id && (
+                              <Badge variant="outline" className="text-orange-400 border-orange-500/30">
+                                Counter Proposal
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          {/* Show negotiated request details if they exist */}
+                          {(card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline) && (
+                            <div className="bg-gray-800/50 rounded-lg p-4 mb-4 border border-gray-700">
+                              <h4 className="text-sm font-semibold text-white mb-3">Proposed Project Details:</h4>
+                              {card.negotiated_title && (
+                                <div className="mb-2">
+                                  <span className="text-xs font-medium text-gray-400">Title: </span>
+                                  <span className="text-sm text-gray-300">{card.negotiated_title}</span>
+                                </div>
+                              )}
+                              {card.negotiated_description && (
+                                <div className="mb-2">
+                                  <span className="text-xs font-medium text-gray-400">Description: </span>
+                                  <span className="text-sm text-gray-300">{card.negotiated_description}</span>
+                                </div>
+                              )}
+                              {card.negotiated_budget_range && (
+                                <div className="mb-2">
+                                  <span className="text-xs font-medium text-gray-400">Budget: </span>
+                                  <span className="text-sm text-gray-300">
+                                    {card.negotiated_budget_range.min && card.negotiated_budget_range.max 
+                                      ? `$${card.negotiated_budget_range.min.toLocaleString()} - $${card.negotiated_budget_range.max.toLocaleString()}`
+                                      : card.negotiated_budget_range.min 
+                                      ? `From $${card.negotiated_budget_range.min.toLocaleString()}`
+                                      : card.negotiated_budget_range.max 
+                                      ? `Up to $${card.negotiated_budget_range.max.toLocaleString()}`
+                                      : 'Budget TBD'
+                                    }
+                                  </span>
+                                </div>
+                              )}
+                              {card.negotiated_timeline && (
+                                <div>
+                                  <span className="text-xs font-medium text-gray-400">Timeline: </span>
+                                  <span className="text-sm text-gray-300">{card.negotiated_timeline}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {card.notes && (
+                            <div className="bg-gray-800/30 rounded-lg p-4 mb-4 border border-gray-700">
+                              <p className="text-sm text-gray-300 leading-relaxed">{card.notes}</p>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <User className="h-4 w-4" />
+                              {card.submitted_by === session?.user?.id ? 'You' : 'Other Party'}
+                            </span>
+                            <span>{new Date(card.created_at).toLocaleDateString()}</span>
+                            {card.scope_link && (
+                              <a href={card.scope_link} target="_blank" rel="noopener noreferrer" 
+                                 className="text-primary hover:underline flex items-center gap-1">
+                                <Paperclip className="h-4 w-4" />
+                                Scope
+                              </a>
+                            )}
+                            {card.terms_link && (
+                              <a href={card.terms_link} target="_blank" rel="noopener noreferrer" 
+                                 className="text-primary hover:underline flex items-center gap-1">
+                                <FileText className="h-4 w-4" />
+                                Terms
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Response Actions */}
+                      <div className="pt-4 border-t border-gray-700">
+                        <ProposalCardResponseActions
+                          cardId={card.id}
+                          cardStatus={card.status}
+                          isLocked={card.is_locked}
+                          submittedBy={card.submitted_by}
+                          responses={responses}
+                          acceptResponses={acceptResponses}
+                          hasCurrentUserResponded={hasCurrentUserResponded}
+                          onActionComplete={handleActionComplete}
+                          onCounterClick={() => handleRespondToCard(card.id, 'counter')}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* New Proposal Form - Only shown when explicitly triggered */}
       {showProposalForm && (
@@ -534,14 +788,77 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       )}
 
       {/* Comments Section */}
-      <CommentsSection
-        comments={comments}
-        newComment={newComment}
-        setNewComment={setNewComment}
-        submitting={submitting}
-        onAddComment={handleAddComment}
-        currentUserId={session?.user?.id}
-      />
+      <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-800">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-black text-white flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            Project Discussion
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Comments List */}
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {comments.length === 0 ? (
+              <div className="text-center py-6 text-gray-400">
+                <MessageSquare className="h-8 w-8 mx-auto mb-2 text-gray-600" />
+                <p className="text-sm">No comments yet. Start the discussion!</p>
+              </div>
+            ) : (
+              comments.map((comment) => (
+                <div key={comment.id} className="flex gap-3 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary/20 text-primary">
+                      <User className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-semibold text-white">
+                        {comment.user_id === session?.user?.id ? 'You' : 'Other Party'}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(comment.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-300 leading-relaxed">{comment.content}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          
+          {/* New Comment Form */}
+          <Separator className="bg-gray-700" />
+          <div className="space-y-3">
+            <Textarea
+              placeholder="Add a comment to the discussion..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="min-h-[80px] bg-gray-800 border-gray-700 text-white"
+            />
+            <div className="flex justify-end">
+              <Button
+                onClick={handleAddComment}
+                disabled={submitting || !newComment.trim()}
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+              >
+                {submitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary-foreground" />
+                    Adding...
+                  </div>
+                ) : (
+                  <>
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Add Comment
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
