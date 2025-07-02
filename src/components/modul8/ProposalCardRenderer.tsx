@@ -53,9 +53,6 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
   return (
     <ProposalCardNew
       card={card}
-      onActionComplete={onActionComplete}
-      onCounterClick={onCounterClick}
-      allCards={allCards}
     />
   );
 };
