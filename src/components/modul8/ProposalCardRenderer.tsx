@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ProposalCard } from '@/types/proposalCards';
-import { ProposalCardNew } from './ProposalCardNew';
+import ProposalCardNew from './ProposalCardNew';
 import { AgreementCard } from './AgreementCard';
 import { DeelIntegrationButton } from './DeelIntegrationButton';
 import { useSession } from '@/hooks/useSession';
@@ -34,10 +34,7 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
 
     return (
       <>
-        <AgreementCard 
-          card={card} 
-          onActionComplete={onActionComplete}
-        />
+        <AgreementCard card={card} />
         <DeelIntegrationButton
           projectTitle={card.negotiated_title}
           projectDescription={card.negotiated_description}
