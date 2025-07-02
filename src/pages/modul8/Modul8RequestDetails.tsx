@@ -100,19 +100,19 @@ const Modul8RequestDetails = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 transition-colors duration-200';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'negotiating':
-        return 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 transition-colors duration-200';
+        return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'agreed':
-        return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 transition-colors duration-200';
+        return 'bg-green-50 text-green-700 border-green-200';
       case 'in_progress':
-        return 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 transition-colors duration-200';
+        return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'completed':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 transition-colors duration-200';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'cancelled':
-        return 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 transition-colors duration-200';
+        return 'bg-red-50 text-red-700 border-red-200';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 transition-colors duration-200';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
@@ -147,91 +147,80 @@ const Modul8RequestDetails = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        {/* Redesigned Header */}
-        <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
-          {/* Top Row: Badges and Indicators in 2-column grid on left, Back button on right */}
-          <div className="flex items-start justify-between gap-3 sm:gap-4">
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 flex-1 max-w-md">
-              <Badge className={`${getStatusColor(serviceRequest.status)} border font-medium justify-center hover:scale-[1.02] transition-all duration-200`}>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/modul8/dashboard')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold">{serviceRequest.title}</h1>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge className={`${getStatusColor(serviceRequest.status)} border font-medium`}>
                 {serviceRequest.status.replace('_', ' ').toUpperCase()}
               </Badge>
-              <div className="text-xs text-muted-foreground text-center py-1 px-2 bg-muted/30 rounded-md border">
-                {new Date(serviceRequest.created_at).toLocaleDateString()}
-              </div>
-              <div className="col-span-2 flex items-center justify-center gap-2 p-1 bg-[#00eada]/5 rounded-md border border-[#00eada]/20">
-                <div className="w-2 h-2 bg-[#00eada] rounded-full animate-pulse"></div>
-                <span className="text-xs text-[#00eada] font-medium">Active Request</span>
-              </div>
+              <span className="text-muted-foreground text-sm">
+                Created {new Date(serviceRequest.created_at).toLocaleDateString()}
+              </span>
             </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/modul8/dashboard')}
-              className="flex items-center gap-2 text-xs sm:text-sm border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-md hover:shadow-[#00eada]/20 shrink-0"
-            >
-              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Back to Dashboard</span>
-              <span className="sm:hidden">Back</span>
-            </Button>
           </div>
 
-          {/* Bottom Row: Action Buttons */}
-          <div className="flex items-center justify-end gap-2">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 transition-all duration-200 hover:shadow-md"
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Request
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  Delete Service Request?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the service request and all associated proposal cards and comments.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteRequest}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
-                    Delete Service Request?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the service request and all associated proposal cards and comments.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteRequest}
-                    disabled={deleting}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    {deleting ? "Deleting..." : "Delete Request"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+                  {deleting ? "Deleting..." : "Delete Request"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar - Only Participants */}
-          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
-            <Card className="border-l-2 border-l-[#00eada]/30 hover:border-l-[#00eada] transition-all duration-200">
-              <CardHeader className="pb-2 sm:pb-3">
-                <CardTitle className="text-sm sm:text-base">Participants</CardTitle>
+          <div className="lg:col-span-1 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Participants</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
+              <CardContent className="space-y-4">
                 {/* Organizer */}
-                <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors duration-200">
-                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={serviceRequest.organizer?.logo_url} />
                     <AvatarFallback>
-                      <Building className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <Building className="h-5 w-5" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="text-xs sm:text-sm font-medium">
+                    <div className="text-sm font-medium">
                       {serviceRequest.organizer?.organization_name || 'Your Organization'}
                     </div>
                     <div className="text-xs text-muted-foreground">Client</div>
@@ -240,15 +229,15 @@ const Modul8RequestDetails = () => {
 
                 {/* Service Provider */}
                 {serviceRequest.service_provider && (
-                  <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-50 dark:bg-green-900/10 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/20 transition-colors duration-200">
-                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                  <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg">
+                    <Avatar className="h-10 w-10">
                       <AvatarImage src={serviceRequest.service_provider.logo_url} />
                       <AvatarFallback>
-                        <Building className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <Building className="h-5 w-5" />
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <div className="text-xs sm:text-sm font-medium">
+                      <div className="text-sm font-medium">
                         {serviceRequest.service_provider.business_name}
                       </div>
                       <div className="text-xs text-muted-foreground">Service Provider</div>
