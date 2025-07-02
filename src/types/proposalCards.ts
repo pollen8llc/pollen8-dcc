@@ -18,7 +18,6 @@ export interface ProposalCard {
     currency: string;
   };
   negotiated_timeline?: string;
-  agreement_url?: string;
   is_locked: boolean;
   created_at: string;
   updated_at: string;
