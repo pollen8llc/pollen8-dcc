@@ -67,28 +67,23 @@ export const AgreementCard: React.FC<AgreementCardProps> = ({ card }) => {
           )}
         </div>
 
-        {/* Clickable CTA with Rainbow Border */}
+        {/* Clickable CTA with Admin Profile Border */}
         <div 
           onClick={handleDeelClick}
-          className="relative cursor-pointer group"
+          className="relative cursor-pointer group admin-profile-border"
         >
-          {/* Animated Rainbow Border */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 via-purple-600 via-blue-600 via-green-600 to-yellow-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-x"></div>
-          
           {/* Main Content */}
-          <div className="relative bg-white dark:bg-gray-900 rounded-lg p-6 transition-transform duration-200 group-hover:scale-[1.02]">
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-200 mb-2">
-                🎉 Ready to Create Your Contract?
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Click here to finalize your agreement with DEEL
-              </p>
-              
-              <div className="inline-flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
-                <span>DEEL</span>
-                <ExternalLink className="h-6 w-6 text-blue-600" />
-              </div>
+          <div className="relative bg-gradient-to-br from-emerald-600 to-green-600 rounded-lg p-6 transition-transform duration-200 group-hover:scale-[1.02] text-center">
+            <h3 className="text-2xl font-bold text-white mb-2">
+              🎉 Create Your Contract Now!
+            </h3>
+            <p className="text-emerald-100 mb-4 text-lg">
+              Click here to finalize with DEEL
+            </p>
+            
+            <div className="inline-flex items-center gap-2 text-2xl font-bold text-white">
+              <span>DEEL</span>
+              <ExternalLink className="h-6 w-6" />
             </div>
           </div>
         </div>
