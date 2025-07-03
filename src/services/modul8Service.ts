@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ServiceProvider, 
@@ -243,14 +242,7 @@ export const getProviderServiceRequests = async (providerId: string): Promise<Se
           focus_areas,
           user_id
         ),
-        service_provider:service_provider_id(
-          id,
-          business_name,
-          tagline,
-          logo_url,
-          tags,
-          user_id
-        )
+        service_provider:service_provider_id(*)
       `)
       .eq('service_provider_id', providerId)
       .order('created_at', { ascending: false });
@@ -303,14 +295,7 @@ export const getAvailableServiceRequestsForProvider = async (providerId: string)
           focus_areas,
           user_id
         ),
-        service_provider:service_provider_id(
-          id,
-          business_name,
-          tagline,
-          logo_url,
-          tags,
-          user_id
-        )
+        service_provider:service_provider_id(*)
       `)
       .is('service_provider_id', null)
       .eq('status', 'pending')
