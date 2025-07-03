@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ServiceProvider, 
@@ -259,7 +260,16 @@ export const getProviderServiceRequests = async (providerId: string): Promise<Se
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(request => ({
+      ...request,
+      budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+      milestones: request.milestones as string[],
+      service_provider: request.service_provider ? {
+        ...request.service_provider,
+        services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
+        pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+      } : undefined
+    })) as ServiceRequest[];
   } catch (error) {
     console.error('Error in getProviderServiceRequests:', error);
     throw error;
@@ -311,7 +321,16 @@ export const getAvailableServiceRequestsForProvider = async (providerId: string)
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(request => ({
+      ...request,
+      budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
+      milestones: request.milestones as string[],
+      service_provider: request.service_provider ? {
+        ...request.service_provider,
+        services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
+        pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+      } : undefined
+    })) as ServiceRequest[];
   } catch (error) {
     console.error('Error in getAvailableServiceRequestsForProvider:', error);
     throw error;
