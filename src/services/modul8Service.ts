@@ -228,63 +228,94 @@ export const getOrganizerServiceRequests = async (organizerId: string): Promise<
   })) as ServiceRequest[];
 };
 
-export const getProviderServiceRequests = async (serviceProviderId: string): Promise<ServiceRequest[]> => {
-  console.log('Getting service requests for provider:', serviceProviderId);
-  
-  const { data, error } = await supabase
-    .from('modul8_service_requests')
-    .select(`
-      *,
-      organizer:modul8_organizers(*)
-    `)
-    .eq('service_provider_id', serviceProviderId)
-    .order('created_at', { ascending: false });
+export const getProviderServiceRequests = async (providerId: string): Promise<ServiceRequest[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('modul8_service_requests')
+      .select(`
+        *,
+        organizer:organizer_id(
+          id,
+          organization_name,
+          description,
+          logo_url,
+          focus_areas,
+          user_id
+        ),
+        service_provider:service_provider_id(
+          id,
+          business_name,
+          tagline,
+          logo_url,
+          tags,
+          user_id
+        )
+      `)
+      .eq('service_provider_id', providerId)
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching provider service requests:', error);
+    if (error) {
+      console.error('Error fetching provider service requests:', error);
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getProviderServiceRequests:', error);
     throw error;
   }
-
-  console.log('Provider service requests found:', data?.length || 0);
-  
-  return (data || []).map(request => ({
-    ...request,
-    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[]
-  })) as ServiceRequest[];
 };
 
 export const getAvailableServiceRequestsForProvider = async (providerId: string): Promise<ServiceRequest[]> => {
-  console.log('Loading available service requests (open market)');
-  
-  const { data, error } = await supabase
-    .from('modul8_service_requests')
-    .select(`
-      *,
-      service_provider:modul8_service_providers(*),
-      organizer:modul8_organizers(*)
-    `)
-    .is('service_provider_id', null)
-    .eq('status', 'pending')
-    .order('created_at', { ascending: false });
-  
-  if (error) {
-    console.error('Error loading available requests:', error);
+  try {
+    // Get the current user's service provider record to check their user_id
+    const { data: providerData, error: providerError } = await supabase
+      .from('modul8_service_providers')
+      .select('user_id')
+      .eq('id', providerId)
+      .single();
+
+    if (providerError) {
+      console.error('Error fetching provider data:', providerError);
+      throw providerError;
+    }
+
+    // Get requests that are available (no service provider assigned yet) and status is pending
+    const { data, error } = await supabase
+      .from('modul8_service_requests')
+      .select(`
+        *,
+        organizer:organizer_id(
+          id,
+          organization_name,
+          description,
+          logo_url,
+          focus_areas,
+          user_id
+        ),
+        service_provider:service_provider_id(
+          id,
+          business_name,
+          tagline,
+          logo_url,
+          tags,
+          user_id
+        )
+      `)
+      .is('service_provider_id', null)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching available service requests:', error);
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getAvailableServiceRequestsForProvider:', error);
     throw error;
   }
-  
-  console.log('Available requests loaded:', data?.length || 0, 'requests');
-  
-  return (data || []).map(request => ({
-    ...request,
-    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[],
-    service_provider: request.service_provider ? {
-      ...request.service_provider,
-      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
-      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
-    } : undefined
-  })) as ServiceRequest[];
 };
 
 export const getAllServiceRequests = async (): Promise<ServiceRequest[]> => {

@@ -12,7 +12,8 @@ import {
   Building, 
   User, 
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  UserPlus
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProposalCardThread from '@/components/modul8/ProposalCardThread';
@@ -204,46 +205,50 @@ const Modul8RequestDetails = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar - Only Participants */}
+          {/* Sidebar - Enhanced Participants Panel */}
           <div className="lg:col-span-1 space-y-6">
-            <Card>
+            <Card className="border-border/40 bg-card/60 backdrop-blur-sm hover:border-primary/20 hover:shadow-lg transition-all">
               <CardHeader>
-                <CardTitle className="text-lg">Participants</CardTitle>
+                <CardTitle className="text-lg font-bold">Participants</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Organizer */}
-                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                  <Avatar className="h-10 w-10">
+                {/* Organizer - Always Present */}
+                <div className="flex items-center gap-3 p-4 bg-blue-500/20 dark:bg-blue-900/20 rounded-xl border border-blue-500/30">
+                  <Avatar className="h-12 w-12">
                     <AvatarImage src={serviceRequest.organizer?.logo_url} />
-                    <AvatarFallback>
-                      <Building className="h-5 w-5" />
+                    <AvatarFallback className="bg-blue-500/20 text-blue-700 font-bold">
+                      <Building className="h-6 w-6" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="text-sm font-medium">
+                    <div className="text-sm font-bold text-blue-700 dark:text-blue-300">
                       {serviceRequest.organizer?.organization_name || 'Your Organization'}
                     </div>
-                    <div className="text-xs text-muted-foreground">Client</div>
+                    <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">Client</div>
                   </div>
                 </div>
 
-                {/* Service Provider */}
-                {serviceRequest.service_provider && (
-                  <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={serviceRequest.service_provider.logo_url} />
-                      <AvatarFallback>
-                        <Building className="h-5 w-5" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">
-                        {serviceRequest.service_provider.business_name}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Service Provider</div>
+                {/* Service Provider - Show Always */}
+                <div className="flex items-center gap-3 p-4 bg-primary/20 dark:bg-primary/10 rounded-xl border border-primary/30">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={serviceRequest.service_provider?.logo_url} />
+                    <AvatarFallback className="bg-primary/20 text-primary font-bold">
+                      {serviceRequest.service_provider ? (
+                        <Building className="h-6 w-6" />
+                      ) : (
+                        <UserPlus className="h-6 w-6" />
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-primary">
+                      {serviceRequest.service_provider?.business_name || 'Open Position'}
+                    </div>
+                    <div className="text-xs text-primary/80 font-medium">
+                      {serviceRequest.service_provider ? 'Service Provider' : 'Awaiting Assignment'}
                     </div>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { 
@@ -55,7 +54,7 @@ const Labr8Dashboard = () => {
       }
       setServiceProvider(provider);
 
-      // Load assigned requests (requests sent to this provider) - including "assigned" status
+      // Load assigned requests - ALL requests where this provider is assigned
       const assigned = await getProviderServiceRequests(provider.id);
       setAssignedRequests(assigned);
 
@@ -123,10 +122,19 @@ const Labr8Dashboard = () => {
     }
   };
 
-  // Categorize requests - including "assigned" status
-  const pendingRequests = [...incomingRequests.filter(r => r.status === 'pending'), ...assignedRequests.filter(r => r.status === 'assigned')];
+  // Enhanced categorization to include all statuses properly
+  const pendingRequests = [
+    ...incomingRequests.filter(r => r.status === 'pending'), 
+    ...assignedRequests.filter(r => ['assigned', 'pending'].includes(r.status))
+  ];
+  
   const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating');
-  const activeProjects = assignedRequests.filter(r => ['agreed', 'in_progress'].includes(r.status));
+  
+  // Include 'agreed' status in active projects
+  const activeProjects = assignedRequests.filter(r => 
+    ['agreed', 'in_progress'].includes(r.status)
+  );
+  
   const completedProjects = assignedRequests.filter(r => r.status === 'completed');
 
   if (loading) {
