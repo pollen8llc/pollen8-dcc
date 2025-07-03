@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FinalizationCardProps {
   card: ProposalCard;
@@ -44,17 +45,17 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card }) => {
 
     try {
       setSubmitting(true);
-      
-      // Here you would typically make an API call to update the proposal card with the DEEL URL
-      // For now, we'll simulate the action
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
+      // Persist the DEEL URL to the proposal card
+      const { error } = await supabase
+        .from('modul8_proposal_cards')
+        .update({ deel_contract_url: deelUrl })
+        .eq('id', card.id);
+      if (error) throw error;
       toast({
         title: "DEEL Link Submitted",
         description: "The agreement link has been sent to the service provider",
         variant: "default"
       });
-      
       setDeelUrl('');
     } catch (error) {
       console.error('Error submitting DEEL link:', error);
@@ -216,9 +217,19 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card }) => {
               <ExternalLink className="h-5 w-5 text-blue-600" />
               <h4 className="font-semibold text-blue-800">Waiting for Contract</h4>
             </div>
-            <p className="text-sm text-blue-700">
-              The organizer is preparing the DEEL contract. You will receive the agreement link shortly to review and sign.
-            </p>
+            {card.deel_contract_url ? (
+              <Button
+                onClick={() => window.open(card.deel_contract_url, '_blank')}
+                className="bg-green-600 hover:bg-green-700 text-white mt-2"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View DEEL Contract
+              </Button>
+            ) : (
+              <p className="text-sm text-blue-700">
+                The organizer is preparing the DEEL contract. You will receive the agreement link shortly to review and sign.
+              </p>
+            )}
           </div>
         )}
       </CardContent>

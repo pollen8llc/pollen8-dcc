@@ -1,4 +1,3 @@
-
 export interface ProposalCard {
   id: string;
   request_id: string;
@@ -23,6 +22,7 @@ export interface ProposalCard {
   updated_at: string;
   responded_at?: string;
   responded_by?: string;
+  deel_contract_url?: string;
 }
 
 export interface CreateProposalCardData {
