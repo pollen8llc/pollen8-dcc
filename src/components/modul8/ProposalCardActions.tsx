@@ -110,11 +110,6 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // Don't show actions for cards submitted by current user
-  if (submittedBy === currentUserId) {
-    return null;
-  }
-
   // If card is locked (final status reached), hide buttons
   if (isLocked) {
     return (

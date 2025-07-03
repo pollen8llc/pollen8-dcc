@@ -356,6 +356,12 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
     }
   };
 
+  // Sort cards so agreement/finalization card is always at the top
+  const sortedProposalCards = [
+    ...proposalCards.filter(card => card.status === 'agreement'),
+    ...proposalCards.filter(card => card.status !== 'agreement')
+  ];
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -484,7 +490,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {proposalCards.map((card, index) => (
+              {sortedProposalCards.map((card, index) => (
                 <ProposalCardRenderer
                   key={card.id}
                   card={card}
