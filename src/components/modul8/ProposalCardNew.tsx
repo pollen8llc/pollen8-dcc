@@ -1,255 +1,194 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ProposalCard } from '@/types/proposalCards';
-import { ProposalCardActions } from './ProposalCardActions';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
-  DollarSign, 
-  Clock, 
   FileText, 
-  Link as LinkIcon,
-  User,
+  Link as LinkIcon, 
   Calendar,
-  MessageSquare
+  DollarSign,
+  User,
+  Building
 } from 'lucide-react';
-import { useSession } from '@/hooks/useSession';
+import { ProposalCard } from '@/types/proposalCards';
+import { ProposalCardResponseActions } from './ProposalCardResponseActions';
 
 interface ProposalCardNewProps {
   card: ProposalCard;
-  hasCounterResponse?: boolean;
+  isServiceProvider: boolean;
+  onResponse?: () => void;
 }
 
-const ProposalCardNew: React.FC<ProposalCardNewProps> = ({ 
-  card,
-  hasCounterResponse = false 
+export const ProposalCardNew: React.FC<ProposalCardNewProps> = ({ 
+  card, 
+  isServiceProvider, 
+  onResponse 
 }) => {
-  const { session } = useSession();
-  const [showCounter, setShowCounter] = useState(false);
-
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'pending':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'accepted':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-green-50 text-green-700 border-green-200';
       case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-50 text-red-700 border-red-200';
       case 'countered':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'cancelled':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+      case 'agreement':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
-  const getStatusText = () => {
-    switch (card.status) {
-      case 'accepted':
-        return 'Accepted';
-      case 'rejected':
-        return 'Rejected';
-      case 'countered':
-        return 'Countered';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return 'Pending';
+  const formatBudget = (budget: any) => {
+    if (!budget || typeof budget !== 'object') return null;
+    const { min, max, currency = 'USD' } = budget;
+    if (min && max) {
+      return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
+    } else if (min) {
+      return `From ${currency} ${min.toLocaleString()}`;
+    } else if (max) {
+      return `Up to ${currency} ${max.toLocaleString()}`;
     }
-  };
-
-  const hasNegotiatedTerms = () => {
-    return card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline;
-  };
-
-  const isOwnCard = () => {
-    return session?.user?.id === card.submitted_by;
-  };
-
-  const getCardBorderColor = () => {
-    switch (card.status) {
-      case 'accepted':
-        return 'border-green-200';
-      case 'rejected':
-        return 'border-red-200';
-      case 'countered':
-        return 'border-blue-200';
-      case 'cancelled':
-        return 'border-gray-200';
-      default:
-        return 'border-yellow-200';
-    }
-  };
-
-  const handleActionComplete = () => {
-    // Refresh or update the card state
-    window.location.reload(); // Simple refresh for now
-  };
-
-  const handleCounterClick = () => {
-    setShowCounter(true);
+    return null;
   };
 
   return (
-    <Card className={`mb-4 ${getCardBorderColor()}`}>
+    <Card className="w-full border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
       <CardHeader className="pb-4">
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                Card #{card.card_number}
-              </Badge>
-              <Badge className={getStatusColor(card.status)}>
-                {getStatusText()}
-              </Badge>
+              <span className="text-2xl font-bold text-primary">#{card.card_number}</span>
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {isServiceProvider ? <Building className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </div>
-          
-          <div className="text-right text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {new Date(card.created_at).toLocaleDateString()}
-            </div>
-            {card.responded_at && (
-              <div className="flex items-center gap-1 mt-1">
-                <MessageSquare className="h-3 w-3" />
-                Responded {new Date(card.responded_at).toLocaleDateString()}
+          <Badge className={`${getStatusColor(card.status)} border font-medium px-3 py-1`}>
+            {card.status.toUpperCase()}
+          </Badge>
+        </div>
+
+        {card.negotiated_title && (
+          <CardTitle className="text-xl font-bold text-foreground mt-3">
+            {card.negotiated_title}
+          </CardTitle>
+        )}
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {/* Negotiated Details Grid */}
+        {(card.negotiated_budget_range || card.negotiated_timeline || card.negotiated_description) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+            {card.negotiated_budget_range && formatBudget(card.negotiated_budget_range) && (
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium">Budget</p>
+                  <p className="text-sm font-semibold text-green-600">
+                    {formatBudget(card.negotiated_budget_range)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {card.negotiated_timeline && (
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium">Timeline</p>
+                  <p className="text-sm font-semibold">{card.negotiated_timeline}</p>
+                </div>
+              </div>
+            )}
+
+            {card.negotiated_description && (
+              <div className="md:col-span-2">
+                <p className="text-xs text-muted-foreground font-medium mb-1">Description</p>
+                <p className="text-sm">{card.negotiated_description}</p>
               </div>
             )}
           </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Negotiated Terms Section */}
-        {hasNegotiatedTerms() && (
-          <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-            <h4 className="font-medium text-sm flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Proposed Terms
-            </h4>
-            
-            <div className="space-y-3">
-              {card.negotiated_title && (
-                <div>
-                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Title</h5>
-                  <p className="text-sm">{card.negotiated_title}</p>
-                </div>
-              )}
-              
-              {card.negotiated_description && (
-                <div>
-                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Description</h5>
-                  <p className="text-sm">{card.negotiated_description}</p>
-                </div>
-              )}
-
-              {card.negotiated_budget_range && (
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">
-                    {card.negotiated_budget_range.min && card.negotiated_budget_range.max 
-                      ? `${card.negotiated_budget_range.currency} ${card.negotiated_budget_range.min.toLocaleString()} - ${card.negotiated_budget_range.max.toLocaleString()}`
-                      : card.negotiated_budget_range.min 
-                        ? `${card.negotiated_budget_range.currency} ${card.negotiated_budget_range.min.toLocaleString()}+`
-                        : `Budget in ${card.negotiated_budget_range.currency}`
-                    }
-                  </span>
-                </div>
-              )}
-
-              {card.negotiated_timeline && (
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm">{card.negotiated_timeline}</span>
-                </div>
-              )}
-            </div>
-          </div>
         )}
 
-        {/* Notes Section */}
+        {/* Notes */}
         {card.notes && (
           <div className="space-y-2">
-            <h4 className="font-medium text-sm flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Notes
-            </h4>
-            <p className="text-sm text-muted-foreground bg-muted/30 p-3 rounded">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">Notes</span>
+            </div>
+            <p className="text-sm text-foreground bg-muted/20 p-3 rounded-md">
               {card.notes}
             </p>
           </div>
         )}
 
+        {/* Links */}
+        <div className="flex flex-wrap gap-2">
+          {card.scope_link && (
+            <a
+              href={card.scope_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1 rounded-full transition-colors"
+            >
+              <LinkIcon className="h-3 w-3" />
+              Scope Document
+            </a>
+          )}
+          {card.terms_link && (
+            <a
+              href={card.terms_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1 rounded-full transition-colors"
+            >
+              <LinkIcon className="h-3 w-3" />
+              Terms Document
+            </a>
+          )}
+        </div>
+
         {/* Asset Links */}
         {card.asset_links && card.asset_links.length > 0 && (
           <div className="space-y-2">
-            <h4 className="font-medium text-sm flex items-center gap-2">
-              <LinkIcon className="h-4 w-4" />
-              Attachments
-            </h4>
+            <span className="text-sm font-medium text-muted-foreground">Attachments</span>
             <div className="flex flex-wrap gap-2">
               {card.asset_links.map((link, index) => (
-                <Button
+                <a
                   key={index}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(link, '_blank')}
-                  className="text-xs"
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/60 px-3 py-1 rounded-full transition-colors"
                 >
-                  <LinkIcon className="h-3 w-3 mr-1" />
-                  Attachment {index + 1}
-                </Button>
+                  <LinkIcon className="h-3 w-3" />
+                  Asset {index + 1}
+                </a>
               ))}
             </div>
           </div>
         )}
 
-        {/* Scope and Terms Links */}
-        {(card.scope_link || card.terms_link) && (
-          <div className="flex gap-2">
-            {card.scope_link && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(card.scope_link, '_blank')}
-                className="text-xs"
-              >
-                <FileText className="h-3 w-3 mr-1" />
-                View Scope
-              </Button>
-            )}
-            {card.terms_link && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(card.terms_link, '_blank')}
-                className="text-xs"
-              >
-                <FileText className="h-3 w-3 mr-1" />
-                View Terms
-              </Button>
-            )}
-          </div>
-        )}
+        {/* Response Actions */}
+        <ProposalCardResponseActions card={card} onResponse={onResponse} />
 
-        {/* Action Buttons */}
-        {!isOwnCard() && (
-          <div className="pt-2 border-t">
-            <ProposalCardActions
-              cardId={card.id}
-              isLocked={card.is_locked}
-              onActionComplete={handleActionComplete}
-              showCounterOption={true}
-              onCounterClick={handleCounterClick}
-              hasCounterResponse={hasCounterResponse}
-              submittedBy={card.submitted_by}
-            />
-          </div>
-        )}
+        {/* Timestamps */}
+        <div className="flex justify-between items-center text-xs text-muted-foreground pt-4 border-t border-border">
+          <span>Created {new Date(card.created_at).toLocaleDateString()}</span>
+          {card.responded_at && (
+            <span>Responded {new Date(card.responded_at).toLocaleDateString()}</span>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
 };
-
-export default ProposalCardNew;

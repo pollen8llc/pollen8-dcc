@@ -1,216 +1,167 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Check, 
+  X, 
+  MessageSquare, 
+  AlertCircle,
+  Loader2
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { respondToProposalCard } from '@/services/proposalCardService';
-import { CreateProposalResponseData, ProposalCardResponse } from '@/types/proposalCards';
-import { CheckCircle, XCircle, MessageSquare, Loader2, Clock } from 'lucide-react';
+import { respondToProposalCard, getProposalCardResponses } from '@/services/proposalCardService';
+import { ProposalCard, ProposalCardResponse } from '@/types/proposalCards';
 import { useSession } from '@/hooks/useSession';
 
 interface ProposalCardResponseActionsProps {
-  cardId: string;
-  cardStatus: 'pending' | 'accepted' | 'rejected' | 'countered' | 'cancelled' | 'final_confirmation' | 'agreement';
-  isLocked: boolean;
-  submittedBy: string;
-  responses: ProposalCardResponse[];
-  acceptResponses: ProposalCardResponse[];
-  hasCurrentUserResponded: boolean;
-  onActionComplete: () => void;
-  showCounterOption?: boolean;
-  onCounterClick?: () => void;
+  card: ProposalCard;
+  onResponse?: () => void;
 }
 
-export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsProps> = ({
-  cardId,
-  cardStatus,
-  isLocked,
-  submittedBy,
-  responses,
-  acceptResponses,
-  hasCurrentUserResponded,
-  onActionComplete,
-  showCounterOption = true,
-  onCounterClick
+export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsProps> = ({ 
+  card, 
+  onResponse 
 }) => {
   const { session } = useSession();
-  const [loading, setLoading] = useState<string | null>(null);
-  const currentUserId = session?.user?.id;
+  const [responseNotes, setResponseNotes] = useState('');
+  const [responding, setResponding] = useState(false);
+  const [userResponses, setUserResponses] = useState<ProposalCardResponse[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
-    setLoading(responseType);
+  useEffect(() => {
+    loadUserResponses();
+  }, [card.id, session?.user?.id]);
+
+  const loadUserResponses = async () => {
+    if (!session?.user?.id) return;
     
     try {
-      const responseData: CreateProposalResponseData = {
-        card_id: cardId,
-        response_type: responseType
-      };
+      setLoading(true);
+      const responses = await getProposalCardResponses(card.id);
+      const currentUserResponses = responses.filter(r => r.responded_by === session.user.id);
+      setUserResponses(currentUserResponses);
+    } catch (error) {
+      console.error('Error loading user responses:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      await respondToProposalCard(responseData);
+  const handleResponse = async (responseType: 'accept' | 'reject' | 'counter') => {
+    if (!session?.user?.id) return;
 
-      const actionMessages = {
-        accept: "✅ Proposal accepted! The other party will be notified.",
-        reject: "❌ Proposal rejected. The other party has been notified.",
-        cancel: "🚫 Proposal cancelled successfully."
-      };
-
-      toast({
-        title: "Success",
-        description: actionMessages[responseType],
-        variant: "default"
+    try {
+      setResponding(true);
+      
+      await respondToProposalCard({
+        card_id: card.id,
+        response_type: responseType,
+        response_notes: responseNotes || undefined
       });
 
-      onActionComplete();
+      toast({
+        title: "Response Submitted",
+        description: `You have ${responseType}ed this proposal`,
+      });
+
+      setResponseNotes('');
+      
+      // Reload responses to update UI
+      await loadUserResponses();
+      
+      if (onResponse) {
+        onResponse();
+      }
     } catch (error) {
       console.error(`Error ${responseType}ing proposal:`, error);
-      
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : `Failed to ${responseType} proposal. Please try again.`;
-      
       toast({
         title: "Error",
-        description: errorMessage,
+        description: error instanceof Error ? error.message : `Failed to ${responseType} proposal`,
         variant: "destructive"
       });
     } finally {
-      setLoading(null);
+      setResponding(false);
     }
   };
 
-  const handleCounterProposal = () => {
-    if (onCounterClick) {
-      onCounterClick();
+  // Don't show actions if card is locked, agreement status, or user has already responded
+  if (card.is_locked || card.status === 'agreement' || userResponses.length > 0 || loading) {
+    if (userResponses.length > 0) {
+      const userResponse = userResponses[0];
+      return (
+        <Card className="mt-4 border-muted">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="capitalize">
+                {userResponse.response_type}ed
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                You have already responded to this proposal
+              </span>
+            </div>
+            {userResponse.response_notes && (
+              <p className="text-sm text-muted-foreground mt-2">
+                {userResponse.response_notes}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      );
     }
-  };
-
-  // Don't show actions for agreement cards - they handle their own UI
-  if (cardStatus === 'agreement') {
     return null;
   }
 
-  // Don't show actions for locked cards (rejected, cancelled, etc.)
-  if (isLocked) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <CheckCircle className="h-4 w-4" />
-        This proposal has been responded to
-      </div>
-    );
-  }
+  return (
+    <Card className="mt-4 border-primary/20 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <AlertCircle className="h-4 w-4" />
+            Your Response Required
+          </div>
 
-  // Check if other party has accepted but current user hasn't responded
-  const otherPartyAccepted = acceptResponses.some(r => r.responded_by !== currentUserId);
-  const currentUserAccepted = acceptResponses.some(r => r.responded_by === currentUserId);
-  
-  // Show "they accepted, waiting for you" when other party accepted but current user hasn't responded
-  if (otherPartyAccepted && !hasCurrentUserResponded) {
-    return (
-      <div className="space-y-2">
-        <div className="text-sm text-orange-400 font-medium animate-pulse">
-          🔥 The other party has accepted this proposal!
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            onClick={() => handleResponse('reject')}
-            disabled={loading !== null}
-            variant="destructive"
-            size="sm"
-          >
-            {loading === 'reject' ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <XCircle className="h-4 w-4 mr-2" />
-            )}
-            {loading === 'reject' ? 'Rejecting...' : 'Reject'}
-          </Button>
+          <Textarea
+            placeholder="Add notes to your response (optional)..."
+            value={responseNotes}
+            onChange={(e) => setResponseNotes(e.target.value)}
+            className="min-h-20"
+          />
 
-          {showCounterOption && (
+          <div className="flex gap-3 pt-2">
             <Button
-              onClick={handleCounterProposal}
-              disabled={loading !== null}
-              variant="outline"
-              size="sm"
+              onClick={() => handleResponse('accept')}
+              disabled={responding}
+              className="bg-green-600 hover:bg-green-700 text-white flex-1"
             >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Counter Proposal
+              {responding ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+              Accept
             </Button>
-          )}
-
-          <Button
-            onClick={() => handleResponse('accept')}
-            disabled={loading !== null}
-            className="bg-green-600 hover:bg-green-700 text-white animate-pulse"
-            size="sm"
-          >
-            {loading === 'accept' ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <CheckCircle className="h-4 w-4 mr-2" />
-            )}
-            {loading === 'accept' ? 'Accepting...' : 'Accept & Create Agreement!'}
-          </Button>
+            
+            <Button
+              onClick={() => handleResponse('counter')}
+              disabled={responding}
+              variant="outline"
+              className="border-orange-200 text-orange-700 hover:bg-orange-50 flex-1"
+            >
+              {responding ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <MessageSquare className="h-4 w-4 mr-2" />}
+              Counter
+            </Button>
+            
+            <Button
+              onClick={() => handleResponse('reject')}
+              disabled={responding}
+              variant="outline"
+              className="border-red-200 text-red-700 hover:bg-red-50 flex-1"
+            >
+              {responding ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
+              Reject
+            </Button>
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  // Show "awaiting response" when current user has responded
-  if (hasCurrentUserResponded) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
-        <Clock className="h-4 w-4" />
-        Awaiting other party's response...
-      </div>
-    );
-  }
-
-  // For pending cards that haven't been responded to, check if it's not their own card
-  if ((cardStatus as string) === 'pending' && submittedBy !== currentUserId) {
-    return (
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          onClick={() => handleResponse('reject')}
-          disabled={loading !== null}
-          variant="destructive"
-          size="sm"
-        >
-          {loading === 'reject' ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <XCircle className="h-4 w-4 mr-2" />
-          )}
-          {loading === 'reject' ? 'Rejecting...' : 'Reject'}
-        </Button>
-
-        {showCounterOption && (
-          <Button
-            onClick={handleCounterProposal}
-            disabled={loading !== null}
-            variant="outline"
-            size="sm"
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Counter Proposal
-          </Button>
-        )}
-
-        <Button
-          onClick={() => handleResponse('accept')}
-          disabled={loading !== null}
-          className="bg-green-600 hover:bg-green-700 text-white"
-          size="sm"
-        >
-          {loading === 'accept' ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <CheckCircle className="h-4 w-4 mr-2" />
-          )}
-          {loading === 'accept' ? 'Accepting...' : 'Accept'}
-        </Button>
-      </div>
-    );
-  }
-
-  // No actions to show
-  return null;
+      </CardContent>
+    </Card>
+  );
 };

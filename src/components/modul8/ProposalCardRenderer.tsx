@@ -1,39 +1,42 @@
 
 import React from 'react';
-import { ProposalCard } from '@/types/proposalCards';
+import { ProposalCardNew } from './ProposalCardNew';
 import { AgreementCard } from './AgreementCard';
-import ProposalCardNew from './ProposalCardNew';
+import { FinalizationCard } from './FinalizationCard';
+import { ProposalCard } from '@/types/proposalCards';
 
 interface ProposalCardRendererProps {
   card: ProposalCard;
-  onActionComplete: () => void;
-  showCounterOption?: boolean;
-  onCounterClick?: () => void;
-  allCards?: ProposalCard[]; // New prop to pass all cards for checking counter responses
+  isServiceProvider: boolean;
+  onResponse?: () => void;
 }
 
-export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
-  card,
-  onActionComplete,
-  showCounterOption,
-  onCounterClick,
-  allCards = []
+export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({ 
+  card, 
+  isServiceProvider, 
+  onResponse 
 }) => {
-  // Check if there's a counter response to this card
-  const hasCounterResponse = allCards.some(
-    otherCard => otherCard.response_to_card_id === card.id
-  );
-
-  // Render agreement cards with special component
+  // Handle finalization card for organizers after agreement
+  if (card.status === 'agreement' && !isServiceProvider) {
+    return <FinalizationCard card={card} isOrganizer={true} />;
+  }
+  
+  // Handle agreement view for service providers
+  if (card.status === 'agreement' && isServiceProvider) {
+    return <FinalizationCard card={card} isOrganizer={false} />;
+  }
+  
+  // Handle legacy agreement cards
   if (card.status === 'agreement') {
     return <AgreementCard card={card} />;
   }
 
-  // Render regular proposal cards - ProposalCardNew has its own prop structure
+  // Handle all other proposal cards
   return (
-    <ProposalCardNew
-      card={card}
-      hasCounterResponse={hasCounterResponse}
+    <ProposalCardNew 
+      card={card} 
+      isServiceProvider={isServiceProvider} 
+      onResponse={onResponse}
     />
   );
 };

@@ -130,7 +130,7 @@ const Labr8Dashboard = () => {
   
   const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating');
   
-  // Include 'agreed' status in active projects
+  // Include both 'agreed' and 'in_progress' status in active projects
   const activeProjects = assignedRequests.filter(r => 
     ['agreed', 'in_progress'].includes(r.status)
   );
