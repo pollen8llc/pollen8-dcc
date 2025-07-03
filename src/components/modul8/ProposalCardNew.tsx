@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,11 +18,17 @@ import { useSession } from '@/hooks/useSession';
 interface ProposalCardNewProps {
   card: ProposalCard;
   hasCounterResponse?: boolean;
+  onActionComplete?: () => void;
+  showCounterOption?: boolean;
+  onCounterClick?: () => void;
 }
 
 const ProposalCardNew: React.FC<ProposalCardNewProps> = ({ 
   card,
-  hasCounterResponse = false 
+  hasCounterResponse = false,
+  onActionComplete,
+  showCounterOption = true,
+  onCounterClick
 }) => {
   const { session } = useSession();
   const [showCounter, setShowCounter] = useState(false);
@@ -234,19 +239,17 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
         )}
 
         {/* Action Buttons */}
-        {!isOwnCard() && (
-          <div className="pt-2 border-t">
-            <ProposalCardActions
-              cardId={card.id}
-              isLocked={card.is_locked}
-              onActionComplete={handleActionComplete}
-              showCounterOption={true}
-              onCounterClick={handleCounterClick}
-              hasCounterResponse={hasCounterResponse}
-              submittedBy={card.submitted_by}
-            />
-          </div>
-        )}
+        <div className="pt-2 border-t">
+          <ProposalCardActions
+            cardId={card.id}
+            isLocked={card.is_locked}
+            onActionComplete={onActionComplete || (() => window.location.reload())}
+            showCounterOption={showCounterOption}
+            onCounterClick={onCounterClick}
+            hasCounterResponse={hasCounterResponse}
+            submittedBy={card.submitted_by}
+          />
+        </div>
       </CardContent>
     </Card>
   );

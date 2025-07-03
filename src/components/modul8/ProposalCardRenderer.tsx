@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ProposalCard } from '@/types/proposalCards';
 import { AgreementCard } from './AgreementCard';
@@ -35,6 +34,9 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
     <ProposalCardNew
       card={card}
       hasCounterResponse={hasCounterResponse}
+      onActionComplete={onActionComplete}
+      showCounterOption={showCounterOption}
+      onCounterClick={onCounterClick}
     />
   );
 };
