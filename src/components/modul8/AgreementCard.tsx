@@ -1,16 +1,24 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, ExternalLink } from 'lucide-react';
 import { ProposalCard } from '@/types/proposalCards';
+import { useSession } from 'next-auth/react';
+import FinalizationCard from './FinalizationCard';
 
 interface AgreementCardProps {
   card: ProposalCard;
 }
 
 export const AgreementCard: React.FC<AgreementCardProps> = ({ card }) => {
+  const { session } = useSession();
+  const isOrganizer = session?.user?.id === card.organizer_id; // Adjust as needed for your data model
+
+  if (isOrganizer) {
+    return <FinalizationCard card={card} />;
+  }
+
   const handleDeelClick = () => {
     window.open('https://app.deel.com/login', '_blank');
   };

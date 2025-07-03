@@ -122,18 +122,16 @@ const Labr8Dashboard = () => {
     }
   };
 
-  // FIXED: Enhanced categorization to properly handle all statuses
+  // Enhanced categorization logic for requests
   const pendingRequests = [
-    ...incomingRequests.filter(r => r.status === 'pending'), 
+    ...incomingRequests.filter(r => r.status === 'pending'),
     ...assignedRequests.filter(r => ['assigned', 'pending'].includes(r.status))
   ];
   
   const negotiatingRequests = assignedRequests.filter(r => r.status === 'negotiating');
   
-  // FIXED: Include 'agreed' status in active projects - this is the key fix
-  const activeProjects = assignedRequests.filter(r => 
-    ['agreed', 'in_progress'].includes(r.status)
-  );
+  // Include both 'agreed' and 'in_progress' in active projects
+  const activeProjects = assignedRequests.filter(r => ['agreed', 'in_progress'].includes(r.status));
   
   const completedProjects = assignedRequests.filter(r => r.status === 'completed');
 

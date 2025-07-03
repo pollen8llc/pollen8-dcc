@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -126,6 +125,16 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
+  // If the current user has already responded, hide action buttons
+  if (hasCurrentUserResponded) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
+        <Clock className="h-4 w-4" />
+        Awaiting other party's response...
+      </div>
+    );
+  }
+
   // Check if other party has accepted but current user hasn't responded
   const otherPartyAccepted = acceptResponses.some(r => r.responded_by !== currentUserId);
   
@@ -177,16 +186,6 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
             {loading === 'accept' ? 'Accepting...' : 'Accept & Create Agreement!'}
           </Button>
         </div>
-      </div>
-    );
-  }
-
-  // Show "awaiting response" when current user has responded
-  if (hasCurrentUserResponded) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
-        <Clock className="h-4 w-4" />
-        Awaiting other party's response...
       </div>
     );
   }
