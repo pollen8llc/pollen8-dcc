@@ -234,14 +234,7 @@ export const getProviderServiceRequests = async (providerId: string): Promise<Se
       .from('modul8_service_requests')
       .select(`
         *,
-        organizer:organizer_id(
-          id,
-          organization_name,
-          description,
-          logo_url,
-          focus_areas,
-          user_id
-        ),
+        organizer:organizer_id(*),
         service_provider:service_provider_id(*)
       `)
       .eq('service_provider_id', providerId)
@@ -287,14 +280,7 @@ export const getAvailableServiceRequestsForProvider = async (providerId: string)
       .from('modul8_service_requests')
       .select(`
         *,
-        organizer:organizer_id(
-          id,
-          organization_name,
-          description,
-          logo_url,
-          focus_areas,
-          user_id
-        ),
+        organizer:organizer_id(*),
         service_provider:service_provider_id(*)
       `)
       .is('service_provider_id', null)
