@@ -154,7 +154,7 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     );
   }
 
-  // Show "you have already responded" when current user has responded - KEY FIX
+  // FIXED: Show "you have already responded" when current user has responded - KEY FIX
   if (hasCurrentUserResponded) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
