@@ -362,6 +362,17 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
     ...proposalCards.filter(card => card.status !== 'agreement')
   ];
 
+  // Only show the first finalization card if there are duplicates
+  const seenAgreement = new Set();
+  const filteredProposalCards = sortedProposalCards.filter(card => {
+    if (card.status === 'agreement') {
+      if (seenAgreement.has(card.request_id)) return false;
+      seenAgreement.add(card.request_id);
+      return true;
+    }
+    return true;
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -490,7 +501,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {sortedProposalCards.map((card, index) => (
+              {filteredProposalCards.map((card, index) => (
                 <ProposalCardRenderer
                   key={card.id}
                   card={card}
@@ -498,6 +509,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                   showCounterOption={true}
                   onCounterClick={() => handleRespondToCard(card.id, 'counter')}
                   allCards={proposalCards}
+                  organizerId={serviceRequest.organizer?.user_id}
                 />
               ))}
             </div>

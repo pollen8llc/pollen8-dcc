@@ -10,6 +10,7 @@ interface ProposalCardRendererProps {
   showCounterOption?: boolean;
   onCounterClick?: () => void;
   allCards?: ProposalCard[]; // New prop to pass all cards for checking counter responses
+  organizerId?: string;
 }
 
 export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
@@ -17,7 +18,8 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
   onActionComplete,
   showCounterOption,
   onCounterClick,
-  allCards = []
+  allCards = [],
+  organizerId
 }) => {
   // Check if there's a counter response to this card
   const hasCounterResponse = allCards.some(
@@ -26,7 +28,7 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
 
   // Render finalization cards (agreement cards that need DEEL processing)
   if (card.status === 'agreement') {
-    return <FinalizationCard card={card} />;
+    return <FinalizationCard card={card} organizerId={organizerId} onActionComplete={onActionComplete} />;
   }
 
   // Render regular proposal cards - ProposalCardNew has its own prop structure

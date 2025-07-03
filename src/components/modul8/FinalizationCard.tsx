@@ -19,15 +19,17 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface FinalizationCardProps {
   card: ProposalCard;
+  organizerId?: string;
+  onActionComplete?: () => void;
 }
 
-const FinalizationCard: React.FC<FinalizationCardProps> = ({ card }) => {
+const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, onActionComplete }) => {
   const { session } = useSession();
-  const [deelUrl, setDeelUrl] = useState('');
+  const [deelUrl, setDeelUrl] = useState(card.deel_contract_url || '');
   const [submitting, setSubmitting] = useState(false);
   const currentUserId = session?.user?.id;
 
-  const isOrganizer = currentUserId !== card.submitted_by; // Assuming organizer didn't submit the final card
+  const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
   const handleGoToDeel = () => {
     window.open('https://app.deel.com', '_blank');
@@ -56,7 +58,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card }) => {
         description: "The agreement link has been sent to the service provider",
         variant: "default"
       });
-      setDeelUrl('');
+      if (onActionComplete) onActionComplete();
     } catch (error) {
       console.error('Error submitting DEEL link:', error);
       toast({
