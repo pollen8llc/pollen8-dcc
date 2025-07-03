@@ -3,6 +3,7 @@ import React from 'react';
 import { ProposalCard } from '@/types/proposalCards';
 import { AgreementCard } from './AgreementCard';
 import ProposalCardNew from './ProposalCardNew';
+import FinalizationCard from './FinalizationCard';
 
 interface ProposalCardRendererProps {
   card: ProposalCard;
@@ -24,9 +25,9 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
     otherCard => otherCard.response_to_card_id === card.id
   );
 
-  // Render agreement cards with special component
+  // Render finalization cards (agreement cards that need DEEL processing)
   if (card.status === 'agreement') {
-    return <AgreementCard card={card} />;
+    return <FinalizationCard card={card} />;
   }
 
   // Render regular proposal cards - ProposalCardNew has its own prop structure

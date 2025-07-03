@@ -132,23 +132,85 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
 
     console.log('✅ Response created successfully:', response);
     
-    // Verify the response was actually created by fetching it back
-    const { data: verifyResponse, error: verifyError } = await supabase
-      .from('modul8_proposal_card_responses')
-      .select('*')
-      .eq('id', response.id)
-      .single();
-    
-    if (verifyError) {
-      console.error('❌ Error verifying response creation:', verifyError);
-    } else {
-      console.log('✅ Response verified in database:', verifyResponse);
+    // Check for mutual acceptance and create finalization card if needed
+    if (data.response_type === 'accept') {
+      const mutualAcceptance = await checkMutualAcceptance(data.card_id);
+      if (mutualAcceptance) {
+        await createFinalizationCard(data.card_id);
+      }
     }
     
     return response as ProposalCardResponse;
   } catch (error) {
     console.error('❌ Comprehensive error in respondToProposalCard:', error);
     console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+    throw error;
+  }
+};
+
+const createFinalizationCard = async (originalCardId: string): Promise<void> => {
+  try {
+    // Get the original card and request details
+    const { data: originalCard, error: fetchError } = await supabase
+      .from('modul8_proposal_cards')
+      .select('*')
+      .eq('id', originalCardId)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch original proposal: ${fetchError.message}`);
+    }
+
+    // Get next card number
+    const { data: existingCards } = await supabase
+      .from('modul8_proposal_cards')
+      .select('card_number')
+      .eq('request_id', originalCard.request_id)
+      .order('card_number', { ascending: false })
+      .limit(1);
+
+    const nextCardNumber = existingCards && existingCards.length > 0 
+      ? existingCards[0].card_number + 1 
+      : 1;
+
+    // Create finalization card with enhanced messaging
+    await supabase
+      .from('modul8_proposal_cards')
+      .insert({
+        request_id: originalCard.request_id,
+        card_number: nextCardNumber,
+        submitted_by: originalCard.submitted_by, // System-generated
+        status: 'agreement',
+        is_locked: true,
+        notes: 'AGREEMENT FINALIZATION - Both parties have accepted the proposal. Please proceed with contract execution via DEEL platform.',
+        negotiated_title: originalCard.negotiated_title,
+        negotiated_description: originalCard.negotiated_description,
+        negotiated_budget_range: originalCard.negotiated_budget_range,
+        negotiated_timeline: originalCard.negotiated_timeline
+      });
+
+    // Lock the original card and request
+    await supabase
+      .from('modul8_proposal_cards')
+      .update({ 
+        status: 'accepted',
+        is_locked: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', originalCardId);
+
+    await supabase
+      .from('modul8_service_requests')
+      .update({ 
+        status: 'agreed',
+        is_agreement_locked: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', originalCard.request_id);
+
+    console.log('✅ Finalization card created successfully');
+  } catch (error) {
+    console.error('❌ Error creating finalization card:', error);
     throw error;
   }
 };
