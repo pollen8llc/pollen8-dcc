@@ -608,8 +608,15 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
                       {/* Response Actions */}
                       <div className="pt-4 border-t border-gray-700">
                         <ProposalCardResponseActions
-                          card={card}
-                          onResponse={handleActionComplete}
+                          cardId={card.id}
+                          cardStatus={card.status}
+                          isLocked={card.is_locked}
+                          submittedBy={card.submitted_by}
+                          responses={responses}
+                          acceptResponses={acceptResponses}
+                          hasCurrentUserResponded={hasCurrentUserResponded}
+                          onActionComplete={handleActionComplete}
+                          onCounterClick={() => handleRespondToCard(card.id, 'counter')}
                         />
                       </div>
                     </CardContent>
