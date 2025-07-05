@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ProposalCard, 
@@ -161,6 +162,18 @@ const createFinalizationCard = async (originalCardId: string): Promise<void> => 
       throw new Error(`Failed to fetch original proposal: ${fetchError.message}`);
     }
 
+    // Get the service provider ID for the user who submitted the proposal
+    const { data: serviceProvider, error: providerError } = await supabase
+      .from('modul8_service_providers')
+      .select('id')
+      .eq('user_id', originalCard.submitted_by)
+      .single();
+
+    if (providerError) {
+      console.error('Error finding service provider:', providerError);
+      throw new Error(`Failed to find service provider for user: ${originalCard.submitted_by}`);
+    }
+
     // Get next card number
     const { data: existingCards } = await supabase
       .from('modul8_proposal_cards')
@@ -199,16 +212,18 @@ const createFinalizationCard = async (originalCardId: string): Promise<void> => 
       })
       .eq('id', originalCardId);
 
+    // Update the service request with both status and service provider assignment
     await supabase
       .from('modul8_service_requests')
       .update({ 
         status: 'agreed',
+        service_provider_id: serviceProvider.id,
         is_agreement_locked: true,
         updated_at: new Date().toISOString()
       })
       .eq('id', originalCard.request_id);
 
-    console.log('✅ Finalization card created successfully');
+    console.log('✅ Finalization card created and service provider assigned successfully');
   } catch (error) {
     console.error('❌ Error creating finalization card:', error);
     throw error;
