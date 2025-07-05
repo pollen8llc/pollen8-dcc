@@ -1,22 +1,24 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, ExternalLink } from 'lucide-react';
 import { ProposalCard } from '@/types/proposalCards';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/hooks/useSession';
 import FinalizationCard from './FinalizationCard';
 
 interface AgreementCardProps {
   card: ProposalCard;
+  organizerId?: string;
 }
 
-export const AgreementCard: React.FC<AgreementCardProps> = ({ card }) => {
+export const AgreementCard: React.FC<AgreementCardProps> = ({ card, organizerId }) => {
   const { session } = useSession();
-  const isOrganizer = session?.user?.id === card.organizer_id; // Adjust as needed for your data model
+  const isOrganizer = organizerId ? session?.user?.id === organizerId : false;
 
   if (isOrganizer) {
-    return <FinalizationCard card={card} />;
+    return <FinalizationCard card={card} organizerId={organizerId} />;
   }
 
   const handleDeelClick = () => {
