@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,9 @@ import {
   CheckCircle,
   Calendar,
   User,
-  Loader2
+  Loader2,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { toast } from '@/hooks/use-toast';
@@ -27,9 +30,40 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
   const { session } = useSession();
   const [deelUrl, setDeelUrl] = useState(card.deel_contract_url || '');
   const [submitting, setSubmitting] = useState(false);
+  const [deelHistory, setDeelHistory] = useState<Array<{ url: string; timestamp: string }>>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const currentUserId = session?.user?.id;
 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
+
+  // Load DEEL links history for this service request
+  useEffect(() => {
+    const loadDeelHistory = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('modul8_proposal_cards')
+          .select('deel_contract_url, updated_at')
+          .eq('request_id', card.request_id)
+          .not('deel_contract_url', 'is', null)
+          .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+
+        const history = data
+          .filter(item => item.deel_contract_url)
+          .map(item => ({
+            url: item.deel_contract_url!,
+            timestamp: item.updated_at
+          }));
+
+        setDeelHistory(history);
+      } catch (error) {
+        console.error('Error loading DEEL history:', error);
+      }
+    };
+
+    loadDeelHistory();
+  }, [card.request_id]);
 
   const handleGoToDeel = () => {
     window.open('https://app.deel.com', '_blank');
@@ -53,11 +87,16 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
         .update({ deel_contract_url: deelUrl })
         .eq('id', card.id);
       if (error) throw error;
+      
       toast({
         title: "DEEL Link Submitted",
         description: "The agreement link has been sent to the service provider",
         variant: "default"
       });
+      
+      // Refresh the history
+      setDeelHistory(prev => [{ url: deelUrl, timestamp: new Date().toISOString() }, ...prev]);
+      
       if (onActionComplete) onActionComplete();
     } catch (error) {
       console.error('Error submitting DEEL link:', error);
@@ -72,7 +111,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
   };
 
   return (
-    <Card className="mb-4 border-green-200 bg-green-50/50">
+    <Card className="rounded-2xl backdrop-blur-md bg-white/5 border border-white/10 text-card-foreground shadow-lg hover:shadow-[#00eada]/10 transition-all duration-200">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
@@ -208,13 +247,56 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
                   Paste the DEEL contract URL to send it to the service provider for signing
                 </p>
               </div>
+
+              {/* DEEL Links History */}
+              {deelHistory.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">
+                      Contract History ({deelHistory.length})
+                    </Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowHistory(!showHistory)}
+                      className="h-6 px-2"
+                    >
+                      {showHistory ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {showHistory && (
+                    <div className="space-y-2 bg-muted/20 p-3 rounded-md max-h-32 overflow-y-auto">
+                      {deelHistory.map((entry, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm">
+                          <a
+                            href={entry.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline truncate flex-1 mr-2"
+                          >
+                            Contract Link #{index + 1}
+                          </a>
+                          <span className="text-muted-foreground text-xs">
+                            {new Date(entry.timestamp).toLocaleDateString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Service Provider View */}
         {!isOrganizer && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <ExternalLink className="h-5 w-5 text-blue-600" />
               <h4 className="font-semibold text-blue-800">Waiting for Contract</h4>
