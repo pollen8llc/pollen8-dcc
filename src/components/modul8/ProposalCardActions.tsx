@@ -110,16 +110,6 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // If card is locked (final status reached), hide buttons
-  if (isLocked) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <CheckCircle className="h-4 w-4" />
-        This proposal has been finalized
-      </div>
-    );
-  }
-
   // If the current user has already responded, hide action buttons
   if (hasCurrentUserResponded) {
     return (
