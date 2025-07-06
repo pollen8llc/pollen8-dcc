@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -175,8 +176,9 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // Default: Show action buttons for fresh proposals that need responses
+  // Default: Show action buttons - but check if this is an initial request or counter-proposal
   console.log(`✅ Showing buttons for card ${cardId} - no responses found or ready for action`);
+  
   return (
     <div className="flex gap-2 flex-wrap">
       <Button

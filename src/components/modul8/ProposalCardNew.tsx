@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +21,7 @@ interface ProposalCardNewProps {
   onActionComplete: () => void;
   showCounterOption?: boolean;
   onCounterClick?: () => void;
+  isServiceProvider?: boolean; // Add context for LAB-R8
 }
 
 const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
@@ -29,13 +29,27 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
   hasCounterResponse = false,
   onActionComplete,
   showCounterOption = true,
-  onCounterClick
+  onCounterClick,
+  isServiceProvider = false
 }) => {
   const { session } = useSession();
   const currentUserId = session?.user?.id;
 
   // Determine if current user is the submitter
   const isSubmitter = currentUserId === card.submitted_by;
+
+  // Determine if action buttons should be shown
+  const shouldShowActions = () => {
+    // In LAB-R8 context (service provider view)
+    if (isServiceProvider) {
+      // Service providers should see actions on organizer-submitted proposals
+      return !isSubmitter;
+    }
+    
+    // In Modul8 context (organizer view)
+    // Organizers should see actions on service provider-submitted proposals
+    return !isSubmitter;
+  };
 
   // Status color mapping
   const getStatusColor = (status: string) => {
@@ -194,8 +208,8 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
           </div>
         )}
 
-        {/* Actions Section - Only show if not submitter and not locked */}
-        {!isSubmitter && (
+        {/* Actions Section - Show based on context and user role */}
+        {shouldShowActions() && (
           <div className="pt-4 border-t">
             <ProposalCardActions
               cardId={card.id}
@@ -205,7 +219,6 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
               onCounterClick={onCounterClick}
               hasCounterResponse={hasCounterResponse}
               submittedBy={card.submitted_by}
-              responseToCardId={card.response_to_card_id} // Pass this to detect initial vs counter proposals
             />
           </div>
         )}

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -18,6 +17,16 @@ const Index = () => {
           navigate("/labr8/setup", { replace: true });
         } else {
           navigate("/labr8/dashboard", { replace: true });
+        }
+        return;
+      }
+      
+      // If user is an organizer, redirect to organizer dashboard
+      if (currentUser.role === 'ORGANIZER') {
+        if (!currentUser.profile_complete) {
+          navigate("/profile/setup", { replace: true });
+        } else {
+          navigate("/organizer", { replace: true });
         }
         return;
       }
