@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { getServiceRequestById, getUserServiceProvider } from '@/services/modul8Service';
+import { getServiceRequest, getUserServiceProvider } from '@/services/modul8Service';
 import { getProposalCards, createCounterProposalFromCard } from '@/services/proposalCardService';
 import { ServiceRequest, ServiceProvider } from '@/types/modul8';
 import { ProposalCard } from '@/types/proposalCards';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Building2, DollarSign, Calendar, Clock, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import ProposalCardNew from '@/components/modul8/ProposalCardNew';
-import StructuredProposalForm from '@/components/modul8/StructuredProposalForm';
+import { StructuredProposalForm } from '@/components/modul8/StructuredProposalForm';
 
 const Labr8RequestDetails = () => {
   const { requestId } = useParams<{ requestId: string }>();
@@ -44,7 +45,7 @@ const Labr8RequestDetails = () => {
       setServiceProvider(provider);
 
       // Get service request
-      const serviceRequest = await getServiceRequestById(requestId);
+      const serviceRequest = await getServiceRequest(requestId);
       setRequest(serviceRequest);
 
       // Get proposal cards
