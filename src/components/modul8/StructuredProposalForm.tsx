@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Plus, X } from 'lucide-react';
+import { ServiceRequest } from '@/types/modul8';
 
 interface ProposalFormData {
   title: string;
@@ -18,24 +19,28 @@ interface ProposalFormData {
 }
 
 interface StructuredProposalFormProps {
+  serviceRequest?: ServiceRequest;
   onSubmit: (data: ProposalFormData) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
   initialData?: Partial<ProposalFormData>;
+  isCounterProposal?: boolean;
 }
 
 const StructuredProposalForm: React.FC<StructuredProposalFormProps> = ({
+  serviceRequest,
   onSubmit,
   onCancel,
   isSubmitting = false,
-  initialData
+  initialData,
+  isCounterProposal = false
 }) => {
   const [formData, setFormData] = useState<ProposalFormData>({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
+    title: initialData?.title || serviceRequest?.title || '',
+    description: initialData?.description || serviceRequest?.description || '',
     budgetMin: initialData?.budgetMin || 0,
     budgetMax: initialData?.budgetMax || 0,
-    timeline: initialData?.timeline || '',
+    timeline: initialData?.timeline || serviceRequest?.timeline || '',
     milestones: initialData?.milestones || ['']
   });
 
@@ -73,7 +78,14 @@ const StructuredProposalForm: React.FC<StructuredProposalFormProps> = ({
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>Service Request Details</CardTitle>
+        <CardTitle>
+          {isCounterProposal ? 'Counter Proposal' : 'Service Request Details'}
+        </CardTitle>
+        {serviceRequest && (
+          <p className="text-sm text-muted-foreground">
+            Responding to: {serviceRequest.title}
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
