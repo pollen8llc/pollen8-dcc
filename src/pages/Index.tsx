@@ -22,6 +22,16 @@ const Index = () => {
         return;
       }
       
+      // If user is an organizer, redirect to organizer dashboard
+      if (currentUser.role === 'ORGANIZER') {
+        if (!currentUser.profile_complete) {
+          navigate("/profile/setup", { replace: true });
+        } else {
+          navigate("/organizer", { replace: true });
+        }
+        return;
+      }
+      
       // For other users, check if profile is complete before redirecting
       if (!currentUser.profile_complete) {
         navigate("/profile/setup", { replace: true });

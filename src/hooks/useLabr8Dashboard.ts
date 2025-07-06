@@ -44,6 +44,7 @@ export const useLabr8Dashboard = (userId?: string) => {
     req.status === 'negotiating'
   );
   
+  // Include accepted and agreed requests in active projects
   const activeProjects = allRequests.filter(req => 
     req.status === 'agreed' || req.status === 'in_progress'
   );
