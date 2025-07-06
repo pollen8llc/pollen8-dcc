@@ -16,6 +16,7 @@ interface ProposalCardActionsProps {
   onCounterClick?: () => void;
   hasCounterResponse?: boolean;
   submittedBy?: string;
+  responseToCardId?: string; // Add this to detect initial vs counter proposals
 }
 
 export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
@@ -25,12 +26,16 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   showCounterOption = true,
   onCounterClick,
   hasCounterResponse = false,
-  submittedBy
+  submittedBy,
+  responseToCardId
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
   const { responses, loading: responsesLoading, acceptResponses, hasCurrentUserResponded } = useProposalCardResponses(cardId);
   const currentUserId = session?.user?.id;
+
+  // Check if this is an initial request (no response_to_card_id)
+  const isInitialRequest = !responseToCardId;
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
     console.log(`🔥 STARTING RESPONSE: ${responseType} for card ${cardId}`);
@@ -98,7 +103,8 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     hasCounterResponse,
     currentUserId: session?.user?.id,
     responsesLoading,
-    submittedBy
+    submittedBy,
+    isInitialRequest
   });
 
   // If still loading responses, show loading state
@@ -107,6 +113,16 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading...
+      </div>
+    );
+  }
+
+  // If card is locked (final status reached), hide buttons
+  if (isLocked) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <CheckCircle className="h-4 w-4" />
+        This proposal has been finalized
       </div>
     );
   }
@@ -176,9 +192,42 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // Default: Show action buttons - but check if this is an initial request or counter-proposal
-  console.log(`✅ Showing buttons for card ${cardId} - no responses found or ready for action`);
-  
+  // For initial requests: Only show Reject and Respond (no Accept)
+  if (isInitialRequest) {
+    console.log(`✅ Showing initial request buttons for card ${cardId} - reject and respond only`);
+    return (
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          onClick={() => handleResponse('reject')}
+          disabled={loading !== null}
+          variant="destructive"
+          size="sm"
+        >
+          {loading === 'reject' ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <XCircle className="h-4 w-4 mr-2" />
+          )}
+          {loading === 'reject' ? 'Rejecting...' : 'Reject'}
+        </Button>
+
+        {showCounterOption && (
+          <Button
+            onClick={handleCounterProposal}
+            disabled={loading !== null}
+            variant="outline"
+            size="sm"
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Respond
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  // For counter-proposals: Show all three options (Accept, Reject, Counter)
+  console.log(`✅ Showing all buttons for counter-proposal card ${cardId}`);
   return (
     <div className="flex gap-2 flex-wrap">
       <Button

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -85,6 +86,16 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
   // Don't show actions for agreement cards - they handle their own UI
   if (cardStatus === 'agreement') {
     return null;
+  }
+
+  // Don't show actions for locked cards (rejected, cancelled, etc.)
+  if (isLocked) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <CheckCircle className="h-4 w-4" />
+        This proposal has been responded to
+      </div>
+    );
   }
 
   // Check if other party has accepted but current user hasn't responded
