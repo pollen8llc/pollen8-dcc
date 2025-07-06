@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ interface FinalizationCardProps {
 
 const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, onActionComplete }) => {
   const { session } = useSession();
-  const [deelUrl, setDeelUrl] = useState(card.deel_contract_url || '');
+  const [deelUrl, setDeelUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const currentUserId = session?.user?.id;
 
@@ -47,10 +48,12 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
     try {
       setSubmitting(true);
-      // Persist the DEEL URL to the proposal card
+      // For now, we'll store this in the notes field until we add the column
+      const updatedNotes = `${card.notes || ''}\n\nDEEL Contract URL: ${deelUrl}`.trim();
+      
       const { error } = await supabase
         .from('modul8_proposal_cards')
-        .update({ deel_contract_url: deelUrl })
+        .update({ notes: updatedNotes })
         .eq('id', card.id);
       if (error) throw error;
       toast({
@@ -72,7 +75,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
   };
 
   return (
-    <Card className="mb-4 border-green-200 bg-green-50/50">
+    <Card className="mb-4 border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
@@ -219,19 +222,9 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
               <ExternalLink className="h-5 w-5 text-blue-600" />
               <h4 className="font-semibold text-blue-800">Waiting for Contract</h4>
             </div>
-            {card.deel_contract_url ? (
-              <Button
-                onClick={() => window.open(card.deel_contract_url, '_blank')}
-                className="bg-green-600 hover:bg-green-700 text-white mt-2"
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                View DEEL Contract
-              </Button>
-            ) : (
-              <p className="text-sm text-blue-700">
-                The organizer is preparing the DEEL contract. You will receive the agreement link shortly to review and sign.
-              </p>
-            )}
+            <p className="text-sm text-blue-700">
+              The organizer is preparing the DEEL contract. You will receive the agreement link shortly to review and sign.
+            </p>
           </div>
         )}
       </CardContent>

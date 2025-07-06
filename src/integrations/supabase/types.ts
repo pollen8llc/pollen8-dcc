@@ -1077,6 +1077,7 @@ export type Database = {
           asset_links: Json | null
           card_number: number
           created_at: string
+          deel_contract_url: string | null
           id: string
           is_locked: boolean
           negotiated_budget_range: Json | null
@@ -1098,6 +1099,7 @@ export type Database = {
           asset_links?: Json | null
           card_number: number
           created_at?: string
+          deel_contract_url?: string | null
           id?: string
           is_locked?: boolean
           negotiated_budget_range?: Json | null
@@ -1119,6 +1121,7 @@ export type Database = {
           asset_links?: Json | null
           card_number?: number
           created_at?: string
+          deel_contract_url?: string | null
           id?: string
           is_locked?: boolean
           negotiated_budget_range?: Json | null

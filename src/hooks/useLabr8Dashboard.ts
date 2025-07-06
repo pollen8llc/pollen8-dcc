@@ -1,54 +1,56 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { getUserServiceProvider, getProviderServiceRequests, getAvailableServiceRequestsForProvider } from "@/services/modul8Service";
-import { ServiceProvider, ServiceRequest } from "@/types/modul8";
+import { useState, useEffect } from 'react';
+import { ServiceRequest } from '@/types/modul8';
+import { getUserServiceProvider, getServiceProviderRequests } from '@/services/modul8Service';
 
-/**
- * Consolidated dashboard logic for LAB-R8 provider.
- */
-export function useLabr8Dashboard(userId?: string) {
-  const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
-  const [assignedRequests, setAssignedRequests] = useState<ServiceRequest[]>([]);
-  const [incomingRequests, setIncomingRequests] = useState<ServiceRequest[]>([]);
+export const useLabr8Dashboard = (userId?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [serviceProvider, setServiceProvider] = useState(null);
+  const [allRequests, setAllRequests] = useState<ServiceRequest[]>([]);
 
-  const loadData = useCallback(async () => {
+  const loadData = async () => {
     if (!userId) return;
-    setLoading(true);
-    setError(null);
+    
     try {
+      setLoading(true);
+      setError(null);
+      
       const provider = await getUserServiceProvider(userId);
       setServiceProvider(provider);
-      if (!provider) return;
-      const assigned = await getProviderServiceRequests(provider.id);
-      const available = await getAvailableServiceRequestsForProvider(provider.id);
-      setAssignedRequests(assigned);
-      setIncomingRequests(available);
-    } catch (err: any) {
-      setError(
-        err?.message ? String(err.message) : "Failed to load dashboard data"
-      );
+      
+      if (provider) {
+        const requests = await getServiceProviderRequests(provider.id);
+        setAllRequests(requests || []);
+      }
+    } catch (err) {
+      console.error('Error loading LAB-R8 dashboard data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  };
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, [userId]);
 
-  const reload = () => loadData();
-
-  // Categorization
-  const pendingRequests = incomingRequests.filter(r => r.status === "pending");
-  const negotiatingRequests = assignedRequests.filter(
-    r => r.status === "negotiating" || r.status === "assigned"
+  // Filter requests by status - include accepted and agreed states
+  const pendingRequests = allRequests.filter(req => 
+    req.status === 'open' || req.status === 'pending'
   );
-  const activeProjects = assignedRequests.filter(r =>
-    ["agreed", "in_progress"].includes(r.status)
+  
+  const negotiatingRequests = allRequests.filter(req => 
+    req.status === 'negotiating' || req.status === 'in_discussion'
   );
-  const completedProjects = assignedRequests.filter(r => r.status === "completed");
+  
+  const activeProjects = allRequests.filter(req => 
+    req.status === 'agreed' || req.status === 'in_progress' || req.status === 'accepted'
+  );
+  
+  const completedProjects = allRequests.filter(req => 
+    req.status === 'completed'
+  );
 
   return {
     loading,
@@ -58,6 +60,6 @@ export function useLabr8Dashboard(userId?: string) {
     negotiatingRequests,
     activeProjects,
     completedProjects,
-    reload,
+    reload: loadData
   };
-}
+};
