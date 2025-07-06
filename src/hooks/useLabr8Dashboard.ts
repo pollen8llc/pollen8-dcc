@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ServiceRequest } from '@/types/modul8';
 import { getUserServiceProvider, getProviderServiceRequests } from '@/services/modul8Service';
@@ -44,9 +43,9 @@ export const useLabr8Dashboard = (userId?: string) => {
     req.status === 'negotiating'
   );
   
-  // Include accepted and agreed requests in active projects
+  // Include accepted, agreed, and in_progress requests in active projects
   const activeProjects = allRequests.filter(req => 
-    req.status === 'agreed' || req.status === 'in_progress'
+    req.status === 'accepted' || req.status === 'agreed' || req.status === 'in_progress'
   );
   
   const completedProjects = allRequests.filter(req => 
