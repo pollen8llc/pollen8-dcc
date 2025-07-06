@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { ServiceRequest } from '@/types/modul8';
-import { getUserServiceProvider, getServiceProviderRequests } from '@/services/modul8Service';
+import { getUserServiceProvider, getProviderServiceRequests } from '@/services/modul8Service';
 
 export const useLabr8Dashboard = (userId?: string) => {
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ export const useLabr8Dashboard = (userId?: string) => {
       setServiceProvider(provider);
       
       if (provider) {
-        const requests = await getServiceProviderRequests(provider.id);
+        const requests = await getProviderServiceRequests(provider.id);
         setAllRequests(requests || []);
       }
     } catch (err) {
@@ -35,17 +35,17 @@ export const useLabr8Dashboard = (userId?: string) => {
     loadData();
   }, [userId]);
 
-  // Filter requests by status - include accepted and agreed states
+  // Filter requests by status - using correct status values
   const pendingRequests = allRequests.filter(req => 
-    req.status === 'open' || req.status === 'pending'
+    req.status === 'pending' || req.status === 'assigned'
   );
   
   const negotiatingRequests = allRequests.filter(req => 
-    req.status === 'negotiating' || req.status === 'in_discussion'
+    req.status === 'negotiating'
   );
   
   const activeProjects = allRequests.filter(req => 
-    req.status === 'agreed' || req.status === 'in_progress' || req.status === 'accepted'
+    req.status === 'agreed' || req.status === 'in_progress'
   );
   
   const completedProjects = allRequests.filter(req => 
