@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
@@ -22,7 +21,7 @@ const Index = () => {
         return;
       }
       
-      // If user is an organizer, redirect to organizer dashboard
+      // If user is an organizer, redirect to /organizer
       if (currentUser.role === 'ORGANIZER') {
         if (!currentUser.profile_complete) {
           navigate("/profile/setup", { replace: true });
