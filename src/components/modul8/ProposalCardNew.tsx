@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,12 +43,12 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
   const shouldShowActions = () => {
     // In LAB-R8 context (service provider view)
     if (isServiceProvider) {
-      // Service providers should see actions on organizer-submitted proposals
+      // Service providers should see actions on organizer-submitted proposals (cards they didn't submit)
       return !isSubmitter;
     }
     
     // In Modul8 context (organizer view)
-    // Organizers should see actions on service provider-submitted proposals
+    // Organizers should see actions on service provider-submitted proposals (cards they didn't submit)
     return !isSubmitter;
   };
 
@@ -62,6 +63,15 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+
+  console.log(`🔍 ProposalCardNew for card ${card.id}:`, {
+    isServiceProvider,
+    isSubmitter,
+    shouldShowActions: shouldShowActions(),
+    currentUserId,
+    cardSubmittedBy: card.submitted_by,
+    cardStatus: card.status
+  });
 
   return (
     <Card className="mb-4">

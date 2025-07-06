@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { getServiceRequest, getUserServiceProvider } from '@/services/modul8Service';
+import { getServiceRequestById, getUserServiceProvider } from '@/services/modul8Service';
 import { getProposalCards, createCounterProposalFromCard } from '@/services/proposalCardService';
 import { ServiceRequest, ServiceProvider } from '@/types/modul8';
 import { ProposalCard } from '@/types/proposalCards';
@@ -13,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Building2, DollarSign, Calendar, Clock, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import ProposalCardNew from '@/components/modul8/ProposalCardNew';
-import { StructuredProposalForm } from '@/components/modul8/StructuredProposalForm';
+import StructuredProposalForm from '@/components/modul8/StructuredProposalForm';
 
 const Labr8RequestDetails = () => {
   const { requestId } = useParams<{ requestId: string }>();
@@ -44,8 +43,8 @@ const Labr8RequestDetails = () => {
       }
       setServiceProvider(provider);
 
-      // Get service request
-      const serviceRequest = await getServiceRequest(requestId);
+      // Get service request - using getServiceRequestById instead of getServiceRequest
+      const serviceRequest = await getServiceRequestById(requestId);
       setRequest(serviceRequest);
 
       // Get proposal cards
@@ -238,7 +237,7 @@ const Labr8RequestDetails = () => {
                 card={card}
                 onActionComplete={loadRequestData}
                 onCounterClick={() => handleCounterProposal(card.id)}
-                isServiceProvider={true} // Pass LAB-R8 context
+                isServiceProvider={true} // Pass LAB-R8 context so buttons show for service providers
               />
             ))
           )}
@@ -249,13 +248,11 @@ const Labr8RequestDetails = () => {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-background rounded-lg max-w-4xl max-h-[90vh] overflow-y-auto w-full">
               <StructuredProposalForm
-                serviceRequest={request}
                 onSubmit={handleProposalSubmit}
                 onCancel={() => {
                   setShowProposalForm(false);
                   setCounteringCardId(null);
                 }}
-                isCounterProposal={!!counteringCardId}
               />
             </div>
           </div>
