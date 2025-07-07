@@ -32,14 +32,33 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
-  // Extract DEEL URL from notes if it exists
+  // Extract DEEL URL from notes with more flexible pattern matching
   const extractDeelUrl = (notes: string | null) => {
     if (!notes) return null;
-    const deelUrlMatch = notes.match(/DEEL Contract URL:\s*(https?:\/\/[^\s\n]+)/);
-    return deelUrlMatch ? deelUrlMatch[1] : null;
+    console.log('🔍 Checking notes for DEEL URL:', notes);
+    
+    // Try multiple patterns to catch different URL formats
+    const patterns = [
+      /DEEL Contract URL:\s*(https?:\/\/[^\s\n]+)/i,
+      /deel.*?url:\s*(https?:\/\/[^\s\n]+)/i,
+      /contract.*?url:\s*(https?:\/\/[^\s\n]+)/i,
+      /(https?:\/\/(?:app\.)?deel\.com[^\s\n]*)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = notes.match(pattern);
+      if (match) {
+        console.log('✅ Found DEEL URL:', match[1]);
+        return match[1];
+      }
+    }
+    
+    console.log('❌ No DEEL URL found in notes');
+    return null;
   };
 
   const existingDeelUrl = extractDeelUrl(card.notes);
+  console.log('🔗 Existing DEEL URL:', existingDeelUrl);
 
   const handleGoToDeel = () => {
     window.open('https://app.deel.com', '_blank');
@@ -63,6 +82,8 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
     try {
       setSubmitting(true);
+      console.log('💾 Submitting DEEL URL:', deelUrl);
+      
       // Store the DEEL URL in the notes field
       const updatedNotes = `${card.notes || ''}\n\nDEEL Contract URL: ${deelUrl}`.trim();
       
@@ -70,16 +91,28 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
         .from('modul8_proposal_cards')
         .update({ notes: updatedNotes })
         .eq('id', card.id);
-      if (error) throw error;
+        
+      if (error) {
+        console.error('❌ Error updating card:', error);
+        throw error;
+      }
+      
+      console.log('✅ DEEL URL submitted successfully');
       
       toast({
         title: "DEEL Link Submitted",
         description: "The agreement link has been sent to the service provider",
         variant: "default"
       });
-      if (onActionComplete) onActionComplete();
+      
+      // Reset form and trigger refresh
+      setDeelUrl('');
+      if (onActionComplete) {
+        console.log('🔄 Triggering data refresh...');
+        onActionComplete();
+      }
     } catch (error) {
-      console.error('Error submitting DEEL link:', error);
+      console.error('❌ Error submitting DEEL link:', error);
       toast({
         title: "Error",
         description: "Failed to submit DEEL link. Please try again.",
@@ -91,21 +124,21 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
   };
 
   return (
-    <Card className="mb-4 border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <Card className="mb-4 border-2 border-gray-700 bg-gray-900/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-200">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs bg-white/50">
+              <Badge variant="outline" className="text-xs bg-gray-800/50 border-gray-600 text-gray-300">
                 Card #{card.card_number}
               </Badge>
-              <Badge className="bg-green-100 text-green-800 border-green-300">
+              <Badge className="bg-emerald-600/20 text-emerald-300 border-emerald-500/30">
                 Agreement Finalization
               </Badge>
             </div>
           </div>
           
-          <div className="text-right text-sm text-muted-foreground">
+          <div className="text-right text-sm text-gray-400">
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               {new Date(card.created_at).toLocaleDateString()}
@@ -116,23 +149,23 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
       <CardContent className="space-y-6">
         {/* Success Message */}
-        <div className="bg-green-100 border border-green-200 rounded-lg p-4">
+        <div className="bg-emerald-900/30 border border-emerald-600/30 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <h3 className="font-semibold text-green-800">Agreement Reached!</h3>
+            <CheckCircle className="h-5 w-5 text-emerald-400" />
+            <h3 className="font-semibold text-emerald-300">Agreement Reached!</h3>
           </div>
-          <p className="text-sm text-green-700">
+          <p className="text-sm text-emerald-200">
             Both parties have accepted the proposal. The next step is to create and execute the contract via DEEL.
           </p>
         </div>
 
         {/* DEEL URL View Button - Show if URL exists */}
         {existingDeelUrl && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-blue-800 mb-1">DEEL Contract Ready</h4>
-                <p className="text-sm text-blue-700">The contract is ready for review and signing.</p>
+                <h4 className="font-semibold text-blue-300 mb-1">DEEL Contract Ready</h4>
+                <p className="text-sm text-blue-200">The contract is ready for review and signing.</p>
               </div>
               <Button
                 onClick={handleViewDeel}
@@ -147,8 +180,8 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
         {/* Negotiated Terms Summary */}
         {(card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline) && (
-          <div className="bg-white/60 border border-green-100 p-4 rounded-lg space-y-3">
-            <h4 className="font-medium text-sm flex items-center gap-2">
+          <div className="bg-gray-800/50 border border-gray-700 p-4 rounded-lg space-y-3">
+            <h4 className="font-medium text-sm flex items-center gap-2 text-gray-300">
               <User className="h-4 w-4" />
               Agreed Terms
             </h4>
@@ -156,22 +189,22 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
             <div className="space-y-3">
               {card.negotiated_title && (
                 <div>
-                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Project Title</h5>
-                  <p className="text-sm">{card.negotiated_title}</p>
+                  <h5 className="font-medium text-xs text-gray-400 uppercase">Project Title</h5>
+                  <p className="text-sm text-gray-200">{card.negotiated_title}</p>
                 </div>
               )}
               
               {card.negotiated_description && (
                 <div>
-                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Description</h5>
-                  <p className="text-sm">{card.negotiated_description}</p>
+                  <h5 className="font-medium text-xs text-gray-400 uppercase">Description</h5>
+                  <p className="text-sm text-gray-200">{card.negotiated_description}</p>
                 </div>
               )}
 
               {card.negotiated_budget_range && (
                 <div>
-                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Budget</h5>
-                  <p className="text-sm">
+                  <h5 className="font-medium text-xs text-gray-400 uppercase">Budget</h5>
+                  <p className="text-sm text-gray-200">
                     {card.negotiated_budget_range.min && card.negotiated_budget_range.max 
                       ? `${card.negotiated_budget_range.currency} ${card.negotiated_budget_range.min.toLocaleString()} - ${card.negotiated_budget_range.max.toLocaleString()}`
                       : card.negotiated_budget_range.min 
@@ -184,8 +217,8 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
               {card.negotiated_timeline && (
                 <div>
-                  <h5 className="font-medium text-xs text-muted-foreground uppercase">Timeline</h5>
-                  <p className="text-sm">{card.negotiated_timeline}</p>
+                  <h5 className="font-medium text-xs text-gray-400 uppercase">Timeline</h5>
+                  <p className="text-sm text-gray-200">{card.negotiated_timeline}</p>
                 </div>
               )}
             </div>
@@ -194,10 +227,10 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
         {/* DEEL Integration Section - Only for Organizers */}
         {isOrganizer && !existingDeelUrl && (
-          <div className="space-y-4 border-t border-green-200 pt-4">
+          <div className="space-y-4 border-t border-gray-700 pt-4">
             <div className="flex items-center gap-2 mb-3">
-              <ExternalLink className="h-5 w-5 text-blue-600" />
-              <h4 className="font-semibold">Contract Execution via DEEL</h4>
+              <ExternalLink className="h-5 w-5 text-blue-400" />
+              <h4 className="font-semibold text-gray-200">Contract Execution via DEEL</h4>
             </div>
             
             <div className="space-y-4">
@@ -209,30 +242,30 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Go to DEEL
                 </Button>
-                <div className="text-sm text-muted-foreground self-center">
+                <div className="text-sm text-gray-400 self-center">
                   Create the contract agreement on DEEL platform
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="deel-url" className="text-sm font-medium">
+                <Label htmlFor="deel-url" className="text-sm font-medium text-gray-300">
                   DEEL Agreement URL
                 </Label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                     <Input
                       id="deel-url"
                       placeholder="https://app.deel.com/contracts/..."
                       value={deelUrl}
                       onChange={(e) => setDeelUrl(e.target.value)}
-                      className="pl-10 bg-white/70 border-green-200"
+                      className="pl-10 bg-gray-800/50 border-gray-600 text-gray-200 placeholder-gray-500"
                     />
                   </div>
                   <Button
                     onClick={handleSubmitDeelLink}
                     disabled={submitting || !deelUrl.trim()}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
                   >
                     {submitting ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -242,7 +275,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
                     {submitting ? 'Sending...' : 'Send to Provider'}
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500">
                   Paste the DEEL contract URL to send it to the service provider for signing
                 </p>
               </div>
@@ -252,12 +285,12 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
         {/* Service Provider View */}
         {!isOrganizer && !existingDeelUrl && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
-              <ExternalLink className="h-5 w-5 text-blue-600" />
-              <h4 className="font-semibold text-blue-800">Waiting for Contract</h4>
+              <ExternalLink className="h-5 w-5 text-blue-400" />
+              <h4 className="font-semibold text-blue-300">Waiting for Contract</h4>
             </div>
-            <p className="text-sm text-blue-700">
+            <p className="text-sm text-blue-200">
               The organizer is preparing the DEEL contract. You will receive the agreement link shortly to review and sign.
             </p>
           </div>

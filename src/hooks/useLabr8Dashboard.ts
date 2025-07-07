@@ -10,21 +10,28 @@ export const useLabr8Dashboard = (userId?: string) => {
   const [allRequests, setAllRequests] = useState<ServiceRequest[]>([]);
 
   const loadData = async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.log('❌ useLabr8Dashboard: No userId provided');
+      return;
+    }
     
     try {
       setLoading(true);
       setError(null);
       
+      console.log('🔍 useLabr8Dashboard: Loading data for user:', userId);
+      
       const provider = await getUserServiceProvider(userId);
+      console.log('👤 useLabr8Dashboard: Service provider found:', provider?.id);
       setServiceProvider(provider);
       
       if (provider) {
         const requests = await getProviderServiceRequests(provider.id);
+        console.log('📋 useLabr8Dashboard: Requests loaded:', requests?.length || 0);
         setAllRequests(requests || []);
       }
     } catch (err) {
-      console.error('Error loading LAB-R8 dashboard data:', err);
+      console.error('❌ Error loading LAB-R8 dashboard data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
     } finally {
       setLoading(false);
@@ -52,6 +59,14 @@ export const useLabr8Dashboard = (userId?: string) => {
   const completedProjects = allRequests.filter(req => 
     req.status === 'completed'
   );
+
+  console.log('📊 useLabr8Dashboard: Request distribution:', {
+    total: allRequests.length,
+    pending: pendingRequests.length,
+    negotiating: negotiatingRequests.length,
+    active: activeProjects.length,
+    completed: completedProjects.length
+  });
 
   return {
     loading,

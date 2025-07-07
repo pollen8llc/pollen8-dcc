@@ -12,8 +12,15 @@ const Index = () => {
   
   useEffect(() => {
     if (!isLoading && currentUser) {
+      console.log('🔍 Index.tsx - Current user:', {
+        role: currentUser.role,
+        profileComplete: currentUser.profile_complete,
+        userId: currentUser.id
+      });
+      
       // If user is a service provider, redirect to LAB-R8
       if (currentUser.role === 'SERVICE_PROVIDER') {
+        console.log('🚀 Redirecting SERVICE_PROVIDER to LAB-R8');
         if (!currentUser.profile_complete) {
           navigate("/labr8/setup", { replace: true });
         } else {
@@ -24,6 +31,7 @@ const Index = () => {
       
       // If user is an organizer, redirect to /organizer
       if (currentUser.role === 'ORGANIZER') {
+        console.log('🚀 Redirecting ORGANIZER to /organizer');
         if (!currentUser.profile_complete) {
           navigate("/profile/setup", { replace: true });
         } else {
@@ -34,9 +42,11 @@ const Index = () => {
       
       // For other users, check if profile is complete before redirecting
       if (!currentUser.profile_complete) {
+        console.log('🚀 Redirecting to profile setup - incomplete profile');
         navigate("/profile/setup", { replace: true });
       } else {
         // If user is logged in and profile is complete, redirect to knowledge resources
+        console.log('🚀 Redirecting to knowledge resources - default fallback');
         navigate("/knowledge/resources", { replace: true });
       }
     }
