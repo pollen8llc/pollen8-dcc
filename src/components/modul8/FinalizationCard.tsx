@@ -32,8 +32,23 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
+  // Extract DEEL URL from notes if it exists
+  const extractDeelUrl = (notes: string | null) => {
+    if (!notes) return null;
+    const deelUrlMatch = notes.match(/DEEL Contract URL:\s*(https?:\/\/[^\s\n]+)/);
+    return deelUrlMatch ? deelUrlMatch[1] : null;
+  };
+
+  const existingDeelUrl = extractDeelUrl(card.notes);
+
   const handleGoToDeel = () => {
     window.open('https://app.deel.com', '_blank');
+  };
+
+  const handleViewDeel = () => {
+    if (existingDeelUrl) {
+      window.open(existingDeelUrl, '_blank');
+    }
   };
 
   const handleSubmitDeelLink = async () => {
@@ -76,15 +91,15 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
   };
 
   return (
-    <Card className="mb-4 border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+    <Card className="mb-4 border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-sm hover:shadow-md transition-shadow duration-200">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs bg-white/50">
                 Card #{card.card_number}
               </Badge>
-              <Badge className="bg-green-100 text-green-800 border-green-200">
+              <Badge className="bg-green-100 text-green-800 border-green-300">
                 Agreement Finalization
               </Badge>
             </div>
@@ -111,9 +126,28 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
           </p>
         </div>
 
+        {/* DEEL URL View Button - Show if URL exists */}
+        {existingDeelUrl && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-blue-800 mb-1">DEEL Contract Ready</h4>
+                <p className="text-sm text-blue-700">The contract is ready for review and signing.</p>
+              </div>
+              <Button
+                onClick={handleViewDeel}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                VIEW DEEL
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Negotiated Terms Summary */}
         {(card.negotiated_title || card.negotiated_description || card.negotiated_budget_range || card.negotiated_timeline) && (
-          <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+          <div className="bg-white/60 border border-green-100 p-4 rounded-lg space-y-3">
             <h4 className="font-medium text-sm flex items-center gap-2">
               <User className="h-4 w-4" />
               Agreed Terms
@@ -159,8 +193,8 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
         )}
 
         {/* DEEL Integration Section - Only for Organizers */}
-        {isOrganizer && (
-          <div className="space-y-4 border-t pt-4">
+        {isOrganizer && !existingDeelUrl && (
+          <div className="space-y-4 border-t border-green-200 pt-4">
             <div className="flex items-center gap-2 mb-3">
               <ExternalLink className="h-5 w-5 text-blue-600" />
               <h4 className="font-semibold">Contract Execution via DEEL</h4>
@@ -192,7 +226,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
                       placeholder="https://app.deel.com/contracts/..."
                       value={deelUrl}
                       onChange={(e) => setDeelUrl(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 bg-white/70 border-green-200"
                     />
                   </div>
                   <Button
@@ -217,7 +251,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
         )}
 
         {/* Service Provider View */}
-        {!isOrganizer && (
+        {!isOrganizer && !existingDeelUrl && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <ExternalLink className="h-5 w-5 text-blue-600" />
