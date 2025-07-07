@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,7 +48,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
     try {
       setSubmitting(true);
-      // For now, we'll store this in the notes field until we add the column
+      // Store the DEEL URL in the notes field
       const updatedNotes = `${card.notes || ''}\n\nDEEL Contract URL: ${deelUrl}`.trim();
       
       const { error } = await supabase
@@ -55,6 +56,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
         .update({ notes: updatedNotes })
         .eq('id', card.id);
       if (error) throw error;
+      
       toast({
         title: "DEEL Link Submitted",
         description: "The agreement link has been sent to the service provider",
