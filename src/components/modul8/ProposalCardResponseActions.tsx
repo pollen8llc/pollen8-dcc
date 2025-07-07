@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -6,6 +5,7 @@ import { respondToProposalCard } from '@/services/proposalCardService';
 import { CreateProposalResponseData, ProposalCardResponse } from '@/types/proposalCards';
 import { CheckCircle, XCircle, MessageSquare, Loader2, Clock } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
+import { assignServiceProvider } from '@/services/serviceRequestService';
 
 interface ProposalCardResponseActionsProps {
   cardId: string;
@@ -18,6 +18,8 @@ interface ProposalCardResponseActionsProps {
   onActionComplete: () => void;
   showCounterOption?: boolean;
   onCounterClick?: () => void;
+  requestId: string;
+  providerId: string;
 }
 
 export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsProps> = ({
@@ -30,7 +32,9 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
   hasCurrentUserResponded,
   onActionComplete,
   showCounterOption = true,
-  onCounterClick
+  onCounterClick,
+  requestId,
+  providerId
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
@@ -60,6 +64,10 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
       });
 
       onActionComplete();
+
+      if (responseType === 'accept' && !acceptResponses.some(r => r.responded_by === currentUserId)) {
+        await assignServiceProvider(requestId, providerId);
+      }
     } catch (error) {
       console.error(`Error ${responseType}ing proposal:`, error);
       

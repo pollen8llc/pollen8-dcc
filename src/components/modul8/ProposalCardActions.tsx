@@ -6,6 +6,7 @@ import { CreateProposalResponseData } from '@/types/proposalCards';
 import { CheckCircle, XCircle, MessageSquare, Loader2, Clock } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { useProposalCardResponses } from '@/hooks/useProposalCardResponses';
+import { assignServiceProvider } from '@/services/serviceRequestService';
 
 interface ProposalCardActionsProps {
   cardId: string;
@@ -15,6 +16,8 @@ interface ProposalCardActionsProps {
   onCounterClick?: () => void;
   hasCounterResponse?: boolean;
   submittedBy?: string;
+  requestId?: string;
+  providerId?: string;
 }
 
 export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
@@ -24,7 +27,9 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   showCounterOption = true,
   onCounterClick,
   hasCounterResponse = false,
-  submittedBy
+  submittedBy,
+  requestId,
+  providerId
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
@@ -61,6 +66,10 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
 
       console.log('🔄 Calling onActionComplete to refresh data...');
       onActionComplete();
+
+      if (responseType === 'accept' && requestId && providerId) {
+        await assignServiceProvider(requestId, providerId);
+      }
     } catch (error) {
       console.error(`❌ Error ${responseType}ing proposal:`, error);
       console.error('Error details:', {
