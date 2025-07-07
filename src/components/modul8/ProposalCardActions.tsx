@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -6,7 +7,7 @@ import { CreateProposalResponseData } from '@/types/proposalCards';
 import { CheckCircle, XCircle, MessageSquare, Loader2, Clock } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { useProposalCardResponses } from '@/hooks/useProposalCardResponses';
-import { assignServiceProvider } from '@/services/serviceRequestService';
+import { assignServiceProvider, getServiceProviderByUserId } from '@/services/serviceRequestService';
 
 interface ProposalCardActionsProps {
   cardId: string;
@@ -67,8 +68,19 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
       console.log('🔄 Calling onActionComplete to refresh data...');
       onActionComplete();
 
-      if (responseType === 'accept' && requestId && providerId) {
-        await assignServiceProvider(requestId, providerId);
+      // Handle service provider assignment when accepting
+      if (responseType === 'accept' && requestId && currentUserId) {
+        try {
+          // Get the service provider ID for the current user
+          const serviceProvider = await getServiceProviderByUserId(currentUserId);
+          if (serviceProvider) {
+            await assignServiceProvider(requestId, serviceProvider.id);
+            console.log('✅ Service provider assigned successfully');
+          }
+        } catch (error) {
+          console.error('❌ Error assigning service provider:', error);
+          // Don't fail the whole operation if assignment fails
+        }
       }
     } catch (error) {
       console.error(`❌ Error ${responseType}ing proposal:`, error);
