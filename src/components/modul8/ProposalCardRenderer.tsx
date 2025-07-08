@@ -9,7 +9,7 @@ interface ProposalCardRendererProps {
   card: ProposalCard;
   serviceRequest: ServiceRequest;
   onActionComplete: () => void;
-  onCounterClick?: (cardId: string) => void;
+  onCounterClick?: () => void;
 }
 
 const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
@@ -34,7 +34,6 @@ const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
   return (
     <ProposalCardNew
       card={card}
-      serviceRequest={serviceRequest}
       onActionComplete={onActionComplete}
       onCounterClick={onCounterClick}
     />

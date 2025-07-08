@@ -198,9 +198,8 @@ const Labr8RequestDetails = () => {
           {/* Main Content - Proposal Thread */}
           <div className="lg:col-span-3">
             <ProposalCardThread 
-              requestId={serviceRequest.id}
-              isServiceProvider={true}
               serviceRequest={serviceRequest}
+              onActionComplete={loadData}
             />
           </div>
         </div>

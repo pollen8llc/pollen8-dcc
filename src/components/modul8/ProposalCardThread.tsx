@@ -72,8 +72,8 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
     }
   };
 
-  const handleCounterClick = (cardId: string) => {
-    setShowCounterForm({ cardId: cardId, visible: true });
+  const handleCounterClick = () => {
+    // Handle counter click logic here
   };
 
   const handleCreateCounter = async (cardId: string, counterData: Omit<ProposalCard, 'id'>) => {
@@ -126,7 +126,6 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       <ProposalCardNew
         key={card.id}
         card={card}
-        serviceRequest={serviceRequest}
         onActionComplete={onActionComplete}
         onCounterClick={handleCounterClick}
       />
@@ -139,14 +138,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         renderProposalCard(card)
       ))}
 
-      {/* New Proposal Card Form */}
-      <ProposalCardNew
-        key="new"
-        serviceRequest={serviceRequest}
-        onCreate={handleCreateCard}
-        isLoading={isCreating}
-        onActionComplete={onActionComplete}
-      />
+      {/* TODO: Add new proposal card creation form here */}
     </div>
   );
 };
