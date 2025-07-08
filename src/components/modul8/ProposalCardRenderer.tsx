@@ -1,44 +1,44 @@
+
 import React from 'react';
 import { ProposalCard } from '@/types/proposalCards';
-import { AgreementCard } from './AgreementCard';
+import { ServiceRequest } from '@/types/modul8';
 import ProposalCardNew from './ProposalCardNew';
 import FinalizationCard from './FinalizationCard';
 
 interface ProposalCardRendererProps {
   card: ProposalCard;
+  serviceRequest: ServiceRequest;
   onActionComplete: () => void;
-  showCounterOption?: boolean;
-  onCounterClick?: () => void;
-  allCards?: ProposalCard[]; // New prop to pass all cards for checking counter responses
-  organizerId?: string;
+  onCounterClick?: (cardId: string) => void;
 }
 
-export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
+const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
   card,
+  serviceRequest,
   onActionComplete,
-  showCounterOption,
-  onCounterClick,
-  allCards = [],
-  organizerId
+  onCounterClick
 }) => {
-  // Check if there's a counter response to this card
-  const hasCounterResponse = allCards.some(
-    otherCard => otherCard.response_to_card_id === card.id
-  );
-
-  // Render finalization cards (agreement cards that need DEEL processing)
+  // Handle agreement cards specially
   if (card.status === 'agreement') {
-    return <FinalizationCard card={card} organizerId={organizerId} onActionComplete={onActionComplete} />;
+    return (
+      <FinalizationCard
+        card={card}
+        organizerId={serviceRequest.organizer?.user_id}
+        serviceProviderId={serviceRequest.service_provider?.user_id}
+        onActionComplete={onActionComplete}
+      />
+    );
   }
 
-  // Render regular proposal cards - ProposalCardNew has its own prop structure
+  // Regular proposal cards
   return (
     <ProposalCardNew
       card={card}
-      hasCounterResponse={hasCounterResponse}
+      serviceRequest={serviceRequest}
       onActionComplete={onActionComplete}
-      showCounterOption={showCounterOption}
       onCounterClick={onCounterClick}
     />
   );
 };
+
+export default ProposalCardRenderer;
