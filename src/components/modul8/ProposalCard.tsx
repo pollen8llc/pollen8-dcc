@@ -44,7 +44,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
       case 'countered':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
     }
   };
 

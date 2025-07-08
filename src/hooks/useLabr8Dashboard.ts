@@ -2,12 +2,14 @@
 import { useState, useEffect } from 'react';
 import { ServiceRequest } from '@/types/modul8';
 import { getUserServiceProvider, getProviderServiceRequests } from '@/services/modul8Service';
+import { getProposalCards } from '@/services/proposalCardService';
 
 export const useLabr8Dashboard = (userId?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [serviceProvider, setServiceProvider] = useState(null);
   const [allRequests, setAllRequests] = useState<ServiceRequest[]>([]);
+  const [requestsWithCards, setRequestsWithCards] = useState<{[key: string]: {hasPending: boolean, hasFinalization: boolean}}>({});
 
   const loadData = async () => {
     if (!userId) {
@@ -29,6 +31,21 @@ export const useLabr8Dashboard = (userId?: string) => {
         const requests = await getProviderServiceRequests(provider.id);
         console.log('📋 useLabr8Dashboard: Requests loaded:', requests?.length || 0);
         setAllRequests(requests || []);
+        
+        // Load proposal cards for each request to determine categorization
+        const cardsData: {[key: string]: {hasPending: boolean, hasFinalization: boolean}} = {};
+        for (const request of requests || []) {
+          try {
+            const cards = await getProposalCards(request.id);
+            const hasPendingCard = cards.some(card => card.status === 'pending');
+            const hasFinalizationCard = cards.some(card => card.status === 'agreement');
+            cardsData[request.id] = { hasPending: hasPendingCard, hasFinalization: hasFinalizationCard };
+          } catch (error) {
+            console.error(`Error loading cards for request ${request.id}:`, error);
+            cardsData[request.id] = { hasPending: false, hasFinalization: false };
+          }
+        }
+        setRequestsWithCards(cardsData);
       }
     } catch (err) {
       console.error('❌ Error loading LAB-R8 dashboard data:', err);
@@ -42,14 +59,20 @@ export const useLabr8Dashboard = (userId?: string) => {
     loadData();
   }, [userId]);
 
-  // Filter requests by status - using correct status values
-  const pendingRequests = allRequests.filter(req => 
-    req.status === 'pending' || req.status === 'assigned'
-  );
+  // Filter requests by status - with new logic for pending cards
+  const pendingRequests = allRequests.filter(req => {
+    const cardData = requestsWithCards[req.id];
+    // Include if status is pending/assigned AND does NOT have pending cards or has finalization card
+    return (req.status === 'pending' || req.status === 'assigned') && 
+           (!cardData?.hasPending || cardData?.hasFinalization);
+  });
   
-  const negotiatingRequests = allRequests.filter(req => 
-    req.status === 'negotiating'
-  );
+  const negotiatingRequests = allRequests.filter(req => {
+    const cardData = requestsWithCards[req.id];
+    // Include if status is negotiating OR has pending cards without finalization card
+    return req.status === 'negotiating' || 
+           (cardData?.hasPending && !cardData?.hasFinalization);
+  });
   
   // Include accepted, agreed, and in_progress requests in active projects
   const activeProjects = allRequests.filter(req => 

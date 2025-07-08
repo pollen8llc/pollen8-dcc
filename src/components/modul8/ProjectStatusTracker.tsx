@@ -29,7 +29,7 @@ const ProjectStatusTracker: React.FC<ProjectStatusTrackerProps> = ({
       case 'pending':
         return {
           icon: <Clock className="h-5 w-5" />,
-          color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+          color: 'bg-blue-100 text-blue-800 border-blue-200',
           progress: 10,
           description: 'Request created, awaiting provider response'
         };

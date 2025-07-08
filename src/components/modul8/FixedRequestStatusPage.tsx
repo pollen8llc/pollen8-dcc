@@ -105,7 +105,7 @@ const FixedRequestStatusPage = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'negotiating':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'agreed':
