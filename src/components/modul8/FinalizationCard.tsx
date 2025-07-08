@@ -21,52 +21,28 @@ import { supabase } from '@/integrations/supabase/client';
 interface FinalizationCardProps {
   card: ProposalCard;
   organizerId?: string;
-  serviceProviderId?: string;
   onActionComplete?: () => void;
 }
 
-const FinalizationCard: React.FC<FinalizationCardProps> = ({ 
-  card, 
-  organizerId, 
-  serviceProviderId,
-  onActionComplete 
-}) => {
+const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, onActionComplete }) => {
   const { session } = useSession();
   const [deelUrl, setDeelUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const currentUserId = session?.user?.id;
 
-  // Improved role detection logic
-  console.log('🔍 FinalizationCard - Role Detection Debug:', {
-    currentUserId,
-    organizerId,
-    serviceProviderId,
-    cardSubmittedBy: card.submitted_by
-  });
+  const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
-  // Check if current user is the organizer by matching with organizerId prop
-  const isCurrentUserOrganizer = organizerId && currentUserId === organizerId;
-  
-  // Check if current user is the service provider by matching with serviceProviderId prop
-  const isCurrentUserServiceProvider = serviceProviderId && currentUserId === serviceProviderId;
-
-  console.log('👤 FinalizationCard - User Role Status:', {
-    isCurrentUserOrganizer,
-    isCurrentUserServiceProvider
-  });
-
-  // Extract DEEL URL from notes with improved pattern matching
+  // Extract DEEL URL from notes with more flexible pattern matching
   const extractDeelUrl = (notes: string | null) => {
     if (!notes) return null;
     console.log('🔍 Checking notes for DEEL URL:', notes);
     
-    // Enhanced patterns to catch different URL formats
+    // Try multiple patterns to catch different URL formats
     const patterns = [
       /DEEL Contract URL:\s*(https?:\/\/[^\s\n]+)/i,
       /deel.*?url:\s*(https?:\/\/[^\s\n]+)/i,
       /contract.*?url:\s*(https?:\/\/[^\s\n]+)/i,
-      /(https?:\/\/(?:app\.)?deel\.com[^\s\n]*)/i,
-      /(https?:\/\/[^\s\n]*deel[^\s\n]*)/i  // Catch any URL containing 'deel'
+      /(https?:\/\/(?:app\.)?deel\.com[^\s\n]*)/i
     ];
     
     for (const pattern of patterns) {
@@ -104,31 +80,16 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({
       return;
     }
 
-    if (!isCurrentUserOrganizer) {
-      toast({
-        title: "Permission Denied",
-        description: "Only organizers can submit DEEL contract URLs",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       setSubmitting(true);
       console.log('💾 Submitting DEEL URL:', deelUrl);
       
-      // Store the DEEL URL in the notes field with clear formatting
-      const deelUrlEntry = `\n\nDEEL Contract URL: ${deelUrl}`;
-      const updatedNotes = (card.notes || '') + deelUrlEntry;
-      
-      console.log('📝 Updating notes to:', updatedNotes);
+      // Store the DEEL URL in the notes field
+      const updatedNotes = `${card.notes || ''}\n\nDEEL Contract URL: ${deelUrl}`.trim();
       
       const { error } = await supabase
         .from('modul8_proposal_cards')
-        .update({ 
-          notes: updatedNotes,
-          updated_at: new Date().toISOString()
-        })
+        .update({ notes: updatedNotes })
         .eq('id', card.id);
         
       if (error) {
@@ -265,7 +226,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({
         )}
 
         {/* DEEL Integration Section - Only for Organizers */}
-        {isCurrentUserOrganizer && !existingDeelUrl && (
+        {isOrganizer && !existingDeelUrl && (
           <div className="space-y-4 border-t border-gray-700 pt-4">
             <div className="flex items-center gap-2 mb-3">
               <ExternalLink className="h-5 w-5 text-blue-400" />
@@ -323,7 +284,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({
         )}
 
         {/* Service Provider View */}
-        {isCurrentUserServiceProvider && !existingDeelUrl && (
+        {!isOrganizer && !existingDeelUrl && (
           <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <ExternalLink className="h-5 w-5 text-blue-400" />
@@ -332,19 +293,6 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({
             <p className="text-sm text-blue-200">
               The organizer is preparing the DEEL contract. You will receive the agreement link shortly to review and sign.
             </p>
-          </div>
-        )}
-
-        {/* Debug Information - Remove in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="bg-gray-800/30 border border-gray-600/30 rounded-lg p-3 text-xs">
-            <div className="text-gray-400">Debug Info:</div>
-            <div className="text-gray-300">Current User: {currentUserId}</div>
-            <div className="text-gray-300">Organizer ID: {organizerId}</div>
-            <div className="text-gray-300">Service Provider ID: {serviceProviderId}</div>
-            <div className="text-gray-300">Is Organizer: {isCurrentUserOrganizer ? 'Yes' : 'No'}</div>
-            <div className="text-gray-300">Is Service Provider: {isCurrentUserServiceProvider ? 'Yes' : 'No'}</div>
-            <div className="text-gray-300">Existing DEEL URL: {existingDeelUrl || 'None'}</div>
           </div>
         )}
       </CardContent>
