@@ -162,16 +162,35 @@ const createFinalizationCard = async (originalCardId: string): Promise<void> => 
       throw new Error(`Failed to fetch original proposal: ${fetchError.message}`);
     }
 
-    // Get the service provider ID for the user who submitted the proposal
-    const { data: serviceProvider, error: providerError } = await supabase
-      .from('modul8_service_providers')
-      .select('id')
-      .eq('user_id', originalCard.submitted_by)
+    // Get the service request to find the correct service provider
+    const { data: serviceRequest, error: requestError } = await supabase
+      .from('modul8_service_requests')
+      .select('service_provider_id, organizer_id')
+      .eq('id', originalCard.request_id)
       .single();
 
-    if (providerError) {
-      console.error('Error finding service provider:', providerError);
-      throw new Error(`Failed to find service provider for user: ${originalCard.submitted_by}`);
+    if (requestError) {
+      throw new Error(`Failed to fetch service request: ${requestError.message}`);
+    }
+
+    // Determine the service provider ID - either from the request or find it based on context
+    let serviceProviderId = serviceRequest.service_provider_id;
+    
+    if (!serviceProviderId) {
+      // Try to find service provider based on the proposal submitter
+      const { data: serviceProvider, error: providerError } = await supabase
+        .from('modul8_service_providers')
+        .select('id')
+        .eq('user_id', originalCard.submitted_by)
+        .single();
+
+      if (providerError || !serviceProvider) {
+        console.warn('Service provider not found for user:', originalCard.submitted_by);
+        // Continue without service provider assignment - the agreement can still be created
+        serviceProviderId = null;
+      } else {
+        serviceProviderId = serviceProvider.id;
+      }
     }
 
     // Get next card number
@@ -212,18 +231,27 @@ const createFinalizationCard = async (originalCardId: string): Promise<void> => 
       })
       .eq('id', originalCardId);
 
-    // Update the service request with both status and service provider assignment
+    // Update the service request status and optionally assign service provider
+    const updateData: any = {
+      status: 'agreed',
+      is_agreement_locked: true,
+      updated_at: new Date().toISOString()
+    };
+
+    // Only update service provider if we found one
+    if (serviceProviderId) {
+      updateData.service_provider_id = serviceProviderId;
+      console.log('✅ Service provider assigned:', serviceProviderId);
+    } else {
+      console.log('⚠️ No service provider assigned - agreement created without provider assignment');
+    }
+
     await supabase
       .from('modul8_service_requests')
-      .update({ 
-        status: 'agreed',
-        service_provider_id: serviceProvider.id,
-        is_agreement_locked: true,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', originalCard.request_id);
 
-    console.log('✅ Finalization card created and service provider assigned successfully');
+    console.log('✅ Finalization card created successfully');
   } catch (error) {
     console.error('❌ Error creating finalization card:', error);
     throw error;

@@ -67,6 +67,13 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
 
       console.log('🔄 Calling onActionComplete to refresh data...');
       onActionComplete();
+      
+      // Also trigger a refresh of the responses data immediately
+      if (typeof onActionComplete === 'function') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
 
       // Handle service provider assignment when accepting
       if (responseType === 'accept' && requestId && currentUserId) {
@@ -144,9 +151,9 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   // If the current user has already responded, hide action buttons
   if (hasCurrentUserResponded) {
     return (
-      <div className="flex items-center gap-2 text-sm text-orange-400 font-semibold animate-pulse">
-        <Clock className="h-4 w-4" />
-        Awaiting other party's response...
+      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+        <CheckCircle className="h-4 w-4 text-green-500" />
+        Response sent - awaiting other party's response
       </div>
     );
   }

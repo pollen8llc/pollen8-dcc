@@ -74,12 +74,19 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
           if (serviceProvider) {
             await assignServiceProvider(requestId, serviceProvider.id);
             console.log('✅ Service provider assigned successfully');
+          } else {
+            console.log('⚠️ No service provider profile found for user - continuing without assignment');
           }
         } catch (error) {
           console.error('❌ Error assigning service provider:', error);
           // Don't fail the whole operation if assignment fails
         }
       }
+      
+      // Trigger immediate refresh of the component
+      setTimeout(() => {
+        onActionComplete();
+      }, 500);
     } catch (error) {
       console.error(`Error ${responseType}ing proposal:`, error);
       
