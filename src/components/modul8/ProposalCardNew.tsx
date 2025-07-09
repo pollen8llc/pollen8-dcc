@@ -21,6 +21,13 @@ interface ProposalCardNewProps {
   onActionComplete?: () => void;
   showCounterOption?: boolean;
   onCounterClick?: () => void;
+  responseData?: {
+    responses: any[];
+    hasCurrentUserResponded: boolean;
+    acceptResponses: any[];
+    hasMutualAcceptance: boolean;
+    hasAnyAcceptance: boolean;
+  };
 }
 
 const ProposalCardNew: React.FC<ProposalCardNewProps> = ({ 
@@ -28,7 +35,8 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
   hasCounterResponse = false,
   onActionComplete,
   showCounterOption = true,
-  onCounterClick
+  onCounterClick,
+  responseData
 }) => {
   const { session } = useSession();
   const [showCounter, setShowCounter] = useState(false);
@@ -248,6 +256,7 @@ const ProposalCardNew: React.FC<ProposalCardNewProps> = ({
             onCounterClick={onCounterClick}
             hasCounterResponse={hasCounterResponse}
             submittedBy={card.submitted_by}
+            responseData={responseData}
           />
         </div>
       </CardContent>

@@ -501,17 +501,21 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredProposalCards.map((card, index) => (
-                <ProposalCardRenderer
-                  key={card.id}
-                  card={card}
-                  onActionComplete={handleActionComplete}
-                  showCounterOption={true}
-                  onCounterClick={() => handleRespondToCard(card.id, 'counter')}
-                  allCards={proposalCards}
-                  organizerId={serviceRequest.organizer?.user_id}
-                />
-              ))}
+              {filteredProposalCards.map((card, index) => {
+                const cardResponseData = getCardResponseData(card.id);
+                return (
+                  <ProposalCardRenderer
+                    key={card.id}
+                    card={card}
+                    onActionComplete={handleActionComplete}
+                    showCounterOption={true}
+                    onCounterClick={() => handleRespondToCard(card.id, 'counter')}
+                    allCards={proposalCards}
+                    organizerId={serviceRequest.organizer?.user_id}
+                    responseData={cardResponseData}
+                  />
+                );
+              })}
             </div>
           )}
         </CardContent>

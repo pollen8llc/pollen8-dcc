@@ -11,6 +11,13 @@ interface ProposalCardRendererProps {
   onCounterClick?: () => void;
   allCards?: ProposalCard[]; // New prop to pass all cards for checking counter responses
   organizerId?: string;
+  responseData?: {
+    responses: any[];
+    hasCurrentUserResponded: boolean;
+    acceptResponses: any[];
+    hasMutualAcceptance: boolean;
+    hasAnyAcceptance: boolean;
+  };
 }
 
 export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
@@ -19,7 +26,8 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
   showCounterOption,
   onCounterClick,
   allCards = [],
-  organizerId
+  organizerId,
+  responseData
 }) => {
   // Check if there's a counter response to this card
   const hasCounterResponse = allCards.some(
@@ -39,6 +47,7 @@ export const ProposalCardRenderer: React.FC<ProposalCardRendererProps> = ({
       onActionComplete={onActionComplete}
       showCounterOption={showCounterOption}
       onCounterClick={onCounterClick}
+      responseData={responseData}
     />
   );
 };

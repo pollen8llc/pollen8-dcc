@@ -19,6 +19,13 @@ interface ProposalCardActionsProps {
   submittedBy?: string;
   requestId?: string;
   providerId?: string;
+  responseData?: {
+    responses: any[];
+    hasCurrentUserResponded: boolean;
+    acceptResponses: any[];
+    hasMutualAcceptance: boolean;
+    hasAnyAcceptance: boolean;
+  };
 }
 
 export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
@@ -30,11 +37,19 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
   hasCounterResponse = false,
   submittedBy,
   requestId,
-  providerId
+  providerId,
+  responseData
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
-  const { responses, loading: responsesLoading, acceptResponses, hasCurrentUserResponded } = useProposalCardResponses(cardId);
+  
+  // Use passed response data if available, otherwise fall back to hook
+  const hookData = useProposalCardResponses(responseData ? '' : cardId);
+  const responses = responseData?.responses || hookData.responses;
+  const responsesLoading = responseData ? false : hookData.loading;
+  const acceptResponses = responseData?.acceptResponses || hookData.acceptResponses;
+  const hasCurrentUserResponded = responseData?.hasCurrentUserResponded ?? hookData.hasCurrentUserResponded;
+  
   const currentUserId = session?.user?.id;
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
