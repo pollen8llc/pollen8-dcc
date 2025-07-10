@@ -39,10 +39,13 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
+  const [hasJustResponded, setHasJustResponded] = useState(false);
   const currentUserId = session?.user?.id;
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
+    // Set immediate local state for UI feedback
     setLoading(responseType);
+    setHasJustResponded(true);
     
     try {
       const responseData: CreateProposalResponseData = {
@@ -53,9 +56,9 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
       await respondToProposalCard(responseData);
 
       const actionMessages = {
-        accept: "✅ Proposal accepted! The other party will be notified.",
-        reject: "❌ Proposal rejected. The other party has been notified.",
-        cancel: "🚫 Proposal cancelled successfully."
+        accept: "Response sent successfully! The other party will be notified.",
+        reject: "Response sent successfully! The other party has been notified.",
+        cancel: "Proposal cancelled successfully."
       };
 
       toast({
@@ -89,6 +92,9 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
       }, 500);
     } catch (error) {
       console.error(`Error ${responseType}ing proposal:`, error);
+      
+      // Reset local state on error
+      setHasJustResponded(false);
       
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -181,12 +187,12 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     );
   }
 
-  // FIXED: Show "you have already responded" when current user has responded - KEY FIX
-  if (hasCurrentUserResponded) {
+  // Show "you have already responded" when current user has responded OR just responded
+  if (hasCurrentUserResponded || hasJustResponded) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
         <CheckCircle className="h-4 w-4 text-green-500" />
-        You have already responded to this proposal
+        Response sent - awaiting other party's response
       </div>
     );
   }
