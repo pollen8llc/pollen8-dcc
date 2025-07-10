@@ -39,13 +39,10 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
-  const [hasJustResponded, setHasJustResponded] = useState(false);
   const currentUserId = session?.user?.id;
 
   const handleResponse = async (responseType: 'accept' | 'reject' | 'cancel') => {
-    // Set immediate local state for UI feedback
     setLoading(responseType);
-    setHasJustResponded(true);
     
     try {
       const responseData: CreateProposalResponseData = {
@@ -85,16 +82,8 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
           // Don't fail the whole operation if assignment fails
         }
       }
-      
-      // Trigger immediate refresh of the component
-      setTimeout(() => {
-        onActionComplete();
-      }, 500);
     } catch (error) {
       console.error(`Error ${responseType}ing proposal:`, error);
-      
-      // Reset local state on error
-      setHasJustResponded(false);
       
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -187,8 +176,8 @@ export const ProposalCardResponseActions: React.FC<ProposalCardResponseActionsPr
     );
   }
 
-  // Show "you have already responded" when current user has responded OR just responded
-  if (hasCurrentUserResponded || hasJustResponded) {
+  // Show "you have already responded" when current user has responded
+  if (hasCurrentUserResponded) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
         <CheckCircle className="h-4 w-4 text-green-500" />

@@ -42,8 +42,6 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
 }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
-  const [hasJustResponded, setHasJustResponded] = useState(false);
-  const [responseType, setResponseType] = useState<string | null>(null);
   
   // Use passed response data if available, otherwise fall back to hook
   const hookData = useProposalCardResponses(responseData ? '' : cardId);
@@ -58,10 +56,7 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     console.log(`🔥 STARTING RESPONSE: ${responseType} for card ${cardId}`);
     console.log('Current user ID:', session?.user?.id);
     
-    // Set immediate local state for UI feedback
     setLoading(responseType);
-    setHasJustResponded(true);
-    setResponseType(responseType);
     
     try {
       const responseData: CreateProposalResponseData = {
@@ -110,10 +105,6 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
         responseType,
         userId: session?.user?.id
       });
-      
-      // Reset local state on error
-      setHasJustResponded(false);
-      setResponseType(null);
       
       const errorMessage = error instanceof Error 
         ? error.message 
@@ -165,8 +156,8 @@ export const ProposalCardActions: React.FC<ProposalCardActionsProps> = ({
     );
   }
 
-  // If the current user has already responded OR just responded, hide action buttons
-  if (hasCurrentUserResponded || hasJustResponded) {
+  // If the current user has already responded, hide action buttons
+  if (hasCurrentUserResponded) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
         <CheckCircle className="h-4 w-4 text-green-500" />

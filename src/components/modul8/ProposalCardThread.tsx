@@ -64,6 +64,9 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
   const cardIds = proposalCards.map(card => card.id);
   const { responsesData, getCardResponseData, refresh: refreshResponses } = useProposalCardResponsesData(cardIds);
   
+  // Track optimistic response updates for immediate UI feedback
+  const [optimisticResponses, setOptimisticResponses] = useState<Record<string, boolean>>({});
+  
   const [showProposalForm, setShowProposalForm] = useState(false);
   const [counteringCardId, setCounteringCardId] = useState<string | null>(null);
   const [proposalNotes, setProposalNotes] = useState('');
@@ -172,6 +175,15 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
       loadThreadData(),
       refreshResponses()
     ]);
+  };
+
+  // Optimistic action handler for immediate UI feedback
+  const handleOptimisticResponse = (cardId: string) => {
+    // Mark this card as responded to optimistically
+    setOptimisticResponses(prev => ({
+      ...prev,
+      [cardId]: true
+    }));
   };
 
   const handleInitialRequestResponse = async (responseType: 'accept' | 'reject' | 'counter') => {
@@ -503,16 +515,25 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             <div className="space-y-4">
               {filteredProposalCards.map((card, index) => {
                 const cardResponseData = getCardResponseData(card.id);
+                // Merge optimistic response with actual response data
+                const enhancedResponseData = cardResponseData ? {
+                  ...cardResponseData,
+                  hasCurrentUserResponded: cardResponseData.hasCurrentUserResponded || optimisticResponses[card.id] || false
+                } : undefined;
+                
                 return (
                   <ProposalCardRenderer
                     key={card.id}
                     card={card}
-                    onActionComplete={handleActionComplete}
+                    onActionComplete={() => {
+                      handleOptimisticResponse(card.id);
+                      handleActionComplete();
+                    }}
                     showCounterOption={true}
                     onCounterClick={() => handleRespondToCard(card.id, 'counter')}
                     allCards={proposalCards}
                     organizerId={serviceRequest.organizer?.user_id}
-                    responseData={cardResponseData}
+                    responseData={enhancedResponseData}
                   />
                 );
               })}
