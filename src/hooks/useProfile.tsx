@@ -115,8 +115,8 @@ export const useProfile = (session: Session | null) => {
           
         if (ownedError) {
           console.error("Error fetching owned communities:", ownedError);
-        } else {
-          managedCommunities = ownedCommunities?.map(m => m.community_id) || [];
+        } else if (ownedCommunities && Array.isArray(ownedCommunities)) {
+          managedCommunities = ownedCommunities.map(m => m.community_id) || [];
         }
       } catch (err) {
         console.error("Exception fetching communities:", err);
