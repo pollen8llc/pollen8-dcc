@@ -123,7 +123,7 @@ const AppRoutes = () => {
               <ProfileSetupPage />
             </NonServiceProviderRoute>
           } />
-          <Route path="/profile/:id" element={
+          <Route path="/profile/:userId" element={
             <NonServiceProviderRoute>
               <ProfilePage />
             </NonServiceProviderRoute>
