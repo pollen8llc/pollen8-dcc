@@ -28,6 +28,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
   const { session } = useSession();
   const [deelUrl, setDeelUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submittedUrl, setSubmittedUrl] = useState<string | null>(null);
   const currentUserId = session?.user?.id;
 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
@@ -80,18 +81,9 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
         variant: "default"
       });
       
-      // Reset form and trigger refresh
+      // Set local state to immediately show VIEW CONTRACT badge
+      setSubmittedUrl(deelUrl);
       setDeelUrl('');
-      
-      // Force immediate refresh by calling onActionComplete if available
-      if (onActionComplete) {
-        console.log('🔄 Triggering data refresh...');
-        await onActionComplete();
-      } else {
-        console.log('⚠️ No onActionComplete callback available, forcing page reload');
-        // Fallback: force a page reload to show the updated state
-        window.location.reload();
-      }
     } catch (error) {
       console.error('❌ Error submitting DEEL link:', error);
       toast({
@@ -259,6 +251,27 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
                 <p className="text-xs text-gray-500">
                   Paste the DEEL contract URL to send it to the service provider for signing
                 </p>
+                
+                {/* Submitted URL Badge */}
+                {submittedUrl && (
+                  <div className="mt-3 p-3 bg-blue-900/30 border border-blue-600/30 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Badge className="bg-blue-600/20 text-blue-300 border-blue-500/30 mb-2">
+                          Contract Submitted
+                        </Badge>
+                        <p className="text-sm text-blue-200">Contract link has been sent to the service provider</p>
+                      </div>
+                      <Button
+                        onClick={() => window.open(submittedUrl, '_blank')}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        VIEW CONTRACT
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
