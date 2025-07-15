@@ -58,20 +58,21 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
     try {
       setSubmitting(true);
-      console.log('💾 Submitting DEEL URL:', deelUrl);
+      console.log('💾 Submitting DEEL URL:', deelUrl, 'for card ID:', card.id);
       
       // Store the DEEL URL in the dedicated deel_contract_url field
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('modul8_proposal_cards')
         .update({ deel_contract_url: deelUrl })
-        .eq('id', card.id);
+        .eq('id', card.id)
+        .select('deel_contract_url'); // Return the updated data
         
       if (error) {
         console.error('❌ Error updating card:', error);
         throw error;
       }
       
-      console.log('✅ DEEL URL submitted successfully');
+      console.log('✅ DEEL URL submitted successfully. Updated data:', data);
       
       toast({
         title: "DEEL Link Submitted",
@@ -81,9 +82,15 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
       
       // Reset form and trigger refresh
       setDeelUrl('');
+      
+      // Force immediate refresh by calling onActionComplete if available
       if (onActionComplete) {
         console.log('🔄 Triggering data refresh...');
-        onActionComplete();
+        await onActionComplete();
+      } else {
+        console.log('⚠️ No onActionComplete callback available, forcing page reload');
+        // Fallback: force a page reload to show the updated state
+        window.location.reload();
       }
     } catch (error) {
       console.error('❌ Error submitting DEEL link:', error);
