@@ -32,32 +32,8 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
-  // Extract DEEL URL from notes with more flexible pattern matching
-  const extractDeelUrl = (notes: string | null) => {
-    if (!notes) return null;
-    console.log('🔍 Checking notes for DEEL URL:', notes);
-    
-    // Try multiple patterns to catch different URL formats
-    const patterns = [
-      /DEEL Contract URL:\s*(https?:\/\/[^\s\n]+)/i,
-      /deel.*?url:\s*(https?:\/\/[^\s\n]+)/i,
-      /contract.*?url:\s*(https?:\/\/[^\s\n]+)/i,
-      /(https?:\/\/(?:app\.)?deel\.com[^\s\n]*)/i
-    ];
-    
-    for (const pattern of patterns) {
-      const match = notes.match(pattern);
-      if (match) {
-        console.log('✅ Found DEEL URL:', match[1]);
-        return match[1];
-      }
-    }
-    
-    console.log('❌ No DEEL URL found in notes');
-    return null;
-  };
-
-  const existingDeelUrl = extractDeelUrl(card.notes);
+  // Use the dedicated deel_contract_url field from the database
+  const existingDeelUrl = card.deel_contract_url;
   console.log('🔗 Existing DEEL URL:', existingDeelUrl);
 
   const handleGoToDeel = () => {
@@ -84,12 +60,10 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
       setSubmitting(true);
       console.log('💾 Submitting DEEL URL:', deelUrl);
       
-      // Store the DEEL URL in the notes field
-      const updatedNotes = `${card.notes || ''}\n\nDEEL Contract URL: ${deelUrl}`.trim();
-      
+      // Store the DEEL URL in the dedicated deel_contract_url field
       const { error } = await supabase
         .from('modul8_proposal_cards')
-        .update({ notes: updatedNotes })
+        .update({ deel_contract_url: deelUrl })
         .eq('id', card.id);
         
       if (error) {
@@ -172,7 +146,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                VIEW DEEL
+                VIEW CONTRACT
               </Button>
             </div>
           </div>
@@ -293,6 +267,25 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
             <p className="text-sm text-blue-200">
               The organizer is preparing the DEEL contract. You will receive the agreement link shortly to review and sign.
             </p>
+          </div>
+        )}
+
+        {/* Service Provider View - CONTRACT button */}
+        {!isOrganizer && existingDeelUrl && (
+          <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-blue-300 mb-1">Contract Ready</h4>
+                <p className="text-sm text-blue-200">The contract is ready for your review and signature.</p>
+              </div>
+              <Button
+                onClick={handleViewDeel}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                VIEW CONTRACT
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>
