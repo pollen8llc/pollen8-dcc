@@ -198,38 +198,29 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
           </div>
         )}
 
-        {/* DEEL Integration Section - Only for Organizers */}
+        {/* Contract Integration Section - Only for Organizers */}
         {isOrganizer && !existingDeelUrl && (
           <div className="space-y-4 border-t border-gray-700 pt-4">
             <div className="flex items-center gap-2 mb-3">
               <ExternalLink className="h-5 w-5 text-blue-400" />
-              <h4 className="font-semibold text-gray-200">Contract Execution via DEEL</h4>
+              <h4 className="font-semibold text-gray-200">Contract Execution</h4>
             </div>
             
             <div className="space-y-4">
-              <div className="flex gap-3">
-                <Button
-                  onClick={handleGoToDeel}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Go to DEEL
-                </Button>
-                <div className="text-sm text-gray-400 self-center">
-                  Create the contract agreement on DEEL platform
-                </div>
+              <div className="text-sm text-gray-400">
+                Choose your preferred platform to create the agreement: Deel, DocuSign, or PandaDoc. Create the contract draft and finalize the service agreement using the selected platform.
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="deel-url" className="text-sm font-medium text-gray-300">
-                  DEEL Agreement URL
+                  Agreement URL
                 </Label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                     <Input
                       id="deel-url"
-                      placeholder="https://app.deel.com/contracts/..."
+                      placeholder="https://example.com/contracts/..."
                       value={deelUrl}
                       onChange={(e) => setDeelUrl(e.target.value)}
                       className="pl-10 bg-gray-800/50 border-gray-600 text-gray-200 placeholder-gray-500"
@@ -249,7 +240,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
                   </Button>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Paste the DEEL contract URL to send it to the service provider for signing
+                  Paste the contract URL to send it to the service provider for signing
                 </p>
                 
                 {/* Submitted URL Badge */}
