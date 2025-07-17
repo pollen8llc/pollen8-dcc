@@ -33,9 +33,9 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
-  // Use the dedicated deel_contract_url field from the database
-  const existingDeelUrl = card.deel_contract_url;
-  console.log('🔗 Existing DEEL URL:', existingDeelUrl);
+  // Use the dedicated deel_contract_url field from the database or locally submitted URL
+  const existingDeelUrl = submittedUrl || card.deel_contract_url;
+  console.log('🔗 Contract URL:', existingDeelUrl);
 
   const handleGoToDeel = () => {
     window.open('https://app.deel.com', '_blank');
@@ -51,7 +51,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
     if (!deelUrl.trim()) {
       toast({
         title: "URL Required",
-        description: "Please enter a valid DEEL agreement URL",
+        description: "Please enter a valid agreement URL",
         variant: "destructive"
       });
       return;
@@ -59,9 +59,9 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
     try {
       setSubmitting(true);
-      console.log('💾 Submitting DEEL URL:', deelUrl, 'for card ID:', card.id);
+      console.log('💾 Submitting contract URL:', deelUrl, 'for card ID:', card.id);
       
-      // Store the DEEL URL in the dedicated deel_contract_url field
+      // Store the contract URL in the dedicated deel_contract_url field
       const { data, error } = await supabase
         .from('modul8_proposal_cards')
         .update({ deel_contract_url: deelUrl })
@@ -73,22 +73,27 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
         throw error;
       }
       
-      console.log('✅ DEEL URL submitted successfully. Updated data:', data);
+      console.log('✅ Contract URL submitted successfully. Updated data:', data);
       
       toast({
-        title: "DEEL Link Submitted",
+        title: "Agreement Link Submitted",
         description: "The agreement link has been sent to the service provider",
         variant: "default"
       });
       
-      // Set local state to immediately show VIEW CONTRACT badge
+      // Set local state to immediately show VIEW CONTRACT button
       setSubmittedUrl(deelUrl);
       setDeelUrl('');
+      
+      // Call onActionComplete to refresh parent component if needed
+      if (onActionComplete) {
+        onActionComplete();
+      }
     } catch (error) {
-      console.error('❌ Error submitting DEEL link:', error);
+      console.error('❌ Error submitting contract link:', error);
       toast({
         title: "Error",
-        description: "Failed to submit DEEL link. Please try again.",
+        description: "Failed to submit agreement link. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -128,7 +133,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
             <h3 className="font-semibold text-emerald-300">Agreement Reached!</h3>
           </div>
           <p className="text-sm text-emerald-200">
-            Both parties have accepted the proposal. The next step is to create and execute the contract via DEEL.
+            Both parties have accepted the proposal. The next step is to create and execute the contract.
           </p>
         </div>
 
@@ -137,7 +142,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
           <div className="bg-blue-900/30 border border-blue-600/30 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-blue-300 mb-1">DEEL Contract Ready</h4>
+                <h4 className="font-semibold text-blue-300 mb-1">Contract Ready</h4>
                 <p className="text-sm text-blue-200">The contract is ready for review and signing.</p>
               </div>
               <Button
@@ -276,7 +281,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
               <h4 className="font-semibold text-blue-300">Waiting for Contract</h4>
             </div>
             <p className="text-sm text-blue-200">
-              The organizer is preparing the DEEL contract. You will receive the agreement link shortly to review and sign.
+              The organizer is preparing the contract. You will receive the agreement link shortly to review and sign.
             </p>
           </div>
         )}
