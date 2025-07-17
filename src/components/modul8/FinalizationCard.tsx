@@ -33,13 +33,9 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
-  // Use local state for immediate updates, fallback to database value
-  const [existingDeelUrl, setExistingDeelUrl] = useState(card.deel_contract_url || submittedUrl);
-  
-  // Update local state when card data changes
-  React.useEffect(() => {
-    setExistingDeelUrl(card.deel_contract_url || submittedUrl);
-  }, [card.deel_contract_url, submittedUrl]);
+  // Use the dedicated deel_contract_url field from the database
+  const existingDeelUrl = card.deel_contract_url;
+  console.log('🔗 Existing DEEL URL:', existingDeelUrl);
 
   const handleGoToDeel = () => {
     window.open('https://app.deel.com', '_blank');
@@ -85,15 +81,9 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
         variant: "default"
       });
       
-      // Update local state immediately to show VIEW CONTRACT badge
-      setExistingDeelUrl(deelUrl);
+      // Set local state to immediately show VIEW CONTRACT badge
       setSubmittedUrl(deelUrl);
       setDeelUrl('');
-      
-      // Call onActionComplete to potentially refresh parent data
-      if (onActionComplete) {
-        onActionComplete();
-      }
     } catch (error) {
       console.error('❌ Error submitting DEEL link:', error);
       toast({
