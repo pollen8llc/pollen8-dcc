@@ -99,41 +99,43 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
     try {
       setSubmitting(true);
-      console.log('💾 Submitting contract URL:', deelUrl, 'for card ID:', card.id);
+      console.log('🔄 Submitting contract URL for card:', card.id, 'URL:', deelUrl);
       
-      // Store the contract URL in the dedicated deel_contract_url field
       const { data, error } = await supabase
         .from('modul8_proposal_cards')
-        .update({ deel_contract_url: deelUrl })
+        .update({ deel_contract_url: deelUrl.trim() })
         .eq('id', card.id)
-        .select('deel_contract_url'); // Return the updated data
+        .select('deel_contract_url');
         
       if (error) {
-        console.error('❌ Error updating card:', error);
-        throw error;
+        console.error('❌ Database error updating contract URL:', error);
+        toast({
+          title: "Database Error",
+          description: `Failed to save contract URL: ${error.message}. Please check if you have permission to update this agreement.`,
+          variant: "destructive"
+        });
+        return;
       }
       
-      console.log('✅ Contract URL submitted successfully. Updated data:', data);
+      console.log('✅ Contract URL saved successfully:', data);
       
-      toast({
-        title: "Agreement Link Submitted",
-        description: "The agreement link has been sent to the service provider",
-        variant: "default"
-      });
-      
-      // Set local state to immediately show VIEW CONTRACT button
-      setSubmittedUrl(deelUrl);
+      // Update local state immediately for better UX
+      setSubmittedUrl(deelUrl.trim());
       setDeelUrl('');
       
-      // Call onActionComplete to refresh parent component if needed
+      toast({
+        title: "Contract URL Saved",
+        description: "The contract link has been saved and shared with both participants.",
+      });
+      
       if (onActionComplete) {
         onActionComplete();
       }
     } catch (error) {
-      console.error('❌ Error submitting contract link:', error);
+      console.error('❌ Unexpected error:', error);
       toast({
         title: "Error",
-        description: "Failed to submit agreement link. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
     } finally {
