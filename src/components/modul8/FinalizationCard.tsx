@@ -34,8 +34,16 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
   // Use the dedicated deel_contract_url field from the database or locally submitted URL
+  // This ensures both participants see the contract URL once submitted
   const existingDeelUrl = submittedUrl || card.deel_contract_url;
   console.log('🔗 Contract URL:', existingDeelUrl);
+
+  // Initialize local state with existing URL if available
+  React.useEffect(() => {
+    if (card.deel_contract_url && !submittedUrl) {
+      setSubmittedUrl(card.deel_contract_url);
+    }
+  }, [card.deel_contract_url, submittedUrl]);
 
   const handleGoToDeel = () => {
     window.open('https://app.deel.com', '_blank');
