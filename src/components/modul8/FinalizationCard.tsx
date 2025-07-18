@@ -33,17 +33,49 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
 
   const isOrganizer = organizerId ? currentUserId === organizerId : currentUserId !== card.submitted_by;
 
-  // Use the dedicated deel_contract_url field from the database or locally submitted URL
-  // This ensures both participants see the contract URL once submitted
-  const existingDeelUrl = submittedUrl || card.deel_contract_url;
-  console.log('🔗 Contract URL:', existingDeelUrl);
-
-  // Initialize local state with existing URL if available
+  // Initialize local state with existing URL from database
   React.useEffect(() => {
-    if (card.deel_contract_url && !submittedUrl) {
+    if (card.deel_contract_url) {
       setSubmittedUrl(card.deel_contract_url);
     }
-  }, [card.deel_contract_url, submittedUrl]);
+  }, [card.deel_contract_url]);
+
+  // Set up real-time subscription for proposal card updates
+  React.useEffect(() => {
+    if (!card.id) return;
+
+    console.log('🔔 Setting up real-time subscription for proposal card:', card.id);
+
+    const channel = supabase
+      .channel(`proposal-card-${card.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'modul8_proposal_cards',
+          filter: `id=eq.${card.id}`
+        },
+        (payload) => {
+          console.log('🔔 Real-time update received for proposal card:', payload);
+          const updatedCard = payload.new as any;
+          if (updatedCard.deel_contract_url) {
+            setSubmittedUrl(updatedCard.deel_contract_url);
+            console.log('🔗 Contract URL updated via real-time:', updatedCard.deel_contract_url);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔇 Cleaning up subscription for proposal card:', card.id);
+      supabase.removeChannel(channel);
+    };
+  }, [card.id]);
+
+  // Use the contract URL from state (which gets updated by real-time or initial load)
+  const existingDeelUrl = submittedUrl || card.deel_contract_url;
+  console.log('🔗 Contract URL:', existingDeelUrl);
 
   const handleGoToDeel = () => {
     window.open('https://app.deel.com', '_blank');
