@@ -73,66 +73,67 @@ const EnhancedModul8Dashboard: React.FC = () => {
   const recentActivity = getRecentActivity();
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Modul8 Dashboard</h1>
-          <p className="text-muted-foreground">Manage your service requests and projects</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Modul8 Dashboard</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Manage your service requests and projects</p>
         </div>
         <Button
           onClick={() => navigate('/modul8/request/new')}
-          className="bg-[#00eada] hover:bg-[#00eada]/90 text-black"
+          className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-sm sm:text-base w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
-          New Request
+          <span className="hidden sm:inline">New Request</span>
+          <span className="sm:hidden">New</span>
         </Button>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <FolderOpen className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Total Projects</span>
+              <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+              <span className="text-xs sm:text-sm text-muted-foreground">Total Projects</span>
             </div>
-            <div className="text-2xl font-bold mt-1">{stats.total}</div>
+            <div className="text-xl sm:text-2xl font-bold mt-1">{stats.total}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-blue-500" />
-              <span className="text-sm text-muted-foreground">Active</span>
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+              <span className="text-xs sm:text-sm text-muted-foreground">Active</span>
             </div>
-            <div className="text-2xl font-bold mt-1 text-blue-600">{stats.active}</div>
+            <div className="text-xl sm:text-2xl font-bold mt-1 text-blue-600">{stats.active}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-muted-foreground">Completed</span>
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+              <span className="text-xs sm:text-sm text-muted-foreground">Completed</span>
             </div>
-            <div className="text-2xl font-bold mt-1 text-green-600">{stats.completed}</div>
+            <div className="text-xl sm:text-2xl font-bold mt-1 text-green-600">{stats.completed}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-orange-500" />
-              <span className="text-sm text-muted-foreground">Pending</span>
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
+              <span className="text-xs sm:text-sm text-muted-foreground">Pending</span>
             </div>
-            <div className="text-2xl font-bold mt-1 text-orange-600">{stats.pending}</div>
+            <div className="text-xl sm:text-2xl font-bold mt-1 text-orange-600">{stats.pending}</div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Domain Pages Quick Access */}
         <Card>
           <CardHeader>
@@ -238,36 +239,36 @@ const EnhancedModul8Dashboard: React.FC = () => {
 
       {/* Quick Actions */}
       <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Button
               onClick={() => navigate('/modul8/request/new')}
               variant="outline"
-              className="h-20 flex-col gap-2"
+              className="h-16 sm:h-20 flex-col gap-2 text-xs sm:text-sm"
             >
-              <Plus className="h-6 w-6" />
-              <span>New Service Request</span>
+              <Plus className="h-4 w-4 sm:h-6 sm:w-6" />
+              <span className="text-center">New Service Request</span>
             </Button>
             
             <Button
               onClick={() => navigate('/modul8/projects')}
               variant="outline"
-              className="h-20 flex-col gap-2"
+              className="h-16 sm:h-20 flex-col gap-2 text-xs sm:text-sm"
             >
-              <FolderOpen className="h-6 w-6" />
-              <span>View All Projects</span>
+              <FolderOpen className="h-4 w-4 sm:h-6 sm:w-6" />
+              <span className="text-center">View All Projects</span>
             </Button>
             
             <Button
               onClick={() => navigate('/modul8/providers')}
               variant="outline"
-              className="h-20 flex-col gap-2"
+              className="h-16 sm:h-20 flex-col gap-2 text-xs sm:text-sm"
             >
-              <Users className="h-6 w-6" />
-              <span>Browse Providers</span>
+              <Users className="h-4 w-4 sm:h-6 sm:w-6" />
+              <span className="text-center">Browse Providers</span>
             </Button>
           </div>
         </CardContent>

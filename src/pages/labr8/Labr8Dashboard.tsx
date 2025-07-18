@@ -150,12 +150,12 @@ const Labr8Dashboard = () => {
 
   const RequestCard = ({ request }: { request: ServiceRequest }) => (
     <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <h3 className="text-lg font-bold text-foreground line-clamp-1">{request.title}</h3>
-              <Badge className={`${getStatusColor(request.status)} font-semibold border px-3 py-1`}>
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+              <h3 className="text-base sm:text-lg font-bold text-foreground line-clamp-1">{request.title}</h3>
+              <Badge className={`${getStatusColor(request.status)} font-semibold border px-2 sm:px-3 py-1 text-xs sm:text-sm self-start`}>
                 {request.status?.replace('_', ' ').toUpperCase() || 'PENDING'}
               </Badge>
             </div>
@@ -166,33 +166,33 @@ const Labr8Dashboard = () => {
               </p>
             )}
             
-            <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm text-muted-foreground mb-4">
               {request.organizer && (
                 <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
+                  <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
                     <AvatarImage src={request.organizer.logo_url} />
                     <AvatarFallback className="bg-muted text-muted-foreground">
                       <Building className="h-3 w-3" />
                     </AvatarFallback>
                   </Avatar>
-                  <span className="font-medium line-clamp-1">{request.organizer.organization_name}</span>
+                  <span className="font-medium line-clamp-1 text-xs sm:text-sm">{request.organizer.organization_name}</span>
                 </div>
               )}
               <div className="flex items-center gap-1">
-                <DollarSign className="h-4 w-4 text-primary" />
-                <span className="font-medium">{formatBudget(request.budget_range)}</span>
+                <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                <span className="font-medium text-xs sm:text-sm">{formatBudget(request.budget_range)}</span>
               </div>
               {request.timeline && (
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  <span>{request.timeline}</span>
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="text-xs sm:text-sm">{request.timeline}</span>
                 </div>
               )}
             </div>
           </div>
         </div>
         
-        <div className="flex justify-between items-center pt-4 border-t border-border">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 border-t border-border">
           <span className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="h-3 w-3" />
             Received {new Date(request.created_at).toLocaleDateString()}
@@ -200,9 +200,9 @@ const Labr8Dashboard = () => {
           <Button
             onClick={() => handleViewRequest(request)}
             size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg px-4 py-2"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm w-full sm:w-auto"
           >
-            <Eye className="h-4 w-4 mr-2" />
+            <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             {request.status === 'pending' || request.status === 'assigned' ? 'View & Respond' : 
              request.status === 'negotiating' ? 'Continue Discussion' :
              request.status === 'agreed' ? 'View Agreement' : 'View Details'}
@@ -216,17 +216,17 @@ const Labr8Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                <Building2 className="h-8 w-8 text-primary-foreground" />
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+                <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
               </div>
-              <div>
-                <h1 className="text-4xl font-black text-foreground tracking-tight">LAB-R8 Dashboard</h1>
-                <p className="text-lg text-muted-foreground font-medium">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground tracking-tight">LAB-R8 Dashboard</h1>
+                <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium">
                   Welcome back, <span className="text-primary font-bold">{serviceProvider?.business_name}</span>
                 </p>
               </div>
@@ -234,67 +234,68 @@ const Labr8Dashboard = () => {
             <Button 
               onClick={handleLogout}
               variant="outline"
-              className="flex items-center gap-2 border-border hover:border-primary hover:text-primary transition-all duration-200"
+              size="sm"
+              className="flex items-center gap-2 border-border hover:border-primary hover:text-primary transition-all duration-200 self-start sm:self-auto"
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-10">
           <Card className="border-border/40 bg-card/60 backdrop-blur-sm hover:border-primary/20 hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">New Requests</p>
-                  <p className="text-3xl font-black text-foreground">{pendingRequests.length}</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">New Requests</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-black text-foreground">{pendingRequests.length}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                  <ExternalLink className="h-6 w-6 text-blue-400" />
+                <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-lg sm:rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-blue-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-border/40 bg-card/60 backdrop-blur-sm hover:border-primary/20 hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">In Discussion</p>
-                  <p className="text-3xl font-black text-foreground">{negotiatingRequests.length}</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">In Discussion</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-black text-foreground">{negotiatingRequests.length}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                  <MessageSquare className="h-6 w-6 text-orange-400" />
+                <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-lg sm:rounded-xl bg-orange-500/20 flex items-center justify-center">
+                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-orange-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-border/40 bg-card/60 backdrop-blur-sm hover:border-primary/20 hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Active Projects</p>
-                  <p className="text-3xl font-black text-foreground">{activeProjects.length}</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Active Projects</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-black text-foreground">{activeProjects.length}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-purple-400" />
+                <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-lg sm:rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-purple-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-border/40 bg-card/60 backdrop-blur-sm hover:border-primary/20 hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+            <CardContent className="p-3 sm:p-4 md:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Completed</p>
-                  <p className="text-3xl font-black text-foreground">{completedProjects.length}</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Completed</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-black text-foreground">{completedProjects.length}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-green-400" />
+                <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-lg sm:rounded-xl bg-green-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-400" />
                 </div>
               </div>
             </CardContent>
@@ -303,20 +304,26 @@ const Labr8Dashboard = () => {
 
         {/* Request Tabs */}
         <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-6 md:p-8">
             <Tabs defaultValue="incoming" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8 bg-muted/20 p-1 rounded-xl">
-                <TabsTrigger value="incoming" className="rounded-lg font-semibold">
-                  New Requests ({pendingRequests.length})
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-6 sm:mb-8 bg-muted/20 p-1 rounded-xl overflow-hidden">
+                <TabsTrigger value="incoming" className="rounded-lg font-semibold text-xs sm:text-sm">
+                  <span className="hidden sm:inline">New Requests </span>
+                  <span className="sm:hidden">New </span>
+                  ({pendingRequests.length})
                 </TabsTrigger>
-                <TabsTrigger value="discussing" className="rounded-lg font-semibold">
-                  Discussing ({negotiatingRequests.length})
+                <TabsTrigger value="discussing" className="rounded-lg font-semibold text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Discussing </span>
+                  <span className="sm:hidden">Talk </span>
+                  ({negotiatingRequests.length})
                 </TabsTrigger>
-                <TabsTrigger value="active" className="rounded-lg font-semibold">
+                <TabsTrigger value="active" className="rounded-lg font-semibold text-xs sm:text-sm">
                   Active ({activeProjects.length})
                 </TabsTrigger>
-                <TabsTrigger value="completed" className="rounded-lg font-semibold">
-                  Completed ({completedProjects.length})
+                <TabsTrigger value="completed" className="rounded-lg font-semibold text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Completed </span>
+                  <span className="sm:hidden">Done </span>
+                  ({completedProjects.length})
                 </TabsTrigger>
               </TabsList>
 

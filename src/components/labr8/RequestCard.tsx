@@ -151,14 +151,15 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
 
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-semibold line-clamp-1">{request.title}</h3>
-              <Badge className={`${getStatusColor(request.status)} font-medium flex items-center gap-1`}>
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+              <h3 className="text-base sm:text-lg font-semibold line-clamp-1">{request.title}</h3>
+              <Badge className={`${getStatusColor(request.status)} font-medium flex items-center gap-1 text-xs sm:text-sm self-start`}>
                 {getStatusIcon(request.status)}
-                {request.status?.replace('_', ' ') || 'pending'}
+                <span className="hidden sm:inline">{request.status?.replace('_', ' ') || 'pending'}</span>
+                <span className="sm:hidden">{request.status?.replace('_', ' ').slice(0, 4) || 'pend'}</span>
               </Badge>
             </div>
             
@@ -168,95 +169,97 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
               </p>
             )}
             
-            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground mb-3">
               {request.organizer && (
                 <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
+                  <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
                     <AvatarImage src={request.organizer.logo_url} />
                     <AvatarFallback>
                       <Building className="h-3 w-3" />
                     </AvatarFallback>
                   </Avatar>
-                  <span className="line-clamp-1">{request.organizer.organization_name}</span>
+                  <span className="line-clamp-1 text-xs sm:text-sm">{request.organizer.organization_name}</span>
                 </div>
               )}
             </div>
             
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
-                <DollarSign className="h-4 w-4" />
-                {formatBudget(request.budget_range)}
+                <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="text-xs sm:text-sm">{formatBudget(request.budget_range)}</span>
               </div>
               {request.timeline && (
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  {request.timeline}
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm">{request.timeline}</span>
                 </div>
               )}
             </div>
           </div>
           
           {canDelete && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border shadow-lg">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem 
-                      onSelect={(e) => e.preventDefault()}
-                      className="text-destructive focus:text-destructive cursor-pointer"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Request
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Delete Service Request
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {request.status === "cancelled" ? (
-                          <>
-                            Are you sure you want to permanently delete the cancelled request "
-                            {request.title}"? This action cannot be undone and will permanently remove the request.
-                          </>
-                        ) : (
-                          <>
-                            Are you sure you want to delete "{request.title}"? This action cannot be undone and will permanently remove the request.
-                          </>
-                        )}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={handleDeleteRequest}
-                        disabled={deleting}
-                        className="bg-destructive hover:bg-destructive/90"
+            <div className="self-start">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem 
+                        onSelect={(e) => e.preventDefault()}
+                        className="text-destructive focus:text-destructive cursor-pointer"
                       >
-                        {deleting ? 'Deleting...' : 'Delete Request'}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Request
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Delete Service Request
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {request.status === "cancelled" ? (
+                            <>
+                              Are you sure you want to permanently delete the cancelled request "
+                              {request.title}"? This action cannot be undone and will permanently remove the request.
+                            </>
+                          ) : (
+                            <>
+                              Are you sure you want to delete "{request.title}"? This action cannot be undone and will permanently remove the request.
+                            </>
+                          )}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleDeleteRequest}
+                          disabled={deleting}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          {deleting ? 'Deleting...' : 'Delete Request'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
         </div>
         
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 border-t border-border">
           <span className="text-xs text-muted-foreground">
             {type === 'incoming' ? 'Received' : 'Created'} {new Date(request.created_at).toLocaleDateString()}
           </span>
           <Button
             onClick={handleViewRequest}
             size="sm"
-            className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-medium"
+            className="bg-[#00eada] hover:bg-[#00eada]/90 text-black font-medium text-xs sm:text-sm w-full sm:w-auto"
           >
             {getActionButtonText()}
           </Button>

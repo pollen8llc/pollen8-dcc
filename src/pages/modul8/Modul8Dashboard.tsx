@@ -58,22 +58,24 @@ const Modul8Dashboard = () => {
   }
 
   const headerActions = (
-    <>
+    <div className="flex flex-col sm:flex-row gap-2">
       <Button
         onClick={() => navigate('/modul8/projects')}
         variant="outline"
         size="sm"
-        className="text-sm border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-md hover:shadow-[#00eada]/20"
+        className="text-xs sm:text-sm border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-md hover:shadow-[#00eada]/20"
       >
-        View Projects
+        <span className="hidden sm:inline">View Projects</span>
+        <span className="sm:hidden">Projects</span>
       </Button>
       <Button
         onClick={() => navigate('/modul8/partners')}
-        className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-sm hover:shadow-lg hover:shadow-[#00eada]/30 transition-all duration-200 hover:scale-[1.02]"
+        className="bg-[#00eada] hover:bg-[#00eada]/90 text-black text-xs sm:text-sm hover:shadow-lg hover:shadow-[#00eada]/30 transition-all duration-200 hover:scale-[1.02]"
       >
-        Manage Partners
+        <span className="hidden sm:inline">Manage Partners</span>
+        <span className="sm:hidden">Partners</span>
       </Button>
-    </>
+    </div>
   );
 
   return (
@@ -94,7 +96,7 @@ const Modul8Dashboard = () => {
               <h2 className="text-lg sm:text-xl font-semibold">Service Domains</h2>
               <div className="h-px flex-1 bg-gradient-to-r from-[#00eada]/30 to-transparent"></div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {DOMAIN_PAGES.map((domain, index) => (
                 <Card
                   key={domain.id}
@@ -102,17 +104,17 @@ const Modul8Dashboard = () => {
                   onClick={() => handleDomainClick(domain.id)}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-2 p-3 sm:p-4">
                     <div className="flex items-center gap-2">
                       <div className="p-2 rounded-lg bg-[#00eada]/10 group-hover:bg-[#00eada]/20 transition-colors duration-200">
-                        <Building2 className="h-4 w-4 text-[#00eada] group-hover:scale-110 transition-transform duration-200" />
+                        <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-[#00eada] group-hover:scale-110 transition-transform duration-200" />
                       </div>
-                      <CardTitle className="text-xs sm:text-sm font-medium group-hover:text-[#00eada] transition-colors duration-200">
+                      <CardTitle className="text-xs sm:text-sm font-medium group-hover:text-[#00eada] transition-colors duration-200 line-clamp-1">
                         {domain.title}
                       </CardTitle>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-3 sm:p-4 pt-0">
                     <p className="text-xs text-muted-foreground line-clamp-2 group-hover:text-muted-foreground/80 transition-colors duration-200">
                       {domain.description}
                     </p>
