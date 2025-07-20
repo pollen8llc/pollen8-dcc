@@ -131,6 +131,18 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
     );
   }
 
+  // Debug: Log all profiles being rendered
+  console.log('=== PROFILES RENDERING DEBUG ===');
+  console.log('Total profiles:', profiles.length);
+  profiles.forEach((profile, index) => {
+    console.log(`Profile ${index}:`, {
+      id: profile.id,
+      name: `${profile.first_name} ${profile.last_name}`,
+      key: profile.id
+    });
+  });
+  console.log('================================');
+
   return (
     <div className="bg-background/95 backdrop-blur-sm rounded-2xl p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
