@@ -1,21 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
-import OnboardingSelector from '@/components/onboarding/OnboardingSelector';
-import CommunityPicker from '@/components/onboarding/CommunityPicker';
-import AuthLayout from '@/components/auth/AuthLayout';
-import { UserRole } from '@/models/types';
 
-enum OnboardingStep {
-  ROLE_SELECTION = 'role',
-  COMMUNITY_SELECTION = 'communities',
-  COMPLETE = 'complete'
-}
 
 const OnboardingPage: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<OnboardingStep>(OnboardingStep.ROLE_SELECTION);
-  const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.MEMBER);
   const { currentUser, isLoading } = useUser();
   const navigate = useNavigate();
 
@@ -28,35 +17,27 @@ const OnboardingPage: React.FC = () => {
   // Show loading state while checking auth
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-lg">Loading...</p>
+          <p className="mt-4 text-lg text-foreground">Loading...</p>
         </div>
       </div>
     );
   }
 
-  const handleRoleSelected = (role: UserRole) => {
-    setSelectedRole(role);
-    
-    // Since communities are deprecated, redirect all users to profile setup
+  // Skip role selection and go directly to profile setup
+  React.useEffect(() => {
     navigate('/profile/setup');
-  };
+  }, [navigate]);
 
   return (
-    <AuthLayout 
-      title="Set up your ECO8 experience"
-      subtitle="Complete a few steps to get started with your eco-friendly journey"
-    >
-      {currentStep === OnboardingStep.ROLE_SELECTION && (
-        <OnboardingSelector />
-      )}
-      
-      {currentStep === OnboardingStep.COMMUNITY_SELECTION && (
-        <CommunityPicker />
-      )}
-    </AuthLayout>
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-lg text-foreground">Setting up your profile...</p>
+      </div>
+    </div>
   );
 };
 
