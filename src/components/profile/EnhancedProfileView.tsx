@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Edit, MapPin, Globe, User, Users, Mail, Phone, ExternalLink, Settings } from "lucide-react";
+import { Edit, MapPin, Globe, User, Users, Mail, Phone, ExternalLink, Settings, BarChart2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { UnifiedProfile } from "@/types/unifiedProfile";
 import { UserRole } from "@/models/types";
@@ -14,6 +14,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { supabase } from "@/integrations/supabase/client";
 import RoleChangeDialog from "./RoleChangeDialog";
 import PublicContactForm from "./PublicContactForm";
+import { useUserKnowledgeStats } from "@/hooks/knowledge/useUserKnowledgeStats";
 
 interface EnhancedProfileViewProps {
   profile: UnifiedProfile;
@@ -38,25 +39,23 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
     bio: profile.bio || '',
     communities: []
   });
+  const { data: stats } = useUserKnowledgeStats();
 
   const FIXED_AVATAR_URL = "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif";
 
   useEffect(() => {
     const fetchUserCommunities = async () => {
       if (!profile?.id) return;
-      
       setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from('communities')
           .select('*')
           .eq('owner_id', profile.id);
-          
         if (error) {
           console.error("Error fetching communities:", error);
           return;
         }
-        
         setCommunities(data || []);
       } catch (error) {
         console.error("Error in fetchUserCommunities:", error);
@@ -64,7 +63,6 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
         setIsLoading(false);
       }
     };
-    
     fetchUserCommunities();
   }, [profile?.id]);
 
@@ -77,7 +75,6 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
   const getInitials = () => {
     const firstName = profile.first_name || '';
     const lastName = profile.last_name || '';
-    
     if (firstName && lastName) {
       return `${firstName[0]}${lastName[0]}`.toUpperCase();
     } else if (firstName) {
@@ -85,7 +82,6 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
     } else if (lastName) {
       return lastName[0].toUpperCase();
     }
-    
     return '?';
   };
 
@@ -100,17 +96,18 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
           style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
         />
-        
         <CardContent className="p-6 relative">
           <div className="flex items-center gap-6">
-            {/* Instagram-style Gradient Avatar */}
+            {/* Animated 3px conic-gradient border avatar */}
             <div className="relative flex-shrink-0">
-              <div className="relative">
-                {/* Animated gradient border */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-spin p-0.5">
-                  <div className="h-full w-full rounded-full bg-background"></div>
-                </div>
-                <Avatar className="relative h-16 w-16 shadow-lg">
+              <div className="relative h-20 w-20 md:h-28 md:w-28">
+                <span className="absolute inset-0 rounded-full animate-gradient-spin border-4 border-transparent" style={{
+                  background: 'conic-gradient(from 180deg at 50% 50%, #3b82f6, #fff, #00eada, #3b82f6)',
+                  padding: 0,
+                  borderWidth: '3px',
+                  zIndex: 1
+                }} />
+                <Avatar className="relative h-20 w-20 md:h-28 md:w-28 border-4 border-background shadow-lg z-10">
                   <AvatarImage src={FIXED_AVATAR_URL} alt={getFullName()} className="object-cover" />
                   <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-accent/20">
                     {getInitials()}
@@ -118,7 +115,6 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 </Avatar>
               </div>
             </div>
-            
             {/* Basic Info */}
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -143,7 +139,6 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                     </p>
                   )}
                 </div>
-                
                 {/* Action Button */}
                 <div className="flex-shrink-0">
                   {isOwnProfile ? (
@@ -228,7 +223,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           </CardContent>
         </Card>
 
-        {/* Activity Stats */}
+        {/* Activity/Stats Dashboard Card */}
         <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
           <div 
             className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
@@ -240,26 +235,40 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 className="p-2 rounded-lg"
                 style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
               >
-                <Users 
+                <BarChart2 
                   className="h-5 w-5" 
                   style={{ color: `hsl(var(--primary))` }}
                 />
               </div>
-              <CardTitle className="text-lg font-semibold">Activity</CardTitle>
+              <CardTitle className="text-lg font-semibold">Activity & Stats</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="relative space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Communities</span>
-              <span className="font-medium">{communities.length}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Connections</span>
-              <span className="font-medium">-</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Projects</span>
-              <span className="font-medium">-</span>
+          <CardContent className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold mb-1">{stats?.totalArticles ?? 0}</div>
+                <div className="text-xs text-muted-foreground">Articles</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold mb-1">{stats?.totalViews ?? 0}</div>
+                <div className="text-xs text-muted-foreground">Views</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold mb-1">{stats?.totalComments ?? 0}</div>
+                <div className="text-xs text-muted-foreground">Comments</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold mb-1">{stats?.totalVotes ?? 0}</div>
+                <div className="text-xs text-muted-foreground">Votes</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold mb-1">{stats?.savedArticlesCount ?? 0}</div>
+                <div className="text-xs text-muted-foreground">Saved</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold mb-1">{stats?.recentArticlesCount ?? 0}</div>
+                <div className="text-xs text-muted-foreground">Recent</div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -302,64 +311,8 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
         </Card>
       )}
 
-
-      {/* Contact Information - Skip if empty */}
-      {(profile.email || profile.phone || (profile?.social_links && typeof profile.social_links === 'object' && Object.keys(profile.social_links).length > 0)) && (
-        <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
-          <div 
-            className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
-            style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
-          />
-          <CardHeader className="relative">
-            <div className="flex items-center gap-3">
-              <div 
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
-              >
-                <Mail 
-                  className="h-5 w-5" 
-                  style={{ color: `hsl(var(--primary))` }}
-                />
-              </div>
-              <CardTitle className="text-lg font-semibold">Contact & Social</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="relative space-y-4">
-            {profile.email && (
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span>{profile.email}</span>
-              </div>
-            )}
-            {profile.phone && (
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>{profile.phone}</span>
-              </div>
-            )}
-            {profile?.social_links && typeof profile.social_links === 'object' && 
-             Object.keys(profile.social_links).length > 0 && (
-              <div className="space-y-2">
-                {Object.entries(profile.social_links).map(([platform, url]) => (
-                  <a 
-                    key={platform}
-                    href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    <span className="capitalize">{platform}</span>
-                  </a>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Communities Section */}
-      <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
+      <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
         <div 
           className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
           style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
@@ -379,77 +332,17 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           </div>
         </CardHeader>
         <CardContent className="relative">
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          ) : communities.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {communities.map((community) => (
-                <Card key={community.id} className="group border-0 bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-300">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      {community.logo_url ? (
-                        <img 
-                          src={community.logo_url} 
-                          alt={community.name}
-                          className="w-10 h-10 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Users className="h-5 w-5 text-primary" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground truncate">
-                          {community.name}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-xs px-2 py-1">
-                            {community.member_count || '1'} {parseInt(community.member_count || '1') === 1 ? 'member' : 'members'}
-                          </Badge>
-                        </div>
-                        {community.description && (
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-                            {community.description}
-                          </p>
-                        )}
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="mt-3 px-0 h-auto text-primary hover:text-accent transition-colors font-semibold"
-                          onClick={() => window.location.href = `/community/${community.id}`}
-                        >
-                          Enter Team →
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <div className="relative inline-block mb-6">
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto">
-                  <Users className="h-12 w-12 text-primary" />
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-accent rounded-full border-4 border-background flex items-center justify-center">
-                  <span className="text-accent-foreground text-xs font-bold">+</span>
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">Ready to Join the Action?</h3>
-              <p className="text-muted-foreground mb-6 text-lg max-w-md mx-auto">
-                Connect with communities that match your interests and start building your network.
-              </p>
-              <Button 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-primary/25 transition-all duration-300"
-                onClick={() => window.location.href = "/communities/join"}
-              >
-                Explore Communities
-              </Button>
-            </div>
-          )}
+          <div className="flex flex-wrap gap-3">
+            {communities.length > 0 ? (
+              communities.map((community, idx) => (
+                <Badge key={idx} variant="secondary" className="px-4 py-2 text-sm font-medium">
+                  {community.name}
+                </Badge>
+              ))
+            ) : (
+              <span className="text-muted-foreground text-sm italic">No communities found.</span>
+            )}
+          </div>
         </CardContent>
       </Card>
 
