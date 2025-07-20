@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import MobileProfileView from "@/components/profile/MobileProfileView";
 import DesktopProfileView from "@/components/profile/DesktopProfileView";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,7 +45,7 @@ const ProfilePage: React.FC = () => {
   }, [profileId, isLoading, getProfileById]);
 
   // Show loading state
-  if (isLoading || profileLoading || !profileData) {
+  if (isLoading || profileLoading) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -60,6 +61,39 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  // Show error state if profile not found
+  if (!profileData) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center min-h-[50vh]">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold mb-4">Profile Not Found</h2>
+              <p className="text-muted-foreground mb-4">
+                The profile you're looking for doesn't exist or you don't have permission to view it.
+              </p>
+              <Button onClick={() => navigate('/profile/search')}>
+                Browse Profiles
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Ensure required fields exist with fallbacks
+  const safeProfileData = {
+    ...profileData,
+    name: profileData.name || profileData.first_name || profileData.email || 'Unknown User',
+    email: profileData.email || '',
+    bio: profileData.bio || '',
+    location: profileData.location || '',
+    interests: profileData.interests || [],
+    createdAt: profileData.created_at || profileData.createdAt || new Date().toISOString()
+  };
+
   const handleEdit = () => {
     navigate("/profile/edit");
   };
@@ -71,7 +105,7 @@ const ProfilePage: React.FC = () => {
       {/* Desktop View */}
       <div className="hidden md:block">
         <DesktopProfileView 
-          user={profileData}
+          user={safeProfileData}
           isOwnProfile={isOwnProfile}
           onEdit={handleEdit}
         />
@@ -80,7 +114,7 @@ const ProfilePage: React.FC = () => {
       {/* Mobile View */}
       <div className="md:hidden">
         <MobileProfileView 
-          user={profileData}
+          user={safeProfileData}
           isOwnProfile={isOwnProfile}
           onEdit={handleEdit}
         />
