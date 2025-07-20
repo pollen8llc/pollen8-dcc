@@ -103,18 +103,19 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
         
         <CardContent className="p-6 relative">
           <div className="flex items-center gap-6">
-            {/* Small Glowing Avatar */}
+            {/* Instagram-style Gradient Avatar */}
             <div className="relative flex-shrink-0">
               <div className="relative">
-                <Avatar className="h-16 w-16 ring-4 ring-primary/20 shadow-lg animate-pulse">
+                {/* Animated gradient border */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-spin p-0.5">
+                  <div className="h-full w-full rounded-full bg-background"></div>
+                </div>
+                <Avatar className="relative h-16 w-16 shadow-lg">
                   <AvatarImage src={FIXED_AVATAR_URL} alt={getFullName()} className="object-cover" />
                   <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-accent/20">
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>
-                {/* Glowing white circle that pulses */}
-                <div className="absolute inset-0 rounded-full bg-white/20 animate-ping"></div>
-                <div className="absolute inset-0 rounded-full bg-white/10 animate-pulse"></div>
               </div>
             </div>
             
@@ -291,15 +292,16 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 <Badge 
                   key={idx} 
                   variant="secondary" 
-                  className="px-3 py-1 text-sm font-medium hover:scale-105 transition-transform cursor-pointer"
+                  className="px-4 py-2 text-sm font-medium hover:scale-105 transition-transform cursor-pointer bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 hover:border-primary/40"
                 >
-                  {interest}
+                  #{interest}
                 </Badge>
               ))}
             </div>
           </CardContent>
         </Card>
       )}
+
 
       {/* Contact Information - Skip if empty */}
       {(profile.email || profile.phone || (profile?.social_links && typeof profile.social_links === 'object' && Object.keys(profile.social_links).length > 0)) && (
