@@ -72,6 +72,7 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
     console.log('Profile object:', profile);
     console.log('Profile ID:', profile.id);
     console.log('Profile name:', profile.first_name, profile.last_name);
+    console.log('Navigating to URL:', `/profile/${profile.id}`);
     console.log('==========================');
     
     if (profile.id) {

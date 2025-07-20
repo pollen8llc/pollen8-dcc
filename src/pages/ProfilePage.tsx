@@ -11,13 +11,21 @@ import { useNavigate } from "react-router-dom";
 const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { currentUser, isLoading } = useUser();
-  const { profile, getProfileById, isLoading: profileLoading } = useProfiles();
+  const { getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<any>(null);
   const navigate = useNavigate();
 
   // Determine which profile to show
   const profileId = id || currentUser?.id;
   const isOwnProfile = !id || id === currentUser?.id;
+  
+  // Debug logging
+  console.log('=== PROFILE PAGE DEBUG ===');
+  console.log('URL param id:', id);
+  console.log('Current user ID:', currentUser?.id);
+  console.log('Profile ID to fetch:', profileId);
+  console.log('Is own profile:', isOwnProfile);
+  console.log('==========================');
 
   // Fetch profile data
   React.useEffect(() => {
