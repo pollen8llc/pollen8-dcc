@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { UserSearch, MapPin, ArrowRight } from "lucide-react";
-import { ExtendedProfile } from "@/types/profiles";
+import { ExtendedProfile } from "@/services/profileService";
 import { 
   Alert, 
   AlertDescription, 

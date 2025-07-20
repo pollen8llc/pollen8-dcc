@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { currentUser, isLoading } = useUser();
-  const { getProfileById, isLoading: profileLoading } = useProfiles();
+  const { profile, getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<any>(null);
   const navigate = useNavigate();
 

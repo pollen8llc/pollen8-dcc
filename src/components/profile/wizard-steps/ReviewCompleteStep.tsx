@@ -3,7 +3,7 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExtendedProfile } from '@/types/profiles';
+import { ExtendedProfile } from '@/services/profileService';
 import { CheckCircle, Globe, Users, UserCircle, Lock } from 'lucide-react';
 
 interface ReviewCompleteStepProps {

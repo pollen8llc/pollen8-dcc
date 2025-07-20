@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ExtendedProfile } from "@/types/profiles";
+import { ExtendedProfile } from "@/services/profileService";
 import { Lock, Users, Globe, Network } from "lucide-react";
 
 interface PrivacySettingsStepProps {
