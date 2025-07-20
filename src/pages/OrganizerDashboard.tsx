@@ -143,14 +143,6 @@ const OrganizerDashboard = () => {
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                Organizer Dashboard
-              </h1>
-              <p className="text-muted-foreground mt-2 text-lg">
-                Access all platform services and manage your organization
-              </p>
-            </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="bg-[#00eada]/10 text-[#00eada] border-[#00eada]/20">
                 <Zap className="h-3 w-3 mr-1" />
