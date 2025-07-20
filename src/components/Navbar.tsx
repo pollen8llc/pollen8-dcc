@@ -29,7 +29,7 @@ const Navbar = () => {
       <div className="flex h-14 items-center px-4">
         {/* Logo */}
         <Link 
-          to={isServiceProvider ? "/labr8/dashboard" : "/welcome"} 
+          to={isServiceProvider ? "/labr8/dashboard" : currentUser?.role === 'ORGANIZER' ? "/organizer" : "/welcome"} 
           className="mr-auto flex items-center space-x-2"
         >
           {isServiceProvider ? (
