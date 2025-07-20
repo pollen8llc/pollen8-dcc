@@ -231,14 +231,8 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           />
           <CardHeader className="pb-4 relative">
             <div className="flex items-center gap-3">
-              <div 
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
-              >
-                <BarChart2 
-                  className="h-5 w-5" 
-                  style={{ color: `hsl(var(--primary))` }}
-                />
+              <div className="p-2 rounded-lg" style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}>
+                <BarChart2 className="h-5 w-5" style={{ color: `hsl(var(--primary))` }} />
               </div>
               <CardTitle className="text-lg font-semibold">Activity & Stats</CardTitle>
             </div>
@@ -272,6 +266,34 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
             </div>
           </CardContent>
         </Card>
+
+        {/* Highlighted Interests Card */}
+        {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 && (
+          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-100 via-white to-cyan-100 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
+            <CardHeader className="relative">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-200/40">
+                  <Globe className="h-5 w-5 text-blue-500" />
+                </div>
+                <CardTitle className="text-lg font-semibold">Highlighted Interests</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              <div className="flex flex-wrap gap-3">
+                {profile.interests.map((interest: string, idx: number) => (
+                  <Badge 
+                    key={idx} 
+                    variant="secondary" 
+                    className="px-4 py-2 text-base font-semibold bg-gradient-to-r from-blue-200 via-white to-cyan-200 border border-blue-300/40 text-blue-900 shadow-sm hover:scale-105 transition-transform cursor-pointer"
+                  >
+                    #{interest}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
       </div>
 
       {/* Interests Section */}
