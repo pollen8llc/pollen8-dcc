@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, X, Plus, Lock, Users, Globe, Network } from "lucide-react";
 import LocationInterestsStep from "./wizard-steps/LocationInterestsStep";
 import SocialLinksStep from "./wizard-steps/SocialLinksStep";
-import { ExtendedProfile } from "@/services/profileService";
+import { ExtendedProfile } from "@/types/profiles";
 
 const ProfileEditor = () => {
   const { currentUser, refreshUser } = useUser();

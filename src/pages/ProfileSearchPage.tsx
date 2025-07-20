@@ -7,17 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, UserSearch, MapPin } from "lucide-react";
-import { ExtendedProfile } from "@/services/profileService";
+import { ExtendedProfile } from "@/types/profiles";
+import { useProfiles } from "@/hooks/useProfiles";
 import { useDebounce } from "@/hooks/useDebounce";
 import ProfileSearchList from "@/components/profile/ProfileSearchList";
 import { Shell } from "@/components/layout/Shell";
-import { UserRole } from "@/models/types";
 
 const ProfileSearchPage: React.FC = () => {
   const { currentUser } = useUser();
+  const { searchProfiles, isLoading: profilesLoading, error: profilesError } = useProfiles();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -25,8 +25,6 @@ const ProfileSearchPage: React.FC = () => {
   const [locationFilter, setLocationFilter] = useState("");
   const [interestFilter, setInterestFilter] = useState<string[]>([]);
   const [profiles, setProfiles] = useState<ExtendedProfile[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [allInterests, setAllInterests] = useState<string[]>([]);
   const [selectedInterest, setSelectedInterest] = useState<string>("");
   
@@ -43,8 +41,6 @@ const ProfileSearchPage: React.FC = () => {
   useEffect(() => {
     const fetchInterests = async () => {
       try {
-        setError(null);
-        
         // Fetch all profiles to extract unique interests directly
         const { data, error } = await supabase
           .from('profiles')
@@ -74,154 +70,44 @@ const ProfileSearchPage: React.FC = () => {
         }
       } catch (error) {
         console.error("Error in fetchInterests:", error);
-        setError("Failed to load interests");
+        toast({
+          title: "Error",
+          description: "Failed to load interests",
+          variant: "destructive",
+        });
       }
     };
     
     fetchInterests();
-  }, []);
+  }, [toast]);
 
-  // Search profiles with role information - using an approach similar to the admin panel
+  // Search profiles using the useProfiles hook
   useEffect(() => {
-    const searchProfiles = async () => {
+    const performSearch = async () => {
       if (!currentUser) return;
       
-      setIsLoading(true);
-      setError(null);
-      
       try {
-        // First, get profiles based on search criteria
-        let query = supabase
-          .from('profiles')
-          .select('*');
-        
-        // Add search filter if provided
-        if (debouncedSearchQuery) {
-          query = query.or(
-            `first_name.ilike.%${debouncedSearchQuery}%,last_name.ilike.%${debouncedSearchQuery}%,bio.ilike.%${debouncedSearchQuery}%`
-          );
-        }
-        
-        // Add location filter if provided
-        if (locationFilter) {
-          query = query.ilike('location', `%${locationFilter}%`);
-        }
-        
-        // Add interest filter if provided
-        if (interestFilter.length > 0) {
-          // We'll need overlap operator for array contains
-          query = query.overlaps('interests', interestFilter);
-        }
-        
-        // Execute the query
-        const { data: profilesData, error: profilesError } = await query;
-        
-        if (profilesError) {
-          console.error("Error searching profiles:", profilesError);
-          setError("Search failed: " + profilesError.message);
-          return;
-        }
-
-        // Process the profile results
-        const profilesWithProcessedData = profilesData.map(profile => ({
-          ...profile,
-          social_links: profile.social_links ? 
-            (typeof profile.social_links === 'string' ? 
-              JSON.parse(profile.social_links) : profile.social_links) : {},
-          privacy_settings: profile.privacy_settings ? 
-            (typeof profile.privacy_settings === 'string' ? 
-              JSON.parse(profile.privacy_settings) : profile.privacy_settings) : { 
-                profile_visibility: "connections" 
-              }
-        }));
-        
-        // Efficiently fetch roles in a single query (similar to admin panel approach)
-        // Get all user IDs from profiles
-        const userIds = profilesWithProcessedData.map(profile => profile.id);
-        
-        // Get all roles for these users in a single query
-        const { data: rolesData, error: rolesError } = await supabase
-          .from('user_roles')
-          .select(`
-            user_id,
-            roles:role_id (
-              name
-            )
-          `)
-          .in('user_id', userIds);
-          
-        if (rolesError) {
-          console.error("Error fetching user roles:", rolesError);
-          // Continue with profiles but without roles
-        }
-        
-        // Create a map of user_id to role name (taking the highest role for each user)
-        const userRoleMap = new Map<string, UserRole>();
-        
-        if (rolesData) {
-          // Process all roles
-          rolesData.forEach(roleItem => {
-            const userId = roleItem.user_id;
-            const roleName = roleItem.roles?.name;
-            
-            if (userId && roleName) {
-              // Determine the highest role (ADMIN > ORGANIZER > MEMBER > SERVICE_PROVIDER)
-              let role: UserRole | undefined;
-              
-              // Map the role string to UserRole enum
-              if (roleName === 'ADMIN') {
-                role = UserRole.ADMIN;
-              } else if (roleName === 'ORGANIZER') {
-                role = UserRole.ORGANIZER;
-              } else if (roleName === 'MEMBER') {
-                role = UserRole.MEMBER;
-              } else if (roleName === 'SERVICE_PROVIDER') {
-                role = UserRole.SERVICE_PROVIDER;
-              }
-              
-              // If this role is defined and higher than any existing role for this user
-              if (role !== undefined) {
-                const existingRole = userRoleMap.get(userId);
-                if (existingRole === undefined || role < existingRole) {
-                  // In the enum, lower values = higher roles (ADMIN = 0, SERVICE_PROVIDER = 3)
-                  userRoleMap.set(userId, role);
-                }
-              }
-            }
-          });
-        }
-        
-        // Merge role data with profile data
-        const profilesWithRoles = profilesWithProcessedData.map(profile => {
-          // Get the role from the map or default to MEMBER
-          const role = userRoleMap.get(profile.id) ?? UserRole.MEMBER;
-          
-          return {
-            ...profile,
-            role,
-            // Get the string representation for logging
-            roleString: UserRole[role]
-          };
+        const result = await searchProfiles({
+          query: debouncedSearchQuery,
+          location: locationFilter,
+          interests: interestFilter,
+          page: 0,
+          limit: 50
         });
         
-        console.log('Profiles with roles:', profilesWithRoles.map(p => ({ 
-          id: p.id, 
-          name: `${p.first_name} ${p.last_name}`, 
-          role: p.role,
-          roleString: p.roleString
-        })));
-        
-        setProfiles(profilesWithRoles);
+        setProfiles(result.profiles);
       } catch (error) {
-        console.error("Error in searchProfiles:", error);
-        setError("An unexpected error occurred while searching profiles");
-      } finally {
-        setIsLoading(false);
+        console.error("Error in performSearch:", error);
+        toast({
+          title: "Search Error",
+          description: "Failed to search profiles. Please try again.",
+          variant: "destructive",
+        });
       }
     };
     
-    searchProfiles();
-  }, [currentUser, debouncedSearchQuery, locationFilter, interestFilter, toast]);
+    performSearch();
+  }, [currentUser, debouncedSearchQuery, locationFilter, interestFilter, searchProfiles, toast]);
 
   // Handle adding an interest filter
   const handleAddInterestFilter = () => {
@@ -358,7 +244,7 @@ const ProfileSearchPage: React.FC = () => {
               <Card className="border-border/40 bg-card/60 backdrop-blur-sm">
                 <CardContent className="p-4 flex items-center justify-between">
                   <h2 className="text-lg font-medium">
-                    {isLoading ? (
+                    {profilesLoading ? (
                       "Searching..."
                     ) : (
                       `Found ${profiles.length} ${profiles.length === 1 ? "person" : "people"}`
@@ -380,8 +266,8 @@ const ProfileSearchPage: React.FC = () => {
             
             <ProfileSearchList 
               profiles={profiles}
-              isLoading={isLoading}
-              error={error}
+              isLoading={profilesLoading}
+              error={profilesError}
               emptyMessage="No profiles found. Try changing your search criteria or filters to find more people."
             />
           </div>

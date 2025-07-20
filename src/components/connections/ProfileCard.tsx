@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
-import { ExtendedProfile } from "@/services/profileService";
+import { ExtendedProfile } from "@/types/profiles";
 import { UserRole } from "@/models/types";
 
 interface ProfileCardProps {

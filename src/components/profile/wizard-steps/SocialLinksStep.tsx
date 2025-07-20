@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Twitter, Linkedin, Facebook, Instagram, Globe, Trash2 } from "lucide-react";
-import { ExtendedProfile } from "@/services/profileService";
+import { ExtendedProfile } from "@/types/profiles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 
