@@ -37,19 +37,19 @@ const ProfilePage: React.FC = () => {
             id: currentUser.id,
             user_id: currentUser.id,
             email: currentUser.email || '',
-            first_name: currentUser.first_name || '',
-            last_name: currentUser.last_name || '',
+            first_name: currentUser.name?.split(' ')[0] || '',
+            last_name: currentUser.name?.split(' ').slice(1).join(' ') || '',
             bio: currentUser.bio,
             location: currentUser.location,
-            avatar_url: currentUser.avatar_url,
+            avatar_url: currentUser.imageUrl,
             interests: currentUser.interests,
-            social_links: currentUser.social_links,
-            privacy_settings: currentUser.privacy_settings,
+            social_links: {},
+            privacy_settings: { profile_visibility: 'public' },
             role: currentUser.role,
-            created_at: currentUser.created_at || new Date().toISOString(),
-            updated_at: currentUser.updated_at || new Date().toISOString(),
+            created_at: currentUser.createdAt || new Date().toISOString(),
+            updated_at: new Date().toISOString(),
             phone: currentUser.phone,
-            website: currentUser.website,
+            website: undefined,
           };
           setProfileData(unifiedProfile);
         } else {
@@ -58,7 +58,7 @@ const ProfilePage: React.FC = () => {
           if (fetchedProfile) {
             const unifiedProfile: UnifiedProfile = {
               id: fetchedProfile.id,
-              user_id: fetchedProfile.user_id || fetchedProfile.id,
+              user_id: fetchedProfile.id,
               email: fetchedProfile.email || '',
               first_name: fetchedProfile.first_name || '',
               last_name: fetchedProfile.last_name || '',
@@ -71,8 +71,8 @@ const ProfilePage: React.FC = () => {
               role: fetchedProfile.role,
               created_at: fetchedProfile.created_at || new Date().toISOString(),
               updated_at: fetchedProfile.updated_at || new Date().toISOString(),
-              phone: fetchedProfile.phone,
-              website: fetchedProfile.website,
+              phone: undefined,
+              website: undefined,
             };
             setProfileData(unifiedProfile);
           }

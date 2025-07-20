@@ -29,7 +29,15 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
   const [communities, setCommunities] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const { getRoleBadge } = usePermissions(profile);
+  const { getRoleBadge } = usePermissions({
+    id: profile.id,
+    name: `${profile.first_name} ${profile.last_name}`,
+    role: profile.role,
+    imageUrl: profile.avatar_url || '',
+    email: profile.email,
+    bio: profile.bio || '',
+    communities: []
+  });
 
   const FIXED_AVATAR_URL = "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif";
 
