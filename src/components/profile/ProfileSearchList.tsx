@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -209,13 +209,15 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
               
               <div className="mt-4">
                 <Button
+                  asChild
                   variant="outline"
                   size="sm"
                   className="w-full hover:bg-[#00eada]/10 hover:text-[#00eada] transition-colors"
-                  onClick={() => handleViewProfile(profile)}
                 >
-                  View Profile
-                  <ArrowRight className="ml-2 h-3 w-3" />
+                  <Link to={`/profile/${profile.id}`}>
+                    View Profile
+                    <ArrowRight className="ml-2 h-3 w-3" />
+                  </Link>
                 </Button>
               </div>
             </div>

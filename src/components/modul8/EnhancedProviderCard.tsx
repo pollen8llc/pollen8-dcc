@@ -12,6 +12,7 @@ import {
   Building
 } from 'lucide-react';
 import { ServiceProvider } from '@/types/modul8';
+import { Link } from 'react-router-dom';
 
 interface EnhancedProviderCardProps {
   provider: ServiceProvider;
@@ -105,13 +106,15 @@ const EnhancedProviderCard: React.FC<EnhancedProviderCardProps> = ({
 
         <div className="flex gap-2 mt-4 pt-4 border-t border-border/40">
           <Button
+            asChild
             variant="outline"
             size="sm"
-            onClick={() => onViewProfile(provider.id)}
             className="flex items-center gap-1"
           >
-            <ExternalLink className="h-3 w-3" />
-            View Profile
+            <Link to={`/profile/${provider.id}`}>
+              <ExternalLink className="h-3 w-3" />
+              View Profile
+            </Link>
           </Button>
           <Button
             onClick={() => onEngage(provider.id)}

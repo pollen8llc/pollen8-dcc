@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserRole } from "@/models/types";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface AuthorCardProps {
   author: {
@@ -120,13 +121,15 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
         
         {author.id && (
           <Button
+            asChild
             variant="outline"
             size="sm"
             className="w-full mt-4 hover:bg-[#00eada]/10 hover:text-[#00eada] transition-colors"
-            onClick={() => navigate(`/profile/${author.id}`)}
           >
-            View Profile
-            <ArrowRight className="ml-2 h-3 w-3" />
+            <Link to={`/profile/${author.id}`}>
+              View Profile
+              <ArrowRight className="ml-2 h-3 w-3" />
+            </Link>
           </Button>
         )}
       </CardContent>

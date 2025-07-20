@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { getUserOrganizer, getServiceProviders } from '@/services/modul8Service';
 import { ServiceProvider } from '@/types/modul8';
@@ -175,13 +175,15 @@ const Modul8Partners = () => {
               Engage
             </Button>
             <Button
+              asChild
               variant="outline"
               size="sm"
               className="flex-1 text-xs"
-              onClick={() => {/* View profile logic */}}
             >
-              <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-              View Profile
+              <Link to={`/profile/${provider.id}`}>
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                View Profile
+              </Link>
             </Button>
           </div>
         </CardContent>
