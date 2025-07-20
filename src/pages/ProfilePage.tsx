@@ -15,7 +15,7 @@ const ProfilePage: React.FC = () => {
   const [profileData, setProfileData] = React.useState<any>(null);
   const navigate = useNavigate();
 
-  // Determine which profile to show
+  // Always determine the profile ID - use current user's ID if no ID provided
   const profileId = id || currentUser?.id;
   const isOwnProfile = !id || id === currentUser?.id;
   
@@ -27,25 +27,21 @@ const ProfilePage: React.FC = () => {
   console.log('Is own profile:', isOwnProfile);
   console.log('==========================');
 
-  // Fetch profile data
+  // Always fetch profile data by ID - no fallback to currentUser
   React.useEffect(() => {
     const fetchProfile = async () => {
       if (profileId) {
-        if (isOwnProfile && currentUser) {
-          // Use current user data for own profile
-          setProfileData(currentUser);
-        } else {
-          // Fetch other user's profile
-          const fetchedProfile = await getProfileById(profileId);
-          setProfileData(fetchedProfile);
-        }
+        console.log('🔍 Fetching profile for ID:', profileId);
+        const fetchedProfile = await getProfileById(profileId);
+        console.log('📊 Fetched profile data:', fetchedProfile);
+        setProfileData(fetchedProfile);
       }
     };
 
     if (!isLoading && profileId) {
       fetchProfile();
     }
-  }, [profileId, currentUser, isLoading, isOwnProfile, getProfileById]);
+  }, [profileId, isLoading, getProfileById]);
 
   // Show loading state
   if (isLoading || profileLoading || !profileData) {
