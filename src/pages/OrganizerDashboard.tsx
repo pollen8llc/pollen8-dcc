@@ -215,8 +215,13 @@ const OrganizerDashboard = () => {
                     <div className="mt-auto">
                       <Button 
                         asChild 
+                        variant="outline"
                         size="sm" 
-                        className="w-full bg-foreground hover:bg-foreground/90 text-background group-hover:bg-foreground group-hover:text-background transition-colors"
+                        className="w-full border-muted-foreground/20 hover:border-muted-foreground/40 transition-all duration-300 group-hover:border-2"
+                        style={{
+                          borderColor: `${service.color}30`,
+                          '--tw-border-opacity': '0.3'
+                        } as React.CSSProperties}
                       >
                         <Link to={service.primaryLink} className="flex items-center justify-center gap-2">
                           {service.primaryLabel}
