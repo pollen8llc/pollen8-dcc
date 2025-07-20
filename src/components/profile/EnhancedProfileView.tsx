@@ -297,41 +297,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
       </div>
 
       {/* Interests Section */}
-      {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 && (
-        <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
-          <div 
-            className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
-            style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
-          />
-          <CardHeader className="relative">
-            <div className="flex items-center gap-3">
-              <div 
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
-              >
-                <Globe 
-                  className="h-5 w-5" 
-                  style={{ color: `hsl(var(--primary))` }}
-                />
-              </div>
-              <CardTitle className="text-lg font-semibold">Interests</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="relative">
-            <div className="flex flex-wrap gap-3">
-              {profile.interests.map((interest: string, idx: number) => (
-                <Badge 
-                  key={idx} 
-                  variant="secondary" 
-                  className="px-4 py-2 text-sm font-medium hover:scale-105 transition-transform cursor-pointer bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 hover:border-primary/40"
-                >
-                  #{interest}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Removed duplicate Interests card at the bottom. Only the Highlighted Interests card is shown above. */}
 
       {/* Communities Section */}
       <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
