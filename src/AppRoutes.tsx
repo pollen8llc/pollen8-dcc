@@ -9,7 +9,6 @@ import NonServiceProviderRoute from "@/components/auth/NonServiceProviderRoute";
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
 const Auth = lazy(() => import("@/pages/Auth"));
-const Profile = lazy(() => import("@/pages/Profile"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const ProfileEditPage = lazy(() => import("@/pages/ProfileEditPage"));
 const ProfileSetupPage = lazy(() => import("@/pages/ProfileSetupPage"));
@@ -130,7 +129,7 @@ const AppRoutes = () => {
           } />
           <Route path="/profile" element={
             <NonServiceProviderRoute>
-              <Profile />
+              <ProfilePage />
             </NonServiceProviderRoute>
           } />
           
