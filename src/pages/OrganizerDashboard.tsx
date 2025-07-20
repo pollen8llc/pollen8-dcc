@@ -142,7 +142,12 @@ const OrganizerDashboard = () => {
       <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
         {/* Header Section */}
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        </div>
+
+        {/* Platform Services Grid */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold">Platform Services</h2>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="bg-[#00eada]/10 text-[#00eada] border-[#00eada]/20">
                 <Zap className="h-3 w-3 mr-1" />
@@ -152,17 +157,10 @@ const OrganizerDashboard = () => {
                 <TrendingUp className="h-3 w-3 mr-1" />
                 {platformServices.length} Services
               </Badge>
+              <p className="text-muted-foreground text-sm hidden sm:block ml-4">
+                Core platform modules for your organization
+              </p>
             </div>
-          </div>
-        </div>
-
-        {/* Platform Services Grid */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">Platform Services</h2>
-            <p className="text-muted-foreground text-sm hidden sm:block">
-              Core platform modules for your organization
-            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
