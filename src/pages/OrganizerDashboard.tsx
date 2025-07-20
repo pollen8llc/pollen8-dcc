@@ -169,13 +169,24 @@ const OrganizerDashboard = () => {
               return (
                 <Card 
                   key={service.id}
-                  className="group relative overflow-hidden border-0 bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 h-full flex flex-col"
+                  className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 h-full flex flex-col"
                 >
+                  <div 
+                    className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+                    style={{ background: `linear-gradient(135deg, ${service.color} 0%, transparent 100%)` }}
+                  />
+                  
                   <CardHeader className="pb-4 relative flex-shrink-0">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <IconComponent className="h-5 w-5 text-primary" />
+                        <div 
+                          className="p-2 rounded-lg"
+                          style={{ backgroundColor: `${service.color}15` }}
+                        >
+                          <IconComponent 
+                            className="h-5 w-5" 
+                            style={{ color: service.color }}
+                          />
                         </div>
                         <div>
                           <CardTitle className="text-lg font-semibold">
@@ -205,7 +216,7 @@ const OrganizerDashboard = () => {
                       <Button 
                         asChild 
                         size="sm" 
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                        className="w-full bg-foreground hover:bg-foreground/90 text-background group-hover:bg-foreground group-hover:text-background transition-colors"
                       >
                         <Link to={service.primaryLink} className="flex items-center justify-center gap-2">
                           {service.primaryLabel}
