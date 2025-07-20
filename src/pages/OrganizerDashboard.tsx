@@ -169,24 +169,13 @@ const OrganizerDashboard = () => {
               return (
                 <Card 
                   key={service.id}
-                  className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5"
+                  className="group relative overflow-hidden border-0 bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 h-full flex flex-col"
                 >
-                  <div 
-                    className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
-                    style={{ background: `linear-gradient(135deg, ${service.color} 0%, transparent 100%)` }}
-                  />
-                  
-                  <CardHeader className="pb-4 relative">
+                  <CardHeader className="pb-4 relative flex-shrink-0">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div 
-                          className="p-2 rounded-lg"
-                          style={{ backgroundColor: `${service.color}15` }}
-                        >
-                          <IconComponent 
-                            className="h-5 w-5" 
-                            style={{ color: service.color }}
-                          />
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <IconComponent className="h-5 w-5 text-primary" />
                         </div>
                         <div>
                           <CardTitle className="text-lg font-semibold">
@@ -200,9 +189,9 @@ const OrganizerDashboard = () => {
                     </div>
                   </CardHeader>
 
-                  <CardContent className="pt-0 relative">
+                  <CardContent className="pt-0 relative flex-1 flex flex-col">
                     {/* Stats Row */}
-                    <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground flex-shrink-0">
                       {Object.entries(service.stats).map(([key, value]) => (
                         <div key={key} className="flex items-center gap-1">
                           <span className="font-medium">{value}</span>
@@ -211,25 +200,16 @@ const OrganizerDashboard = () => {
                       ))}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
+                    {/* Action Button */}
+                    <div className="mt-auto">
                       <Button 
                         asChild 
                         size="sm" 
-                        className="flex-1 bg-foreground hover:bg-foreground/90 text-background"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                       >
-                        <Link to={service.primaryLink}>
+                        <Link to={service.primaryLink} className="flex items-center justify-center gap-2">
                           {service.primaryLabel}
-                        </Link>
-                      </Button>
-                      <Button 
-                        asChild 
-                        variant="outline" 
-                        size="sm"
-                        className="border-muted-foreground/20 hover:border-muted-foreground/40"
-                      >
-                        <Link to={service.secondaryLink}>
-                          {service.secondaryLabel}
+                          <ArrowRight className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
