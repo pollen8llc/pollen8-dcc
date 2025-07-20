@@ -2,24 +2,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { 
-  ArrowLeft, 
-  Building, 
-  User, 
-  Trash2,
-  AlertTriangle,
-  UserPlus
-} from 'lucide-react';
+import { Trash2, AlertTriangle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProposalCardThread from '@/components/modul8/ProposalCardThread';
 import { ServiceRequest } from '@/types/modul8';
 import { getServiceRequestById, deleteServiceRequest, getUserOrganizer } from '@/services/modul8Service';
 import { toast } from '@/hooks/use-toast';
+import { MobileRequestLayout } from '@/components/shared/MobileRequestLayout';
 
 const Modul8RequestDetails = () => {
   const { requestId } = useParams<{ requestId: string }>();
@@ -98,25 +89,6 @@ const Modul8RequestDetails = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'negotiating':
-        return 'bg-orange-50 text-orange-700 border-orange-200';
-      case 'agreed':
-        return 'bg-green-50 text-green-700 border-green-200';
-      case 'in_progress':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
-      case 'completed':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'cancelled':
-        return 'bg-red-50 text-red-700 border-red-200';
-      default:
-        return 'bg-gray-50 text-gray-700 border-gray-200';
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -144,125 +116,59 @@ const Modul8RequestDetails = () => {
     );
   }
 
+  const deleteButton = (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button 
+          variant="outline" 
+          className="w-full lg:w-auto text-red-600 border-red-200 hover:bg-red-50 min-h-[44px]"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete Request
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
+            Delete Service Request?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the service request and all associated proposal cards and comments.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDeleteRequest}
+            disabled={deleting}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            {deleting ? "Deleting..." : "Delete Request"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('/modul8/dashboard')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold">{serviceRequest.title}</h1>
-            <div className="flex items-center gap-2 mt-2">
-              <Badge className={`${getStatusColor(serviceRequest.status)} border font-medium`}>
-                {serviceRequest.status.replace('_', ' ').toUpperCase()}
-              </Badge>
-              <span className="text-muted-foreground text-sm">
-                Created {new Date(serviceRequest.created_at).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Request
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  Delete Service Request?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the service request and all associated proposal cards and comments.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteRequest}
-                  disabled={deleting}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  {deleting ? "Deleting..." : "Delete Request"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar - Enhanced Participants Panel */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card className="border-border/40 bg-card/60 backdrop-blur-sm hover:border-primary/20 hover:shadow-lg transition-all">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold">Participants</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Organizer - Always Present */}
-                <div className="flex items-center gap-3 p-4 bg-blue-500/20 dark:bg-blue-900/20 rounded-xl border border-blue-500/30">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={serviceRequest.organizer?.logo_url} />
-                    <AvatarFallback className="bg-blue-500/20 text-blue-700 font-bold">
-                      <Building className="h-6 w-6" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="text-sm font-bold text-blue-700 dark:text-blue-300">
-                      {serviceRequest.organizer?.organization_name || 'Your Organization'}
-                    </div>
-                    <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">Client</div>
-                  </div>
-                </div>
-
-                {/* Service Provider - Show Always */}
-                <div className="flex items-center gap-3 p-4 bg-primary/20 dark:bg-primary/10 rounded-xl border border-primary/30">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={serviceRequest.service_provider?.logo_url} />
-                    <AvatarFallback className="bg-primary/20 text-primary font-bold">
-                      {serviceRequest.service_provider ? (
-                        <Building className="h-6 w-6" />
-                      ) : (
-                        <UserPlus className="h-6 w-6" />
-                      )}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="text-sm font-bold text-primary">
-                      {serviceRequest.service_provider?.business_name || 'Open Position'}
-                    </div>
-                    <div className="text-xs text-primary/80 font-medium">
-                      {serviceRequest.service_provider ? 'Service Provider' : 'Awaiting Assignment'}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content - Proposal Thread */}
-          <div className="lg:col-span-3">
-            <ProposalCardThread 
-              requestId={serviceRequest.id}
-              isServiceProvider={false}
-              serviceRequest={serviceRequest}
-            />
-          </div>
-        </div>
-      </div>
+      <MobileRequestLayout
+        serviceRequest={serviceRequest}
+        serviceProvider={serviceRequest.service_provider}
+        currentUserRole="organizer"
+        platformLabel="MODUL-8"
+        onBack={() => navigate('/modul8/dashboard')}
+        deleteButton={deleteButton}
+      >
+        <ProposalCardThread 
+          requestId={serviceRequest.id}
+          isServiceProvider={false}
+          serviceRequest={serviceRequest}
+        />
+      </MobileRequestLayout>
     </div>
   );
 };

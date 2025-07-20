@@ -22,19 +22,24 @@ const Index = () => {
       if (currentUser.role === 'SERVICE_PROVIDER') {
         console.log('🚀 Redirecting SERVICE_PROVIDER to LAB-R8');
         if (!currentUser.profile_complete) {
+          console.log('📝 Profile incomplete, redirecting to setup');
           navigate("/labr8/setup", { replace: true });
         } else {
+          console.log('✅ Profile complete, redirecting to dashboard');
           navigate("/labr8/dashboard", { replace: true });
         }
         return;
       }
       
-      // If user is an organizer, redirect to /organizer
+      // If user is an organizer, redirect to organizer dashboard
       if (currentUser.role === 'ORGANIZER') {
-        console.log('🚀 Redirecting ORGANIZER to /organizer');
+        console.log('🚀 Redirecting ORGANIZER to organizer dashboard');
         if (!currentUser.profile_complete) {
+          console.log('📝 Organizer profile incomplete, redirecting to setup');
           navigate("/profile/setup", { replace: true });
         } else {
+          console.log('✅ Organizer profile complete, redirecting to dashboard');
+          // Enhanced: Always redirect organizers to their dashboard when logged in
           navigate("/organizer", { replace: true });
         }
         return;
