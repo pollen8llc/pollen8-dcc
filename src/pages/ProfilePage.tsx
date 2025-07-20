@@ -68,7 +68,13 @@ const ProfilePage: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center min-h-[50vh]">
             <div className="text-center">
-              <p className="mt-4 text-lg text-red-500">Profile not found or you do not have access.</p>
+              <h2 className="text-2xl font-bold mb-4">Profile Not Found</h2>
+              <p className="text-muted-foreground mb-4">
+                The profile you're looking for doesn't exist or you don't have permission to view it.
+              </p>
+              <Button onClick={() => navigate('/profile/search')}>
+                Browse Profiles
+              </Button>
             </div>
           </div>
         </div>
