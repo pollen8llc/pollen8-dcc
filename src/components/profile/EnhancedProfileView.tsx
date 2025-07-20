@@ -94,110 +94,83 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* Hero Section with Creative Agency Feel */}
-      <div className="relative overflow-hidden rounded-3xl glass-card p-8 md:p-12 mb-8">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20"></div>
-          <div className="absolute top-0 left-0 w-full h-full opacity-20">
-            <div className="w-full h-full" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300eada' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='7' r='1'/%3E%3Ccircle cx='47' cy='7' r='1'/%3E%3Ccircle cx='7' cy='27' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='27' r='1'/%3E%3Ccircle cx='7' cy='47' r='1'/%3E%3Ccircle cx='27' cy='47' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-            }}></div>
-          </div>
-        </div>
+      {/* Business Card Header - Horizontal Layout */}
+      <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
+        <div 
+          className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+          style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
+        />
         
-        <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8">
-          {/* Avatar Section */}
-          <div className="relative">
-            <div className="relative">
-              {isAdmin && (
-                <div className="absolute -inset-2 rounded-full admin-avatar-border"></div>
-              )}
-              <Avatar className="h-32 w-32 lg:h-40 lg:w-40 ring-4 ring-primary/20 shadow-2xl">
-                <AvatarImage src={FIXED_AVATAR_URL} alt={getFullName()} className="object-cover" />
-                <AvatarFallback className="text-2xl lg:text-3xl font-bold bg-gradient-to-br from-primary/20 to-accent/20">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              {/* Status Indicator */}
-              <div className="absolute bottom-2 right-2 w-6 h-6 bg-primary rounded-full border-4 border-background animate-pulse"></div>
+        <CardContent className="p-6 relative">
+          <div className="flex items-center gap-6">
+            {/* Small Glowing Avatar */}
+            <div className="relative flex-shrink-0">
+              <div className="relative">
+                <Avatar className="h-16 w-16 ring-4 ring-primary/20 shadow-lg animate-pulse">
+                  <AvatarImage src={FIXED_AVATAR_URL} alt={getFullName()} className="object-cover" />
+                  <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-accent/20">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Glowing white circle that pulses */}
+                <div className="absolute inset-0 rounded-full bg-white/20 animate-ping"></div>
+                <div className="absolute inset-0 rounded-full bg-white/10 animate-pulse"></div>
+              </div>
             </div>
-          </div>
-          
-          {/* Profile Info */}
-          <div className="flex-1 text-center lg:text-left">
-            <div className="space-y-4">
-              <div>
-                <h1 className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-2">
-                  {getFullName()}
-                </h1>
-                <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-3">
+            
+            {/* Basic Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-semibold text-foreground mb-1">
+                    {getFullName()}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {profile?.location && (
+                      <div className="flex items-center text-muted-foreground text-sm">
+                        <MapPin className="h-4 w-4 mr-1 text-primary" />
+                        <span>{profile.location}</span>
+                      </div>
+                    )}
+                    <div className="text-sm text-muted-foreground">
+                      Active since {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'recently'}
+                    </div>
+                  </div>
+                  {profile?.bio && (
+                    <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                      {profile.bio.length > 100 ? `${profile.bio.substring(0, 100)}...` : profile.bio}
+                    </p>
+                  )}
+                </div>
+                
+                {/* Action Button */}
+                <div className="flex-shrink-0">
                   {isOwnProfile ? (
-                    <Button
-                      variant="ghost"
+                    <Button 
+                      onClick={onEdit} 
+                      variant="outline"
                       size="sm"
-                      className="bg-primary/20 text-primary hover:bg-primary/30 border border-primary/40 rounded-full px-4"
-                      onClick={() => setShowRoleDialog(true)}
+                      className="border-muted-foreground/20 hover:border-muted-foreground/40 transition-all duration-300"
                     >
-                      {roleBadge.text}
-                      <Settings className="ml-2 h-3 w-3" />
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
                     </Button>
                   ) : (
-                    <Badge variant="teal" className="rounded-full px-4 py-1 text-sm font-medium">
-                      {roleBadge.text}
-                    </Badge>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="border-muted-foreground/20 hover:border-muted-foreground/40 transition-all duration-300"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Connect
+                    </Button>
                   )}
                 </div>
               </div>
-              
-              {profile?.location && (
-                <div className="flex items-center justify-center lg:justify-start text-muted-foreground">
-                  <MapPin className="h-5 w-5 mr-2 text-primary" />
-                  <span className="text-lg">{profile.location}</span>
-                </div>
-              )}
-              
-              <p className="text-muted-foreground text-lg">
-                Active since {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'recently'}
-              </p>
-              
-              {/* Quick Bio Preview */}
-              {profile?.bio && (
-                <p className="text-foreground/80 text-lg max-w-2xl leading-relaxed">
-                  {profile.bio.length > 150 ? `${profile.bio.substring(0, 150)}...` : profile.bio}
-                </p>
-              )}
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 mt-6 justify-center lg:justify-start">
-              {isOwnProfile ? (
-                <Button 
-                  onClick={onEdit} 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-primary/25 transition-all duration-300"
-                >
-                  <Edit className="h-5 w-5 mr-2" />
-                  Edit Profile
-                </Button>
-              ) : (
-                <Button 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-primary/25 transition-all duration-300"
-                >
-                  <Mail className="h-5 w-5 mr-2" />
-                  Connect
-                </Button>
-              )}
-              <Button 
-                variant="outline" 
-                className="border-primary/40 text-primary hover:bg-primary/10 px-6 py-3 rounded-xl font-semibold"
-              >
-                <ExternalLink className="h-5 w-5 mr-2" />
-                Share Profile
-              </Button>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Contact form for non-own profiles */}
       {!isOwnProfile && (
@@ -223,74 +196,104 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
         </Card>
       )}
 
-      {/* Esports-Style Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {/* About/Bio Card */}
-        <Card className="glass-card border-primary/20 col-span-1 md:col-span-2 lg:col-span-2">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 rounded-lg bg-primary/20">
-                <User className="h-5 w-5 text-primary" />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+        {/* Bio Section */}
+        <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 col-span-1 md:col-span-2 xl:col-span-2">
+          <div 
+            className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+            style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
+          />
+          <CardHeader className="pb-4 relative">
+            <div className="flex items-center gap-3">
+              <div 
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
+              >
+                <User 
+                  className="h-5 w-5" 
+                  style={{ color: `hsl(var(--primary))` }}
+                />
               </div>
-              About
-            </CardTitle>
+              <CardTitle className="text-lg font-semibold">Bio</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             {profile?.bio ? (
-              <p className="text-foreground/90 leading-relaxed text-lg">{profile.bio}</p>
+              <p className="text-foreground/90 leading-relaxed">{profile.bio}</p>
             ) : (
-              <p className="text-muted-foreground italic text-lg">No bio provided yet - add your story!</p>
+              <p className="text-muted-foreground italic">No bio provided yet - add your story!</p>
             )}
           </CardContent>
         </Card>
 
-        {/* Quick Stats Card */}
-        <Card className="glass-card border-primary/20">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 rounded-lg bg-accent/20">
-                <Users className="h-5 w-5 text-accent" />
+        {/* Activity Stats */}
+        <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
+          <div 
+            className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+            style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
+          />
+          <CardHeader className="pb-4 relative">
+            <div className="flex items-center gap-3">
+              <div 
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
+              >
+                <Users 
+                  className="h-5 w-5" 
+                  style={{ color: `hsl(var(--primary))` }}
+                />
               </div>
-              Stats
-            </CardTitle>
+              <CardTitle className="text-lg font-semibold">Activity</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
+          <CardContent className="relative space-y-4">
+            <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Communities</span>
-              <span className="text-xl font-bold text-primary">{communities.length}</span>
+              <span className="font-medium">{communities.length}</span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Connections</span>
-              <span className="text-xl font-bold text-accent">-</span>
+              <span className="font-medium">-</span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Projects</span>
-              <span className="text-xl font-bold text-primary">-</span>
+              <span className="font-medium">-</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Skills/Interests Section with Gaming Feel */}
+      {/* Interests Section */}
       {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 && (
-        <Card className="glass-card border-accent/20 mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 rounded-lg bg-accent/20">
-                <Globe className="h-5 w-5 text-accent" />
+        <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
+          <div 
+            className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+            style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
+          />
+          <CardHeader className="relative">
+            <div className="flex items-center gap-3">
+              <div 
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
+              >
+                <Globe 
+                  className="h-5 w-5" 
+                  style={{ color: `hsl(var(--primary))` }}
+                />
               </div>
-              Skills & Interests
-            </CardTitle>
+              <CardTitle className="text-lg font-semibold">Interests</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="flex flex-wrap gap-3">
               {profile.interests.map((interest: string, idx: number) => (
                 <Badge 
                   key={idx} 
-                  variant="tag" 
-                  className="px-4 py-2 text-sm font-medium hover:scale-105 transition-transform cursor-pointer"
+                  variant="secondary" 
+                  className="px-3 py-1 text-sm font-medium hover:scale-105 transition-transform cursor-pointer"
                 >
-                  #{interest.toLowerCase().replace(/\s+/g, '')}
+                  {interest}
                 </Badge>
               ))}
             </div>
@@ -298,110 +301,105 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
         </Card>
       )}
 
-      {/* Contact & Social Links Combined */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Contact Information */}
-        {(profile.email || profile.phone) && (
-          <Card className="glass-card border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-xl">
-                <div className="p-2 rounded-lg bg-primary/20">
-                  <Mail className="h-5 w-5 text-primary" />
-                </div>
-                Contact
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {profile.email && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
-                  <Mail className="h-5 w-5 text-primary" />
-                  <span className="text-foreground">{profile.email}</span>
-                </div>
-              )}
-              {profile.phone && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
-                  <Phone className="h-5 w-5 text-accent" />
-                  <span className="text-foreground">{profile.phone}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Social Links */}
-        <Card className="glass-card border-accent/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 rounded-lg bg-accent/20">
-                <Globe className="h-5 w-5 text-accent" />
+      {/* Contact Information - Skip if empty */}
+      {(profile.email || profile.phone || (profile?.social_links && typeof profile.social_links === 'object' && Object.keys(profile.social_links).length > 0)) && (
+        <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
+          <div 
+            className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+            style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
+          />
+          <CardHeader className="relative">
+            <div className="flex items-center gap-3">
+              <div 
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
+              >
+                <Mail 
+                  className="h-5 w-5" 
+                  style={{ color: `hsl(var(--primary))` }}
+                />
               </div>
-              Social Links
-            </CardTitle>
+              <CardTitle className="text-lg font-semibold">Contact & Social</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative space-y-4">
+            {profile.email && (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Mail className="h-4 w-4" />
+                <span>{profile.email}</span>
+              </div>
+            )}
+            {profile.phone && (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4" />
+                <span>{profile.phone}</span>
+              </div>
+            )}
             {profile?.social_links && typeof profile.social_links === 'object' && 
-             Object.keys(profile.social_links).length > 0 ? (
-              <div className="space-y-3">
+             Object.keys(profile.social_links).length > 0 && (
+              <div className="space-y-2">
                 {Object.entries(profile.social_links).map(([platform, url]) => (
                   <a 
                     key={platform}
                     href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 hover:bg-primary/20 hover:border-primary/40 transition-all duration-300 border border-transparent group"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    <ExternalLink className="h-5 w-5 text-primary group-hover:text-accent transition-colors" />
-                    <span className="capitalize font-medium text-foreground group-hover:text-primary transition-colors">{platform}</span>
+                    <ExternalLink className="h-4 w-4" />
+                    <span className="capitalize">{platform}</span>
                   </a>
                 ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Globe className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground italic">No social links added yet</p>
               </div>
             )}
           </CardContent>
         </Card>
-      </div>
+      )}
 
-      {/* Communities/Teams Section with Gaming Aesthetic */}
-      <Card className="glass-card border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3 text-2xl">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Users className="h-6 w-6 text-primary" />
+      {/* Communities Section */}
+      <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
+        <div 
+          className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+          style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
+        />
+        <CardHeader className="relative">
+          <div className="flex items-center gap-3">
+            <div 
+              className="p-2 rounded-lg"
+              style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
+            >
+              <Users 
+                className="h-5 w-5" 
+                style={{ color: `hsl(var(--primary))` }}
+              />
             </div>
-            Teams & Communities
-          </CardTitle>
+            <CardTitle className="text-lg font-semibold">Communities</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
             </div>
           ) : communities.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {communities.map((community) => (
-                <Card key={community.id} className="glass-card border-accent/20 overflow-hidden hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 group">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
+                <Card key={community.id} className="group border-0 bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-300">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
                       {community.logo_url ? (
-                        <div className="relative">
-                          <img 
-                            src={community.logo_url} 
-                            alt={community.name}
-                            className="w-14 h-14 rounded-xl object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
-                          />
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-background"></div>
-                        </div>
+                        <img 
+                          src={community.logo_url} 
+                          alt={community.name}
+                          className="w-10 h-10 rounded-lg object-cover"
+                        />
                       ) : (
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
-                          <Users className="h-7 w-7 text-primary" />
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Users className="h-5 w-5 text-primary" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors truncate">
+                        <h4 className="font-semibold text-foreground truncate">
                           {community.name}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
