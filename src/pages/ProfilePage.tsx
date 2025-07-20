@@ -4,15 +4,15 @@ import { useParams } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { useProfiles } from "@/hooks/useProfiles";
 import Navbar from "@/components/Navbar";
-import MobileProfileView from "@/components/profile/MobileProfileView";
-import DesktopProfileView from "@/components/profile/DesktopProfileView";
+import EnhancedProfileView from "@/components/profile/EnhancedProfileView";
 import { useNavigate } from "react-router-dom";
+import { UnifiedProfile } from "@/types/unifiedProfile";
 
 const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { currentUser, isLoading } = useUser();
   const { getProfileById, isLoading: profileLoading } = useProfiles();
-  const [profileData, setProfileData] = React.useState<any>(null);
+  const [profileData, setProfileData] = React.useState<UnifiedProfile | null>(null);
   const navigate = useNavigate();
 
   // Determine which profile to show
@@ -32,12 +32,50 @@ const ProfilePage: React.FC = () => {
     const fetchProfile = async () => {
       if (profileId) {
         if (isOwnProfile && currentUser) {
-          // Use current user data for own profile
-          setProfileData(currentUser);
+          // Convert current user to UnifiedProfile format
+          const unifiedProfile: UnifiedProfile = {
+            id: currentUser.id,
+            user_id: currentUser.id,
+            email: currentUser.email || '',
+            first_name: currentUser.first_name || '',
+            last_name: currentUser.last_name || '',
+            bio: currentUser.bio,
+            location: currentUser.location,
+            avatar_url: currentUser.avatar_url,
+            interests: currentUser.interests,
+            social_links: currentUser.social_links,
+            privacy_settings: currentUser.privacy_settings,
+            role: currentUser.role,
+            created_at: currentUser.created_at || new Date().toISOString(),
+            updated_at: currentUser.updated_at || new Date().toISOString(),
+            phone: currentUser.phone,
+            website: currentUser.website,
+          };
+          setProfileData(unifiedProfile);
         } else {
           // Fetch other user's profile
           const fetchedProfile = await getProfileById(profileId);
-          setProfileData(fetchedProfile);
+          if (fetchedProfile) {
+            const unifiedProfile: UnifiedProfile = {
+              id: fetchedProfile.id,
+              user_id: fetchedProfile.user_id || fetchedProfile.id,
+              email: fetchedProfile.email || '',
+              first_name: fetchedProfile.first_name || '',
+              last_name: fetchedProfile.last_name || '',
+              bio: fetchedProfile.bio,
+              location: fetchedProfile.location,
+              avatar_url: fetchedProfile.avatar_url,
+              interests: fetchedProfile.interests,
+              social_links: fetchedProfile.social_links,
+              privacy_settings: fetchedProfile.privacy_settings,
+              role: fetchedProfile.role,
+              created_at: fetchedProfile.created_at || new Date().toISOString(),
+              updated_at: fetchedProfile.updated_at || new Date().toISOString(),
+              phone: fetchedProfile.phone,
+              website: fetchedProfile.website,
+            };
+            setProfileData(unifiedProfile);
+          }
         }
       }
     };
@@ -72,19 +110,9 @@ const ProfilePage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Desktop View */}
-      <div className="hidden md:block">
-        <DesktopProfileView 
-          user={profileData}
-          isOwnProfile={isOwnProfile}
-          onEdit={handleEdit}
-        />
-      </div>
-      
-      {/* Mobile View */}
-      <div className="md:hidden">
-        <MobileProfileView 
-          user={profileData}
+      <div className="container mx-auto px-4 py-8">
+        <EnhancedProfileView 
+          profile={profileData}
           isOwnProfile={isOwnProfile}
           onEdit={handleEdit}
         />

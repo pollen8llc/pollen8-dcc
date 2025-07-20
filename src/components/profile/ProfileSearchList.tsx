@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -65,6 +66,9 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
 
   // Check if user is admin
   const isAdmin = (role?: UserRole) => role === UserRole.ADMIN;
+
+  // Fixed avatar URL for all users
+  const FIXED_AVATAR_URL = "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif";
 
   // Handle view profile navigation
   const handleViewProfile = (profile: ExtendedProfile) => {
@@ -155,7 +159,7 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
             <div className="p-6">
               <div className="flex items-start gap-4">
                 <Avatar className={`h-16 w-16 ${isAdmin(profile.role) ? 'ring-2 ring-[#9b87f5]/50' : 'ring-2 ring-[#00eada]/20'}`}>
-                  <AvatarImage src={profile.avatar_url || ""} />
+                  <AvatarImage src={FIXED_AVATAR_URL} />
                   <AvatarFallback className="bg-[#00eada]/10 text-[#00eada] font-medium">
                     {getInitials(profile.first_name, profile.last_name)}
                   </AvatarFallback>
