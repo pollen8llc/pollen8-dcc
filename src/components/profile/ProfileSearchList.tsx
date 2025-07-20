@@ -68,7 +68,12 @@ const ProfileSearchList: React.FC<ProfileSearchListProps> = ({
 
   // Handle view profile navigation
   const handleViewProfile = (profile: ExtendedProfile) => {
-    console.log('Navigating to profile:', profile.id, profile);
+    console.log('=== PROFILE CLICK DEBUG ===');
+    console.log('Profile object:', profile);
+    console.log('Profile ID:', profile.id);
+    console.log('Profile name:', profile.first_name, profile.last_name);
+    console.log('==========================');
+    
     if (profile.id) {
       navigate(`/profile/${profile.id}`);
     } else {
