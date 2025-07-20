@@ -7,6 +7,7 @@ import ProposalCardThread from '@/components/modul8/ProposalCardThread';
 import { ServiceRequest } from '@/types/modul8';
 import { getServiceRequestById, getUserServiceProvider } from '@/services/modul8Service';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import { MobileRequestLayout } from '@/components/shared/MobileRequestLayout';
 
 const Labr8RequestDetails = () => {
