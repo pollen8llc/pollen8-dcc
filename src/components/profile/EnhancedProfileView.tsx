@@ -88,6 +88,9 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
   const isAdmin = profile?.role === UserRole.ADMIN;
   const roleBadge = getRoleBadge();
 
+  // Debug: log interests
+  console.log("Profile interests:", profile.interests);
+
   return (
     <div className="w-full max-w-6xl mx-auto">
       {/* Business Card Header - Horizontal Layout */}
