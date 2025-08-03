@@ -145,66 +145,11 @@ export const useProfiles = () => {
   };
 
   // Search for profiles
-  const searchProfiles = async (params: {
-    query?: string;
-    interests?: string[];
-    location?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ profiles: ExtendedProfile[]; count: number }> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { query, interests, location, page = 0, limit = 10 } = params;
-      
-      let queryBuilder = supabase
-        .from('profiles')
-        .select('*', { count: 'exact' });
-      
-      // Apply filters if provided
-      if (query) {
-        queryBuilder = queryBuilder.or(
-          `first_name.ilike.%${query}%,last_name.ilike.%${query}%,bio.ilike.%${query}%`
-        );
-      }
-      
-      if (location) {
-        queryBuilder = queryBuilder.ilike('location', `%${location}%`);
-      }
-      
-      if (interests && interests.length > 0) {
-        queryBuilder = queryBuilder.contains('interests', interests);
-      }
-      
-      // Apply pagination
-      queryBuilder = queryBuilder
-        .order('created_at', { ascending: false })
-        .range(page * limit, (page + 1) * limit - 1);
-      
-      const { data, error, count } = await queryBuilder;
-      
-      if (error) {
-        console.error("Error searching profiles:", error);
-        setError(error.message);
-        return { profiles: [], count: 0 };
-      }
-      
-      return { profiles: data as ExtendedProfile[], count: count || 0 };
-    } catch (err: any) {
-      console.error("Exception in searchProfiles:", err);
-      setError(err.message || "An unexpected error occurred");
-      return { profiles: [], count: 0 };
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return {
     getProfileById,
     updateProfile,
-    searchProfiles,
     isLoading,
-    error,
+    error
   };
 };

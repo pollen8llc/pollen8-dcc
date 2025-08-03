@@ -29,7 +29,7 @@ import {
   Bell,
   Folder,
   PlusCircle,
-  UserSearch,
+  
   Building2
 } from "lucide-react";
 
@@ -113,14 +113,6 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   My Profile
                 </Button>
 
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => handleNavigation("/profile/search")}
-                >
-                  <UserSearch className="mr-2 h-4 w-4" />
-                  Find Profiles
-                </Button>
 
                 <Button
                   variant="ghost"

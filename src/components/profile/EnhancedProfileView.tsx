@@ -92,280 +92,243 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
   console.log("Profile interests:", profile.interests);
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      {/* Business Card Header - Horizontal Layout */}
-      <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
-        <div 
-          className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
-          style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
-        />
-        <CardContent className="p-6 relative">
-          <div className="flex items-center gap-6">
-            {/* Animated 3px conic-gradient border avatar */}
-            <div className="relative flex-shrink-0">
-              <div className="relative h-20 w-20 md:h-28 md:w-28">
-                <span className="absolute inset-0 rounded-full animate-gradient-spin border-4 border-transparent" style={{
-                  background: 'conic-gradient(from 180deg at 50% 50%, #3b82f6, #fff, #00eada, #3b82f6)',
-                  padding: 0,
-                  borderWidth: '3px',
-                  zIndex: 1
-                }} />
-                <Avatar className="relative h-20 w-20 md:h-28 md:w-28 border-4 border-background shadow-lg z-10">
-                  <AvatarImage src={FIXED_AVATAR_URL} alt={getFullName()} className="object-cover" />
-                  <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-accent/20">
+    <div className="w-full max-w-7xl mx-auto p-6 space-y-8">
+      {/* Enhanced Business Card Header - Full Width */}
+      <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
+        <CardContent className="p-0">
+          <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-8">
+            <div className="flex items-center gap-8">
+              {/* Avatar with Instagram-style animated gradient border */}
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-spin-slow opacity-75 blur-sm" />
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-pulse" />
+                <Avatar className="relative w-24 h-24 border-4 border-background shadow-2xl">
+                  <AvatarImage src={profile.avatar_url || FIXED_AVATAR_URL} alt={getFullName()} />
+                  <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/20 to-secondary/20">
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>
               </div>
-            </div>
-            {/* Basic Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-semibold text-foreground mb-1">
+              
+              {/* Profile Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-4 mb-3">
+                  <h1 className="text-5xl font-bold text-foreground tracking-tight">
                     {getFullName()}
                   </h1>
-                  <div className="flex flex-wrap items-center gap-3">
-                    {profile?.location && (
-                      <div className="flex items-center text-muted-foreground text-sm">
-                        <MapPin className="h-4 w-4 mr-1 text-primary" />
-                        <span>{profile.location}</span>
-                      </div>
-                    )}
-                    <div className="text-sm text-muted-foreground">
-                      Active since {profile?.created_at ? formatDistanceToNow(new Date(profile.created_at), { addSuffix: true }) : 'recently'}
-                    </div>
+                  {profile.role && (
+                    <Badge variant="secondary" className="text-sm font-medium">
+                      {profile.role}
+                    </Badge>
+                  )}
+                </div>
+                
+                {profile.location && (
+                  <div className="flex items-center gap-3 mb-4">
+                    <MapPin className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-xl text-muted-foreground font-medium">{profile.location}</span>
                   </div>
-                  {profile?.bio && (
-                    <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                      {profile.bio.length > 100 ? `${profile.bio.substring(0, 100)}...` : profile.bio}
-                    </p>
-                  )}
-                </div>
-                {/* Action Button */}
-                <div className="flex-shrink-0">
-                  {isOwnProfile ? (
-                    <Button 
-                      onClick={onEdit} 
-                      variant="outline"
-                      size="sm"
-                      className="border-muted-foreground/20 hover:border-muted-foreground/40 transition-all duration-300"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
-                    </Button>
-                  ) : (
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="border-muted-foreground/20 hover:border-muted-foreground/40 transition-all duration-300"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Connect
-                    </Button>
-                  )}
-                </div>
+                )}
+                
+                {profile.bio && (
+                  <p className="text-lg text-foreground/80 leading-relaxed max-w-3xl">
+                    {profile.bio}
+                  </p>
+                )}
+              </div>
+              
+              {/* Action Button */}
+              <div className="flex-shrink-0">
+                {isOwnProfile ? (
+                  <Button onClick={onEdit} size="lg" className="px-8 py-4 text-lg font-semibold">
+                    <Edit className="w-5 h-5 mr-3" />
+                    Edit Profile
+                  </Button>
+                ) : (
+                  <Button variant="default" size="lg" className="px-8 py-4 text-lg font-semibold">
+                    <Mail className="w-5 h-5 mr-3" />
+                    Connect
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Contact form for non-own profiles */}
+      {/* Contact Form for non-own profiles */}
       {!isOwnProfile && (
-        <Card className="mb-8">
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="contact" className="border-none">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                <div className="flex items-center gap-2 text-lg font-semibold">
-                  <Mail className="h-5 w-5" />
-                  Contact {getFullName()}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
-                <div className="flex justify-center">
-                  <PublicContactForm 
-                    profileUserId={profile.id}
-                    profileUserName={getFullName()}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </Card>
+        <Accordion type="single" collapsible className="mb-8">
+          <AccordionItem value="contact" className="border border-border/50 rounded-lg px-4">
+            <AccordionTrigger className="text-xl font-semibold hover:no-underline py-6">
+              <div className="flex items-center gap-3">
+                <Mail className="w-6 h-6 text-primary" />
+                Contact {getFullName()}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pb-6">
+              <PublicContactForm 
+                profileUserId={profile.id}
+                profileUserName={getFullName()}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       )}
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-        {/* Bio Section */}
-        <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 col-span-1 md:col-span-2 xl:col-span-2">
-          <div 
-            className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
-            style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
-          />
-          <CardHeader className="pb-4 relative">
-            <div className="flex items-center gap-3">
-              <div 
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
-              >
-                <User 
-                  className="h-5 w-5" 
-                  style={{ color: `hsl(var(--primary))` }}
-                />
-              </div>
-              <CardTitle className="text-lg font-semibold">Bio</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="relative">
-            {profile?.bio ? (
-              <p className="text-foreground/90 leading-relaxed">{profile.bio}</p>
-            ) : (
-              <p className="text-muted-foreground italic">No bio provided yet - add your story!</p>
-            )}
-          </CardContent>
-        </Card>
+      {/* Enhanced Main Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        {/* Left Column - Bio & Activity */}
+        <div className="xl:col-span-8 space-y-8">
+          {/* Bio Section with enhanced styling */}
+          {profile.bio && (
+            <Card className="border-border/50 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <User className="w-6 h-6 text-primary" />
+                  About
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-lg text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                  {profile.bio}
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
-        {/* Activity/Stats Dashboard Card */}
-        <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
-          <div 
-            className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
-            style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
-          />
-          <CardHeader className="pb-4 relative">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg" style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}>
-                <BarChart2 className="h-5 w-5" style={{ color: `hsl(var(--primary))` }} />
-              </div>
-              <CardTitle className="text-lg font-semibold">Activity & Stats</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="relative">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold mb-1">{stats?.totalArticles ?? 0}</div>
-                <div className="text-xs text-muted-foreground">Articles</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold mb-1">{stats?.totalViews ?? 0}</div>
-                <div className="text-xs text-muted-foreground">Views</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold mb-1">{stats?.totalComments ?? 0}</div>
-                <div className="text-xs text-muted-foreground">Comments</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold mb-1">{stats?.totalVotes ?? 0}</div>
-                <div className="text-xs text-muted-foreground">Votes</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold mb-1">{stats?.savedArticlesCount ?? 0}</div>
-                <div className="text-xs text-muted-foreground">Saved</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold mb-1">{stats?.recentArticlesCount ?? 0}</div>
-                <div className="text-xs text-muted-foreground">Recent</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Highlighted Interests Card */}
-        {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 && (
-          <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-blue-100 via-white to-cyan-100 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
-            <CardHeader className="relative">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-200/40">
-                  <Globe className="h-5 w-5 text-blue-500" />
-                </div>
-                <CardTitle className="text-lg font-semibold">Highlighted Interests</CardTitle>
-              </div>
+          {/* Enhanced Activity & Stats Card */}
+          <Card className="border-border/50 shadow-lg">
+            <CardHeader className="pb-6">
+              <CardTitle className="flex items-center gap-3 text-2xl">
+                <BarChart2 className="w-6 h-6 text-primary" />
+                Activity & Stats
+              </CardTitle>
             </CardHeader>
-            <CardContent className="relative">
-              <div className="flex flex-wrap gap-3">
-                {profile.interests.map((interest: string, idx: number) => (
-                  <Badge 
-                    key={idx} 
-                    variant="secondary" 
-                    className="px-4 py-2 text-base font-semibold bg-gradient-to-r from-blue-200 via-white to-cyan-200 border border-blue-300/40 text-blue-900 shadow-sm hover:scale-105 transition-transform cursor-pointer"
-                  >
-                    #{interest}
-                  </Badge>
-                ))}
+            <CardContent>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="text-center p-6 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
+                  <div className="text-3xl font-bold text-primary">{stats?.totalArticles ?? 0}</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Articles</div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/20 rounded-xl">
+                  <div className="text-3xl font-bold text-blue-500">{stats?.totalViews ?? 0}</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Views</div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-green-500/5 to-green-500/10 border border-green-500/20 rounded-xl">
+                  <div className="text-3xl font-bold text-green-500">{stats?.totalComments ?? 0}</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Comments</div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-orange-500/5 to-orange-500/10 border border-orange-500/20 rounded-xl">
+                  <div className="text-3xl font-bold text-orange-500">{stats?.totalVotes ?? 0}</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Votes</div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/20 rounded-xl">
+                  <div className="text-3xl font-bold text-purple-500">{stats?.savedArticlesCount ?? 0}</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Saved</div>
+                </div>
+                <div className="text-center p-6 bg-gradient-to-br from-teal-500/5 to-teal-500/10 border border-teal-500/20 rounded-xl">
+                  <div className="text-3xl font-bold text-teal-500">{stats?.recentArticlesCount ?? 0}</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Recent</div>
+                </div>
               </div>
             </CardContent>
           </Card>
-        )}
+        </div>
 
-        {/* Social Links Card */}
-        {profile?.social_links && typeof profile.social_links === 'object' && Object.keys(profile.social_links).length > 0 && (
-          <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5">
-            <CardHeader className="relative">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-200/40">
-                  <ExternalLink className="h-5 w-5 text-blue-500" />
+        {/* Right Column - Interests, Social & Communities */}
+        <div className="xl:col-span-4 space-y-8">
+          {/* Enhanced Interests */}
+          {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 && (
+            <Card className="border-border/50 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <Globe className="w-5 h-5 text-primary" />
+                  Interests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  {profile.interests.map((interest: string, idx: number) => (
+                    <Badge 
+                      key={idx} 
+                      variant="secondary"
+                      className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border border-primary/30 hover:from-primary/20 hover:via-secondary/20 hover:to-accent/20 transition-all duration-300 cursor-pointer shadow-sm"
+                    >
+                      #{interest}
+                    </Badge>
+                  ))}
                 </div>
-                <CardTitle className="text-lg font-semibold">Social Links</CardTitle>
-              </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Enhanced Social Links */}
+          {profile?.social_links && typeof profile.social_links === 'object' && Object.keys(profile.social_links).length > 0 && (
+            <Card className="border-border/50 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <ExternalLink className="w-5 h-5 text-primary" />
+                  Social Links
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(profile.social_links).map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-primary/5 hover:to-secondary/5 border border-transparent hover:border-primary/20 transition-all duration-300"
+                    >
+                      <ExternalLink className="w-5 h-5 text-primary" />
+                      <span className="capitalize font-medium text-lg">{platform}</span>
+                    </a>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Enhanced Communities */}
+          <Card className="border-border/50 shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <Users className="w-5 h-5 text-primary" />
+                Communities
+              </CardTitle>
             </CardHeader>
-            <CardContent className="relative">
-              <div className="flex flex-wrap gap-3">
-                {Object.entries(profile.social_links).map(([platform, url]) => (
-                  <a
-                    key={platform}
-                    href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-100 text-blue-900 font-medium hover:bg-blue-200 transition-colors shadow-sm border border-blue-200"
-                  >
-                    <span className="capitalize">{platform}</span>
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                ))}
-              </div>
+            <CardContent>
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-4 text-muted-foreground">Loading communities...</p>
+                </div>
+              ) : communities.length > 0 ? (
+                <div className="space-y-4">
+                  {communities.map((community) => (
+                    <div key={community.id} className="p-4 rounded-xl bg-gradient-to-r from-muted/20 to-muted/30 border border-border/30 hover:border-primary/20 transition-all duration-300">
+                      <h4 className="font-semibold text-lg mb-2">{community.name}</h4>
+                      {community.description && (
+                        <p className="text-muted-foreground leading-relaxed">
+                          {community.description.substring(0, 120)}
+                          {community.description.length > 120 && '...'}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8">
+                  No communities found
+                </p>
+              )}
             </CardContent>
           </Card>
-        )}
-
+        </div>
       </div>
 
-      {/* Interests Section */}
-      {/* Removed duplicate Interests card at the bottom. Only the Highlighted Interests card is shown above. */}
-
-      {/* Communities Section */}
-      <Card className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 mb-8">
-        <div 
-          className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
-          style={{ background: `linear-gradient(135deg, hsl(var(--primary)) 0%, transparent 100%)` }}
-        />
-        <CardHeader className="relative">
-          <div className="flex items-center gap-3">
-            <div 
-              className="p-2 rounded-lg"
-              style={{ backgroundColor: `hsl(var(--primary) / 0.1)` }}
-            >
-              <Users 
-                className="h-5 w-5" 
-                style={{ color: `hsl(var(--primary))` }}
-              />
-            </div>
-            <CardTitle className="text-lg font-semibold">Communities</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="relative">
-          <div className="flex flex-wrap gap-3">
-            {communities.length > 0 ? (
-              communities.map((community, idx) => (
-                <Badge key={idx} variant="secondary" className="px-4 py-2 text-sm font-medium">
-                  {community.name}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-muted-foreground text-sm italic">No communities found.</span>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Role Change Dialog */}
       <RoleChangeDialog

@@ -12,7 +12,7 @@ const Auth = lazy(() => import("@/pages/Auth"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const ProfileEditPage = lazy(() => import("@/pages/ProfileEditPage"));
 const ProfileSetupPage = lazy(() => import("@/pages/ProfileSetupPage"));
-const ProfileSearchPage = lazy(() => import("@/pages/ProfileSearchPage"));
+
 const Documentation = lazy(() => import("@/pages/Documentation"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
@@ -107,11 +107,6 @@ const AppRoutes = () => {
           } />
           
           {/* Profile routes - Protected from service providers - FIXED ORDER */}
-          <Route path="/profile/search" element={
-            <NonServiceProviderRoute>
-              <ProfileSearchPage />
-            </NonServiceProviderRoute>
-          } />
           <Route path="/profile/edit" element={
             <NonServiceProviderRoute>
               <ProfileEditPage />
