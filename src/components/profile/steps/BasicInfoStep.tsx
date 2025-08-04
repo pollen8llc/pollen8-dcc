@@ -100,46 +100,6 @@ const BasicInfoStep = () => {
           </FormItem>
         )}
       />
-      
-      <FormField
-        name="phone"
-        control={undefined}
-        render={() => (
-          <FormItem>
-            <FormLabel>Phone Number (Optional)</FormLabel>
-            <FormControl>
-              <Input 
-                {...register('phone')} 
-                placeholder="Enter your phone number" 
-                type="tel"
-              />
-            </FormControl>
-            {errors.phone && (
-              <FormMessage>{errors.phone.message as string}</FormMessage>
-            )}
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        name="website"
-        control={undefined}
-        render={() => (
-          <FormItem>
-            <FormLabel>Website (Optional)</FormLabel>
-            <FormControl>
-              <Input 
-                {...register('website')} 
-                placeholder="https://your-website.com" 
-                type="url"
-              />
-            </FormControl>
-            {errors.website && (
-              <FormMessage>{errors.website.message as string}</FormMessage>
-            )}
-          </FormItem>
-        )}
-      />
     </div>
   );
 };

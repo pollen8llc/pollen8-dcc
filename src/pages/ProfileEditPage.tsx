@@ -23,9 +23,7 @@ const ProfileEditPage: React.FC = () => {
       location: '',
       interests: [],
       socialLinks: {},
-      profileVisibility: 'public',
-      phone: '',
-      website: ''
+      profileVisibility: 'public'
     }
   });
 
@@ -47,9 +45,7 @@ const ProfileEditPage: React.FC = () => {
             location: fetchedProfile.location || '',
             interests: fetchedProfile.interests || [],
             socialLinks: fetchedProfile.social_links || {},
-            profileVisibility: fetchedProfile.privacy_settings?.profile_visibility || 'public',
-            phone: fetchedProfile.phone || '',
-            website: fetchedProfile.website || ''
+            profileVisibility: fetchedProfile.privacy_settings?.profile_visibility || 'public'
           };
           
           console.log("Resetting form with data:", formData);
@@ -65,9 +61,7 @@ const ProfileEditPage: React.FC = () => {
             location: currentUser.location || '',
             interests: currentUser.interests || [],
             socialLinks: {},
-            profileVisibility: 'public',
-            phone: '',
-            website: ''
+            profileVisibility: 'public'
           };
           
           form.reset(formData);

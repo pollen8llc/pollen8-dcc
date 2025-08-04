@@ -1616,13 +1616,11 @@ export type Database = {
           invited_by: string | null
           last_name: string | null
           location: string | null
-          phone: string | null
           privacy_settings: Json
           profile_complete: boolean | null
           social_links: Json | null
           updated_at: string
           user_id: string
-          website: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -1635,13 +1633,11 @@ export type Database = {
           invited_by?: string | null
           last_name?: string | null
           location?: string | null
-          phone?: string | null
           privacy_settings?: Json
           profile_complete?: boolean | null
           social_links?: Json | null
           updated_at?: string
           user_id?: string
-          website?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -1654,13 +1650,11 @@ export type Database = {
           invited_by?: string | null
           last_name?: string | null
           location?: string | null
-          phone?: string | null
           privacy_settings?: Json
           profile_complete?: boolean | null
           social_links?: Json | null
           updated_at?: string
           user_id?: string
-          website?: string | null
         }
         Relationships: []
       }
@@ -2293,13 +2287,11 @@ export type Database = {
           invited_by: string | null
           last_name: string | null
           location: string | null
-          phone: string | null
           privacy_settings: Json
           profile_complete: boolean | null
           social_links: Json | null
           updated_at: string
           user_id: string
-          website: string | null
         }[]
       }
       get_connection_depth: {

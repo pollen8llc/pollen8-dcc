@@ -52,6 +52,14 @@ const ProfilePage: React.FC = () => {
             phone: fetchedProfile.phone,
             website: fetchedProfile.website,
           };
+          
+          console.log('=== PROFILE DATA DEBUG ===');
+          console.log('Fetched profile:', fetchedProfile);
+          console.log('Unified profile:', unifiedProfile);
+          console.log('Location:', unifiedProfile.location);
+          console.log('Interests:', unifiedProfile.interests);
+          console.log('=========================');
+          
           setProfileData(unifiedProfile);
         }
       }
