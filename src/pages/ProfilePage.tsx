@@ -31,51 +31,28 @@ const ProfilePage: React.FC = () => {
   React.useEffect(() => {
     const fetchProfile = async () => {
       if (profileId) {
-        if (isOwnProfile && currentUser) {
-          // Convert current user to UnifiedProfile format
+        // Always fetch from database to get the most up-to-date profile data
+        const fetchedProfile = await getProfileById(profileId);
+        if (fetchedProfile) {
           const unifiedProfile: UnifiedProfile = {
-            id: currentUser.id,
-            user_id: currentUser.id,
-            email: currentUser.email || '',
-            first_name: currentUser.name?.split(' ')[0] || '',
-            last_name: currentUser.name?.split(' ').slice(1).join(' ') || '',
-            bio: currentUser.bio,
-            location: currentUser.location,
-            avatar_url: currentUser.imageUrl,
-            interests: currentUser.interests,
-            social_links: {},
-            privacy_settings: { profile_visibility: 'public' },
-            role: currentUser.role,
-            created_at: currentUser.createdAt || new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            phone: currentUser.phone,
-            website: undefined,
+            id: fetchedProfile.id,
+            user_id: fetchedProfile.id,
+            email: fetchedProfile.email || '',
+            first_name: fetchedProfile.first_name || '',
+            last_name: fetchedProfile.last_name || '',
+            bio: fetchedProfile.bio,
+            location: fetchedProfile.location,
+            avatar_url: fetchedProfile.avatar_url,
+            interests: fetchedProfile.interests,
+            social_links: fetchedProfile.social_links,
+            privacy_settings: fetchedProfile.privacy_settings,
+            role: fetchedProfile.role,
+            created_at: fetchedProfile.created_at || new Date().toISOString(),
+            updated_at: fetchedProfile.updated_at || new Date().toISOString(),
+            phone: fetchedProfile.phone,
+            website: fetchedProfile.website,
           };
           setProfileData(unifiedProfile);
-        } else {
-          // Fetch other user's profile
-          const fetchedProfile = await getProfileById(profileId);
-          if (fetchedProfile) {
-            const unifiedProfile: UnifiedProfile = {
-              id: fetchedProfile.id,
-              user_id: fetchedProfile.id,
-              email: fetchedProfile.email || '',
-              first_name: fetchedProfile.first_name || '',
-              last_name: fetchedProfile.last_name || '',
-              bio: fetchedProfile.bio,
-              location: fetchedProfile.location,
-              avatar_url: fetchedProfile.avatar_url,
-              interests: fetchedProfile.interests,
-              social_links: fetchedProfile.social_links,
-              privacy_settings: fetchedProfile.privacy_settings,
-              role: fetchedProfile.role,
-              created_at: fetchedProfile.created_at || new Date().toISOString(),
-              updated_at: fetchedProfile.updated_at || new Date().toISOString(),
-              phone: undefined,
-              website: undefined,
-            };
-            setProfileData(unifiedProfile);
-          }
         }
       }
     };

@@ -125,6 +125,8 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
           interests: data.interests,
           social_links: data.socialLinks,
           privacy_settings: { profile_visibility: data.profileVisibility || 'public' },
+          phone: data.phone,
+          website: data.website,
           profile_complete: true,
         };
         

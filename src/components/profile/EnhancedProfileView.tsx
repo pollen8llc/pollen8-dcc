@@ -130,11 +130,43 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                   </div>
                 )}
                 
-                {profile.bio && (
-                  <p className="text-lg text-foreground/80 leading-relaxed max-w-3xl">
+                 {profile.bio && (
+                  <p className="text-lg text-foreground/80 leading-relaxed max-w-3xl mb-4">
                     {profile.bio}
                   </p>
                 )}
+                
+                {/* Contact Information */}
+                <div className="flex flex-wrap gap-4 text-base">
+                  {profile.phone && (
+                    <a 
+                      href={`tel:${profile.phone}`}
+                      className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Phone className="w-4 h-4" />
+                      <span>{profile.phone}</span>
+                    </a>
+                  )}
+                  {profile.website && (
+                    <a 
+                      href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Website</span>
+                    </a>
+                  )}
+                  {profile.privacy_settings?.profile_visibility && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      {profile.privacy_settings.profile_visibility === 'public' && <Globe className="w-4 h-4" />}
+                      {profile.privacy_settings.profile_visibility === 'connections' && <Users className="w-4 h-4" />}
+                      {profile.privacy_settings.profile_visibility === 'private' && <User className="w-4 h-4" />}
+                      <span className="capitalize">{profile.privacy_settings.profile_visibility} Profile</span>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Action Button */}

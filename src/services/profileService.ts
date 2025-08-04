@@ -19,6 +19,8 @@ export interface ExtendedProfile {
   created_at?: string;
   updated_at?: string;
   role?: UserRole;
+  phone?: string;
+  website?: string;
 }
 
 /**
@@ -131,6 +133,8 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
         privacy_settings: privacy_settings,
         avatar_url: profileData.avatar_url,
         profile_complete: profileData.profile_complete,
+        phone: profileData.phone,
+        website: profileData.website,
       })
       .eq('id', currentUser.id)
       .select()
