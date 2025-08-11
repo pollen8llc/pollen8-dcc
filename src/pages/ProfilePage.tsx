@@ -37,38 +37,11 @@ const ProfilePage: React.FC = () => {
         setFetching(true);
         setError(null);
         try {
-          // Always fetch from database to get the most up-to-date profile data
           const fetchedProfile = await getProfileById(profileId);
           if (fetchedProfile) {
-            const unifiedProfile: UnifiedProfile = {
-              id: fetchedProfile.id,
-              user_id: fetchedProfile.id,
-              email: fetchedProfile.email || '',
-              first_name: fetchedProfile.first_name || '',
-              last_name: fetchedProfile.last_name || '',
-              bio: fetchedProfile.bio,
-              location: fetchedProfile.location,
-              avatar_url: fetchedProfile.avatar_url,
-              interests: fetchedProfile.interests,
-              social_links: fetchedProfile.social_links,
-              privacy_settings: fetchedProfile.privacy_settings,
-              role: fetchedProfile.role,
-              created_at: fetchedProfile.created_at || new Date().toISOString(),
-              updated_at: fetchedProfile.updated_at || new Date().toISOString(),
-              phone: fetchedProfile.phone,
-              website: fetchedProfile.website,
-            };
-            
-            console.log('=== PROFILE DATA DEBUG ===');
-            console.log('Fetched profile:', fetchedProfile);
-            console.log('Unified profile:', unifiedProfile);
-            console.log('Location:', unifiedProfile.location);
-            console.log('Interests:', unifiedProfile.interests);
-            console.log('=========================');
-            
-            setProfileData(unifiedProfile);
+            setProfileData(fetchedProfile);
           } else {
-            console.warn('No profile found or not visible for ID:', profileId);
+            setError('Profile not found');
             setProfileData(null);
           }
         } catch (e: any) {
@@ -84,7 +57,7 @@ const ProfilePage: React.FC = () => {
     if (!isLoading && profileId) {
       fetchProfile();
     }
-  }, [profileId, currentUser, isLoading, isOwnProfile, getProfileById]);
+  }, [profileId, isLoading]);
 
   // SEO: Set title, meta description, and canonical
   React.useEffect(() => {
