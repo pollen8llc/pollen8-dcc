@@ -51,65 +51,6 @@ const BioStep = () => {
         )}
       />
       
-      <FormField
-        name="socialLinks.linkedin"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>LinkedIn Profile</FormLabel>
-            <FormDescription>
-              Your LinkedIn profile URL
-            </FormDescription>
-            <FormControl>
-              <Input 
-                {...field}
-                placeholder="https://linkedin.com/in/yourprofile" 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        name="socialLinks.twitter"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Twitter/X Profile</FormLabel>
-            <FormDescription>
-              Your Twitter/X profile URL
-            </FormDescription>
-            <FormControl>
-              <Input 
-                {...field}
-                placeholder="https://twitter.com/yourhandle" 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      
-      <FormField
-        name="socialLinks.github"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>GitHub Profile</FormLabel>
-            <FormDescription>
-              Your GitHub profile URL
-            </FormDescription>
-            <FormControl>
-              <Input 
-                {...field}
-                placeholder="https://github.com/yourusername" 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </div>
   );
 };

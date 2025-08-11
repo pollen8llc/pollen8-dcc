@@ -6,6 +6,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Camera } from 'lucide-react';
+import SocialLinksInput from './SocialLinksInput';
 
 const BasicInfoStep = () => {
   const { register, watch, setValue, formState: { errors } } = useFormContext();
@@ -140,6 +141,8 @@ const BasicInfoStep = () => {
           </FormItem>
         )}
       />
+      
+      <SocialLinksInput />
     </div>
   );
 };
