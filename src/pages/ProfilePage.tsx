@@ -2,11 +2,12 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
-import { useProfiles } from "@/hooks/useProfiles";
+import { useProfiles } from "@/hooks/useProfiles.tsx";
 import Navbar from "@/components/Navbar";
 import EnhancedProfileView from "@/components/profile/EnhancedProfileView";
 import { useNavigate } from "react-router-dom";
 import { UnifiedProfile } from "@/types/unifiedProfile";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -85,6 +86,36 @@ const ProfilePage: React.FC = () => {
     }
   }, [profileId, currentUser, isLoading, isOwnProfile, getProfileById]);
 
+  // SEO: Set title, meta description, and canonical
+  React.useEffect(() => {
+    const name = profileData ? `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim() : '';
+    const title = name ? `${name} | Profile` : 'User Profile';
+    document.title = title;
+
+    const ensureTag = (selector: string, create: () => HTMLElement) => {
+      let el = document.querySelector(selector) as HTMLElement | null;
+      if (!el) {
+        el = create();
+        document.head.appendChild(el);
+      }
+      return el;
+    };
+
+    const metaDesc = ensureTag('meta[name="description"]', () => {
+      const m = document.createElement('meta');
+      m.setAttribute('name', 'description');
+      return m;
+    }) as HTMLMetaElement;
+    metaDesc.setAttribute('content', profileData?.bio?.slice(0, 150) || 'View user profile, bio, location and interests.');
+
+    const canonical = ensureTag('link[rel="canonical"]', () => {
+      const l = document.createElement('link');
+      l.setAttribute('rel', 'canonical');
+      return l;
+    }) as HTMLLinkElement;
+    canonical.setAttribute('href', window.location.origin + (id ? `/profile/${id}` : '/profile'));
+  }, [profileData, id]);
+
   // Show loading state
   if (isLoading || profileLoading || fetching) {
     return (
@@ -92,10 +123,7 @@ const ProfilePage: React.FC = () => {
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center min-h-[50vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-lg">Loading profile...</p>
-            </div>
+            <LoadingSpinner size="lg" text="Loading profile..." />
           </div>
         </div>
       </div>
@@ -125,6 +153,7 @@ const ProfilePage: React.FC = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
+        <h1 className="sr-only">Profile of {profileData.first_name || ''} {profileData.last_name || ''}</h1>
         <EnhancedProfileView 
           profile={profileData}
           isOwnProfile={isOwnProfile}

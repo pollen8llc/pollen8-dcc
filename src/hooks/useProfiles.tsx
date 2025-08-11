@@ -42,13 +42,13 @@ export const useProfiles = () => {
         location: data.location,
         avatar_url: data.avatar_url,
         interests: data.interests,
-        social_links: data.social_links,
-        privacy_settings: data.privacy_settings,
-        role: data.role,
+        social_links: (data.social_links as any) as Record<string, string> | undefined,
+        privacy_settings: (data.privacy_settings as any) as { profile_visibility?: string } | undefined,
+        role: (data as any).role,
         created_at: data.created_at || new Date().toISOString(),
         updated_at: data.updated_at || new Date().toISOString(),
-        phone: data.phone,
-        website: data.website,
+        phone: (data as any).phone,
+        website: (data as any).website,
       };
       
       return unifiedProfile;
@@ -123,13 +123,13 @@ export const useProfiles = () => {
         location: data[0].location,
         avatar_url: data[0].avatar_url,
         interests: data[0].interests,
-        social_links: data[0].social_links,
-        privacy_settings: data[0].privacy_settings,
-        role: data[0].role,
+        social_links: (data[0].social_links as any) as Record<string, string> | undefined,
+        privacy_settings: (data[0].privacy_settings as any) as { profile_visibility?: string } | undefined,
+        role: (data[0] as any).role,
         created_at: data[0].created_at || new Date().toISOString(),
         updated_at: data[0].updated_at || new Date().toISOString(),
-        phone: data[0].phone,
-        website: data[0].website,
+        phone: (data[0] as any).phone,
+        website: (data[0] as any).website,
       };
       
       return updatedProfile;

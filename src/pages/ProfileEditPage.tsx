@@ -2,15 +2,17 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
-import { useProfiles } from "@/hooks/useProfiles";
+import { useProfiles } from "@/hooks/useProfiles.tsx";
 import { FormProvider, useForm } from "react-hook-form";
 import Navbar from "@/components/Navbar";
 import UnifiedProfileForm from "@/components/profile/UnifiedProfileForm";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const ProfileEditPage: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, isLoading } = useUser();
-  const { getProfileById, isLoading: profileLoading } = useProfiles();
+  const { getProfileById, isLoading: profileLoading, error: profileError } = useProfiles();
   const [profileData, setProfileData] = React.useState<any>(null);
   const [isFormInitialized, setIsFormInitialized] = React.useState(false);
 
@@ -82,6 +84,31 @@ const ProfileEditPage: React.FC = () => {
     }
   }, [currentUser, isLoading, getProfileById, form, isFormInitialized]);
 
+  // SEO: Set title/meta for the edit profile page
+  React.useEffect(() => {
+    document.title = 'Edit Profile';
+    const ensureTag = (selector: string, create: () => HTMLElement) => {
+      let el = document.querySelector(selector) as HTMLElement | null;
+      if (!el) {
+        el = create();
+        document.head.appendChild(el);
+      }
+      return el;
+    };
+    const metaDesc = ensureTag('meta[name="description"]', () => {
+      const m = document.createElement('meta');
+      m.setAttribute('name', 'description');
+      return m;
+    }) as HTMLMetaElement;
+    metaDesc.setAttribute('content', 'Edit your user profile: name, bio, location, interests, links.');
+    const canonical = ensureTag('link[rel="canonical"]', () => {
+      const l = document.createElement('link');
+      l.setAttribute('rel', 'canonical');
+      return l;
+    }) as HTMLLinkElement;
+    canonical.setAttribute('href', window.location.origin + '/profile/edit');
+  }, []);
+
   // Redirect if user is not authenticated
   if (!isLoading && !currentUser) {
     navigate("/auth?redirectTo=/profile/edit");
@@ -95,10 +122,7 @@ const ProfileEditPage: React.FC = () => {
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center min-h-[50vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-lg">Loading profile...</p>
-            </div>
+              <LoadingSpinner size="lg" text="Loading profile..." />
           </div>
         </div>
       </div>
@@ -109,6 +133,13 @@ const ProfileEditPage: React.FC = () => {
     <div className="min-h-screen">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
+        <h1 className="sr-only">Edit Profile</h1>
+        {profileError && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTitle>Failed to load profile</AlertTitle>
+            <AlertDescription>{profileError}</AlertDescription>
+          </Alert>
+        )}
         <div className="max-w-3xl mx-auto">
           <FormProvider {...form}>
             <UnifiedProfileForm 
