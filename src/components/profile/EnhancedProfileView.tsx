@@ -93,7 +93,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
 
   return (
     <div className="w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 lg:space-y-8">
-      {/* Enhanced Business Card Header - Mobile Responsive */}
+      {/* Simplified Profile Header - Only Avatar, Name, Location */}
       <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
         <CardContent className="p-0">
           <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-4 sm:p-6 lg:p-8">
@@ -110,10 +110,10 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 </Avatar>
               </div>
               
-              {/* Profile Info */}
+              {/* Profile Info - Name and Location Only */}
               <div className="flex-1 min-w-0 text-center sm:text-left">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
-                  <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-foreground tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
                     {getFullName()}
                   </h1>
                   {profile.role && (
@@ -124,49 +124,11 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 </div>
                 
                 {profile.location && (
-                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 justify-center sm:justify-start">
+                  <div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start">
                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     <span className="text-base sm:text-lg lg:text-xl text-muted-foreground font-medium">{profile.location}</span>
                   </div>
                 )}
-                
-                {profile.bio && (
-                  <p className="text-sm sm:text-base lg:text-lg text-foreground/80 leading-relaxed max-w-3xl mb-3 sm:mb-4">
-                    {profile.bio}
-                  </p>
-                )}
-                
-                {/* Contact Information */}
-                <div className="flex flex-wrap gap-3 sm:gap-4 items-center justify-center sm:justify-start">
-                  {profile.phone && (
-                    <a 
-                      href={`tel:${profile.phone}`}
-                      className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted/20"
-                    >
-                      <Phone className="w-4 h-4" />
-                      <span className="text-sm sm:text-base font-medium">{profile.phone}</span>
-                    </a>
-                  )}
-                  {profile.website && (
-                    <a 
-                      href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted/20"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      <span className="text-sm sm:text-base font-medium">Website</span>
-                    </a>
-                  )}
-                  {profile.privacy_settings?.profile_visibility && (
-                    <div className="flex items-center gap-2 text-muted-foreground p-2">
-                      {profile.privacy_settings.profile_visibility === 'public' && <Globe className="w-4 h-4" />}
-                      {profile.privacy_settings.profile_visibility === 'connections' && <Users className="w-4 h-4" />}
-                      {profile.privacy_settings.profile_visibility === 'private' && <Settings className="w-4 h-4" />}
-                      <span className="text-xs sm:text-sm capitalize">{profile.privacy_settings.profile_visibility} Profile</span>
-                    </div>
-                  )}
-                </div>
               </div>
               
               {/* Action Button */}
@@ -295,8 +257,8 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
             </Card>
           )}
 
-          {/* Enhanced Social Links */}
-          {profile?.social_links && typeof profile.social_links === 'object' && Object.keys(profile.social_links).length > 0 && (
+          {/* Enhanced Social Links - Show All Profile Links */}
+          {profile?.social_links && typeof profile.social_links === 'object' && Object.keys(profile.social_links).filter(key => profile.social_links[key]).length > 0 && (
             <Card className="border-border/50 shadow-lg">
               <CardHeader className="pb-3 sm:pb-4">
                 <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
@@ -306,7 +268,9 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 sm:space-y-3">
-                  {Object.entries(profile.social_links).map(([platform, url]) => (
+                  {Object.entries(profile.social_links)
+                    .filter(([platform, url]) => url && url.toString().trim())
+                    .map(([platform, url]) => (
                     <a
                       key={platform}
                       href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
@@ -315,7 +279,10 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                       className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-gradient-to-r hover:from-primary/5 hover:to-secondary/5 border border-transparent hover:border-primary/20 transition-all duration-300 min-h-[44px]"
                     >
                       <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                      <span className="capitalize font-medium text-sm sm:text-base lg:text-lg">{platform}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="capitalize font-medium text-sm sm:text-base lg:text-lg block">{platform}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground truncate block">{url}</span>
+                      </div>
                     </a>
                   ))}
                 </div>
