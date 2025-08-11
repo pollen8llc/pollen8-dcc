@@ -20,7 +20,7 @@ export const useProfiles = () => {
         .from('profiles')
         .select('*')
         .eq('id', profileId)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error("Error fetching profile:", error);
@@ -28,6 +28,9 @@ export const useProfiles = () => {
         return null;
       }
       
+      if (!data) {
+        return null;
+      }
       // Convert to UnifiedProfile format
       const unifiedProfile: UnifiedProfile = {
         id: data.id,

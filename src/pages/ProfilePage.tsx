@@ -14,6 +14,8 @@ const ProfilePage: React.FC = () => {
   const { getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<UnifiedProfile | null>(null);
   const navigate = useNavigate();
+  const [fetching, setFetching] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   // Determine which profile to show
   const profileId = id || currentUser?.id;
@@ -31,36 +33,49 @@ const ProfilePage: React.FC = () => {
   React.useEffect(() => {
     const fetchProfile = async () => {
       if (profileId) {
-        // Always fetch from database to get the most up-to-date profile data
-        const fetchedProfile = await getProfileById(profileId);
-        if (fetchedProfile) {
-          const unifiedProfile: UnifiedProfile = {
-            id: fetchedProfile.id,
-            user_id: fetchedProfile.id,
-            email: fetchedProfile.email || '',
-            first_name: fetchedProfile.first_name || '',
-            last_name: fetchedProfile.last_name || '',
-            bio: fetchedProfile.bio,
-            location: fetchedProfile.location,
-            avatar_url: fetchedProfile.avatar_url,
-            interests: fetchedProfile.interests,
-            social_links: fetchedProfile.social_links,
-            privacy_settings: fetchedProfile.privacy_settings,
-            role: fetchedProfile.role,
-            created_at: fetchedProfile.created_at || new Date().toISOString(),
-            updated_at: fetchedProfile.updated_at || new Date().toISOString(),
-            phone: fetchedProfile.phone,
-            website: fetchedProfile.website,
-          };
-          
-          console.log('=== PROFILE DATA DEBUG ===');
-          console.log('Fetched profile:', fetchedProfile);
-          console.log('Unified profile:', unifiedProfile);
-          console.log('Location:', unifiedProfile.location);
-          console.log('Interests:', unifiedProfile.interests);
-          console.log('=========================');
-          
-          setProfileData(unifiedProfile);
+        setFetching(true);
+        setError(null);
+        try {
+          // Always fetch from database to get the most up-to-date profile data
+          const fetchedProfile = await getProfileById(profileId);
+          if (fetchedProfile) {
+            const unifiedProfile: UnifiedProfile = {
+              id: fetchedProfile.id,
+              user_id: fetchedProfile.id,
+              email: fetchedProfile.email || '',
+              first_name: fetchedProfile.first_name || '',
+              last_name: fetchedProfile.last_name || '',
+              bio: fetchedProfile.bio,
+              location: fetchedProfile.location,
+              avatar_url: fetchedProfile.avatar_url,
+              interests: fetchedProfile.interests,
+              social_links: fetchedProfile.social_links,
+              privacy_settings: fetchedProfile.privacy_settings,
+              role: fetchedProfile.role,
+              created_at: fetchedProfile.created_at || new Date().toISOString(),
+              updated_at: fetchedProfile.updated_at || new Date().toISOString(),
+              phone: fetchedProfile.phone,
+              website: fetchedProfile.website,
+            };
+            
+            console.log('=== PROFILE DATA DEBUG ===');
+            console.log('Fetched profile:', fetchedProfile);
+            console.log('Unified profile:', unifiedProfile);
+            console.log('Location:', unifiedProfile.location);
+            console.log('Interests:', unifiedProfile.interests);
+            console.log('=========================');
+            
+            setProfileData(unifiedProfile);
+          } else {
+            console.warn('No profile found or not visible for ID:', profileId);
+            setProfileData(null);
+          }
+        } catch (e: any) {
+          console.error('Error fetching profile:', e);
+          setError(e?.message || 'Failed to load profile');
+          setProfileData(null);
+        } finally {
+          setFetching(false);
         }
       }
     };
@@ -71,7 +86,7 @@ const ProfilePage: React.FC = () => {
   }, [profileId, currentUser, isLoading, isOwnProfile, getProfileById]);
 
   // Show loading state
-  if (isLoading || profileLoading || !profileData) {
+  if (isLoading || profileLoading || fetching) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -81,6 +96,20 @@ const ProfilePage: React.FC = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
               <p className="mt-4 text-lg">Loading profile...</p>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold">Profile not found</h1>
+            <p className="mt-2 text-muted-foreground">The profile may not exist or you may not have permission to view it.</p>
           </div>
         </div>
       </div>
