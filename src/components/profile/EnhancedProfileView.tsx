@@ -88,8 +88,11 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
   const isAdmin = profile?.role === UserRole.ADMIN;
   const roleBadge = getRoleBadge();
 
-  // Debug: log interests
+  // Debug: log interests and social links
   console.log("Profile interests:", profile.interests);
+  console.log("Profile social_links:", profile.social_links);
+  console.log("Profile social_links type:", typeof profile.social_links);
+  console.log("Profile social_links keys:", profile.social_links ? Object.keys(profile.social_links) : 'no social_links');
 
   return (
     <div className="w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 lg:space-y-8">
@@ -258,7 +261,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           )}
 
           {/* Enhanced Social Links - Show All Profile Links */}
-          {profile?.social_links && typeof profile.social_links === 'object' && Object.keys(profile.social_links).filter(key => profile.social_links[key]).length > 0 && (
+          {profile?.social_links && typeof profile.social_links === 'object' && (
             <Card className="border-border/50 shadow-lg">
               <CardHeader className="pb-3 sm:pb-4">
                 <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
@@ -267,25 +270,65 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 sm:space-y-3">
-                  {Object.entries(profile.social_links)
-                    .filter(([platform, url]) => url && url.toString().trim())
-                    .map(([platform, url]) => (
-                    <a
-                      key={platform}
-                      href={typeof url === 'string' && url.startsWith('http') ? url : `https://${url}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-gradient-to-r hover:from-primary/5 hover:to-secondary/5 border border-transparent hover:border-primary/20 transition-all duration-300 min-h-[44px]"
-                    >
-                      <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                      <div className="flex-1 min-w-0">
-                        <span className="capitalize font-medium text-sm sm:text-base lg:text-lg block">{platform}</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground truncate block">{url}</span>
-                      </div>
-                    </a>
-                  ))}
-                </div>
+                {(() => {
+                  const socialEntries = Object.entries(profile.social_links || {})
+                    .filter(([platform, url]) => {
+                      const hasValue = url && typeof url === 'string' && url.trim() !== '';
+                      console.log(`Social link ${platform}:`, url, 'hasValue:', hasValue);
+                      return hasValue;
+                    });
+                  
+                  console.log('Filtered social entries:', socialEntries);
+                  
+                  if (socialEntries.length === 0) {
+                    return (
+                      <p className="text-muted-foreground text-center py-4 text-sm sm:text-base">
+                        No social links added
+                      </p>
+                    );
+                  }
+                  
+                  return (
+                    <div className="space-y-2 sm:space-y-3">
+                      {socialEntries.map(([platform, url]) => {
+                        // Improve platform labeling
+                        const platformLabels = {
+                          linkedin: 'LinkedIn',
+                          twitter: 'Twitter',
+                          facebook: 'Facebook',
+                          instagram: 'Instagram',
+                          github: 'GitHub',
+                          youtube: 'YouTube',
+                          tiktok: 'TikTok',
+                          discord: 'Discord',
+                          telegram: 'Telegram',
+                          website: 'Website',
+                          portfolio: 'Portfolio',
+                          blog: 'Blog'
+                        };
+                        
+                        const displayName = platformLabels[platform.toLowerCase()] || 
+                          platform.charAt(0).toUpperCase() + platform.slice(1);
+                        
+                        return (
+                          <a
+                            key={platform}
+                            href={url.startsWith('http') ? url : `https://${url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-gradient-to-r hover:from-primary/5 hover:to-secondary/5 border border-transparent hover:border-primary/20 transition-all duration-300 min-h-[44px]"
+                          >
+                            <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium text-sm sm:text-base lg:text-lg block">{displayName}</span>
+                              <span className="text-xs sm:text-sm text-muted-foreground truncate block">{url}</span>
+                            </div>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           )}
