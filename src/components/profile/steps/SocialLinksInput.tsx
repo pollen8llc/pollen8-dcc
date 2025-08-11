@@ -36,6 +36,7 @@ const SocialLinksInput = () => {
 
   // Initialize from form data
   useEffect(() => {
+    console.log("SocialLinksInput: Form social links changed:", formSocialLinks);
     if (formSocialLinks && typeof formSocialLinks === 'object') {
       const links = Object.entries(formSocialLinks)
         .filter(([, url]) => url && typeof url === 'string' && url.trim() !== '')
@@ -43,6 +44,7 @@ const SocialLinksInput = () => {
           platform,
           url: url as string
         }));
+      console.log("SocialLinksInput: Setting links:", links);
       setSocialLinks(links);
     }
   }, [formSocialLinks]);
@@ -55,6 +57,7 @@ const SocialLinksInput = () => {
       return acc;
     }, {} as Record<string, string>);
     
+    console.log("SocialLinksInput: Updating form value:", socialLinksObject);
     setValue('social_links', socialLinksObject, { shouldDirty: true });
   };
 

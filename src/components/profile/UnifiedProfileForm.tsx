@@ -82,6 +82,9 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
   const onSubmit = async (data: any) => {
     if (!currentUser) return;
     
+    console.log("UnifiedProfileForm: Form data being submitted:", data);
+    console.log("UnifiedProfileForm: Social links in form data:", data.social_links);
+    
     setIsSubmitting(true);
     
     try {
@@ -129,6 +132,9 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
           phone: data.phone,
           website: data.website,
         };
+        
+        console.log("UnifiedProfileForm: Profile data being sent to updateProfile:", profileData);
+        console.log("UnifiedProfileForm: Social links being saved:", profileData.social_links);
         
         await updateProfile(profileData);
       } catch (profileError) {
