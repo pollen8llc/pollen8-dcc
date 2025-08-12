@@ -272,8 +272,8 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
     <Card className="overflow-hidden">
       <CardContent className="p-6">
         <div className="space-y-4">
-          {hasResponded || isOwner ? (
-            // Show animated results
+          {responseCounts.length > 0 && (
+            // Show animated results for everyone when there are responses
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-6">
                 <h4 className="font-semibold text-lg flex items-center gap-2">
@@ -296,8 +296,10 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
                 ))}
               </div>
             </div>
-          ) : (
-            // Show voting interface
+          )}
+
+          {!hasResponded && (
+            // Show voting interface for users who haven't voted yet
             <div className="space-y-6">
               <h4 className="font-medium text-base text-muted-foreground">
                 {pollData.allowMultipleSelections ? 'Select one or more options:' : 'Select one option:'}
