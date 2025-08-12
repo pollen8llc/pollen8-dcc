@@ -65,10 +65,10 @@ const PostWizard = () => {
   
   const getPostTypeIcon = () => {
     switch (postType) {
-      case 'question': return <MessageSquare className="h-5 w-5 text-cyan-400" />;
-      case 'quote': return <Quote className="h-5 w-5 text-cyan-400" />;
-      case 'poll': return <BarChart2 className="h-5 w-5 text-cyan-400" />;
-      case 'article': return <BookOpen className="h-5 w-5 text-cyan-400" />;
+      case 'question': return <MessageSquare className="h-5 w-5 text-primary" />;
+      case 'quote': return <Quote className="h-5 w-5 text-primary" />;
+      case 'poll': return <BarChart2 className="h-5 w-5 text-primary" />;
+      case 'article': return <BookOpen className="h-5 w-5 text-primary" />;
       default: return null;
     }
   };
@@ -164,7 +164,7 @@ const PostWizard = () => {
   }
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-6">
@@ -172,26 +172,26 @@ const PostWizard = () => {
         
         {/* Navigation */}
         <div className="mb-4 sm:mb-6">
-          <Button variant="ghost" className="pl-0" onClick={handleBack}>
+          <Button variant="ghost" className="pl-0 hover-scale" onClick={handleBack}>
             <ChevronLeft className="mr-2 h-4 w-4" />
             {currentStep === 1 ? 'Back to Type Selection' : 'Back'}
           </Button>
         </div>
         
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto animate-fade-in">
           {/* Header */}
-          <div className="mb-6 sm:mb-8 flex items-center gap-3">
+          <div className="mb-6 sm:mb-8 flex items-center gap-3 animate-fade-in">
             {getPostTypeIcon()}
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{getPostTypeTitle()}</h1>
           </div>
           
           {/* Steps Indicator */}
-          <div className="mb-6 sm:mb-8">
+          <div className="mb-6 sm:mb-8 animate-fade-in">
             <Steps currentStep={currentStep} steps={getSteps()} />
           </div>
           
           {/* Form Card */}
-          <Card>
+          <Card className="border-0 bg-card/50 backdrop-blur-sm shadow-lg">
             <CardHeader>
               <CardTitle>{getSteps()[currentStep - 1]}</CardTitle>
               <CardDescription>
@@ -248,7 +248,7 @@ const PostWizard = () => {
               )}
             </CardContent>
             
-            <CardFooter className="flex justify-between border-t pt-6">
+            <CardFooter className="flex justify-between border-t pt-6 sticky bottom-0 bg-card/80 backdrop-blur-sm z-10">
               <Button variant="outline" onClick={handleBack}>
                 {currentStep === 1 ? 'Change Type' : 'Back'}
               </Button>

@@ -55,94 +55,109 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
 
   return (
     <form id="content-form" onSubmit={handleSubmit}>
-      <div className="space-y-6">
-        {/* Content type badge */}
-        <div className="flex justify-between items-center">
-          <Badge variant="secondary" className="text-xs px-2 py-0.5">
-            {getContentTypeLabel()}
-          </Badge>
-        </div>
+      <section className="space-y-6">
+        {/* Top meta */}
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="text-xs px-2 py-0.5">
+              {getContentTypeLabel()}
+            </Badge>
+            {formData.tags && formData.tags.length > 0 && (
+              <div className="hidden sm:flex flex-wrap gap-2">
+                {formData.tags.map((tag: string) => (
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </header>
 
-        {/* Title */}
-        <div>
-          <h3 className="text-xl font-semibold mb-2">{getTitle()}</h3>
-          
-          {/* Subtitle for articles */}
-          {contentType === ContentType.ARTICLE && formData.subtitle && (
-            <p className="text-lg text-muted-foreground mb-2">{formData.subtitle}</p>
-          )}
-          
-          {/* Tags */}
-          {formData.tags && formData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.tags.map((tag: string) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+          {/* Main content */}
+          <article className="lg:col-span-8 space-y-4">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{getTitle()}</h1>
+            {contentType === ContentType.ARTICLE && formData.subtitle && (
+              <p className="text-lg text-muted-foreground">{formData.subtitle}</p>
+            )}
 
-        <Separator />
-
-        {/* Content */}
-        <div className="prose prose-sm max-w-none dark:prose-invert">
-          {contentType === ContentType.ARTICLE && (
-            <div>
-              {formData.content && (
-                <div dangerouslySetInnerHTML={{ __html: formData.content }} />
-              )}
-            </div>
-          )}
-          
-          {contentType === ContentType.QUESTION && (
-            <p className="whitespace-pre-wrap">{formData.content}</p>
-          )}
-          
-          {contentType === ContentType.QUOTE && (
-            <div>
-              <blockquote className="italic border-l-4 border-muted-foreground/20 pl-4 mb-4">
-                "{formData.quote}"
-                {formData.author && (
-                  <footer className="text-sm text-muted-foreground mt-2">
-                    — {formData.author}
-                  </footer>
+            <div className="rounded-lg border bg-card/50 p-4 sm:p-6">
+              <div className="prose prose-sm sm:prose max-w-none dark:prose-invert">
+                {contentType === ContentType.ARTICLE && (
+                  <div>
+                    {formData.content && (
+                      <div dangerouslySetInnerHTML={{ __html: formData.content }} />
+                    )}
+                  </div>
                 )}
-              </blockquote>
-              {formData.context && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium mb-2">Context:</h4>
-                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">{formData.context}</p>
+
+                {contentType === ContentType.QUESTION && (
+                  <p className="whitespace-pre-wrap">{formData.content}</p>
+                )}
+
+                {contentType === ContentType.QUOTE && (
+                  <figure>
+                    <blockquote className="italic border-l-4 border-primary/30 pl-4 sm:pl-6 text-lg sm:text-xl leading-relaxed">
+                      “{formData.quote}”
+                    </blockquote>
+                    {formData.author && (
+                      <figcaption className="text-sm text-muted-foreground mt-3">— {formData.author}</figcaption>
+                    )}
+                    {formData.context && (
+                      <div className="mt-4 text-sm text-muted-foreground whitespace-pre-wrap">{formData.context}</div>
+                    )}
+                  </figure>
+                )}
+
+                {contentType === ContentType.POLL && (
+                  <div>
+                    <p className="whitespace-pre-wrap mb-4">{formData.question}</p>
+                    <ul className="space-y-2">
+                      {formData.options?.map((option: { text: string }, index: number) => (
+                        <li key={index} className="flex items-center gap-3 rounded-md border bg-muted/20 px-3 py-2">
+                          <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">{index + 1}</span>
+                          <span>{option.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {formData.allowMultipleSelections && (
+                      <p className="text-sm text-muted-foreground mt-3">Multiple selections allowed</p>
+                    )}
+                    {formData.duration && (
+                      <p className="text-sm text-muted-foreground">Duration: {formData.duration} days</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </article>
+
+          {/* Sidebar */}
+          <aside className="lg:col-span-4">
+            <div className="rounded-lg border bg-card/50 p-4 sm:p-6 space-y-4">
+              <h4 className="text-sm font-medium">Details</h4>
+              {formData.tags && formData.tags.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {formData.tags.map((tag: string) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No tags added</p>
+              )}
+
+              {contentType === ContentType.POLL && (
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div>Selections: {formData.allowMultipleSelections ? 'Multiple' : 'Single'}</div>
+                  {formData.duration && <div>Duration: {formData.duration} days</div>}
                 </div>
               )}
             </div>
-          )}
-          
-          {contentType === ContentType.POLL && (
-            <div>
-              <p className="whitespace-pre-wrap mb-4">{formData.question}</p>
-              <h4 className="text-sm font-medium mb-2">Options:</h4>
-              <ul className="list-disc pl-5 space-y-1">
-                {formData.options?.map((option: { text: string }, index: number) => (
-                  <li key={index}>{option.text}</li>
-                ))}
-              </ul>
-              {formData.allowMultipleSelections && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Multiple selections allowed
-                </p>
-              )}
-              {formData.duration && (
-                <p className="text-sm text-muted-foreground">
-                  Duration: {formData.duration} days
-                </p>
-              )}
-            </div>
-          )}
+          </aside>
         </div>
-
-        <Separator />
 
         {/* Submit button */}
         <div className="flex justify-end">
@@ -150,7 +165,7 @@ export const ReviewContent: React.FC<ReviewContentProps> = ({
             {isSubmitting ? 'Publishing...' : 'Publish'}
           </Button>
         </div>
-      </div>
+      </section>
     </form>
   );
 };
