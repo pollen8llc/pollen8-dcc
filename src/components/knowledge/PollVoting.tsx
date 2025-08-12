@@ -253,31 +253,29 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
     <Card className="overflow-hidden">
       <CardContent className="p-6">
         <div className="space-y-4">
-          {responseCounts.length > 0 && (
-            // Show animated results for everyone when there are responses
-            <div className="space-y-4">
-              <div className="flex items-center justify-between mb-6">
-                <h4 className="font-semibold text-lg flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  Poll Results
-                </h4>
-                <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                  {totalResponses} {totalResponses === 1 ? 'response' : 'responses'}
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                {pollData.options.map((option, index) => (
-                  <AnimatedResultOption
-                    key={index}
-                    option={option}
-                    index={index}
-                    delay={index * 150}
-                  />
-                ))}
+          {/* Always show results/progress bars for all users */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="font-semibold text-lg flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Poll Results
+              </h4>
+              <div className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                {totalResponses} {totalResponses === 1 ? 'response' : 'responses'}
               </div>
             </div>
-          )}
+            
+            <div className="space-y-3">
+              {pollData.options.map((option, index) => (
+                <AnimatedResultOption
+                  key={index}
+                  option={option}
+                  index={index}
+                  delay={index * 150}
+                />
+              ))}
+            </div>
+          </div>
 
           {!hasResponded && (
             // Show voting interface for users who haven't voted yet
