@@ -29,4 +29,29 @@ const Progress = React.forwardRef<
 ))
 Progress.displayName = ProgressPrimitive.Root.displayName
 
-export { Progress }
+// High-contrast glow progress bar (no animation)
+const GlowProgress = React.forwardRef<
+  React.ElementRef<typeof ProgressPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>
+>(({ className, value, ...props }, ref) => (
+  <ProgressPrimitive.Root
+    ref={ref}
+    className={cn(
+      "relative h-4 w-full overflow-hidden rounded-full bg-secondary",
+      className
+    )}
+    {...props}
+  >
+    <ProgressPrimitive.Indicator
+      className={cn("h-full w-full flex-1 bg-accent")}
+      style={{
+        transform: `translateX(-${100 - (value || 0)}%)`,
+        boxShadow:
+          '0 10px 15px -3px hsl(var(--accent) / 0.5), 0 4px 6px -2px hsl(var(--accent) / 0.5)'
+      }}
+    />
+  </ProgressPrimitive.Root>
+));
+GlowProgress.displayName = "GlowProgress";
+
+export { Progress, GlowProgress }

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
+import { GlowProgress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, TrendingUp } from 'lucide-react';
@@ -208,24 +208,17 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
     
     return (
       <div 
-        className={`space-y-3 p-4 rounded-lg border transition-all duration-500 hover:shadow-md ${
+        className={`space-y-3 p-4 rounded-lg border hover:shadow-md ${
           isSelected 
             ? 'bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30 shadow-sm' 
             : 'bg-background hover:bg-muted/30'
         }`}
-        style={{ 
-          animationDelay: `${delay}ms`,
-          animation: showResults ? 'fade-in 0.6s ease-out forwards' : 'none',
-          opacity: showResults ? 1 : 0,
-          transform: showResults ? 'translateY(0)' : 'translateY(20px)'
-        }}
       >
         <div className="flex justify-between items-start">
           <div className="flex items-start gap-3 flex-1">
             {isSelected && (
               <CheckCircle2 
-                className="h-5 w-5 text-primary mt-0.5 animate-scale-in" 
-                style={{ animationDelay: `${delay + 200}ms` }}
+                className="h-5 w-5 text-primary mt-0.5"
               />
             )}
             <span className={`text-sm leading-relaxed ${isSelected ? 'font-medium text-primary' : 'text-foreground'}`}>
@@ -247,10 +240,9 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
         </div>
         
         <div className="relative">
-          <Progress 
+          <GlowProgress 
             value={percentage}
             className="h-3"
-            indicatorClassName="bg-accent transition-none"
           />
         </div>
       </div>
