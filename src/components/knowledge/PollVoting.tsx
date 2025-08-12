@@ -237,21 +237,20 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <TrendingUp className="h-3 w-3" />
               <span className="font-mono font-medium">
-                {showResults ? animatedCount : 0}
+                {responseCount}
               </span>
             </div>
             <div className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-              {showResults ? `${animatedPercentage.toFixed(1)}%` : '0.0%'}
+              {`${percentage.toFixed(1)}%`}
             </div>
           </div>
         </div>
         
         <div className="relative">
           <Progress 
-            value={showResults ? percentage : 0} 
-            className="h-3 transition-all duration-1000 ease-out" 
-            style={{ transitionDelay: `${delay + 100}ms` }}
-            indicatorClassName="bg-primary/90"
+            value={percentage}
+            className="h-3"
+            indicatorClassName="bg-accent transition-none"
           />
         </div>
       </div>
