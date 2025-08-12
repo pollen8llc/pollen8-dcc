@@ -10,7 +10,7 @@ import { UnifiedProfile } from "@/types/unifiedProfile";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const ProfilePage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { userId } = useParams<{ userId: string }>();
   const { currentUser, isLoading } = useUser();
   const { getProfileById, isLoading: profileLoading } = useProfiles();
   const [profileData, setProfileData] = React.useState<UnifiedProfile | null>(null);
@@ -19,12 +19,12 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
 
   // Determine which profile to show
-  const profileId = id || currentUser?.id;
-  const isOwnProfile = !id || id === currentUser?.id;
+  const profileId = userId || currentUser?.id;
+  const isOwnProfile = !userId || userId === currentUser?.id;
   
   // Debug logging
   console.log('=== PROFILE PAGE DEBUG ===');
-  console.log('URL param id:', id);
+  console.log('URL param userId:', userId);
   console.log('Current user ID:', currentUser?.id);
   console.log('Profile ID to fetch:', profileId);
   console.log('Is own profile:', isOwnProfile);
@@ -86,8 +86,8 @@ const ProfilePage: React.FC = () => {
       l.setAttribute('rel', 'canonical');
       return l;
     }) as HTMLLinkElement;
-    canonical.setAttribute('href', window.location.origin + (id ? `/profile/${id}` : '/profile'));
-  }, [profileData, id]);
+    canonical.setAttribute('href', window.location.origin + (userId ? `/profile/${userId}` : '/profile'));
+  }, [profileData, userId]);
 
   // Show loading state
   if (isLoading || profileLoading || fetching) {
