@@ -38,7 +38,7 @@ import { CommentSection } from '@/components/knowledge/CommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
 import { VotingButtons } from '@/components/knowledge/VotingButtons';
-import { PollVoting } from '@/components/knowledge/PollVoting';
+import { ModernPollVoting } from '@/components/knowledge/ModernPollVoting';
 
 // Mocks and types
 import { ContentType, VoteType } from '@/models/knowledgeTypes';
@@ -258,7 +258,7 @@ const ArticleView = () => {
                       [&_td]:text-white [&_td]:border [&_td]:border-gray-600 [&_td]:px-4 [&_td]:py-3">
                       <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
                     </div>
-                    <PollVoting 
+                    <ModernPollVoting 
                       pollId={article.id} 
                       pollData={article.options}
                       isOwner={currentUser?.id === article.user_id}
