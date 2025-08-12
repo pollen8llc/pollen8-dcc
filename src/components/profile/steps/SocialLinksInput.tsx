@@ -15,13 +15,26 @@ interface SocialLink {
 const COMMON_PLATFORMS = [
   'LinkedIn',
   'Twitter',
-  'GitHub',
   'Instagram',
   'Facebook',
   'YouTube',
   'TikTok',
+  'GitHub',
+  'Discord',
+  'Telegram',
+  'Luma',
+  'Eventbrite',
+  'Meetup',
+  'Snapchat',
+  'Pinterest',
+  'WhatsApp',
+  'Threads',
+  'Medium',
+  'Behance',
+  'Dribbble',
   'Portfolio',
   'Blog',
+  'Website',
   'Other'
 ];
 

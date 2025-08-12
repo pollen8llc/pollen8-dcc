@@ -126,12 +126,27 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                   )}
                 </div>
                 
-                {profile.location && (
-                  <div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start">
-                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                    <span className="text-base sm:text-lg lg:text-xl text-muted-foreground font-medium">{profile.location}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start flex-wrap">
+                  {profile.location && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                      <span className="text-base sm:text-lg lg:text-xl text-muted-foreground font-medium">{profile.location}</span>
+                    </div>
+                  )}
+                  {profile.website && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Globe className="w-3 h-3" />
+                      <a 
+                        href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs hover:underline"
+                      >
+                        Website
+                      </a>
+                    </Badge>
+                  )}
+                </div>
               </div>
               
               {/* Action Button */}
@@ -291,7 +306,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                   return (
                     <div className="space-y-2 sm:space-y-3">
                       {socialEntries.map(([platform, url]) => {
-                        // Improve platform labeling
+                        // Updated platform labeling for social networks and event platforms
                         const platformLabels = {
                           linkedin: 'LinkedIn',
                           twitter: 'Twitter',
@@ -304,7 +319,17 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                           telegram: 'Telegram',
                           website: 'Website',
                           portfolio: 'Portfolio',
-                          blog: 'Blog'
+                          blog: 'Blog',
+                          luma: 'Luma',
+                          eventbrite: 'Eventbrite',
+                          meetup: 'Meetup',
+                          snapchat: 'Snapchat',
+                          pinterest: 'Pinterest',
+                          whatsapp: 'WhatsApp',
+                          threads: 'Threads',
+                          medium: 'Medium',
+                          behance: 'Behance',
+                          dribbble: 'Dribbble'
                         };
                         
                         const displayName = platformLabels[platform.toLowerCase()] || 
@@ -333,7 +358,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
             </Card>
           )}
 
-          {/* Enhanced Communities */}
+          {/* Enhanced Communities - Moved after Activity & Stats */}
           <Card className="border-border/50 shadow-lg">
             <CardHeader className="pb-3 sm:pb-4">
               <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
