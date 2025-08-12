@@ -71,44 +71,54 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
 
   const loadResponses = async () => {
     try {
-      // Get response counts for each option
-      const { data: responses, error } = await supabase
-        .from('poll_responses')
-        .select('option_index')
-        .eq('poll_id', pollId);
+      console.log('📊 Loading poll counts via RPC for poll:', pollId);
 
-      if (error) throw error;
+      // 1) Get aggregated counts for all users via secure RPC
+      const { data: aggCounts, error: aggError } = await supabase.rpc('get_poll_counts', { poll_id: pollId });
+      if (aggError) {
+        console.error('❌ RPC get_poll_counts error:', aggError);
+        throw aggError;
+      }
 
-      // Count responses per option
-      const counts: { [key: number]: number } = {};
-      responses?.forEach(response => {
-        counts[response.option_index] = (counts[response.option_index] || 0) + 1;
-      });
-
-      const responseCountsArray = Object.entries(counts).map(([index, count]) => ({
-        option_index: parseInt(index),
-        count: count as number
+      // Normalize to our ResponseCount[] (some options might be 0 and won't appear in RPC result)
+      const countsArray: ResponseCount[] = (aggCounts || []).map((row: any) => ({
+        option_index: Number(row.option_index),
+        count: Number(row.count || 0),
       }));
 
-      setResponseCounts(responseCountsArray);
-      setTotalResponses(responses?.length || 0);
+      setResponseCounts(countsArray);
 
-      // Check if current user has responded
+      const total = (aggCounts || []).reduce((sum: number, r: any) => sum + Number(r.count || 0), 0);
+      setTotalResponses(total);
+
+      // 2) Check if current user has responded (allowed by RLS)
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: userResponses } = await supabase
+        const { data: userResponses, error: userErr } = await supabase
           .from('poll_responses')
           .select('option_index')
           .eq('poll_id', pollId)
           .eq('user_id', user.id);
 
+        if (userErr) {
+          console.warn('⚠️ Could not fetch user-specific responses (may be fine if not responded):', userErr);
+        }
+
         if (userResponses && userResponses.length > 0) {
           setHasResponded(true);
           setSelectedOptions(userResponses.map(r => r.option_index));
+        } else {
+          setHasResponded(false);
+          setSelectedOptions([]);
         }
+      } else {
+        // Not logged in - no user-specific selections
+        setHasResponded(false);
+        setSelectedOptions([]);
       }
     } catch (error) {
       console.error('Error loading responses:', error);
+      // Do not toast here to avoid noise; UI will simply show zeroed bars if something fails
     }
   };
 

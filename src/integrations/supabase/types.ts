@@ -1616,11 +1616,13 @@ export type Database = {
           invited_by: string | null
           last_name: string | null
           location: string | null
+          phone: string | null
           privacy_settings: Json
           profile_complete: boolean | null
           social_links: Json | null
           updated_at: string
           user_id: string
+          website: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -1633,11 +1635,13 @@ export type Database = {
           invited_by?: string | null
           last_name?: string | null
           location?: string | null
+          phone?: string | null
           privacy_settings?: Json
           profile_complete?: boolean | null
           social_links?: Json | null
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -1650,11 +1654,13 @@ export type Database = {
           invited_by?: string | null
           last_name?: string | null
           location?: string | null
+          phone?: string | null
           privacy_settings?: Json
           profile_complete?: boolean | null
           social_links?: Json | null
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -2287,11 +2293,13 @@ export type Database = {
           invited_by: string | null
           last_name: string | null
           location: string | null
+          phone: string | null
           privacy_settings: Json
           profile_complete: boolean | null
           social_links: Json | null
           updated_at: string
           user_id: string
+          website: string | null
         }[]
       }
       get_connection_depth: {
@@ -2305,6 +2313,13 @@ export type Database = {
       get_is_admin: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      get_poll_counts: {
+        Args: { poll_id: string }
+        Returns: {
+          option_index: number
+          count: number
+        }[]
       }
       get_user_memberships: {
         Args: { user_id: string }
