@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-import { useAuth } from '@/hooks/useAuth';
 import { useUserKnowledgeStats } from '@/hooks/knowledge/useUserKnowledgeStats';
 import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
@@ -33,23 +32,8 @@ import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation'
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
   const { data: stats, isLoading: statsLoading } = useUserKnowledgeStats();
   const { savedArticles, isLoading: savedLoading } = useSavedArticles();
-
-  if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto px-4 py-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4 text-white">Please log in to view your knowledge resources</h1>
-            <Button onClick={() => navigate('/auth')}>Log In</Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const StatCard = ({ icon: Icon, title, value, description }: {
     icon: any;
