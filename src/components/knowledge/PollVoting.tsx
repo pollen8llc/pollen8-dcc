@@ -251,18 +251,8 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
             value={showResults ? percentage : 0} 
             className="h-3 transition-all duration-1000 ease-out" 
             style={{ transitionDelay: `${delay + 100}ms` }}
-            indicatorClassName="bg-primary"
+            indicatorClassName="bg-primary/90"
           />
-          {percentage > 0 && (
-            <div 
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-pulse"
-              style={{ 
-                width: `${percentage}%`,
-                animationDelay: `${delay + 300}ms`,
-                animationDuration: '2s'
-              }}
-            />
-          )}
         </div>
       </div>
     );
