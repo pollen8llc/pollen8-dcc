@@ -20,7 +20,7 @@ import {
   CardDescription 
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Steps } from '@/components/ui/steps';
+import { Progress } from '@/components/ui/progress';
 import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
@@ -77,6 +77,8 @@ const PostWizard = () => {
     return ['Content & Tags', 'Review & Submit'];
   };
   
+  // Progress value for the wizard (acts like a loading bar)
+  const getProgressValue = () => (currentStep === 1 ? 50 : 100);
   const getContentType = (): ContentType => {
     switch (postType) {
       case 'question': return ContentType.QUESTION;
@@ -185,9 +187,13 @@ const PostWizard = () => {
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{getPostTypeTitle()}</h1>
           </div>
           
-          {/* Steps Indicator */}
+          {/* Progress Indicator */}
           <div className="mb-6 sm:mb-8 animate-fade-in">
-            <Steps currentStep={currentStep} steps={getSteps()} />
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">Step {currentStep} of 2</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">{getSteps()[currentStep - 1]}</span>
+            </div>
+            <Progress value={getProgressValue()} indicatorClassName="bg-primary" />
           </div>
           
           {/* Form Card */}
