@@ -118,10 +118,10 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
 
   // Trigger results animation after data loads
   useEffect(() => {
-    if ((hasResponded || isOwner) && responseCounts.length > 0) {
+    if (responseCounts.length > 0) {
       setTimeout(() => setShowResults(true), 300);
     }
-  }, [hasResponded, isOwner, responseCounts]);
+  }, [responseCounts]);
 
   const handleSubmitResponse = async () => {
     if (selectedOptions.length === 0) {
