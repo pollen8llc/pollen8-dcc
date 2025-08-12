@@ -246,9 +246,45 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
               </div>
             </CardContent>
           </Card>
+
+          {/* Enhanced Communities - Moved to main panel */}
+          <Card className="border-border/50 shadow-lg">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                Communities
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="text-center py-6 sm:py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-3 sm:mt-4 text-sm sm:text-base text-muted-foreground">Loading communities...</p>
+                </div>
+              ) : communities.length > 0 ? (
+                <div className="space-y-3 sm:space-y-4">
+                  {communities.map((community) => (
+                    <div key={community.id} className="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-muted/20 to-muted/30 border border-border/30 hover:border-primary/20 transition-all duration-300">
+                      <h4 className="font-semibold text-sm sm:text-base lg:text-lg mb-1 sm:mb-2">{community.name}</h4>
+                      {community.description && (
+                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                          {community.description.substring(0, 120)}
+                          {community.description.length > 120 && '...'}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-6 sm:py-8 text-sm sm:text-base">
+                  No communities found
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Right Column - Interests, Social & Communities */}
+        {/* Right Column - Interests & Social Links Only */}
         <div className="lg:col-span-4 space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Enhanced Interests */}
           {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 && (
@@ -357,42 +393,6 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
               </CardContent>
             </Card>
           )}
-
-          {/* Enhanced Communities - Moved after Activity & Stats */}
-          <Card className="border-border/50 shadow-lg">
-            <CardHeader className="pb-3 sm:pb-4">
-              <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
-                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                Communities
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="text-center py-6 sm:py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-primary mx-auto"></div>
-                  <p className="mt-3 sm:mt-4 text-sm sm:text-base text-muted-foreground">Loading communities...</p>
-                </div>
-              ) : communities.length > 0 ? (
-                <div className="space-y-3 sm:space-y-4">
-                  {communities.map((community) => (
-                    <div key={community.id} className="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-muted/20 to-muted/30 border border-border/30 hover:border-primary/20 transition-all duration-300">
-                      <h4 className="font-semibold text-sm sm:text-base lg:text-lg mb-1 sm:mb-2">{community.name}</h4>
-                      {community.description && (
-                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                          {community.description.substring(0, 120)}
-                          {community.description.length > 120 && '...'}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-center py-6 sm:py-8 text-sm sm:text-base">
-                  No communities found
-                </p>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
 
