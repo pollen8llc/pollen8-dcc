@@ -52,6 +52,17 @@ export interface KnowledgeComment {
   vote_count?: number;
   user_vote?: number | null;
   author?: KnowledgeAuthor;
+  parent_comment_id?: string | null;
+  reply_count?: number;
+  replies?: KnowledgeComment[];
+  mentions?: KnowledgeCommentMention[];
+}
+
+export interface KnowledgeCommentMention {
+  id: string;
+  comment_id: string;
+  mentioned_user_id: string;
+  created_at: string;
 }
 
 export interface KnowledgeTag {

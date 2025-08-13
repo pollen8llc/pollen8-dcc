@@ -456,6 +456,35 @@ export type Database = {
           },
         ]
       }
+      knowledge_comment_mentions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          mentioned_user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          mentioned_user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          mentioned_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_comment_mentions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_comments: {
         Row: {
           article_id: string
@@ -463,6 +492,8 @@ export type Database = {
           created_at: string
           id: string
           is_accepted: boolean | null
+          parent_comment_id: string | null
+          reply_count: number
           updated_at: string
           user_id: string
         }
@@ -472,6 +503,8 @@ export type Database = {
           created_at?: string
           id?: string
           is_accepted?: boolean | null
+          parent_comment_id?: string | null
+          reply_count?: number
           updated_at?: string
           user_id: string
         }
@@ -481,6 +514,8 @@ export type Database = {
           created_at?: string
           id?: string
           is_accepted?: boolean | null
+          parent_comment_id?: string | null
+          reply_count?: number
           updated_at?: string
           user_id?: string
         }
@@ -490,6 +525,13 @@ export type Database = {
             columns: ["article_id"]
             isOneToOne: false
             referencedRelation: "knowledge_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_comments"
             referencedColumns: ["id"]
           },
         ]

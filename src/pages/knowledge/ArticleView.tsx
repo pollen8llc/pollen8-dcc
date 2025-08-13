@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 // Custom Components
-import { CommentSection } from '@/components/knowledge/CommentSection';
+import { EnhancedCommentSection } from '@/components/knowledge/EnhancedCommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
 import { VotingButtons } from '@/components/knowledge/VotingButtons';
@@ -433,16 +433,10 @@ const ArticleView = () => {
             
             <Separator className="my-8" />
             
-            {/* Comments section */}
-            <CommentSection 
+            {/* Enhanced Comments section */}
+            <EnhancedCommentSection
               articleId={id}
-              comments={comments}
               isArticleAuthor={currentUser?.id === article.user_id}
-              isLoading={commentsLoading}
-              onVote={handleCommentVote}
-              onAccept={handleAcceptAnswer}
-              onDelete={handleDeleteComment}
-              onAddComment={handleAddComment}
             />
           </div>
           
