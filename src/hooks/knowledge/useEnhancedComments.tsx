@@ -43,7 +43,7 @@ export const useEnhancedComments = (articleId: string | undefined) => {
         // Fetch all author profiles in a single query
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, avatar_url')
+          .select('id, first_name, last_name, username, avatar_url')
           .in('id', userIds);
           
         if (profileError) {
@@ -69,11 +69,14 @@ export const useEnhancedComments = (articleId: string | undefined) => {
             ...comment,
             author: profile ? {
               id: comment.user_id,
-              name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+              name: (() => {
+                const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+                return fullName || profile.username || 'Anonymous User';
+              })(),
               avatar_url: profile.avatar_url
             } : {
               id: comment.user_id,
-              name: 'Unknown User',
+              name: 'Anonymous User',
               avatar_url: null
             },
             mentions: commentMentions

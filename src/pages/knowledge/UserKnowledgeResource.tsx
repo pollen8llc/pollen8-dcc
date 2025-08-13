@@ -239,41 +239,59 @@ const UserKnowledgeResource = () => {
                           {recentActivity.slice(0, 6).map((activity) => (
                             <div 
                               key={`${activity.type}-${activity.id}`}
-                              className="flex items-start gap-3 p-3 glass-morphism hover:bg-white/10 rounded-lg cursor-pointer transition-all duration-200 group"
+                              className="flex items-start gap-3 p-4 glass-morphism hover:bg-white/10 rounded-lg cursor-pointer transition-all duration-200 group border border-white/5 hover:border-white/10"
                               onClick={() => navigate(`/knowledge/article/${activity.article_id}`)}
                             >
-                              <div className="flex-shrink-0 mt-0.5">
-                                {activity.type === 'comment' && (
-                                  <MessageSquare className="h-4 w-4 text-blue-400" />
-                                )}
-                                {activity.type === 'vote' && (
-                                  <Heart className={`h-4 w-4 ${activity.vote_type === 'upvote' ? 'text-green-400' : 'text-red-400'}`} />
-                                )}
-                                {activity.type === 'article' && (
-                                  <FileText className="h-4 w-4 text-primary" />
+                              <div className="flex-shrink-0">
+                                {activity.avatar_url ? (
+                                  <img 
+                                    src={activity.avatar_url} 
+                                    alt={activity.user_name}
+                                    className="h-8 w-8 rounded-full object-cover border border-white/10"
+                                  />
+                                ) : (
+                                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center border border-white/10">
+                                    <span className="text-xs font-medium text-primary">
+                                      {activity.user_name?.charAt(0) || '?'}
+                                    </span>
+                                  </div>
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-sm font-medium text-foreground truncate">
+                                  <span className="text-sm font-semibold text-foreground">
                                     {activity.user_name}
                                   </span>
-                                  {activity.type === 'comment' && (
-                                    <span className="text-xs text-muted-foreground">commented on</span>
-                                  )}
-                                  {activity.type === 'vote' && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {activity.vote_type === 'upvote' ? 'upvoted' : 'downvoted'}
-                                    </span>
-                                  )}
-                                  {activity.type === 'article' && (
-                                    <span className="text-xs text-muted-foreground">published</span>
-                                  )}
+                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    {activity.type === 'comment' && (
+                                      <>
+                                        <MessageSquare className="h-3 w-3 text-blue-400" />
+                                        <span>commented on</span>
+                                      </>
+                                    )}
+                                    {activity.type === 'vote' && (
+                                      <>
+                                        <Heart className={`h-3 w-3 ${activity.vote_type === 'upvote' ? 'text-green-400' : 'text-red-400'}`} />
+                                        <span>{activity.vote_type === 'upvote' ? 'upvoted' : 'downvoted'}</span>
+                                      </>
+                                    )}
+                                    {activity.type === 'article' && (
+                                      <>
+                                        <FileText className="h-3 w-3 text-primary" />
+                                        <span>published</span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
-                                <p className="text-xs sm:text-sm font-medium text-primary truncate group-hover:text-primary/80 transition-colors">
+                                <p className="text-sm font-medium text-primary truncate group-hover:text-primary/80 transition-colors mb-1">
                                   {activity.article_title}
                                 </p>
-                                <p className="text-xs text-muted-foreground mt-1">
+                                {activity.type === 'comment' && activity.content && (
+                                  <p className="text-xs text-muted-foreground bg-white/5 rounded p-2 mb-2 italic">
+                                    "{activity.content}"
+                                  </p>
+                                )}
+                                <p className="text-xs text-muted-foreground">
                                   {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
                                 </p>
                               </div>
