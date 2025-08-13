@@ -95,21 +95,21 @@ const UserKnowledgeResource = () => {
           <TabsList className="glass-morphism border-0 bg-card/30 backdrop-blur-md w-full justify-start overflow-x-auto">
             <TabsTrigger 
               value="overview" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0"
+              className="data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:shadow-lg text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0 transition-all duration-200"
             >
               <BarChart3 className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
             <TabsTrigger 
               value="my-posts" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0"
+              className="data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:shadow-lg text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0 transition-all duration-200"
             >
               <FileText className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">My Posts</span>
             </TabsTrigger>
             <TabsTrigger 
               value="saved" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary-foreground text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0"
+              className="data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:shadow-lg text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0 transition-all duration-200"
             >
               <Bookmark className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">Saved</span>
@@ -206,7 +206,7 @@ const UserKnowledgeResource = () => {
                           <Badge 
                             key={type} 
                             variant="secondary"
-                            className="glass-morphism border-0 bg-primary/20 text-primary-foreground backdrop-blur-sm"
+                            className="bg-primary text-black border-0 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
                           >
                             <TagIcon className="h-3 w-3 mr-1" />
                             {type.toLowerCase()}: {count}
@@ -336,14 +336,14 @@ const UserKnowledgeResource = () => {
                           <Badge 
                             key={t} 
                             variant="secondary"
-                            className="glass-morphism border-0 bg-primary/20 text-primary-foreground backdrop-blur-sm text-xs"
+                            className="bg-primary text-black border-0 shadow-sm font-medium text-xs"
                           >
                             <TagIcon className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                             {t}
                           </Badge>
                         ))}
                         {(article.tags?.length || 0) > 3 && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-primary text-primary bg-primary/10">
                             +{(article.tags?.length || 0) - 3} more
                           </Badge>
                         )}
@@ -445,14 +445,14 @@ const UserKnowledgeResource = () => {
                           <Badge 
                             key={t} 
                             variant="secondary"
-                            className="glass-morphism border-0 bg-primary/20 text-primary-foreground backdrop-blur-sm text-xs"
+                            className="bg-primary text-black border-0 shadow-sm font-medium text-xs"
                           >
                             <TagIcon className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                             {t}
                           </Badge>
                         ))}
                         {(article.tags?.length || 0) > 3 && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-primary text-primary bg-primary/10">
                             +{(article.tags?.length || 0) - 3} more
                           </Badge>
                         )}
