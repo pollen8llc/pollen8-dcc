@@ -80,78 +80,131 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <Navbar />
-      <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+      <div className="container mx-auto py-6 px-4">
+        {/* Glassmorphic Header */}
+        <div className="glass-morphism glass-morphism-hover rounded-3xl p-6 mb-8 animate-fade-in">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-2">
+            Admin Dashboard
+          </h1>
+          <p className="text-muted-foreground">Platform oversight and analytics</p>
+        </div>
         
         {isAdmin && (
           <div className="mb-10">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full mb-8 glass dark:glass-dark">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="metrics">Metrics</TabsTrigger>
-                <TabsTrigger value="users">User Management</TabsTrigger>
-                <TabsTrigger value="settings">System Settings</TabsTrigger>
+              {/* Glassmorphic Tab List */}
+              <TabsList className="w-full mb-8 glass-morphism border border-primary/20 bg-primary/5 backdrop-blur-md p-2 rounded-2xl">
+                <TabsTrigger 
+                  value="overview" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="metrics" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
+                >
+                  Metrics
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="users" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
+                >
+                  User Management
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="settings" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
+                >
+                  System Settings
+                </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="overview">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System Administration</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-6">
-                      Welcome to the admin dashboard. Use the tabs above to manage users, roles, and system settings.
-                    </p>
-                    <AdminOverviewCards onTabChange={setActiveTab} />
-                    
-                    <div className="mt-8">
-                      <h2 className="text-xl font-semibold mb-4">Community Creation Audit Log</h2>
-                      <CommunityAuditTable />
+              <TabsContent value="overview" className="animate-fade-in">
+                <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                      <span className="text-black font-bold text-xl">⚡</span>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">System Administration</h2>
+                      <p className="text-muted-foreground">Welcome to the admin dashboard. Manage platform operations with ease.</p>
+                    </div>
+                  </div>
+                  
+                  <AdminOverviewCards onTabChange={setActiveTab} />
+                  
+                  {/* Enhanced Community Audit Section */}
+                  <div className="mt-8 glass-morphism glass-morphism-hover rounded-2xl p-6 border border-primary/10">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                        <span className="text-primary font-bold">📊</span>
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground">Community Creation Audit Log</h3>
+                    </div>
+                    <CommunityAuditTable />
+                  </div>
+                </div>
               </TabsContent>
 
-              <TabsContent value="metrics">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Platform Metrics</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <AdminMetrics />
-                  </CardContent>
-                </Card>
+              <TabsContent value="metrics" className="animate-fade-in">
+                <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                      <span className="text-black font-bold text-xl">📈</span>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">Platform Metrics</h2>
+                      <p className="text-muted-foreground">Real-time analytics and performance insights</p>
+                    </div>
+                  </div>
+                  <AdminMetrics />
+                </div>
               </TabsContent>
 
-              <TabsContent value="users">
+              <TabsContent value="users" className="animate-fade-in">
                 <UserManagementTab />
               </TabsContent>
               
-              <TabsContent value="settings">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System Settings</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+              <TabsContent value="settings" className="animate-fade-in">
+                <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                      <span className="text-black font-bold text-xl">⚙️</span>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">System Settings</h2>
+                      <p className="text-muted-foreground">Configure platform settings and preferences</p>
+                    </div>
+                  </div>
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                      <span className="text-primary text-2xl">🔧</span>
+                    </div>
                     <p className="text-muted-foreground">
                       System settings will be implemented in a future update.
                     </p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
         )}
         
         {!isAdmin && isOrganizer && (
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">Organizer Dashboard</h2>
-            <p className="text-muted-foreground mb-6">
-              Manage your organization settings and users here.
-            </p>
-            <AdminOverviewCards onTabChange={() => navigate("/organizer")} />
+          <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20 animate-fade-in">
+            <div className="text-center py-12">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                <span className="text-black text-3xl font-bold">👑</span>
+              </div>
+              <h2 className="text-2xl font-semibold mb-2 text-foreground">Organizer Dashboard</h2>
+              <p className="text-muted-foreground mb-8">
+                Manage your organization settings and users with enhanced controls.
+              </p>
+              <AdminOverviewCards onTabChange={() => navigate("/organizer")} />
+            </div>
           </div>
         )}
       </div>
