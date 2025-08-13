@@ -7,6 +7,7 @@ import { useUserSearch } from '@/hooks/knowledge/useEnhancedComments';
 interface MentionUser {
   id: string;
   name: string;
+  username: string;
   avatar_url?: string;
 }
 
@@ -71,13 +72,13 @@ export const MentionInput: React.FC<MentionInputProps> = ({
       setMentionStart(null);
     }
 
-    // Extract mentioned user IDs from the text
+    // Extract mentioned usernames from the text
     const mentionRegex = /@\[([^\]]+)\]\(([^)]+)\)/g;
     const extractedMentions: string[] = [];
     let match;
     
     while ((match = mentionRegex.exec(newValue)) !== null) {
-      extractedMentions.push(match[2]); // The user ID is in the second capture group
+      extractedMentions.push(match[2]); // The username is in the second capture group
     }
     
     setMentions(extractedMentions);
@@ -92,13 +93,13 @@ export const MentionInput: React.FC<MentionInputProps> = ({
 
     const beforeMention = value.slice(0, mentionStart);
     const afterMention = value.slice(textarea.selectionStart);
-    const mentionText = `@[${user.name}](${user.id})`;
+    const mentionText = `@[${user.name}](${user.username})`;
     
     const newValue = beforeMention + mentionText + afterMention;
     const newCursorPos = mentionStart + mentionText.length;
 
     // Update the mentions list
-    const newMentions = [...mentions, user.id];
+    const newMentions = [...mentions, user.username];
     setMentions(newMentions);
     
     onChange(newValue, newMentions);

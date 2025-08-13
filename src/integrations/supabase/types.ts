@@ -462,18 +462,21 @@ export type Database = {
           created_at: string
           id: string
           mentioned_user_id: string
+          mentioned_username: string | null
         }
         Insert: {
           comment_id: string
           created_at?: string
           id?: string
           mentioned_user_id: string
+          mentioned_username?: string | null
         }
         Update: {
           comment_id?: string
           created_at?: string
           id?: string
           mentioned_user_id?: string
+          mentioned_username?: string | null
         }
         Relationships: [
           {
@@ -1664,6 +1667,7 @@ export type Database = {
           social_links: Json | null
           updated_at: string
           user_id: string
+          username: string | null
           website: string | null
         }
         Insert: {
@@ -1683,6 +1687,7 @@ export type Database = {
           social_links?: Json | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           website?: string | null
         }
         Update: {
@@ -1702,6 +1707,7 @@ export type Database = {
           social_links?: Json | null
           updated_at?: string
           user_id?: string
+          username?: string | null
           website?: string | null
         }
         Relationships: []
@@ -2341,6 +2347,7 @@ export type Database = {
           social_links: Json | null
           updated_at: string
           user_id: string
+          username: string | null
           website: string | null
         }[]
       }

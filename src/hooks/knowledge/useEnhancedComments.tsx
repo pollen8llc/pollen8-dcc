@@ -159,9 +159,9 @@ export const useEnhancedCommentMutations = () => {
       
       // Insert mentions if provided
       if (mentions && mentions.length > 0) {
-        const mentionInserts = mentions.map(userId => ({
+        const mentionInserts = mentions.map(username => ({
           comment_id: comment.id,
-          mentioned_user_id: userId
+          mentioned_username: username
         }));
 
         const { error: mentionError } = await supabase
@@ -309,8 +309,8 @@ export const useUserSearch = () => {
     
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, avatar_url')
-      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
+      .select('id, first_name, last_name, username, avatar_url')
+      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,username.ilike.%${query}%`)
       .limit(10);
     
     if (error) {
@@ -320,7 +320,8 @@ export const useUserSearch = () => {
     
     return data?.map(user => ({
       id: user.id,
-      name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown User',
+      name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || 'Unknown User',
+      username: user.username || '',
       avatar_url: user.avatar_url
     })) || [];
   };
