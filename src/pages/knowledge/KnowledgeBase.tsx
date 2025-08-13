@@ -43,16 +43,6 @@ const KnowledgeBase = () => {
     { value: 'poll', label: 'Polls', icon: BarChart3 }
   ];
 
-  // Filter articles by type for stats (excluding total)
-  const articleStats = useMemo(() => {
-    const stats = {
-      articles: articles.filter(a => a.content_type === ContentType.ARTICLE).length,
-      questions: articles.filter(a => a.content_type === ContentType.QUESTION).length,
-      quotes: articles.filter(a => a.content_type === ContentType.QUOTE).length,
-      polls: articles.filter(a => a.content_type === ContentType.POLL).length,
-    };
-    return stats;
-  }, [articles]);
 
   // Get top 10 tags sorted by popularity
   const topTags = useMemo(() => {
@@ -99,58 +89,6 @@ const KnowledgeBase = () => {
           </div>
         </div>
 
-        {/* Stats Cards - Only show when not loading */}
-        {!isLoading && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <BookOpen className="h-4 w-4 text-blue-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{articleStats.articles}</p>
-                    <p className="text-xs text-muted-foreground">Articles</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <HelpCircle className="h-4 w-4 text-green-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{articleStats.questions}</p>
-                    <p className="text-xs text-muted-foreground">Questions</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Quote className="h-4 w-4 text-purple-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{articleStats.quotes}</p>
-                    <p className="text-xs text-muted-foreground">Quotes</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <BarChart3 className="h-4 w-4 text-orange-600" />
-                  <div>
-                    <p className="text-2xl font-bold text-white">{articleStats.polls}</p>
-                    <p className="text-xs text-muted-foreground">Polls</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
 
         {/* Search and Filters */}
         <Card className="mb-6">
