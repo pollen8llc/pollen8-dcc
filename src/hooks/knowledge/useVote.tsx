@@ -13,7 +13,8 @@ export const useVote = () => {
   const vote = useCallback(async (
     type: 'article' | 'comment',
     id: string,
-    voteType: VoteType
+    voteType: VoteType,
+    articleId?: string
   ) => {
     try {
       if (!currentUser) {
@@ -87,7 +88,9 @@ export const useVote = () => {
         queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
       } else {
         queryClient.invalidateQueries({ queryKey: ['knowledgeComments'] });
-        queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', id] });
+        if (articleId) {
+          queryClient.invalidateQueries({ queryKey: ['enhancedComments', articleId] });
+        }
       }
     } catch (error: any) {
       toast({

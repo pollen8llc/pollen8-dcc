@@ -82,7 +82,7 @@ export const EnhancedCommentSection: React.FC<EnhancedCommentSectionProps> = ({
 
   const handleVote = async (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
     try {
-      await vote('comment', commentId, voteType);
+      await vote('comment', commentId, voteType, articleId);
     } catch (error) {
       console.error('Error voting on comment:', error);
     }
