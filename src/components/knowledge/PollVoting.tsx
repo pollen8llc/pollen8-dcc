@@ -224,7 +224,7 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
             : 'bg-background hover:bg-muted/30'
         }`}
       >
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
           <div className="flex items-start gap-3 flex-1">
             {isSelected && (
               <CheckCircle2 
@@ -236,7 +236,7 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
             </span>
           </div>
           
-          <div className="flex items-center gap-3 text-right">
+          <div className="flex items-center justify-between sm:justify-end gap-3">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <TrendingUp className="h-3 w-3" />
               <span className="font-mono font-medium">

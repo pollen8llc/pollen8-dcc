@@ -241,7 +241,7 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
         
         {/* Option content */}
         <div className="relative p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-3 flex-1">
               {!stats.hasVoted && (
                 <div className="flex-shrink-0">
@@ -274,15 +274,17 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
               </div>
             </div>
 
-            {/* Results section */}
-            <div className="flex items-center gap-3">
-              {wasUserChoice && (
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-              )}
-              
-              {isTopChoice && stats.totalVotes > 1 && (
-                <TrendingUp className="h-4 w-4 text-green-500" />
-              )}
+            {/* Results section - stacked on mobile, inline on desktop */}
+            <div className="flex items-center justify-between sm:justify-end gap-3">
+              <div className="flex items-center gap-2">
+                {wasUserChoice && (
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                )}
+                
+                {isTopChoice && stats.totalVotes > 1 && (
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                )}
+              </div>
               
               <div className="text-right">
                 <div className="text-sm font-semibold">
