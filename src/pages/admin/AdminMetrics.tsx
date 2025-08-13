@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 import { Users, BookOpen, MessageSquare, Building, Heart, ThumbsUp, TrendingUp, Activity, Target, Send, Mail, Briefcase, Clock, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { getPlatformMetrics, getMetricsChartData } from '@/services/metricsService';
 
 // Enhanced Metric Card Component with glassmorphic design
@@ -14,7 +13,6 @@ interface MetricCardProps {
   description?: string;
   color: string;
   bgColor: string;
-  progress?: number;
   trend?: number;
 }
 
@@ -25,7 +23,6 @@ const EnhancedMetricCard: React.FC<MetricCardProps> = ({
   description, 
   color, 
   bgColor, 
-  progress, 
   trend 
 }) => (
   <div className={`glass-morphism glass-morphism-hover rounded-2xl p-4 sm:p-6 border border-primary/10 bg-gradient-to-br ${bgColor} hover:scale-105 transition-all duration-300 animate-fade-in group`}>
@@ -48,23 +45,6 @@ const EnhancedMetricCard: React.FC<MetricCardProps> = ({
       <div className="text-sm font-medium text-muted-foreground">
         {label}
       </div>
-      
-      {progress !== undefined && (
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">Progress</span>
-            <span className="text-xs font-medium text-primary">{progress}%</span>
-          </div>
-          <div className="relative">
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className={`h-full bg-gradient-to-r ${color} transition-all duration-500 ease-out rounded-full`}
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
       
       {description && (
         <div className="text-xs text-muted-foreground/80">
@@ -132,10 +112,6 @@ const AdminMetrics = () => {
     );
   }
 
-  // Calculate progress percentages (example targets)
-  const userProgress = Math.min((metrics.users.total / 1000) * 100, 100);
-  const contentProgress = Math.min((metrics.content.totalPosts / 500) * 100, 100);
-  const engagementProgress = Math.min((metrics.engagement.totalVotes / 200) * 100, 100);
 
   return (
     <div className="space-y-8">
@@ -156,7 +132,6 @@ const AdminMetrics = () => {
             description="Platform registrations"
             color="from-primary to-primary/80"
             bgColor="from-primary/5 to-primary/10"
-            progress={userProgress}
             trend={12}
           />
           <EnhancedMetricCard
@@ -166,7 +141,6 @@ const AdminMetrics = () => {
             description="Last 30 days"
             color="from-blue-500 to-blue-600"
             bgColor="from-blue-500/5 to-blue-500/10"
-            progress={Math.min((metrics.users.activeUsers / metrics.users.total) * 100, 100)}
             trend={8}
           />
           <EnhancedMetricCard
@@ -176,7 +150,6 @@ const AdminMetrics = () => {
             description="Active communities"
             color="from-green-500 to-green-600"
             bgColor="from-green-500/5 to-green-500/10"
-            progress={Math.min((metrics.communities.total / 50) * 100, 100)}
             trend={15}
           />
           <EnhancedMetricCard
@@ -186,7 +159,6 @@ const AdminMetrics = () => {
             description="Community visibility"
             color="from-purple-500 to-purple-600"
             bgColor="from-purple-500/5 to-purple-500/10"
-            progress={Math.min((metrics.communities.public / metrics.communities.total) * 100, 100)}
             trend={5}
           />
         </div>
@@ -209,7 +181,6 @@ const AdminMetrics = () => {
             description="Knowledge articles"
             color="from-primary to-primary/80"
             bgColor="from-primary/5 to-primary/10"
-            progress={Math.min((metrics.content.articles / 100) * 100, 100)}
             trend={18}
           />
           <EnhancedMetricCard
@@ -219,7 +190,6 @@ const AdminMetrics = () => {
             description="User questions"
             color="from-yellow-500 to-yellow-600"
             bgColor="from-yellow-500/5 to-yellow-500/10"
-            progress={Math.min((metrics.content.questions / 50) * 100, 100)}
             trend={25}
           />
           <EnhancedMetricCard
@@ -229,7 +199,6 @@ const AdminMetrics = () => {
             description="Inspirational quotes"
             color="from-pink-500 to-pink-600"
             bgColor="from-pink-500/5 to-pink-500/10"
-            progress={Math.min((metrics.content.quotes / 30) * 100, 100)}
             trend={10}
           />
           <EnhancedMetricCard
@@ -239,7 +208,6 @@ const AdminMetrics = () => {
             description="Community polls"
             color="from-orange-500 to-orange-600"
             bgColor="from-orange-500/5 to-orange-500/10"
-            progress={Math.min((metrics.content.polls / 20) * 100, 100)}
             trend={30}
           />
         </div>
@@ -262,7 +230,6 @@ const AdminMetrics = () => {
             description="Content engagement"
             color="from-green-500 to-green-600"
             bgColor="from-green-500/5 to-green-500/10"
-            progress={engagementProgress}
             trend={22}
           />
           <EnhancedMetricCard
@@ -272,7 +239,6 @@ const AdminMetrics = () => {
             description="User discussions"
             color="from-blue-500 to-blue-600"
             bgColor="from-blue-500/5 to-blue-500/10"
-            progress={Math.min((metrics.content.totalComments / 1000) * 100, 100)}
             trend={16}
           />
           <EnhancedMetricCard
@@ -282,7 +248,6 @@ const AdminMetrics = () => {
             description="User bookmarks"
             color="from-purple-500 to-purple-600"
             bgColor="from-purple-500/5 to-purple-500/10"
-            progress={Math.min((metrics.engagement.savedArticles / 300) * 100, 100)}
             trend={14}
           />
           <EnhancedMetricCard
@@ -292,7 +257,6 @@ const AdminMetrics = () => {
             description="Content categories"
             color="from-teal-500 to-teal-600"
             bgColor="from-teal-500/5 to-teal-500/10"
-            progress={Math.min((metrics.content.totalTags / 100) * 100, 100)}
             trend={8}
           />
         </div>
@@ -315,7 +279,6 @@ const AdminMetrics = () => {
             description="Total requests"
             color="from-purple-500 to-purple-600"
             bgColor="from-purple-500/5 to-purple-500/10"
-            progress={Math.min((metrics.modul8.totalServiceRequests / 100) * 100, 100)}
             trend={35}
           />
           <EnhancedMetricCard
@@ -325,7 +288,6 @@ const AdminMetrics = () => {
             description="In progress"
             color="from-yellow-500 to-yellow-600"
             bgColor="from-yellow-500/5 to-yellow-500/10"
-            progress={Math.min((metrics.modul8.activeProposals / 50) * 100, 100)}
             trend={20}
           />
           <EnhancedMetricCard
@@ -335,7 +297,6 @@ const AdminMetrics = () => {
             description="Successful projects"
             color="from-green-500 to-green-600"
             bgColor="from-green-500/5 to-green-500/10"
-            progress={Math.min((metrics.modul8.completedDeals / 30) * 100, 100)}
             trend={45}
           />
           <EnhancedMetricCard
@@ -345,7 +306,6 @@ const AdminMetrics = () => {
             description="Platform participants"
             color="from-blue-500 to-blue-600"
             bgColor="from-blue-500/5 to-blue-500/10"
-            progress={Math.min(((metrics.modul8.serviceProviders + metrics.modul8.organizers) / 100) * 100, 100)}
             trend={28}
           />
         </div>
@@ -368,7 +328,6 @@ const AdminMetrics = () => {
             description="Relationship management"
             color="from-teal-500 to-teal-600"
             bgColor="from-teal-500/5 to-teal-500/10"
-            progress={Math.min((metrics.rel8t.totalContacts / 500) * 100, 100)}
             trend={18}
           />
           <EnhancedMetricCard
@@ -378,7 +337,6 @@ const AdminMetrics = () => {
             description="Automation rules"
             color="from-blue-500 to-blue-600"
             bgColor="from-blue-500/5 to-blue-500/10"
-            progress={Math.min((metrics.rel8t.activeTriggers / 50) * 100, 100)}
             trend={25}
           />
           <EnhancedMetricCard
@@ -388,7 +346,6 @@ const AdminMetrics = () => {
             description="Outreach communications"
             color="from-green-500 to-green-600"
             bgColor="from-green-500/5 to-green-500/10"
-            progress={Math.min((metrics.rel8t.emailsSent / 1000) * 100, 100)}
             trend={40}
           />
           <EnhancedMetricCard
@@ -398,7 +355,6 @@ const AdminMetrics = () => {
             description="Queue status"
             color="from-orange-500 to-orange-600"
             bgColor="from-orange-500/5 to-orange-500/10"
-            progress={Math.min((metrics.rel8t.pendingEmails / 100) * 100, 100)}
             trend={-5}
           />
         </div>
