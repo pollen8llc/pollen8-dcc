@@ -2321,6 +2321,10 @@ export type Database = {
           count: number
         }[]
       }
+      get_rel8t_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_user_memberships: {
         Args: { user_id: string }
         Returns: {
