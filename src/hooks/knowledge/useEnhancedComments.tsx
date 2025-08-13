@@ -56,34 +56,7 @@ export const useEnhancedComments = (articleId: string | undefined) => {
           return map;
         }, {} as Record<string, any>);
         
-        // Get vote counts for all comments
-        const { data: votes, error: votesError } = await supabase
-          .from('knowledge_votes')
-          .select('comment_id, vote_type, user_id')
-          .in('comment_id', commentIds);
-          
-        if (votesError) {
-          console.error('Error fetching comment votes:', votesError);
-        }
-        
-        // Calculate vote totals and user votes
-        const voteMap = new Map();
-        const userVoteMap = new Map();
-        
-        if (votes) {
-          votes.forEach(vote => {
-            const commentId = vote.comment_id;
-            if (!voteMap.has(commentId)) {
-              voteMap.set(commentId, 0);
-            }
-            voteMap.set(commentId, voteMap.get(commentId) + vote.vote_type);
-            
-            const key = `${vote.comment_id}_${vote.user_id}`;
-            userVoteMap.set(key, vote.vote_type);
-          });
-        }
-        
-        // Get current user id for user votes
+        // Get current user id for user context
         const { data: { user } } = await supabase.auth.getUser();
         const currentUserId = user?.id;
         
@@ -103,8 +76,6 @@ export const useEnhancedComments = (articleId: string | undefined) => {
               name: 'Unknown User',
               avatar_url: null
             },
-            vote_count: voteMap.get(comment.id) || 0,
-            user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null,
             mentions: commentMentions
           } as KnowledgeComment;
         });

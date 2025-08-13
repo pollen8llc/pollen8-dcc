@@ -5,11 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { VotingButtons } from './VotingButtons';
 import { MentionInput } from './MentionInput';
 import { useUser } from '@/contexts/UserContext';
 import { useEnhancedComments, useEnhancedCommentMutations } from '@/hooks/knowledge/useEnhancedComments';
-import { useVote } from '@/hooks/knowledge/useVote';
 import { Check, Reply, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { KnowledgeComment } from '@/models/knowledgeTypes';
@@ -26,7 +24,6 @@ export const EnhancedCommentSection: React.FC<EnhancedCommentSectionProps> = ({
   const { currentUser } = useUser();
   const { data: comments, isLoading } = useEnhancedComments(articleId);
   const { createComment, deleteComment, acceptAnswer, isSubmitting } = useEnhancedCommentMutations();
-  const { vote } = useVote();
   
   const [newComment, setNewComment] = useState('');
   const [newCommentMentions, setNewCommentMentions] = useState<string[]>([]);
@@ -80,13 +77,6 @@ export const EnhancedCommentSection: React.FC<EnhancedCommentSectionProps> = ({
     }
   };
 
-  const handleVote = async (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
-    try {
-      await vote('comment', commentId, voteType, articleId);
-    } catch (error) {
-      console.error('Error voting on comment:', error);
-    }
-  };
 
   const toggleReplies = (commentId: string) => {
     const newExpanded = new Set(expandedReplies);
@@ -187,14 +177,6 @@ export const EnhancedCommentSection: React.FC<EnhancedCommentSectionProps> = ({
             
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center space-x-2">
-                <VotingButtons
-                  itemType="comment"
-                  itemId={comment.id}
-                  voteCount={comment.vote_count || 0}
-                  userVote={comment.user_vote}
-                  size="sm"
-                />
-                
                 {!isReply && (
                   <Button
                     variant="ghost"

@@ -86,11 +86,6 @@ export const useVote = () => {
       if (type === 'article') {
         queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', id] });
         queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['knowledgeComments'] });
-        if (articleId) {
-          queryClient.invalidateQueries({ queryKey: ['enhancedComments', articleId] });
-        }
       }
     } catch (error: any) {
       toast({

@@ -338,14 +338,7 @@ const ArticleView = () => {
                   </CardContent>
                   
                   <CardFooter className="flex justify-between pt-0">
-                    <VotingButtons
-                      itemType="comment"
-                      itemId={comment.id}
-                      voteCount={comment.vote_count}
-                      userVote={comment.user_vote}
-                      size="sm"
-                      showCount={true}
-                    />
+                    {/* Comment voting removed */}
                   </CardFooter>
                 </Card>
               ))

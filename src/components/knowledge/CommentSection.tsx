@@ -205,26 +205,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
               </CardContent>
               
               <CardFooter className="flex justify-between pt-0">
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant={comment.user_vote === 1 ? "default" : "outline"}
-                    className={comment.user_vote === 1 ? "bg-royal-blue-600 hover:bg-royal-blue-700" : ""}
-                    onClick={() => onVote(comment.id, 'upvote', comment.user_vote)}
-                  >
-                    <ThumbsUp className="h-4 w-4 mr-1" />
-                    {comment.vote_count && comment.vote_count > 0 ? comment.vote_count : ''}
-                  </Button>
-                  
-                  <Button 
-                    size="sm" 
-                    variant={comment.user_vote === -1 ? "default" : "outline"}
-                    className={comment.user_vote === -1 ? "bg-rose-600 hover:bg-rose-700" : ""}
-                    onClick={() => onVote(comment.id, 'downvote', comment.user_vote)}
-                  >
-                    <ThumbsDown className="h-4 w-4" />
-                  </Button>
-                </div>
+                {/* Voting removed - comments no longer have voting functionality */}
               </CardFooter>
             </Card>
           ))

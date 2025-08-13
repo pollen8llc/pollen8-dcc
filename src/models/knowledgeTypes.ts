@@ -49,8 +49,6 @@ export interface KnowledgeComment {
   created_at: string;
   updated_at: string;
   is_accepted?: boolean;
-  vote_count?: number;
-  user_vote?: number | null;
   author?: KnowledgeAuthor;
   parent_comment_id?: string | null;
   reply_count?: number;
