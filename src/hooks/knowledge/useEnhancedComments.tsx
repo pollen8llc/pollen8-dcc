@@ -161,6 +161,7 @@ export const useEnhancedCommentMutations = () => {
       if (mentions && mentions.length > 0) {
         const mentionInserts = mentions.map(username => ({
           comment_id: comment.id,
+          mentioned_user_id: null,
           mentioned_username: username
         }));
 

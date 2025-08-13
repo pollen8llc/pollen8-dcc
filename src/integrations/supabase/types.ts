@@ -461,21 +461,21 @@ export type Database = {
           comment_id: string
           created_at: string
           id: string
-          mentioned_user_id: string
+          mentioned_user_id: string | null
           mentioned_username: string | null
         }
         Insert: {
           comment_id: string
           created_at?: string
           id?: string
-          mentioned_user_id: string
+          mentioned_user_id?: string | null
           mentioned_username?: string | null
         }
         Update: {
           comment_id?: string
           created_at?: string
           id?: string
-          mentioned_user_id?: string
+          mentioned_user_id?: string | null
           mentioned_username?: string | null
         }
         Relationships: [
