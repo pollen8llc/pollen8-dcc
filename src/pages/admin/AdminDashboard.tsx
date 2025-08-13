@@ -13,6 +13,7 @@ import UserManagementTab from "@/components/admin/UserManagementTab";
 import AdminOverviewCards from "@/components/admin/AdminOverviewCards";
 import NotFoundState from "@/components/community/NotFoundState";
 import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
+import AdminMetrics from "@/pages/admin/AdminMetrics";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
@@ -89,6 +90,7 @@ const AdminDashboard = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="w-full mb-8 glass dark:glass-dark">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="metrics">Metrics</TabsTrigger>
                 <TabsTrigger value="users">User Management</TabsTrigger>
                 <TabsTrigger value="settings">System Settings</TabsTrigger>
               </TabsList>
@@ -108,6 +110,17 @@ const AdminDashboard = () => {
                       <h2 className="text-xl font-semibold mb-4">Community Creation Audit Log</h2>
                       <CommunityAuditTable />
                     </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="metrics">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Platform Metrics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <AdminMetrics />
                   </CardContent>
                 </Card>
               </TabsContent>

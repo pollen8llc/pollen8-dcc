@@ -6,7 +6,7 @@ import { UserRole } from "@/models/types";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import UserManagementTable from "./UserManagementTable";
 import UserManagementHeader from "./UserManagementHeader";
-import UserStatsCards from "./UserStatsCards";
+// Removed UserStatsCards import - moved to metrics page
 import UserDetailsDialog from "./UserDetailsDialog";
 import UserCommunitiesDialog from "./UserCommunitiesDialog";
 import AddUserForm from "./AddUserForm";
@@ -44,7 +44,7 @@ const UserManagementTab = () => {
         canManageUsers={canManageUsers}
       />
 
-      <UserStatsCards userStats={userStats} />
+      {/* User stats moved to dedicated metrics page */}
 
       <Card>
         <CardHeader>

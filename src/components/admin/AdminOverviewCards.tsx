@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bug, Users, Settings } from "lucide-react";
+import { Bug, Users, Settings, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface AdminOverviewCardsProps {
@@ -12,7 +12,23 @@ const AdminOverviewCards = ({ onTabChange }: AdminOverviewCardsProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Card 
+        className="hover:shadow-md hover:shadow-[#00eada]/20 cursor-pointer transition-all h-[180px]" 
+        onClick={() => onTabChange("metrics")}
+      >
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center">
+            <BarChart3 className="mr-2 h-5 w-5 text-[#00eada]" />
+            Platform Metrics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            View comprehensive platform analytics and statistics
+          </p>
+        </CardContent>
+      </Card>
       <Card 
         className="hover:shadow-md hover:shadow-[#00eada]/20 cursor-pointer transition-all h-[180px]" 
         onClick={() => onTabChange("users")}
