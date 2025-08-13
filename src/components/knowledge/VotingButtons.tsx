@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { cn } from '@/lib/utils';
@@ -62,7 +62,7 @@ export const VotingButtons: React.FC<VotingButtonsProps> = ({
         )}
         onClick={() => handleVote('upvote')}
       >
-        <ChevronUp className={iconSizeClasses[size]} />
+        <ThumbsUp className={iconSizeClasses[size]} />
         <span className="sr-only">Upvote</span>
       </Button>
       
@@ -88,7 +88,7 @@ export const VotingButtons: React.FC<VotingButtonsProps> = ({
         )}
         onClick={() => handleVote('downvote')}
       >
-        <ChevronDown className={iconSizeClasses[size]} />
+        <ThumbsDown className={iconSizeClasses[size]} />
         <span className="sr-only">Downvote</span>
       </Button>
     </div>

@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useUser } from '@/contexts/UserContext';
 import { usePermissions } from '@/hooks/usePermissions';
+import { supabase } from '@/integrations/supabase/client';
 import DOMPurify from 'dompurify';
 import {
   ChevronLeft,
@@ -47,6 +49,7 @@ import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
   const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer, deleteArticle } = useKnowledgeBase();
@@ -59,6 +62,23 @@ const ArticleView = () => {
   
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = useComments(id || '');
+
+  // Increment view count when article loads
+  useEffect(() => {
+    const incrementViewCount = async () => {
+      if (article?.id) {
+        try {
+          await supabase.rpc('increment_view_count', { article_id: article.id });
+          // Invalidate the article query to refresh the view count
+          queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', article.id] });
+        } catch (error) {
+          console.error('Failed to increment view count:', error);
+        }
+      }
+    };
+
+    incrementViewCount();
+  }, [article?.id, queryClient]);
   
   // Check if current user can edit this article - ONLY the creator can edit
   const canEdit = currentUser && article && currentUser.id === article.user_id;
