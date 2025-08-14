@@ -631,6 +631,101 @@ export type Database = {
           },
         ]
       }
+      luma_import_history: {
+        Row: {
+          contacts_imported: number
+          created_at: string
+          duplicates_found: number
+          errors_count: number
+          event_id: string
+          event_name: string
+          id: string
+          import_data: Json | null
+          import_status: string
+          integration_id: string
+          user_id: string
+        }
+        Insert: {
+          contacts_imported?: number
+          created_at?: string
+          duplicates_found?: number
+          errors_count?: number
+          event_id: string
+          event_name: string
+          id?: string
+          import_data?: Json | null
+          import_status?: string
+          integration_id: string
+          user_id: string
+        }
+        Update: {
+          contacts_imported?: number
+          created_at?: string
+          duplicates_found?: number
+          errors_count?: number
+          event_id?: string
+          event_name?: string
+          id?: string
+          import_data?: Json | null
+          import_status?: string
+          integration_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "luma_import_history_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "luma_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      luma_integrations: {
+        Row: {
+          access_token: string
+          connected_at: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          luma_user_id: string | null
+          luma_username: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          connected_at?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          luma_user_id?: string | null
+          luma_username?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          connected_at?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          luma_user_id?: string | null
+          luma_username?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       modul8_deals: {
         Row: {
           completed_at: string | null
@@ -1877,6 +1972,9 @@ export type Database = {
           id: string
           last_contact_date: string | null
           location: string | null
+          luma_attendee_id: string | null
+          luma_event_id: string | null
+          luma_import_date: string | null
           name: string
           notes: string | null
           organization: string | null
@@ -1894,6 +1992,9 @@ export type Database = {
           id?: string
           last_contact_date?: string | null
           location?: string | null
+          luma_attendee_id?: string | null
+          luma_event_id?: string | null
+          luma_import_date?: string | null
           name: string
           notes?: string | null
           organization?: string | null
@@ -1911,6 +2012,9 @@ export type Database = {
           id?: string
           last_contact_date?: string | null
           location?: string | null
+          luma_attendee_id?: string | null
+          luma_event_id?: string | null
+          luma_import_date?: string | null
           name?: string
           notes?: string | null
           organization?: string | null
