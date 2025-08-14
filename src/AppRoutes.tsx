@@ -14,6 +14,7 @@ const ProfileEditPage = lazy(() => import("@/pages/ProfileEditPage"));
 const ProfileSetupPage = lazy(() => import("@/pages/ProfileSetupPage"));
 
 const Documentation = lazy(() => import("@/pages/Documentation"));
+const FeaturesPage = lazy(() => import("@/pages/FeaturesPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const DotConnectorDashboard = lazy(() => import("@/pages/DotConnectorDashboard"));
@@ -362,10 +363,15 @@ const AppRoutes = () => {
           <Route path="/labr8/inbox" element={<ServiceProviderProtectedRoute><Labr8Dashboard /></ServiceProviderProtectedRoute>} />
           <Route path="/labr8/dashboard/request/:requestId" element={<ServiceProviderProtectedRoute><Labr8RequestDetails /></ServiceProviderProtectedRoute>} />
 
-          {/* Documentation and 404 - Accessible to all */}
+          {/* Documentation and Features - Accessible to all */}
           <Route path="/docs" element={
             <NonServiceProviderRoute>
               <Documentation />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/features" element={
+            <NonServiceProviderRoute>
+              <FeaturesPage />
             </NonServiceProviderRoute>
           } />
           <Route path="*" element={<NotFound />} />
