@@ -51,6 +51,9 @@ const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
 const Triggers = lazy(() => import("@/pages/rel8t/Triggers"));
 const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
 
+// A10D pages
+const A10DDashboard = lazy(() => import("@/pages/a10d/A10DDashboard"));
+
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
 const Modul8Projects = lazy(() => import("@/pages/modul8/Modul8Projects"));
@@ -372,6 +375,15 @@ const AppRoutes = () => {
           <Route path="/features" element={
             <NonServiceProviderRoute>
               <FeaturesPage />
+            </NonServiceProviderRoute>
+          } />
+          
+          {/* A10D Community Tracker Routes */}
+          <Route path="/a10d" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DDashboard />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="*" element={<NotFound />} />
