@@ -797,8 +797,105 @@ const Documentation = () => {
                 </Card>
               </section>
 
-              {/* API section would go here */}
-              
+              {/* API section */}
+              <section id="api" className="scroll-mt-20">
+                <Card className="glass-dark">
+                  <CardHeader>
+                    <CardTitle className="text-2xl">API</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <p>The platform integrates with various external APIs to provide enhanced functionality.</p>
+                    
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="luma-integration">
+                        <AccordionTrigger className="text-lg font-medium">Luma Events Integration</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-4">
+                            <p className="text-muted-foreground">
+                              Streamlined OAuth-based integration for importing event attendees into your CRM system.
+                            </p>
+                            
+                            <div className="bg-card/60 p-4 rounded-lg">
+                              <h4 className="font-semibold mb-2">Setup Requirements</h4>
+                              <ol className="list-decimal pl-5 space-y-1 text-sm">
+                                <li>Register your application with Luma.co</li>
+                                <li>Configure OAuth settings in Luma developer portal</li>
+                                <li>Add LUMA_CLIENT_ID and LUMA_CLIENT_SECRET to Supabase secrets</li>
+                                <li>Set redirect URI to: <code className="bg-black/20 px-2 py-1 rounded text-xs">https://[your-project-id].supabase.co/functions/v1/luma-oauth-callback</code></li>
+                              </ol>
+                            </div>
+
+                            <div className="bg-card/60 p-4 rounded-lg">
+                              <h4 className="font-semibold mb-2">Edge Functions</h4>
+                              <div className="space-y-3">
+                                <div>
+                                  <h5 className="font-medium text-sm">luma-oauth-callback</h5>
+                                  <p className="text-xs text-muted-foreground mb-1">Handles OAuth token exchange and stores integration credentials</p>
+                                  <code className="bg-black/20 px-2 py-1 rounded text-xs block">POST /functions/v1/luma-oauth-callback</code>
+                                </div>
+                                <div>
+                                  <h5 className="font-medium text-sm">luma-get-events</h5>
+                                  <p className="text-xs text-muted-foreground mb-1">Fetches user's events from Luma API with automatic token refresh</p>
+                                  <code className="bg-black/20 px-2 py-1 rounded text-xs block">GET /functions/v1/luma-get-events</code>
+                                </div>
+                                <div>
+                                  <h5 className="font-medium text-sm">luma-import-contacts</h5>
+                                  <p className="text-xs text-muted-foreground mb-1">Imports event attendees as contacts with duplicate detection</p>
+                                  <code className="bg-black/20 px-2 py-1 rounded text-xs block">POST /functions/v1/luma-import-contacts</code>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-card/60 p-4 rounded-lg">
+                              <h4 className="font-semibold mb-2">Database Tables</h4>
+                              <div className="space-y-2">
+                                <div>
+                                  <h5 className="font-medium text-sm">luma_integrations</h5>
+                                  <p className="text-xs text-muted-foreground">Stores OAuth tokens and user integration status</p>
+                                </div>
+                                <div>
+                                  <h5 className="font-medium text-sm">luma_import_history</h5>
+                                  <p className="text-xs text-muted-foreground">Tracks import operations and results</p>
+                                </div>
+                                <div>
+                                  <h5 className="font-medium text-sm">rms_contacts (enhanced)</h5>
+                                  <p className="text-xs text-muted-foreground">Extended with Luma-specific fields for event tracking</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-card/60 p-4 rounded-lg">
+                              <h4 className="font-semibold mb-2">User Flow</h4>
+                              <ol className="list-decimal pl-5 space-y-1 text-sm">
+                                <li>User clicks "Connect to Luma" in Import Contacts page</li>
+                                <li>OAuth popup opens for Luma authorization</li>
+                                <li>User authorizes application access</li>
+                                <li>Tokens are stored securely in database</li>
+                                <li>User's events are automatically fetched and displayed</li>
+                                <li>User selects events to import attendees from</li>
+                                <li>System imports contacts with duplicate detection</li>
+                                <li>Import results and history are tracked</li>
+                              </ol>
+                            </div>
+
+                            <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg">
+                              <h5 className="font-medium text-sm text-amber-400 mb-1">Security Features</h5>
+                              <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-1">
+                                <li>OAuth 2.0 standard compliance</li>
+                                <li>Automatic token refresh handling</li>
+                                <li>Encrypted credential storage</li>
+                                <li>User-scoped data access</li>
+                                <li>RLS policies for data protection</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </CardContent>
+                </Card>
+              </section>
+
               {/* Database section would go here */}
             </div>
           </ScrollArea>
