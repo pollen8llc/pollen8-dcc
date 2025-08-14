@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, Users, BarChart3, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Navbar from '@/components/Navbar';
 import A10DProfileCard from '@/components/a10d/A10DProfileCard';
 import A10DAddProfileDialog from '@/components/a10d/A10DAddProfileDialog';
-import A10DProfileDetailsModal from '@/components/a10d/A10DProfileDetailsModal';
 import { A10DProfile, A10DClassification } from '@/types/a10d';
 
 // Mock data for development
@@ -122,12 +122,11 @@ const mockProfiles: A10DProfile[] = [
 ];
 
 const A10DDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [profiles] = useState<A10DProfile[]>(mockProfiles);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClassification, setSelectedClassification] = useState<string>('all');
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<A10DProfile | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Filter profiles based on search and classification
   const filteredProfiles = useMemo(() => {
@@ -327,10 +326,7 @@ const A10DDashboard: React.FC = () => {
                     <A10DProfileCard 
                       key={profile.id} 
                       profile={profile}
-                      onClick={() => {
-                        setSelectedProfile(profile);
-                        setShowDetailsModal(true);
-                      }}
+                      onClick={() => navigate(`/a10d/profile/${profile.id}`)}
                     />
                   ))}
                 </div>
@@ -353,19 +349,6 @@ const A10DDashboard: React.FC = () => {
       <A10DAddProfileDialog 
         open={showAddDialog} 
         onOpenChange={setShowAddDialog}
-      />
-
-      <A10DProfileDetailsModal
-        profile={selectedProfile}
-        open={showDetailsModal}
-        onClose={() => {
-          setShowDetailsModal(false);
-          setSelectedProfile(null);
-        }}
-        onEdit={(profile) => {
-          setShowDetailsModal(false);
-          // TODO: Implement edit functionality
-        }}
       />
     </div>
   );
