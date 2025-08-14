@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Navbar from '@/components/Navbar';
 import A10DProfileCard from '@/components/a10d/A10DProfileCard';
 import A10DAddProfileDialog from '@/components/a10d/A10DAddProfileDialog';
+import A10DProfileDetailsModal from '@/components/a10d/A10DProfileDetailsModal';
 import { A10DProfile, A10DClassification } from '@/types/a10d';
 
 // Mock data for development
@@ -125,6 +126,8 @@ const A10DDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClassification, setSelectedClassification] = useState<string>('all');
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<A10DProfile | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Filter profiles based on search and classification
   const filteredProfiles = useMemo(() => {
@@ -321,7 +324,14 @@ const A10DDashboard: React.FC = () => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {groupProfiles.map((profile) => (
-                    <A10DProfileCard key={profile.id} profile={profile} />
+                    <A10DProfileCard 
+                      key={profile.id} 
+                      profile={profile}
+                      onClick={() => {
+                        setSelectedProfile(profile);
+                        setShowDetailsModal(true);
+                      }}
+                    />
                   ))}
                 </div>
               </div>
@@ -343,6 +353,19 @@ const A10DDashboard: React.FC = () => {
       <A10DAddProfileDialog 
         open={showAddDialog} 
         onOpenChange={setShowAddDialog}
+      />
+
+      <A10DProfileDetailsModal
+        profile={selectedProfile}
+        open={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setSelectedProfile(null);
+        }}
+        onEdit={(profile) => {
+          setShowDetailsModal(false);
+          // TODO: Implement edit functionality
+        }}
       />
     </div>
   );
