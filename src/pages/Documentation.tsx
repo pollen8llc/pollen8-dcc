@@ -810,19 +810,115 @@ const Documentation = () => {
                       <AccordionItem value="luma-integration">
                         <AccordionTrigger className="text-lg font-medium">Luma Events Integration</AccordionTrigger>
                         <AccordionContent>
-                          <div className="space-y-4">
+                          <div className="space-y-6">
                             <p className="text-muted-foreground">
-                              Streamlined OAuth-based integration for importing event attendees into your CRM system.
+                              Streamlined OAuth-based integration for importing event attendees into your CRM system. This integration allows users to connect their Luma account and import contacts from their events with one click.
                             </p>
                             
+                            <div className="bg-card/60 p-4 rounded-lg border-l-4 border-blue-500">
+                              <h4 className="font-semibold mb-3 text-blue-400">Prerequisites</h4>
+                              <ul className="list-disc pl-5 space-y-1 text-sm">
+                                <li>A Luma.co account with events created</li>
+                                <li>Access to Luma's developer/API settings (contact Luma support if needed)</li>
+                                <li>Admin access to your Supabase project</li>
+                              </ul>
+                            </div>
+
                             <div className="bg-card/60 p-4 rounded-lg">
-                              <h4 className="font-semibold mb-2">Setup Requirements</h4>
-                              <ol className="list-decimal pl-5 space-y-1 text-sm">
-                                <li>Register your application with Luma.co</li>
-                                <li>Configure OAuth settings in Luma developer portal</li>
-                                <li>Add LUMA_CLIENT_ID and LUMA_CLIENT_SECRET to Supabase secrets</li>
-                                <li>Set redirect URI to: <code className="bg-black/20 px-2 py-1 rounded text-xs">https://[your-project-id].supabase.co/functions/v1/luma-oauth-callback</code></li>
+                              <h4 className="font-semibold mb-3">Step 1: Register Your Application with Luma</h4>
+                              <ol className="list-decimal pl-5 space-y-2 text-sm">
+                                <li>
+                                  <strong>Contact Luma Support:</strong> Email Luma's developer team to request API access for your application
+                                  <div className="bg-black/20 p-2 rounded mt-1 text-xs">
+                                    Email: <code>api@luma.co</code> or use their support channels
+                                  </div>
+                                </li>
+                                <li>
+                                  <strong>Provide Application Details:</strong> Include your app name, description, use case, and website URL
+                                </li>
+                                <li>
+                                  <strong>Request OAuth Credentials:</strong> Specifically ask for OAuth 2.0 client credentials for API access
+                                </li>
+                                <li>
+                                  <strong>Specify Scopes:</strong> Request permissions for:
+                                  <ul className="list-disc pl-5 mt-1">
+                                    <li><code>events:read</code> - Access to user's events</li>
+                                    <li><code>guests:read</code> - Access to event attendee lists</li>
+                                    <li><code>user:read</code> - Basic user profile information</li>
+                                  </ul>
+                                </li>
                               </ol>
+                            </div>
+
+                            <div className="bg-card/60 p-4 rounded-lg">
+                              <h4 className="font-semibold mb-3">Step 2: Configure OAuth Settings</h4>
+                              <p className="text-sm text-muted-foreground mb-3">Once Luma approves your application, you'll receive OAuth credentials and need to configure the redirect URI.</p>
+                              <div className="space-y-3">
+                                <div>
+                                  <h5 className="font-medium text-sm mb-1">Redirect URI Configuration</h5>
+                                  <p className="text-xs text-muted-foreground mb-2">Set your redirect URI in Luma's developer portal to:</p>
+                                  <div className="bg-black/20 p-2 rounded">
+                                    <code className="text-xs break-all">
+                                      https://[YOUR-PROJECT-ID].supabase.co/functions/v1/luma-oauth-callback
+                                    </code>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Replace <code>[YOUR-PROJECT-ID]</code> with your actual Supabase project ID
+                                  </p>
+                                </div>
+                                <div>
+                                  <h5 className="font-medium text-sm mb-1">OAuth Flow Type</h5>
+                                  <p className="text-xs text-muted-foreground">Request authorization code flow (standard OAuth 2.0)</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-card/60 p-4 rounded-lg">
+                              <h4 className="font-semibold mb-3">Step 3: Add Credentials to Supabase</h4>
+                              <p className="text-sm text-muted-foreground mb-3">Once you receive your OAuth credentials from Luma, add them as secrets in your Supabase project.</p>
+                              <ol className="list-decimal pl-5 space-y-2 text-sm">
+                                <li>
+                                  Go to your Supabase project dashboard
+                                </li>
+                                <li>
+                                  Navigate to <strong>Settings → Edge Functions</strong>
+                                </li>
+                                <li>
+                                  Add the following secrets:
+                                  <div className="bg-black/20 p-3 rounded mt-2 space-y-2">
+                                    <div>
+                                      <strong>Secret Name:</strong> <code>LUMA_CLIENT_ID</code><br/>
+                                      <strong>Value:</strong> Your OAuth client ID from Luma
+                                    </div>
+                                    <div>
+                                      <strong>Secret Name:</strong> <code>LUMA_CLIENT_SECRET</code><br/>
+                                      <strong>Value:</strong> Your OAuth client secret from Luma
+                                    </div>
+                                  </div>
+                                </li>
+                              </ol>
+                            </div>
+
+                            <div className="bg-card/60 p-4 rounded-lg">
+                              <h4 className="font-semibold mb-3">Step 4: Test the Integration</h4>
+                              <ol className="list-decimal pl-5 space-y-1 text-sm">
+                                <li>Navigate to <code>/rel8t/import-contacts</code> in your application</li>
+                                <li>Click on the "Luma" tab</li>
+                                <li>Click "Connect to Luma" button</li>
+                                <li>Authorize your application in the Luma OAuth popup</li>
+                                <li>Verify that your events are fetched and displayed</li>
+                                <li>Test importing contacts from a sample event</li>
+                              </ol>
+                            </div>
+
+                            <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
+                              <h5 className="font-medium text-sm text-red-400 mb-2">Important Notes</h5>
+                              <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-1">
+                                <li>Luma's API is currently in private beta - approval may take time</li>
+                                <li>Keep your client secret secure and never expose it in frontend code</li>
+                                <li>Test with a small event first to verify the import process</li>
+                                <li>Users will need to re-authorize if tokens expire (handled automatically)</li>
+                              </ul>
                             </div>
 
                             <div className="bg-card/60 p-4 rounded-lg">
