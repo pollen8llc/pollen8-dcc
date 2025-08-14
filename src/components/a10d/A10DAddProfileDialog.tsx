@@ -12,6 +12,7 @@ import { A10DClassification } from '@/types/a10d';
 interface A10DAddProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultClassification?: A10DClassification;
 }
 
 const A10DAddProfileDialog: React.FC<A10DAddProfileDialogProps> = ({ open, onOpenChange }) => {

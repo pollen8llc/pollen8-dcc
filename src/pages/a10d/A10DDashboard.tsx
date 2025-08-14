@@ -227,123 +227,77 @@ const A10DDashboard: React.FC = () => {
           </Button>
         </div>
 
-        {/* Statistics Cards */}
+        {/* Contact Type Navigation */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/a10d/ambassadors')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Profiles</p>
-                  <p className="text-2xl font-bold">{stats.totalProfiles}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Ambassadors</p>
+                  <p className="text-2xl font-bold">{profiles.filter(p => p.classification === 'Ambassador').length}</p>
                 </div>
-                <Users className="h-8 w-8 text-primary" />
+                <Star className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/a10d/volunteers')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Avg Engagement</p>
-                  <p className="text-2xl font-bold">{stats.avgEngagement}%</p>
+                  <p className="text-sm font-medium text-muted-foreground">Volunteers</p>
+                  <p className="text-2xl font-bold">{profiles.filter(p => p.classification === 'Volunteer').length}</p>
                 </div>
-                <BarChart3 className="h-8 w-8 text-green-500" />
+                <Users className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/a10d/moderators')}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Events Attended</p>
-                  <p className="text-2xl font-bold">{stats.totalEvents}</p>
-                </div>
-                <Star className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active This Month</p>
-                  <p className="text-2xl font-bold">{stats.activeThisMonth}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Moderators</p>
+                  <p className="text-2xl font-bold">{profiles.filter(p => p.classification === 'Moderator').length}</p>
                 </div>
                 <Filter className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search profiles, emails, or interests..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={selectedClassification} onValueChange={setSelectedClassification}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Filter by role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Classifications</SelectItem>
-              <SelectItem value="Ambassador">Ambassador</SelectItem>
-              <SelectItem value="Volunteer">Volunteer</SelectItem>
-              <SelectItem value="Moderator">Moderator</SelectItem>
-              <SelectItem value="Supporter">Supporter</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Team Groups */}
-        <div className="space-y-8">
-          {Object.entries(profilesByClassification).map(([classification, groupProfiles]) => {
-            const Icon = getClassificationIcon(classification as A10DClassification);
-            const colorClass = getClassificationColor(classification as A10DClassification);
-            
-            return (
-              <div key={classification} className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${colorClass}`}>
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <h2 className="text-xl font-semibold">{classification}s</h2>
-                  <Badge variant="secondary" className="ml-2">
-                    {groupProfiles.length}
-                  </Badge>
+          
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/a10d/supporters')}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Supporters</p>
+                  <p className="text-2xl font-bold">{profiles.filter(p => p.classification === 'Supporter').length}</p>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {groupProfiles.map((profile) => (
-                    <A10DProfileCard 
-                      key={profile.id} 
-                      profile={profile}
-                      onClick={() => navigate(`/a10d/profile/${profile.id}`)}
-                    />
-                  ))}
-                </div>
+                <BarChart3 className="h-8 w-8 text-orange-500" />
               </div>
-            );
-          })}
+            </CardContent>
+          </Card>
         </div>
 
-        {filteredProfiles.length === 0 && (
-          <div className="text-center py-12">
-            <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-muted-foreground">No profiles found</h3>
-            <p className="text-muted-foreground mt-1">
-              Try adjusting your search or filter criteria
-            </p>
-          </div>
-        )}
+        {/* Quick Overview */}
+        <div className="text-center py-12">
+          <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-muted-foreground">Select a contact type above</h3>
+          <p className="text-muted-foreground mt-1">
+            Click on any contact type to view and manage those profiles
+          </p>
+        </div>
       </div>
 
       <A10DAddProfileDialog 
