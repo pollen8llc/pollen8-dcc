@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Search, Star } from 'lucide-react';
+import { Plus, Search, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/Navbar';
+import { A10DNavigation } from '@/components/a10d/A10DNavigation';
 import A10DProfileCard from '@/components/a10d/A10DProfileCard';
 import A10DAddProfileDialog from '@/components/a10d/A10DAddProfileDialog';
 import { A10DProfile } from '@/types/a10d';
@@ -72,36 +73,28 @@ const A10DAmbassadors: React.FC = () => {
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate('/a10d')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to A10D
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary/80">
-                <Star className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">Ambassadors</h1>
-                <p className="text-muted-foreground mt-1">
-                  High-engagement community leaders and advocates
-                </p>
-              </div>
-              <Badge variant="secondary" className="ml-2">
-                {filteredProfiles.length}
-              </Badge>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary/80">
+              <Star className="w-5 h-5 text-white" />
             </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Ambassadors</h1>
+              <p className="text-muted-foreground mt-1">
+                High-engagement community leaders and advocates
+              </p>
+            </div>
+            <Badge variant="secondary" className="ml-2">
+              {filteredProfiles.length}
+            </Badge>
           </div>
           <Button onClick={() => setShowAddDialog(true)} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Add Ambassador
           </Button>
         </div>
+
+        {/* Navigation */}
+        <A10DNavigation />
 
         {/* Search */}
         <div className="relative max-w-md">

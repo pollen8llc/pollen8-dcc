@@ -1,15 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, Users, BarChart3, Star } from 'lucide-react';
+import { Plus, Users, BarChart3, Star, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/Navbar';
-import A10DProfileCard from '@/components/a10d/A10DProfileCard';
+import { A10DNavigation } from '@/components/a10d/A10DNavigation';
 import A10DAddProfileDialog from '@/components/a10d/A10DAddProfileDialog';
-import { A10DProfile, A10DClassification } from '@/types/a10d';
+import { A10DProfile } from '@/types/a10d';
 
 // Mock data for development
 const mockProfiles: A10DProfile[] = [
@@ -124,89 +121,7 @@ const mockProfiles: A10DProfile[] = [
 const A10DDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [profiles] = useState<A10DProfile[]>(mockProfiles);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedClassification, setSelectedClassification] = useState<string>('all');
   const [showAddDialog, setShowAddDialog] = useState(false);
-
-  // Filter profiles based on search and classification
-  const filteredProfiles = useMemo(() => {
-    return profiles.filter(profile => {
-      const matchesSearch = profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           profile.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           profile.interests.some(interest => 
-                             interest.toLowerCase().includes(searchQuery.toLowerCase())
-                           );
-      
-      const matchesClassification = selectedClassification === 'all' || 
-                                   profile.classification === selectedClassification;
-      
-      return matchesSearch && matchesClassification;
-    });
-  }, [profiles, searchQuery, selectedClassification]);
-
-  // Group profiles by classification
-  const profilesByClassification = useMemo(() => {
-    const groups = filteredProfiles.reduce((acc, profile) => {
-      const classification = profile.classification;
-      if (!acc[classification]) {
-        acc[classification] = [];
-      }
-      acc[classification].push(profile);
-      return acc;
-    }, {} as Record<A10DClassification, A10DProfile[]>);
-
-    return groups;
-  }, [filteredProfiles]);
-
-  // Statistics
-  const stats = useMemo(() => {
-    const totalProfiles = profiles.length;
-    const avgEngagement = profiles.reduce((sum, p) => sum + p.communityEngagement, 0) / totalProfiles;
-    const totalEvents = profiles.reduce((sum, p) => sum + p.eventsAttended, 0);
-    const activeThisMonth = profiles.filter(p => {
-      const lastActive = new Date(p.lastActive);
-      const thisMonth = new Date();
-      thisMonth.setDate(1);
-      return lastActive >= thisMonth;
-    }).length;
-
-    return {
-      totalProfiles,
-      avgEngagement: Math.round(avgEngagement),
-      totalEvents,
-      activeThisMonth
-    };
-  }, [profiles]);
-
-  const getClassificationColor = (classification: A10DClassification) => {
-    switch (classification) {
-      case 'Ambassador':
-        return 'from-primary to-primary/80';
-      case 'Volunteer':
-        return 'from-green-500 to-green-600';
-      case 'Moderator':
-        return 'from-blue-500 to-blue-600';
-      case 'Supporter':
-        return 'from-orange-500 to-orange-600';
-      default:
-        return 'from-muted to-muted/80';
-    }
-  };
-
-  const getClassificationIcon = (classification: A10DClassification) => {
-    switch (classification) {
-      case 'Ambassador':
-        return Star;
-      case 'Volunteer':
-        return Users;
-      case 'Moderator':
-        return Filter;
-      case 'Supporter':
-        return BarChart3;
-      default:
-        return Users;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -226,6 +141,9 @@ const A10DDashboard: React.FC = () => {
             Add Profile
           </Button>
         </div>
+
+        {/* Navigation */}
+        <A10DNavigation />
 
         {/* Contact Type Navigation */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
