@@ -1,12 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Users, BarChart3, Star, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Users, BarChart3, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Navbar from '@/components/Navbar';
-import { A10DNavigation } from '@/components/a10d/A10DNavigation';
+import A10DProfileCard from '@/components/a10d/A10DProfileCard';
 import A10DAddProfileDialog from '@/components/a10d/A10DAddProfileDialog';
-import { A10DProfile } from '@/types/a10d';
+import { A10DProfile, A10DClassification } from '@/types/a10d';
 
 // Mock data for development
 const mockProfiles: A10DProfile[] = [
@@ -121,7 +124,89 @@ const mockProfiles: A10DProfile[] = [
 const A10DDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [profiles] = useState<A10DProfile[]>(mockProfiles);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedClassification, setSelectedClassification] = useState<string>('all');
   const [showAddDialog, setShowAddDialog] = useState(false);
+
+  // Filter profiles based on search and classification
+  const filteredProfiles = useMemo(() => {
+    return profiles.filter(profile => {
+      const matchesSearch = profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           profile.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           profile.interests.some(interest => 
+                             interest.toLowerCase().includes(searchQuery.toLowerCase())
+                           );
+      
+      const matchesClassification = selectedClassification === 'all' || 
+                                   profile.classification === selectedClassification;
+      
+      return matchesSearch && matchesClassification;
+    });
+  }, [profiles, searchQuery, selectedClassification]);
+
+  // Group profiles by classification
+  const profilesByClassification = useMemo(() => {
+    const groups = filteredProfiles.reduce((acc, profile) => {
+      const classification = profile.classification;
+      if (!acc[classification]) {
+        acc[classification] = [];
+      }
+      acc[classification].push(profile);
+      return acc;
+    }, {} as Record<A10DClassification, A10DProfile[]>);
+
+    return groups;
+  }, [filteredProfiles]);
+
+  // Statistics
+  const stats = useMemo(() => {
+    const totalProfiles = profiles.length;
+    const avgEngagement = profiles.reduce((sum, p) => sum + p.communityEngagement, 0) / totalProfiles;
+    const totalEvents = profiles.reduce((sum, p) => sum + p.eventsAttended, 0);
+    const activeThisMonth = profiles.filter(p => {
+      const lastActive = new Date(p.lastActive);
+      const thisMonth = new Date();
+      thisMonth.setDate(1);
+      return lastActive >= thisMonth;
+    }).length;
+
+    return {
+      totalProfiles,
+      avgEngagement: Math.round(avgEngagement),
+      totalEvents,
+      activeThisMonth
+    };
+  }, [profiles]);
+
+  const getClassificationColor = (classification: A10DClassification) => {
+    switch (classification) {
+      case 'Ambassador':
+        return 'from-primary to-primary/80';
+      case 'Volunteer':
+        return 'from-green-500 to-green-600';
+      case 'Moderator':
+        return 'from-blue-500 to-blue-600';
+      case 'Supporter':
+        return 'from-orange-500 to-orange-600';
+      default:
+        return 'from-muted to-muted/80';
+    }
+  };
+
+  const getClassificationIcon = (classification: A10DClassification) => {
+    switch (classification) {
+      case 'Ambassador':
+        return Star;
+      case 'Volunteer':
+        return Users;
+      case 'Moderator':
+        return Filter;
+      case 'Supporter':
+        return BarChart3;
+      default:
+        return Users;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -142,80 +227,123 @@ const A10DDashboard: React.FC = () => {
           </Button>
         </div>
 
-        {/* Navigation */}
-        <A10DNavigation />
-
-        {/* Contact Type Navigation */}
+        {/* Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => navigate('/a10d/ambassadors')}
-          >
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Ambassadors</p>
-                  <p className="text-2xl font-bold">{profiles.filter(p => p.classification === 'Ambassador').length}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Profiles</p>
+                  <p className="text-2xl font-bold">{stats.totalProfiles}</p>
                 </div>
-                <Star className="h-8 w-8 text-primary" />
+                <Users className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => navigate('/a10d/volunteers')}
-          >
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Volunteers</p>
-                  <p className="text-2xl font-bold">{profiles.filter(p => p.classification === 'Volunteer').length}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Avg Engagement</p>
+                  <p className="text-2xl font-bold">{stats.avgEngagement}%</p>
                 </div>
-                <Users className="h-8 w-8 text-green-500" />
+                <BarChart3 className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
           
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => navigate('/a10d/moderators')}
-          >
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Moderators</p>
-                  <p className="text-2xl font-bold">{profiles.filter(p => p.classification === 'Moderator').length}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Events Attended</p>
+                  <p className="text-2xl font-bold">{stats.totalEvents}</p>
+                </div>
+                <Star className="h-8 w-8 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Active This Month</p>
+                  <p className="text-2xl font-bold">{stats.activeThisMonth}</p>
                 </div>
                 <Filter className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
-          
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => navigate('/a10d/supporters')}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Supporters</p>
-                  <p className="text-2xl font-bold">{profiles.filter(p => p.classification === 'Supporter').length}</p>
-                </div>
-                <BarChart3 className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Quick Overview */}
-        <div className="text-center py-12">
-          <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground">Select a contact type above</h3>
-          <p className="text-muted-foreground mt-1">
-            Click on any contact type to view and manage those profiles
-          </p>
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search profiles, emails, or interests..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={selectedClassification} onValueChange={setSelectedClassification}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Classifications</SelectItem>
+              <SelectItem value="Ambassador">Ambassador</SelectItem>
+              <SelectItem value="Volunteer">Volunteer</SelectItem>
+              <SelectItem value="Moderator">Moderator</SelectItem>
+              <SelectItem value="Supporter">Supporter</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+
+        {/* Team Groups */}
+        <div className="space-y-8">
+          {Object.entries(profilesByClassification).map(([classification, groupProfiles]) => {
+            const Icon = getClassificationIcon(classification as A10DClassification);
+            const colorClass = getClassificationColor(classification as A10DClassification);
+            
+            return (
+              <div key={classification} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg bg-gradient-to-r ${colorClass}`}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <h2 className="text-xl font-semibold">{classification}s</h2>
+                  <Badge variant="secondary" className="ml-2">
+                    {groupProfiles.length}
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {groupProfiles.map((profile) => (
+                    <A10DProfileCard 
+                      key={profile.id} 
+                      profile={profile}
+                      onClick={() => navigate(`/a10d/profile/${profile.id}`)}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {filteredProfiles.length === 0 && (
+          <div className="text-center py-12">
+            <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-muted-foreground">No profiles found</h3>
+            <p className="text-muted-foreground mt-1">
+              Try adjusting your search or filter criteria
+            </p>
+          </div>
+        )}
       </div>
 
       <A10DAddProfileDialog 

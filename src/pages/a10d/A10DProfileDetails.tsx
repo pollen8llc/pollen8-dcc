@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Navbar from '@/components/Navbar';
-import { A10DNavigation } from '@/components/a10d/A10DNavigation';
 import { 
   Calendar, 
   BarChart3, 
+  ArrowLeft,
   Mail, 
   ExternalLink,
   Edit,
@@ -143,8 +143,7 @@ const A10DProfileDetails: React.FC = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-6 space-y-6">
-          <A10DNavigation />
+        <div className="container mx-auto px-4 py-6">
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-muted-foreground">Profile Not Found</h2>
             <p className="text-muted-foreground mt-2">The profile you're looking for doesn't exist.</p>
@@ -201,9 +200,16 @@ const A10DProfileDetails: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Navigation */}
-        <A10DNavigation />
+      <div className="container mx-auto px-4 py-6">
+        {/* Back Button */}
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/a10d')}
+          className="mb-6 flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to A10D Dashboard
+        </Button>
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header Section */}
