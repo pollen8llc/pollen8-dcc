@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shell } from "@/components/layout/Shell";
+import { A10DNavigation } from "@/components/a10d/A10DNavigation";
 import { ExternalLink, Zap } from "lucide-react";
 
 const integrationOptions = [
@@ -10,8 +11,7 @@ const integrationOptions = [
     name: 'Eventbrite',
     description: 'Ticketing, RSVPs, venues',
     category: 'Ticketing & Events',
-    logo: '🎫',
-    color: 'bg-orange-500/20 text-orange-500',
+    color: 'from-orange-500/30 to-orange-600/30 border-orange-500/50',
     status: 'Coming Soon'
   },
   {
@@ -19,8 +19,7 @@ const integrationOptions = [
     name: 'Luma',
     description: 'Community-first events + RSVPs, waitlists',
     category: 'Community Events',
-    logo: '🌟',
-    color: 'bg-purple-500/20 text-purple-500',
+    color: 'from-purple-500/30 to-purple-600/30 border-purple-500/50',
     status: 'Coming Soon'
   },
   {
@@ -28,8 +27,7 @@ const integrationOptions = [
     name: 'Meetup',
     description: 'Groups, events, RSVPs',
     category: 'Community Events',
-    logo: '👥',
-    color: 'bg-red-500/20 text-red-500',
+    color: 'from-red-500/30 to-red-600/30 border-red-500/50',
     status: 'Coming Soon'
   },
   {
@@ -37,8 +35,7 @@ const integrationOptions = [
     name: 'Ticketmaster',
     description: 'Large-scale ticketing & discovery',
     category: 'Ticketing & Events',
-    logo: '🎪',
-    color: 'bg-blue-500/20 text-blue-500',
+    color: 'from-blue-500/30 to-blue-600/30 border-blue-500/50',
     status: 'Coming Soon'
   },
   {
@@ -46,8 +43,7 @@ const integrationOptions = [
     name: 'Universe',
     description: 'Ticketing API by Ticketmaster',
     category: 'Ticketing & Events',
-    logo: '🌌',
-    color: 'bg-indigo-500/20 text-indigo-500',
+    color: 'from-indigo-500/30 to-indigo-600/30 border-indigo-500/50',
     status: 'Coming Soon'
   },
   {
@@ -55,8 +51,7 @@ const integrationOptions = [
     name: 'SplashThat',
     description: 'Guest lists, registrations, event data',
     category: 'Event Management',
-    logo: '💧',
-    color: 'bg-cyan-500/20 text-cyan-500',
+    color: 'from-cyan-500/30 to-cyan-600/30 border-cyan-500/50',
     status: 'Coming Soon'
   },
   {
@@ -64,8 +59,7 @@ const integrationOptions = [
     name: 'Bevy',
     description: 'Community-led events, chapters',
     category: 'Community Events',
-    logo: '🏠',
-    color: 'bg-green-500/20 text-green-500',
+    color: 'from-green-500/30 to-green-600/30 border-green-500/50',
     status: 'Coming Soon'
   },
   {
@@ -73,8 +67,7 @@ const integrationOptions = [
     name: 'Hopin',
     description: 'Hybrid/virtual conferences, analytics',
     category: 'Conference & Summit',
-    logo: '🎬',
-    color: 'bg-pink-500/20 text-pink-500',
+    color: 'from-pink-500/30 to-pink-600/30 border-pink-500/50',
     status: 'Coming Soon'
   },
   {
@@ -82,8 +75,7 @@ const integrationOptions = [
     name: 'Airmeet',
     description: 'Conferences, webinars, expos',
     category: 'Conference & Summit',
-    logo: '✈️',
-    color: 'bg-sky-500/20 text-sky-500',
+    color: 'from-sky-500/30 to-sky-600/30 border-sky-500/50',
     status: 'Coming Soon'
   },
   {
@@ -91,8 +83,7 @@ const integrationOptions = [
     name: 'Bizzabo',
     description: 'Enterprise conference management',
     category: 'Conference & Summit',
-    logo: '🏢',
-    color: 'bg-slate-500/20 text-slate-500',
+    color: 'from-slate-500/30 to-slate-600/30 border-slate-500/50',
     status: 'Coming Soon'
   }
 ];
@@ -109,6 +100,9 @@ export default function A10DImport() {
     <Shell>
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <div className="container mx-auto px-4 py-8">
+          {/* Navigation */}
+          <A10DNavigation />
+          
           {/* Header */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -132,47 +126,39 @@ export default function A10DImport() {
                 {category}
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {integrationOptions
                   .filter(option => option.category === category)
                   .map((option) => (
                     <Card 
                       key={option.id}
-                      className="group hover:scale-105 transition-all duration-300 hover:shadow-xl border-0 bg-card/60 backdrop-blur-md"
+                      className={`group hover:scale-102 transition-all duration-300 hover:shadow-lg border-0 
+                                  bg-gradient-to-r ${option.color} backdrop-blur-md border`}
                     >
-                      <CardContent className="p-6">
-                        <div className="flex flex-col items-center text-center space-y-4">
-                          {/* Logo */}
-                          <div className="text-6xl mb-2">
-                            {option.logo}
-                          </div>
-                          
-                          {/* Name & Description */}
-                          <div>
-                            <h3 className="font-semibold text-lg mb-2">{option.name}</h3>
-                            <p className="text-sm text-muted-foreground mb-4">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-foreground mb-1">{option.name}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">
                               {option.description}
                             </p>
+                            <Badge variant="outline" className="text-xs">
+                              {option.status}
+                            </Badge>
                           </div>
-
-                          {/* Status Badge */}
-                          <Badge variant="outline" className="mb-4">
-                            {option.status}
-                          </Badge>
-
-                          {/* Connect Button */}
+                          
                           <Button
                             onClick={() => handleConnect(option.id)}
                             disabled={option.status === 'Coming Soon'}
-                            className="w-full"
+                            size="sm"
                             variant={option.status === 'Coming Soon' ? 'outline' : 'default'}
                           >
                             {option.status === 'Coming Soon' ? (
-                              'Coming Soon'
+                              'Soon'
                             ) : (
                               <>
                                 Connect
-                                <ExternalLink className="w-4 h-4 ml-2" />
+                                <ExternalLink className="w-3 h-3 ml-1" />
                               </>
                             )}
                           </Button>

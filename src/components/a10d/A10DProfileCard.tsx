@@ -60,57 +60,57 @@ const A10DProfileCard: React.FC<A10DProfileCardProps> = ({ profile, onClick }) =
     <Card 
       className="group hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer 
                  border-0 bg-white/5 backdrop-blur-lg hover:bg-white/10 
-                 rounded-2xl overflow-hidden aspect-square flex flex-col"
+                 rounded-2xl overflow-hidden"
       onClick={handleCardClick}
     >
-      <CardContent className="p-6 flex flex-col h-full">
-        {/* Avatar */}
-        <div className="flex justify-center mb-4">
-          <Avatar className="w-20 h-20 border-2 border-white/20 shadow-lg">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-4">
+          {/* Avatar */}
+          <Avatar className="w-12 h-12 border-2 border-white/20 shadow-lg flex-shrink-0">
             <AvatarImage src={profile.avatar} alt={profile.name} />
-            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-secondary/30 text-lg font-bold text-white">
+            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-secondary/30 text-sm font-bold text-white">
               {getInitials(profile.name)}
             </AvatarFallback>
           </Avatar>
-        </div>
 
-        {/* Name */}
-        <h3 className="font-bold text-lg text-center text-foreground mb-2 truncate">
-          {profile.name}
-        </h3>
-
-        {/* Classification Badge */}
-        <div className="flex justify-center mb-3">
-          <Badge className={`${getClassificationColor(profile.classification)} text-xs font-medium border`}>
-            {profile.classification}
-          </Badge>
-        </div>
-
-        {/* Location */}
-        <div className="flex items-center justify-center gap-1 mb-4 text-muted-foreground">
-          <MapPin className="w-3 h-3" />
-          <span className="text-xs truncate">{location}</span>
-        </div>
-
-        {/* Social Icons */}
-        <div className="flex justify-center gap-2 mt-auto">
-          {profile.socialMedia && Object.entries(profile.socialMedia).map(([platform, handle]) => {
-            const IconComponent = getSocialIcon(platform);
-            if (!IconComponent || !handle) return null;
+          {/* Main Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-foreground truncate">
+                {profile.name}
+              </h3>
+              <Badge className={`${getClassificationColor(profile.classification)} text-xs font-medium border flex-shrink-0`}>
+                {profile.classification}
+              </Badge>
+            </div>
             
-            return (
-              <div
-                key={platform}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Handle social link click
-                }}
-              >
-                <IconComponent className="w-4 h-4 text-white/80" />
-              </div>
-            );
-          })}
+            {/* Location */}
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <MapPin className="w-3 h-3 flex-shrink-0" />
+              <span className="text-sm truncate">{location}</span>
+            </div>
+          </div>
+
+          {/* Social Icons */}
+          <div className="flex gap-1 flex-shrink-0">
+            {profile.socialMedia && Object.entries(profile.socialMedia).map(([platform, handle]) => {
+              const IconComponent = getSocialIcon(platform);
+              if (!IconComponent || !handle) return null;
+              
+              return (
+                <div
+                  key={platform}
+                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Handle social link click
+                  }}
+                >
+                  <IconComponent className="w-3 h-3 text-white/80" />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </CardContent>
     </Card>

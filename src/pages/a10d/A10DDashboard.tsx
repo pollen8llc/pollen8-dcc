@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Navbar from '@/components/Navbar';
 import A10DProfileCard from '@/components/a10d/A10DProfileCard';
 import A10DAddProfileDialog from '@/components/a10d/A10DAddProfileDialog';
+import { A10DNavigation } from '@/components/a10d/A10DNavigation';
 import { A10DProfile, A10DClassification } from '@/types/a10d';
 
 // Mock data for development
@@ -219,6 +220,9 @@ const A10DDashboard: React.FC = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-6 space-y-8">
+        {/* Navigation */}
+        <A10DNavigation />
+        
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -327,7 +331,7 @@ const A10DDashboard: React.FC = () => {
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                   {groupProfiles.map((profile) => (
                     <A10DProfileCard 
                       key={profile.id} 
