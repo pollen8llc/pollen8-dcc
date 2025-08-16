@@ -53,6 +53,8 @@ const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
 
 // A10D pages
 const A10DDashboard = lazy(() => import("@/pages/a10d/A10DDashboard"));
+const A10DProfileDetails = lazy(() => import("@/pages/a10d/A10DProfileDetails"));
+const A10DImport = lazy(() => import("@/pages/a10d/A10DImport"));
 
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
@@ -383,6 +385,20 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <A10DDashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/a10d/import" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImport />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/a10d/profile/:profileId" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DProfileDetails />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
