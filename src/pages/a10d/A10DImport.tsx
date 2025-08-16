@@ -1,9 +1,12 @@
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shell } from "@/components/layout/Shell";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Navbar from '@/components/Navbar';
 import { A10DNavigation } from "@/components/a10d/A10DNavigation";
-import { ExternalLink, Zap } from "lucide-react";
+import { ExternalLink, Zap, Search, Filter, Users, BarChart3, Star, Download } from "lucide-react";
 
 const integrationOptions = [
   {
@@ -91,34 +94,155 @@ const integrationOptions = [
 const categories = Array.from(new Set(integrationOptions.map(option => option.category)));
 
 export default function A10DImport() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
   const handleConnect = (integrationId: string) => {
     // TODO: Implement connection logic for each integration
     console.log(`Connecting to ${integrationId}`);
   };
 
+  // Filter integrations based on search and category
+  const filteredIntegrations = useMemo(() => {
+    return integrationOptions.filter(integration => {
+      const matchesSearch = integration.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           integration.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = selectedCategory === 'all' || 
+                             integration.category === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  // Group integrations by category
+  const integrationsByCategory = useMemo(() => {
+    const groups = filteredIntegrations.reduce((acc, integration) => {
+      const category = integration.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(integration);
+      return acc;
+    }, {} as Record<string, typeof integrationOptions>);
+
+    return groups;
+  }, [filteredIntegrations]);
+
+  // Statistics
+  const stats = useMemo(() => {
+    const totalIntegrations = integrationOptions.length;
+    const availableIntegrations = integrationOptions.filter(option => option.status !== 'Coming Soon').length;
+    const categoriesCount = categories.length;
+    const comingSoonCount = integrationOptions.filter(option => option.status === 'Coming Soon').length;
+
+    return {
+      totalIntegrations,
+      availableIntegrations,
+      categoriesCount,
+      comingSoonCount
+    };
+  }, []);
+
   return (
-    <Shell>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto px-4 py-8">
-          {/* Navigation */}
-          <A10DNavigation />
-          
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-primary" />
-              </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Import Contacts
-              </h1>
-            </div>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-6 space-y-8">
+        {/* Navigation */}
+        <A10DNavigation />
+        
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Import Contacts</h1>
+            <p className="text-muted-foreground mt-1">
               Connect your event platforms to automatically import attendees and build your community database
             </p>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-primary" />
+            </div>
+          </div>
+                </div>
 
-          {/* Categories */}
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Integrations</p>
+                  <p className="text-2xl font-bold">{stats.totalIntegrations}</p>
+                </div>
+                <Download className="h-8 w-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Available Now</p>
+                  <p className="text-2xl font-bold">{stats.availableIntegrations}</p>
+                </div>
+                <Zap className="h-8 w-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Categories</p>
+                  <p className="text-2xl font-bold">{stats.categoriesCount}</p>
+                </div>
+                <Filter className="h-8 w-8 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Coming Soon</p>
+                  <p className="text-2xl font-bold">{stats.comingSoonCount}</p>
+                </div>
+                <Star className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search integrations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>{category}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Integration Categories */}
           {categories.map((category) => (
             <div key={category} className="mb-10">
               <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">

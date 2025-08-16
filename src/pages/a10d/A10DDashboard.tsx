@@ -40,13 +40,13 @@ const mockProfiles: A10DProfile[] = [
     email: 'marcus@example.com',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
     location: 'Austin, TX',
-    classification: 'Volunteer',
-    communityEngagement: 78,
-    eventsAttended: 8,
+    classification: 'Ambassador',
+    communityEngagement: 88,
+    eventsAttended: 15,
     interests: ['Event Planning', 'Community Outreach', 'Non-Profit'],
     joinDate: '2024-02-01',
     lastActive: '2024-03-08',
-    notes: 'Reliable volunteer, great with logistics',
+    notes: 'Reliable ambassador, great with logistics',
     socialMedia: {
       linkedin: 'marcus-rodriguez'
     }
@@ -58,13 +58,13 @@ const mockProfiles: A10DProfile[] = [
     email: 'elena.v@example.com',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
     location: 'Miami, FL',
-    classification: 'Moderator',
-    communityEngagement: 88,
-    eventsAttended: 15,
+    classification: 'Ambassador',
+    communityEngagement: 92,
+    eventsAttended: 18,
     interests: ['Content Moderation', 'Community Guidelines', 'Digital Safety'],
     joinDate: '2023-11-20',
     lastActive: '2024-03-09',
-    notes: 'Excellent moderator, handles conflicts well',
+    notes: 'Excellent ambassador, handles conflicts well',
     socialMedia: {
       twitter: '@elena_v',
       linkedin: 'elena-vasquez-community'
@@ -77,13 +77,13 @@ const mockProfiles: A10DProfile[] = [
     email: 'david.kim@example.com',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
     location: 'Seattle, WA',
-    classification: 'Supporter',
-    communityEngagement: 45,
-    eventsAttended: 3,
+    classification: 'Ambassador',
+    communityEngagement: 85,
+    eventsAttended: 10,
     interests: ['Tech Trends', 'Startups', 'Innovation'],
     joinDate: '2024-02-20',
     lastActive: '2024-03-05',
-    notes: 'New to community, showing interest',
+    notes: 'Tech-savvy ambassador, great networker',
     socialMedia: {
       linkedin: 'david-kim-tech'
     }
@@ -114,6 +114,25 @@ const mockProfiles: A10DProfile[] = [
     email: 'james.w@example.com',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
     location: 'Remote',
+    classification: 'Ambassador',
+    communityEngagement: 78,
+    eventsAttended: 12,
+    interests: ['Event Photography', 'Content Creation', 'Social Media'],
+    joinDate: '2024-01-08',
+    lastActive: '2024-03-07',
+    notes: 'Talented photographer, helps with event coverage',
+    socialMedia: {
+      instagram: '@jameswilson_photo',
+      linkedin: 'james-wilson-creative'
+    }
+  },
+  {
+    id: '7',
+    contactId: 'contact-7',
+    name: 'Alex Thompson',
+    email: 'alex.t@example.com',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+    location: 'Chicago, IL',
     classification: 'Volunteer',
     communityEngagement: 67,
     eventsAttended: 6,
@@ -122,8 +141,45 @@ const mockProfiles: A10DProfile[] = [
     lastActive: '2024-03-07',
     notes: 'Talented photographer, helps with event coverage',
     socialMedia: {
-      instagram: '@jameswilson_photo',
-      linkedin: 'james-wilson-creative'
+      instagram: '@alexthompson_photo',
+      linkedin: 'alex-thompson-creative'
+    }
+  },
+  {
+    id: '8',
+    contactId: 'contact-8',
+    name: 'Maria Garcia',
+    email: 'maria.g@example.com',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
+    location: 'Los Angeles, CA',
+    classification: 'Moderator',
+    communityEngagement: 82,
+    eventsAttended: 9,
+    interests: ['Content Moderation', 'Community Guidelines', 'Digital Safety'],
+    joinDate: '2023-12-15',
+    lastActive: '2024-03-09',
+    notes: 'Excellent moderator, handles conflicts well',
+    socialMedia: {
+      twitter: '@maria_g',
+      linkedin: 'maria-garcia-community'
+    }
+  },
+  {
+    id: '9',
+    contactId: 'contact-9',
+    name: 'Chris Johnson',
+    email: 'chris.j@example.com',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+    location: 'Boston, MA',
+    classification: 'Supporter',
+    communityEngagement: 45,
+    eventsAttended: 3,
+    interests: ['Tech Trends', 'Startups', 'Innovation'],
+    joinDate: '2024-02-20',
+    lastActive: '2024-03-05',
+    notes: 'New to community, showing interest',
+    socialMedia: {
+      linkedin: 'chris-johnson-tech'
     }
   }
 ];
