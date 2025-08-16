@@ -2,11 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
   Home,
-  Shield,
-  HeartHandshake,
-  Users,
-  Download,
-  UserPlus
+  Download
 } from "lucide-react";
 
 export function A10DNavigation() {
@@ -18,30 +14,6 @@ export function A10DNavigation() {
       label: "Dashboard",
       icon: Home,
       isActive: location.pathname === "/a10d"
-    },
-    {
-      href: "/a10d/ambassadors",
-      label: "Ambassadors",
-      icon: Shield,
-      isActive: location.pathname === "/a10d/ambassadors"
-    },
-    {
-      href: "/a10d/volunteers",
-      label: "Volunteers",
-      icon: HeartHandshake,
-      isActive: location.pathname === "/a10d/volunteers"
-    },
-    {
-      href: "/a10d/moderators",
-      label: "Moderators",
-      icon: Users,
-      isActive: location.pathname === "/a10d/moderators"
-    },
-    {
-      href: "/a10d/supporters",
-      label: "Supporters",
-      icon: UserPlus,
-      isActive: location.pathname === "/a10d/supporters"
     },
     {
       href: "/a10d/import",
