@@ -1,11 +1,9 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { MoreHorizontal, Calendar, BarChart3, Star, ExternalLink } from 'lucide-react';
+import { MapPin, Twitter, Linkedin, Instagram, Facebook } from 'lucide-react';
 import { A10DProfile, A10DClassification } from '@/types/a10d';
-import { formatDistanceToNow } from 'date-fns';
 
 interface A10DProfileCardProps {
   profile: A10DProfile;
@@ -24,128 +22,95 @@ const A10DProfileCard: React.FC<A10DProfileCardProps> = ({ profile, onClick }) =
   const getClassificationColor = (classification: A10DClassification) => {
     switch (classification) {
       case 'Ambassador':
-        return 'bg-primary text-primary-foreground';
+        return 'bg-primary/80 text-primary-foreground border-primary/40';
       case 'Volunteer':
-        return 'bg-green-500 text-white';
+        return 'bg-green-500/80 text-white border-green-500/40';
       case 'Moderator':
-        return 'bg-blue-500 text-white';
+        return 'bg-blue-500/80 text-white border-blue-500/40';
       case 'Supporter':
-        return 'bg-orange-500 text-white';
+        return 'bg-orange-500/80 text-white border-orange-500/40';
       default:
-        return 'bg-muted text-muted-foreground';
+        return 'bg-muted/80 text-muted-foreground border-muted/40';
     }
   };
 
-  const getEngagementColor = (engagement: number) => {
-    if (engagement >= 80) return 'text-green-500';
-    if (engagement >= 60) return 'text-orange-500';
-    return 'text-red-500';
+  const getSocialIcon = (platform: string) => {
+    switch (platform) {
+      case 'twitter':
+        return Twitter;
+      case 'linkedin':
+        return Linkedin;
+      case 'instagram':
+        return Instagram;
+      case 'facebook':
+        return Facebook;
+      default:
+        return null;
+    }
   };
 
   const handleCardClick = () => {
     if (onClick) onClick(profile);
   };
 
+  // Use location from profile or fallback
+  const location = profile.location || 'Remote';
+
   return (
     <Card 
-      className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-border/50"
+      className="group hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer 
+                 border-0 bg-white/5 backdrop-blur-lg hover:bg-white/10 
+                 rounded-2xl overflow-hidden aspect-square flex flex-col"
       onClick={handleCardClick}
     >
-      <CardContent className="p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Avatar className="w-12 h-12 border-2 border-primary/20">
-              <AvatarImage src={profile.avatar} alt={profile.name} />
-              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-sm font-semibold">
-                {getInitials(profile.name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-base truncate">{profile.name}</h3>
-              <p className="text-sm text-muted-foreground truncate">{profile.email}</p>
-            </div>
-          </div>
-          <Button variant="ghost" size="icon" className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity">
-            <MoreHorizontal className="w-4 h-4" />
-          </Button>
+      <CardContent className="p-6 flex flex-col h-full">
+        {/* Avatar */}
+        <div className="flex justify-center mb-4">
+          <Avatar className="w-20 h-20 border-2 border-white/20 shadow-lg">
+            <AvatarImage src={profile.avatar} alt={profile.name} />
+            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-secondary/30 text-lg font-bold text-white">
+              {getInitials(profile.name)}
+            </AvatarFallback>
+          </Avatar>
         </div>
 
+        {/* Name */}
+        <h3 className="font-bold text-lg text-center text-foreground mb-2 truncate">
+          {profile.name}
+        </h3>
+
         {/* Classification Badge */}
-        <div className="mb-4">
-          <Badge className={`${getClassificationColor(profile.classification)} text-xs font-medium`}>
+        <div className="flex justify-center mb-3">
+          <Badge className={`${getClassificationColor(profile.classification)} text-xs font-medium border`}>
             {profile.classification}
           </Badge>
         </div>
 
-        {/* Engagement Metrics */}
-        <div className="space-y-3 mb-4">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Engagement</span>
-            </div>
-            <span className={`font-semibold ${getEngagementColor(profile.communityEngagement)}`}>
-              {profile.communityEngagement}%
-            </span>
-          </div>
-          
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Events</span>
-            </div>
-            <span className="font-semibold">{profile.eventsAttended}</span>
-          </div>
+        {/* Location */}
+        <div className="flex items-center justify-center gap-1 mb-4 text-muted-foreground">
+          <MapPin className="w-3 h-3" />
+          <span className="text-xs truncate">{location}</span>
         </div>
 
-        {/* Interests */}
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-1 max-h-12 overflow-hidden">
-            {profile.interests.slice(0, 2).map((interest, index) => (
-              <Badge 
-                key={index} 
-                variant="outline" 
-                className="text-xs px-2 py-1 bg-muted/20 border-muted"
+        {/* Social Icons */}
+        <div className="flex justify-center gap-2 mt-auto">
+          {profile.socialMedia && Object.entries(profile.socialMedia).map(([platform, handle]) => {
+            const IconComponent = getSocialIcon(platform);
+            if (!IconComponent || !handle) return null;
+            
+            return (
+              <div
+                key={platform}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Handle social link click
+                }}
               >
-                {interest}
-              </Badge>
-            ))}
-            {profile.interests.length > 2 && (
-              <Badge variant="outline" className="text-xs px-2 py-1 bg-muted/20 border-muted">
-                +{profile.interests.length - 2}
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border/50">
-          <span>
-            Last active {formatDistanceToNow(new Date(profile.lastActive), { addSuffix: true })}
-          </span>
-          {(profile.socialMedia?.twitter || profile.socialMedia?.linkedin) && (
-            <div className="flex items-center gap-1">
-              <ExternalLink className="w-3 h-3" />
-              <span>Social</span>
-            </div>
-          )}
-        </div>
-
-        {/* Progress Bar for Engagement */}
-        <div className="mt-3">
-          <div className="w-full bg-muted rounded-full h-1.5">
-            <div 
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                profile.communityEngagement >= 80 
-                  ? 'bg-green-500' 
-                  : profile.communityEngagement >= 60 
-                    ? 'bg-orange-500' 
-                    : 'bg-red-500'
-              }`}
-              style={{ width: `${profile.communityEngagement}%` }}
-            />
-          </div>
+                <IconComponent className="w-4 h-4 text-white/80" />
+              </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

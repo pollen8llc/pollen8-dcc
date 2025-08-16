@@ -19,6 +19,7 @@ const mockProfiles: A10DProfile[] = [
     name: 'Sarah Chen',
     email: 'sarah.chen@example.com',
     avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200',
+    location: 'San Francisco, CA',
     classification: 'Ambassador',
     communityEngagement: 95,
     eventsAttended: 12,
@@ -37,6 +38,7 @@ const mockProfiles: A10DProfile[] = [
     name: 'Marcus Rodriguez',
     email: 'marcus@example.com',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+    location: 'Austin, TX',
     classification: 'Volunteer',
     communityEngagement: 78,
     eventsAttended: 8,
@@ -54,6 +56,7 @@ const mockProfiles: A10DProfile[] = [
     name: 'Elena Vasquez',
     email: 'elena.v@example.com',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
+    location: 'Miami, FL',
     classification: 'Moderator',
     communityEngagement: 88,
     eventsAttended: 15,
@@ -72,6 +75,7 @@ const mockProfiles: A10DProfile[] = [
     name: 'David Kim',
     email: 'david.kim@example.com',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+    location: 'Seattle, WA',
     classification: 'Supporter',
     communityEngagement: 45,
     eventsAttended: 3,
@@ -89,6 +93,7 @@ const mockProfiles: A10DProfile[] = [
     name: 'Priya Patel',
     email: 'priya.patel@example.com',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
+    location: 'New York, NY',
     classification: 'Ambassador',
     communityEngagement: 92,
     eventsAttended: 18,
@@ -107,6 +112,7 @@ const mockProfiles: A10DProfile[] = [
     name: 'James Wilson',
     email: 'james.w@example.com',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
+    location: 'Remote',
     classification: 'Volunteer',
     communityEngagement: 67,
     eventsAttended: 6,
@@ -209,10 +215,10 @@ const A10DDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="container mx-auto px-4 py-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -321,7 +327,7 @@ const A10DDashboard: React.FC = () => {
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {groupProfiles.map((profile) => (
                     <A10DProfileCard 
                       key={profile.id} 

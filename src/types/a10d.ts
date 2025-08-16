@@ -6,6 +6,7 @@ export interface A10DProfile {
   name: string;
   email: string;
   avatar?: string;
+  location?: string;
   classification: A10DClassification;
   communityEngagement: number; // 0-100 percentage
   eventsAttended: number;
