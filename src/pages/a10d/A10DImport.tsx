@@ -242,21 +242,59 @@ export default function A10DImport() {
           </Select>
         </div>
 
-        {/* Integration Categories */}
-          {categories.map((category) => (
-            <div key={category} className="mb-10">
-              <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                <div className="w-2 h-8 bg-primary rounded-full"></div>
-                {category}
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {integrationOptions
-                  .filter(option => option.category === category)
-                  .map((option) => (
+                {/* Integration Categories */}
+        <div className="space-y-8">
+          {Object.entries(integrationsByCategory).map(([category, groupIntegrations]) => {
+            const getCategoryColor = (category: string) => {
+              switch (category) {
+                case 'Ticketing & Events':
+                  return 'from-orange-500 to-orange-600';
+                case 'Community Events':
+                  return 'from-purple-500 to-purple-600';
+                case 'Event Management':
+                  return 'from-cyan-500 to-cyan-600';
+                case 'Conference & Summit':
+                  return 'from-pink-500 to-pink-600';
+                default:
+                  return 'from-primary to-primary/80';
+              }
+            };
+
+            const getCategoryIcon = (category: string) => {
+              switch (category) {
+                case 'Ticketing & Events':
+                  return Download;
+                case 'Community Events':
+                  return Users;
+                case 'Event Management':
+                  return BarChart3;
+                case 'Conference & Summit':
+                  return Star;
+                default:
+                  return Zap;
+              }
+            };
+
+            const Icon = getCategoryIcon(category);
+            const colorClass = getCategoryColor(category);
+            
+            return (
+              <div key={category} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg bg-gradient-to-r ${colorClass}`}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <h2 className="text-xl font-semibold">{category}</h2>
+                  <Badge variant="secondary" className="ml-2">
+                    {groupIntegrations.length}
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {groupIntegrations.map((option) => (
                     <Card 
                       key={option.id}
-                      className={`group hover:scale-102 transition-all duration-300 hover:shadow-lg border-0 
+                      className={`group hover:scale-105 transition-all duration-300 hover:shadow-lg border-0 
                                   bg-gradient-to-r ${option.color} backdrop-blur-md border`}
                     >
                       <CardContent className="p-4">
@@ -289,22 +327,33 @@ export default function A10DImport() {
                         </div>
                       </CardContent>
                     </Card>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
 
-          {/* Footer Note */}
-          <div className="text-center mt-16 p-6 rounded-xl bg-muted/50 backdrop-blur-sm">
-            <p className="text-muted-foreground">
-              More integrations coming soon. Have a specific platform in mind?{" "}
-              <Button variant="link" className="p-0 h-auto text-primary">
-                Let us know
-              </Button>
+        {filteredIntegrations.length === 0 && (
+          <div className="text-center py-12">
+            <Zap className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-muted-foreground">No integrations found</h3>
+            <p className="text-muted-foreground mt-1">
+              Try adjusting your search or filter criteria
             </p>
           </div>
+        )}
+
+        {/* Footer Note */}
+        <div className="text-center mt-16 p-6 rounded-xl bg-muted/50 backdrop-blur-sm">
+          <p className="text-muted-foreground">
+            More integrations coming soon. Have a specific platform in mind?{" "}
+            <Button variant="link" className="p-0 h-auto text-primary">
+              Let us know
+            </Button>
+          </p>
         </div>
       </div>
-    </Shell>
+    </div>
   );
 }
