@@ -53,11 +53,6 @@ const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
 
 // A10D pages
 const A10DDashboard = lazy(() => import("@/pages/a10d/A10DDashboard"));
-const A10DAmbassadors = lazy(() => import("@/pages/a10d/A10DAmbassadors"));
-const A10DVolunteers = lazy(() => import("@/pages/a10d/A10DVolunteers"));
-const A10DModerators = lazy(() => import("@/pages/a10d/A10DModerators"));
-const A10DSupporters = lazy(() => import("@/pages/a10d/A10DSupporters"));
-const A10DProfileDetails = lazy(() => import("@/pages/a10d/A10DProfileDetails"));
 
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
@@ -388,41 +383,6 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <A10DDashboard />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/a10d/ambassadors" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DAmbassadors />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/a10d/volunteers" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DVolunteers />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/a10d/moderators" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DModerators />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/a10d/supporters" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DSupporters />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/a10d/profile/:profileId" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DProfileDetails />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

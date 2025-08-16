@@ -18,6 +18,8 @@ export interface A10DProfile {
     linkedin?: string;
     instagram?: string;
     facebook?: string;
+    github?: string;
+    behance?: string;
   };
 }
 
