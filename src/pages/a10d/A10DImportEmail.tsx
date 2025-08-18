@@ -63,16 +63,6 @@ export default function A10DImportEmail() {
         
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button
-            onClick={() => navigate('/a10d/import')}
-            variant="outline"
-            size="sm"
-            className="gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Import</span>
-            <span className="sm:hidden">Back</span>
-          </Button>
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600">
               <Mail className="w-5 h-5 text-white" />
@@ -82,6 +72,16 @@ export default function A10DImportEmail() {
               <p className="text-muted-foreground">Connect your email account to import contacts</p>
             </div>
           </div>
+          <Button
+            onClick={() => navigate('/a10d/import')}
+            variant="outline"
+            size="sm"
+            className="ml-auto gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back to Import</span>
+            <span className="sm:hidden">Back</span>
+          </Button>
         </div>
 
         {/* Step 1: Provider Selection */}

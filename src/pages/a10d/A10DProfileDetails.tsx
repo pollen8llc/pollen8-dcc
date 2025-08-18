@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Navbar from '@/components/Navbar';
+import { A10DNavigation } from '@/components/a10d/A10DNavigation';
 import { 
   Calendar, 
   BarChart3, 
@@ -207,20 +208,25 @@ const A10DProfileDetails: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6">
-        {/* Back Button */}
-        <Button
-          onClick={() => navigate('/a10d')}
-          variant="outline"
-          size="sm"
-          className="mb-6 flex items-center gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Back to Dashboard</span>
-          <span className="sm:hidden">Back</span>
-        </Button>
+      <div className="container mx-auto px-4 py-6 space-y-8">
+        {/* Navigation */}
+        <A10DNavigation />
 
-        <div className="max-w-4xl mx-auto space-y-6">
+        {/* Back Button aligned right */}
+        <div className="flex">
+          <Button
+            onClick={() => navigate('/a10d')}
+            variant="outline"
+            size="sm"
+            className="ml-auto flex items-center gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
+          </Button>
+        </div>
+
+        <div className="space-y-6">
           {/* Header Section */}
           <div className="flex items-start gap-6">
             <Avatar className="w-20 h-20 border-4 border-primary/20">
