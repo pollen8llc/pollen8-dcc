@@ -6,7 +6,39 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from '@/components/Navbar';
 import { A10DNavigation } from "@/components/a10d/A10DNavigation";
-import { ExternalLink, Zap, Search, Filter, Users, BarChart3, Star, Download } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { ExternalLink, Zap, Search, Filter, Users, BarChart3, Star, Download, FileText, Mail, Phone, Globe, FileSpreadsheet, Contact } from "lucide-react";
+
+const manualImportOptions = [
+  {
+    id: 'csv',
+    name: 'CSV Import',
+    description: 'Upload CSV files with contact data',
+    icon: FileSpreadsheet,
+    color: 'from-green-500/20 to-green-600/20 border-green-500/30'
+  },
+  {
+    id: 'email',
+    name: 'Email Import',
+    description: 'Extract contacts from email accounts',
+    icon: Mail,
+    color: 'from-blue-500/20 to-blue-600/20 border-blue-500/30'
+  },
+  {
+    id: 'phone',
+    name: 'Phone Contacts',
+    description: 'Sync contacts from phone devices',
+    icon: Contact,
+    color: 'from-purple-500/20 to-purple-600/20 border-purple-500/30'
+  },
+  {
+    id: 'website',
+    name: 'Website Scraping',
+    description: 'Extract contacts from websites',
+    icon: Globe,
+    color: 'from-orange-500/20 to-orange-600/20 border-orange-500/30'
+  }
+];
 
 const integrationOptions = [
   {
@@ -94,12 +126,17 @@ const integrationOptions = [
 const categories = Array.from(new Set(integrationOptions.map(option => option.category)));
 
 export default function A10DImport() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const handleConnect = (integrationId: string) => {
     // TODO: Implement connection logic for each integration
     console.log(`Connecting to ${integrationId}`);
+  };
+
+  const handleManualImport = (importType: string) => {
+    navigate(`/a10d/import/${importType}`);
   };
 
   // Filter integrations based on search and category
@@ -165,8 +202,57 @@ export default function A10DImport() {
               <Zap className="w-5 h-5 text-primary" />
             </div>
           </div>
-                </div>
+        </div>
 
+        {/* Manual Import Options */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary/80">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-xl font-semibold">Manual Import</h2>
+            <Badge variant="secondary">Quick Setup</Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {manualImportOptions.map((option) => {
+              const Icon = option.icon;
+              return (
+                <Card 
+                  key={option.id}
+                  className={`group hover:scale-105 transition-all duration-300 hover:shadow-lg border-0 
+                              bg-gradient-to-r ${option.color} backdrop-blur-md border cursor-pointer`}
+                  onClick={() => handleManualImport(option.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-white/10">
+                        <Icon className="w-5 h-5 text-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground text-sm">{option.name}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {option.description}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Platform Integrations */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-secondary to-secondary/80">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-xl font-semibold">Platform Integrations</h2>
+            <Badge variant="secondary">Auto-Sync</Badge>
+          </div>
+        </div>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">

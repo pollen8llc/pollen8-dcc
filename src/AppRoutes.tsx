@@ -55,6 +55,10 @@ const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
 const A10DDashboard = lazy(() => import("@/pages/a10d/A10DDashboard"));
 const A10DProfileDetails = lazy(() => import("@/pages/a10d/A10DProfileDetails"));
 const A10DImport = lazy(() => import("@/pages/a10d/A10DImport"));
+const A10DImportCSV = lazy(() => import("@/pages/a10d/A10DImportCSV"));
+const A10DImportEmail = lazy(() => import("@/pages/a10d/A10DImportEmail"));
+const A10DImportPhone = lazy(() => import("@/pages/a10d/A10DImportPhone"));
+const A10DImportWebsite = lazy(() => import("@/pages/a10d/A10DImportWebsite"));
 
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
@@ -392,6 +396,34 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <A10DImport />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/a10d/import/csv" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImportCSV />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/a10d/import/email" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImportEmail />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/a10d/import/phone" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImportPhone />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/a10d/import/website" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImportWebsite />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
