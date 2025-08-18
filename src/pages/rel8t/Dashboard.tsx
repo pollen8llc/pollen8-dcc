@@ -67,42 +67,6 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Metrics cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 sm:mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-primary" />
-                <div className="text-xl sm:text-2xl font-bold">{outreachCounts.upcoming}</div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Overdue</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Calendar className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-destructive" />
-                <div className="text-xl sm:text-2xl font-bold">{outreachCounts.overdue}</div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Contacts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 mr-3 text-primary" />
-                <div className="text-xl sm:text-2xl font-bold">{contactCount}</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
         
         {/* Main content tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">

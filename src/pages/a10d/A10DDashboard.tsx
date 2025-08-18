@@ -293,56 +293,6 @@ const A10DDashboard: React.FC = () => {
           </Button>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Profiles</p>
-                  <p className="text-2xl font-bold">{stats.totalProfiles}</p>
-                </div>
-                <Users className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Avg Engagement</p>
-                  <p className="text-2xl font-bold">{stats.avgEngagement}%</p>
-                </div>
-                <BarChart3 className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Events Attended</p>
-                  <p className="text-2xl font-bold">{stats.totalEvents}</p>
-                </div>
-                <Star className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active This Month</p>
-                  <p className="text-2xl font-bold">{stats.activeThisMonth}</p>
-                </div>
-                <Filter className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">

@@ -167,56 +167,6 @@ export default function A10DImport() {
           </div>
                 </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Integrations</p>
-                  <p className="text-2xl font-bold">{stats.totalIntegrations}</p>
-                </div>
-                <Download className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Available Now</p>
-                  <p className="text-2xl font-bold">{stats.availableIntegrations}</p>
-                </div>
-                <Zap className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Categories</p>
-                  <p className="text-2xl font-bold">{stats.categoriesCount}</p>
-                </div>
-                <Filter className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Coming Soon</p>
-                  <p className="text-2xl font-bold">{stats.comingSoonCount}</p>
-                </div>
-                <Star className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
