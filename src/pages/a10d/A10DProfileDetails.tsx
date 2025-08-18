@@ -147,8 +147,15 @@ const A10DProfileDetails: React.FC = () => {
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-muted-foreground">Profile Not Found</h2>
             <p className="text-muted-foreground mt-2">The profile you're looking for doesn't exist.</p>
-            <Button onClick={() => navigate('/a10d')} className="mt-4">
-              Back to A10D Dashboard
+            <Button
+              onClick={() => navigate('/a10d')}
+              variant="outline"
+              size="sm"
+              className="mt-4 flex items-center gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Button>
           </div>
         </div>
@@ -202,13 +209,15 @@ const A10DProfileDetails: React.FC = () => {
       
       <div className="container mx-auto px-4 py-6">
         {/* Back Button */}
-        <Button 
-          variant="ghost" 
+        <Button
           onClick={() => navigate('/a10d')}
-          className="mb-6 flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          className="mb-6 flex items-center gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to A10D Dashboard
+          <span className="hidden sm:inline">Back to Dashboard</span>
+          <span className="sm:hidden">Back</span>
         </Button>
 
         <div className="max-w-4xl mx-auto space-y-6">
