@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { BackButton } from "@/components/shared/BackButton";
 
 interface CompactHeaderProps {
   title: string;
@@ -39,11 +38,16 @@ const CompactHeader: React.FC<CompactHeaderProps> = ({
         </div>
         
         {showBackButton && onBack && (
-          <BackButton
+          <Button
             onClick={onBack}
-            label={backLabel}
-            className="shrink-0 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
-          />
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 text-sm shrink-0 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">{backLabel}</span>
+            <span className="sm:hidden">Back</span>
+          </Button>
         )}
       </div>
       

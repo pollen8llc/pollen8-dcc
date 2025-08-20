@@ -21,7 +21,6 @@ import {
 import { A10DProfile, A10DClassification } from '@/types/a10d';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { BackButton } from '@/components/shared/BackButton';
 
 // Mock data - in real app this would come from API/context
 const mockProfiles: A10DProfile[] = [
@@ -149,11 +148,16 @@ const A10DProfileDetails: React.FC = () => {
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-muted-foreground">Profile Not Found</h2>
             <p className="text-muted-foreground mt-2">The profile you're looking for doesn't exist.</p>
-            <BackButton
-              to="/a10d"
-              label="Back to A10D"
-              className="mt-4 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
-            />
+            <Button
+              onClick={() => navigate('/a10d')}
+              variant="outline"
+              size="sm"
+              className="mt-4 flex items-center gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Back</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -210,11 +214,16 @@ const A10DProfileDetails: React.FC = () => {
 
         {/* Back Button aligned right */}
         <div className="flex">
-          <BackButton
-            to="/a10d"
-            label="Back to A10D"
-            className="ml-auto border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
-          />
+          <Button
+            onClick={() => navigate('/a10d')}
+            variant="outline"
+            size="sm"
+            className="ml-auto flex items-center gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
+          </Button>
         </div>
 
         <div className="space-y-6">

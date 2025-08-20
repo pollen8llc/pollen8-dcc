@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { BackButton } from "@/components/shared/BackButton";
+import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ContactForm from "@/components/rel8t/ContactForm";
 import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
@@ -83,12 +83,15 @@ const ContactCreate = () => {
         </Breadcrumb>
         
         <div className="flex flex-col sm:flex-row sm:items-center mb-8 gap-4">
-          <BackButton
-            to="/rel8/contacts"
+          <Button
             variant="ghost"
-            label="Back to Contacts"
-            className="self-start"
-          />
+            size="sm"
+            onClick={() => navigate("/rel8/contacts")}
+            className="self-start flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           <div className="min-w-0">
             <h1 className="text-2xl font-bold truncate">Create New Contact</h1>
             <p className="text-muted-foreground">Add a new contact to your network</p>
