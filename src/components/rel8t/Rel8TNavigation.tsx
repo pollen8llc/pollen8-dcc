@@ -24,7 +24,7 @@ export const Rel8Navigation = () => {
     { name: "Relationships", href: "/rel8/relationships", icon: CalendarClock },
     { name: "Groups", href: "/rel8/groups", icon: Grid3x3 },
     { name: "Categories", href: "/rel8/categories", icon: Tag },
-    { name: "Import", href: "/rel8/contacts/import", icon: Import },
+    { name: "Import", href: "/import", icon: Import },
     { name: "Settings", href: "/rel8/settings", icon: Settings }
   ];
   

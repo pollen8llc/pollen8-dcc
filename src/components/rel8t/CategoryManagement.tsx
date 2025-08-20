@@ -69,6 +69,7 @@ export const CategoryManagement = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { currentUser } = useUser();
   const { toast } = useToast();
   
@@ -130,6 +131,7 @@ export const CategoryManagement = () => {
       });
       
       form.reset();
+      setIsCreateDialogOpen(false);
       loadCategories();
     } catch (error: any) {
       console.error('Error creating category:', error);
@@ -220,11 +222,12 @@ export const CategoryManagement = () => {
             Organize your contacts with custom categories
           </CardDescription>
         </div>
-        <Dialog>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => {
               setEditingCategory(null);
               form.reset({ name: '', color: '#6366f1' });
+              setIsCreateDialogOpen(true);
             }}>
               <Plus className="mr-2 h-4 w-4" />
               Add Category
