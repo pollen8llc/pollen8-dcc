@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2, Mail, Phone, MapPin, Building, User, Tag, Calendar, Edit } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import Navbar from "@/components/Navbar";
 import ContactForm from "@/components/rel8t/ContactForm";
 import { 
@@ -36,6 +40,7 @@ const ContactEdit = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   // Fetch contact details
   const { data: contact, isLoading } = useQuery({
@@ -132,9 +137,27 @@ const ContactEdit = () => {
     deleteMutation.mutate();
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  const handleEditToggle = () => {
+    setShowEditForm(!showEditForm);
+  };
+
+  const handleContact = () => {
+    if (contact?.email) {
+      window.location.href = `mailto:${contact.email}`;
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[60vh]">
@@ -150,12 +173,19 @@ const ContactEdit = () => {
 
   if (!contact && !isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Contact not found</h2>
-            <Button onClick={() => navigate("/rel8/contacts")}>
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold mb-4 text-muted-foreground">Contact not found</h2>
+            <p className="text-muted-foreground mt-2">The contact you're looking for doesn't exist.</p>
+            <Button 
+              onClick={() => navigate("/rel8/contacts")}
+              variant="outline"
+              size="sm"
+              className="mt-4 flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
               Back to Contacts
             </Button>
           </div>
@@ -165,11 +195,11 @@ const ContactEdit = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6">
-        <Breadcrumb className="mb-6">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/rel8">Dashboard</BreadcrumbLink>
@@ -184,59 +214,215 @@ const ContactEdit = () => {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/rel8/contacts")}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Edit Contact</h1>
-              <p className="text-muted-foreground">Update contact information</p>
-            </div>
-          </div>
-          
+
+        {/* Back Button aligned right */}
+        <div className="flex">
           <Button
-            variant="destructive"
+            onClick={() => navigate('/rel8/contacts')}
+            variant="outline"
             size="sm"
-            onClick={handleDelete}
-            disabled={updateMutation.isPending || deleteMutation.isPending}
-            className="flex items-center gap-2"
+            className="ml-auto flex items-center gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
           >
-            <Trash2 className="h-4 w-4" />
-            Delete Contact
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back to Contacts</span>
+            <span className="sm:hidden">Back</span>
           </Button>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-card rounded-lg border shadow-sm p-6">
-          {contact && (
-            <ContactForm
-              initialValues={{
-                name: contact.name,
-                email: contact.email || '',
-                phone: contact.phone || '',
-                organization: contact.organization || '',
-                role: contact.role || '',
-                notes: contact.notes || '',
-                tags: contact.tags || [],
-                category_id: contact.category_id || '',
-                location: contact.location || '',
-                groups: contact.groups || []
-              }}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              isSubmitting={updateMutation.isPending}
-            />
-          )}
-        </div>
+        {contact && (
+          <div className="space-y-6">
+            {/* Header Section */}
+            <div className="flex items-start gap-6">
+              <Avatar className="w-20 h-20 border-4 border-primary/20">
+                <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${contact.name}`} alt={contact.name} />
+                <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-lg font-semibold">
+                  {getInitials(contact.name)}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1 space-y-3">
+                <div>
+                  <h1 className="text-3xl font-bold">{contact.name}</h1>
+                  {contact.email && (
+                    <p className="text-muted-foreground text-lg">{contact.email}</p>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-3 flex-wrap">
+                  {contact.organization && (
+                    <Badge variant="outline" className="bg-muted/20 border-muted">
+                      <Building className="w-3 h-3 mr-1" />
+                      {contact.organization}
+                    </Badge>
+                  )}
+                  {contact.role && (
+                    <Badge variant="outline" className="bg-muted/20 border-muted">
+                      <User className="w-3 h-3 mr-1" />
+                      {contact.role}
+                    </Badge>
+                  )}
+                  {contact.location && (
+                    <Badge variant="outline" className="bg-muted/20 border-muted">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {contact.location}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={handleEditToggle} variant="outline" size="sm">
+                    <Edit className="w-4 h-4 mr-2" />
+                    {showEditForm ? 'View Profile' : 'Edit Contact'}
+                  </Button>
+                  {contact.email && (
+                    <Button onClick={handleContact} variant="outline" size="sm">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Contact
+                    </Button>
+                  )}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={updateMutation.isPending || deleteMutation.isPending}
+                    className="flex items-center gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {showEditForm ? (
+              /* Edit Form */
+              <Card>
+                <CardHeader>
+                  <CardTitle>Edit Contact Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ContactForm
+                    initialValues={{
+                      name: contact.name,
+                      email: contact.email || '',
+                      phone: contact.phone || '',
+                      organization: contact.organization || '',
+                      role: contact.role || '',
+                      notes: contact.notes || '',
+                      tags: contact.tags || [],
+                      category_id: contact.category_id || '',
+                      location: contact.location || '',
+                      groups: contact.groups || []
+                    }}
+                    onSubmit={handleSubmit}
+                    onCancel={() => setShowEditForm(false)}
+                    isSubmitting={updateMutation.isPending}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              /* Profile View */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Contact Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="w-5 h-5 text-primary" />
+                      Contact Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {contact.email && (
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">{contact.email}</span>
+                      </div>
+                    )}
+                    {contact.phone && (
+                      <div className="flex items-center gap-3">
+                        <Phone className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">{contact.phone}</span>
+                      </div>
+                    )}
+                    {contact.location && (
+                      <div className="flex items-center gap-3">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">{contact.location}</span>
+                      </div>
+                    )}
+                    {contact.organization && (
+                      <div className="flex items-center gap-3">
+                        <Building className="w-4 h-4 text-muted-foreground" />
+                        <div>
+                          <div className="text-sm font-medium">{contact.organization}</div>
+                          {contact.role && <div className="text-xs text-muted-foreground">{contact.role}</div>}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Groups & Category */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Tag className="w-5 h-5 text-primary" />
+                      Organization
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {contact.groups && contact.groups.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Groups</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {contact.groups.map((group) => (
+                            <Badge key={group.id} variant="outline" className="bg-muted/20 border-muted">
+                              {group.color && (
+                                <div 
+                                  className="w-2 h-2 rounded-full mr-1" 
+                                  style={{ backgroundColor: group.color }}
+                                />
+                              )}
+                              {group.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {contact.tags && contact.tags.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2">Tags</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {contact.tags.map((tag, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Notes Section - Only show in profile view */}
+            {!showEditForm && contact.notes && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground whitespace-pre-wrap">
+                    {contact.notes}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
