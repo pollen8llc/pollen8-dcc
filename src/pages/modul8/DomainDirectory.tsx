@@ -11,12 +11,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Building2, Star, ExternalLink } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { toast } from '@/hooks/use-toast';
+import { useSmartEngage } from '@/hooks/useSmartEngage';
 
 const DomainDirectory = () => {
   const { session } = useSession();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const domainId = parseInt(searchParams.get('domain') || '1');
+  const { handleEngage, loading: engageLoading } = useSmartEngage();
   
   const [providers, setProviders] = useState<ServiceProvider[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,9 +57,7 @@ const DomainDirectory = () => {
   };
 
   const handleEngageProvider = (provider: ServiceProvider) => {
-    // Store selected provider in session storage
-    sessionStorage.setItem('selectedProvider', JSON.stringify(provider));
-    navigate(`/modul8/dashboard/request/new?providerId=${provider.id}`);
+    handleEngage(provider.id);
   };
 
   const currentDomain = DOMAIN_PAGES.find(p => p.id === domainId);
@@ -172,9 +172,10 @@ const DomainDirectory = () => {
                     <div className="flex gap-2 pt-2">
                       <Button
                         onClick={() => handleEngageProvider(provider)}
+                        disabled={engageLoading}
                         className="flex-1 bg-[#00eada] hover:bg-[#00eada]/90 text-black"
                       >
-                        Engage
+                        {engageLoading ? 'Processing...' : 'Engage'}
                       </Button>
                       {provider.portfolio_links && provider.portfolio_links.length > 0 && (
                         <Button
