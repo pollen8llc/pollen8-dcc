@@ -378,6 +378,13 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
+          <Route path="/modul8/dashboard/request/:id" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Modul8RequestDetails />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
           <Route path="/modul8/setup/organizer" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
@@ -404,6 +411,11 @@ const AppRoutes = () => {
             </ServiceProviderProtectedRoute>
           } />
           <Route path="/labr8/request/:id" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8RequestDetails />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/dashboard/request/:id" element={
             <ServiceProviderProtectedRoute>
               <Labr8RequestDetails />
             </ServiceProviderProtectedRoute>
