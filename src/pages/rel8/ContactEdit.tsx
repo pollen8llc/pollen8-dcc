@@ -2,7 +2,13 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Trash2, Mail, Phone, MapPin, Building, User, Tag, Calendar, Edit } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2, Mail, Phone, MapPin, Building, User, Tag, Calendar, Edit, ChevronDown, Settings, UserPlus, Heart, Send } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -149,10 +155,18 @@ const ContactEdit = () => {
     setShowEditForm(!showEditForm);
   };
 
-  const handleContact = () => {
-    if (contact?.email) {
-      window.location.href = `mailto:${contact.email}`;
-    }
+  const handleManageAction = (action: string) => {
+    toast({
+      title: "Coming Soon",
+      description: `${action} feature will be available soon.`,
+    });
+  };
+
+  const handleEngageAction = (action: string) => {
+    toast({
+      title: "Coming Soon", 
+      description: `${action} feature will be available soon.`,
+    });
   };
 
   if (isLoading) {
@@ -272,24 +286,71 @@ const ContactEdit = () => {
                 <div className="flex gap-2">
                   <Button onClick={handleEditToggle} variant="outline" size="sm">
                     <Edit className="w-4 h-4 mr-2" />
-                    {showEditForm ? 'View Profile' : 'Edit Contact'}
+                    {showEditForm ? 'View Profile' : 'Edit'}
                   </Button>
-                  {contact.email && (
-                    <Button onClick={handleContact} variant="outline" size="sm">
-                      <Mail className="w-4 h-4 mr-2" />
-                      Contact
+                  
+                  {showEditForm && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                      disabled={updateMutation.isPending || deleteMutation.isPending}
+                      className="flex items-center gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
                     </Button>
                   )}
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDelete}
-                    disabled={updateMutation.isPending || deleteMutation.isPending}
-                    className="flex items-center gap-2"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </Button>
+
+                  {!showEditForm && (
+                    <>
+                      {/* Manage Dropdown */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Manage
+                            <ChevronDown className="w-4 h-4 ml-2" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="bg-background border border-border shadow-lg">
+                          <DropdownMenuItem onClick={() => handleManageAction("BUILD PROFILE")}>
+                            <User className="w-4 h-4 mr-2" />
+                            BUILD PROFILE
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleManageAction("TRACK MEMBER")}>
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            TRACK MEMBER
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      {/* Engage Dropdown */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Heart className="w-4 h-4 mr-2" />
+                            Engage
+                            <ChevronDown className="w-4 h-4 ml-2" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="bg-background border border-border shadow-lg">
+                          <DropdownMenuItem onClick={() => handleEngageAction("BUILD RAPPORT")}>
+                            <Heart className="w-4 h-4 mr-2" />
+                            BUILD RAPPORT
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleEngageAction("SEND INVITE")}
+                            disabled={!contact.email}
+                            className={!contact.email ? "opacity-50 cursor-not-allowed" : ""}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            SEND INVITE
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
