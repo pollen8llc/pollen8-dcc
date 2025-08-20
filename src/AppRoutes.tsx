@@ -298,6 +298,40 @@ const AppRoutes = () => {
               <ImportCSV />
             </NonServiceProviderRoute>
           } />
+
+          {/* Import routes */}
+          <Route path="/import" element={
+            <NonServiceProviderRoute>
+              <ImportsAndInvites />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/imports" element={
+            <NonServiceProviderRoute>
+              <ImportsAndInvites />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/import/email" element={
+            <NonServiceProviderRoute>
+              <ImportEmail />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/import/phone" element={
+            <NonServiceProviderRoute>
+              <ImportPhone />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/import/website" element={
+            <NonServiceProviderRoute>
+              <ImportWebsite />
+            </NonServiceProviderRoute>
+          } />
+
+          {/* Legacy A10D routes */}
+          <Route path="/a10d/import" element={
+            <NonServiceProviderRoute>
+              <ImportsAndInvites />
+            </NonServiceProviderRoute>
+          } />
           <Route path="/a10d/profile/:profileId" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>

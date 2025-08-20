@@ -46,7 +46,7 @@ const ImportsAndInvites: React.FC = () => {
   }
 
   const handleImportNavigation = (type: string) => {
-    navigate(`/a10d/import/${type}`);
+    navigate(`/import/${type}`);
   };
 
   return (
