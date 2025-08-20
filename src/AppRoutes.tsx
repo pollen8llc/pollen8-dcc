@@ -370,7 +370,7 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/modul8/request/:id" element={
+          <Route path="/modul8/request/:requestId" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <Modul8RequestDetails />
