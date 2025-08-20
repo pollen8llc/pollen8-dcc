@@ -1,19 +1,25 @@
-
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { toast } from "@/hooks/use-toast";
 import { createContact } from "@/services/rel8t/contactService";
 import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, FileSpreadsheet } from "lucide-react";
 
-const ImportContacts = () => {
+const ImportCSV = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Determine if this is being used for REL8 or general import
+  const isRel8Import = location.pathname.includes('/rel8');
+  const backPath = isRel8Import ? '/rel8/contacts' : '/imports';
+  const successPath = isRel8Import ? '/rel8/contacts' : '/a10d';
 
   const handleImportComplete = async (importedContacts: NormalizedContact[]) => {
     setIsProcessing(true);
@@ -44,8 +50,8 @@ const ImportContacts = () => {
         // Invalidate contacts query to refresh the contacts list
         queryClient.invalidateQueries({ queryKey: ["contacts"] });
         
-        // Navigate back to contacts page after successful import
-        navigate("/rel8/contacts");
+        // Navigate back to appropriate page after successful import
+        navigate(successPath);
       } else {
         toast({
           title: "Import failed",
@@ -71,13 +77,26 @@ const ImportContacts = () => {
       <Navbar />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <Rel8OnlyNavigation />
-        
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
-          <div>
-            <h1 className="text-3xl font-bold">Import Contacts</h1>
-            <p className="text-muted-foreground">Import contacts from CSV, vCard, or Excel files</p>
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600">
+              <FileSpreadsheet className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Import CSV</h1>
+              <p className="text-muted-foreground">Import contacts from CSV, vCard, or Excel files</p>
+            </div>
           </div>
+          <Button
+            onClick={() => navigate(backPath)}
+            variant="outline"
+            size="sm"
+            className="ml-auto gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back</span>
+          </Button>
         </div>
         
         <Card>
@@ -103,4 +122,4 @@ const ImportContacts = () => {
   );
 };
 
-export default ImportContacts;
+export default ImportCSV;

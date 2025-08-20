@@ -45,7 +45,6 @@ const ContactEdit = lazy(() => import("@/pages/rel8t/ContactEdit"));
 const Categories = lazy(() => import("@/pages/rel8t/Categories"));
 const Rel8Settings = lazy(() => import("@/pages/rel8t/Settings"));
 const RelationshipWizard = lazy(() => import("@/pages/rel8t/RelationshipWizard"));
-const ImportContacts = lazy(() => import("@/pages/rel8t/ImportContacts"));
 const TriggerWizard = lazy(() => import("@/pages/rel8t/TriggerWizard"));
 const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
 const Triggers = lazy(() => import("@/pages/rel8t/Triggers"));
@@ -54,11 +53,12 @@ const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
 // A10D pages
 const A10DDashboard = lazy(() => import("@/pages/a10d/A10DDashboard"));
 const A10DProfileDetails = lazy(() => import("@/pages/a10d/A10DProfileDetails"));
-const A10DImport = lazy(() => import("@/pages/a10d/A10DImport"));
-const A10DImportCSV = lazy(() => import("@/pages/a10d/A10DImportCSV"));
-const A10DImportEmail = lazy(() => import("@/pages/a10d/A10DImportEmail"));
-const A10DImportPhone = lazy(() => import("@/pages/a10d/A10DImportPhone"));
-const A10DImportWebsite = lazy(() => import("@/pages/a10d/A10DImportWebsite"));
+
+// Import pages - moved from A10D
+const ImportCSV = lazy(() => import("@/pages/ImportCSV"));
+const ImportEmail = lazy(() => import("@/pages/ImportEmail"));
+const ImportPhone = lazy(() => import("@/pages/ImportPhone"));
+const ImportWebsite = lazy(() => import("@/pages/ImportWebsite"));
 
 // Imports & Invites page
 const ImportsAndInvites = lazy(() => import("@/pages/ImportsAndInvites"));
@@ -316,16 +316,6 @@ const AppRoutes = () => {
               <RelationshipWizard />
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8/import" element={
-            <NonServiceProviderRoute>
-              <ImportContacts />
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/rel8t/import" element={
-            <NonServiceProviderRoute>
-              <ImportContacts />
-            </NonServiceProviderRoute>
-          } />
           <Route path="/rel8/triggers/wizard" element={
             <NonServiceProviderRoute>
               <TriggerWizard />
@@ -398,28 +388,28 @@ const AppRoutes = () => {
           <Route path="/imports/csv" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DImportCSV />
+                <ImportCSV />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/imports/email" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DImportEmail />
+                <ImportEmail />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/imports/phone" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DImportPhone />
+                <ImportPhone />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/imports/website" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DImportWebsite />
+                <ImportWebsite />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
@@ -432,40 +422,15 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          {/* Redirect A10D import routes to new Imports page */}
-          <Route path="/a10d/import" element={
+          {/* REL8 Import - now uses unified CSV import */}
+          <Route path="/rel8/import" element={
             <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <ImportsAndInvites />
-              </ProtectedRoute>
+              <ImportCSV />
             </NonServiceProviderRoute>
           } />
-          <Route path="/a10d/import/csv" element={
+          <Route path="/rel8t/import" element={
             <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DImportCSV />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/a10d/import/email" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DImportEmail />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/a10d/import/phone" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DImportPhone />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/a10d/import/website" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DImportWebsite />
-              </ProtectedRoute>
+              <ImportCSV />
             </NonServiceProviderRoute>
           } />
           <Route path="/a10d/profile/:profileId" element={
