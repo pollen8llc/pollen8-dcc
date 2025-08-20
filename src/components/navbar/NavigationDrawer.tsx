@@ -250,10 +250,10 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                     <Button
                       variant="ghost"
                       className="justify-start"
-                      onClick={() => handleNavigation("/invites")}
+                      onClick={() => handleNavigation("/imports")}
                     >
-                      <Users className="mr-2 h-4 w-4" />
-                      Manage Invites
+                      <Import className="mr-2 h-4 w-4" />
+                      Import + Invites
                     </Button>
                   </>
                 )}

@@ -60,6 +60,9 @@ const A10DImportEmail = lazy(() => import("@/pages/a10d/A10DImportEmail"));
 const A10DImportPhone = lazy(() => import("@/pages/a10d/A10DImportPhone"));
 const A10DImportWebsite = lazy(() => import("@/pages/a10d/A10DImportWebsite"));
 
+// Imports & Invites page
+const ImportsAndInvites = lazy(() => import("@/pages/ImportsAndInvites"));
+
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
 const Modul8Projects = lazy(() => import("@/pages/modul8/Modul8Projects"));
@@ -384,6 +387,43 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
           
+          {/* Imports & Invites Routes */}
+          <Route path="/imports" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <ImportsAndInvites />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/imports/csv" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImportCSV />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/imports/email" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImportEmail />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/imports/phone" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImportPhone />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/imports/website" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DImportWebsite />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+
           {/* A10D Community Tracker Routes */}
           <Route path="/a10d" element={
             <NonServiceProviderRoute>
@@ -392,10 +432,11 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
+          {/* Redirect A10D import routes to new Imports page */}
           <Route path="/a10d/import" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DImport />
+                <ImportsAndInvites />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

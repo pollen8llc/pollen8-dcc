@@ -14,12 +14,6 @@ export function A10DNavigation() {
       label: "Dashboard",
       icon: Home,
       isActive: location.pathname === "/a10d"
-    },
-    {
-      href: "/a10d/import",
-      label: "Import",
-      icon: Download,
-      isActive: location.pathname === "/a10d/import"
     }
   ];
 
