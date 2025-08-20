@@ -88,15 +88,27 @@ const ImportCSV = () => {
               <p className="text-muted-foreground">Import contacts from CSV, vCard, or Excel files</p>
             </div>
           </div>
-          <Button
-            onClick={() => navigate(backPath)}
-            variant="outline"
-            size="sm"
-            className="ml-auto gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back</span>
-          </Button>
+          <div className="ml-auto flex gap-2">
+            {isRel8Import && (
+              <Button
+                onClick={() => navigate('/imports')}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                More Options
+              </Button>
+            )}
+            <Button
+              onClick={() => navigate(backPath)}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+          </div>
         </div>
         
         <Card>
