@@ -38,17 +38,17 @@ const ArticleEdit = lazy(() => import("@/pages/core/ArticleEdit"));
 const TagView = lazy(() => import("@/pages/core/TagView"));
 
 // REL8 pages
-const Rel8Dashboard = lazy(() => import("@/pages/rel8t/Dashboard"));
-const Contacts = lazy(() => import("@/pages/rel8t/Contacts"));
-const ContactCreate = lazy(() => import("@/pages/rel8t/ContactCreate"));
-const ContactEdit = lazy(() => import("@/pages/rel8t/ContactEdit"));
-const Categories = lazy(() => import("@/pages/rel8t/Categories"));
-const Rel8Settings = lazy(() => import("@/pages/rel8t/Settings"));
-const RelationshipWizard = lazy(() => import("@/pages/rel8t/RelationshipWizard"));
-const TriggerWizard = lazy(() => import("@/pages/rel8t/TriggerWizard"));
-const EmailTest = lazy(() => import("@/pages/rel8t/EmailTest"));
-const Triggers = lazy(() => import("@/pages/rel8t/Triggers"));
-const BuildRapport = lazy(() => import("@/pages/rel8t/BuildRapport"));
+const Rel8Dashboard = lazy(() => import("@/pages/rel8/Dashboard"));
+const Contacts = lazy(() => import("@/pages/rel8/Contacts"));
+const ContactCreate = lazy(() => import("@/pages/rel8/ContactCreate"));
+const ContactEdit = lazy(() => import("@/pages/rel8/ContactEdit"));
+const Categories = lazy(() => import("@/pages/rel8/Categories"));
+const Rel8Settings = lazy(() => import("@/pages/rel8/Settings"));
+const RelationshipWizard = lazy(() => import("@/pages/rel8/RelationshipWizard"));
+const TriggerWizard = lazy(() => import("@/pages/rel8/TriggerWizard"));
+const EmailTest = lazy(() => import("@/pages/rel8/EmailTest"));
+const Triggers = lazy(() => import("@/pages/rel8/Triggers"));
+const BuildRapport = lazy(() => import("@/pages/rel8/BuildRapport"));
 
 // A10D pages
 const A10DDashboard = lazy(() => import("@/pages/a10d/A10DDashboard"));
@@ -241,17 +241,7 @@ const AppRoutes = () => {
               <Rel8Dashboard />
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8t" element={
-            <NonServiceProviderRoute>
-              <Rel8Dashboard />
-            </NonServiceProviderRoute>
-          } />
           <Route path="/rel8/contacts" element={
-            <NonServiceProviderRoute>
-              <Contacts />
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/rel8t/contacts" element={
             <NonServiceProviderRoute>
               <Contacts />
             </NonServiceProviderRoute>
@@ -261,17 +251,7 @@ const AppRoutes = () => {
               <ContactCreate />
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8t/contacts/create" element={
-            <NonServiceProviderRoute>
-              <ContactCreate />
-            </NonServiceProviderRoute>
-          } />
           <Route path="/rel8/contacts/:id/edit" element={
-            <NonServiceProviderRoute>
-              <ContactEdit />
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/rel8t/contacts/:id/edit" element={
             <NonServiceProviderRoute>
               <ContactEdit />
             </NonServiceProviderRoute>
@@ -281,17 +261,7 @@ const AppRoutes = () => {
               <Categories />
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8t/categories" element={
-            <NonServiceProviderRoute>
-              <Categories />
-            </NonServiceProviderRoute>
-          } />
           <Route path="/rel8/triggers" element={
-            <NonServiceProviderRoute>
-              <Triggers />
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/rel8t/triggers" element={
             <NonServiceProviderRoute>
               <Triggers />
             </NonServiceProviderRoute>
@@ -301,17 +271,7 @@ const AppRoutes = () => {
               <Rel8Settings />
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8t/settings" element={
-            <NonServiceProviderRoute>
-              <Rel8Settings />
-            </NonServiceProviderRoute>
-          } />
           <Route path="/rel8/wizard" element={
-            <NonServiceProviderRoute>
-              <RelationshipWizard />
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/rel8t/wizard" element={
             <NonServiceProviderRoute>
               <RelationshipWizard />
             </NonServiceProviderRoute>
@@ -321,17 +281,7 @@ const AppRoutes = () => {
               <TriggerWizard />
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8t/triggers/wizard" element={
-            <NonServiceProviderRoute>
-              <TriggerWizard />
-            </NonServiceProviderRoute>
-          } />
           <Route path="/rel8/test-email" element={
-            <NonServiceProviderRoute>
-              <EmailTest />
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/rel8t/test-email" element={
             <NonServiceProviderRoute>
               <EmailTest />
             </NonServiceProviderRoute>
@@ -341,94 +291,9 @@ const AppRoutes = () => {
               <BuildRapport />
             </NonServiceProviderRoute>
           } />
-          <Route path="/rel8t/build-rapport" element={
-            <NonServiceProviderRoute>
-              <BuildRapport />
-            </NonServiceProviderRoute>
-          } />
 
-          {/* Modul8 Routes */}
-          <Route path="/modul8" element={<Modul8Dashboard />} />
-          <Route path="/modul8/dashboard" element={<Modul8Dashboard />} />
-          <Route path="/modul8/projects" element={<Modul8Projects />} />
-          <Route path="/modul8/partners" element={<Modul8Partners />} />
-          <Route path="/modul8/dashboard/directory" element={<DomainDirectory />} />
-          <Route path="/modul8/dashboard/request/new" element={<ServiceRequestForm />} />
-          <Route path="/modul8/dashboard/request/:requestId" element={<Modul8RequestDetails />} />
-          <Route path="/modul8/setup/organizer" element={<OrganizerSetup />} />
-
-          {/* Labr8 Routes - Updated */}
-          <Route path="/labr8" element={<Labr8Landing />} />
-          <Route path="/labr8/auth" element={<Labr8Auth />} />
-          <Route path="/labr8/setup" element={<ServiceProviderSetup />} />
-          <Route path="/labr8/dashboard" element={<ServiceProviderProtectedRoute><Labr8Dashboard /></ServiceProviderProtectedRoute>} />
-          <Route path="/labr8/inbox" element={<ServiceProviderProtectedRoute><Labr8Dashboard /></ServiceProviderProtectedRoute>} />
-          <Route path="/labr8/dashboard/request/:requestId" element={<ServiceProviderProtectedRoute><Labr8RequestDetails /></ServiceProviderProtectedRoute>} />
-
-          {/* Documentation and Features - Accessible to all */}
-          <Route path="/docs" element={
-            <NonServiceProviderRoute>
-              <Documentation />
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/features" element={
-            <NonServiceProviderRoute>
-              <FeaturesPage />
-            </NonServiceProviderRoute>
-          } />
-          
-          {/* Imports & Invites Routes */}
-          <Route path="/imports" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <ImportsAndInvites />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/imports/csv" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <ImportCSV />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/imports/email" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <ImportEmail />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/imports/phone" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <ImportPhone />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/imports/website" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <ImportWebsite />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-
-          {/* A10D Community Tracker Routes */}
-          <Route path="/a10d" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <A10DDashboard />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
           {/* REL8 Import - now uses unified CSV import */}
           <Route path="/rel8/import" element={
-            <NonServiceProviderRoute>
-              <ImportCSV />
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/rel8t/import" element={
             <NonServiceProviderRoute>
               <ImportCSV />
             </NonServiceProviderRoute>

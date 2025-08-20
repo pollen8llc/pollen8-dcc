@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { TriggerManagement } from "@/components/rel8t/TriggerManagement";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";

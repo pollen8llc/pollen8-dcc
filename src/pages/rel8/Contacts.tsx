@@ -215,7 +215,7 @@ const Contacts = () => {
                   </Button>
                   
                   <Button 
-                    onClick={() => navigate("/rel8/contacts/new")}
+                    onClick={() => navigate("/rel8/contacts/create")}
                     className="flex items-center gap-2 w-full sm:w-auto"
                     size="sm"
                   >
