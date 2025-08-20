@@ -14,6 +14,7 @@ import AdminOverviewCards from "@/components/admin/AdminOverviewCards";
 import NotFoundState from "@/components/community/NotFoundState";
 import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
 import AdminMetrics from "@/pages/admin/AdminMetrics";
+import UserFlows from "@/pages/admin/UserFlows";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
@@ -109,6 +110,12 @@ const AdminDashboard = () => {
                   Metrics
                 </TabsTrigger>
                 <TabsTrigger 
+                  value="flows" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
+                >
+                  User Flows
+                </TabsTrigger>
+                <TabsTrigger 
                   value="users" 
                   className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
                 >
@@ -162,6 +169,10 @@ const AdminDashboard = () => {
                   </div>
                   <AdminMetrics />
                 </div>
+              </TabsContent>
+
+              <TabsContent value="flows" className="animate-fade-in">
+                <UserFlows />
               </TabsContent>
 
               <TabsContent value="users" className="animate-fade-in">
