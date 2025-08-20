@@ -11,10 +11,7 @@ export const useSmartEngage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleEngage = async (serviceProviderId: string) => {
-    console.log('🚀 Smart Engage clicked for provider:', serviceProviderId);
-    
     if (!session?.user?.id) {
-      console.log('❌ No user session found');
       toast({
         title: "Authentication Required",
         description: "Please log in to engage with service providers",
@@ -25,14 +22,11 @@ export const useSmartEngage = () => {
 
     try {
       setLoading(true);
-      console.log('📋 Loading organizer data for user:', session.user.id);
 
       // Get the current user's organizer profile
       const organizer = await getUserOrganizer(session.user.id);
-      console.log('👤 Organizer data:', organizer);
       
       if (!organizer) {
-        console.log('❌ No organizer profile found, redirecting to setup');
         toast({
           title: "Profile Required",
           description: "Please complete your organizer profile first",
@@ -43,28 +37,28 @@ export const useSmartEngage = () => {
       }
 
       // Check if there's an existing service request between this organizer and provider
-      console.log('🔍 Checking for existing requests...');
       const allRequests = await getServiceRequests();
-      console.log('📋 All requests:', allRequests.length);
-      
       const existingRequest = allRequests.find(r => 
         r.organizer_id === organizer.id && 
         r.service_provider_id === serviceProviderId
       );
-      console.log('🔍 Existing request found:', existingRequest);
 
       if (existingRequest) {
-        const targetUrl = `/modul8/provider/${serviceProviderId}/${existingRequest.id}/status`;
-        console.log('✅ Navigating to existing request status:', targetUrl);
-        navigate(targetUrl);
+        // Route to appropriate page based on request status and user type
+        if (existingRequest.status === 'agreed') {
+          // For agreed requests, route to the enhanced status page
+          navigate(`/modul8/provider/${serviceProviderId}/${existingRequest.id}/status`);
+        } else {
+          // For other statuses, route to the regular status page
+          navigate(`/modul8/provider/${serviceProviderId}/${existingRequest.id}/status`);
+        }
       } else {
-        const targetUrl = `/modul8/provider/${serviceProviderId}/request`;
-        console.log('✅ Navigating to new request form:', targetUrl);
-        navigate(targetUrl);
+        // Route to new request page if no existing request
+        navigate(`/modul8/provider/${serviceProviderId}/request`);
       }
 
     } catch (error) {
-      console.error('💥 Error in smart engage:', error);
+      console.error('Error in smart engage:', error);
       toast({
         title: "Error",
         description: "Failed to process engagement request",
