@@ -2,13 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Trash2, Mail, Phone, MapPin, Building, User, Tag, Calendar, Edit, ChevronDown, Settings, UserPlus, Heart, Send } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ArrowLeft, Loader2, Trash2, Mail, Phone, MapPin, Building, User, Tag, Edit, Settings, UserPlus, Heart, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,7 +40,7 @@ const ContactEdit = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
+  const [currentMode, setCurrentMode] = useState<'view' | 'edit' | 'manage' | 'engage'>('view');
 
   // Fetch contact details
   const { data: contact, isLoading } = useQuery({
@@ -151,8 +145,8 @@ const ContactEdit = () => {
       .toUpperCase();
   };
 
-  const handleEditToggle = () => {
-    setShowEditForm(!showEditForm);
+  const handleModeChange = (mode: 'view' | 'edit' | 'manage' | 'engage') => {
+    setCurrentMode(mode);
   };
 
   const handleManageAction = (action: string) => {
@@ -283,72 +277,126 @@ const ContactEdit = () => {
                   )}
                 </div>
 
-                <div className="flex gap-2">
-                  <Button onClick={handleEditToggle} variant="outline" size="sm">
-                    <Edit className="w-4 h-4 mr-2" />
-                    {showEditForm ? 'View Profile' : 'Edit'}
-                  </Button>
+                {/* Dynamic Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  {currentMode === 'view' && (
+                    <>
+                      <Button 
+                        onClick={() => handleModeChange('edit')} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button 
+                        onClick={() => handleModeChange('manage')} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Manage
+                      </Button>
+                      <Button 
+                        onClick={() => handleModeChange('engage')} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Heart className="w-4 h-4 mr-2" />
+                        Engage
+                      </Button>
+                    </>
+                  )}
                   
-                  {showEditForm && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleDelete}
-                      disabled={updateMutation.isPending || deleteMutation.isPending}
-                      className="flex items-center gap-2"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete
-                    </Button>
+                  {currentMode === 'edit' && (
+                    <>
+                      <Button 
+                        onClick={() => handleModeChange('view')} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        View Profile
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleDelete}
+                        disabled={updateMutation.isPending || deleteMutation.isPending}
+                        className="w-full sm:w-auto flex items-center gap-2"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                    </>
                   )}
 
-                  {!showEditForm && (
+                  {currentMode === 'manage' && (
                     <>
-                      {/* Manage Dropdown */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Settings className="w-4 h-4 mr-2" />
-                            Manage
-                            <ChevronDown className="w-4 h-4 ml-2" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="bg-background border border-border shadow-lg">
-                          <DropdownMenuItem onClick={() => handleManageAction("BUILD PROFILE")}>
-                            <User className="w-4 h-4 mr-2" />
-                            BUILD PROFILE
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleManageAction("TRACK MEMBER")}>
-                            <UserPlus className="w-4 h-4 mr-2" />
-                            TRACK MEMBER
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button 
+                        onClick={() => handleModeChange('view')} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back
+                      </Button>
+                      <Button 
+                        onClick={() => handleManageAction("BUILD PROFILE")} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        Build Profile
+                      </Button>
+                      <Button 
+                        onClick={() => handleManageAction("TRACK MEMBER")} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Track Member
+                      </Button>
+                    </>
+                  )}
 
-                      {/* Engage Dropdown */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Heart className="w-4 h-4 mr-2" />
-                            Engage
-                            <ChevronDown className="w-4 h-4 ml-2" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="bg-background border border-border shadow-lg">
-                          <DropdownMenuItem onClick={() => handleEngageAction("BUILD RAPPORT")}>
-                            <Heart className="w-4 h-4 mr-2" />
-                            BUILD RAPPORT
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleEngageAction("SEND INVITE")}
-                            disabled={!contact.email}
-                            className={!contact.email ? "opacity-50 cursor-not-allowed" : ""}
-                          >
-                            <Send className="w-4 h-4 mr-2" />
-                            SEND INVITE
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                  {currentMode === 'engage' && (
+                    <>
+                      <Button 
+                        onClick={() => handleModeChange('view')} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back
+                      </Button>
+                      <Button 
+                        onClick={() => handleEngageAction("BUILD RAPPORT")} 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Heart className="w-4 h-4 mr-2" />
+                        Build Rapport
+                      </Button>
+                      <Button 
+                        onClick={() => handleEngageAction("SEND INVITE")} 
+                        variant="outline" 
+                        size="sm"
+                        disabled={!contact.email}
+                        className="w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        Send Invite
+                      </Button>
                     </>
                   )}
                 </div>
@@ -357,7 +405,7 @@ const ContactEdit = () => {
 
             <Separator />
 
-            {showEditForm ? (
+            {currentMode === 'edit' ? (
               /* Edit Form */
               <Card>
                 <CardHeader>
@@ -378,7 +426,7 @@ const ContactEdit = () => {
                       groups: contact.groups || []
                     }}
                     onSubmit={handleSubmit}
-                    onCancel={() => setShowEditForm(false)}
+                    onCancel={() => handleModeChange('view')}
                     isSubmitting={updateMutation.isPending}
                   />
                 </CardContent>
@@ -470,7 +518,7 @@ const ContactEdit = () => {
             )}
 
             {/* Notes Section - Only show in profile view */}
-            {!showEditForm && contact.notes && (
+            {currentMode !== 'edit' && contact.notes && (
               <Card>
                 <CardHeader>
                   <CardTitle>Notes</CardTitle>
