@@ -16,6 +16,7 @@ const ProfileSetupPage = lazy(() => import("@/pages/ProfileSetupPage"));
 const Documentation = lazy(() => import("@/pages/Documentation"));
 const FeaturesPage = lazy(() => import("@/pages/FeaturesPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+const RouteDiagnostic = lazy(() => import("@/pages/RouteDiagnostic"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const DotConnectorDashboard = lazy(() => import("@/pages/DotConnectorDashboard"));
 const OrganizerDashboard = lazy(() => import("@/pages/OrganizerDashboard"));
@@ -452,6 +453,10 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
+          
+          {/* Route Diagnostic Tool */}
+          <Route path="/diagnostic" element={<RouteDiagnostic />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
