@@ -326,6 +326,97 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
 
+          {/* Modul8 routes */}
+          <Route path="/modul8" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Modul8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/dashboard" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Modul8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/projects" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Modul8Projects />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/partners" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Modul8Partners />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/domains" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <DomainDirectory />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/request" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <ServiceRequestForm />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/request/:id" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Modul8RequestDetails />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/setup/organizer" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <OrganizerSetup />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+
+          {/* Lab-R8 routes */}
+          <Route path="/labr8" element={
+            <Labr8Landing />
+          } />
+          <Route path="/labr8/auth" element={
+            <Labr8Auth />
+          } />
+          <Route path="/labr8/setup" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8Setup />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/dashboard" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8Dashboard />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/request/:id" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8RequestDetails />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/project/:id" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8ProjectStatusNew />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/provider/setup" element={
+            <ServiceProviderProtectedRoute>
+              <ServiceProviderSetup />
+            </ServiceProviderProtectedRoute>
+          } />
+
           {/* Legacy A10D routes */}
           <Route path="/a10d" element={
             <NonServiceProviderRoute>
