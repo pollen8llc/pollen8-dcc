@@ -240,15 +240,15 @@ const ContactEdit = () => {
         {contact && (
           <div className="space-y-6">
             {/* Header Section */}
-            <div className="flex items-start gap-6">
-              <Avatar className="w-20 h-20 border-4 border-primary/20">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-primary/20 mx-auto sm:mx-0">
                 <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${contact.name}`} alt={contact.name} />
                 <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-lg font-semibold">
                   {getInitials(contact.name)}
                 </AvatarFallback>
               </Avatar>
               
-              <div className="flex-1 space-y-3">
+              <div className="flex-1 space-y-3 w-full text-center sm:text-left">
                 <div>
                   <h1 className="text-3xl font-bold">{contact.name}</h1>
                   {contact.email && (
@@ -256,7 +256,7 @@ const ContactEdit = () => {
                   )}
                 </div>
                 
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
                   {contact.organization && (
                     <Badge variant="outline" className="bg-muted/20 border-muted">
                       <Building className="w-3 h-3 mr-1" />
@@ -278,7 +278,7 @@ const ContactEdit = () => {
                 </div>
 
                 {/* Dynamic Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-2 w-full justify-center sm:justify-start">
                   {currentMode === 'view' && (
                     <>
                       <Button 
