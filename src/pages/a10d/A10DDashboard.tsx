@@ -287,9 +287,9 @@ const A10DDashboard: React.FC = () => {
               Track and classify your community members by engagement level
             </p>
           </div>
-          <Button onClick={() => setShowAddDialog(true)} className="flex items-center gap-2">
+          <Button onClick={() => navigate('/a10d/track')} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            Add Profile
+            Create Profile
           </Button>
         </div>
 
