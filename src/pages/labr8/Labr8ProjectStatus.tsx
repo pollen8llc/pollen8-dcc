@@ -35,6 +35,7 @@ import {
   Link
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { BackButton } from "@/components/shared/BackButton";
 
 const Labr8ProjectStatus = () => {
   const { requestId } = useParams<{ requestId: string }>();
@@ -254,14 +255,11 @@ const Labr8ProjectStatus = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-3xl mx-auto px-2 py-8">
-        <Button
-          variant="outline"
-          size="sm"
-          className="mb-6 flex items-center gap-2"
-          onClick={() => navigate('/labr8/dashboard')}
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-        </Button>
+        <BackButton
+          to="/labr8/dashboard"
+          label="Back to Dashboard"
+          className="mb-6"
+        />
         
         {/* Request Header */}
         <Card className="mb-8">

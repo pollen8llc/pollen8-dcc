@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Trash2, Mail, Phone, MapPin, Building, User, Tag, Edit, Settings, UserPlus, Heart, Send } from "lucide-react";
+import { Loader2, Trash2, Mail, Phone, MapPin, Building, User, Tag, Edit, Settings, UserPlus, Heart, Send, ArrowLeft } from "lucide-react";
+import { BackButton } from "@/components/shared/BackButton";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -187,15 +188,11 @@ const ContactEdit = () => {
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold mb-4 text-muted-foreground">Contact not found</h2>
             <p className="text-muted-foreground mt-2">The contact you're looking for doesn't exist.</p>
-            <Button 
-              onClick={() => navigate("/rel8/contacts")}
-              variant="outline"
-              size="sm"
-              className="mt-4 flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Contacts
-            </Button>
+            <BackButton 
+              to="/rel8/contacts"
+              label="Back to Contacts"
+              className="mt-4"
+            />
           </div>
         </div>
       </div>
@@ -225,16 +222,11 @@ const ContactEdit = () => {
 
         {/* Back Button aligned right */}
         <div className="flex">
-          <Button
-            onClick={() => navigate('/rel8/contacts')}
-            variant="outline"
-            size="sm"
-            className="ml-auto flex items-center gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Contacts</span>
-            <span className="sm:hidden">Back</span>
-          </Button>
+          <BackButton
+            to="/rel8/contacts"
+            label="Back to Contacts"
+            className="ml-auto"
+          />
         </div>
 
         {contact && (

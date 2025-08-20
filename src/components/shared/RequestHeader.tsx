@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ArrowLeft, Building } from 'lucide-react';
+import { BackButton } from "@/components/shared/BackButton";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ServiceRequest } from '@/types/modul8';
@@ -23,15 +24,11 @@ export const RequestHeader: React.FC<RequestHeaderProps> = ({
 }) => {
   return (
     <div className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 ${compact ? 'mb-4 sm:mb-6' : 'mb-8'}`}>
-      <Button
-        variant="outline"
-        size="sm"
+      <BackButton
         onClick={onBack}
-        className="flex items-center gap-2 self-start text-sm"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Dashboard
-      </Button>
+        label="Back to Dashboard"
+        className="self-start"
+      />
       
       <div className="flex-1 min-w-0">
         <h1 className={`${compact ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'} font-bold truncate`}>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Users, Plus, Star, Shield, Heart, Trophy } from 'lucide-react';
+import { BackButton } from "@/components/shared/BackButton";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -178,15 +179,11 @@ const A10DTrack: React.FC = () => {
           
           {/* Header */}
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <BackButton 
+              variant="ghost"
               onClick={() => setStep('select')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Selection
-            </Button>
+              label="Back to Selection"
+            />
             <div>
               <h1 className="text-3xl font-bold text-foreground">Promote Contact to A10D</h1>
               <p className="text-muted-foreground mt-1">
@@ -343,15 +340,11 @@ const A10DTrack: React.FC = () => {
         
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/a10d')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to A10D
-          </Button>
+          <BackButton 
+            variant="ghost"
+            to="/a10d"
+            label="Back to A10D"
+          />
           <div>
             <h1 className="text-3xl font-bold text-foreground">Track New A10D Profile</h1>
             <p className="text-muted-foreground mt-1">

@@ -1,5 +1,5 @@
 
-import { Button } from '@/components/ui/button';
+import { BackButton } from "@/components/shared/BackButton";
 
 interface RequestNotFoundProps {
   onBackToDashboard: () => void;
@@ -11,9 +11,10 @@ const RequestNotFound = ({ onBackToDashboard }: RequestNotFoundProps) => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-2">Request Not Found</h2>
-          <Button onClick={onBackToDashboard}>
-            Back to Dashboard
-          </Button>
+          <BackButton 
+            onClick={onBackToDashboard}
+            label="Back to Dashboard"
+          />
         </div>
       </div>
     </div>
