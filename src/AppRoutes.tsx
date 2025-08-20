@@ -327,6 +327,20 @@ const AppRoutes = () => {
           } />
 
           {/* Legacy A10D routes */}
+          <Route path="/a10d" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DDashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/a10d/dashboard" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DDashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
           <Route path="/a10d/import" element={
             <NonServiceProviderRoute>
               <ImportsAndInvites />
