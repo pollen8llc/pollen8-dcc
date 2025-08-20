@@ -70,8 +70,11 @@ const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
 const Modul8Projects = lazy(() => import("@/pages/modul8/Modul8Projects"));
 const Modul8Partners = lazy(() => import("@/pages/modul8/Modul8Partners"));
 const DomainDirectory = lazy(() => import("@/pages/modul8/DomainDirectory"));
+const DomainProviders = lazy(() => import("@/pages/modul8/DomainProviders"));
 const ServiceRequestForm = lazy(() => import("@/pages/modul8/ServiceRequestForm"));
 const Modul8RequestDetails = lazy(() => import("@/pages/modul8/Modul8RequestDetails"));
+const ProviderRequestPortal = lazy(() => import("@/pages/modul8/ProviderRequestPortal"));
+const RequestStatus = lazy(() => import("@/pages/modul8/RequestStatus"));
 const ServiceProviderSetup = lazy(() => import("@/pages/modul8/setup/ServiceProviderSetup"));
 const OrganizerSetup = lazy(() => import("@/pages/modul8/setup/OrganizerSetup"));
 
@@ -81,6 +84,7 @@ const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
 const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
+const Labr8RequestStatus = lazy(() => import("@/pages/labr8/Labr8RequestStatus"));
 const Labr8ProjectStatusNew = lazy(() => import("@/pages/labr8/Labr8ProjectStatusNew"));
 
 // Loading component
@@ -364,6 +368,48 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
+          <Route path="/modul8/domain/:domainId" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <DomainProviders />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/directory" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <DomainDirectory />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/dashboard/directory" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <DomainDirectory />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/providers" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <DomainDirectory />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/provider/:providerId/request" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <ProviderRequestPortal />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/modul8/provider/:providerId/:requestId/status" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <RequestStatus />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
           <Route path="/modul8/request" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
@@ -413,6 +459,16 @@ const AppRoutes = () => {
           <Route path="/labr8/request/:requestId" element={
             <ServiceProviderProtectedRoute>
               <Labr8RequestDetails />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/request/:requestId/status" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8RequestStatus />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/:providerId/:requestId/status" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8RequestStatus />
             </ServiceProviderProtectedRoute>
           } />
           <Route path="/labr8/dashboard/request/:requestId" element={
