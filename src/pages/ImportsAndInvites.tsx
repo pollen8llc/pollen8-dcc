@@ -92,7 +92,7 @@ const ImportsAndInvites: React.FC = () => {
                       <Button
                         variant="outline"
                         className="h-24 flex-col gap-2"
-                        onClick={() => handleImportNavigation('csv')}
+                        onClick={() => navigate('/rel8/import')}
                       >
                         <FileSpreadsheet className="h-8 w-8" />
                         <span>CSV Import</span>
