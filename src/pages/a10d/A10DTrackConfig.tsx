@@ -161,22 +161,11 @@ const A10DTrackConfig: React.FC = () => {
         <A10DNavigation />
         
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/a10d/track')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Selection
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Promote Contact to A10D</h1>
-            <p className="text-muted-foreground mt-1">
-              Configure the A10D profile for {contact.name}
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Promote Contact to A10D</h1>
+          <p className="text-muted-foreground mt-1">
+            Configure the A10D profile for {contact.name}
+          </p>
         </div>
 
         <div className="w-full space-y-8">
