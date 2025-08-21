@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Users, Plus, Star, Shield, Heart, Trophy } from 'lucide-react';
+import { ArrowLeft, Search, Users, Plus, Star, Shield, Heart, Trophy, Mail, Phone, Building, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -363,50 +363,89 @@ const A10DTrack: React.FC = () => {
         {/* Contacts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredContacts.map((contact) => (
-            <Card 
+            <div 
               key={contact.id} 
-              className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-              onClick={() => handleContactSelect(contact)}
+              className="h-full overflow-hidden transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
+                bg-white/5 border border-white/10 shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20"
             >
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${contact.name}`} />
-                    <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold truncate">{contact.name}</h3>
-                      <div 
-                        className={`w-2 h-2 rounded-full ${getConnectionStrengthColor(contact.connectionStrength)}`}
-                        title={`${contact.connectionStrength} connection`}
-                      />
+              {/* Section 1: Header with name and organization */}
+              <div className="p-4 pb-2 relative">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-base font-medium mb-1 line-clamp-1 text-white">{contact.name}</h3>
+                  <div 
+                    className={`w-3 h-3 rounded-full ${getConnectionStrengthColor(contact.connectionStrength)}`}
+                    title={`${contact.connectionStrength} connection`}
+                  />
+                </div>
+                
+                {contact.organization && (
+                  <div className="flex items-center text-xs text-white/70">
+                    <Building className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                    <span className="truncate">{contact.organization}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Section 2: Contact information */}
+              <div className="px-4 py-2 border-t border-white/5 flex-grow">
+                <div className="space-y-1.5">
+                  {contact.email && (
+                    <div className="flex items-center text-xs text-white/70">
+                      <Mail className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                      <span className="truncate">{contact.email}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate mb-2">{contact.email}</p>
-                    {contact.organization && (
-                      <p className="text-xs text-muted-foreground truncate mb-3">{contact.organization}</p>
-                    )}
-                    
-                    <div className="flex flex-wrap gap-1 mb-3">
+                  )}
+                  
+                  {contact.phone && (
+                    <div className="flex items-center text-xs text-white/70">
+                      <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                      <span className="truncate">{contact.phone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Section 3: Tags and action button */}
+              <div className="px-4 pt-2 pb-3 border-t border-white/5">
+                {contact.tags && contact.tags.length > 0 && (
+                  <div className="flex items-start text-xs mb-3">
+                    <Tag className="h-3 w-3 mr-1.5 flex-shrink-0 mt-0.5 text-white/70" />
+                    <div className="flex flex-wrap gap-1">
                       {contact.tags.slice(0, 2).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                        <span
+                          key={tag}
+                          className="bg-[#00eada]/20 text-[#00eada] px-1.5 py-0.5 rounded-full text-xs"
+                        >
                           {tag}
-                        </Badge>
+                        </span>
                       ))}
                       {contact.tags.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{contact.tags.length - 2}
-                        </Badge>
+                        <span className="text-xs text-white/70">
+                          +{contact.tags.length - 2} more
+                        </span>
                       )}
                     </div>
-
-                    <p className="text-xs text-muted-foreground">
-                      Last contact: {new Date(contact.lastContact).toLocaleDateString()}
-                    </p>
                   </div>
+                )}
+                
+                <div className="flex justify-between items-center">
+                  <div className="text-xs text-white/70">
+                    Last contact: {new Date(contact.lastContact).toLocaleDateString()}
+                  </div>
+                  
+                  <Button
+                    size="sm"
+                    className="h-7 px-3 bg-[#00eada] hover:bg-[#00eada]/80 text-black font-medium"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContactSelect(contact);
+                    }}
+                  >
+                    Track
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
 
