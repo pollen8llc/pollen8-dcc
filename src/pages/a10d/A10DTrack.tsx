@@ -342,22 +342,11 @@ const A10DTrack: React.FC = () => {
         <A10DNavigation />
         
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/a10d')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to A10D
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Track New A10D Profile</h1>
-            <p className="text-muted-foreground mt-1">
-              Select a contact from your REL8 database to promote to A10D tracking
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Track New A10D Profile</h1>
+          <p className="text-muted-foreground mt-1">
+            Select a contact from your REL8 database to promote to A10D tracking
+          </p>
         </div>
 
         {/* Search */}
