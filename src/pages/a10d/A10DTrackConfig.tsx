@@ -179,7 +179,7 @@ const A10DTrackConfig: React.FC = () => {
           </div>
         </div>
 
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="w-full space-y-8">
           {/* Contact Preview - Compact */}
           <Card>
             <CardContent className="p-6">
@@ -245,36 +245,38 @@ const A10DTrackConfig: React.FC = () => {
                     New Classification
                   </Button>
                 </div>
-                <RadioGroup value={classification} onValueChange={(value) => setClassification(value as A10DClassification)}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Supporter" id="supporter" />
-                    <Label htmlFor="supporter" className="flex items-center gap-2 cursor-pointer">
-                      <Heart className="w-4 h-4" />
-                      Supporter
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Volunteer" id="volunteer" />
-                    <Label htmlFor="volunteer" className="flex items-center gap-2 cursor-pointer">
-                      <Users className="w-4 h-4" />
-                      Volunteer
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Moderator" id="moderator" />
-                    <Label htmlFor="moderator" className="flex items-center gap-2 cursor-pointer">
-                      <Shield className="w-4 h-4" />
-                      Moderator
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Ambassador" id="ambassador" />
-                    <Label htmlFor="ambassador" className="flex items-center gap-2 cursor-pointer">
-                      <Star className="w-4 h-4" />
-                      Ambassador
-                    </Label>
-                  </div>
-                </RadioGroup>
+                <div className="grid gap-3">
+                  {[
+                    { value: 'Supporter' as A10DClassification, icon: Heart, label: 'Supporter' },
+                    { value: 'Volunteer' as A10DClassification, icon: Users, label: 'Volunteer' },
+                    { value: 'Moderator' as A10DClassification, icon: Shield, label: 'Moderator' },
+                    { value: 'Ambassador' as A10DClassification, icon: Star, label: 'Ambassador' }
+                  ].map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = classification === option.value;
+                    return (
+                      <div
+                        key={option.value}
+                        onClick={() => setClassification(option.value)}
+                        className={`
+                          w-full p-4 rounded-lg border cursor-pointer transition-all duration-200
+                          backdrop-blur-sm bg-background/50 hover:bg-background/70
+                          ${isSelected 
+                            ? 'border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/20' 
+                            : 'border-border/50 hover:border-border'
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className={`w-5 h-5 ${isSelected ? 'text-cyan-400' : 'text-muted-foreground'}`} />
+                          <span className={`font-medium ${isSelected ? 'text-cyan-300' : 'text-foreground'}`}>
+                            {option.label}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* A10D Group Selection with Create New */}
