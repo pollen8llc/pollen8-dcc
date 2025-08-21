@@ -2,7 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
   Home,
-  Download
+  UserPlus,
+  Settings
 } from "lucide-react";
 
 export function A10DNavigation() {
@@ -14,6 +15,18 @@ export function A10DNavigation() {
       label: "Dashboard",
       icon: Home,
       isActive: location.pathname === "/a10d"
+    },
+    {
+      href: "/a10d/track",
+      label: "Track",
+      icon: UserPlus,
+      isActive: location.pathname === "/a10d/track"
+    },
+    {
+      href: "/a10d/settings",
+      label: "Settings",
+      icon: Settings,
+      isActive: location.pathname === "/a10d/settings"
     }
   ];
 

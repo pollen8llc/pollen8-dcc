@@ -179,16 +179,10 @@ const A10DTrackConfig: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Contact Preview */}
+        <div className="max-w-2xl mx-auto space-y-8">
+          {/* Contact Preview - Compact */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Contact Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <Avatar className="w-16 h-16">
                   <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${contact.name}`} />
@@ -216,41 +210,20 @@ const A10DTrackConfig: React.FC = () => {
                       </div>
                     )}
                   </div>
+                  
+                  {contact.tags && contact.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {contact.tags.map((tag: string) => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className={`w-3 h-3 rounded-full ${getConnectionStrengthColor(contact.connectionStrength)}`} 
                      title={`${contact.connectionStrength} connection`} />
               </div>
-              
-              {contact.tags && contact.tags.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium flex items-center gap-1.5">
-                    <Tag className="w-3 h-3" />
-                    Tags
-                  </Label>
-                  <div className="flex flex-wrap gap-2">
-                    {contact.tags.map((tag: string) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {contact.notes && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Existing Notes</Label>
-                  <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-                    {contact.notes}
-                  </p>
-                </div>
-              )}
-
-              {contact.lastContact && (
-                <div className="text-xs text-muted-foreground">
-                  Last contact: {new Date(contact.lastContact).toLocaleDateString()}
-                </div>
-              )}
             </CardContent>
           </Card>
 
@@ -263,9 +236,15 @@ const A10DTrackConfig: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Classification Selection */}
+              {/* Classification Selection with Create New */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Classification Level</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Classification Level</Label>
+                  <Button variant="outline" size="sm">
+                    <Plus className="w-3 h-3 mr-1" />
+                    New Classification
+                  </Button>
+                </div>
                 <RadioGroup value={classification} onValueChange={(value) => setClassification(value as A10DClassification)}>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="Supporter" id="supporter" />
@@ -298,9 +277,15 @@ const A10DTrackConfig: React.FC = () => {
                 </RadioGroup>
               </div>
 
-              {/* A10D Group Selection */}
+              {/* A10D Group Selection with Create New */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Assign to A10D Group</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Assign to A10D Group</Label>
+                  <Button variant="outline" size="sm">
+                    <Plus className="w-3 h-3 mr-1" />
+                    New Group
+                  </Button>
+                </div>
                 <Select value={selectedGroup} onValueChange={setSelectedGroup}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select an A10D group for tracking" />
