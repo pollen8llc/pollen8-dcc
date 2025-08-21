@@ -63,6 +63,13 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     autofocus,
   });
 
+  // Sync editor content when the content prop changes
+  React.useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
+
   if (!editor) {
     return null;
   }

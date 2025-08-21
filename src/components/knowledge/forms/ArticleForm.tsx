@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { useDebounce } from '@/hooks/useDebounce';
 import DOMPurify from 'dompurify';
 
 // UI Components
@@ -37,6 +38,8 @@ interface ArticleFormProps {
   initialData?: Partial<ArticleFormValues>;
 }
 
+const KNOWLEDGE_DRAFT_KEY = 'knowledge-article-draft';
+
 export const ArticleForm: React.FC<ArticleFormProps> = ({
   onSubmit,
   isSubmitting,
@@ -48,16 +51,41 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
   const [popularTags, setPopularTags] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<string>("editor");
   
-  // Form setup
+  // Load draft from localStorage
+  const loadDraft = () => {
+    try {
+      const saved = localStorage.getItem(KNOWLEDGE_DRAFT_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const savedDraft = loadDraft();
+  const defaultValues = savedDraft || {
+    title: initialData?.title || "",
+    subtitle: initialData?.subtitle || "",
+    content: initialData?.content || "",
+    tags: initialData?.tags || [],
+  };
+  
+  // Form setup with draft persistence
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
-    defaultValues: {
-      title: initialData?.title || "",
-      subtitle: initialData?.subtitle || "",
-      content: initialData?.content || "",
-      tags: initialData?.tags || [],
-    },
+    shouldUnregister: false,
+    defaultValues,
   });
+
+  // Watch form values for autosave
+  const watchedValues = form.watch();
+  const debouncedValues = useDebounce(watchedValues, 1000);
+
+  // Autosave to localStorage
+  useEffect(() => {
+    if (debouncedValues.title || debouncedValues.content || debouncedValues.tags.length > 0) {
+      localStorage.setItem(KNOWLEDGE_DRAFT_KEY, JSON.stringify(debouncedValues));
+    }
+  }, [debouncedValues]);
   
   // Update form when initialData changes
   useEffect(() => {
@@ -217,8 +245,10 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
                     </TabsList>
                   </div>
                   
-                  <TabsContent value="editor" className="mt-2">
-                    <TiptapEditor content={field.value} onChange={field.onChange} />
+                  <TabsContent value="editor" className="mt-2" forceMount>
+                    <div className={activeTab === "editor" ? "block" : "hidden"}>
+                      <TiptapEditor content={field.value} onChange={field.onChange} />
+                    </div>
                   </TabsContent>
                   
                   <TabsContent value="preview" className="mt-2">

@@ -130,6 +130,9 @@ const PostWizard = () => {
       
       await createArticle(finalData);
       
+      // Clear the draft on successful creation
+      localStorage.removeItem('knowledge-article-draft');
+      
       toast({
         title: "Success!",
         description: `Your ${postType} has been published`,

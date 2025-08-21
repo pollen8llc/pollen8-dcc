@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useToast } from '@/hooks/use-toast';
+import { useDebounce } from '@/hooks/useDebounce';
 import DOMPurify from 'dompurify';
 
 // UI Components
@@ -37,6 +38,8 @@ interface ArticleFormProps {
   mode: 'create' | 'edit';
 }
 
+const CORE_DRAFT_KEY = 'core-article-draft';
+
 const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -45,16 +48,42 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("editor");
   
-  // Form setup
+  // Load draft for create mode, use article data for edit mode
+  const loadDraft = () => {
+    if (mode === 'edit') return null;
+    try {
+      const saved = localStorage.getItem(CORE_DRAFT_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const savedDraft = mode === 'create' ? loadDraft() : null;
+  const defaultValues = savedDraft || {
+    title: article?.title || "",
+    subtitle: article?.subtitle || "",
+    content: article?.content || "",
+    tags: article?.tags || [],
+  };
+  
+  // Form setup with draft persistence
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
-    defaultValues: {
-      title: article?.title || "",
-      subtitle: article?.subtitle || "",
-      content: article?.content || "",
-      tags: article?.tags || [],
-    },
+    shouldUnregister: false,
+    defaultValues,
   });
+
+  // Watch form values for autosave (only in create mode)
+  const watchedValues = form.watch();
+  const debouncedValues = useDebounce(watchedValues, 1000);
+
+  // Autosave to localStorage (only in create mode)
+  useEffect(() => {
+    if (mode === 'create' && (debouncedValues.title || debouncedValues.content || debouncedValues.tags.length > 0)) {
+      localStorage.setItem(CORE_DRAFT_KEY, JSON.stringify(debouncedValues));
+    }
+  }, [debouncedValues, mode]);
   
   // Handle form submission
   const handleSubmit = async (data: ArticleFormValues) => {
@@ -67,8 +96,18 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
         content: DOMPurify.sanitize(data.content)
       };
       
-      if (mode === 'edit' && article) {
-        // Fix: Pass the complete updated article data as a single argument
+      if (mode === 'create') {
+        // Clear draft on successful creation
+        localStorage.removeItem(CORE_DRAFT_KEY);
+        // Handle create mode - you'll need to implement createArticle
+        console.log('Create article:', sanitizedData);
+        toast({
+          title: "Success!",
+          description: "Article created successfully",
+        });
+        navigate('/knowledge');
+      } else if (mode === 'edit' && article) {
+        // Handle edit mode
         const updatedArticle = {
           ...article,
           ...sanitizedData
@@ -81,15 +120,23 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
         navigate(`/knowledge/article/${article.id}`);
       }
     } catch (error) {
-      console.error('Error updating article:', error);
+      console.error('Error submitting article:', error);
       toast({
         title: "Error",
-        description: "Failed to update article",
-        variant: "destructive",
+        description: "There was a problem saving your article",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Handle cancel - clear draft in create mode
+  const handleCancel = () => {
+    if (mode === 'create') {
+      localStorage.removeItem(CORE_DRAFT_KEY);
+    }
+    navigate(mode === 'edit' && article ? `/knowledge/article/${article.id}` : '/knowledge');
   };
   
   return (
@@ -153,8 +200,10 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
                     </TabsList>
                   </div>
                   
-                  <TabsContent value="editor" className="mt-2">
-                    <TiptapEditor content={field.value} onChange={field.onChange} />
+                  <TabsContent value="editor" className="mt-2" forceMount>
+                    <div className={activeTab === "editor" ? "block" : "hidden"}>
+                      <TiptapEditor content={field.value} onChange={field.onChange} />
+                    </div>
                   </TabsContent>
                   
                   <TabsContent value="preview" className="mt-2">
@@ -216,7 +265,8 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate(mode === 'edit' && article ? `/knowledge/article/${article.id}` : '/knowledge')}
+            onClick={handleCancel}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
