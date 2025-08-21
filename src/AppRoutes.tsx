@@ -53,6 +53,7 @@ const BuildRapport = lazy(() => import("@/pages/rel8/BuildRapport"));
 // A10D pages
 const A10DDashboard = lazy(() => import("@/pages/a10d/A10DDashboard"));
 const A10DTrack = lazy(() => import("@/pages/a10d/A10DTrack"));
+const A10DTrackConfig = lazy(() => import("@/pages/a10d/A10DTrackConfig"));
 const A10DProfileDetails = lazy(() => import("@/pages/a10d/A10DProfileDetails"));
 
 // Import pages - moved from A10D
@@ -442,6 +443,13 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <A10DTrack />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/a10d/track/config/:contactId" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <A10DTrackConfig />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
