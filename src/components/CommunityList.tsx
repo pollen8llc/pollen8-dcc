@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CommunityCard from "./CommunityCard";
-import { Community } from "@/models/types";
+import { Community } from "@/data/types";
 import * as communityService from "@/services/communityService";
 import { Button } from "@/components/ui/button";
 import { useInView } from "react-intersection-observer";

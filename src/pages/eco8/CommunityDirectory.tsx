@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Search, Users, Plus } from 'lucide-react';
-import { Community } from '@/models/types';
+import { Community } from '@/data/types';
 import CommunityCard from '@/components/CommunityCard';
 import Navbar from '@/components/Navbar';
 
@@ -54,7 +54,7 @@ const CommunityDirectory: React.FC = () => {
               organizerIds: ['org1'],
               memberIds: Array.from({length: 156}, (_, i) => `member${i}`),
               tags: ['startup', 'AI', 'blockchain', 'mobile'],
-              is_public: true,
+               isPublic: true,
               created_at: '2024-01-10T10:00:00Z',
               updated_at: '2024-01-20T15:30:00Z'
             },
@@ -68,7 +68,7 @@ const CommunityDirectory: React.FC = () => {
               organizerIds: ['org2'],
               memberIds: Array.from({length: 89}, (_, i) => `member${i}`),
               tags: ['sustainability', 'environment', 'activism', 'community'],
-              is_public: true,
+               isPublic: true,
               created_at: '2024-01-05T08:00:00Z',
               updated_at: '2024-01-18T12:00:00Z'
             },
@@ -82,7 +82,7 @@ const CommunityDirectory: React.FC = () => {
               organizerIds: ['org3'],
               memberIds: Array.from({length: 234}, (_, i) => `member${i}`),
               tags: ['art', 'design', 'music', 'culture', 'collaboration'],
-              is_public: true,
+              isPublic: true,
               created_at: '2024-01-01T16:00:00Z',
               updated_at: '2024-01-19T09:15:00Z'
             }
