@@ -10,11 +10,12 @@ import {
   Upload, 
   Settings, 
   Activity, 
-  BarChart3, 
   Plus,
   Eye,
   Download,
-  UserPlus
+  Network,
+  Calendar,
+  MessageSquare
 } from 'lucide-react';
 
 const Eco8Dashboard: React.FC = () => {
@@ -37,10 +38,10 @@ const Eco8Dashboard: React.FC = () => {
   ];
 
   const quickStats = {
-    totalCommunities: managedCommunities.length,
-    totalMembers: managedCommunities.reduce((sum, c) => sum + c.memberCount, 0),
-    activeToday: 34,
-    pendingRequests: 7
+    networkSize: 1247,
+    communitiesManaged: managedCommunities.length,
+    totalEvents: 23,
+    totalContributions: 156
   };
 
   return (
@@ -62,8 +63,20 @@ const Eco8Dashboard: React.FC = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
+                  <p className="text-sm text-muted-foreground">Network</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.networkSize}</p>
+                </div>
+                <Network className="h-8 w-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="text-sm text-muted-foreground">Communities</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.totalCommunities}</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.communitiesManaged}</p>
                 </div>
                 <Users className="h-8 w-8 text-primary" />
               </div>
@@ -74,10 +87,10 @@ const Eco8Dashboard: React.FC = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Members</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.totalMembers}</p>
+                  <p className="text-sm text-muted-foreground">Events</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.totalEvents}</p>
                 </div>
-                <UserPlus className="h-8 w-8 text-primary" />
+                <Calendar className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
@@ -86,22 +99,10 @@ const Eco8Dashboard: React.FC = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Today</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.activeToday}</p>
+                  <p className="text-sm text-muted-foreground">Contributions</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.totalContributions}</p>
                 </div>
-                <Activity className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.pendingRequests}</p>
-                </div>
-                <BarChart3 className="h-8 w-8 text-primary" />
+                <MessageSquare className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
