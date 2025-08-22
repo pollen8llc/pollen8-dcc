@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { MapPin, FileText, Circle } from "lucide-react";
-import { Community } from "@/data/types";
+import { Community } from "@/models/types";
 import { Badge } from "@/components/ui/badge";
 import { useRef, useEffect, useState, memo } from "react";
 
