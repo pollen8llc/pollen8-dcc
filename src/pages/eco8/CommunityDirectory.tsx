@@ -5,27 +5,35 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, Users, MapPin, TrendingUp, Plus } from 'lucide-react';
+import { Search, Users, Plus } from 'lucide-react';
 import { Community } from '@/models/types';
 import CommunityCard from '@/components/CommunityCard';
+import Navbar from '@/components/Navbar';
 
 const COMMUNITY_TYPES = [
+  'All Types',
   'Technology',
-  'Arts & Culture', 
-  'Health & Wellness',
+  'Arts & Literature', 
+  'Health & Fitness',
   'Business',
-  'Education',
-  'Environment',
-  'Social Impact',
-  'Other'
+  'Sustainability',
+  'Professional'
+];
+
+const GROWTH_STATUS = [
+  'All Statuses',
+  'Growing',
+  'Recruiting', 
+  'Active',
+  'Paused'
 ];
 
 const CommunityDirectory: React.FC = () => {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('All Types');
+  const [statusFilter, setStatusFilter] = useState('All Statuses');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -99,7 +107,7 @@ const CommunityDirectory: React.FC = () => {
   useEffect(() => {
     let filtered = communities;
 
-    // Apply search filter
+    // Apply search filter - search across name, description, and tags
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(community =>
@@ -109,87 +117,101 @@ const CommunityDirectory: React.FC = () => {
       );
     }
 
-    // Note: Type and status filters removed since they don't exist in the old Community interface
-    
     setFilteredCommunities(filtered);
   }, [communities, searchQuery, typeFilter, statusFilter]);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setTypeFilter('All Types');
+    setStatusFilter('All Statuses');
+  };
 
   const totalMembers = communities.reduce((sum, community) => sum + parseInt(community.communitySize), 0);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4 text-white">Community Directory</h1>
-          <p className="text-xl text-muted-foreground mb-8">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Header Navigation & Page Hero Section */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-foreground mb-2">Community Directory</h1>
+          <p className="text-muted-foreground text-lg">
             Discover and connect with communities that share your interests
           </p>
-          
-          {/* Search and Filters */}
-          <Card className="backdrop-blur-md bg-white/5 border border-white/10 mb-8">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search communities or tags..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        </div>
 
-          {/* Stats */}
-          <div className="flex justify-center items-center gap-8 mb-8 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              <span>{filteredCommunities.length} communities found</span>
+        {/* Search & Filter Bar */}
+        <Card className="bg-card border rounded-2xl p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Search communities, organizers, or topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-background"
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              <span>{totalMembers} total members</span>
+            <div className="flex gap-3">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Community Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COMMUNITY_TYPES.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Growth Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GROWTH_STATUS.map(status => (
+                    <SelectItem key={status} value={status}>{status}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+        </Card>
+
+        {/* Results Summary */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Users className="h-5 w-5" />
+            <span>{filteredCommunities.length} communities found</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Users className="h-5 w-5" />
+            <span>{totalMembers} total members</span>
           </div>
         </div>
 
-        {/* Communities Grid */}
+        {/* Community Grid - Responsive card layout */}
         {filteredCommunities.length === 0 ? (
-          <Card className="backdrop-blur-md bg-white/5 border border-white/10 text-center py-12">
+          /* Empty State - Helpful fallback when no results */
+          <Card className="bg-card text-center py-12">
             <CardContent>
-              <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">No communities found</h3>
+              <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl font-semibold mb-2 text-foreground">No communities found</h3>
               <p className="text-muted-foreground mb-6">
                 Try adjusting your search criteria or explore different categories.
               </p>
-              {searchQuery ? (
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setSearchQuery('');
-                  }}
-                >
-                  Clear Filters
-                </Button>
-              ) : (
-                <Button asChild>
-                  <Link to="/eco8/setup">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create First Community
-                  </Link>
-                </Button>
-              )}
+              <Button variant="outline" onClick={clearFilters}>
+                Clear Filters
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -209,7 +231,7 @@ const CommunityDirectory: React.FC = () => {
             </Link>
           </Button>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

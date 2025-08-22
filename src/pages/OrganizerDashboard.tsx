@@ -66,10 +66,16 @@ const OrganizerDashboard = () => {
     {
       id: 'eco8',
       name: 'Eco8',
-      description: 'Add your community to get started',
+      description: (() => {
+        const communities = JSON.parse(localStorage.getItem('communities') || '[]');
+        return communities.length > 0 ? 'Manage your communities' : 'Add your community to get started';
+      })(),
       icon: Building2,
       color: 'hsl(142 76% 36%)', // green
-      link: '/eco8/setup',
+      link: (() => {
+        const communities = JSON.parse(localStorage.getItem('communities') || '[]');
+        return communities.length > 0 ? '/eco8/dashboard' : '/eco8/setup';
+      })(),
       setup: 10, // 100% of 10%
       usage: 20, // 50% of 40%
       premium: 0 // 0% of 50%
