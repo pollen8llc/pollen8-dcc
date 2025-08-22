@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
+import { useCommunities } from '@/hooks/useCommunities';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Users, 
   Search, 
@@ -16,33 +18,19 @@ import {
   Download,
   Network,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  AlertCircle
 } from 'lucide-react';
 
 const Eco8Dashboard: React.FC = () => {
-  // Mock data for organizer's communities
-  const managedCommunities = [
-    {
-      id: '1',
-      name: 'Tech Innovators Hub',
-      memberCount: 156,
-      status: 'growing',
-      lastActivity: '2 hours ago'
-    },
-    {
-      id: '2', 
-      name: 'Sustainable Living Network',
-      memberCount: 89,
-      status: 'active',
-      lastActivity: '1 day ago'
-    }
-  ];
+  const { userCommunities, hasUserCommunities, loading } = useCommunities();
+  const { currentUser } = useAuth();
 
   const quickStats = {
-    networkSize: 1247,
-    communitiesManaged: managedCommunities.length,
-    totalEvents: 23,
-    totalContributions: 156
+    networkSize: 0, // This would come from actual network connections
+    communitiesManaged: userCommunities.length,
+    totalEvents: 0, // This would come from events data
+    totalContributions: 0 // This would come from contributions data
   };
 
   return (
@@ -219,8 +207,27 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
         </div>
 
+        {/* Setup Prompt if no communities */}
+        {!loading && !hasUserCommunities && (
+          <Card className="border-2 border-dashed border-primary/50 bg-primary/5">
+            <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+              <AlertCircle className="h-16 w-16 text-primary mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Welcome to ECO8!</h3>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                You haven't created any communities yet. Start building your network by creating your first community.
+              </p>
+              <Link to="/eco8/setup">
+                <Button size="lg" className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  Create Your First Community
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Managed Communities */}
-        {managedCommunities.length > 0 && (
+        {hasUserCommunities && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -238,22 +245,26 @@ const Eco8Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {managedCommunities.map((community) => (
+                {userCommunities.map((community) => (
                   <div key={community.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <Users className="h-6 w-6 text-primary" />
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden">
+                        {community.logo_url ? (
+                          <img src={community.logo_url} alt={community.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <Users className="h-6 w-6 text-primary" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-semibold text-foreground">{community.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {community.memberCount} members • {community.lastActivity}
+                          {community.type || community.community_type} • {community.location || 'Remote'}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Badge variant={community.status === 'growing' ? 'default' : 'secondary'}>
-                        {community.status}
+                      <Badge variant={community.is_public ? 'default' : 'secondary'}>
+                        {community.is_public ? 'Public' : 'Private'}
                       </Badge>
                       <Link to={`/eco8/community/${community.id}`}>
                         <Button variant="outline" size="sm">
