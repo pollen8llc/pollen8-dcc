@@ -1,28 +1,28 @@
 
 import React from "react";
-import Navbar from "@/components/Navbar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { MultiProgress } from "@/components/ui/multi-progress";
+import Navbar from "@/components/Navbar";
 import { useUser } from "@/contexts/UserContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { UserRole } from "@/models/types";
 import { 
-  Users, 
-  Bell, 
-  Settings, 
-  Briefcase, 
-  Network, 
-  BookOpen, 
-  Building2,
-  MessageSquare,
-  Target,
-  ArrowRight,
+  Settings,
+  MapPin,
+  Users,
+  Network,
+  Star,
+  BarChart3,
   Zap,
-  TrendingUp
+  TrendingUp,
+  Building2,
+  Briefcase,
+  UserCog,
+  ShoppingCart
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const OrganizerDashboard = () => {
   const { currentUser } = useUser();
@@ -34,256 +34,251 @@ const OrganizerDashboard = () => {
     return null;
   }
 
-  const platformServices = [
+  const getFullName = () => {
+    return currentUser.name || "Organizer";
+  };
+
+  const getInitials = () => {
+    const name = currentUser.name || '';
+    const nameParts = name.split(' ');
+    if (nameParts.length >= 2) {
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+    } else if (nameParts.length === 1 && nameParts[0]) {
+      return nameParts[0][0].toUpperCase();
+    }
+    return 'O';
+  };
+
+  const FIXED_AVATAR_URL = "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif";
+
+  const modules = [
+    {
+      id: 'initi8',
+      name: 'Initi8',
+      description: 'Onboarding, update your organizer profile',
+      icon: UserCog,
+      color: 'hsl(var(--primary))',
+      link: '/profile/edit',
+      setup: 8, // 80% of 10%
+      usage: 25, // 62.5% of 40%
+      premium: 15 // 30% of 50%
+    },
+    {
+      id: 'eco8',
+      name: 'Eco8',
+      description: 'Add your community to get started',
+      icon: Building2,
+      color: 'hsl(142 76% 36%)', // green
+      link: '/communities',
+      setup: 10, // 100% of 10%
+      usage: 20, // 50% of 40%
+      premium: 0 // 0% of 50%
+    },
+    {
+      id: 'rel8',
+      name: 'Rel8',
+      description: 'Connect members, build relationships',
+      icon: Network,
+      color: 'hsl(221 83% 53%)', // blue
+      link: '/rel8',
+      setup: 10, // 100% of 10%
+      usage: 35, // 87.5% of 40%
+      premium: 25 // 50% of 50%
+    },
+    {
+      id: 'nomin8',
+      name: 'Nomin8',
+      description: 'Recognize or categorize members (roles, types, pathways)',
+      icon: Star,
+      color: 'hsl(262 83% 58%)', // purple
+      link: '/nmn8',
+      setup: 6, // 60% of 10%
+      usage: 15, // 37.5% of 40%
+      premium: 10 // 20% of 50%
+    },
+    {
+      id: 'evalu8',
+      name: 'Evalu8',
+      description: 'Understand behavior, gather insights, measure engagement',
+      icon: BarChart3,
+      color: 'hsl(43 96% 56%)', // yellow/orange
+      link: '/analytics',
+      setup: 4, // 40% of 10%
+      usage: 8, // 20% of 40%
+      premium: 5 // 10% of 50%
+    },
+    {
+      id: 'actv8',
+      name: 'Actv8',
+      description: 'Empower members to participate, lead, and contribute',
+      icon: Zap,
+      color: 'hsl(168 76% 42%)', // teal
+      link: '/activities',
+      setup: 2, // 20% of 10%
+      usage: 5, // 12.5% of 40%
+      premium: 0 // 0% of 50%
+    },
+    {
+      id: 'advc8',
+      name: 'Advc8',
+      description: 'Manage volunteers and evangelists',
+      icon: Users,
+      color: 'hsl(346 87% 43%)', // pink/red
+      link: '/volunteers',
+      setup: 0, // 0% of 10%
+      usage: 0, // 0% of 40%
+      premium: 0 // 0% of 50%
+    },
     {
       id: 'modul8',
       name: 'Modul8',
-      description: 'Service marketplace for finding and managing providers',
+      description: 'Connect with service providers to help you scale',
       icon: Briefcase,
-      color: '#00eada',
-      primaryLink: '/modul8/dashboard',
-      secondaryLink: '/modul8/request/new',
-      primaryLabel: 'Dashboard',
-      secondaryLabel: 'New Request',
-      stats: { projects: 12, providers: 45 }
-    },
-    {
-      id: 'rel8t',
-      name: 'REL8T',
-      description: 'Relationship management and networking platform',
-      icon: Network,
-      color: '#3b82f6',
-      primaryLink: '/rel8/dashboard',
-      secondaryLink: '/rel8/contacts',
-      primaryLabel: 'Dashboard',
-      secondaryLabel: 'Contacts',
-      stats: { contacts: 89, connections: 156 }
-    },
-    {
-      id: 'labr8',
-      name: 'LAB-R8',
-      description: 'Project management and service provider workspace',
-      icon: Building2,
-      color: '#8b5cf6',
-      primaryLink: '/labr8/dashboard',
-      secondaryLink: '/labr8/projects',
-      primaryLabel: 'Dashboard',
-      secondaryLabel: 'Projects',
-      stats: { active: 8, completed: 23 }
-    },
-    {
-      id: 'knowledge',
-      name: 'Knowledge Base',
-      description: 'Share knowledge, articles, and best practices',
-      icon: BookOpen,
-      color: '#10b981',
-      primaryLink: '/knowledge',
-      secondaryLink: '/knowledge/create',
-      primaryLabel: 'Browse',
-      secondaryLabel: 'Create',
-      stats: { articles: 34, views: 1200 }
-    },
-    {
-      id: 'smart-engage',
-      name: 'Smart Engage',
-      description: 'Automated outreach and engagement management',
-      icon: MessageSquare,
-      color: '#f59e0b',
-      primaryLink: '/rel8/triggers',
-      secondaryLink: '/rel8/outreach',
-      primaryLabel: 'Triggers',
-      secondaryLabel: 'Outreach',
-      stats: { campaigns: 6, responses: 89 }
-    },
-    {
-      id: 'dot-connector',
-      name: 'Dot Connector',
-      description: 'Connect people and opportunities across your network',
-      icon: Target,
-      color: '#ec4899',
-      primaryLink: '/dot-connector',
-      secondaryLink: '/connections',
-      primaryLabel: 'Dashboard',
-      secondaryLabel: 'Connections',
-      stats: { matches: 15, opportunities: 7 }
+      color: 'hsl(271 91% 65%)', // violet
+      link: '/modul8',
+      setup: 7, // 70% of 10%
+      usage: 18, // 45% of 40%
+      premium: 12 // 24% of 50%
     }
   ];
 
-  const managementTools = [
-    {
-      id: 'invites',
-      name: 'Manage Invites',
-      description: 'Create and manage invitation links for new users',
-      icon: Users,
-      link: '/invites',
-      count: 5
-    },
-    {
-      id: 'notifications',
-      name: 'Notifications',
-      description: 'View system notifications and alerts',
-      icon: Bell,
-      link: '/rel8/notifications',
-      count: 12
-    },
-    {
-      id: 'settings',
-      name: 'Settings',
-      description: 'Configure your account settings and preferences',
-      icon: Settings,
-      link: '/settings',
-      count: null
-    }
-  ];
+  const handleSettingsClick = () => {
+    navigate("/settings");
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <div className="container mx-auto px-4 sm:px-6 py-8 max-w-7xl">
-        {/* Header Section */}
-        <div className="mb-8">
-        </div>
-
-        {/* Platform Services Grid */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">Platform Services</h2>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-[#00eada]/10 text-[#00eada] border-[#00eada]/20">
-                <Zap className="h-3 w-3 mr-1" />
-                Active
-              </Badge>
-              <Badge variant="outline">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                {platformServices.length} Services
-              </Badge>
-              <p className="text-muted-foreground text-sm hidden sm:block ml-4">
-                Core platform modules for your organization
-              </p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {platformServices.map((service) => {
-              const IconComponent = service.icon;
-              return (
-                <Card 
-                  key={service.id}
-                  className="group relative overflow-hidden border-0 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-xl hover:shadow-black/5 h-full flex flex-col"
-                >
-                  <div 
-                    className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
-                    style={{ background: `linear-gradient(135deg, ${service.color} 0%, transparent 100%)` }}
-                  />
+      
+      <div className="container mx-auto px-4 py-6 space-y-8 max-w-6xl">
+        {/* Profile Header */}
+        <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
+          <CardContent className="p-0">
+            <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
+                {/* Avatar with animated gradient border */}
+                <div className="relative flex-shrink-0">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-spin-slow opacity-75 blur-sm" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-pulse" />
+                  <Avatar className="relative w-24 h-24 border-4 border-background shadow-2xl">
+                    <AvatarImage src={currentUser.imageUrl || FIXED_AVATAR_URL} alt={getFullName()} />
+                    <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-primary/20 to-secondary/20">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                
+                {/* Profile Info */}
+                <div className="flex-1 min-w-0 text-center sm:text-left">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
+                    <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
+                      {getFullName()}
+                    </h1>
+                    <Badge variant="secondary" className="text-sm font-medium self-center sm:self-auto">
+                      {currentUser.role}
+                    </Badge>
+                  </div>
                   
-                  <CardHeader className="pb-4 relative flex-shrink-0">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="p-2 rounded-lg"
-                          style={{ backgroundColor: `${service.color}15` }}
-                        >
-                          <IconComponent 
-                            className="h-5 w-5" 
-                            style={{ color: service.color }}
-                          />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg font-semibold">
-                            {service.name}
-                          </CardTitle>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {service.description}
-                          </p>
-                        </div>
+                  <div className="flex items-center gap-3 justify-center sm:justify-start flex-wrap">
+                    {currentUser.location && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-lg text-muted-foreground font-medium">{currentUser.location}</span>
                       </div>
-                    </div>
-                  </CardHeader>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Settings Button */}
+                <div className="flex-shrink-0 w-full sm:w-auto">
+                  <Button 
+                    onClick={handleSettingsClick} 
+                    size="default" 
+                    className="w-full sm:w-auto px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+                  >
+                    <Settings className="w-5 h-5 mr-3" />
+                    Settings
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-                  <CardContent className="pt-0 relative flex-1 flex flex-col">
-                    {/* Stats Row */}
-                    <div className="flex items-center gap-4 mb-4 text-xs text-muted-foreground flex-shrink-0">
-                      {Object.entries(service.stats).map(([key, value]) => (
-                        <div key={key} className="flex items-center gap-1">
-                          <span className="font-medium">{value}</span>
-                          <span className="capitalize">{key}</span>
-                        </div>
-                      ))}
+        {/* Module Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {modules.map((module) => {
+            const IconComponent = module.icon;
+            return (
+              <Card 
+                key={module.id}
+                className="group relative overflow-hidden border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]"
+                onClick={() => navigate(module.link)}
+              >
+                {/* Glassmorphic overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+                
+                {/* Subtle colored background */}
+                <div 
+                  className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+                  style={{ backgroundColor: module.color }}
+                />
+                
+                <CardHeader className="pb-4 relative">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div 
+                      className="p-2.5 rounded-xl backdrop-blur-sm border"
+                      style={{ 
+                        backgroundColor: `color-mix(in srgb, ${module.color} 15%, transparent)`,
+                        borderColor: `color-mix(in srgb, ${module.color} 30%, transparent)`
+                      }}
+                    >
+                      <IconComponent 
+                        className="h-6 w-6" 
+                        style={{ color: module.color }}
+                      />
                     </div>
+                    <CardTitle className="text-xl font-bold">
+                      {module.name}
+                    </CardTitle>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {module.description}
+                  </p>
+                </CardHeader>
 
-                    {/* Action Button */}
-                    <div className="mt-auto">
-                      <Button 
-                        asChild 
-                        variant="outline"
-                        size="sm" 
-                        className="w-full border-muted-foreground/20 hover:border-muted-foreground/40 transition-all duration-300 group-hover:border-2"
-                        style={{
-                          borderColor: `${service.color}30`,
-                          '--tw-border-opacity': '0.3'
-                        } as React.CSSProperties}
-                      >
-                        <Link to={service.primaryLink} className="flex items-center justify-center gap-2">
-                          {service.primaryLabel}
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </Button>
+                <CardContent className="pt-0 relative">
+                  {/* Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Progress</span>
+                      <span>{Math.round(((module.setup + module.usage + module.premium) / 100) * 100)}%</span>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Management Tools */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">Management Tools</h2>
-            <p className="text-muted-foreground text-sm hidden sm:block">
-              Administrative and organizational tools
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {managementTools.map((tool) => {
-              const IconComponent = tool.icon;
-              return (
-                <Card 
-                  key={tool.id}
-                  className="group hover:shadow-lg transition-all duration-300 border-0 bg-card/30 backdrop-blur-sm hover:bg-card/50"
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <IconComponent className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">{tool.name}</h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {tool.description}
-                          </p>
-                        </div>
-                      </div>
-                      {tool.count !== null && (
-                        <Badge variant="secondary" className="bg-primary/10 text-primary">
-                          {tool.count}
-                        </Badge>
-                      )}
+                    <MultiProgress
+                      setupValue={module.setup}
+                      usageValue={module.usage}
+                      premiumValue={module.premium}
+                      className="h-2.5"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        Setup
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        Usage
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                        Premium
+                      </span>
                     </div>
-                    
-                    <Button asChild className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Link to={tool.link} className="flex items-center justify-center gap-2">
-                        Access Tool
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
