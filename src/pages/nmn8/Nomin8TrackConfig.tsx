@@ -36,13 +36,13 @@ const mockA10DGroups = [
   { id: '5', name: 'Tech Mentors', color: 'purple' }
 ];
 
-const A10DTrackConfig: React.FC = () => {
+const Nomin8TrackConfig: React.FC = () => {
   const navigate = useNavigate();
   const { contactId } = useParams<{ contactId: string }>();
   
   const [contact, setContact] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [classification, setClassification] = useState<A10DClassification>('Supporter');
+  const [classification, setClassification] = useState<Nomin8Classification>('Supporter');
   const [selectedGroup, setSelectedGroup] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -63,7 +63,7 @@ const A10DTrackConfig: React.FC = () => {
           description: "Failed to load contact details.",
           variant: "destructive"
         });
-        navigate('/a10d/track');
+        navigate('/nmn8/track');
       } finally {
         setLoading(false);
       }
@@ -85,7 +85,7 @@ const A10DTrackConfig: React.FC = () => {
     }
   };
 
-  const getClassificationIcon = (classification: A10DClassification) => {
+  const getClassificationIcon = (classification: Nomin8Classification) => {
     switch (classification) {
       case 'Ambassador': return Star;
       case 'Volunteer': return Users;
@@ -112,7 +112,7 @@ const A10DTrackConfig: React.FC = () => {
     });
 
     // Navigate back to A10D dashboard
-    navigate('/a10d');
+    navigate('/nmn8');
   };
 
   if (loading) {
@@ -120,7 +120,7 @@ const A10DTrackConfig: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <Navbar />
         <div className="container mx-auto px-4 py-6 space-y-8">
-          <A10DNavigation />
+          <Nomin8Navigation />
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -137,7 +137,7 @@ const A10DTrackConfig: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <Navbar />
         <div className="container mx-auto px-4 py-6 space-y-8">
-          <A10DNavigation />
+          <Nomin8Navigation />
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">Contact Not Found</h2>
             <p className="text-muted-foreground mb-4">The contact you're looking for could not be found.</p>
@@ -158,7 +158,7 @@ const A10DTrackConfig: React.FC = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-6 space-y-8">
-        <A10DNavigation />
+        <Nomin8Navigation />
         
         {/* Header */}
         <div>
@@ -236,10 +236,10 @@ const A10DTrackConfig: React.FC = () => {
                 </div>
                 <div className="grid gap-3">
                   {[
-                    { value: 'Supporter' as A10DClassification, icon: Heart, label: 'Supporter' },
-                    { value: 'Volunteer' as A10DClassification, icon: Users, label: 'Volunteer' },
-                    { value: 'Moderator' as A10DClassification, icon: Shield, label: 'Moderator' },
-                    { value: 'Ambassador' as A10DClassification, icon: Star, label: 'Ambassador' }
+                  { value: 'Supporter' as Nomin8Classification, icon: Heart, label: 'Supporter' },
+                  { value: 'Volunteer' as Nomin8Classification, icon: Users, label: 'Volunteer' },
+                  { value: 'Moderator' as Nomin8Classification, icon: Shield, label: 'Moderator' },
+                  { value: 'Ambassador' as Nomin8Classification, icon: Star, label: 'Ambassador' }
                   ].map((option) => {
                     const Icon = option.icon;
                     const isSelected = classification === option.value;
@@ -321,4 +321,4 @@ const A10DTrackConfig: React.FC = () => {
   );
 };
 
-export default A10DTrackConfig;
+export default Nomin8TrackConfig;

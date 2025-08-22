@@ -23,7 +23,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 // Mock data - in real app this would come from API/context
-const mockProfiles: A10DProfile[] = [
+const mockProfiles: Nomin8Profile[] = [
   {
     id: '1',
     contactId: 'contact-1',
@@ -132,7 +132,7 @@ const mockProfiles: A10DProfile[] = [
   }
 ];
 
-const A10DProfileDetails: React.FC = () => {
+const Nomin8ProfileDetails: React.FC = () => {
   const { profileId } = useParams<{ profileId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -149,7 +149,7 @@ const A10DProfileDetails: React.FC = () => {
             <h2 className="text-2xl font-bold text-muted-foreground">Profile Not Found</h2>
             <p className="text-muted-foreground mt-2">The profile you're looking for doesn't exist.</p>
             <Button
-              onClick={() => navigate('/a10d')}
+              onClick={() => navigate('/nmn8')}
               variant="outline"
               size="sm"
               className="mt-4 flex items-center gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
@@ -172,7 +172,7 @@ const A10DProfileDetails: React.FC = () => {
       .toUpperCase();
   };
 
-  const getClassificationColor = (classification: A10DClassification) => {
+  const getClassificationColor = (classification: Nomin8Classification) => {
     switch (classification) {
       case 'Ambassador':
         return 'bg-primary text-primary-foreground';
@@ -210,12 +210,12 @@ const A10DProfileDetails: React.FC = () => {
       
       <div className="container mx-auto px-4 py-6 space-y-8">
         {/* Navigation */}
-        <A10DNavigation />
+        <Nomin8Navigation />
 
         {/* Back Button aligned right */}
         <div className="flex">
           <Button
-            onClick={() => navigate('/a10d')}
+            onClick={() => navigate('/nmn8')}
             variant="outline"
             size="sm"
             className="ml-auto flex items-center gap-2 border-[#00eada]/30 hover:border-[#00eada] hover:bg-[#00eada]/10 transition-all duration-200 hover:shadow-lg hover:shadow-[#00eada]/20"
@@ -413,4 +413,4 @@ const A10DProfileDetails: React.FC = () => {
   );
 };
 
-export default A10DProfileDetails;
+export default Nomin8ProfileDetails;

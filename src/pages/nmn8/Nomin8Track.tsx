@@ -94,7 +94,7 @@ const mockA10DGroups = [
   { id: '5', name: 'Tech Mentors', color: 'purple' }
 ];
 
-const A10DTrack: React.FC = () => {
+const Nomin8Track: React.FC = () => {
   const navigate = useNavigate();
   const [contacts] = useState(mockContacts);
   const [searchQuery, setSearchQuery] = useState('');
@@ -142,7 +142,7 @@ const A10DTrack: React.FC = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-6 space-y-8">
-        <A10DNavigation />
+        <Nomin8Navigation />
         
         {/* Header */}
         <div>
