@@ -69,7 +69,7 @@ const OrganizerDashboard = () => {
       description: 'Add your community to get started',
       icon: Building2,
       color: 'hsl(142 76% 36%)', // green
-      link: '/communities',
+      link: '/eco8/setup',
       setup: 10, // 100% of 10%
       usage: 20, // 50% of 40%
       premium: 0 // 0% of 50%
