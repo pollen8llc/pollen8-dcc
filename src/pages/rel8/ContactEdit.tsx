@@ -407,7 +407,7 @@ const ContactEdit = () => {
 
             {currentMode === 'edit' ? (
               /* Edit Form */
-              <Card>
+              <Card className="bg-card/40 backdrop-blur-md border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300">
                 <CardHeader>
                   <CardTitle>Edit Contact Information</CardTitle>
                 </CardHeader>
@@ -435,7 +435,7 @@ const ContactEdit = () => {
               /* Profile View */
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Contact Information */}
-                <Card>
+                <Card className="bg-card/40 backdrop-blur-md border border-border/50 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:scale-[1.02]">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5 text-primary" />

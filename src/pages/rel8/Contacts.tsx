@@ -133,7 +133,7 @@ const Contacts = () => {
   };
 
   return (
-    <div className="flex flex-col bg-background">
+    <div className="flex flex-col bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
       <div className="flex flex-col flex-1 overflow-hidden">
@@ -142,7 +142,7 @@ const Contacts = () => {
           
           <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-4">
             <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Contacts</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Contacts</h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-1">
                 Manage your network and relationships
               </p>
@@ -216,7 +216,7 @@ const Contacts = () => {
                   
                   <Button 
                     onClick={() => navigate("/rel8/contacts/create")}
-                    className="flex items-center gap-2 w-full sm:w-auto"
+                    className="flex items-center gap-2 w-full sm:w-auto hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
                     size="sm"
                   >
                     <PlusCircle className="h-4 w-4" />

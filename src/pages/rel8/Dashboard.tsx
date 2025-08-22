@@ -40,16 +40,16 @@ const Dashboard = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-6">
         <Rel8OnlyNavigation />
         
         <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-2 sm:mt-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Relationships</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Relationships</h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-1">
                 Manage your outreach and nurture your network
               </p>
@@ -57,7 +57,7 @@ const Dashboard = () => {
             
             <Button 
               onClick={handleBuildRapport}
-              className="flex items-center gap-2 w-full sm:w-auto"
+              className="flex items-center gap-2 w-full sm:w-auto hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
               size="sm"
             >
               <Heart className="h-4 w-4" />

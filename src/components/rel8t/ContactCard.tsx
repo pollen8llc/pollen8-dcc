@@ -73,8 +73,9 @@ const ContactCard = ({
   return (
     <div 
       className={`h-full overflow-hidden transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
-        bg-white/5 border border-white/10 shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20
-        ${isSelected ? 'ring-2 ring-[#00eada] ring-inset bg-[#00eada]/10' : ''}`}
+        bg-card/40 border border-border/50 shadow-lg hover:shadow-xl hover:shadow-primary/10 hover:bg-card/60
+        hover:scale-[1.02] group
+        ${isSelected ? 'ring-2 ring-primary ring-inset bg-primary/10 scale-[1.02]' : ''}`}
       onClick={handleCardClick}
     >
       {/* Selection checkbox */}
@@ -91,7 +92,7 @@ const ContactCard = ({
       {/* Section 1: Header with name and category */}
       <div className={`p-4 pb-2 relative ${isSelectionMode ? 'pt-12' : ''}`}>
         <div className="flex justify-between items-start">
-          <h3 className="text-base font-medium mb-1 line-clamp-1 text-white">{contact.name}</h3>
+          <h3 className="text-base font-medium mb-1 line-clamp-1">{contact.name}</h3>
           
           {contact.category && (
             <Badge 
@@ -109,7 +110,7 @@ const ContactCard = ({
         </div>
         
         {contact.organization && (
-          <div className="flex items-center text-xs text-white/70">
+          <div className="flex items-center text-xs text-muted-foreground">
             <Building className="h-3 w-3 mr-1.5 flex-shrink-0" />
             <span className="truncate">{contact.organization}</span>
           </div>
@@ -131,24 +132,24 @@ const ContactCard = ({
       </div>
       
       {/* Section 2: Contact information */}
-      <div className="px-4 py-2 border-t border-white/5 flex-grow">
+      <div className="px-4 py-2 border-t border-border/20 flex-grow">
         <div className="space-y-1.5">
           {contact.email && (
-            <div className="flex items-center text-xs text-white/70">
+            <div className="flex items-center text-xs text-muted-foreground">
               <Mail className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.email}</span>
             </div>
           )}
           
           {contact.phone && (
-            <div className="flex items-center text-xs text-white/70">
+            <div className="flex items-center text-xs text-muted-foreground">
               <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.phone}</span>
             </div>
           )}
           
           {contact.location && (
-            <div className="flex items-center text-xs text-white/70">
+            <div className="flex items-center text-xs text-muted-foreground">
               <MapPin className="h-3 w-3 mr-1.5 flex-shrink-0" />
               <span className="truncate">{contact.location}</span>
             </div>
@@ -157,21 +158,21 @@ const ContactCard = ({
       </div>
       
       {/* Section 3: Tags and action buttons */}
-      <div className="px-4 pt-2 pb-3 border-t border-white/5">
+      <div className="px-4 pt-2 pb-3 border-t border-border/20">
         {contact.tags && contact.tags.length > 0 && (
           <div className="flex items-start text-xs mb-3">
-            <Tag className="h-3 w-3 mr-1.5 flex-shrink-0 mt-0.5 text-white/70" />
+            <Tag className="h-3 w-3 mr-1.5 flex-shrink-0 mt-0.5 text-muted-foreground" />
             <div className="flex flex-wrap gap-1">
               {contact.tags.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className="bg-[#00eada]/20 text-[#00eada] px-1.5 py-0.5 rounded-full text-xs"
+                  className="bg-primary/20 text-primary px-1.5 py-0.5 rounded-full text-xs"
                 >
                   {tag}
                 </span>
               ))}
               {contact.tags.length > 2 && (
-                <span className="text-xs text-white/70">
+                <span className="text-xs text-muted-foreground">
                   +{contact.tags.length - 2} more
                 </span>
               )}
@@ -197,7 +198,7 @@ const ContactCard = ({
                   </Badge>
                 ))}
                 {contact.groups.length > 2 && (
-                  <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-white/20 text-white/70">
+                   <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-border/30 text-muted-foreground">
                     +{contact.groups.length - 2}
                   </Badge>
                 )}
@@ -210,7 +211,7 @@ const ContactCard = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0 hover:bg-[#00eada]/10 hover:text-[#00eada]"
+                className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-110"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleEdit();
@@ -222,7 +223,7 @@ const ContactCard = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
+                className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 hover:scale-110"
                 onClick={handleDelete}
               >
                 <Trash2 className="h-3.5 w-3.5" />

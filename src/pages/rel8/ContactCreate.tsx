@@ -62,11 +62,11 @@ const ContactCreate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6">
-        <Breadcrumb className="mb-6">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/rel8">Dashboard</BreadcrumbLink>
@@ -82,23 +82,23 @@ const ContactCreate = () => {
           </BreadcrumbList>
         </Breadcrumb>
         
-        <div className="flex flex-col sm:flex-row sm:items-center mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => navigate("/rel8/contacts")}
-            className="self-start flex items-center gap-2"
+            className="self-start flex items-center gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold truncate">Create New Contact</h1>
+            <h1 className="text-2xl font-bold truncate tracking-tight">Create New Contact</h1>
             <p className="text-muted-foreground">Add a new contact to your network</p>
           </div>
         </div>
 
-        <div className="bg-card rounded-lg border shadow-sm p-6">
+        <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-6">
           <ContactForm
             onSubmit={handleSubmit}
             onCancel={handleCancel}
