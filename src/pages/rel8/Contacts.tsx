@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import ContactList from "@/components/rel8t/ContactList";
-import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search, Filter } from "lucide-react";
+import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search, Filter, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -212,6 +212,16 @@ const Contacts = () => {
                   >
                     <CheckSquare className="h-4 w-4" />
                     <span className="hidden sm:inline">Select</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => navigate("/rel8/import")}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    size="sm"
+                  >
+                    <Upload className="h-4 w-4" />
+                    <span className="hidden sm:inline">Import</span>
                   </Button>
                   
                   <Button 
