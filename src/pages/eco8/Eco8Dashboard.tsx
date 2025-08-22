@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Navbar from '@/components/Navbar';
 import { 
   Users, 
   Search, 
@@ -15,7 +16,6 @@ import {
   Download,
   UserPlus
 } from 'lucide-react';
-import { Eco8Navigation } from '@/components/eco8/Eco8Navigation';
 
 const Eco8Dashboard: React.FC = () => {
   // Mock data for organizer's communities
@@ -45,7 +45,7 @@ const Eco8Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Eco8Navigation />
+      <Navbar />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
