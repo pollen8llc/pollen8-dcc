@@ -3,14 +3,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Twitter, Linkedin, Instagram, Facebook } from 'lucide-react';
-import { A10DProfile, A10DClassification } from '@/types/a10d';
+import { Nomin8Profile, Nomin8Classification } from '@/types/nomin8';
 
-interface A10DProfileCardProps {
-  profile: A10DProfile;
-  onClick?: (profile: A10DProfile) => void;
+interface Nomin8ProfileCardProps {
+  profile: Nomin8Profile;
+  onClick?: (profile: Nomin8Profile) => void;
 }
 
-const A10DProfileCard: React.FC<A10DProfileCardProps> = ({ profile, onClick }) => {
+const Nomin8ProfileCard: React.FC<Nomin8ProfileCardProps> = ({ profile, onClick }) => {
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -19,7 +19,7 @@ const A10DProfileCard: React.FC<A10DProfileCardProps> = ({ profile, onClick }) =
       .toUpperCase();
   };
 
-  const getClassificationColor = (classification: A10DClassification) => {
+  const getClassificationColor = (classification: Nomin8Classification) => {
     switch (classification) {
       case 'Ambassador':
         return 'bg-primary/80 text-primary-foreground border-primary/40';
@@ -117,4 +117,4 @@ const A10DProfileCard: React.FC<A10DProfileCardProps> = ({ profile, onClick }) =
   );
 };
 
-export default A10DProfileCard;
+export default Nomin8ProfileCard;

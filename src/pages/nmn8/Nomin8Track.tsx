@@ -11,8 +11,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
-import { A10DNavigation } from '@/components/a10d/A10DNavigation';
-import { A10DClassification } from '@/types/a10d';
+import { Nomin8Navigation } from '@/components/nomin8/Nomin8Navigation';
+import { Nomin8Classification } from '@/types/nomin8';
 import { toast } from '@/hooks/use-toast';
 
 // Mock contacts data from REL8
@@ -122,7 +122,7 @@ const A10DTrack: React.FC = () => {
     }
   };
 
-  const getClassificationIcon = (classification: A10DClassification) => {
+  const getClassificationIcon = (classification: Nomin8Classification) => {
     switch (classification) {
       case 'Ambassador': return Star;
       case 'Volunteer': return Users;
@@ -133,7 +133,7 @@ const A10DTrack: React.FC = () => {
   };
 
   const handleContactSelect = (contact: any) => {
-    navigate(`/a10d/track/config/${contact.id}`);
+    navigate(`/nmn8/track/config/${contact.id}`);
   };
 
 
@@ -266,4 +266,4 @@ const A10DTrack: React.FC = () => {
   );
 };
 
-export default A10DTrack;
+export default Nomin8Track;

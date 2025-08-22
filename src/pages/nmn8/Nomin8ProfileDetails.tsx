@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import Navbar from '@/components/Navbar';
-import { A10DNavigation } from '@/components/a10d/A10DNavigation';
+import { Nomin8Navigation } from '@/components/nomin8/Nomin8Navigation';
 import { 
   Calendar, 
   BarChart3, 
@@ -18,7 +18,7 @@ import {
   Star,
   TrendingUp
 } from 'lucide-react';
-import { A10DProfile, A10DClassification } from '@/types/a10d';
+import { Nomin8Profile, Nomin8Classification } from '@/types/nomin8';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 

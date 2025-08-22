@@ -1,13 +1,13 @@
-export type A10DClassification = 'Ambassador' | 'Volunteer' | 'Supporter' | 'Moderator';
+export type Nomin8Classification = 'Ambassador' | 'Volunteer' | 'Supporter' | 'Moderator';
 
-export interface A10DProfile {
+export interface Nomin8Profile {
   id: string;
   contactId: string; // Reference to REL8 contact
   name: string;
   email: string;
   avatar?: string;
   location?: string;
-  classification: A10DClassification;
+  classification: Nomin8Classification;
   communityEngagement: number; // 0-100 percentage
   eventsAttended: number;
   interests: string[];
@@ -24,16 +24,16 @@ export interface A10DProfile {
   };
 }
 
-export interface A10DMetrics {
+export interface Nomin8Metrics {
   totalProfiles: number;
   averageEngagement: number;
   totalEvents: number;
   activeThisMonth: number;
-  classificationBreakdown: Record<A10DClassification, number>;
+  classificationBreakdown: Record<Nomin8Classification, number>;
 }
 
-export interface A10DFilter {
-  classification?: A10DClassification | 'all';
+export interface Nomin8Filter {
+  classification?: Nomin8Classification | 'all';
   engagementRange?: {
     min: number;
     max: number;

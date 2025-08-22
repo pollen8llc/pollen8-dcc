@@ -50,12 +50,12 @@ const EmailTest = lazy(() => import("@/pages/rel8/EmailTest"));
 const Triggers = lazy(() => import("@/pages/rel8/Triggers"));
 const BuildRapport = lazy(() => import("@/pages/rel8/BuildRapport"));
 
-// A10D pages
-const A10DDashboard = lazy(() => import("@/pages/a10d/A10DDashboard"));
-const A10DTrack = lazy(() => import("@/pages/a10d/A10DTrack"));
-const A10DTrackConfig = lazy(() => import("@/pages/a10d/A10DTrackConfig"));
-const A10DSettings = lazy(() => import("@/pages/a10d/A10DSettings"));
-const A10DProfileDetails = lazy(() => import("@/pages/a10d/A10DProfileDetails"));
+// Nomin8 pages
+const Nomin8Dashboard = lazy(() => import("@/pages/nmn8/Nomin8Dashboard"));
+const Nomin8Track = lazy(() => import("@/pages/nmn8/Nomin8Track"));
+const Nomin8TrackConfig = lazy(() => import("@/pages/nmn8/Nomin8TrackConfig"));
+const Nomin8Settings = lazy(() => import("@/pages/nmn8/Nomin8Settings"));
+const Nomin8ProfileDetails = lazy(() => import("@/pages/nmn8/Nomin8ProfileDetails"));
 
 // Import pages - moved from A10D
 const ImportCSV = lazy(() => import("@/pages/ImportCSV"));
@@ -425,51 +425,51 @@ const AppRoutes = () => {
             </ServiceProviderProtectedRoute>
           } />
 
-          {/* Legacy A10D routes */}
-          <Route path="/a10d" element={
+          {/* Nomin8 routes */}
+          <Route path="/nmn8" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DDashboard />
+                <Nomin8Dashboard />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/a10d/dashboard" element={
+          <Route path="/nmn8/dashboard" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DDashboard />
+                <Nomin8Dashboard />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/a10d/track" element={
+          <Route path="/nmn8/track" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DTrack />
+                <Nomin8Track />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/a10d/track/config/:contactId" element={
+          <Route path="/nmn8/track/config/:contactId" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DTrackConfig />
+                <Nomin8TrackConfig />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/a10d/settings" element={
+          <Route path="/nmn8/settings" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DSettings />
+                <Nomin8Settings />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/a10d/import" element={
+          <Route path="/nmn8/import" element={
             <NonServiceProviderRoute>
               <ImportsAndInvites />
             </NonServiceProviderRoute>
           } />
-          <Route path="/a10d/profile/:profileId" element={
+          <Route path="/nmn8/profile/:profileId" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <A10DProfileDetails />
+                <Nomin8ProfileDetails />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

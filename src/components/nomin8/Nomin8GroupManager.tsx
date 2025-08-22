@@ -28,7 +28,7 @@ const colorOptions = [
   { value: 'indigo', label: 'Indigo', class: 'bg-indigo-500' },
 ];
 
-export const A10DGroupManager: React.FC = () => {
+export const Nomin8GroupManager: React.FC = () => {
   const [groups, setGroups] = useState(mockGroups);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newGroup, setNewGroup] = useState({
@@ -59,7 +59,7 @@ export const A10DGroupManager: React.FC = () => {
     
     toast({
       title: "Group Created",
-      description: `${newGroup.name} has been added to your A10D groups.`
+      description: `${newGroup.name} has been added to your Nomin8 groups.`
     });
   };
 
@@ -80,7 +80,7 @@ export const A10DGroupManager: React.FC = () => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>A10D Groups</CardTitle>
+          <CardTitle>Nomin8 Groups</CardTitle>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
@@ -90,7 +90,7 @@ export const A10DGroupManager: React.FC = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create New A10D Group</DialogTitle>
+                <DialogTitle>Create New Nomin8 Group</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <div className="space-y-2">

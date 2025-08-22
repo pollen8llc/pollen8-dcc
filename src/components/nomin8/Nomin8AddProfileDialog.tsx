@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,18 +8,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X, Plus } from 'lucide-react';
-import { A10DClassification } from '@/types/a10d';
+import { Nomin8Classification } from '@/types/nomin8';
 
-interface A10DAddProfileDialogProps {
+interface Nomin8AddProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const A10DAddProfileDialog: React.FC<A10DAddProfileDialogProps> = ({ open, onOpenChange }) => {
+const Nomin8AddProfileDialog: React.FC<Nomin8AddProfileDialogProps> = ({ open, onOpenChange }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    classification: '' as A10DClassification | '',
+    classification: '' as Nomin8Classification | '',
     communityEngagement: 0,
     eventsAttended: 0,
     notes: '',
@@ -69,7 +70,8 @@ const A10DAddProfileDialog: React.FC<A10DAddProfileDialogProps> = ({ open, onOpe
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would typically save the profile to your backend
-    console.log('New profile data:', formData);
+    console.log('Creating Nomin8 profile:', formData);
+    toast.success("Nomin8 profile created successfully!");
     
     // Reset form and close dialog
     setFormData({
@@ -93,7 +95,10 @@ const A10DAddProfileDialog: React.FC<A10DAddProfileDialogProps> = ({ open, onOpe
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New A10D Profile</DialogTitle>
+          <DialogTitle>Add Nomin8 Profile</DialogTitle>
+          <DialogDescription>
+            Create a new Nomin8 profile for community tracking and engagement.
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -255,7 +260,7 @@ const A10DAddProfileDialog: React.FC<A10DAddProfileDialogProps> = ({ open, onOpe
               Cancel
             </Button>
             <Button type="submit" disabled={!formData.name || !formData.email || !formData.classification}>
-              Add Profile
+              Add Nomin8 Profile
             </Button>
           </div>
         </form>
@@ -264,4 +269,4 @@ const A10DAddProfileDialog: React.FC<A10DAddProfileDialogProps> = ({ open, onOpe
   );
 };
 
-export default A10DAddProfileDialog;
+export default Nomin8AddProfileDialog;

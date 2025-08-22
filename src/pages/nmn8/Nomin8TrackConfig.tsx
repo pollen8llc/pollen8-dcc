@@ -10,8 +10,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
-import { A10DNavigation } from '@/components/a10d/A10DNavigation';
-import { A10DClassification } from '@/types/a10d';
+import { Nomin8Navigation } from '@/components/nomin8/Nomin8Navigation';
+import { Nomin8Classification } from '@/types/nomin8';
 import { toast } from '@/hooks/use-toast';
 
 // Mock contact data (will be replaced with real contact service)

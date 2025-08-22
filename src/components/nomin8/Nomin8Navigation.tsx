@@ -6,27 +6,27 @@ import {
   Settings
 } from "lucide-react";
 
-export function A10DNavigation() {
+export function Nomin8Navigation() {
   const location = useLocation();
   
   const navItems = [
     {
-      href: "/a10d",
+      href: "/nmn8",
       label: "Dashboard",
       icon: Home,
-      isActive: location.pathname === "/a10d"
+      isActive: location.pathname === "/nmn8"
     },
     {
-      href: "/a10d/track",
+      href: "/nmn8/track",
       label: "Track",
       icon: UserPlus,
-      isActive: location.pathname === "/a10d/track"
+      isActive: location.pathname === "/nmn8/track"
     },
     {
-      href: "/a10d/settings",
+      href: "/nmn8/settings",
       label: "Settings",
       icon: Settings,
-      isActive: location.pathname === "/a10d/settings"
+      isActive: location.pathname === "/nmn8/settings"
     }
   ];
 

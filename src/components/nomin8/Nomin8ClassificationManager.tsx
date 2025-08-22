@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { A10DClassification } from '@/types/a10d';
+import { Nomin8Classification } from '@/types/nomin8';
 import { toast } from '@/hooks/use-toast';
 
 // Mock classifications data - will be replaced with real service
@@ -23,7 +23,7 @@ const iconMap = {
   Star
 };
 
-export const A10DClassificationManager: React.FC = () => {
+export const Nomin8ClassificationManager: React.FC = () => {
   const [classifications, setClassifications] = useState(mockClassifications);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newClassification, setNewClassification] = useState({
@@ -74,7 +74,7 @@ export const A10DClassificationManager: React.FC = () => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>A10D Classifications</CardTitle>
+          <CardTitle>Nomin8 Classifications</CardTitle>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
