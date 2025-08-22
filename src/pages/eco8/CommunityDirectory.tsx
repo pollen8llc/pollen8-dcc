@@ -140,7 +140,7 @@ const CommunityDirectory: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="w-full px-4 py-8">
         {/* Header Navigation & Page Hero Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">Community Directory</h1>

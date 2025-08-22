@@ -34,8 +34,8 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
     >
       <div className="relative h-full overflow-hidden rounded-2xl bg-card border border-border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10">
         {/* Banner Section */}
-        <div className="relative h-32 bg-cover bg-center" style={{ backgroundImage: `url(${community.imageUrl}?w=800&q=80)` }}>
-          <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5"></div>
           
           {/* Status Badge */}
           <div className="absolute top-3 right-3 z-10">
@@ -49,27 +49,35 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
         <div className="p-4 space-y-3">
           {/* Header Section */}
           <div className="flex items-start space-x-3">
-            <div className="w-12 h-12 rounded-xl border border-border bg-background overflow-hidden flex-shrink-0">
-              <img 
-                src={`${community.imageUrl}?w=100&q=80`} 
-                alt={`${community.name} logo`}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-12 h-12 rounded-xl bg-black/80 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm"></div>
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-foreground line-clamp-1">
                 {community.name}
               </h3>
-              <p className="text-sm text-muted-foreground">
-                {community.tags[0] || 'Community'}
-              </p>
+              {/* Topic badges */}
+              <div className="flex flex-wrap gap-1 mt-1">
+                {community.tags.slice(0, 2).map((tag) => (
+                  <Badge 
+                    key={tag} 
+                    variant="secondary" 
+                    className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-0"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+                {community.tags.length > 2 && (
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs px-2 py-0.5 bg-muted/50 text-muted-foreground border-0"
+                  >
+                    +{community.tags.length - 2}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
-
-          {/* Description */}
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {community.description}
-          </p>
 
           {/* Organizer Section */}
           <div className="flex items-center space-x-2">

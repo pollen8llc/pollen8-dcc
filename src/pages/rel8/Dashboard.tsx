@@ -60,7 +60,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
+      <main className="w-full px-4 py-8">
         <Rel8OnlyNavigation />
         
         {/* Header */}
@@ -234,24 +234,22 @@ const Dashboard = () => {
           </Card>
 
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <Settings className="h-6 w-6 text-primary" />
-                Setup Wizard
-              </CardTitle>
-              <CardDescription>
-                Complete initial setup with categories, contacts, and triggers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button 
-                variant="ghost" 
-                className="w-full"
-                onClick={() => navigate("/rel8/setup")}
-              >
-                Run Setup
-              </Button>
-            </CardContent>
+            <Link to="/nmn8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Users className="h-6 w-6 text-primary" />
+                  Nomin8 Community
+                </CardTitle>
+                <CardDescription>
+                  Track and engage with your community members and supporters
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="ghost" className="w-full">
+                  Manage Community
+                </Button>
+              </CardContent>
+            </Link>
           </Card>
         </div>
 
