@@ -161,7 +161,7 @@ const LandingPage: React.FC = () => {
               <h3 className="font-bold mb-4">Platform</h3>
               <ul className="space-y-2">
                 <li><Link to="/rel8/dashboard" className="text-muted-foreground hover:text-foreground text-sm">REL8</Link></li>
-                <li><Link to="/communities" className="text-muted-foreground hover:text-foreground text-sm">ECO8</Link></li>
+                <li><Link to="/eco8" className="text-muted-foreground hover:text-foreground text-sm">ECO8</Link></li>
                 <li><Link to="/documentation" className="text-muted-foreground hover:text-foreground text-sm">Documentation</Link></li>
                 <li><Link to="/profiles/search" className="text-muted-foreground hover:text-foreground text-sm">Search Profiles</Link></li>
               </ul>

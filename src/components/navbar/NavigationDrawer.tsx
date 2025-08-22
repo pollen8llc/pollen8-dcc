@@ -123,6 +123,21 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   Notifications
                 </Button>
 
+                {/* ECO8 Section */}
+                <Separator className="my-2" />
+                <p className="px-4 py-2 text-sm font-medium opacity-70">
+                  ECO8
+                </p>
+
+                <Button
+                  variant="ghost"
+                  className="justify-start"
+                  onClick={() => handleNavigation("/eco8")}
+                >
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Community Directory
+                </Button>
+
                 {/* Modul8 Section */}
                 <Separator className="my-2" />
                 <p className="px-4 py-2 text-sm font-medium opacity-70">

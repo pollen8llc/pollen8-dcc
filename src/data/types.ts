@@ -22,11 +22,12 @@ export interface Community {
   id: string;
   name: string;
   description: string;
-  location: string;
-  imageUrl: string;
+  location?: string;
+  imageUrl?: string;
   communitySize: string; 
   organizerIds: string[];
   memberIds: string[];
   tags: string[];
   isPublic: boolean;
+  updated_at?: string;
 }

@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { MapPin, FileText, Circle } from "lucide-react";
-import { Community } from "@/models/types";
+import { Community } from "@/data/types";
 import { Badge } from "@/components/ui/badge";
 import { useRef, useEffect, useState, memo } from "react";
 
@@ -49,7 +49,7 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
 
   return (
     <Link
-      to={`/community/${community.id}`}
+      to={`/eco8/community/${community.id}`}
       className="group relative h-full w-full"
     >
       <div className="relative h-full overflow-hidden rounded-xl bg-card border border-border/40 transition-all duration-300 group-hover:shadow-md transform group-hover:-translate-y-1">
