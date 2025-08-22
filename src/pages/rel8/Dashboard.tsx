@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
 import { Calendar, Users, Heart, Settings, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle } from "lucide-react";
@@ -57,31 +58,15 @@ const Dashboard = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <main className="w-full px-4 py-8">
+      {/* DotConnector Header with Sliver */}
+      <DotConnectorHeader />
+
+      {/* Full-width content below the sliver */}
+      <div className="w-full px-4 py-8">
         <Rel8OnlyNavigation />
-        
-        {/* Header */}
-        <div className="mb-8 mt-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">Relationships Dashboard</h1>
-              <p className="text-muted-foreground text-lg">
-                Manage your outreach and nurture your network
-              </p>
-            </div>
-            
-            <Button 
-              onClick={handleBuildRapport}
-              className="flex items-center gap-2 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
-            >
-              <Heart className="h-4 w-4" />
-              Build Rapport
-            </Button>
-          </div>
-        </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -309,7 +294,7 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
   );
 };

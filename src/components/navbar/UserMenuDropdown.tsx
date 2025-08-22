@@ -3,6 +3,7 @@ import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface UserMenuDropdownProps {
   currentUser: User;
@@ -10,6 +11,8 @@ interface UserMenuDropdownProps {
 }
 
 const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
+  const navigate = useNavigate();
+  
   const getUserInitials = () => {
     if (!currentUser) return "?";
     
@@ -20,8 +23,20 @@ const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
     return nameParts[0][0].toUpperCase();
   };
 
+  const handleAvatarClick = () => {
+    if (currentUser.role === UserRole.ORGANIZER || currentUser.role === UserRole.ADMIN) {
+      navigate("/organizer");
+    } else {
+      navigate("/profile");
+    }
+  };
+
   return (
-    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+    <Button 
+      variant="ghost" 
+      className="relative h-8 w-8 rounded-full"
+      onClick={handleAvatarClick}
+    >
       <Avatar className="h-8 w-8 ring-1 ring-primary/20">
         <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
         <AvatarFallback>{getUserInitials()}</AvatarFallback>

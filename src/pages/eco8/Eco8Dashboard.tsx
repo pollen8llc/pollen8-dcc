@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/Navbar';
+import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
 import { 
   Users, 
   Search, 
@@ -45,17 +46,14 @@ const Eco8Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">ECO8 Dashboard</h1>
-          <p className="text-muted-foreground text-lg">
-            Manage your communities, connect with members, and grow your network
-          </p>
-        </div>
+      {/* DotConnector Header with Sliver */}
+      <DotConnectorHeader />
+
+      {/* Full-width content below the sliver */}
+      <div className="w-full px-4 py-8">
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -270,7 +268,7 @@ const Eco8Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         )}
-      </main>
+      </div>
     </div>
   );
 };
