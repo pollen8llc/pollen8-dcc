@@ -62,10 +62,10 @@ const ContactCreate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -98,7 +98,7 @@ const ContactCreate = () => {
           </div>
         </div>
 
-        <div className="bg-card rounded-lg border shadow-sm p-6">
+        <div className="bg-card/40 backdrop-blur-md rounded-2xl border-0 shadow-xl p-6 lg:p-8">
           <ContactForm
             onSubmit={handleSubmit}
             onCancel={handleCancel}

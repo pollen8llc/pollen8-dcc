@@ -407,35 +407,35 @@ const ContactEdit = () => {
 
             {currentMode === 'edit' ? (
               /* Edit Form */
-              <Card>
-                <CardHeader>
-                  <CardTitle>Edit Contact Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ContactForm
-                    initialValues={{
-                      name: contact.name,
-                      email: contact.email || '',
-                      phone: contact.phone || '',
-                      organization: contact.organization || '',
-                      role: contact.role || '',
-                      notes: contact.notes || '',
-                      tags: contact.tags || [],
-                      category_id: contact.category_id || '',
-                      location: contact.location || '',
-                      groups: contact.groups || []
-                    }}
-                    onSubmit={handleSubmit}
-                    onCancel={() => handleModeChange('view')}
-                    isSubmitting={updateMutation.isPending}
-                  />
-                </CardContent>
-              </Card>
+                <Card className="overflow-hidden bg-card/40 backdrop-blur-md border-0 shadow-xl">
+                  <CardHeader>
+                    <CardTitle>Edit Contact Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ContactForm
+                      initialValues={{
+                        name: contact.name,
+                        email: contact.email || '',
+                        phone: contact.phone || '',
+                        organization: contact.organization || '',
+                        role: contact.role || '',
+                        notes: contact.notes || '',
+                        tags: contact.tags || [],
+                        category_id: contact.category_id || '',
+                        location: contact.location || '',
+                        groups: contact.groups || []
+                      }}
+                      onSubmit={handleSubmit}
+                      onCancel={() => handleModeChange('view')}
+                      isSubmitting={updateMutation.isPending}
+                    />
+                  </CardContent>
+                </Card>
             ) : (
               /* Profile View */
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Contact Information */}
-                <Card>
+                <Card className="overflow-hidden bg-card/40 backdrop-blur-md border-0 shadow-xl">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5 text-primary" />
@@ -474,7 +474,7 @@ const ContactEdit = () => {
                 </Card>
 
                 {/* Groups & Category */}
-                <Card>
+                <Card className="overflow-hidden bg-card/40 backdrop-blur-md border-0 shadow-xl">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Tag className="w-5 h-5 text-primary" />
@@ -519,7 +519,7 @@ const ContactEdit = () => {
 
             {/* Notes Section - Only show in profile view */}
             {currentMode !== 'edit' && contact.notes && (
-              <Card>
+              <Card className="overflow-hidden bg-card/40 backdrop-blur-md border-0 shadow-xl">
                 <CardHeader>
                   <CardTitle>Notes</CardTitle>
                 </CardHeader>
