@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
-import { Calendar, Users, Heart } from "lucide-react";
+import { Calendar, Users, Heart, Settings } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { useEffect } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -38,6 +39,14 @@ const Dashboard = () => {
   const handleBuildRapport = () => {
     navigate("/rel8/build-rapport");
   };
+
+  // Check if this is first time setup
+  useEffect(() => {
+    const setupComplete = localStorage.getItem('rel8_setup_complete');
+    if (!setupComplete && contactCount === 0 && categories.length === 0) {
+      navigate("/rel8/setup");
+    }
+  }, [contactCount, categories, navigate]);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
@@ -92,10 +101,19 @@ const Dashboard = () => {
             <p className="text-muted-foreground mt-2 mb-4">
               Build rapport with your contacts to start nurturing your network
             </p>
-            <Button onClick={handleBuildRapport}>
-              <Heart className="h-4 w-4 mr-2" />
-              Build Rapport
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={handleBuildRapport}>
+                <Heart className="h-4 w-4 mr-2" />
+                Build Rapport
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/rel8/setup")}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Run Setup
+              </Button>
+            </div>
           </div>
         )}
       </div>

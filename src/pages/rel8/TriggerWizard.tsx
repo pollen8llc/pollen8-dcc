@@ -57,10 +57,10 @@ const TriggerWizard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full space-y-6">
         <Rel8OnlyNavigation />
         
         <div className="flex items-center gap-4 mt-4 sm:mt-6 mb-6 sm:mb-8">
