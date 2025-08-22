@@ -130,7 +130,7 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
 
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/imports-and-invites">
+            <Link to="/imports">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
                   <Upload className="h-6 w-6 text-primary" />
@@ -185,20 +185,22 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
 
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <Download className="h-6 w-6 text-primary" />
-                Export Data
-              </CardTitle>
-              <CardDescription>
-                Download member lists, analytics, and community reports
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="ghost" className="w-full">
-                Export Options
-              </Button>
-            </CardContent>
+            <Link to="/eco8/invites">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Users className="h-6 w-6 text-primary" />
+                  Manage Invites
+                </CardTitle>
+                <CardDescription>
+                  Generate and manage invitation codes for new members
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="ghost" className="w-full">
+                  Invite Users
+                </Button>
+              </CardContent>
+            </Link>
           </Card>
 
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">

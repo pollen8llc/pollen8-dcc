@@ -63,8 +63,8 @@ const ImportEmail = lazy(() => import("@/pages/ImportEmail"));
 const ImportPhone = lazy(() => import("@/pages/ImportPhone"));
 const ImportWebsite = lazy(() => import("@/pages/ImportWebsite"));
 
-// Imports & Invites page
-const ImportsAndInvites = lazy(() => import("@/pages/ImportsAndInvites"));
+// Imports page
+const Imports = lazy(() => import("@/pages/Imports"));
 
 // ECO8 Community pages
 const CommunitySetup = lazy(() => import("@/pages/eco8/CommunitySetup"));
@@ -72,6 +72,7 @@ const CommunityDirectory = lazy(() => import("@/pages/eco8/CommunityDirectory"))
 const CommunityProfile = lazy(() => import("@/pages/eco8/CommunityProfile"));
 const CommunityDashboard = lazy(() => import("@/pages/eco8/CommunityDashboard"));
 const Eco8Dashboard = lazy(() => import("@/pages/eco8/Eco8Dashboard"));
+const InvitesPage = lazy(() => import("@/pages/eco8/InvitesPage"));
 
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
@@ -312,12 +313,12 @@ const AppRoutes = () => {
           {/* Import routes */}
           <Route path="/import" element={
             <NonServiceProviderRoute>
-              <ImportsAndInvites />
+              <Imports />
             </NonServiceProviderRoute>
           } />
           <Route path="/imports" element={
             <NonServiceProviderRoute>
-              <ImportsAndInvites />
+              <Imports />
             </NonServiceProviderRoute>
           } />
           <Route path="/import/email" element={
@@ -470,7 +471,7 @@ const AppRoutes = () => {
           } />
           <Route path="/nmn8/import" element={
             <NonServiceProviderRoute>
-              <ImportsAndInvites />
+              <Imports />
             </NonServiceProviderRoute>
           } />
           <Route path="/nmn8/profile/:profileId" element={
@@ -514,6 +515,13 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <CommunityProfile />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/eco8/invites" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <InvitesPage />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
