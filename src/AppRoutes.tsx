@@ -71,6 +71,7 @@ const CommunitySetup = lazy(() => import("@/pages/eco8/CommunitySetup"));
 const CommunityDirectory = lazy(() => import("@/pages/eco8/CommunityDirectory"));
 const CommunityProfile = lazy(() => import("@/pages/eco8/CommunityProfile"));
 const CommunityDashboard = lazy(() => import("@/pages/eco8/CommunityDashboard"));
+const Eco8Dashboard = lazy(() => import("@/pages/eco8/Eco8Dashboard"));
 
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
@@ -484,6 +485,20 @@ const AppRoutes = () => {
           <Route path="/eco8" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
+                <Eco8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/eco8/dashboard" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Eco8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/eco8/directory" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
                 <CommunityDirectory />
               </ProtectedRoute>
             </NonServiceProviderRoute>
@@ -495,17 +510,17 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/eco8/dashboard" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <CommunityDashboard />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
           <Route path="/eco8/community/:id" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <CommunityProfile />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/eco8/community-dashboard/:id" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <CommunityDashboard />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

@@ -1,8 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CommunitySetupWizard } from '@/components/eco8/CommunitySetupWizard';
 import { CommunityFormData } from '@/types/community';
 
 const CommunitySetup: React.FC = () => {
+  const navigate = useNavigate();
+  
   const handleSetupComplete = async (data: CommunityFormData) => {
     // TODO: Integrate with Supabase to save community data
     console.log('Community setup completed:', data);
@@ -36,6 +39,9 @@ const CommunitySetup: React.FC = () => {
     const existingCommunities = JSON.parse(localStorage.getItem('communities') || '[]');
     existingCommunities.push(communityData);
     localStorage.setItem('communities', JSON.stringify(existingCommunities));
+    
+    // Redirect to ECO8 dashboard after setup completion
+    navigate('/eco8/dashboard');
     
     return communityData;
   };
