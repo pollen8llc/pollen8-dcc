@@ -241,7 +241,7 @@ const AppRoutes = () => {
           {/* REL8 routes - Protected from service providers */}
           <Route path="/rel8" element={
             <NonServiceProviderRoute>
-              <Contacts />
+              <Rel8Dashboard />
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/contacts" element={

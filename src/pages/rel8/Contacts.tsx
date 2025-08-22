@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import ContactList from "@/components/rel8t/ContactList";
-import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search, Filter, Upload } from "lucide-react";
+import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -134,26 +133,22 @@ const Contacts = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+    <div className="flex flex-col bg-background">
       <Navbar />
       
       <div className="flex flex-col flex-1 overflow-hidden">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 flex-shrink-0 max-w-6xl">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 flex-shrink-0">
           <Rel8OnlyNavigation />
           
-          {/* Header Card */}
-          <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl mb-6">
-            <CardContent className="p-0">
-              <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="w-full sm:w-auto">
-                    <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight mb-2">Contacts</h1>
-                    <p className="text-lg text-muted-foreground">
-                      Manage your network and relationships
-                    </p>
-                  </div>
+          <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-4">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Contacts</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">
+                Manage your network and relationships
+              </p>
+            </div>
             
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               {isSelectionMode ? (
                 <>
                   <Button
@@ -220,16 +215,6 @@ const Contacts = () => {
                   </Button>
                   
                   <Button 
-                    onClick={() => navigate("/rel8/import")}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                    size="sm"
-                  >
-                    <Upload className="h-4 w-4" />
-                    <span className="hidden sm:inline">Import</span>
-                  </Button>
-                  
-                  <Button 
                     onClick={() => navigate("/rel8/contacts/create")}
                     className="flex items-center gap-2 w-full sm:w-auto"
                     size="sm"
@@ -239,87 +224,81 @@ const Contacts = () => {
                   </Button>
                 </>
               )}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Search and Filter Controls */}
-          <Card className="overflow-hidden bg-card/40 backdrop-blur-md border-0 shadow-xl mb-6">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {/* Search Bar */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search contacts by name, email, organization..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-background/50 border-border/50"
-                  />
-                </div>
-
-                {/* Filter Controls */}
-                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                  <div className="flex items-center gap-2 flex-1">
-                    <Filter className="h-4 w-4 text-muted-foreground" />
-                    
-                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                      <SelectTrigger className="w-full sm:w-48 bg-background/50 border-border/50">
-                        <SelectValue placeholder="All Categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Select value={selectedTag} onValueChange={setSelectedTag}>
-                      <SelectTrigger className="w-full sm:w-48 bg-background/50 border-border/50">
-                        <SelectValue placeholder="All Tags" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Tags</SelectItem>
-                        {allTags.map((tag) => (
-                          <SelectItem key={tag} value={tag}>
-                            {tag}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {(searchQuery || selectedCategory !== "all" || selectedTag !== "all") && (
-                    <Button
-                      variant="outline"
-                      onClick={clearFilters}
-                      size="sm"
-                      className="flex items-center gap-2 bg-background/50 border-border/50"
-                    >
-                      Clear Filters
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <ScrollArea className="flex-1">
-            <ContactList
-              contacts={filteredContacts}
-              isLoading={isLoading}
-              onEdit={handleEditContact}
-              onRefresh={handleRefresh}
-              onContactMultiSelect={isSelectionMode ? handleContactSelect : undefined}
-              selectedContacts={selectedContacts}
-              isSelectionMode={isSelectionMode}
-            />
-          </ScrollArea>
+            </div>
+          </div>
         </div>
+
+        {/* Search and Filter Controls */}
+        <div className="space-y-4 mb-6 flex-shrink-0">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search contacts by name, email, organization..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Filter Controls */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex items-center gap-2 flex-1">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedTag} onValueChange={setSelectedTag}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="All Tags" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tags</SelectItem>
+                  {allTags.map((tag) => (
+                    <SelectItem key={tag} value={tag}>
+                      {tag}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(searchQuery || selectedCategory !== "all" || selectedTag !== "all") && (
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
+        </div>
+        
+        <ScrollArea className="flex-1">
+          <ContactList
+            contacts={filteredContacts}
+            isLoading={isLoading}
+            onEdit={handleEditContact}
+            onRefresh={handleRefresh}
+            onContactMultiSelect={isSelectionMode ? handleContactSelect : undefined}
+            selectedContacts={selectedContacts}
+            isSelectionMode={isSelectionMode}
+          />
+        </ScrollArea>
       </div>
     </div>
   );
