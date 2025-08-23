@@ -24,7 +24,7 @@ max_client_conn = 100
 
 [realtime]
 enabled = true
-ip_version = "IPV4"
+ip_version = "IPv4"
 
 [studio]
 enabled = true
@@ -72,30 +72,3 @@ enabled = false
 client_id = ""
 secret = ""
 redirect_uri = ""
-
-[functions]
-enabled = true
-port = 54328
-
-[functions.process-triggers]
-verify_jwt = true
-
-# SMTP configuration with actual values
-[functions.process-triggers.env]
-SMTP_HOST = "mail.pollen8.app"
-SMTP_PORT = "587"
-SMTP_USER = "notifications@pollen8.app"
-SMTP_PASS = "JdT*9GeCp&APcH04"
-FROM_EMAIL = "notifications@pollen8.app"
-SMTP_FROM_NAME = "Rel8t Automation"
-
-# SMTP configuration for send-email function
-[functions.send-email]
-verify_jwt = true
-
-[functions.send-email.env]
-SMTP_HOST = "mail.pollen8.app"
-SMTP_PORT = "587"
-SMTP_USER = "notifications@pollen8.app"
-SMTP_PASS = "JdT*9GeCp&APcH04"
-FROM_EMAIL = "notifications@pollen8.app"
