@@ -50,10 +50,23 @@ const CommunitySetup: React.FC = () => {
       }
 
       // Transform form data for community_data_distribution submission
+      const allowedTypes = ['tech','creative','wellness','professional','social-impact','education','social','other'] as const;
+      const normalizeType = (t?: string) => {
+        if (!t) return 'tech';
+        const slug = t.trim().toLowerCase().replace(/[\s_]+/g, '-');
+        return (allowedTypes as readonly string[]).includes(slug) ? slug : 'other';
+      };
+      const normalizeFormat = (f?: string) => {
+        if (!f) return 'hybrid';
+        const v = f.trim().toLowerCase();
+        if (v === 'online' || v === 'hybrid' || v === 'irl') return v === 'irl' ? 'IRL' : v; // accept "irl" and send as IRL
+        return 'hybrid';
+      };
+
       const submissionData = {
         name: data.name,
         description: data.description,
-        type: data.type || 'tech',
+        type: normalizeType(data.type as any),
         location: data.location || 'Remote',
         isPublic: data.isPublic,
         website: data.website || null,
@@ -64,10 +77,9 @@ const CommunitySetup: React.FC = () => {
           facebook: data.socialLinks.facebook || null
         } : {},
         bio: data.bio || null, // This will be mapped to vision field
-        format: 'hybrid', // Default format
+        format: normalizeFormat((data as any).format), // ensure valid value
         communicationPlatforms: {} // Default empty object
       };
-
       // Submit to community_data_distribution for processing
       const { data: distributionData, error: distributionError } = await supabase
         .from('community_data_distribution')
@@ -83,7 +95,7 @@ const CommunitySetup: React.FC = () => {
         console.error('Error submitting community data:', distributionError);
         toast({
           title: "Submission Failed",
-          description: "Failed to submit community data. Please try again.",
+          description: distributionError.message || "Failed to submit community data. Please try again.",
           variant: "destructive",
         });
         return;
