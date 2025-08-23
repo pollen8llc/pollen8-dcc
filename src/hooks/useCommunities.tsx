@@ -93,33 +93,13 @@ export const useCommunities = () => {
     }
   };
 
-  const createCommunity = async (communityData: Partial<Community>) => {
+  // Deprecated: Direct creation is disabled to avoid RLS/type issues.
+  // Use the community_data_distribution pipeline via the CommunitySetup wizard instead.
+  const createCommunity = async (_communityData: Partial<Community>) => {
     if (!currentUser?.id) throw new Error('User not authenticated');
 
-    // This method is kept for backward compatibility but should not be used directly
-    // Use the community_data_distribution pipeline instead
-    console.warn('Direct community creation should use community_data_distribution pipeline');
-    
-    try {
-      const { data, error } = await supabase
-        .from('communities')
-        .insert({
-          ...communityData,
-          owner_id: currentUser.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      // Refresh user communities
-      await fetchUserCommunities();
-      
-      return data;
-    } catch (err) {
-      console.error('Error creating community:', err);
-      throw err;
-    }
+    console.warn('Direct community creation is disabled. Use the ECO8 Setup wizard (community_data_distribution) instead.');
+    throw new Error('Community creation must go through the ECO8 Setup wizard. Please use /eco8/setup.');
   };
 
   useEffect(() => {
