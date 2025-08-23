@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -2401,7 +2401,7 @@ export type Database = {
     }
     Functions: {
       assign_request_to_provider: {
-        Args: { p_service_request_id: string; p_service_provider_id: string }
+        Args: { p_service_provider_id: string; p_service_request_id: string }
         Returns: boolean
       }
       can_access_profile: {
@@ -2409,11 +2409,11 @@ export type Database = {
         Returns: boolean
       }
       can_manage_community: {
-        Args: { user_id: string; community_id: string }
+        Args: { community_id: string; user_id: string }
         Returns: boolean
       }
       can_view_profile: {
-        Args: { viewer_id: string; profile_id: string }
+        Args: { profile_id: string; viewer_id: string }
         Returns: boolean
       }
       generate_unique_invite_code: {
@@ -2429,11 +2429,11 @@ export type Database = {
         Returns: number
       }
       get_community_admin_status: {
-        Args: { user_id: string; community_id: string }
+        Args: { community_id: string; user_id: string }
         Returns: boolean
       }
       get_connected_profiles: {
-        Args: { user_id: string; max_depth?: number }
+        Args: { max_depth?: number; user_id: string }
         Returns: {
           avatar_url: string | null
           bio: string | null
@@ -2470,8 +2470,8 @@ export type Database = {
       get_poll_counts: {
         Args: { poll_id: string }
         Returns: {
-          option_index: number
           count: number
+          option_index: number
         }[]
       }
       get_rel8t_metrics: {
@@ -2497,7 +2497,7 @@ export type Database = {
         Returns: string[]
       }
       has_role: {
-        Args: { user_id: string; role_name: string }
+        Args: { role_name: string; user_id: string }
         Returns: boolean
       }
       increment_view_count: {
@@ -2513,11 +2513,11 @@ export type Database = {
         Returns: boolean
       }
       is_community_owner: {
-        Args: { user_id: string; community_id: string }
+        Args: { community_id: string; user_id: string }
         Returns: boolean
       }
       is_connected_within_depth: {
-        Args: { viewer_id: string; profile_id: string; max_depth?: number }
+        Args: { max_depth?: number; profile_id: string; viewer_id: string }
         Returns: boolean
       }
       is_organizer: {
@@ -2530,10 +2530,10 @@ export type Database = {
       }
       log_audit_action: {
         Args: {
+          action_details?: Json
           action_name: string
           performer_id?: string
           target_id?: string
-          action_details?: Json
         }
         Returns: undefined
       }
@@ -2546,7 +2546,7 @@ export type Database = {
         Returns: boolean
       }
       update_user_role: {
-        Args: { p_user_id: string; p_role_name: string; p_assigner_id: string }
+        Args: { p_assigner_id: string; p_role_name: string; p_user_id: string }
         Returns: boolean
       }
       update_user_role_self: {

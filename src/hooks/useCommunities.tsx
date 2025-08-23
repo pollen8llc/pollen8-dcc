@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -95,18 +96,16 @@ export const useCommunities = () => {
   const createCommunity = async (communityData: Partial<Community>) => {
     if (!currentUser?.id) throw new Error('User not authenticated');
 
-    // Ensure required fields are present
-    if (!communityData.name) throw new Error('Community name is required');
-    if (!communityData.description) throw new Error('Community description is required');
-
+    // This method is kept for backward compatibility but should not be used directly
+    // Use the community_data_distribution pipeline instead
+    console.warn('Direct community creation should use community_data_distribution pipeline');
+    
     try {
       const { data, error } = await supabase
         .from('communities')
         .insert({
           ...communityData,
           owner_id: currentUser.id,
-          name: communityData.name, // Ensure name is included
-          description: communityData.description // Ensure description is included
         })
         .select()
         .single();

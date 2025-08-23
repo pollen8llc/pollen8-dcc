@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,43 +15,23 @@ import {
   Calendar,
   MessageSquare,
   Eye,
-  Edit
+  Edit,
+  Building2
 } from 'lucide-react';
-import { Community } from '@/types/community';
-import { useUser } from '@/contexts/UserContext';
+import { useCommunities } from '@/hooks/useCommunities';
+import { useAuth } from '@/hooks/useAuth';
 
 const CommunityDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser } = useUser();
-  const [myCommunities, setMyCommunities] = useState<Community[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
+  const { userCommunities, loading, refreshUserCommunities } = useCommunities();
 
   useEffect(() => {
-    const loadMyCommunities = () => {
-      try {
-        const communities = JSON.parse(localStorage.getItem('communities') || '[]');
-        // TODO: Filter by current user's ID when user system is integrated
-        const userCommunities = communities.filter((c: Community) => 
-          c.organizerId === currentUser?.id || c.organizerId === 'current-user-id'
-        );
-        setMyCommunities(userCommunities);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading communities:', error);
-        setLoading(false);
-      }
-    };
-
-    loadMyCommunities();
-  }, [currentUser]);
-
-  // Check if user needs to go through setup
-  useEffect(() => {
-    if (!loading && myCommunities.length === 0) {
-      // User has no communities, redirect to setup
-      navigate('/eco8/setup');
+    // Refresh data when component mounts
+    if (currentUser?.id) {
+      refreshUserCommunities();
     }
-  }, [loading, myCommunities.length, navigate]);
+  }, [currentUser?.id, refreshUserCommunities]);
 
   if (loading) {
     return (
@@ -60,12 +41,43 @@ const CommunityDashboard: React.FC = () => {
     );
   }
 
-  if (myCommunities.length === 0) {
-    return null; // Will redirect to setup
+  // If user has no communities, show setup prompt
+  if (!loading && userCommunities.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <Card className="backdrop-blur-md bg-white/5 border border-white/10 max-w-md mx-4">
+          <CardContent className="p-8 text-center">
+            <Building2 className="h-16 w-16 text-primary mx-auto mb-4" />
+            <h1 className="text-2xl font-bold mb-4">Welcome to ECO8!</h1>
+            <p className="text-muted-foreground mb-6">
+              You haven't created any communities yet. Let's get started by setting up your first community.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button asChild className="w-full">
+                <Link to="/eco8/setup">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Community
+                </Link>
+              </Button>
+              <Button variant="outline" asChild className="w-full">
+                <Link to="/eco8">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Browse Communities
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  const totalMembers = myCommunities.reduce((sum, community) => sum + community.memberCount, 0);
-  const activeCommunitiesCount = myCommunities.filter(c => c.growthStatus === 'active').length;
+  const totalMembers = userCommunities.reduce((sum, community) => {
+    const memberCount = parseInt(community.community_size || '1');
+    return sum + (isNaN(memberCount) ? 1 : memberCount);
+  }, 0);
+
+  const activeCommunitiesCount = userCommunities.filter(c => c.is_public).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -102,7 +114,7 @@ const CommunityDashboard: React.FC = () => {
                   <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{myCommunities.length}</p>
+                  <p className="text-2xl font-bold">{userCommunities.length}</p>
                   <p className="text-sm text-muted-foreground">Communities</p>
                 </div>
               </div>
@@ -131,7 +143,7 @@ const CommunityDashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{activeCommunitiesCount}</p>
-                  <p className="text-sm text-muted-foreground">Active</p>
+                  <p className="text-sm text-muted-foreground">Public</p>
                 </div>
               </div>
             </CardContent>
@@ -154,22 +166,15 @@ const CommunityDashboard: React.FC = () => {
 
         {/* Communities Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {myCommunities.map(community => (
+          {userCommunities.map(community => (
             <Card key={community.id} className="backdrop-blur-md bg-white/5 border border-white/10 hover:scale-[1.02] transition-all duration-300">
               <div className="relative">
-                {/* Banner */}
-                <div 
-                  className="h-32 bg-cover bg-center rounded-t-2xl relative"
-                  style={{ backgroundImage: `url(${community.banner})` }}
-                >
-                  <div className="absolute inset-0 bg-black/40 rounded-t-2xl"></div>
-                  
+                {/* Header */}
+                <div className="h-32 bg-gradient-to-r from-primary/20 to-primary/10 rounded-t-2xl relative">
                   {/* Status Badge */}
                   <div className="absolute top-3 right-3">
-                    <Badge className={`bg-${community.growthStatus === 'growing' ? 'green' : 
-                      community.growthStatus === 'recruiting' ? 'blue' : 
-                      community.growthStatus === 'active' ? 'primary' : 'yellow'}-500 text-white border-0`}>
-                      {community.growthStatus}
+                    <Badge className={`${community.is_public ? 'bg-green-500' : 'bg-yellow-500'} text-white border-0`}>
+                      {community.is_public ? 'Public' : 'Private'}
                     </Badge>
                   </div>
 
@@ -187,7 +192,7 @@ const CommunityDashboard: React.FC = () => {
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4 mb-4">
                     <Avatar className="h-16 w-16 border-2 border-white/20">
-                      <AvatarImage src={community.logo} alt={community.name} />
+                      <AvatarImage src={community.logo_url} alt={community.name} />
                       <AvatarFallback className="text-lg">{community.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     
@@ -198,7 +203,7 @@ const CommunityDashboard: React.FC = () => {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4" />
-                          <span>{community.memberCount}</span>
+                          <span>{community.community_size || '1'}</span>
                         </div>
                         {community.location && (
                           <div className="flex items-center gap-1">
@@ -256,9 +261,9 @@ const CommunityDashboard: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               {[
-                { action: 'New member joined', community: myCommunities[0]?.name, time: '2 hours ago', type: 'member' },
-                { action: 'Community update posted', community: myCommunities[0]?.name, time: '5 hours ago', type: 'post' },
-                { action: 'Event scheduled', community: myCommunities[0]?.name, time: '1 day ago', type: 'event' }
+                { action: 'New member joined', community: userCommunities[0]?.name || 'Your Community', time: '2 hours ago', type: 'member' },
+                { action: 'Community update posted', community: userCommunities[0]?.name || 'Your Community', time: '5 hours ago', type: 'post' },
+                { action: 'Event scheduled', community: userCommunities[0]?.name || 'Your Community', time: '1 day ago', type: 'event' }
               ].map((activity, i) => (
                 <div key={i} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                   <div className="flex items-center gap-3">
