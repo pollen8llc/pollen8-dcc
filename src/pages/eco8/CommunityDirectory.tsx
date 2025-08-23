@@ -6,9 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Search, Users, Plus } from 'lucide-react';
-import { Community } from '@/data/types';
 import CommunityCard from '@/components/CommunityCard';
 import Navbar from '@/components/Navbar';
+import { useCommunities, Community } from '@/hooks/useCommunities';
 
 const COMMUNITY_TYPES = [
   'All Types',
@@ -29,80 +29,11 @@ const GROWTH_STATUS = [
 ];
 
 const CommunityDirectory: React.FC = () => {
-  const [communities, setCommunities] = useState<Community[]>([]);
+  const { communities, loading } = useCommunities();
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('All Types');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // TODO: Replace with Supabase query
-    const loadCommunities = () => {
-      try {
-        const savedCommunities = JSON.parse(localStorage.getItem('communities') || '[]');
-        // Add mock communities if none exist
-        if (savedCommunities.length === 0) {
-          const mockCommunities = [
-            {
-              id: '1',
-              name: 'SF Tech Innovators',
-              description: 'Building the future of technology in San Francisco',
-              location: 'San Francisco, CA',
-              imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=200&fit=crop',
-              communitySize: '156',
-              organizerIds: ['org1'],
-              memberIds: Array.from({length: 156}, (_, i) => `member${i}`),
-              tags: ['startup', 'AI', 'blockchain', 'mobile'],
-               isPublic: true,
-              created_at: '2024-01-10T10:00:00Z',
-              updated_at: '2024-01-20T15:30:00Z'
-            },
-            {
-              id: '2',
-              name: 'Green Living Collective',
-              description: 'Sustainable living advocates making a positive impact',
-              location: 'Portland, OR',
-              imageUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=200&h=200&fit=crop',
-              communitySize: '89',
-              organizerIds: ['org2'],
-              memberIds: Array.from({length: 89}, (_, i) => `member${i}`),
-              tags: ['sustainability', 'environment', 'activism', 'community'],
-               isPublic: true,
-              created_at: '2024-01-05T08:00:00Z',
-              updated_at: '2024-01-18T12:00:00Z'
-            },
-            {
-              id: '3',
-              name: 'NYC Creative Collective',
-              description: 'Artists and creators shaping the cultural landscape',
-              location: 'New York, NY',
-              imageUrl: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=200&h=200&fit=crop',
-              communitySize: '234',
-              organizerIds: ['org3'],
-              memberIds: Array.from({length: 234}, (_, i) => `member${i}`),
-              tags: ['art', 'design', 'music', 'culture', 'collaboration'],
-              isPublic: true,
-              created_at: '2024-01-01T16:00:00Z',
-              updated_at: '2024-01-19T09:15:00Z'
-            }
-          ];
-          
-          localStorage.setItem('communities', JSON.stringify(mockCommunities));
-          setCommunities(mockCommunities);
-        } else {
-          setCommunities(savedCommunities);
-        }
-        
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading communities:', error);
-        setLoading(false);
-      }
-    };
-
-    loadCommunities();
-  }, []);
 
   useEffect(() => {
     let filtered = communities;
@@ -113,8 +44,13 @@ const CommunityDirectory: React.FC = () => {
       filtered = filtered.filter(community =>
         community.name.toLowerCase().includes(query) ||
         community.description.toLowerCase().includes(query) ||
-        community.tags.some(tag => tag.toLowerCase().includes(query))
+        (community.tags && community.tags.some(tag => tag.toLowerCase().includes(query)))
       );
+    }
+
+    // Apply type filter
+    if (typeFilter !== 'All Types') {
+      filtered = filtered.filter(community => community.type === typeFilter.toLowerCase());
     }
 
     setFilteredCommunities(filtered);
@@ -126,7 +62,10 @@ const CommunityDirectory: React.FC = () => {
     setStatusFilter('All Statuses');
   };
 
-  const totalMembers = communities.reduce((sum, community) => sum + parseInt(community.communitySize), 0);
+  const totalMembers = communities.reduce((sum, community) => {
+    const memberCount = parseInt(community.community_size || '1') || 1;
+    return sum + memberCount;
+  }, 0);
 
   if (loading) {
     return (

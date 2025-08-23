@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { MapPin, Users, TrendingUp } from "lucide-react";
-import { Community } from "@/data/types";
+import { Community } from "@/hooks/useCommunities";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { memo } from "react";
@@ -58,7 +58,7 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
               </h3>
               {/* Topic badges */}
               <div className="flex flex-wrap gap-1 mt-1">
-                {community.tags.slice(0, 2).map((tag) => (
+                {(community.tags || []).slice(0, 2).map((tag) => (
                   <Badge 
                     key={tag} 
                     variant="secondary" 
@@ -67,12 +67,12 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
                     {tag}
                   </Badge>
                 ))}
-                {community.tags.length > 2 && (
+                {(community.tags || []).length > 2 && (
                   <Badge 
                     variant="secondary" 
                     className="text-xs px-2 py-0.5 bg-muted/50 text-muted-foreground border-0"
                   >
-                    +{community.tags.length - 2}
+                    +{(community.tags || []).length - 2}
                   </Badge>
                 )}
               </div>
@@ -96,7 +96,7 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
               <div className="flex items-center space-x-1">
                 <Users className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
-                  {community.communitySize}
+                  {community.community_size || '1'}
                 </span>
               </div>
               <div className="flex items-center space-x-1">

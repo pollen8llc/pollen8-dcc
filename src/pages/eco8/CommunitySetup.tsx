@@ -2,48 +2,51 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CommunitySetupWizard } from '@/components/eco8/CommunitySetupWizard';
 import { CommunityFormData } from '@/types/community';
+import { useCommunities } from '@/hooks/useCommunities';
+import { useToast } from '@/hooks/use-toast';
 
 const CommunitySetup: React.FC = () => {
   const navigate = useNavigate();
+  const { createCommunity } = useCommunities();
+  const { toast } = useToast();
   
   const handleSetupComplete = async (data: CommunityFormData) => {
-    // TODO: Integrate with Supabase to save community data
-    console.log('Community setup completed:', data);
-    
-    // Mock implementation - replace with actual API call
-    const communityData = {
-      ...data,
-      id: crypto.randomUUID(),
-      organizerId: 'current-user-id', // Get from auth context
-      organizer: 'Current User Name', // Get from auth context
-      organizerPhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-      memberCount: 1,
-      growthStatus: 'growing' as const,
-      banner: `https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=320&fit=crop`,
-      logo: `https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=200&fit=crop`,
-      badges: [],
-      stats: {
-        totalMembers: 1,
-        activeMembers: 1,
-        monthlyGrowth: 0
-      },
-      media: {
-        videos: [],
-        images: []
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    try {
+      // Transform the form data to match the community table structure
+      const communityData = {
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        location: data.location || 'Remote',
+        is_public: data.isPublic,
+        website: data.website || undefined,
+        tags: data.tags || [],
+        vision: data.bio || undefined, // Map bio to vision field
+        social_media: data.socialLinks ? {
+          twitter: data.socialLinks.twitter || undefined,
+          linkedin: data.socialLinks.linkedin || undefined,
+          facebook: data.socialLinks.facebook || undefined
+        } : undefined
+      };
 
-    // Save to localStorage for now (replace with Supabase)
-    const existingCommunities = JSON.parse(localStorage.getItem('communities') || '[]');
-    existingCommunities.push(communityData);
-    localStorage.setItem('communities', JSON.stringify(existingCommunities));
-    
-    // Redirect to ECO8 dashboard after setup completion
-    navigate('/eco8/dashboard');
-    
-    return communityData;
+      const newCommunity = await createCommunity(communityData);
+      
+      toast({
+        title: "Community Created!",
+        description: "Your community has been successfully set up.",
+      });
+      
+      navigate('/eco8/dashboard');
+      return newCommunity;
+    } catch (error) {
+      console.error('Error creating community:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create community. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   return <CommunitySetupWizard onComplete={handleSetupComplete} />;
