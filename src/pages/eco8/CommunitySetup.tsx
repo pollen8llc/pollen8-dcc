@@ -7,6 +7,27 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+// Location options matching the wizard
+const LOCATION_OPTIONS = [
+  { value: 'remote', label: 'Remote/Online' },
+  { value: 'san-francisco', label: 'San Francisco, CA' },
+  { value: 'new-york', label: 'New York, NY' },
+  { value: 'los-angeles', label: 'Los Angeles, CA' },
+  { value: 'chicago', label: 'Chicago, IL' },
+  { value: 'austin', label: 'Austin, TX' },
+  { value: 'seattle', label: 'Seattle, WA' },
+  { value: 'boston', label: 'Boston, MA' },
+  { value: 'miami', label: 'Miami, FL' },
+  { value: 'denver', label: 'Denver, CO' },
+  { value: 'london', label: 'London, UK' },
+  { value: 'toronto', label: 'Toronto, Canada' },
+  { value: 'berlin', label: 'Berlin, Germany' },
+  { value: 'amsterdam', label: 'Amsterdam, Netherlands' },
+  { value: 'singapore', label: 'Singapore' },
+  { value: 'sydney', label: 'Sydney, Australia' },
+  { value: 'other', label: 'Other' },
+];
+
 const CommunitySetup: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -63,22 +84,31 @@ const CommunitySetup: React.FC = () => {
         return 'hybrid';
       };
 
+      // Transform location
+      const getLocationValue = (location: string, customLocation?: string) => {
+        if (location === 'other') return customLocation || 'Other';
+        const locationOption = LOCATION_OPTIONS.find(l => l.value === location);
+        return locationOption?.label || location;
+      };
+
       const submissionData = {
         name: data.name,
         description: data.description,
         type: normalizeType(data.type as any),
-        location: data.location || 'Remote',
+        location: getLocationValue(data.location, data.customLocation),
         isPublic: data.isPublic,
         website: data.website || null,
-        targetAudience: data.tags || [], // Map tags to target audience
+        targetAudience: data.tags || [],
         socialMedia: data.socialLinks ? {
           twitter: data.socialLinks.twitter || null,
           linkedin: data.socialLinks.linkedin || null,
           facebook: data.socialLinks.facebook || null
         } : {},
-        bio: data.bio || null, // This will be mapped to vision field
-        format: normalizeFormat((data as any).format), // ensure valid value
-        communicationPlatforms: {} // Default empty object
+        bio: data.bio || null,
+        format: normalizeFormat(data.format),
+        community_size: data.communitySize || '1-10',
+        event_frequency: data.eventFrequency || 'monthly',
+        communicationPlatforms: {}
       };
       // Submit to community_data_distribution for processing
       const { data: distributionData, error: distributionError } = await supabase

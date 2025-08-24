@@ -9,9 +9,53 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Steps, Step } from '@/components/ui/steps';
-import { ChevronLeft, ChevronRight, Check, Building2, Globe, Users, Camera } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Building2, Globe, Users, Camera, Loader2 } from 'lucide-react';
 import { CommunityFormData, COMMUNITY_TYPES } from '@/types/community';
 import { useToast } from '@/hooks/use-toast';
+
+// Structured data options
+const LOCATION_OPTIONS = [
+  { value: 'remote', label: 'Remote/Online' },
+  { value: 'san-francisco', label: 'San Francisco, CA' },
+  { value: 'new-york', label: 'New York, NY' },
+  { value: 'los-angeles', label: 'Los Angeles, CA' },
+  { value: 'chicago', label: 'Chicago, IL' },
+  { value: 'austin', label: 'Austin, TX' },
+  { value: 'seattle', label: 'Seattle, WA' },
+  { value: 'boston', label: 'Boston, MA' },
+  { value: 'miami', label: 'Miami, FL' },
+  { value: 'denver', label: 'Denver, CO' },
+  { value: 'london', label: 'London, UK' },
+  { value: 'toronto', label: 'Toronto, Canada' },
+  { value: 'berlin', label: 'Berlin, Germany' },
+  { value: 'amsterdam', label: 'Amsterdam, Netherlands' },
+  { value: 'singapore', label: 'Singapore' },
+  { value: 'sydney', label: 'Sydney, Australia' },
+  { value: 'other', label: 'Other' },
+];
+
+const FORMAT_OPTIONS = [
+  { value: 'online', label: 'Online Only' },
+  { value: 'IRL', label: 'In-Person Only (IRL)' },
+  { value: 'hybrid', label: 'Hybrid (Online & In-Person)' },
+];
+
+const COMMUNITY_SIZE_OPTIONS = [
+  { value: '1-10', label: '1-10 members' },
+  { value: '11-50', label: '11-50 members' },
+  { value: '51-100', label: '51-100 members' },
+  { value: '101-500', label: '101-500 members' },
+  { value: '500+', label: '500+ members' },
+];
+
+const EVENT_FREQUENCY_OPTIONS = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'biweekly', label: 'Bi-weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'quarterly', label: 'Quarterly' },
+  { value: 'adhoc', label: 'Ad-hoc' },
+];
 
 const WIZARD_STEPS = [
   'Basic Information',
@@ -28,12 +72,16 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<CommunityFormData>({
     name: '',
     description: '',
     bio: '',
     type: '',
-    location: '',
+    location: 'remote',
+    format: 'hybrid',
+    communitySize: '1-10',
+    eventFrequency: 'monthly',
     tags: [],
     isPublic: true,
     website: '',
@@ -42,7 +90,8 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
       twitter: '',
       linkedin: '',
       facebook: ''
-    }
+    },
+    customLocation: ''
   });
 
   const [newTag, setNewTag] = useState('');
@@ -77,7 +126,7 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
   const isStepValid = () => {
     switch (currentStep) {
       case 0:
-        return formData.name.trim() && formData.type;
+        return formData.name.trim() && formData.type && formData.location && formData.format;
       case 1:
         return formData.description.trim() && formData.bio.trim();
       case 2:
@@ -90,19 +139,19 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
   };
 
   const handleComplete = async () => {
+    if (isSubmitting) return; // Prevent double submission
+    
     try {
+      setIsSubmitting(true);
       await onComplete(formData);
-      toast({
-        title: "Community Created!",
-        description: "Your community has been successfully set up.",
-      });
-      navigate('/eco8/dashboard');
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to create community. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -143,13 +192,77 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
               </div>
 
               <div>
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  placeholder="e.g., San Francisco, CA"
-                  value={formData.location}
-                  onChange={(e) => updateFormData('location', e.target.value)}
-                />
+                <Label htmlFor="location">Location *</Label>
+                <Select value={formData.location} onValueChange={(value) => updateFormData('location', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOCATION_OPTIONS.map(location => (
+                      <SelectItem key={location.value} value={location.value}>
+                        {location.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.location === 'other' && (
+                  <Input
+                    className="mt-2"
+                    placeholder="Enter custom location"
+                    value={formData.customLocation}
+                    onChange={(e) => updateFormData('customLocation', e.target.value)}
+                  />
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="format">Community Format *</Label>
+                <Select value={formData.format} onValueChange={(value) => updateFormData('format', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FORMAT_OPTIONS.map(format => (
+                      <SelectItem key={format.value} value={format.value}>
+                        {format.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="communitySize">Expected Size</Label>
+                  <Select value={formData.communitySize} onValueChange={(value) => updateFormData('communitySize', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMMUNITY_SIZE_OPTIONS.map(size => (
+                        <SelectItem key={size.value} value={size.value}>
+                          {size.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="eventFrequency">Event Frequency</Label>
+                  <Select value={formData.eventFrequency} onValueChange={(value) => updateFormData('eventFrequency', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EVENT_FREQUENCY_OPTIONS.map(freq => (
+                        <SelectItem key={freq.value} value={freq.value}>
+                          {freq.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </div>
@@ -287,7 +400,12 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
               <CardContent className="p-6 space-y-4">
                 <div>
                   <h3 className="font-semibold text-lg">{formData.name}</h3>
-                  <p className="text-muted-foreground">{formData.type} • {formData.location}</p>
+                  <p className="text-muted-foreground">
+                    {formData.type} • {LOCATION_OPTIONS.find(l => l.value === formData.location)?.label || formData.customLocation} • {formData.format}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Size: {formData.communitySize} • Events: {formData.eventFrequency}
+                  </p>
                 </div>
                 
                 <div>
@@ -354,9 +472,10 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
                 </Button>
                 
                 {currentStep === WIZARD_STEPS.length - 1 ? (
-                  <Button onClick={handleComplete}>
-                    <Check className="h-4 w-4 mr-2" />
-                    Create Community
+                  <Button onClick={handleComplete} disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {!isSubmitting && <Check className="h-4 w-4 mr-2" />}
+                    {isSubmitting ? 'Creating...' : 'Create Community'}
                   </Button>
                 ) : (
                   <Button

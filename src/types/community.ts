@@ -41,6 +41,10 @@ export interface CommunityFormData {
   bio: string;
   type: string;
   location?: string;
+  format?: string;
+  customLocation?: string;
+  communitySize?: string;
+  eventFrequency?: string;
   tags: string[];
   isPublic: boolean;
   website?: string;
