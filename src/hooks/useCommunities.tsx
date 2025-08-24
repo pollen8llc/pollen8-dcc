@@ -43,6 +43,7 @@ export const useCommunities = () => {
   const fetchCommunities = async () => {
     try {
       setLoading(true);
+      console.log('Fetching all public communities');
       const { data, error } = await supabase
         .from('communities')
         .select('*')
@@ -50,6 +51,7 @@ export const useCommunities = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('All public communities fetched:', data);
       setCommunities(data || []);
     } catch (err) {
       console.error('Error fetching communities:', err);
@@ -60,20 +62,37 @@ export const useCommunities = () => {
   };
 
   const fetchUserCommunities = async () => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id) {
+      console.log('No current user ID, skipping user communities fetch');
+      setUserCommunities([]);
+      return;
+    }
 
     try {
+      console.log('Fetching user communities for user ID:', currentUser.id);
       const { data, error } = await supabase
         .from('communities')
         .select('*')
         .eq('owner_id', currentUser.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setUserCommunities(data || []);
+      if (error) {
+        console.error('Supabase error fetching user communities:', error);
+        throw error;
+      }
+      
+      console.log('User communities fetched:', data);
+      console.log('Number of user communities:', data?.length || 0);
+      
+      // Additional validation to ensure we only have user's communities
+      const filteredData = data?.filter(community => community.owner_id === currentUser.id) || [];
+      console.log('Filtered user communities:', filteredData);
+      
+      setUserCommunities(filteredData);
     } catch (err) {
       console.error('Error fetching user communities:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch user communities');
+      setUserCommunities([]);
     }
   };
 

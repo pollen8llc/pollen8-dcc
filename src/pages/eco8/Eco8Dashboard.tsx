@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
 import { useCommunities } from '@/hooks/useCommunities';
 import { useAuth } from '@/hooks/useAuth';
+import { CommunityDebugger } from '@/components/debug/CommunityDebugger';
 import { 
   Users, 
   Search, 
@@ -26,6 +27,11 @@ import {
 const Eco8Dashboard: React.FC = () => {
   const { userCommunities, hasUserCommunities, loading } = useCommunities();
   const { currentUser } = useAuth();
+
+  // Debug logging
+  console.log('Eco8Dashboard - Current user:', currentUser?.id);
+  console.log('Eco8Dashboard - User communities:', userCommunities);
+  console.log('Eco8Dashboard - Has user communities:', hasUserCommunities);
 
   const quickStats = {
     networkSize: 0, // This would come from actual network connections
@@ -287,6 +293,9 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
         )}
       </div>
+      
+      {/* Debug Component - Remove this after debugging */}
+      <CommunityDebugger />
     </div>
   );
 };
