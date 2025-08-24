@@ -19,7 +19,8 @@ import {
   Network,
   Calendar,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  Edit
 } from 'lucide-react';
 
 const Eco8Dashboard: React.FC = () => {
@@ -270,6 +271,12 @@ const Eco8Dashboard: React.FC = () => {
                         <Button variant="outline" size="sm">
                           <Eye className="h-4 w-4 mr-2" />
                           View
+                        </Button>
+                      </Link>
+                      <Link to={`/eco8/community/${community.id}?edit=true`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
                         </Button>
                       </Link>
                     </div>

@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Navbar from '@/components/Navbar';
+import { CommunityEditForm } from '@/components/eco8/CommunityEditForm';
 import { useCommunities, Community } from '@/hooks/useCommunities';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Users, 
   MapPin, 
@@ -25,15 +29,21 @@ import {
   Target,
   Lightbulb,
   BookOpen,
-  Rss
+  Rss,
+  Trash2,
+  Loader2
 } from 'lucide-react';
 
 const CommunityProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { getCommunityById } = useCommunities();
   const { currentUser } = useAuth();
+  const { toast } = useToast();
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const loadCommunity = async () => {
@@ -43,6 +53,12 @@ const CommunityProfile: React.FC = () => {
         setLoading(true);
         const foundCommunity = await getCommunityById(id);
         setCommunity(foundCommunity);
+        
+        // Check if we should go into edit mode
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('edit') === 'true' && foundCommunity?.owner_id === currentUser?.id) {
+          setIsEditing(true);
+        }
       } catch (error) {
         console.error('Error loading community:', error);
       } finally {
@@ -51,7 +67,7 @@ const CommunityProfile: React.FC = () => {
     };
 
     loadCommunity();
-  }, [id, getCommunityById]);
+  }, [id, getCommunityById, currentUser?.id]);
 
   if (loading) {
     return (
@@ -83,8 +99,65 @@ const CommunityProfile: React.FC = () => {
     );
   }
 
+  const handleDelete = async () => {
+    if (!community || !currentUser) return;
+
+    try {
+      setIsDeleting(true);
+      const { error } = await supabase
+        .from('communities')
+        .delete()
+        .eq('id', community.id)
+        .eq('owner_id', currentUser.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Community Deleted',
+        description: 'Your community has been successfully deleted.',
+      });
+
+      navigate('/eco8');
+    } catch (error) {
+      console.error('Error deleting community:', error);
+      toast({
+        title: 'Delete Failed',
+        description: error instanceof Error ? error.message : 'Failed to delete community.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSave = (updatedCommunity: Community) => {
+    setCommunity(updatedCommunity);
+    setIsEditing(false);
+  };
+
   const isOwner = currentUser?.id === community.owner_id;
   const isRecent = new Date(community.updated_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  if (isEditing) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Navbar />
+        <div className="w-full px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold mb-2">Edit Community</h1>
+              <p className="text-muted-foreground">Update your community information</p>
+            </div>
+            <CommunityEditForm
+              community={community}
+              onSave={handleSave}
+              onCancel={() => setIsEditing(false)}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
@@ -98,10 +171,46 @@ const CommunityProfile: React.FC = () => {
             <div className="h-48 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 relative">
               {isOwner && (
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <Button size="sm" variant="outline" className="bg-background/80 backdrop-blur-sm">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="bg-background/80 backdrop-blur-sm"
+                    onClick={() => setIsEditing(true)}
+                  >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="destructive" 
+                        className="bg-destructive/80 backdrop-blur-sm"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Community</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{community.name}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               )}
             </div>
