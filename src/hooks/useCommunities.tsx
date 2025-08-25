@@ -1,98 +1,67 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Community {
   id: string;
   name: string;
   description: string;
   type?: string;
-  community_type?: string;
   location?: string;
-  owner_id?: string;
-  target_audience?: string[];
-  social_media?: any;
+  is_public: boolean;
   website?: string;
   newsletter_url?: string;
-  communication_platforms?: any;
-  community_size?: string;
-  format?: string;
-  event_frequency?: string;
-  start_date?: string;
   vision?: string;
-  community_structure?: string;
   community_values?: string;
+  community_structure?: string;
   personal_background?: string;
-  role_title?: string;
-  founder_name?: string;
-  logo_url?: string;
-  is_public: boolean;
+  format?: string;
+  community_size?: string;
+  event_frequency?: string;
+  target_audience?: string[];
   tags?: string[];
+  logo_url?: string;
+  role_title?: string;
+  member_count?: string;
+  founder_name?: string;
+  community_type?: string;
+  start_date?: string;
+  social_media?: Record<string, string>;
+  communication_platforms?: Record<string, string>;
+  owner_id?: string;
   created_at: string;
   updated_at: string;
 }
 
 export const useCommunities = () => {
   const [communities, setCommunities] = useState<Community[]>([]);
-  const [userCommunities, setUserCommunities] = useState<Community[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { currentUser } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const fetchCommunities = async () => {
+  const getAllCommunities = async (page = 1, limit = 20) => {
     try {
       setLoading(true);
-      console.log('Fetching all public communities');
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from('communities')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('is_public', true)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range((page - 1) * limit, page * limit - 1);
 
       if (error) throw error;
-      console.log('All public communities fetched:', data);
-      setCommunities(data || []);
-    } catch (err) {
-      console.error('Error fetching communities:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch communities');
+      
+      return { data: data || [], count: count || 0 };
+    } catch (error) {
+      console.error('Error fetching communities:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load communities.',
+        variant: 'destructive',
+      });
+      return { data: [], count: 0 };
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchUserCommunities = async () => {
-    if (!currentUser?.id) {
-      console.log('No current user ID, skipping user communities fetch');
-      setUserCommunities([]);
-      return;
-    }
-
-    try {
-      console.log('Fetching user communities for user ID:', currentUser.id);
-      const { data, error } = await supabase
-        .from('communities')
-        .select('*')
-        .eq('owner_id', currentUser.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Supabase error fetching user communities:', error);
-        throw error;
-      }
-      
-      console.log('User communities fetched:', data);
-      console.log('Number of user communities:', data?.length || 0);
-      
-      // Additional validation to ensure we only have user's communities
-      const filteredData = data?.filter(community => community.owner_id === currentUser.id) || [];
-      console.log('Filtered user communities:', filteredData);
-      
-      setUserCommunities(filteredData);
-    } catch (err) {
-      console.error('Error fetching user communities:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch user communities');
-      setUserCommunities([]);
     }
   };
 
@@ -105,45 +74,157 @@ export const useCommunities = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching community by ID:', error);
+        console.error('Error fetching community:', error);
         throw error;
       }
-      
+
       return data;
-    } catch (err) {
-      console.error('Error fetching community:', err);
+    } catch (error) {
+      console.error('Error fetching community by ID:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load community.',
+        variant: 'destructive',
+      });
       return null;
     }
   };
 
-  // Deprecated: Direct creation is disabled to avoid RLS/type issues.
-  // Use the community_data_distribution pipeline via the CommunitySetup wizard instead.
-  const createCommunity = async (_communityData: Partial<Community>) => {
-    if (!currentUser?.id) throw new Error('User not authenticated');
+  const getManagedCommunities = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('communities')
+        .select('*')
+        .eq('owner_id', userId)
+        .order('created_at', { ascending: false });
 
-    console.warn('Direct community creation is disabled. Use the ECO8 Setup wizard (community_data_distribution) instead.');
-    throw new Error('Community creation must go through the ECO8 Setup wizard. Please use /eco8/setup.');
+      if (error) throw error;
+      
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching managed communities:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load your communities.',
+        variant: 'destructive',
+      });
+      return [];
+    }
   };
 
-  useEffect(() => {
-    fetchCommunities();
-  }, []);
+  const searchCommunities = async (query: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('communities')
+        .select('*')
+        .eq('is_public', true)
+        .or(`name.ilike.%${query}%,description.ilike.%${query}%,tags.cs.{${query}}`)
+        .order('created_at', { ascending: false });
 
-  useEffect(() => {
-    if (currentUser?.id) {
-      fetchUserCommunities();
+      if (error) throw error;
+      
+      return { data: data || [], count: data?.length || 0 };
+    } catch (error) {
+      console.error('Error searching communities:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to search communities.',
+        variant: 'destructive',
+      });
+      return { data: [], count: 0 };
     }
-  }, [currentUser?.id]);
+  };
+
+  const createCommunity = async (communityData: Partial<Community>) => {
+    try {
+      const { data, error } = await supabase
+        .from('communities')
+        .insert(communityData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Community created successfully.',
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error creating community:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create community.',
+        variant: 'destructive',
+      });
+      throw error;
+    }
+  };
+
+  const updateCommunity = async (id: string, updates: Partial<Community>) => {
+    try {
+      const { data, error } = await supabase
+        .from('communities')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Community updated successfully.',
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error updating community:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update community.',
+        variant: 'destructive',
+      });
+      throw error;
+    }
+  };
+
+  const deleteCommunity = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('communities')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Community deleted successfully.',
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting community:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete community.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
 
   return {
     communities,
-    userCommunities,
     loading,
-    error,
-    refreshCommunities: fetchCommunities,
-    refreshUserCommunities: fetchUserCommunities,
+    getAllCommunities,
     getCommunityById,
+    getManagedCommunities,
+    searchCommunities,
     createCommunity,
-    hasUserCommunities: userCommunities.length > 0
+    updateCommunity,
+    deleteCommunity,
   };
 };

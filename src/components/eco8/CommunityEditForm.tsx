@@ -36,6 +36,14 @@ interface CommunityFormData {
   event_frequency?: string;
   target_audience: string[];
   tags: string[];
+  logo_url?: string;
+  role_title?: string;
+  member_count?: string;
+  founder_name?: string;
+  community_type?: string;
+  start_date?: string;
+  social_media?: any;
+  communication_platforms?: any;
 }
 
 const communityTypes = [
@@ -83,6 +91,10 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
   const [tags, setTags] = useState<string[]>(community.tags || []);
   const [newTag, setNewTag] = useState('');
   const [newAudience, setNewAudience] = useState('');
+  const [socialPlatforms, setSocialPlatforms] = useState<Record<string, string>>(community.social_media || {});
+  const [commPlatforms, setCommPlatforms] = useState<Record<string, string>>(community.communication_platforms || {});
+  const [newSocialPlatform, setNewSocialPlatform] = useState({ platform: '', url: '' });
+  const [newCommPlatform, setNewCommPlatform] = useState({ platform: '', url: '' });
 
   const {
     register,
@@ -108,6 +120,12 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
       event_frequency: community.event_frequency || 'monthly',
       target_audience: community.target_audience || [],
       tags: community.tags || [],
+      logo_url: community.logo_url || '',
+      role_title: community.role_title || '',
+      member_count: community.member_count || '',
+      founder_name: community.founder_name || '',
+      community_type: community.community_type || '',
+      start_date: community.start_date || '',
     },
   });
 
@@ -141,6 +159,42 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
     setValue('tags', updated);
   };
 
+  const addSocialPlatform = () => {
+    if (newSocialPlatform.platform.trim() && newSocialPlatform.url.trim()) {
+      setSocialPlatforms(prev => ({
+        ...prev,
+        [newSocialPlatform.platform.trim()]: newSocialPlatform.url.trim()
+      }));
+      setNewSocialPlatform({ platform: '', url: '' });
+    }
+  };
+
+  const removeSocialPlatform = (platform: string) => {
+    setSocialPlatforms(prev => {
+      const updated = { ...prev };
+      delete updated[platform];
+      return updated;
+    });
+  };
+
+  const addCommPlatform = () => {
+    if (newCommPlatform.platform.trim() && newCommPlatform.url.trim()) {
+      setCommPlatforms(prev => ({
+        ...prev,
+        [newCommPlatform.platform.trim()]: newCommPlatform.url.trim()
+      }));
+      setNewCommPlatform({ platform: '', url: '' });
+    }
+  };
+
+  const removeCommPlatform = (platform: string) => {
+    setCommPlatforms(prev => {
+      const updated = { ...prev };
+      delete updated[platform];
+      return updated;
+    });
+  };
+
   const onSubmit = async (data: CommunityFormData) => {
     try {
       setIsSubmitting(true);
@@ -149,6 +203,8 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
         ...data,
         target_audience: targetAudience,
         tags: tags,
+        social_media: socialPlatforms,
+        communication_platforms: commPlatforms,
         updated_at: new Date().toISOString(),
       };
 
@@ -247,10 +303,38 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
             />
             <Label htmlFor="is_public">Make community public</Label>
           </div>
+
+          <div>
+            <Label htmlFor="logo_url">Logo URL</Label>
+            <Input
+              id="logo_url"
+              {...register('logo_url')}
+              placeholder="https://example.com/logo.png"
+              type="url"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="founder_name">Founder Name</Label>
+            <Input
+              id="founder_name"
+              {...register('founder_name')}
+              placeholder="Name of the community founder"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="role_title">Your Role Title</Label>
+            <Input
+              id="role_title"
+              {...register('role_title')}
+              placeholder="e.g., Community Manager, Founder, Organizer"
+            />
+          </div>
         </CardContent>
       </Card>
 
-      {/* Details */}
+      {/* Community Details */}
       <Card>
         <CardHeader>
           <CardTitle>Community Details</CardTitle>
@@ -293,6 +377,24 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
               {...register('personal_background')}
               placeholder="Tell us about your background and why you started this community"
               rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="start_date">Start Date</Label>
+            <Input
+              id="start_date"
+              {...register('start_date')}
+              placeholder="e.g., January 2024, 2023"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="member_count">Current Member Count</Label>
+            <Input
+              id="member_count"
+              {...register('member_count')}
+              placeholder="e.g., 150 members, 50+ active members"
             />
           </div>
         </CardContent>
@@ -373,6 +475,88 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
                 placeholder="https://newsletter-signup.com"
                 type="url"
               />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Social Media Platforms */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Social Media</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-2">
+              <Input
+                value={newSocialPlatform.platform}
+                onChange={(e) => setNewSocialPlatform(prev => ({ ...prev, platform: e.target.value }))}
+                placeholder="Platform name (e.g., Twitter, LinkedIn)"
+              />
+              <div className="flex gap-2">
+                <Input
+                  value={newSocialPlatform.url}
+                  onChange={(e) => setNewSocialPlatform(prev => ({ ...prev, url: e.target.value }))}
+                  placeholder="Profile URL"
+                />
+                <Button type="button" onClick={addSocialPlatform} variant="outline">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {Object.entries(socialPlatforms).map(([platform, url]) => (
+                <div key={platform} className="flex items-center justify-between bg-muted p-2 rounded">
+                  <span className="text-sm">
+                    <strong>{platform}:</strong> {url}
+                  </span>
+                  <X 
+                    className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-destructive" 
+                    onClick={() => removeSocialPlatform(platform)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Communication Platforms */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Communication Platforms</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-2">
+              <Input
+                value={newCommPlatform.platform}
+                onChange={(e) => setNewCommPlatform(prev => ({ ...prev, platform: e.target.value }))}
+                placeholder="Platform name (e.g., Discord, Slack)"
+              />
+              <div className="flex gap-2">
+                <Input
+                  value={newCommPlatform.url}
+                  onChange={(e) => setNewCommPlatform(prev => ({ ...prev, url: e.target.value }))}
+                  placeholder="Invite or join URL"
+                />
+                <Button type="button" onClick={addCommPlatform} variant="outline">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {Object.entries(commPlatforms).map(([platform, url]) => (
+                <div key={platform} className="flex items-center justify-between bg-muted p-2 rounded">
+                  <span className="text-sm">
+                    <strong>{platform}:</strong> {url}
+                  </span>
+                  <X 
+                    className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-destructive" 
+                    onClick={() => removeCommPlatform(platform)}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </CardContent>
