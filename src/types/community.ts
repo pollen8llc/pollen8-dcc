@@ -57,17 +57,14 @@ export interface CommunityFormData {
 }
 
 export const COMMUNITY_TYPES = [
-  'Technology',
-  'Arts & Culture',
-  'Health & Wellness',
-  'Business & Entrepreneurship',
-  'Education',
-  'Environment & Sustainability',
-  'Social Impact',
-  'Sports & Recreation',
-  'Food & Cooking',
-  'Travel & Adventure',
-  'Other'
+  'tech',
+  'creative', 
+  'wellness',
+  'professional',
+  'social-impact',
+  'education',
+  'social',
+  'other'
 ];
 
 export const GROWTH_STATUS_COLORS = {

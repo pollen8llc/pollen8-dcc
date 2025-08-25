@@ -184,9 +184,11 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {COMMUNITY_TYPES.map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
+                  {COMMUNITY_TYPES.map(type => (
+                    <SelectItem key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')}
+                    </SelectItem>
+                  ))}
                   </SelectContent>
                 </Select>
               </div>

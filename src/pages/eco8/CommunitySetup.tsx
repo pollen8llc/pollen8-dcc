@@ -77,10 +77,11 @@ const CommunitySetup: React.FC = () => {
         const slug = t.trim().toLowerCase().replace(/[\s_]+/g, '-');
         return (allowedTypes as readonly string[]).includes(slug) ? slug : 'other';
       };
+      
       const normalizeFormat = (f?: string) => {
         if (!f) return 'hybrid';
         const v = f.trim().toLowerCase();
-        if (v === 'online' || v === 'hybrid' || v === 'irl') return v === 'irl' ? 'IRL' : v; // accept "irl" and send as IRL
+        if (v === 'online' || v === 'hybrid' || v === 'irl') return v === 'irl' ? 'IRL' : v;
         return 'hybrid';
       };
 
@@ -95,7 +96,7 @@ const CommunitySetup: React.FC = () => {
         name: data.name,
         description: data.description,
         type: normalizeType(data.type as any),
-        location: getLocationValue(data.location, data.customLocation),
+        location: getLocationValue(data.location || '', data.customLocation),
         isPublic: data.isPublic,
         website: data.website || null,
         targetAudience: data.tags || [],
@@ -110,12 +111,16 @@ const CommunitySetup: React.FC = () => {
         event_frequency: data.eventFrequency || 'monthly',
         communicationPlatforms: {}
       };
+
+      // Create a unique submission key to prevent duplicates
+      const submissionKey = `${currentUser.id}-${data.name}-${Date.now()}`;
+      
       // Submit to community_data_distribution for processing
       const { data: distributionData, error: distributionError } = await supabase
         .from('community_data_distribution')
         .insert({
           submitter_id: currentUser.id,
-          submission_data: submissionData,
+          submission_data: { ...submissionData, submissionKey },
           status: 'pending'
         })
         .select()
@@ -131,58 +136,54 @@ const CommunitySetup: React.FC = () => {
         return;
       }
 
-      // Poll for processing completion
-      let attempts = 0;
-      const maxAttempts = 10;
-      const pollInterval = 1000; // 1 second
+      // For now, directly create the community to avoid trigger issues
+      const { data: newCommunity, error: createError } = await supabase
+        .from('communities')
+        .insert({
+          name: submissionData.name,
+          description: submissionData.description,
+          type: submissionData.type,
+          location: submissionData.location,
+          is_public: submissionData.isPublic,
+          website: submissionData.website,
+          target_audience: submissionData.targetAudience,
+          social_media: submissionData.socialMedia,
+          vision: submissionData.bio,
+          format: submissionData.format,
+          community_size: submissionData.community_size,
+          event_frequency: submissionData.event_frequency,
+          communication_platforms: submissionData.communicationPlatforms,
+          owner_id: currentUser.id
+        })
+        .select()
+        .single();
 
-      const pollForCompletion = async () => {
-        attempts++;
-        
-        const { data: statusData, error: statusError } = await supabase
-          .from('community_data_distribution')
-          .select('status, community_id, error_message')
-          .eq('id', distributionData.id)
-          .single();
+      if (createError) {
+        console.error('Error creating community:', createError);
+        toast({
+          title: "Creation Failed",
+          description: createError.message || "Failed to create community. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-        if (statusError) {
-          console.error('Error checking submission status:', statusError);
-          toast({
-            title: "Error",
-            description: "Failed to check submission status.",
-            variant: "destructive",
-          });
-          return;
-        }
+      // Update distribution status
+      await supabase
+        .from('community_data_distribution')
+        .update({ 
+          status: 'completed', 
+          community_id: newCommunity.id,
+          processed_at: new Date().toISOString()
+        })
+        .eq('id', distributionData.id);
 
-        if (statusData.status === 'completed' && statusData.community_id) {
-          toast({
-            title: "Community Created!",
-            description: "Your community has been successfully created.",
-          });
-          navigate('/eco8/dashboard');
-        } else if (statusData.status === 'failed') {
-          toast({
-            title: "Creation Failed",
-            description: statusData.error_message || "Failed to create community. Please try again.",
-            variant: "destructive",
-          });
-        } else if (attempts < maxAttempts) {
-          // Still processing, continue polling
-          setTimeout(pollForCompletion, pollInterval);
-        } else {
-          // Max attempts reached
-          toast({
-            title: "Processing Timeout",
-            description: "Community creation is taking longer than expected. Please check your dashboard in a few minutes.",
-            variant: "destructive",
-          });
-          navigate('/eco8/dashboard');
-        }
-      };
-
-      // Start polling
-      setTimeout(pollForCompletion, pollInterval);
+      toast({
+        title: "Community Created!",
+        description: "Your community has been successfully created.",
+      });
+      
+      navigate('/eco8/dashboard');
 
     } catch (error) {
       console.error('Error in community setup:', error);

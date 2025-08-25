@@ -104,7 +104,11 @@ export const useCommunities = () => {
         .eq('id', id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching community by ID:', error);
+        throw error;
+      }
+      
       return data;
     } catch (err) {
       console.error('Error fetching community:', err);
