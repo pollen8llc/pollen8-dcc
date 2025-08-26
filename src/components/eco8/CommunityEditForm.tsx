@@ -222,7 +222,7 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
         description: 'Your community has been successfully updated.',
       });
 
-      onSave(updatedCommunity);
+      onSave(updatedCommunity as any);
     } catch (error) {
       console.error('Error updating community:', error);
       toast({

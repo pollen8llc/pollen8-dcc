@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface Community {
   id: string;
@@ -27,8 +28,8 @@ export interface Community {
   founder_name?: string;
   community_type?: string;
   start_date?: string;
-  social_media?: Record<string, string>;
-  communication_platforms?: Record<string, string>;
+  social_media?: any;
+  communication_platforms?: any;
   owner_id?: string;
   created_at: string;
   updated_at: string;
@@ -38,6 +39,26 @@ export const useCommunities = () => {
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { currentUser } = useAuth();
+  const [userCommunities, setUserCommunities] = useState<Community[]>([]);
+  const hasUserCommunities = userCommunities.length > 0;
+
+  const refreshUserCommunities = async () => {
+    if (!currentUser?.id) return;
+    try {
+      setLoading(true);
+      const data = await getManagedCommunities(currentUser.id);
+      setUserCommunities((data as any) || []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      refreshUserCommunities();
+    }
+  }, [currentUser?.id]);
 
   const getAllCommunities = async (page = 1, limit = 20) => {
     try {
@@ -78,7 +99,7 @@ export const useCommunities = () => {
         throw error;
       }
 
-      return data;
+      return data as any as Community;
     } catch (error) {
       console.error('Error fetching community by ID:', error);
       toast({
@@ -135,11 +156,11 @@ export const useCommunities = () => {
     }
   };
 
-  const createCommunity = async (communityData: Partial<Community>) => {
+  const createCommunity = async (communityData: any) => {
     try {
       const { data, error } = await supabase
         .from('communities')
-        .insert(communityData)
+        .insert(communityData as any)
         .select()
         .single();
 
@@ -162,11 +183,11 @@ export const useCommunities = () => {
     }
   };
 
-  const updateCommunity = async (id: string, updates: Partial<Community>) => {
+  const updateCommunity = async (id: string, updates: any) => {
     try {
       const { data, error } = await supabase
         .from('communities')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();
@@ -218,6 +239,9 @@ export const useCommunities = () => {
 
   return {
     communities,
+    userCommunities,
+    hasUserCommunities,
+    refreshUserCommunities,
     loading,
     getAllCommunities,
     getCommunityById,
