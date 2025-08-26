@@ -11,28 +11,12 @@ import { Switch } from '@/components/ui/switch';
 import { Steps, Step } from '@/components/ui/steps';
 import { ChevronLeft, ChevronRight, Check, Building2, Globe, Users, Camera, Loader2 } from 'lucide-react';
 import { CommunityFormData, COMMUNITY_TYPES } from '@/types/community';
+import { TagLibrarySelector } from '@/components/eco8/TagLibrarySelector';
+import { US_STATES } from '@/constants/communityTagLibrary';
 import { useToast } from '@/hooks/use-toast';
 
-// Structured data options
-const LOCATION_OPTIONS = [
-  { value: 'remote', label: 'Remote/Online' },
-  { value: 'san-francisco', label: 'San Francisco, CA' },
-  { value: 'new-york', label: 'New York, NY' },
-  { value: 'los-angeles', label: 'Los Angeles, CA' },
-  { value: 'chicago', label: 'Chicago, IL' },
-  { value: 'austin', label: 'Austin, TX' },
-  { value: 'seattle', label: 'Seattle, WA' },
-  { value: 'boston', label: 'Boston, MA' },
-  { value: 'miami', label: 'Miami, FL' },
-  { value: 'denver', label: 'Denver, CO' },
-  { value: 'london', label: 'London, UK' },
-  { value: 'toronto', label: 'Toronto, Canada' },
-  { value: 'berlin', label: 'Berlin, Germany' },
-  { value: 'amsterdam', label: 'Amsterdam, Netherlands' },
-  { value: 'singapore', label: 'Singapore' },
-  { value: 'sydney', label: 'Sydney, Australia' },
-  { value: 'other', label: 'Other' },
-];
+// US States from the library instead of the custom options
+const LOCATION_OPTIONS = US_STATES;
 
 const FORMAT_OPTIONS = [
   { value: 'online', label: 'Online Only' },
@@ -78,7 +62,7 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
     description: '',
     bio: '',
     type: '',
-    location: 'remote',
+    location: 'REMOTE',
     format: 'hybrid',
     communitySize: '1-10',
     eventFrequency: 'monthly',
@@ -301,26 +285,11 @@ export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({ onCo
                 />
               </div>
 
-              <div>
-                <Label htmlFor="tags">Tags</Label>
-                <div className="flex gap-2 mb-2">
-                  <Input
-                    id="tags"
-                    placeholder="Add a tag"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  />
-                  <Button type="button" onClick={addTag} size="sm">Add</Button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {formData.tags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
-                      {tag} ×
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              <TagLibrarySelector
+                selectedTags={formData.tags}
+                onTagsChange={(tags) => updateFormData('tags', tags)}
+                maxTags={15}
+              />
             </div>
           </div>
         );

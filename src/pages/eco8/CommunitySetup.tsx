@@ -14,6 +14,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, X, Plus } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { TagLibrarySelector } from '@/components/eco8/TagLibrarySelector';
+import { US_STATES } from '@/constants/communityTagLibrary';
 
 const communityTypes = [
   { value: 'tech', label: 'Technology' },
@@ -54,7 +56,7 @@ const CommunitySetup: React.FC = () => {
     name: '',
     description: '',
     type: 'tech',
-    location: '',
+    location: 'REMOTE',
     is_public: true,
     website: '',
     format: 'hybrid',
@@ -130,7 +132,7 @@ const CommunitySetup: React.FC = () => {
           name: formData.name.trim(),
           description: formData.description.trim(),
           type: formData.type,
-          location: formData.location.trim() || 'Remote',
+          location: formData.location || 'REMOTE',
           is_public: formData.is_public,
           website: formData.website?.trim() || null,
           format: formData.format,
@@ -224,15 +226,21 @@ const CommunitySetup: React.FC = () => {
                     </Select>
                   </div>
 
-                  <div>
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                      placeholder="e.g., San Francisco, Remote"
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="location">Location/State</Label>
+                  <Select value={formData.location} onValueChange={(value) => setFormData(prev => ({ ...prev, location: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      {US_STATES.map(state => (
+                        <SelectItem key={state.value} value={state.value}>
+                          {state.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 </div>
 
                 <div>
@@ -307,37 +315,11 @@ const CommunitySetup: React.FC = () => {
             </Card>
 
             {/* Tags */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Tags</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      placeholder="Add tag"
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    />
-                    <Button type="button" onClick={addTag} variant="outline">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                        {tag}
-                        <X 
-                          className="h-3 w-3 cursor-pointer" 
-                          onClick={() => removeTag(tag)}
-                        />
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <TagLibrarySelector
+              selectedTags={formData.tags}
+              onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+              maxTags={15}
+            />
 
             <div className="flex justify-end gap-4">
               <Button type="button" variant="outline" onClick={() => navigate('/eco8')}>
