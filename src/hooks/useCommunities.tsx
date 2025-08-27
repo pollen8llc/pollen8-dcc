@@ -158,9 +158,12 @@ export const useCommunities = () => {
 
   const createCommunity = async (communityData: any) => {
     try {
+      // Remove owner_id from the data - let the trigger handle it
+      const { owner_id, ...dataWithoutOwner } = communityData;
+      
       const { data, error } = await supabase
         .from('communities')
-        .insert(communityData as any)
+        .insert(dataWithoutOwner as any)
         .select()
         .single();
 
@@ -170,6 +173,9 @@ export const useCommunities = () => {
         title: 'Success',
         description: 'Community created successfully.',
       });
+
+      // Refresh user communities after creation
+      await refreshUserCommunities();
 
       return data;
     } catch (error) {
