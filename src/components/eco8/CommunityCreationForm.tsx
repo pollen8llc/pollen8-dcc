@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -80,6 +81,18 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
   const onSubmit = async (data: CommunityFormData) => {
     try {
       setIsSubmitting(true);
+      
+      console.log('Starting community creation...');
+
+      // Get current user to verify authentication
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error('Authentication error:', userError);
+        throw new Error('You must be logged in to create a community');
+      }
+      
+      console.log('User authenticated:', user.id);
 
       // Create the community data object - DO NOT include owner_id
       // The database trigger will automatically set it to auth.uid()
@@ -92,7 +105,7 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
         website: data.website.trim() || null,
         is_public: data.is_public,
         tags: selectedTags,
-        // These are required fields with defaults
+        // Set required fields with proper defaults
         target_audience: [], // Empty array as default
         social_media: {}, // Empty object as default
         communication_platforms: {}, // Empty object as default
@@ -108,8 +121,16 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
 
       if (error) {
         console.error('Supabase error:', error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         throw new Error(error.message || 'Failed to create community');
       }
+
+      console.log('Community created successfully:', community);
 
       toast({
         title: 'Community Created',
