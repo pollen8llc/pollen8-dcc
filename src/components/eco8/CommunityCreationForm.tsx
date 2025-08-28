@@ -82,7 +82,7 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
     try {
       setIsSubmitting(true);
       
-      console.log('Starting community creation...');
+      console.log('Starting community creation via RPC...');
 
       // Get current user to verify authentication
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -94,43 +94,27 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
       
       console.log('User authenticated:', user.id);
 
-      // Create the community data object - DO NOT include owner_id
-      // The database trigger will automatically set it to auth.uid()
-      const communityData = {
-        name: data.name.trim(),
-        description: data.description.trim(),
-        type: data.type,
-        location: data.location,
-        format: data.format,
-        website: data.website.trim() || null,
-        is_public: data.is_public,
-        tags: selectedTags,
-        // Set required fields with proper defaults
-        target_audience: [], // Empty array as default
-        social_media: {}, // Empty object as default
-        communication_platforms: {}, // Empty object as default
-      };
-
-      console.log('Creating community with data:', communityData);
-
-      const { data: community, error } = await supabase
-        .from('communities')
-        .insert(communityData)
-        .select()
-        .single();
+      // Use the new RPC function to create the community
+      const { data: community, error } = await supabase.rpc('create_community', {
+        p_name: data.name.trim(),
+        p_description: data.description.trim(),
+        p_type: data.type,
+        p_location: data.location,
+        p_format: data.format,
+        p_website: data.website.trim() || null,
+        p_is_public: data.is_public,
+        p_tags: selectedTags,
+        p_target_audience: [], // Empty array as default
+        p_social_media: {}, // Empty object as default
+        p_communication_platforms: {}, // Empty object as default
+      });
 
       if (error) {
-        console.error('Supabase error:', error);
-        console.error('Error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
+        console.error('RPC error:', error);
         throw new Error(error.message || 'Failed to create community');
       }
 
-      console.log('Community created successfully:', community);
+      console.log('Community created successfully via RPC:', community);
 
       toast({
         title: 'Community Created',

@@ -2416,6 +2416,51 @@ export type Database = {
         Args: { profile_id: string; viewer_id: string }
         Returns: boolean
       }
+      create_community: {
+        Args: {
+          p_communication_platforms?: Json
+          p_description: string
+          p_format?: string
+          p_is_public?: boolean
+          p_location?: string
+          p_name: string
+          p_social_media?: Json
+          p_tags?: string[]
+          p_target_audience?: string[]
+          p_type?: string
+          p_website?: string
+        }
+        Returns: {
+          communication_platforms: Json | null
+          community_size: string | null
+          community_structure: string | null
+          community_type: string | null
+          community_values: string | null
+          created_at: string
+          description: string
+          event_frequency: string | null
+          format: string | null
+          founder_name: string | null
+          id: string
+          is_public: boolean
+          location: string | null
+          logo_url: string | null
+          member_count: string | null
+          name: string
+          newsletter_url: string | null
+          owner_id: string | null
+          personal_background: string | null
+          role_title: string | null
+          social_media: Json | null
+          start_date: string | null
+          tags: string[] | null
+          target_audience: string[] | null
+          type: string | null
+          updated_at: string
+          vision: string | null
+          website: string | null
+        }
+      }
       generate_unique_invite_code: {
         Args: Record<PropertyKey, never>
         Returns: string
