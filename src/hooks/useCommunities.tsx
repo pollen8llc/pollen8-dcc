@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -86,7 +86,7 @@ export const useCommunities = () => {
     }
   };
 
-  const getCommunityById = async (id: string): Promise<Community | null> => {
+  const getCommunityById = useCallback(async (id: string): Promise<Community | null> => {
     try {
       const { data, error } = await supabase
         .from('communities')
@@ -109,7 +109,7 @@ export const useCommunities = () => {
       });
       return null;
     }
-  };
+  }, [toast]);
 
   const getManagedCommunities = async (userId: string) => {
     try {
