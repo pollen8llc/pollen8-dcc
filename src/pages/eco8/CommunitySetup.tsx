@@ -4,9 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { CommunityCreationForm } from '@/components/eco8/CommunityCreationForm';
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
+import { useCommunities } from '@/hooks/useCommunities';
 
 const CommunitySetup: React.FC = () => {
   const navigate = useNavigate();
+  const { hasUserCommunities, loading } = useCommunities();
+
+  React.useEffect(() => {
+    if (!loading && hasUserCommunities) {
+      navigate('/eco8');
+    }
+  }, [loading, hasUserCommunities, navigate]);
 
   const handleSuccess = (community: any) => {
     console.log('Community created successfully:', community);

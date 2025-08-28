@@ -159,19 +159,21 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
 
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/eco8/setup">
+            <Link to={hasUserCommunities ? "/eco8" : "/eco8/setup"}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
                   <Plus className="h-6 w-6 text-primary" />
-                  Create Community
+                  {hasUserCommunities ? 'Manage Communities' : 'Create Community'}
                 </CardTitle>
                 <CardDescription>
-                  Start a new community and invite members
+                  {hasUserCommunities
+                    ? 'View and manage your existing communities'
+                    : 'Start a new community and invite members'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button variant="ghost" className="w-full">
-                  Get Started
+                  {hasUserCommunities ? 'Open Dashboard' : 'Get Started'}
                 </Button>
               </CardContent>
             </Link>

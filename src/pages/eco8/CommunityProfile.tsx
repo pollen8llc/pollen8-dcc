@@ -47,8 +47,10 @@ const CommunityProfile: React.FC = () => {
 
   useEffect(() => {
     const loadCommunity = async () => {
-      if (!id) return;
-      
+      if (!id) {
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const foundCommunity = await getCommunityById(id);
