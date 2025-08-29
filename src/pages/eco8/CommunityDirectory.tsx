@@ -29,11 +29,30 @@ const GROWTH_STATUS = [
 ];
 
 const CommunityDirectory: React.FC = () => {
-  const { communities, loading } = useCommunities();
+  const { getAllCommunities } = useCommunities();
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('All Types');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
+
+  useEffect(() => {
+    const loadCommunities = async () => {
+      try {
+        setLoading(true);
+        const result = await getAllCommunities(1, 100); // Load first 100 communities
+        setCommunities(result.data);
+      } catch (error) {
+        console.error('Error loading communities:', error);
+        setCommunities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCommunities();
+  }, [getAllCommunities]);
 
   useEffect(() => {
     let filtered = communities;

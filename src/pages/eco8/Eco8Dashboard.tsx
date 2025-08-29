@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
 import { useCommunities } from '@/hooks/useCommunities';
 import { useAuth } from '@/hooks/useAuth';
-import { CommunityDebugger } from '@/components/debug/CommunityDebugger';
+
 import { 
   Users, 
   Search, 
@@ -295,9 +295,6 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
         )}
       </div>
-      
-      {/* Debug Component - Remove this after debugging */}
-      <CommunityDebugger />
     </div>
   );
 };
