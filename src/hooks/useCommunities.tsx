@@ -60,7 +60,7 @@ export const useCommunities = () => {
     }
   }, [currentUser?.id]);
 
-  const getAllCommunities = async (page = 1, limit = 20) => {
+  const getAllCommunities = useCallback(async (page = 1, limit = 20) => {
     try {
       const { data, error, count } = await supabase
         .from('communities')
@@ -81,7 +81,7 @@ export const useCommunities = () => {
       });
       return { data: [], count: 0 };
     }
-  };
+  }, [toast]);
 
   const getCommunityById = useCallback(async (id: string): Promise<Community | null> => {
     try {
@@ -130,7 +130,7 @@ export const useCommunities = () => {
     }
   };
 
-  const searchCommunities = async (query: string) => {
+  const searchCommunities = useCallback(async (query: string) => {
     try {
       const { data, error } = await supabase
         .from('communities')
@@ -151,7 +151,7 @@ export const useCommunities = () => {
       });
       return { data: [], count: 0 };
     }
-  };
+  }, [toast]);
 
   const createCommunity = async (communityData: any) => {
     try {

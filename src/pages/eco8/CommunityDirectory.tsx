@@ -55,24 +55,37 @@ const CommunityDirectory: React.FC = () => {
   }, [getAllCommunities]);
 
   useEffect(() => {
-    let filtered = communities;
+    try {
+      let filtered = communities;
 
-    // Apply search filter - search across name, description, and tags
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(community =>
-        community.name.toLowerCase().includes(query) ||
-        community.description.toLowerCase().includes(query) ||
-        (community.tags && community.tags.some(tag => tag.toLowerCase().includes(query)))
-      );
+      // Apply search filter - search across name, description, and tags with null guards
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(community => {
+          const name = community.name || '';
+          const description = community.description || '';
+          const tags = Array.isArray(community.tags) ? community.tags : [];
+          
+          return name.toLowerCase().includes(query) ||
+                 description.toLowerCase().includes(query) ||
+                 tags.some(tag => (tag || '').toLowerCase().includes(query));
+        });
+      }
+
+      // Apply type filter - handle both type and community_type fields
+      if (typeFilter !== 'All Types') {
+        const filterType = typeFilter.toLowerCase();
+        filtered = filtered.filter(community => {
+          const communityType = community.type || community.community_type || '';
+          return communityType.toLowerCase() === filterType;
+        });
+      }
+
+      setFilteredCommunities(filtered);
+    } catch (error) {
+      console.error('Error filtering communities:', error);
+      setFilteredCommunities(communities); // Fallback to unfiltered
     }
-
-    // Apply type filter
-    if (typeFilter !== 'All Types') {
-      filtered = filtered.filter(community => community.type === typeFilter.toLowerCase());
-    }
-
-    setFilteredCommunities(filtered);
   }, [communities, searchQuery, typeFilter, statusFilter]);
 
   const clearFilters = () => {
@@ -82,8 +95,13 @@ const CommunityDirectory: React.FC = () => {
   };
 
   const totalMembers = communities.reduce((sum, community) => {
-    const memberCount = parseInt(community.community_size || '1') || 1;
-    return sum + memberCount;
+    try {
+      const sizeStr = community.community_size || community.member_count || '1';
+      const memberCount = parseInt(sizeStr) || 1;
+      return sum + memberCount;
+    } catch {
+      return sum + 1; // Fallback to 1 member if parsing fails
+    }
   }, 0);
 
   if (loading) {
