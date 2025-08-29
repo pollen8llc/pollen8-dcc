@@ -129,9 +129,6 @@ export function Rel8SetupWizard() {
         title: "Setup Complete!",
         description: "Your Rel8 setup is complete. Welcome aboard!"
       });
-
-      // Mark setup as complete in localStorage
-      localStorage.setItem('rel8_setup_complete', 'true');
       
       navigate("/rel8");
     } catch (error) {

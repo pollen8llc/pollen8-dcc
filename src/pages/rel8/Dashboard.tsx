@@ -43,11 +43,11 @@ const Dashboard = () => {
 
   // Check if this is first time setup
   useEffect(() => {
-    const setupComplete = localStorage.getItem('rel8_setup_complete');
-    if (!setupComplete && contactCount === 0 && categories.length === 0) {
+    // Only redirect to setup if user has 0 contacts
+    if (contactCount === 0) {
       navigate("/rel8/setup");
     }
-  }, [contactCount, categories, navigate]);
+  }, [contactCount, navigate]);
 
   // Quick stats calculations
   const quickStats = {
