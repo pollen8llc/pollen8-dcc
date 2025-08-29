@@ -62,7 +62,6 @@ export const useCommunities = () => {
 
   const getAllCommunities = async (page = 1, limit = 20) => {
     try {
-      setLoading(true);
       const { data, error, count } = await supabase
         .from('communities')
         .select('*', { count: 'exact' })
@@ -81,8 +80,6 @@ export const useCommunities = () => {
         variant: 'destructive',
       });
       return { data: [], count: 0 };
-    } finally {
-      setLoading(false);
     }
   };
 
