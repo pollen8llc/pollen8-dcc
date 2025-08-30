@@ -58,6 +58,11 @@ const Nomin8TrackConfig = lazy(() => import("@/pages/nmn8/Nomin8TrackConfig"));
 const Nomin8Settings = lazy(() => import("@/pages/nmn8/Nomin8Settings"));
 const Nomin8ProfileDetails = lazy(() => import("@/pages/nmn8/Nomin8ProfileDetails"));
 
+// Initi8 pages
+const Initi8Dashboard = lazy(() => import("@/pages/initi8/Initi8Dashboard"));
+const SearchProfiles = lazy(() => import("@/pages/initi8/SearchProfiles"));
+const ManageVolunteers = lazy(() => import("@/pages/initi8/ManageVolunteers"));
+
 // Import pages - moved from A10D
 const ImportCSV = lazy(() => import("@/pages/ImportCSV"));
 const ImportEmail = lazy(() => import("@/pages/ImportEmail"));
@@ -484,6 +489,36 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <Nomin8ProfileDetails />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+
+          {/* Initi8 routes */}
+          <Route path="/initi8" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Initi8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/initi8/dashboard" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Initi8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/initi8/search" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <SearchProfiles />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/initi8/volunteers" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <ManageVolunteers />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

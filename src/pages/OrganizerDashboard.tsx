@@ -35,10 +35,10 @@ const OrganizerDashboard = () => {
     {
       id: 'initi8',
       name: 'Initi8',
-      description: 'Onboarding, update your organizer profile',
+      description: 'Onboarding, profile setup, and volunteer management',
       icon: UserCog,
       color: 'hsl(var(--primary))',
-      link: '/profile/edit',
+      link: '/initi8',
       setup: 8, // 80% of 10%
       usage: 25, // 62.5% of 40%
       premium: 15 // 30% of 50%
