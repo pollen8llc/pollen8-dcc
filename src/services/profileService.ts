@@ -13,6 +13,10 @@ export interface ExtendedProfile {
   social_links?: Record<string, string>;
   invited_by?: string;
   profile_complete?: boolean;
+  rel8_complete?: boolean;
+  eco8_complete?: boolean;
+  modul8_complete?: boolean;
+  labr8_complete?: boolean;
   privacy_settings?: {
     profile_visibility: "public" | "connections" | "connections2" | "connections3" | "private";
   };
@@ -133,6 +137,10 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
         privacy_settings: privacy_settings,
         avatar_url: profileData.avatar_url,
         profile_complete: profileData.profile_complete,
+        rel8_complete: profileData.rel8_complete,
+        eco8_complete: profileData.eco8_complete,
+        modul8_complete: profileData.modul8_complete,
+        labr8_complete: profileData.labr8_complete,
         phone: profileData.phone,
         website: profileData.website,
       })

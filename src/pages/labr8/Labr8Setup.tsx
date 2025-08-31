@@ -134,7 +134,10 @@ const Labr8Setup = () => {
       // Update profile completion status
       await supabase
         .from('profiles')
-        .update({ profile_complete: true })
+        .update({ 
+          profile_complete: true,
+          labr8_complete: true 
+        })
         .eq('id', currentUser.id);
 
       toast({
@@ -142,7 +145,7 @@ const Labr8Setup = () => {
         description: "Your LAB-R8 service provider profile has been created successfully.",
       });
 
-      navigate("/labr8/inbox");
+      navigate("/labr8");
     } catch (error: any) {
       console.error('Error creating service provider profile:', error);
       toast({

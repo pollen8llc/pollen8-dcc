@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/hooks/useSession";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
@@ -15,6 +17,7 @@ import { useEffect } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { session } = useSession();
   const [activeTab, setActiveTab] = useState("outreach");
   
   // Get outreach status counts with shorter staleTime
@@ -43,11 +46,30 @@ const Dashboard = () => {
 
   // Check if this is first time setup
   useEffect(() => {
-    // Only redirect to setup if user has 0 contacts
-    if (contactCount === 0) {
-      navigate("/rel8/setup");
+    const checkSetupStatus = async () => {
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('rel8_complete')
+          .eq('id', session?.user?.id)
+          .single();
+        
+        if (!data?.rel8_complete) {
+          navigate("/rel8/setup");
+        }
+      } catch (error) {
+        console.error('Error checking REL8 setup status:', error);
+        // Fallback to contact count check
+        if (contactCount === 0) {
+          navigate("/rel8/setup");
+        }
+      }
+    };
+
+    if (session?.user?.id) {
+      checkSetupStatus();
     }
-  }, [contactCount, navigate]);
+  }, [session?.user?.id, contactCount, navigate]);
 
   // Quick stats calculations
   const quickStats = {

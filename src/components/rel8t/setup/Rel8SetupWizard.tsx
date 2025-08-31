@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +14,6 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle, CalendarIcon, Clock, Users, Building2, Zap } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
 import { createCategory } from "@/services/rel8t/contactService";
 import { createContact } from "@/services/rel8t/contactService";
 import { createTrigger } from "@/services/rel8t/triggerService";
@@ -44,6 +45,33 @@ export function Rel8SetupWizard() {
     contact: { name: "", email: "", category_id: "" },
     trigger: { name: "", triggerDate: new Date(), triggerTime: "09:00" }
   });
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      // Mark REL8 setup as complete
+      const { data: user } = await supabase.auth.getUser();
+      if (user?.user?.id) {
+        await supabase
+          .from('profiles')
+          .update({ rel8_complete: true })
+          .eq('id', user.user.id);
+      }
+      
+      navigate("/rel8");
+    } catch (error) {
+      console.error('Error completing REL8 setup:', error);
+      toast({
+        title: "Error",
+        description: "Failed to complete setup",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const updateState = (updates: Partial<SetupState>) => {
     setState(prev => ({ ...prev, ...updates }));
@@ -129,6 +157,15 @@ export function Rel8SetupWizard() {
         title: "Setup Complete!",
         description: "Your Rel8 setup is complete. Welcome aboard!"
       });
+      
+      // Mark REL8 setup as complete
+      const { data: user } = await supabase.auth.getUser();
+      if (user?.user?.id) {
+        await supabase
+          .from('profiles')
+          .update({ rel8_complete: true })
+          .eq('id', user.user.id);
+      }
       
       navigate("/rel8");
     } catch (error) {

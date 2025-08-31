@@ -1749,16 +1749,20 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          eco8_complete: boolean | null
           email: string
           first_name: string | null
           id: string
           interests: string[] | null
           invited_by: string | null
+          labr8_complete: boolean | null
           last_name: string | null
           location: string | null
+          modul8_complete: boolean | null
           phone: string | null
           privacy_settings: Json
           profile_complete: boolean | null
+          rel8_complete: boolean | null
           social_links: Json | null
           updated_at: string
           user_id: string
@@ -1769,16 +1773,20 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          eco8_complete?: boolean | null
           email: string
           first_name?: string | null
           id?: string
           interests?: string[] | null
           invited_by?: string | null
+          labr8_complete?: boolean | null
           last_name?: string | null
           location?: string | null
+          modul8_complete?: boolean | null
           phone?: string | null
           privacy_settings?: Json
           profile_complete?: boolean | null
+          rel8_complete?: boolean | null
           social_links?: Json | null
           updated_at?: string
           user_id?: string
@@ -1789,16 +1797,20 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          eco8_complete?: boolean | null
           email?: string
           first_name?: string | null
           id?: string
           interests?: string[] | null
           invited_by?: string | null
+          labr8_complete?: boolean | null
           last_name?: string | null
           location?: string | null
+          modul8_complete?: boolean | null
           phone?: string | null
           privacy_settings?: Json
           profile_complete?: boolean | null
+          rel8_complete?: boolean | null
           social_links?: Json | null
           updated_at?: string
           user_id?: string
@@ -2483,16 +2495,20 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          eco8_complete: boolean | null
           email: string
           first_name: string | null
           id: string
           interests: string[] | null
           invited_by: string | null
+          labr8_complete: boolean | null
           last_name: string | null
           location: string | null
+          modul8_complete: boolean | null
           phone: string | null
           privacy_settings: Json
           profile_complete: boolean | null
+          rel8_complete: boolean | null
           social_links: Json | null
           updated_at: string
           user_id: string

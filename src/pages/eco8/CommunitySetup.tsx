@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { CommunityCreationForm } from '@/components/eco8/CommunityCreationForm';
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
+import { supabase } from '@/integrations/supabase/client';
 import { useCommunities } from '@/hooks/useCommunities';
 
 const CommunitySetup: React.FC = () => {
@@ -18,8 +19,27 @@ const CommunitySetup: React.FC = () => {
 
   const handleSuccess = (community: any) => {
     console.log('Community created successfully:', community);
-    // Navigate to the new community page or dashboard
-    navigate(`/eco8/community/${community.id}`);
+    
+    // Mark ECO8 setup as complete
+    const completeSetup = async () => {
+      try {
+        const { data: user } = await supabase.auth.getUser();
+        if (user?.user?.id) {
+          await supabase
+            .from('profiles')
+            .update({ eco8_complete: true })
+            .eq('id', user.user.id);
+        }
+        // Navigate to the new community page or dashboard
+        navigate(`/eco8/community/${community.id}`);
+      } catch (error) {
+        console.error('Error completing ECO8 setup:', error);
+        // Still navigate even if update fails
+        navigate(`/eco8/community/${community.id}`);
+      }
+    };
+    
+    completeSetup();
   };
 
   const handleCancel = () => {

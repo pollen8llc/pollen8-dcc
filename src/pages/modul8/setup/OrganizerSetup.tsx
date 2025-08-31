@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
+import { supabase } from '@/integrations/supabase/client';
 import { createOrganizer } from '@/services/modul8Service';
 import { CreateOrganizerData } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,6 +43,15 @@ const OrganizerSetup = () => {
       };
 
       await createOrganizer(createData);
+      
+      // Mark MODUL8 setup as complete
+      const { data: user } = await supabase.auth.getUser();
+      if (user?.user?.id) {
+        await supabase
+          .from('profiles')
+          .update({ modul8_complete: true })
+          .eq('id', user.user.id);
+      }
       
       toast({
         title: "Success!",

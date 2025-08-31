@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
+import { supabase } from '@/integrations/supabase/client';
 import { getUserOrganizer } from '@/services/modul8Service';
 import { DOMAIN_PAGES } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +27,18 @@ const Modul8Dashboard = () => {
     if (!session?.user?.id) return;
     
     try {
+      // Check MODUL8 setup status first
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('modul8_complete')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (!profileData?.modul8_complete) {
+        navigate('/modul8/setup/organizer');
+        return;
+      }
+      
       const organizer = await getUserOrganizer(session.user.id);
       if (!organizer) {
         navigate('/modul8/setup/organizer');

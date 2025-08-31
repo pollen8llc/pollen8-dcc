@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   getUserServiceProvider,
   getProviderServiceRequests,
@@ -46,6 +47,18 @@ const Labr8Dashboard = () => {
 
     try {
       setLoading(true);
+      
+      // Check LABR8 setup status first
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('labr8_complete')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (!profileData?.labr8_complete) {
+        navigate('/labr8/setup');
+        return;
+      }
       
       const provider = await getUserServiceProvider(session.user.id);
       if (!provider) {
