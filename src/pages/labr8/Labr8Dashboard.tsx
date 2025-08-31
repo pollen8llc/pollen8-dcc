@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
-import { supabase } from '@/integrations/supabase/client';
 import { 
   getUserServiceProvider,
   getProviderServiceRequests,
@@ -29,6 +28,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 
 const Labr8Dashboard = () => {
   const { session, logout } = useSession();
@@ -37,31 +37,31 @@ const Labr8Dashboard = () => {
   const [assignedRequests, setAssignedRequests] = useState<ServiceRequest[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const { labr8_complete, loading: completionLoading } = useModuleCompletion();
 
   useEffect(() => {
     loadProviderData();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, completionLoading, labr8_complete]);
 
   const loadProviderData = async () => {
     if (!session?.user?.id) return;
+    
+    // Check LABR8 setup status - only use database state
+    if (!completionLoading && labr8_complete === false) {
+      navigate('/labr8/setup');
+      return;
+    }
+    
+    if (completionLoading || labr8_complete === null) {
+      return;
+    }
 
     try {
       setLoading(true);
       
-      // Check LABR8 setup status first
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('labr8_complete')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (!profileData?.labr8_complete) {
-        navigate('/labr8/setup');
-        return;
-      }
-      
       const provider = await getUserServiceProvider(session.user.id);
       if (!provider) {
+        // If no provider found but setup is marked complete, redirect to setup to fix inconsistency
         navigate('/labr8/setup');
         return;
       }

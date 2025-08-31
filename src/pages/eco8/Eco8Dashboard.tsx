@@ -1,14 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
-import { supabase } from '@/integrations/supabase/client';
-import { useSession } from '@/hooks/useSession';
 import { useCommunities } from '@/hooks/useCommunities';
 import { useAuth } from '@/hooks/useAuth';
+import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 
 import { 
   Users, 
@@ -28,36 +27,16 @@ import {
 
 const Eco8Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { session } = useSession();
   const { userCommunities, hasUserCommunities, loading } = useCommunities();
   const { currentUser } = useAuth();
+  const { eco8_complete, loading: completionLoading } = useModuleCompletion();
 
-  // Check ECO8 setup status
-  useEffect(() => {
-    const checkSetupStatus = async () => {
-      try {
-        const { data } = await supabase
-          .from('profiles')
-          .select('eco8_complete')
-          .eq('id', session?.user?.id)
-          .single();
-        
-        if (!data?.eco8_complete) {
-          navigate("/eco8/setup");
-        }
-      } catch (error) {
-        console.error('Error checking ECO8 setup status:', error);
-        // Fallback to community count check
-        if (!loading && !hasUserCommunities) {
-          navigate("/eco8/setup");
-        }
-      }
-    };
-
-    if (session?.user?.id) {
-      checkSetupStatus();
+  // Check ECO8 setup status - only use database state
+  React.useEffect(() => {
+    if (!completionLoading && eco8_complete === false) {
+      navigate("/eco8/setup");
     }
-  }, [session?.user?.id, loading, hasUserCommunities, navigate]);
+  }, [completionLoading, eco8_complete, navigate]);
 
   // Debug logging
   console.log('Eco8Dashboard - Current user:', currentUser?.id);

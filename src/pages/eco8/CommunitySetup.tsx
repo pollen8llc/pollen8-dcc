@@ -5,17 +5,17 @@ import { CommunityCreationForm } from '@/components/eco8/CommunityCreationForm';
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
 import { supabase } from '@/integrations/supabase/client';
-import { useCommunities } from '@/hooks/useCommunities';
+import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 
 const CommunitySetup: React.FC = () => {
   const navigate = useNavigate();
-  const { hasUserCommunities, loading } = useCommunities();
+  const { eco8_complete, loading } = useModuleCompletion();
 
   React.useEffect(() => {
-    if (!loading && hasUserCommunities) {
+    if (!loading && eco8_complete === true) {
       navigate('/eco8');
     }
-  }, [loading, hasUserCommunities, navigate]);
+  }, [loading, eco8_complete, navigate]);
 
   const handleSuccess = (community: any) => {
     console.log('Community created successfully:', community);

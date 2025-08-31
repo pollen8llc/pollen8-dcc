@@ -3,8 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useSession } from "@/hooks/useSession";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
@@ -13,12 +11,13 @@ import { getContactCount, getCategories } from "@/services/rel8t/contactService"
 import { Calendar, Users, Heart, Settings, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { useModuleCompletion } from "@/hooks/useModuleCompletion";
 import { useEffect } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { session } = useSession();
   const [activeTab, setActiveTab] = useState("outreach");
+  const { rel8_complete, loading: completionLoading } = useModuleCompletion();
   
   // Get outreach status counts with shorter staleTime
   const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 } } = useQuery({
@@ -44,32 +43,12 @@ const Dashboard = () => {
     navigate("/rel8/build-rapport");
   };
 
-  // Check if this is first time setup
+  // Check REL8 setup status - only use database state
   useEffect(() => {
-    const checkSetupStatus = async () => {
-      try {
-        const { data } = await supabase
-          .from('profiles')
-          .select('rel8_complete')
-          .eq('id', session?.user?.id)
-          .single();
-        
-        if (!data?.rel8_complete) {
-          navigate("/rel8/setup");
-        }
-      } catch (error) {
-        console.error('Error checking REL8 setup status:', error);
-        // Fallback to contact count check
-        if (contactCount === 0) {
-          navigate("/rel8/setup");
-        }
-      }
-    };
-
-    if (session?.user?.id) {
-      checkSetupStatus();
+    if (!completionLoading && rel8_complete === false) {
+      navigate("/rel8/setup");
     }
-  }, [session?.user?.id, contactCount, navigate]);
+  }, [completionLoading, rel8_complete, navigate]);
 
   // Quick stats calculations
   const quickStats = {

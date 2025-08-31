@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { supabase } from '@/integrations/supabase/client';
 import { getUserOrganizer } from '@/services/modul8Service';
 import { DOMAIN_PAGES } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,36 +10,36 @@ import { Building2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import CompactHeader from '@/components/modul8/CompactHeader';
 import { toast } from '@/hooks/use-toast';
+import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 
 const Modul8Dashboard = () => {
-  const { session } = useSession();
   const navigate = useNavigate();
-  
+  const { session } = useSession();
   const [organizerData, setOrganizerData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { modul8_complete, loading: completionLoading } = useModuleCompletion();
 
   useEffect(() => {
     loadData();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, completionLoading, modul8_complete]);
 
   const loadData = async () => {
     if (!session?.user?.id) return;
     
+    // Check MODUL8 setup status - only use database state
+    if (!completionLoading && modul8_complete === false) {
+      navigate('/modul8/setup/organizer');
+      return;
+    }
+    
+    if (completionLoading || modul8_complete === null) {
+      return;
+    }
+    
     try {
-      // Check MODUL8 setup status first
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('modul8_complete')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (!profileData?.modul8_complete) {
-        navigate('/modul8/setup/organizer');
-        return;
-      }
-      
       const organizer = await getUserOrganizer(session.user.id);
       if (!organizer) {
+        // If no organizer found but setup is marked complete, redirect to setup to fix inconsistency
         navigate('/modul8/setup/organizer');
         return;
       }
