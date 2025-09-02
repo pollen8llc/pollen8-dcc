@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import Navbar from "@/components/Navbar";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,10 +28,9 @@ const BuildRapport = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Rel8Header />
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        <Rel8OnlyNavigation />
         
         <div className="flex items-center gap-4 mt-4 sm:mt-6 mb-6 sm:mb-8">
           <Button 

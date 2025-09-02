@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
@@ -9,7 +8,7 @@ import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { Contact } from "@/services/rel8t/contactService";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Rel8Navigation } from "@/components/rel8t/Rel8TNavigation";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 
@@ -100,7 +99,7 @@ const RelationshipWizard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Rel8Header showProfileBanner={false} />
       
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-4">
@@ -117,8 +116,6 @@ const RelationshipWizard = () => {
             Back to {selectedTrigger ? "Build Rapport" : "Dashboard"}
           </Button>
         </div>
-        
-        <Rel8Navigation />
         
         <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
           <div>

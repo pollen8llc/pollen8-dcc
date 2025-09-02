@@ -1,5 +1,4 @@
-import Navbar from "@/components/Navbar";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,10 +57,9 @@ const TriggerWizard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <Navbar />
+      <Rel8Header />
       
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full space-y-6">
-        <Rel8OnlyNavigation />
         
         <div className="flex items-center gap-4 mt-4 sm:mt-6 mb-6 sm:mb-8">
           <Button 

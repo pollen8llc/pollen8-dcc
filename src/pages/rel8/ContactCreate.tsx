@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import ContactForm from "@/components/rel8t/ContactForm";
 import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
@@ -63,7 +63,7 @@ const ContactCreate = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <Navbar />
+      <Rel8Header showProfileBanner={false} />
       
       <div className="container mx-auto px-4 py-6 space-y-6">
         <Breadcrumb>

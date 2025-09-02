@@ -1,13 +1,13 @@
 import React from 'react';
-import Navbar from "@/components/Navbar";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Rel8SetupWizard } from "@/components/rel8t/setup/Rel8SetupWizard";
 
 const Setup = () => {
   return (
-    <>
-      <Navbar />
+    <div className="min-h-screen bg-background">
+      <Rel8Header showProfileBanner={false} />
       <Rel8SetupWizard />
-    </>
+    </div>
   );
 };
 

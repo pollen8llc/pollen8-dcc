@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
 import { Calendar, Users, Heart, Settings, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
-import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useModuleCompletion } from "@/hooks/useModuleCompletion";
 import { useEffect } from "react";
 
@@ -60,14 +58,10 @@ const Dashboard = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <Navbar />
-      
-      {/* DotConnector Header with Sliver */}
-      <DotConnectorHeader />
+      <Rel8Header />
 
-      {/* Full-width content below the sliver */}
+      {/* Full-width content below the header */}
       <div className="w-full px-4 py-8">
-        <Rel8OnlyNavigation />
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">

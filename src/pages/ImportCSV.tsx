@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { toast } from "@/hooks/use-toast";
 import { createContact } from "@/services/rel8t/contactService";
 import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
@@ -74,7 +75,7 @@ const ImportCSV = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      {isRel8Import ? <Rel8Header /> : <Navbar />}
       
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Header */}

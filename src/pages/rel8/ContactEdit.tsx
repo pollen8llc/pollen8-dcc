@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import Navbar from "@/components/Navbar";
+import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import ContactForm from "@/components/rel8t/ContactForm";
 import { 
   getContactById, 
@@ -166,7 +166,7 @@ const ContactEdit = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-        <Navbar />
+        <Rel8Header showProfileBanner={false} />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
@@ -182,7 +182,7 @@ const ContactEdit = () => {
   if (!contact && !isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-        <Navbar />
+        <Rel8Header showProfileBanner={false} />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold mb-4 text-muted-foreground">Contact not found</h2>
@@ -204,7 +204,7 @@ const ContactEdit = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <Navbar />
+      <Rel8Header showProfileBanner={false} />
       
       <div className="container mx-auto px-4 py-6 space-y-6">
         <Breadcrumb>
