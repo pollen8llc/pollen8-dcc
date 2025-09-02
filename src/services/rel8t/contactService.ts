@@ -189,6 +189,9 @@ export const updateContact = async (id: string, contact: Partial<Contact>): Prom
   // Remove groups from the contact data as they're stored in separate tables
   const { groups, ...contactData } = contact;
   
+  console.log("Updating contact with ID:", id);
+  console.log("Contact data to update:", contactData);
+  
   const { data, error } = await supabase
     .from("rms_contacts")
     .update(contactData)
@@ -203,9 +206,11 @@ export const updateContact = async (id: string, contact: Partial<Contact>): Prom
     `);
   
   if (error) {
+    console.error("Error updating contact:", error);
     throw new Error(error.message);
   }
   
+  console.log("Contact update result:", data);
   return data[0];
 };
 
@@ -303,6 +308,8 @@ export const addContactToGroup = async (
   contactId: string,
   groupId: string
 ): Promise<void> => {
+  console.log("Adding contact to group:", { contactId, groupId });
+  
   const { error } = await supabase
     .from("rms_contact_group_members")
     .insert([{ 
@@ -311,8 +318,11 @@ export const addContactToGroup = async (
     }]);
   
   if (error) {
+    console.error("Error adding contact to group:", error);
     throw new Error(error.message);
   }
+  
+  console.log("Successfully added contact to group");
 };
 
 // Remove a contact from a group
@@ -320,6 +330,8 @@ export const removeContactFromGroup = async (
   contactId: string,
   groupId: string
 ): Promise<void> => {
+  console.log("Removing contact from group:", { contactId, groupId });
+  
   const { error } = await supabase
     .from("rms_contact_group_members")
     .delete()
@@ -329,8 +341,11 @@ export const removeContactFromGroup = async (
     });
   
   if (error) {
+    console.error("Error removing contact from group:", error);
     throw new Error(error.message);
   }
+  
+  console.log("Successfully removed contact from group");
 };
 
 // Get all contacts in a group

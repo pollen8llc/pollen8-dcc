@@ -54,8 +54,14 @@ const ContactEdit = () => {
     mutationFn: async (values: any) => {
       if (!id) throw new Error("Contact ID is required");
       
+      console.log("ContactEdit mutation - received values:", values);
+      
       // Extract selectedGroups from values before updating contact
       const { selectedGroups, ...contactData } = values;
+      
+      console.log("ContactEdit mutation - contact data:", contactData);
+      console.log("ContactEdit mutation - selected groups:", selectedGroups);
+      console.log("ContactEdit mutation - current contact groups:", contact?.groups);
       
       // Update basic contact data
       const updatedContact = await updateContact(id, contactData);
@@ -66,6 +72,9 @@ const ContactEdit = () => {
         const currentGroupIds = contact.groups.map(g => g.id);
         const groupsToAdd = selectedGroups.filter((g: string) => !currentGroupIds.includes(g));
         const groupsToRemove = currentGroupIds.filter(g => !selectedGroups.includes(g));
+        
+        console.log("Groups to add:", groupsToAdd);
+        console.log("Groups to remove:", groupsToRemove);
         
         // Add contact to new groups
         for (const groupId of groupsToAdd) {
