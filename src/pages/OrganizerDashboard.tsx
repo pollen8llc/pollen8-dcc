@@ -52,10 +52,7 @@ const OrganizerDashboard = () => {
       })(),
       icon: Building2,
       color: 'hsl(142 76% 36%)', // green
-      link: (() => {
-        const communities = JSON.parse(localStorage.getItem('communities') || '[]');
-        return communities.length > 0 ? '/eco8/dashboard' : '/eco8/setup';
-      })(),
+      link: '/eco8',
       setup: 10, // 100% of 10%
       usage: 20, // 50% of 40%
       premium: 0 // 0% of 50%

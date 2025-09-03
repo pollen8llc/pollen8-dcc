@@ -4,7 +4,9 @@ import { MapPin, Users, TrendingUp } from "lucide-react";
 import { Community } from "@/hooks/useCommunities";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
+import { useProfiles } from "@/hooks/useProfiles";
+import { ExtendedProfile } from "@/services/profileService";
 
 interface CommunityCardProps {
   community: Community;
@@ -19,9 +21,30 @@ const GROWTH_STATUS_COLORS = {
 
 // Using memo to prevent unnecessary re-renders
 const CommunityCard = memo(({ community }: CommunityCardProps) => {
-  // Mock organizer data since it's not in the current Community interface
-  const organizerName = "Community Organizer";
-  const organizerAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&q=80";
+  const { getProfileById } = useProfiles();
+  const [organizer, setOrganizer] = useState<ExtendedProfile | null>(null);
+  
+  // Fetch organizer profile data
+  useEffect(() => {
+    const fetchOrganizer = async () => {
+      if (community.owner_id) {
+        try {
+          const profile = await getProfileById(community.owner_id);
+          setOrganizer(profile);
+        } catch (error) {
+          console.error('Failed to fetch organizer profile:', error);
+        }
+      }
+    };
+    
+    fetchOrganizer();
+  }, [community.owner_id, getProfileById]);
+  
+  // Fallback data
+  const organizerName = organizer 
+    ? `${organizer.first_name} ${organizer.last_name}`.trim() || organizer.email || "Community Organizer"
+    : "Community Organizer";
+  const organizerAvatar = organizer?.avatar_url;
   
   // Mock growth status since it's not in current interface
   const growthStatus = 'active';

@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, Users, Plus } from 'lucide-react';
+import { Search, Users, Plus, Filter, X } from 'lucide-react';
 import CommunityCard from '@/components/CommunityCard';
 import Navbar from '@/components/Navbar';
+import { FilterDialog } from '@/components/eco8/FilterDialog';
 import { useCommunities, Community } from '@/hooks/useCommunities';
 
 const COMMUNITY_TYPES = [
@@ -34,8 +34,8 @@ const CommunityDirectory: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('All Types');
-  const [statusFilter, setStatusFilter] = useState('All Statuses');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
 
   useEffect(() => {
     const loadCommunities = async () => {
@@ -72,12 +72,23 @@ const CommunityDirectory: React.FC = () => {
         });
       }
 
-      // Apply type filter - handle both type and community_type fields
-      if (typeFilter !== 'All Types') {
-        const filterType = typeFilter.toLowerCase();
+      // Apply tags filter
+      if (selectedTags.length > 0) {
         filtered = filtered.filter(community => {
-          const communityType = community.type || community.community_type || '';
-          return communityType.toLowerCase() === filterType;
+          const tags = Array.isArray(community.tags) ? community.tags : [];
+          return selectedTags.some(selectedTag => 
+            tags.some(tag => tag && tag.toLowerCase() === selectedTag.toLowerCase())
+          );
+        });
+      }
+
+      // Apply locations filter
+      if (selectedLocations.length > 0) {
+        filtered = filtered.filter(community => {
+          const location = community.location || '';
+          return selectedLocations.some(selectedLocation =>
+            location.toLowerCase() === selectedLocation.toLowerCase()
+          );
         });
       }
 
@@ -86,13 +97,15 @@ const CommunityDirectory: React.FC = () => {
       console.error('Error filtering communities:', error);
       setFilteredCommunities(communities); // Fallback to unfiltered
     }
-  }, [communities, searchQuery, typeFilter, statusFilter]);
+  }, [communities, searchQuery, selectedTags, selectedLocations]);
 
   const clearFilters = () => {
     setSearchQuery('');
-    setTypeFilter('All Types');
-    setStatusFilter('All Statuses');
+    setSelectedTags([]);
+    setSelectedLocations([]);
   };
+
+  const hasActiveFilters = selectedTags.length > 0 || selectedLocations.length > 0;
 
   const totalMembers = communities.reduce((sum, community) => {
     try {
@@ -127,7 +140,7 @@ const CommunityDirectory: React.FC = () => {
 
         {/* Search & Filter Bar */}
         <Card className="bg-card border rounded-2xl p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
@@ -137,29 +150,71 @@ const CommunityDirectory: React.FC = () => {
                 className="pl-10 bg-background"
               />
             </div>
-            <div className="flex gap-3">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Community Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMMUNITY_TYPES.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            
+            <div className="flex flex-wrap gap-3">
+              <FilterDialog
+                title="Filter by Tags"
+                type="tags"
+                selectedValues={selectedTags}
+                onSelectionChange={setSelectedTags}
+              >
+                <Button variant="outline" className="gap-2">
+                  <Filter className="h-4 w-4" />
+                  Tags {selectedTags.length > 0 && `(${selectedTags.length})`}
+                </Button>
+              </FilterDialog>
               
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Growth Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {GROWTH_STATUS.map(status => (
-                    <SelectItem key={status} value={status}>{status}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FilterDialog
+                title="Filter by Location"
+                type="locations"
+                selectedValues={selectedLocations}
+                onSelectionChange={setSelectedLocations}
+              >
+                <Button variant="outline" className="gap-2">
+                  <Filter className="h-4 w-4" />
+                  Locations {selectedLocations.length > 0 && `(${selectedLocations.length})`}
+                </Button>
+              </FilterDialog>
+              
+              {hasActiveFilters && (
+                <Button variant="ghost" onClick={clearFilters} className="gap-2">
+                  <X className="h-4 w-4" />
+                  Clear Filters
+                </Button>
+              )}
             </div>
+            
+            {/* Active Filters Display */}
+            {hasActiveFilters && (
+              <div className="flex flex-wrap gap-2 pt-2 border-t">
+                {selectedTags.map(tag => (
+                  <Badge 
+                    key={tag} 
+                    variant="secondary" 
+                    className="bg-primary/10 text-primary gap-1"
+                  >
+                    {tag}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:bg-primary/20 rounded-full p-0.5" 
+                      onClick={() => setSelectedTags(prev => prev.filter(t => t !== tag))}
+                    />
+                  </Badge>
+                ))}
+                {selectedLocations.map(location => (
+                  <Badge 
+                    key={location} 
+                    variant="secondary" 
+                    className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 gap-1"
+                  >
+                    {location}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5" 
+                      onClick={() => setSelectedLocations(prev => prev.filter(l => l !== location))}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </Card>
 
