@@ -11,20 +11,14 @@ const CommunitySetup: React.FC = () => {
   const navigate = useNavigate();
   const { eco8_complete, loading } = useModuleCompletion();
 
-  React.useEffect(() => {
-    if (!loading && eco8_complete === true) {
-      navigate('/eco8');
-    }
-  }, [loading, eco8_complete, navigate]);
-
   const handleSuccess = (community: any) => {
     console.log('Community created successfully:', community);
     
-    // Mark ECO8 setup as complete
+    // Mark ECO8 setup as complete for first-time users
     const completeSetup = async () => {
       try {
         const { data: user } = await supabase.auth.getUser();
-        if (user?.user?.id) {
+        if (user?.user?.id && !eco8_complete) {
           await supabase
             .from('profiles')
             .update({ eco8_complete: true })
