@@ -58,6 +58,9 @@ const Nomin8TrackConfig = lazy(() => import("@/pages/nmn8/Nomin8TrackConfig"));
 const Nomin8Settings = lazy(() => import("@/pages/nmn8/Nomin8Settings"));
 const Nomin8ProfileDetails = lazy(() => import("@/pages/nmn8/Nomin8ProfileDetails"));
 
+// Evalu8 pages
+const Evalu8Dashboard = lazy(() => import("@/pages/Evalu8Dashboard"));
+
 // Initi8 pages
 const Initi8Dashboard = lazy(() => import("@/pages/initi8/Initi8Dashboard"));
 const SearchProfiles = lazy(() => import("@/pages/initi8/SearchProfiles"));
@@ -519,6 +522,15 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <ManageVolunteers />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+
+          {/* Evalu8 routes */}
+          <Route path="/analytics" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Evalu8Dashboard />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

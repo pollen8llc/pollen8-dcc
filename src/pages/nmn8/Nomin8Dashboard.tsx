@@ -1,183 +1,141 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, Search, Users, BarChart3, Star, Filter } from 'lucide-react';
+import { ArrowLeft, Search, Users, Plus, Star, Shield, Heart, Trophy, Mail, Phone, Building, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
-import Nomin8ProfileCard from '@/components/nomin8/Nomin8ProfileCard';
-import Nomin8AddProfileDialog from '@/components/nomin8/Nomin8AddProfileDialog';
 import { Nomin8Navigation } from '@/components/nomin8/Nomin8Navigation';
-import { Nomin8Profile, Nomin8Classification, Nomin8Metrics } from '@/types/nomin8';
+import { Nomin8Classification } from '@/types/nomin8';
+import { toast } from '@/hooks/use-toast';
 
-// Mock data for development
-const mockProfiles: Nomin8Profile[] = [
+// Mock contacts data from REL8
+const mockContacts = [
   {
     id: '1',
-    contactId: 'contact-1',
     name: 'Sarah Chen',
     email: 'sarah.chen@example.com',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200',
-    location: 'San Francisco, CA',
-    classification: 'Ambassador',
-    communityEngagement: 95,
-    eventsAttended: 12,
-    interests: ['Tech Leadership', 'AI/ML', 'Community Building'],
-    joinDate: '2024-01-15',
-    lastActive: '2024-03-10',
-    notes: 'Highly engaged community leader, excellent speaker',
-    socialMedia: {
-      twitter: '@sarahchen',
-      linkedin: 'sarah-chen-tech'
-    }
+    phone: '+1 (555) 123-4567',
+    organization: 'Tech Innovators Inc',
+    tags: ['tech', 'speaker', 'mentor'],
+    notes: 'Active community member, speaks at events',
+    lastContact: '2024-03-10',
+    connectionStrength: 'strong'
   },
   {
     id: '2',
-    contactId: 'contact-2',
     name: 'Marcus Rodriguez',
     email: 'marcus@example.com',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-    location: 'Austin, TX',
-    classification: 'Volunteer',
-    communityEngagement: 88,
-    eventsAttended: 15,
-    interests: ['Event Planning', 'Community Outreach', 'Non-Profit'],
-    joinDate: '2024-02-01',
-    lastActive: '2024-03-08',
-    notes: 'Reliable volunteer, great with logistics',
-    socialMedia: {
-      linkedin: 'marcus-rodriguez'
-    }
+    phone: '+1 (555) 234-5678',
+    organization: 'Community Builders LLC',
+    tags: ['events', 'organizing', 'volunteer'],
+    notes: 'Helps organize community events',
+    lastContact: '2024-03-08',
+    connectionStrength: 'medium'
   },
   {
     id: '3',
-    contactId: 'contact-3',
     name: 'Elena Vasquez',
     email: 'elena.v@example.com',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-    location: 'Miami, FL',
-    classification: 'Moderator',
-    communityEngagement: 92,
-    eventsAttended: 18,
-    interests: ['Content Moderation', 'Community Guidelines', 'Digital Safety'],
-    joinDate: '2023-11-20',
-    lastActive: '2024-03-09',
-    notes: 'Excellent moderator, handles conflicts well',
-    socialMedia: {
-      twitter: '@elena_v',
-      linkedin: 'elena-vasquez-community'
-    }
+    phone: '+1 (555) 345-6789',
+    organization: 'Digital Safety Corp',
+    tags: ['moderation', 'safety', 'guidelines'],
+    notes: 'Expert in community moderation',
+    lastContact: '2024-03-09',
+    connectionStrength: 'strong'
   },
   {
     id: '4',
-    contactId: 'contact-4',
     name: 'David Kim',
     email: 'david.kim@example.com',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
-    location: 'Seattle, WA',
-    classification: 'Supporter',
-    communityEngagement: 85,
-    eventsAttended: 10,
-    interests: ['Tech Trends', 'Startups', 'Innovation'],
-    joinDate: '2024-02-20',
-    lastActive: '2024-03-05',
-    notes: 'Tech-savvy supporter, great networker',
-    socialMedia: {
-      linkedin: 'david-kim-tech'
-    }
+    phone: '+1 (555) 456-7890',
+    organization: 'StartupTech',
+    tags: ['networking', 'startups', 'innovation'],
+    notes: 'Great networker, connects people',
+    lastContact: '2024-03-05',
+    connectionStrength: 'medium'
+  },
+  {
+    id: '5',
+    name: 'Priya Patel',
+    email: 'priya.patel@example.com',
+    phone: '+1 (555) 567-8901',
+    organization: 'Women in Tech Foundation',
+    tags: ['diversity', 'mentorship', 'leadership'],
+    notes: 'Champions diversity and inclusion',
+    lastContact: '2024-03-11',
+    connectionStrength: 'strong'
+  },
+  {
+    id: '6',
+    name: 'Chris Johnson',
+    email: 'chris.j@example.com',
+    phone: '+1 (555) 678-9012',
+    organization: 'Innovation Labs',
+    tags: ['new-member', 'interested', 'potential'],
+    notes: 'New to community, showing interest',
+    lastContact: '2024-03-05',
+    connectionStrength: 'weak'
   }
 ];
 
+// Mock A10D groups for assignment
+const mockA10DGroups = [
+  { id: '1', name: 'Core Community Leaders', color: 'primary' },
+  { id: '2', name: 'Event Organizers', color: 'green' },
+  { id: '3', name: 'Content Moderators', color: 'blue' },
+  { id: '4', name: 'New Member Supporters', color: 'orange' },
+  { id: '5', name: 'Tech Mentors', color: 'purple' }
+];
+
 const Nomin8Dashboard: React.FC = () => {
-  const [profiles, setProfiles] = useState<Nomin8Profile[]>(mockProfiles);
+  const navigate = useNavigate();
+  const [contacts] = useState(mockContacts);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedClassification, setSelectedClassification] = useState<Nomin8Classification | 'all'>('all');
-  const [showAddDialog, setShowAddDialog] = useState(false);
 
-  const filteredProfiles = useMemo(() => {
-    return profiles.filter(profile => {
-      const matchesSearch = profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          profile.email.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesClassification = selectedClassification === 'all' || 
-                                   profile.classification === selectedClassification;
-      return matchesSearch && matchesClassification;
-    });
-  }, [profiles, searchQuery, selectedClassification]);
+  // Filter contacts based on search
+  const filteredContacts = useMemo(() => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.organization?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contact.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [contacts, searchQuery]);
 
-  // Group profiles by classification
-  const profilesByClassification = useMemo(() => {
-    const groups: Record<Nomin8Classification, Nomin8Profile[]> = {
-      Ambassador: [],
-      Volunteer: [],
-      Moderator: [],
-      Supporter: []
-    };
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
 
-    filteredProfiles.forEach(profile => {
-      groups[profile.classification].push(profile);
-    });
-
-    return groups;
-  }, [filteredProfiles]);
-
-  // Calculate stats
-  const stats: Nomin8Metrics = useMemo(() => {
-    const totalProfiles = profiles.length;
-    const averageEngagement = profiles.reduce((sum, p) => sum + p.communityEngagement, 0) / totalProfiles || 0;
-    const totalEvents = profiles.reduce((sum, p) => sum + p.eventsAttended, 0);
-    const activeThisMonth = profiles.filter(p => {
-      const lastActive = new Date(p.lastActive);
-      const monthAgo = new Date();
-      monthAgo.setMonth(monthAgo.getMonth() - 1);
-      return lastActive > monthAgo;
-    }).length;
-
-    const classificationBreakdown: Record<Nomin8Classification, number> = {
-      Ambassador: profiles.filter(p => p.classification === 'Ambassador').length,
-      Volunteer: profiles.filter(p => p.classification === 'Volunteer').length,
-      Moderator: profiles.filter(p => p.classification === 'Moderator').length,
-      Supporter: profiles.filter(p => p.classification === 'Supporter').length,
-    };
-
-    return {
-      totalProfiles,
-      averageEngagement,
-      totalEvents,
-      activeThisMonth,
-      classificationBreakdown
-    };
-  }, [profiles]);
-
-  const getClassificationColor = (classification: Nomin8Classification) => {
-    switch (classification) {
-      case 'Ambassador':
-        return 'bg-primary/80 text-primary-foreground border-primary/40';
-      case 'Volunteer':
-        return 'bg-green-500/80 text-white border-green-500/40';
-      case 'Moderator':
-        return 'bg-blue-500/80 text-white border-blue-500/40';
-      case 'Supporter':
-        return 'bg-orange-500/80 text-white border-orange-500/40';
-      default:
-        return 'bg-muted/80 text-muted-foreground border-muted/40';
+  const getConnectionStrengthColor = (strength: string) => {
+    switch (strength) {
+      case 'strong': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'weak': return 'bg-red-500';
+      default: return 'bg-muted';
     }
   };
 
   const getClassificationIcon = (classification: Nomin8Classification) => {
     switch (classification) {
-      case 'Ambassador':
-        return Star;
-      case 'Volunteer':
-        return Users;
-      case 'Moderator':
-        return Filter;
-      case 'Supporter':
-        return BarChart3;
-      default:
-        return Users;
+      case 'Ambassador': return Star;
+      case 'Volunteer': return Users;
+      case 'Moderator': return Shield;
+      case 'Supporter': return Heart;
+      default: return Trophy;
     }
   };
+
+  const handleContactSelect = (contact: any) => {
+    navigate(`/nmn8/track/config/${contact.id}`);
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
@@ -187,90 +145,122 @@ const Nomin8Dashboard: React.FC = () => {
         <Nomin8Navigation />
         
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Nomin8 Dashboard</h1>
-            <p className="text-muted-foreground mt-1">
-              Track community member engagement and classifications
-            </p>
-          </div>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <UserPlus className="w-4 h-4 mr-2" />
-            Create Profile
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Nomin8 Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Select a contact from your REL8 database to promote to A10D tracking
+          </p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="flex gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search profiles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="w-48">
-            <Select value={selectedClassification} onValueChange={(value: Nomin8Classification | 'all') => setSelectedClassification(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by classification" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Classifications</SelectItem>
-                <SelectItem value="Ambassador">Ambassador</SelectItem>
-                <SelectItem value="Volunteer">Volunteer</SelectItem>
-                <SelectItem value="Moderator">Moderator</SelectItem>
-                <SelectItem value="Supporter">Supporter</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Search */}
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search contacts..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
 
-        {/* Profiles by Classification */}
-        <div className="space-y-8">
-          {Object.entries(profilesByClassification).map(([classification, classificationProfiles]) => {
-            if (classificationProfiles.length === 0) return null;
-            
-            const Icon = getClassificationIcon(classification as Nomin8Classification);
-            
-            return (
-              <div key={classification} className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary/80">
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <h2 className="text-xl font-semibold">{classification}s</h2>
-                  <Badge variant="secondary" className="ml-2">
-                    {classificationProfiles.length}
-                  </Badge>
+        {/* Contacts Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredContacts.map((contact) => (
+            <div 
+              key={contact.id} 
+              className="h-full overflow-hidden transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
+                bg-white/5 border border-white/10 shadow-lg hover:shadow-[#00eada]/10 hover:border-[#00eada]/20"
+            >
+              {/* Section 1: Header with name and organization */}
+              <div className="p-4 pb-2 relative">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-base font-medium mb-1 line-clamp-1 text-white">{contact.name}</h3>
+                  <div 
+                    className={`w-3 h-3 rounded-full ${getConnectionStrengthColor(contact.connectionStrength)}`}
+                    title={`${contact.connectionStrength} connection`}
+                  />
                 </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {classificationProfiles.map((profile) => (
-                    <Nomin8ProfileCard 
-                      key={profile.id} 
-                      profile={profile}
-                    />
-                  ))}
+                {contact.organization && (
+                  <div className="flex items-center text-xs text-white/70">
+                    <Building className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                    <span className="truncate">{contact.organization}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Section 2: Contact information */}
+              <div className="px-4 py-2 border-t border-white/5 flex-grow">
+                <div className="space-y-1.5">
+                  {contact.email && (
+                    <div className="flex items-center text-xs text-white/70">
+                      <Mail className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                      <span className="truncate">{contact.email}</span>
+                    </div>
+                  )}
+                  
+                  {contact.phone && (
+                    <div className="flex items-center text-xs text-white/70">
+                      <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
+                      <span className="truncate">{contact.phone}</span>
+                    </div>
+                  )}
                 </div>
               </div>
-            );
-          })}
+              
+              {/* Section 3: Tags and action button */}
+              <div className="px-4 pt-2 pb-3 border-t border-white/5">
+                {contact.tags && contact.tags.length > 0 && (
+                  <div className="flex items-start text-xs mb-3">
+                    <Tag className="h-3 w-3 mr-1.5 flex-shrink-0 mt-0.5 text-white/70" />
+                    <div className="flex flex-wrap gap-1">
+                      {contact.tags.slice(0, 2).map((tag) => (
+                        <span
+                          key={tag}
+                          className="bg-[#00eada]/20 text-[#00eada] px-1.5 py-0.5 rounded-full text-xs"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {contact.tags.length > 2 && (
+                        <span className="text-xs text-white/70">
+                          +{contact.tags.length - 2} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center">
+                  <div className="text-xs text-white/70">
+                    Last contact: {new Date(contact.lastContact).toLocaleDateString()}
+                  </div>
+                  
+                  <Button
+                    size="sm"
+                    className="h-7 px-3 bg-[#00eada] hover:bg-[#00eada]/80 text-black font-medium"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleContactSelect(contact);
+                    }}
+                  >
+                    Track
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {filteredProfiles.length === 0 && (
+        {filteredContacts.length === 0 && (
           <div className="text-center py-12">
             <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-muted-foreground">No profiles found</h3>
-            <p className="text-muted-foreground mt-1">Try adjusting your search criteria</p>
+            <h3 className="text-lg font-semibold text-muted-foreground">No contacts found</h3>
+            <p className="text-muted-foreground mt-1">
+              Try adjusting your search or add more contacts to REL8 first
+            </p>
           </div>
         )}
-
-        <Nomin8AddProfileDialog 
-          open={showAddDialog} 
-          onOpenChange={setShowAddDialog} 
-        />
       </div>
     </div>
   );
