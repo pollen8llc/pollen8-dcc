@@ -17,7 +17,8 @@ import {
   Building2,
   Briefcase,
   UserCog,
-  ShoppingCart
+  ShoppingCart,
+  BookOpen
 } from "lucide-react";
 
 const OrganizerDashboard = () => {
@@ -111,6 +112,17 @@ const OrganizerDashboard = () => {
       setup: 0, // 0% of 10%
       usage: 0, // 0% of 40%
       premium: 0 // 0% of 50%
+    },
+    {
+      id: 'cultv8',
+      name: 'Cultv8',
+      description: 'Knowledge base, resources, and community content',
+      icon: BookOpen,
+      color: 'hsl(168 76% 42%)', // teal
+      link: '/knowledge/resources',
+      setup: 9, // 90% of 10%
+      usage: 30, // 75% of 40%
+      premium: 20 // 40% of 50%
     },
     {
       id: 'modul8',
