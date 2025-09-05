@@ -13,6 +13,8 @@ import Navbar from '@/components/Navbar';
 import { Nomin8Navigation } from '@/components/nomin8/Nomin8Navigation';
 import { Nomin8Classification } from '@/types/nomin8';
 import { toast } from '@/hooks/use-toast';
+import { getContacts, Contact } from '@/services/rel8t/contactService';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock contact data (will be replaced with real contact service)
 const mockContact = {
@@ -40,30 +42,38 @@ const Nomin8TrackConfig: React.FC = () => {
   const navigate = useNavigate();
   const { contactId } = useParams<{ contactId: string }>();
   
-  const [contact, setContact] = useState<any>(null);
+  const [contact, setContact] = useState<Contact | null>(null);
   const [loading, setLoading] = useState(true);
   const [classification, setClassification] = useState<Nomin8Classification>('Supporter');
   const [selectedGroup, setSelectedGroup] = useState('');
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
-    // Mock loading contact data (replace with actual API call)
     const loadContact = async () => {
+      if (!contactId) return;
+      
       try {
         setLoading(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setContact(mockContact);
-        if (mockContact.notes) {
-          setNotes(mockContact.notes);
+        // Get contact from REL8
+        const contacts = await getContacts();
+        const foundContact = contacts.find(c => c.id === contactId);
+        
+        if (foundContact) {
+          setContact(foundContact);
+          if (foundContact.notes) {
+            setNotes(foundContact.notes);
+          }
+        } else {
+          throw new Error('Contact not found');
         }
       } catch (error) {
+        console.error('Failed to load contact:', error);
         toast({
           title: "Error",
           description: "Failed to load contact details.",
           variant: "destructive"
         });
-        navigate('/nmn8/track');
+        navigate('/nmn8');
       } finally {
         setLoading(false);
       }
@@ -76,15 +86,6 @@ const Nomin8TrackConfig: React.FC = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  const getConnectionStrengthColor = (strength: string) => {
-    switch (strength) {
-      case 'strong': return 'bg-green-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'weak': return 'bg-red-500';
-      default: return 'bg-muted';
-    }
-  };
-
   const getClassificationIcon = (classification: Nomin8Classification) => {
     switch (classification) {
       case 'Ambassador': return Star;
@@ -95,24 +96,50 @@ const Nomin8TrackConfig: React.FC = () => {
     }
   };
 
-  const handleCreateProfile = () => {
+  const handleCreateProfile = async () => {
     if (!contact || !selectedGroup) {
       toast({
         title: "Missing Information",
-        description: "Please select an A10D group.",
+        description: "Please select a group.",
         variant: "destructive"
       });
       return;
     }
 
-    // Here you would normally make an API call to create the A10D profile
-    toast({
-      title: "Profile Created Successfully",
-      description: `${contact.name} has been promoted to ${classification} and added to the A10D system.`,
-    });
+    try {
+      toast({
+        title: "Promoting Contact",
+        description: `Promoting ${contact.name} to member...`,
+      });
 
-    // Navigate back to A10D dashboard
-    navigate('/nmn8');
+      // Call edge function to promote contact to member
+      const { data, error } = await supabase.functions.invoke('promote-to-member', {
+        body: {
+          contactId: contact.id,
+          classification,
+          notes
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Member Created Successfully",
+        description: `${contact.name} has been promoted to member with ${classification} classification. Temporary password: ${data.temporaryPassword}`,
+      });
+
+      // Navigate back to dashboard
+      navigate('/nmn8');
+    } catch (error) {
+      console.error('Failed to promote contact:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to promote contact to member.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -141,7 +168,7 @@ const Nomin8TrackConfig: React.FC = () => {
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">Contact Not Found</h2>
             <p className="text-muted-foreground mb-4">The contact you're looking for could not be found.</p>
-            <Button onClick={() => navigate('/a10d/track')}>
+            <Button onClick={() => navigate('/nmn8')}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Contact Selection
             </Button>
@@ -162,9 +189,9 @@ const Nomin8TrackConfig: React.FC = () => {
         
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Promote Contact to A10D</h1>
+          <h1 className="text-3xl font-bold text-foreground">Promote Contact to Member</h1>
           <p className="text-muted-foreground mt-1">
-            Configure the A10D profile for {contact.name}
+            Configure the Nomin8 profile for {contact.name}
           </p>
         </div>
 
@@ -210,8 +237,8 @@ const Nomin8TrackConfig: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <div className={`w-3 h-3 rounded-full ${getConnectionStrengthColor(contact.connectionStrength)}`} 
-                     title={`${contact.connectionStrength} connection`} />
+                <div className={`w-3 h-3 rounded-full bg-green-500`} 
+                     title="REL8 contact" />
               </div>
             </CardContent>
           </Card>
@@ -221,7 +248,7 @@ const Nomin8TrackConfig: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ClassificationIcon className="w-5 h-5" />
-                A10D Configuration
+                Nomin8 Configuration
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -271,7 +298,7 @@ const Nomin8TrackConfig: React.FC = () => {
               {/* A10D Group Selection with Create New */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">Assign to A10D Group</Label>
+                  <Label className="text-sm font-medium">Assign to Nomin8 Group</Label>
                   <Button variant="outline" size="sm">
                     <Plus className="w-3 h-3 mr-1" />
                     New Group
@@ -279,7 +306,7 @@ const Nomin8TrackConfig: React.FC = () => {
                 </div>
                 <Select value={selectedGroup} onValueChange={setSelectedGroup}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select an A10D group for tracking" />
+                    <SelectValue placeholder="Select a Nomin8 group for tracking" />
                   </SelectTrigger>
                   <SelectContent>
                     {mockA10DGroups.map((group) => (
@@ -296,9 +323,9 @@ const Nomin8TrackConfig: React.FC = () => {
 
               {/* Additional Notes */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">A10D Profile Notes</Label>
+                <Label className="text-sm font-medium">Nomin8 Profile Notes</Label>
                 <Textarea
-                  placeholder="Add any additional notes for this A10D profile..."
+                  placeholder="Add any additional notes for this Nomin8 profile..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={4}
@@ -311,7 +338,7 @@ const Nomin8TrackConfig: React.FC = () => {
                 disabled={!selectedGroup}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Create A10D Profile
+                Create Member Profile
               </Button>
             </CardContent>
           </Card>

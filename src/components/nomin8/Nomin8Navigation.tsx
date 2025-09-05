@@ -17,10 +17,10 @@ export function Nomin8Navigation() {
       isActive: location.pathname === "/nmn8"
     },
     {
-      href: "/nmn8/track",
-      label: "Track",
+      href: "/nmn8/manage",
+      label: "Manage",
       icon: UserPlus,
-      isActive: location.pathname === "/nmn8/track"
+      isActive: location.pathname === "/nmn8/manage"
     },
     {
       href: "/nmn8/settings",

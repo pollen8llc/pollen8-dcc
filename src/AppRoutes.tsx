@@ -462,14 +462,14 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/nmn8/track" element={
+          <Route path="/nmn8/manage" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <Nomin8Track />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/nmn8/track/config/:contactId" element={
+          <Route path="/nmn8/manage/config/:contactId" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <Nomin8TrackConfig />
