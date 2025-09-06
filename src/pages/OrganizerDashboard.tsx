@@ -45,6 +45,17 @@ const OrganizerDashboard = () => {
       premium: 15 // 30% of 50%
     },
     {
+      id: 'invites',
+      name: 'Invites',
+      description: 'Manage invitation codes and onboard new members',
+      icon: UserCog,
+      color: 'hsl(217 91% 60%)',
+      link: '/organizer/invites',
+      setup: 10,
+      usage: 0,
+      premium: 0
+    },
+    {
       id: 'eco8',
       name: 'Eco8',
       description: (() => {

@@ -21,6 +21,7 @@ const DotConnectorDashboard = lazy(() => import("@/pages/DotConnectorDashboard")
 const OrganizerDashboard = lazy(() => import("@/pages/OrganizerDashboard"));
 const InvitesManagementPage = lazy(() => import("@/pages/InvitesManagementPage"));
 const InvitePage = lazy(() => import("@/pages/InvitePage"));
+const InvitesDashboard = lazy(() => import("@/pages/organizer/InvitesDashboard"));
 const Settings = lazy(() => import("@/pages/Settings"));
 
 // Admin pages
@@ -167,9 +168,14 @@ const AppRoutes = () => {
               <OrganizerDashboard />
             </NonServiceProviderRoute>
           } />
+          <Route path="/organizer/invites" element={
+            <NonServiceProviderRoute>
+              <InvitesDashboard />
+            </NonServiceProviderRoute>
+          } />
           <Route path="/invites" element={
             <NonServiceProviderRoute>
-              <InvitesManagementPage />
+              <InvitesDashboard />
             </NonServiceProviderRoute>
           } />
           <Route path="/invite/:code" element={
