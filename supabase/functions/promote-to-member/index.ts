@@ -27,7 +27,7 @@ serve(async (req) => {
     // Get contact details from REL8
     const { data: contact, error: contactError } = await supabaseAdmin
       .from('rms_contacts')
-      .select('*')
+      .select('*, user_id')
       .eq('id', contactId)
       .single();
 
@@ -66,7 +66,7 @@ serve(async (req) => {
 
     console.log('Auth user created:', authUser.user.id);
 
-    // Create profile
+    // Create profile with organizer reference
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
@@ -77,7 +77,8 @@ serve(async (req) => {
         last_name: contact.name.split(' ').slice(1).join(' ') || '',
         phone: contact.phone,
         location: contact.location,
-        bio: notes || contact.notes
+        bio: notes || contact.notes,
+        invited_by: contact.user_id // Associate with the organizer who nominated them
       });
 
     if (profileError) {
