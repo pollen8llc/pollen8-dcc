@@ -356,22 +356,22 @@ const ContactEdit = () => {
                         Back
                       </Button>
                       <Button 
-                        onClick={() => handleManageAction("BUILD PROFILE")} 
+                        onClick={() => handleManageAction("NOMINATE")} 
                         variant="outline" 
                         size="sm"
                         className="w-full sm:w-auto"
                       >
                         <User className="w-4 h-4 mr-2" />
-                        Build Profile
+                        Nominate
                       </Button>
                       <Button 
-                        onClick={() => handleManageAction("TRACK MEMBER")} 
+                        onClick={() => handleManageAction("EVALUATE")} 
                         variant="outline" 
                         size="sm"
                         className="w-full sm:w-auto"
                       >
                         <UserPlus className="w-4 h-4 mr-2" />
-                        Track Member
+                        Evaluate
                       </Button>
                     </>
                   )}
