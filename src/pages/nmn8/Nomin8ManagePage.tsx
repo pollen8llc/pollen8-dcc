@@ -20,7 +20,7 @@ interface NominatedContact {
   groups: Record<string, boolean>;
   created_at: string;
   updated_at: string;
-  contact: {
+  contact?: {
     id: string;
     name: string;
     email: string;
@@ -60,7 +60,7 @@ const Nomin8ManagePage: React.FC = () => {
 
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('nmn8')
           .select(`
             *,
@@ -75,7 +75,7 @@ const Nomin8ManagePage: React.FC = () => {
           .eq('organizer_id', currentUser.id);
 
         if (error) throw error;
-        setNominations(data || []);
+        setNominations(data as NominatedContact[] || []);
       } catch (error) {
         console.error('Failed to load nominations:', error);
         toast({
@@ -136,7 +136,7 @@ const Nomin8ManagePage: React.FC = () => {
       const updatedGroups = { ...nomination.groups };
       updatedGroups[groupId] = false;
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('nmn8')
         .update({ groups: updatedGroups })
         .eq('id', nominationId);
