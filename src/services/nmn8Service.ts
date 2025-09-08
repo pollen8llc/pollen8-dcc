@@ -13,7 +13,7 @@ export interface Nomination {
   id: string;
   organizer_id: string;
   contact_id: string;
-  groups: Record<string, boolean>;
+  groups: Record<string, boolean> | any; // Allow for JSON type from database
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -27,6 +27,43 @@ export interface GroupConfig {
   maxMembers?: number;
   description?: string;
 }
+
+// Utility function to safely parse groups data
+const parseGroupsData = (groups: any): Record<string, boolean> => {
+  if (!groups || typeof groups !== 'object') {
+    return {};
+  }
+  
+  // If it's already a proper object, return it
+  if (typeof groups === 'object' && !Array.isArray(groups)) {
+    return groups as Record<string, boolean>;
+  }
+  
+  // If it's a string, try to parse it as JSON
+  if (typeof groups === 'string') {
+    try {
+      const parsed = JSON.parse(groups);
+      return typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  
+  return {};
+};
+
+// Utility function to validate nomination data structure
+export const validateNominationData = (nomination: any): boolean => {
+  return (
+    nomination &&
+    typeof nomination === 'object' &&
+    typeof nomination.id === 'string' &&
+    typeof nomination.organizer_id === 'string' &&
+    typeof nomination.contact_id === 'string' &&
+    nomination.groups &&
+    typeof nomination.groups === 'object'
+  );
+};
 
 export const nmn8Service = {
   // Get all nominations for the current organizer
@@ -55,7 +92,15 @@ export const nmn8Service = {
       throw error;
     }
 
-    return data || [];
+    // Parse groups data for each nomination to ensure proper typing
+    const parsedData = (data || [])
+      .filter(validateNominationData) // Filter out invalid nominations
+      .map(nomination => ({
+        ...nomination,
+        groups: parseGroupsData(nomination.groups)
+      }));
+
+    return parsedData;
   },
 
   // Nominate a contact to specific groups
@@ -100,7 +145,11 @@ export const nmn8Service = {
       description: "Contact nominated successfully",
     });
 
-    return data;
+    // Parse groups data to ensure proper typing
+    return {
+      ...data,
+      groups: parseGroupsData(data.groups)
+    };
   },
 
   // Update nomination groups
@@ -143,7 +192,8 @@ export const nmn8Service = {
       throw fetchError;
     }
 
-    const updatedGroups = { ...nomination.groups };
+    const parsedGroups = parseGroupsData(nomination.groups);
+    const updatedGroups = { ...parsedGroups };
     updatedGroups[groupId] = false;
 
     // Check if any groups are still true
@@ -221,7 +271,11 @@ export const nmn8Service = {
       return null;
     }
 
-    return data;
+    // Parse groups data to ensure proper typing
+    return data ? {
+      ...data,
+      groups: parseGroupsData(data.groups)
+    } : null;
   }
 };
 

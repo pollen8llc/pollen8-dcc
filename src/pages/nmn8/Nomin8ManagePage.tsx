@@ -50,11 +50,14 @@ const Nomin8ManagePage: React.FC = () => {
     const grouped: Record<string, NominatedContact[]> = {};
     
     groups.forEach(group => {
-      grouped[group.id] = nominations.filter(nomination => 
-        nomination.groups[group.id] === true
-      );
+      grouped[group.id] = nominations.filter(nomination => {
+        // Ensure groups is an object and has the group id as a key
+        if (!nomination.groups || typeof nomination.groups !== 'object') {
+          return false;
+        }
+        return nomination.groups[group.id] === true;
+      });
     });
-
     return grouped;
   }, [nominations, groups]);
 
@@ -155,6 +158,23 @@ const Nomin8ManagePage: React.FC = () => {
                       {nomination.contact.organization}
                     </span>
                   )}
+                  {/* Show other groups this contact belongs to */}
+                  {Object.keys(nomination.groups).filter(gId => 
+                    gId !== group.id && nomination.groups[gId] === true
+                  ).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {Object.keys(nomination.groups).filter(gId => 
+                        gId !== group.id && nomination.groups[gId] === true
+                      ).map(gId => {
+                        const otherGroup = groups.find(g => g.id === gId);
+                        return otherGroup ? (
+                          <Badge key={gId} variant="secondary" className="text-xs px-1 py-0">
+                            {otherGroup.name}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Remove button */}
@@ -236,6 +256,23 @@ const Nomin8ManagePage: React.FC = () => {
             <p className="text-muted-foreground mt-1">
               Organize your nominated contacts into flexible groups
             </p>
+            {nominations.length > 0 && (
+              <div className="flex items-center gap-4 mt-2">
+                <Badge variant="outline" className="text-sm">
+                  {nominations.length} Total Nominations
+                </Badge>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {groups.map(group => {
+                    const count = nominationsByGroup[group.id]?.length || 0;
+                    return count > 0 ? (
+                      <span key={group.id}>
+                        {group.name}: {count}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <div className="relative">
