@@ -1677,6 +1677,48 @@ export type Database = {
           },
         ]
       }
+      nmn8: {
+        Row: {
+          contact_id: string
+          created_at: string | null
+          groups: Json
+          id: string
+          organizer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string | null
+          groups?: Json
+          id?: string
+          organizer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string | null
+          groups?: Json
+          id?: string
+          organizer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nmn8_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nmn8_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_responses: {
         Row: {
           created_at: string

@@ -1,48 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Users, Settings, Search, Edit2, Trash2, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Plus, Trash2, Users, Search, UserPlus, Settings } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import { Nomin8Navigation } from '@/components/nomin8/Nomin8Navigation';
-import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
+import { nmn8Service, defaultGroups, type Nomination, type GroupConfig } from '@/services/nmn8Service';
 
-interface NominatedContact {
-  id: string;
-  organizer_id: string;
-  contact_id: string;
-  groups: Record<string, boolean>;
-  created_at: string;
-  updated_at: string;
-  contact?: {
-    id: string;
-    name: string;
-    email: string;
-    avatar_url?: string;
-    organization?: string;
-  };
-}
-
-interface GroupConfig {
-  id: string;
-  name: string;
-  color: string;
-  maxMembers?: number;
-  description?: string;
-}
-
-const defaultGroups: GroupConfig[] = [
-  { id: 'ambassador', name: 'Ambassadors', color: 'bg-primary text-primary-foreground', maxMembers: 5, description: 'Community leaders and advocates' },
-  { id: 'moderator', name: 'Moderators', color: 'bg-blue-500 text-white', maxMembers: 3, description: 'Content and community moderators' },
-  { id: 'evangelist', name: 'Evangelists', color: 'bg-green-500 text-white', maxMembers: 8, description: 'Active promoters and supporters' },
-  { id: 'mentor', name: 'Mentors', color: 'bg-purple-500 text-white', maxMembers: 6, description: 'Experienced guidance providers' },
-];
+// Use the service types
+type NominatedContact = Nomination;
 
 const Nomin8ManagePage: React.FC = () => {
   const navigate = useNavigate();
@@ -55,40 +27,22 @@ const Nomin8ManagePage: React.FC = () => {
 
   // Load nominated contacts for current organizer
   useEffect(() => {
-    const loadNominations = async () => {
+    const fetchNominations = async () => {
       if (!currentUser?.id) return;
 
       try {
         setLoading(true);
-        const { data, error } = await (supabase as any)
-          .from('nmn8')
-          .select(`
-            *,
-            contact:rms_contacts(
-              id,
-              name,
-              email,
-              avatar_url,
-              organization
-            )
-          `)
-          .eq('organizer_id', currentUser.id);
-
-        if (error) throw error;
-        setNominations(data as NominatedContact[] || []);
+        const data = await nmn8Service.getNominations(currentUser.id);
+        setNominations(data);
       } catch (error) {
         console.error('Failed to load nominations:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load nominated contacts.",
-          variant: "destructive"
-        });
+        // Error handling is done in the service
       } finally {
         setLoading(false);
       }
     };
 
-    loadNominations();
+    fetchNominations();
   }, [currentUser?.id]);
 
   // Group nominations by group type
@@ -109,9 +63,9 @@ const Nomin8ManagePage: React.FC = () => {
     if (!searchQuery) return nominations;
     
     return nominations.filter(nomination =>
-      nomination.contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      nomination.contact.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      nomination.contact.organization?.toLowerCase().includes(searchQuery.toLowerCase())
+      nomination.contact?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      nomination.contact?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      nomination.contact?.organization?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [nominations, searchQuery]);
 
@@ -125,44 +79,21 @@ const Nomin8ManagePage: React.FC = () => {
 
   const handleAddToGroup = (groupId: string) => {
     // Navigate to contact selection for this group
-    navigate('/nmn8', { state: { targetGroup: groupId } });
+    navigate('/rel8/contacts', { state: { targetGroup: groupId } });
   };
 
   const handleRemoveFromGroup = async (nominationId: string, groupId: string) => {
+    if (!currentUser?.id) return;
+
     try {
-      const nomination = nominations.find(n => n.id === nominationId);
-      if (!nomination) return;
-
-      const updatedGroups = { ...nomination.groups };
-      updatedGroups[groupId] = false;
-
-      const { error } = await (supabase as any)
-        .from('nmn8')
-        .update({ groups: updatedGroups })
-        .eq('id', nominationId);
-
-      if (error) throw error;
-
-      // Update local state
-      setNominations(prev => 
-        prev.map(n => 
-          n.id === nominationId 
-            ? { ...n, groups: updatedGroups }
-            : n
-        )
-      );
-
-      toast({
-        title: "Success",
-        description: "Contact removed from group.",
-      });
+      await nmn8Service.removeFromGroup(nominationId, groupId);
+      
+      // Refresh nominations after successful removal
+      const data = await nmn8Service.getNominations(currentUser.id);
+      setNominations(data);
     } catch (error) {
-      console.error('Failed to update group membership:', error);
-      toast({
-        title: "Error",
-        description: "Failed to remove contact from group.",
-        variant: "destructive"
-      });
+      console.error('Failed to remove contact from group:', error);
+      // Error handling is done in the service
     }
   };
 
@@ -171,7 +102,7 @@ const Nomin8ManagePage: React.FC = () => {
     const remainingSlots = group.maxMembers ? Math.max(0, group.maxMembers - groupNominations.length) : 3;
 
     return (
-      <Card key={group.id} className="glassmorphic-card">
+      <Card key={group.id} className="bg-card/40 backdrop-blur-md border border-border/50 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -206,20 +137,20 @@ const Nomin8ManagePage: React.FC = () => {
                 className="group relative"
               >
                 <div
-                  className="flex flex-col items-center p-3 rounded-xl bg-white/5 border border-white/10 
-                           hover:bg-white/10 transition-all duration-200 cursor-pointer"
-                  onClick={() => handleContactClick(nomination.contact.id)}
+                  className="flex flex-col items-center p-3 rounded-xl bg-muted/20 border border-border 
+                           hover:bg-muted/40 transition-all duration-200 cursor-pointer"
+                  onClick={() => handleContactClick(nomination.contact?.id || '')}
                 >
-                  <Avatar className="w-12 h-12 mb-2 border-2 border-white/20">
-                    <AvatarImage src={nomination.contact.avatar_url} alt={nomination.contact.name} />
+                  <Avatar className="w-12 h-12 mb-2 border-2 border-primary/20">
+                    <AvatarImage src={nomination.contact?.avatar} alt={nomination.contact?.name} />
                     <AvatarFallback className="bg-gradient-to-br from-primary/30 to-secondary/30 text-xs font-bold">
-                      {getInitials(nomination.contact.name)}
+                      {nomination.contact ? getInitials(nomination.contact.name) : '?'}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-xs font-medium text-center line-clamp-2">
-                    {nomination.contact.name}
+                    {nomination.contact?.name || 'Unknown'}
                   </span>
-                  {nomination.contact.organization && (
+                  {nomination.contact?.organization && (
                     <span className="text-xs text-muted-foreground mt-1 line-clamp-1">
                       {nomination.contact.organization}
                     </span>
@@ -245,11 +176,11 @@ const Nomin8ManagePage: React.FC = () => {
             {Array.from({ length: remainingSlots }).map((_, index) => (
               <div
                 key={`empty-${index}`}
-                className="flex flex-col items-center p-3 rounded-xl border-2 border-dashed border-white/20 
-                         hover:border-primary/50 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                className="flex flex-col items-center p-3 rounded-xl border-2 border-dashed border-border/50 
+                         hover:border-primary/50 hover:bg-muted/20 transition-all duration-200 cursor-pointer"
                 onClick={() => handleAddToGroup(group.id)}
               >
-                <div className="w-12 h-12 mb-2 rounded-full bg-white/10 flex items-center justify-center">
+                <div className="w-12 h-12 mb-2 rounded-full bg-muted/20 flex items-center justify-center">
                   <Plus className="w-6 h-6 text-muted-foreground" />
                 </div>
                 <span className="text-xs text-muted-foreground text-center">
@@ -271,7 +202,7 @@ const Nomin8ManagePage: React.FC = () => {
           <Nomin8Navigation />
           <div className="space-y-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="glassmorphic-card">
+              <Card key={i} className="bg-card/40 backdrop-blur-md border border-border/50">
                 <CardHeader>
                   <Skeleton className="h-6 w-48" />
                   <Skeleton className="h-4 w-32" />
@@ -299,7 +230,7 @@ const Nomin8ManagePage: React.FC = () => {
         <Nomin8Navigation />
         
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Manage Nominations</h1>
             <p className="text-muted-foreground mt-1">
@@ -316,7 +247,7 @@ const Nomin8ManagePage: React.FC = () => {
                 className="pl-10 w-64"
               />
             </div>
-            <Button onClick={() => navigate('/nmn8')}>
+            <Button onClick={() => navigate('/rel8/contacts')}>
               <UserPlus className="w-4 h-4 mr-2" />
               Nominate More
             </Button>
@@ -336,7 +267,7 @@ const Nomin8ManagePage: React.FC = () => {
             <p className="text-muted-foreground mt-1 mb-4">
               Start by nominating contacts from your REL8 database
             </p>
-            <Button onClick={() => navigate('/nmn8')}>
+            <Button onClick={() => navigate('/rel8/contacts')}>
               <UserPlus className="w-4 h-4 mr-2" />
               Nominate Contacts
             </Button>

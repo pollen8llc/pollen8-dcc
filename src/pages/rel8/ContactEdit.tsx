@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import ContactForm from "@/components/rel8t/ContactForm";
+import { NominationDialog } from "@/components/nomin8/NominationDialog";
+import { useUser } from "@/contexts/UserContext";
 import { 
   getContactById, 
   updateContact, 
@@ -39,7 +41,9 @@ const ContactEdit = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { currentUser } = useUser();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [nominationDialogOpen, setNominationDialogOpen] = useState(false);
   const [currentMode, setCurrentMode] = useState<'view' | 'edit' | 'manage' | 'engage'>('view');
 
   // Fetch contact details
@@ -159,10 +163,17 @@ const ContactEdit = () => {
   };
 
   const handleManageAction = (action: string) => {
-    toast({
-      title: "Coming Soon",
-      description: `${action} feature will be available soon.`,
-    });
+    if (action === "NOMINATE") {
+      setNominationDialogOpen(true);
+    } else if (action === "EVALUATE") {
+      // Navigate to evaluation page
+      navigate(`/elavu8/${id}`);
+    } else {
+      toast({
+        title: "Coming Soon",
+        description: `${action} feature will be available soon.`,
+      });
+    }
   };
 
   const handleEngageAction = (action: string) => {

@@ -504,6 +504,15 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
 
+          {/* Elavu8 routes */}
+          <Route path="/elavu8/:contactId" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <ContactEvaluationPage />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+
           {/* Initi8 routes */}
           <Route path="/initi8" element={
             <NonServiceProviderRoute>
