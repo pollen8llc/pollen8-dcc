@@ -14,13 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      communities: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          email: string
+          first_name: string | null
+          full_name: string | null
+          id: string
+          interests: string[] | null
+          is_profile_complete: boolean | null
+          last_name: string | null
+          location: string | null
+          privacy_settings: Json | null
+          skills: string[] | null
+          social_links: Json | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          email: string
+          first_name?: string | null
+          full_name?: string | null
+          id?: string
+          interests?: string[] | null
+          is_profile_complete?: boolean | null
+          last_name?: string | null
+          location?: string | null
+          privacy_settings?: Json | null
+          skills?: string[] | null
+          social_links?: Json | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          full_name?: string | null
+          id?: string
+          interests?: string[] | null
+          is_profile_complete?: boolean | null
+          last_name?: string | null
+          location?: string | null
+          privacy_settings?: Json | null
+          skills?: string[] | null
+          social_links?: Json | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          permissions: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          permissions?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          permissions?: Json | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_highest_role: {
+        Args: { user_id: string }
+        Returns: string
+      }
+      get_managed_communities: {
+        Args: { user_id: string }
+        Returns: {
+          community_id: string
+          community_name: string
+          member_count: number
+        }[]
+      }
+      get_user_roles: {
+        Args: { user_id: string }
+        Returns: {
+          assigned_at: string
+          role_description: string
+          role_name: string
+        }[]
+      }
+      has_role: {
+        Args: { role_name: string; user_id: string }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      update_user_role: {
+        Args: { p_assigner_id: string; p_role_name: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
