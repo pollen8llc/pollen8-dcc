@@ -16,30 +16,236 @@ export type Database = {
     Tables: {
       communities: {
         Row: {
+          communication_platforms: Json | null
           created_at: string
           description: string | null
+          format: string | null
           id: string
+          is_public: boolean | null
+          location: string | null
+          logo_url: string | null
+          member_count: string | null
           name: string
+          newsletter_url: string | null
           owner_id: string
+          social_media: Json | null
+          tags: string[] | null
+          target_audience: string[] | null
+          type: string | null
           updated_at: string
+          vision: string | null
+          website: string | null
         }
         Insert: {
+          communication_platforms?: Json | null
           created_at?: string
           description?: string | null
+          format?: string | null
           id?: string
+          is_public?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          member_count?: string | null
           name: string
+          newsletter_url?: string | null
           owner_id: string
+          social_media?: Json | null
+          tags?: string[] | null
+          target_audience?: string[] | null
+          type?: string | null
           updated_at?: string
+          vision?: string | null
+          website?: string | null
         }
         Update: {
+          communication_platforms?: Json | null
           created_at?: string
           description?: string | null
+          format?: string | null
           id?: string
+          is_public?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          member_count?: string | null
           name?: string
+          newsletter_url?: string | null
           owner_id?: string
+          social_media?: Json | null
+          tags?: string[] | null
+          target_audience?: string[] | null
+          type?: string | null
           updated_at?: string
+          vision?: string | null
+          website?: string | null
         }
         Relationships: []
+      }
+      community_data: {
+        Row: {
+          community_id: string
+          data: Json
+          data_type: string
+          id: string
+          imported_at: string
+          imported_by: string
+          metadata: Json | null
+        }
+        Insert: {
+          community_id: string
+          data?: Json
+          data_type: string
+          id?: string
+          imported_at?: string
+          imported_by: string
+          metadata?: Json | null
+        }
+        Update: {
+          community_id?: string
+          data?: Json
+          data_type?: string
+          id?: string
+          imported_at?: string
+          imported_by?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_data_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_data_distribution: {
+        Row: {
+          community_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          processed_at: string | null
+          status: string
+          submission_data: Json
+          submitter_id: string
+        }
+        Insert: {
+          community_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          submission_data: Json
+          submitter_id: string
+        }
+        Update: {
+          community_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          submission_data?: Json
+          submitter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_data_distribution_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_members: {
+        Row: {
+          community_id: string
+          id: string
+          invited_by: string | null
+          joined_at: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          role?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_base: {
+        Row: {
+          author_id: string
+          category: string | null
+          community_id: string
+          content: string
+          created_at: string
+          id: string
+          is_published: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          author_id: string
+          category?: string | null
+          community_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          author_id?: string
+          category?: string | null
+          community_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -162,6 +368,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_community_member_count: {
+        Args: { community_id: string }
+        Returns: number
+      }
       get_highest_role: {
         Args: { user_id: string }
         Returns: string
