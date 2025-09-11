@@ -86,13 +86,13 @@ export const CategoryManagement = () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('rms_contact_categories')
+        .from('rms_contact_categories' as any)
         .select('*')
         .eq('user_id', currentUser.id)
         .order('name');
       
       if (error) throw error;
-      setCategories(data || []);
+      setCategories((data as any[]) || []);
     } catch (error: any) {
       console.error('Error loading categories:', error);
       toast({
@@ -114,7 +114,7 @@ export const CategoryManagement = () => {
     
     try {
       const { data, error } = await supabase
-        .from('rms_contact_categories')
+        .from('rms_contact_categories' as any)
         .insert({
           user_id: currentUser.id,
           name: values.name,

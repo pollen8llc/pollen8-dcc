@@ -106,7 +106,7 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
 
         if (userResponses && userResponses.length > 0) {
           setHasResponded(true);
-          setSelectedOptions(userResponses.map(r => r.option_index));
+          setSelectedOptions(userResponses.map((r: any) => r.option_index));
         } else {
           setHasResponded(false);
           setSelectedOptions([]);

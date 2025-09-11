@@ -69,26 +69,26 @@ const PublicContactForm: React.FC<PublicContactFormProps> = ({
     try {
       // Get the ORGANIC category for this user
       const { data: organicCategory } = await supabase
-        .from('rms_contact_categories')
+        .from('rms_contact_categories' as any)
         .select('id')
         .eq('user_id', profileUserId)
         .eq('name', 'ORGANIC')
         .single();
 
-      if (!organicCategory) {
+      if (!organicCategory || !('id' in organicCategory)) {
         throw new Error('ORGANIC category not found');
       }
 
       // Insert the contact
       const { error } = await supabase
-        .from('rms_contacts')
+        .from('rms_contacts' as any)
         .insert({
           user_id: profileUserId,
           name: formData.name,
           email: formData.email,
           phone: formData.phone || null,
           tags: formData.tags.length > 0 ? formData.tags : null,
-          category_id: organicCategory.id,
+          category_id: (organicCategory as any).id,
           source: 'organic'
         });
 

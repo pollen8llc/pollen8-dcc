@@ -102,7 +102,7 @@ const FinalizationCard: React.FC<FinalizationCardProps> = ({ card, organizerId, 
       console.log('🔄 Submitting contract URL for card:', card.id, 'URL:', deelUrl);
       
       const { data, error } = await supabase
-        .from('modul8_proposal_cards')
+        .from('modul8_proposal_cards' as any)
         .update({ deel_contract_url: deelUrl.trim() })
         .eq('id', card.id)
         .select('deel_contract_url');

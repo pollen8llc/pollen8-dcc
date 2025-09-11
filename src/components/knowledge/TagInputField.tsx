@@ -31,18 +31,18 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
   useEffect(() => {
     const fetchTags = async () => {
       const { data } = await supabase
-        .from('knowledge_tags')
+        .from('knowledge_tags' as any)
         .select('name, count')
         .order('count', { ascending: false });
         
       if (data) {
-        const tagNames = data.map(tag => tag.name);
+        const tagNames = data.map((tag: any) => tag.name);
         setDbTags(tagNames);
         
         // Determine popular tags (top 25%)
         const popularThreshold = Math.ceil(data.length / 4);
         const popularTagSet = new Set(
-          data.slice(0, popularThreshold).map(tag => tag.name)
+          data.slice(0, popularThreshold).map((tag: any) => tag.name)
         );
         setPopularTags(popularTagSet);
       }

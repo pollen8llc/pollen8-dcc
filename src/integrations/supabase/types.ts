@@ -250,6 +250,7 @@ export type Database = {
       knowledge_tags: {
         Row: {
           color: string | null
+          count: number
           created_at: string
           created_by: string | null
           description: string | null
@@ -258,6 +259,7 @@ export type Database = {
         }
         Insert: {
           color?: string | null
+          count?: number
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -266,6 +268,7 @@ export type Database = {
         }
         Update: {
           color?: string | null
+          count?: number
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -471,6 +474,8 @@ export type Database = {
           notes: string | null
           phone: string | null
           position: string | null
+          source: string | null
+          tags: string[] | null
           updated_at: string
           user_id: string
         }
@@ -484,6 +489,8 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           position?: string | null
+          source?: string | null
+          tags?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -497,6 +504,8 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           position?: string | null
+          source?: string | null
+          tags?: string[] | null
           updated_at?: string
           user_id?: string
         }

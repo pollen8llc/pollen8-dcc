@@ -48,8 +48,8 @@ const RoleChangeDialog = ({ open, onOpenChange, currentRole }: RoleChangeDialogP
 
     setIsUpdating(true);
     try {
-      const { data, error } = await supabase.rpc('update_user_role_self', {
-        new_role: selectedRole
+      const { data, error } = await supabase.rpc('update_user_role_self' as any, {
+        p_role_name: selectedRole
       });
 
       if (error) {
