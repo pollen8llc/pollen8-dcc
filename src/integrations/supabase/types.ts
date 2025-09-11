@@ -247,6 +247,75 @@ export type Database = {
           },
         ]
       }
+      knowledge_tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      modul8_proposal_cards: {
+        Row: {
+          created_at: string
+          deel_contract_url: string | null
+          description: string | null
+          id: string
+          proposed_budget: number | null
+          proposed_timeline: string | null
+          provider_id: string
+          request_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deel_contract_url?: string | null
+          description?: string | null
+          id?: string
+          proposed_budget?: number | null
+          proposed_timeline?: string | null
+          provider_id: string
+          request_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deel_contract_url?: string | null
+          description?: string | null
+          id?: string
+          proposed_budget?: number | null
+          proposed_timeline?: string | null
+          provider_id?: string
+          request_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       poll_responses: {
         Row: {
           created_at: string
@@ -366,6 +435,80 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      rms_contact_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rms_contacts: {
+        Row: {
+          category_id: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          position: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_id?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_contacts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contact_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       roles: {
         Row: {
@@ -532,6 +675,10 @@ export type Database = {
       }
       update_user_role: {
         Args: { p_assigner_id?: string; p_role_name: string; p_user_id: string }
+        Returns: boolean
+      }
+      update_user_role_self: {
+        Args: { p_role_name: string }
         Returns: boolean
       }
     }
