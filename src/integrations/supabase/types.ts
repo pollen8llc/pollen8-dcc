@@ -251,16 +251,28 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          communities: string[] | null
           created_at: string
+          eco8_setup_complete: boolean | null
           email: string
           first_name: string | null
           full_name: string | null
           id: string
           interests: string[] | null
           is_profile_complete: boolean | null
+          labr8_setup_complete: boolean | null
+          last_login_at: string | null
           last_name: string | null
           location: string | null
+          managed_communities: string[] | null
+          modul8_setup_complete: boolean | null
+          nmn8_setup_complete: boolean | null
+          onboarding_complete: boolean | null
+          phone: string | null
           privacy_settings: Json | null
+          profile_complete: boolean | null
+          rel8_complete: boolean | null
+          role: string | null
           skills: string[] | null
           social_links: Json | null
           updated_at: string
@@ -270,16 +282,28 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          communities?: string[] | null
           created_at?: string
+          eco8_setup_complete?: boolean | null
           email: string
           first_name?: string | null
           full_name?: string | null
           id?: string
           interests?: string[] | null
           is_profile_complete?: boolean | null
+          labr8_setup_complete?: boolean | null
+          last_login_at?: string | null
           last_name?: string | null
           location?: string | null
+          managed_communities?: string[] | null
+          modul8_setup_complete?: boolean | null
+          nmn8_setup_complete?: boolean | null
+          onboarding_complete?: boolean | null
+          phone?: string | null
           privacy_settings?: Json | null
+          profile_complete?: boolean | null
+          rel8_complete?: boolean | null
+          role?: string | null
           skills?: string[] | null
           social_links?: Json | null
           updated_at?: string
@@ -289,16 +313,28 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          communities?: string[] | null
           created_at?: string
+          eco8_setup_complete?: boolean | null
           email?: string
           first_name?: string | null
           full_name?: string | null
           id?: string
           interests?: string[] | null
           is_profile_complete?: boolean | null
+          labr8_setup_complete?: boolean | null
+          last_login_at?: string | null
           last_name?: string | null
           location?: string | null
+          managed_communities?: string[] | null
+          modul8_setup_complete?: boolean | null
+          nmn8_setup_complete?: boolean | null
+          onboarding_complete?: boolean | null
+          phone?: string | null
           privacy_settings?: Json | null
+          profile_complete?: boolean | null
+          rel8_complete?: boolean | null
+          role?: string | null
           skills?: string[] | null
           social_links?: Json | null
           updated_at?: string
@@ -384,6 +420,47 @@ export type Database = {
           member_count: number
         }[]
       }
+      get_managed_communities_detailed: {
+        Args: { user_id: string }
+        Returns: {
+          community_id: string
+          community_name: string
+          created_at: string
+          is_public: boolean
+          member_count: number
+          type: string
+        }[]
+      }
+      get_user_profile_with_role: {
+        Args: { user_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          created_at: string
+          eco8_setup_complete: boolean
+          email: string
+          first_name: string
+          full_name: string
+          id: string
+          interests: string[]
+          is_profile_complete: boolean
+          labr8_setup_complete: boolean
+          last_name: string
+          location: string
+          modul8_setup_complete: boolean
+          nmn8_setup_complete: boolean
+          onboarding_complete: boolean
+          phone: string
+          privacy_settings: Json
+          rel8_complete: boolean
+          role: string
+          skills: string[]
+          social_links: Json
+          updated_at: string
+          user_id: string
+          website: string
+        }[]
+      }
       get_user_roles: {
         Args: { user_id: string }
         Returns: {
@@ -400,8 +477,16 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      is_community_owner: {
+        Args: { community_id: string; user_id: string }
+        Returns: boolean
+      }
+      update_module_completion: {
+        Args: { is_complete?: boolean; module_name: string; user_id: string }
+        Returns: boolean
+      }
       update_user_role: {
-        Args: { p_assigner_id: string; p_role_name: string; p_user_id: string }
+        Args: { p_assigner_id?: string; p_role_name: string; p_user_id: string }
         Returns: boolean
       }
     }
