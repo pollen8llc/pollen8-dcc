@@ -95,7 +95,7 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
       console.log('User authenticated:', user.id);
 
       // Use the new RPC function to create the community
-      const { data: community, error } = await supabase.rpc('create_community', {
+      const { data: community, error } = await supabase.rpc('create_community' as any, {
         p_name: data.name.trim(),
         p_description: data.description.trim(),
         p_type: data.type,

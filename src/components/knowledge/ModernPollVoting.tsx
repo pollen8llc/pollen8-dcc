@@ -66,7 +66,7 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
       
       // Get poll counts via RPC function
       const { data: pollCounts, error: countsError } = await supabase
-        .rpc('get_poll_counts', { poll_id: pollId });
+        .rpc('get_poll_counts' as any, { poll_id: pollId });
       
       if (countsError) {
         console.error('Error fetching poll counts:', countsError);
@@ -79,7 +79,7 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
         optionCounts[index] = 0;
       });
       
-      if (pollCounts) {
+      if (pollCounts && Array.isArray(pollCounts)) {
         pollCounts.forEach((count: any) => {
           optionCounts[count.option_index] = count.count || 0;
         });
@@ -94,13 +94,13 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
 
       if (user) {
         const { data: userResponses } = await supabase
-          .from('poll_responses')
+          .from('poll_responses' as any)
           .select('option_index')
           .eq('poll_id', pollId)
           .eq('user_id', user.id);
 
         if (userResponses && userResponses.length > 0) {
-          userSelections = userResponses.map(r => r.option_index);
+          userSelections = userResponses.map((r: any) => r.option_index);
           hasVoted = true;
         }
       }
@@ -151,7 +151,7 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
 
       // Remove existing responses
       await supabase
-        .from('poll_responses')
+        .from('poll_responses' as any)
         .delete()
         .eq('poll_id', pollId)
         .eq('user_id', user.id);
@@ -164,7 +164,7 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
       }));
 
       const { error } = await supabase
-        .from('poll_responses')
+        .from('poll_responses' as any)
         .insert(responses);
 
       if (error) throw error;

@@ -74,7 +74,7 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
       console.log('📊 Loading poll counts via RPC for poll:', pollId);
 
       // 1) Get aggregated counts for all users via secure RPC
-      const { data: aggCounts, error: aggError } = await supabase.rpc('get_poll_counts', { poll_id: pollId });
+      const { data: aggCounts, error: aggError } = await supabase.rpc('get_poll_counts' as any, { poll_id: pollId });
       if (aggError) {
         console.error('❌ RPC get_poll_counts error:', aggError);
         throw aggError;
@@ -95,7 +95,7 @@ export const PollVoting: React.FC<PollVotingProps> = ({ pollId, pollData, isOwne
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: userResponses, error: userErr } = await supabase
-          .from('poll_responses')
+          .from('poll_responses' as any)
           .select('option_index')
           .eq('poll_id', pollId)
           .eq('user_id', user.id);

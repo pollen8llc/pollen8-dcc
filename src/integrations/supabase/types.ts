@@ -247,6 +247,30 @@ export type Database = {
           },
         ]
       }
+      poll_responses: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -404,6 +428,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_community: {
+        Args: {
+          p_description: string
+          p_format?: string
+          p_is_public?: boolean
+          p_location?: string
+          p_name: string
+          p_tags?: string[]
+          p_target_audience?: string[]
+          p_type?: string
+          p_website?: string
+        }
+        Returns: string
+      }
       get_community_member_count: {
         Args: { community_id: string }
         Returns: number
@@ -429,6 +467,13 @@ export type Database = {
           is_public: boolean
           member_count: number
           type: string
+        }[]
+      }
+      get_poll_counts: {
+        Args: { poll_id: string }
+        Returns: {
+          count: number
+          option_index: number
         }[]
       }
       get_user_profile_with_role: {
