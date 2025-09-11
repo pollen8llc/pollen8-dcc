@@ -16,7 +16,7 @@ import {
 import { ContentType } from '@/models/knowledgeTypes';
 import { cn } from '@/lib/utils';
 import { truncateText } from '@/utils/textUtils';
-import PollVoting from './PollVoting';
+import { PollVoting } from './PollVoting';
 
 interface Article {
   id: string;

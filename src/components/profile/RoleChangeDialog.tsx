@@ -46,17 +46,28 @@ const RoleChangeDialog = ({ open, onOpenChange, currentRole }: RoleChangeDialogP
       return;
     }
 
-      setIsUpdating(true);
-      try {
-        // Role change functionality temporarily disabled
+    setIsUpdating(true);
+    try {
+      const { data, error } = await supabase.rpc('update_user_role_self', {
+        new_role: selectedRole
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
         toast({
-          title: "Feature Coming Soon",
-          description: "Role management will be available after database setup is complete.",
-          variant: "default",
+          title: "Role updated successfully",
+          description: `Your role has been changed to ${selectedRole}`,
         });
         
-        // Close dialog after showing message
+        // Refresh user data to reflect the change
+        await refreshUser();
         onOpenChange(false);
+      } else {
+        throw new Error("Failed to update role");
+      }
     } catch (error: any) {
       console.error("Error updating role:", error);
       toast({
