@@ -94,20 +94,25 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
       
       console.log('User authenticated:', user.id);
 
-      // Use the new RPC function to create the community
-      const { data: community, error } = await supabase.rpc('create_community', {
-        p_name: data.name.trim(),
-        p_description: data.description.trim(),
-        p_type: data.type,
-        p_location: data.location,
-        p_format: data.format,
-        p_website: data.website.trim() || null,
-        p_is_public: data.is_public,
-        p_tags: selectedTags,
-        p_target_audience: [], // Empty array as default
-        p_social_media: {}, // Empty object as default
-        p_communication_platforms: {}, // Empty object as default
-      });
+      // Create the community directly in the communities table
+      const { data: community, error } = await supabase
+        .from('communities')
+        .insert({
+          name: data.name.trim(),
+          description: data.description.trim(),
+          type: data.type,
+          location: data.location,
+          format: data.format,
+          website: data.website.trim() || null,
+          is_public: data.is_public,
+          tags: selectedTags,
+          target_audience: [], // Empty array as default
+          social_media: {}, // Empty object as default
+          communication_platforms: {}, // Empty object as default
+          owner_id: user.id
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('RPC error:', error);

@@ -1,165 +1,126 @@
-
-import React, { useState, KeyboardEvent, useRef, useEffect } from 'react';
-import { X, Tag as TagIcon } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
-import { KnowledgeTag } from '@/models/knowledgeTypes';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { X, Tag } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TagInputFieldProps {
-  value: string[];
-  onChange: (value: string[]) => void;
-  availableTags?: string[];
-  placeholder?: string;
+  tags?: string[];
+  value?: string[];
+  onChange: (tags: string[]) => void;
   maxTags?: number;
+  placeholder?: string;
+  className?: string;
+  availableTags?: string[];
 }
 
-export const TagInputField: React.FC<TagInputFieldProps> = ({ 
-  value, 
-  onChange, 
-  availableTags = [],
+export function TagInputField({
+  tags: propTags,
+  value: propValue,
+  onChange,
+  maxTags = 10,
   placeholder = "Add tags...",
-  maxTags = 5
-}) => {
-  const [input, setInput] = useState("");
+  className,
+  availableTags = []
+}: TagInputFieldProps) {
+  const tags = propTags || propValue || [];
+  const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [dbTags, setDbTags] = useState<string[]>([]);
-  const [popularTags, setPopularTags] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  // Fetch tags from database
-  useEffect(() => {
-    const fetchTags = async () => {
-      const { data } = await supabase
-        .from('knowledge_tags')
-        .select('name, count')
-        .order('count', { ascending: false });
-        
-      if (data) {
-        const tagNames = data.map(tag => tag.name);
-        setDbTags(tagNames);
-        
-        // Determine popular tags (top 25%)
-        const popularThreshold = Math.ceil(data.length / 4);
-        const popularTagSet = new Set(
-          data.slice(0, popularThreshold).map(tag => tag.name)
-        );
-        setPopularTags(popularTagSet);
-      }
-    };
-    
-    fetchTags();
-  }, []);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    const trimmedInput = input.trim();
-    
-    // If Enter or comma is pressed
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      
-      // Check if there's valid input and we haven't reached max tags
-      if (trimmedInput && value.length < maxTags) {
-        // Check if tag doesn't already exist
-        if (!value.includes(trimmedInput)) {
-          onChange([...value, trimmedInput]);
-          setInput('');
-          setSuggestions([]);
-        }
-      }
-    }
-    
-    // If Backspace is pressed and input is empty, remove the last tag
-    if (e.key === 'Backspace' && input === '' && value.length > 0) {
-      onChange(value.slice(0, -1));
-    }
-  };
+  // Mock popular tags for now
+  const popularTags = new Set(['React', 'TypeScript', 'JavaScript', 'Supabase', 'Next.js']);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newInput = e.target.value;
-    setInput(newInput);
-    
-    // Show suggestions only if input is not empty
-    if (newInput.trim()) {
-      // Prioritize database tags, then fallback to props tags
-      const availableTagsToUse = dbTags.length > 0 ? dbTags : availableTags;
-      
-      const filtered = availableTagsToUse.filter(
-        tag => tag.toLowerCase().includes(newInput.toLowerCase()) && !value.includes(tag)
-      );
-      setSuggestions(filtered.slice(0, 5)); // Limit to 5 suggestions
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInput(value);
+
+    if (value.length > 1) {
+      // Mock suggestions
+      const mockSuggestions = Array.from(popularTags)
+        .filter(tag => tag.toLowerCase().includes(value.toLowerCase()))
+        .slice(0, 5);
+      setSuggestions(mockSuggestions);
     } else {
       setSuggestions([]);
     }
-  };
+  }, []);
 
-  const removeTag = (tagToRemove: string) => {
-    onChange(value.filter(tag => tag !== tagToRemove));
-  };
-
-  const addSuggestion = (suggestion: string) => {
-    if (!value.includes(suggestion) && value.length < maxTags) {
-      onChange([...value, suggestion]);
-      setInput('');
-      setSuggestions([]);
+  const addTag = useCallback((tagName: string) => {
+    const trimmedTag = tagName.trim();
+    if (trimmedTag && !tags.includes(trimmedTag) && tags.length < maxTags) {
+      onChange([...tags, trimmedTag]);
     }
-  };
+    setInput('');
+    setSuggestions([]);
+    inputRef.current?.focus();
+  }, [tags, onChange, maxTags]);
+
+  const removeTag = useCallback((tagToRemove: string) => {
+    onChange(tags.filter(tag => tag !== tagToRemove));
+  }, [tags, onChange]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      if (input.trim()) {
+        addTag(input);
+      }
+    } else if (e.key === 'Backspace' && !input && tags.length > 0) {
+      removeTag(tags[tags.length - 1]);
+    }
+  }, [input, tags, addTag, removeTag]);
 
   return (
-    <div className="w-full space-y-2">
-      {/* Tags display */}
-      <div className="flex flex-wrap gap-2 mb-2">
-        {value.map(tag => (
-          <Badge 
-            key={tag} 
-            variant={popularTags.has(tag) ? "popularTag" : "tag"}
-            className="flex items-center gap-1 py-1.5 px-3 text-sm transition-all"
-          >
-            <TagIcon className="h-3.5 w-3.5 mr-1 opacity-70" />
+    <div className={cn("space-y-2", className)}>
+      <div className="flex items-center gap-2 flex-wrap p-2 border rounded-md focus-within:ring-2 focus-within:ring-ring">
+        {tags.map((tag, index) => (
+          <Badge key={index} variant="secondary" className="text-xs">
+            <Tag className="w-3 h-3 mr-1" />
             {tag}
-            <X 
-              className="h-3.5 w-3.5 ml-1 cursor-pointer hover:text-destructive" 
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-4 w-4 p-0 ml-1 hover:bg-destructive hover:text-destructive-foreground"
               onClick={() => removeTag(tag)}
-            />
+            >
+              <X className="w-3 h-3" />
+            </Button>
           </Badge>
         ))}
-      </div>
-      
-      {/* Input */}
-      <div className="relative">
+        
         <Input
           ref={inputRef}
           type="text"
-          placeholder={value.length === 0 ? placeholder : value.length >= maxTags ? "Max tags reached" : placeholder}
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          disabled={value.length >= maxTags}
-          className="w-full"
+          placeholder={tags.length < maxTags ? placeholder : "Max tags reached"}
+          disabled={tags.length >= maxTags}
+          className="border-0 bg-transparent p-0 h-auto focus-visible:ring-0 flex-1 min-w-[120px]"
         />
-        
-        {/* Suggestions dropdown */}
-        {suggestions.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full bg-popover border rounded-md shadow-md py-1">
-            {suggestions.map(suggestion => (
-              <div
-                key={suggestion}
-                className="flex items-center px-3 py-1.5 cursor-pointer hover:bg-muted text-sm"
-                onClick={() => addSuggestion(suggestion)}
-              >
-                <TagIcon className="h-3.5 w-3.5 mr-2 opacity-70" />
-                <span className={popularTags.has(suggestion) ? "text-[#00eada]" : ""}>
-                  {suggestion}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-      
-      <p className="text-xs text-muted-foreground">
-        Press Enter or comma to add a tag. {maxTags - value.length} tags remaining.
-      </p>
+
+      {suggestions.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          <span className="text-xs text-muted-foreground mr-2">Suggestions:</span>
+          {suggestions.map((suggestion, index) => (
+            <Badge
+              key={index}
+              variant="outline"
+              className="cursor-pointer text-xs hover:bg-muted"
+              onClick={() => addTag(suggestion)}
+            >
+              {suggestion}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      <div className="text-xs text-muted-foreground">
+        {tags.length}/{maxTags} tags
+      </div>
     </div>
   );
-};
+}
