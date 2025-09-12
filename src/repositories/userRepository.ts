@@ -35,7 +35,7 @@ const mapDbUser = async (profile: any): Promise<User> => {
   // Determine user role
   let role = UserRole.MEMBER;
   
-  if (adminRole?.role === "ADMIN") {
+  if ((adminRole as any)?.role === "ADMIN") {
     role = UserRole.ADMIN;
   } else if (managedCommunities.length > 0) {
     role = UserRole.ORGANIZER;

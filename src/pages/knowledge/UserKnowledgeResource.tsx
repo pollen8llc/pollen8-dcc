@@ -37,7 +37,7 @@ import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation'
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
-  const { data: stats, isLoading: statsLoading } = useUserKnowledgeStats();
+  const { stats, loading: statsLoading } = useUserKnowledgeStats();
   const { savedArticles, isLoading: savedLoading } = useSavedArticles();
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity();
 
@@ -214,7 +214,7 @@ const UserKnowledgeResource = () => {
                         <TagIcon className="h-3 w-3 mr-1" />
                         {type.toLowerCase()}
                       </Badge>
-                      <span className="text-sm font-medium text-foreground">{count}</span>
+                      <span className="text-sm font-medium text-foreground">{String(count)}</span>
                     </div>
                   ))}
                   {Object.keys(stats?.contentTypeStats || {}).length === 0 && (

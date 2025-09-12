@@ -152,9 +152,20 @@ export const createCrossPlatformNotification = async (data: {
   platform_context: 'modul8' | 'labr8' | 'both';
   data?: any;
 }): Promise<CrossPlatformNotification> => {
-  const { data: result, error } = await supabase
+  const { data: result, error } = await (supabase as any)
     .from('cross_platform_notifications')
-    .insert(data)
+    .insert({
+      user_id: data.recipient_id,
+      notification_type: data.notification_type,
+      title: data.title,
+      message: data.message,
+      metadata: {
+        sender_id: data.sender_id,
+        service_request_id: data.service_request_id,
+        platform_context: data.platform_context,
+        ...data.data
+      }
+    })
     .select()
     .single();
 
@@ -163,10 +174,10 @@ export const createCrossPlatformNotification = async (data: {
 };
 
 export const getCrossPlatformNotifications = async (userId: string, platform?: 'modul8' | 'labr8'): Promise<CrossPlatformNotification[]> => {
-  let query = supabase
+  let query = (supabase as any)
     .from('cross_platform_notifications')
     .select('*')
-    .eq('recipient_id', userId)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
   if (platform) {

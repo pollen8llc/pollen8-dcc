@@ -13,9 +13,9 @@ import {
 
 // Project Revision Services
 export const createProjectRevision = async (data: CreateProjectRevisionData): Promise<ProjectRevision> => {
-  const { data: result, error } = await supabase
+  const { data: result, error } = await (supabase as any)
     .from('modul8_project_revisions')
-    .insert(data)
+    .insert(data as any)
     .select()
     .single();
   
@@ -24,7 +24,7 @@ export const createProjectRevision = async (data: CreateProjectRevisionData): Pr
 };
 
 export const getProjectRevisions = async (serviceRequestId: string): Promise<ProjectRevision[]> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_project_revisions')
     .select('*')
     .eq('service_request_id', serviceRequestId)
@@ -35,9 +35,9 @@ export const getProjectRevisions = async (serviceRequestId: string): Promise<Pro
 };
 
 export const updateRevisionStatus = async (revisionId: string, status: 'pending' | 'addressed' | 'accepted'): Promise<ProjectRevision> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_project_revisions')
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({ status, updated_at: new Date().toISOString() } as any)
     .eq('id', revisionId)
     .select()
     .single();
@@ -48,25 +48,25 @@ export const updateRevisionStatus = async (revisionId: string, status: 'pending'
 
 // Project Completion Services
 export const createProjectCompletion = async (data: CreateProjectCompletionData): Promise<ProjectCompletion> => {
-  const { data: result, error } = await supabase
+  const { data: result, error } = await (supabase as any)
     .from('modul8_project_completions')
-    .insert(data)
+    .insert(data as any)
     .select()
     .single();
-  
+
   if (error) throw error;
-  return result as ProjectCompletion;
+  return result as any;
 };
 
 export const getProjectCompletion = async (serviceRequestId: string): Promise<ProjectCompletion | null> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_project_completions')
     .select('*')
     .eq('service_request_id', serviceRequestId)
     .single();
-  
+
   if (error && error.code !== 'PGRST116') throw error;
-  return data as ProjectCompletion | null;
+  return (data as any) || null;
 };
 
 export const confirmProjectCompletion = async (completionId: string, confirmerId: string): Promise<ProjectCompletion> => {
@@ -187,5 +187,5 @@ export const getServiceProviderProjects = async (serviceProviderId: string): Pro
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  return (data as any) || [];
 };

@@ -20,7 +20,7 @@ const DesktopProfileView = ({ user, isOwnProfile, onEdit }: DesktopProfileViewPr
   const { getRoleBadge } = usePermissions(user);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const roleBadge = getRoleBadge();
-  const { data: stats } = useUserKnowledgeStats();
+  const { stats } = useUserKnowledgeStats();
 
   // Mock social links - in real app these would come from user.social_links
   const socialLinks = [

@@ -68,7 +68,7 @@ export const createInvite = async (
     // Generate a link ID based on the code
     const linkId = generateUniqueLinkId(code);
     
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('invites')
       .insert({
         creator_id: creatorId,
@@ -78,7 +78,7 @@ export const createInvite = async (
         max_uses: maxUses || null,
         expires_at: expiresAt || null,
         is_active: true
-      })
+      } as any)
       .select('*')
       .single();
       
@@ -102,7 +102,7 @@ export const createInvite = async (
       }
     });
     
-    return data;
+    return (data as any) || null;
   } catch (error) {
     console.error("Exception in createInvite:", error);
     return null;
@@ -114,18 +114,18 @@ export const createInvite = async (
  */
 export const getInvitesByCreator = async (creatorId: string): Promise<InviteData[]> => {
   try {
-    const { data, error } = await supabase
-      .from('invites')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .order('created_at', { ascending: false });
+  const { data, error } = await (supabase as any)
+    .from('invites')
+    .select('*')
+    .eq('creator_id', creatorId)
+    .order('created_at', { ascending: false });
       
     if (error) {
       console.error("Error fetching invites:", error);
       return [];
     }
     
-    return data;
+    return (data as any) || [];
   } catch (error) {
     console.error("Exception in getInvitesByCreator:", error);
     return [];
@@ -137,7 +137,7 @@ export const getInvitesByCreator = async (creatorId: string): Promise<InviteData
  */
 export const getInviteByCode = async (code: string): Promise<InviteData | null> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('invites')
       .select('*')
       .eq('code', code)
@@ -148,7 +148,7 @@ export const getInviteByCode = async (code: string): Promise<InviteData | null> 
       return null;
     }
     
-    return data;
+    return (data as any) || null;
   } catch (error) {
     console.error("Exception in getInviteByCode:", error);
     return null;
@@ -160,7 +160,7 @@ export const getInviteByCode = async (code: string): Promise<InviteData | null> 
  */
 export const getInviteByLinkId = async (linkId: string): Promise<InviteData | null> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('invites')
       .select('*')
       .eq('link_id', linkId)
@@ -171,7 +171,7 @@ export const getInviteByLinkId = async (linkId: string): Promise<InviteData | nu
       return null;
     }
     
-    return data;
+    return (data as any) || null;
   } catch (error) {
     console.error("Exception in getInviteByLinkId:", error);
     return null;
@@ -183,7 +183,7 @@ export const getInviteByLinkId = async (linkId: string): Promise<InviteData | nu
  */
 export const invalidateInvite = async (inviteId: string): Promise<boolean> => {
   try {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('invites')
       .update({ is_active: false })
       .eq('id', inviteId);
@@ -215,7 +215,7 @@ export const invalidateInvite = async (inviteId: string): Promise<boolean> => {
  */
 export const validateInvite = async (inviteId: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('invites')
       .select('*')
       .eq('id', inviteId)
@@ -227,17 +227,17 @@ export const validateInvite = async (inviteId: string): Promise<boolean> => {
     }
     
     // Check if invite is active
-    if (!data.is_active) {
+    if (!(data as any).is_active) {
       return false;
     }
     
     // Check if invite has expired
-    if (data.expires_at && new Date(data.expires_at) < new Date()) {
+    if ((data as any).expires_at && new Date((data as any).expires_at) < new Date()) {
       return false;
     }
     
     // Check if invite has reached max uses
-    if (data.max_uses !== null && data.used_count >= data.max_uses) {
+    if ((data as any).max_uses !== null && (data as any).used_count >= (data as any).max_uses) {
       return false;
     }
     
@@ -253,11 +253,11 @@ export const validateInvite = async (inviteId: string): Promise<boolean> => {
  */
 export const recordInviteUse = async (inviteCode: string, userId: string): Promise<string | null> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .rpc('record_invite_use', {
         invite_code: inviteCode,
-        user_id: userId
-      });
+        used_by_id: userId
+      } as any);
       
     if (error) {
       console.error("Error recording invite use:", error);
@@ -278,7 +278,7 @@ export const recordInviteUse = async (inviteCode: string, userId: string): Promi
       }
     });
     
-    return data;
+    return (data as any) || null;
   } catch (error) {
     console.error("Exception in recordInviteUse:", error);
     return null;

@@ -93,7 +93,7 @@ export const getConnectionsByUser = async (userId: string, maxDepth: number = 1)
       return [];
     }
     
-    return data;
+    return (data as any) || [];
   } catch (error) {
     console.error("Exception in getConnectionsByUser:", error);
     return [];

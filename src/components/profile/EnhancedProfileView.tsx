@@ -39,7 +39,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
     bio: profile.bio || '',
     communities: []
   });
-  const { data: stats } = useUserKnowledgeStats();
+  const { stats } = useUserKnowledgeStats();
 
   const FIXED_AVATAR_URL = "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif";
 
