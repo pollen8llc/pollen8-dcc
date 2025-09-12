@@ -38,60 +38,118 @@ export const useUserKnowledgeStats = (userId?: string) => {
       }
 
       try {
-        // Use mock data for now until types are updated
-        const defaultStats: UserKnowledgeStats = {
-          totalArticles: 0,
-          totalQuestions: 0,
-          totalPolls: 0,
-          totalQuotes: 0,
-          recentActivity: [],
-          contentTypeStats: {},
-          articles: [],
-          questions: [],
-          polls: [],
-          quotes: []
-        };
+        // Fetch user's actual articles from database
+        const { data: userArticles, error } = await supabase
+          .from('knowledge_articles')
+          .select('*')
+          .eq('author_id', userId)
+          .eq('is_published', true)
+          .order('created_at', { ascending: false });
 
-        // Filter mock data by user (for demo purposes)
-        const mockData = await getMockArticles();
-        const userArticles = mockData.filter(() => Math.random() > 0.7);
-        
-        const articles = userArticles.filter(article => 
-          (article as any).content_type === ContentType.ARTICLE
+        if (error) {
+          console.error('Error fetching user articles:', error);
+          // Fallback to mock data
+          const mockData = await getMockArticles();
+          const filteredMockData = mockData.filter(() => Math.random() > 0.7);
+          
+          const articles = filteredMockData.filter(article => 
+            (article as any).content_type === ContentType.ARTICLE
+          );
+          const questions = filteredMockData.filter(article => 
+            (article as any).content_type === ContentType.QUESTION
+          );
+          const polls = filteredMockData.filter(article => 
+            (article as any).content_type === ContentType.POLL
+          );
+          const quotes = filteredMockData.filter(article => 
+            (article as any).content_type === ContentType.QUOTE
+          );
+
+          const contentTypeStats: Record<string, number> = {};
+          filteredMockData.forEach(article => {
+            const type = (article as any).content_type || 'ARTICLE';
+            contentTypeStats[type] = (contentTypeStats[type] || 0) + 1;
+          });
+
+          setStats({
+            totalArticles: articles.length,
+            totalQuestions: questions.length,
+            totalPolls: polls.length,
+            totalQuotes: quotes.length,
+            totalViews: Math.floor(Math.random() * 1000),
+            totalComments: Math.floor(Math.random() * 200),
+            totalVotes: Math.floor(Math.random() * 300),
+            savedArticlesCount: Math.floor(Math.random() * 50),
+            recentArticlesCount: Math.floor(Math.random() * 20),
+            contentTypeStats,
+            articles,
+            questions,
+            polls,
+            quotes,
+            recentActivity: filteredMockData.slice(0, 5)
+          });
+          return;
+        }
+
+        // Process real data
+        const articles = (userArticles || []).filter(article => 
+          article.content_type === ContentType.ARTICLE
         );
-        const questions = userArticles.filter(article => 
-          (article as any).content_type === ContentType.QUESTION
+        const questions = (userArticles || []).filter(article => 
+          article.content_type === ContentType.QUESTION
         );
-        const polls = userArticles.filter(article => 
-          (article as any).content_type === ContentType.POLL
+        const polls = (userArticles || []).filter(article => 
+          article.content_type === ContentType.POLL
         );
-        const quotes = userArticles.filter(article => 
-          (article as any).content_type === ContentType.QUOTE
+        const quotes = (userArticles || []).filter(article => 
+          article.content_type === ContentType.QUOTE
         );
 
         const contentTypeStats: Record<string, number> = {};
-        userArticles.forEach(article => {
-          const type = (article as any).content_type || 'ARTICLE';
+        (userArticles || []).forEach(article => {
+          const type = article.content_type || 'ARTICLE';
           contentTypeStats[type] = (contentTypeStats[type] || 0) + 1;
         });
 
+        // Get additional stats
+        const { data: voteStats } = await supabase
+          .from('knowledge_votes')
+          .select('vote_type')
+          .in('article_id', (userArticles || []).map(a => a.id));
+
+        const totalVotes = voteStats?.reduce((sum, vote) => {
+          return sum + (vote.vote_type === 'upvote' ? 1 : vote.vote_type === 'downvote' ? -1 : 0);
+        }, 0) || 0;
+
         setStats({
-          ...defaultStats,
           totalArticles: articles.length,
           totalQuestions: questions.length,
           totalPolls: polls.length,
           totalQuotes: quotes.length,
-          totalViews: Math.floor(Math.random() * 1000),
-          totalComments: Math.floor(Math.random() * 200),
-          totalVotes: Math.floor(Math.random() * 300),
-          savedArticlesCount: Math.floor(Math.random() * 50),
-          recentArticlesCount: Math.floor(Math.random() * 20),
+          totalViews: (userArticles || []).reduce((sum, article) => sum + (article.view_count || 0), 0),
+          totalComments: (userArticles || []).reduce((sum, article) => sum + (article.comment_count || 0), 0),
+          totalVotes: Math.abs(totalVotes),
+          savedArticlesCount: 0, // Will be fetched separately
+          recentArticlesCount: (userArticles || []).filter(article => {
+            const created = new Date(article.created_at);
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return created > weekAgo;
+          }).length,
           contentTypeStats,
           articles,
           questions,
           polls,
           quotes,
-          recentActivity: userArticles.slice(0, 5)
+          recentActivity: (userArticles || []).slice(0, 5).map(article => ({
+            id: article.id,
+            type: 'article' as const,
+            content: article.title,
+            article_title: article.title,
+            article_id: article.id,
+            created_at: article.created_at,
+            user_name: 'You'
+          }))
         });
 
       } catch (error) {
