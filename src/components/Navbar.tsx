@@ -17,12 +17,22 @@ const navigationItems = [
 ];
 
 const Navbar = () => {
-  const { currentUser, logout } = useUser();
+  const { currentUser, session, isLoading, logout } = useUser();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Check if user is a service provider
   const isServiceProvider = currentUser?.role === 'SERVICE_PROVIDER';
+  
+  // Debug logging
+  React.useEffect(() => {
+    console.log("🔍 Navbar state:", { 
+      hasSession: !!session, 
+      hasCurrentUser: !!currentUser, 
+      isLoading,
+      userRole: currentUser?.role 
+    });
+  }, [session, currentUser, isLoading]);
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -61,8 +71,12 @@ const Navbar = () => {
         )}
         
         <div className="flex items-center space-x-2">
-          {currentUser ? (
+          {isLoading ? (
+            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+          ) : currentUser ? (
             <UserMenuDropdown currentUser={currentUser} isAdmin={currentUser.role === 'ADMIN'} />
+          ) : session ? (
+            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
           ) : (
             <Button 
               onClick={() => navigate(isServiceProvider ? '/labr8/auth' : '/auth')} 

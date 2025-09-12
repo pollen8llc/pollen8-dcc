@@ -7,6 +7,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 
 interface UserContextType {
   currentUser: User | null;
+  session: any;
   isLoading: boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -17,6 +18,7 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType>({
   currentUser: null,
+  session: null,
   isLoading: true,
   logout: async () => {},
   refreshUser: async () => {},
@@ -39,10 +41,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Create profile if it doesn't exist yet
   React.useEffect(() => {
     if (session && !profileLoading && !currentUser) {
-      console.log("Session exists but no profile found, attempting to create");
-      createProfileIfNotExists();
+      console.log("🔄 UserContext: Session exists but no profile found, attempting to create");
+      createProfileIfNotExists().then((created) => {
+        if (created) {
+          console.log("✅ UserContext: Profile created, refreshing user data");
+          setTimeout(() => refreshUser(), 100); // Small delay to ensure DB consistency
+        }
+      });
     }
-  }, [session, currentUser, profileLoading, createProfileIfNotExists]);
+  }, [session, currentUser, profileLoading, createProfileIfNotExists, refreshUser]);
 
   // Listen for role change events via localStorage
   React.useEffect(() => {
@@ -65,6 +72,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <UserContext.Provider value={{ 
       currentUser, 
+      session,
       isLoading,
       logout,
       refreshUser,

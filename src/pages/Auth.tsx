@@ -48,7 +48,7 @@ const Auth = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { currentUser, isLoading } = useUser();
+  const { currentUser, session, isLoading } = useUser();
   const { toast } = useToast();
 
   // Update form field
@@ -66,32 +66,79 @@ const Auth = () => {
     updateAuthStatus({ error: null, message: null });
   }, [updateAuthStatus]);
 
-  // Handle successful authentication redirect
-  const handleAuthenticatedRedirect = useCallback((user: any) => {
-    console.log('🔍 Auth.tsx - Handling authenticated redirect:', {
-      role: user.role,
-      profileComplete: user.profile_complete,
-      userId: user.id
-    });
+  // Fast redirect for authenticated users using session
+  const handleAuthenticatedRedirect = useCallback(async (user: any, skipProfileCheck = false) => {
+    try {
+      console.log("🚀 Auth: Handling redirect for user:", { 
+        id: user.id, 
+        skipProfileCheck, 
+        currentUserExists: !!currentUser 
+      });
 
-    // Service providers go to LAB-R8, others go to initi8
-    if (user.role === 'SERVICE_PROVIDER') {
-      console.log('🚀 Auth.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
-      const destination = user.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
-      navigate(destination, { replace: true });
-    } else {
-      console.log('🚀 Auth.tsx - Redirecting authenticated user to initi8 dashboard');
+      if (!skipProfileCheck && currentUser) {
+        // Use existing currentUser data for fastest redirect
+        if (currentUser.role === 'SERVICE_PROVIDER') {
+          const destination = currentUser.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
+          console.log("🚀 Auth: Redirecting SERVICE_PROVIDER to:", destination);
+          navigate(destination, { replace: true });
+        } else {
+          console.log("🚀 Auth: Redirecting authenticated user to /initi8");
+          navigate("/initi8", { replace: true });
+        }
+        return;
+      }
+
+      // Quick role check using session for immediate redirect
+      if (skipProfileCheck || !currentUser) {
+        console.log("🔍 Auth: Performing quick role check for immediate redirect");
+        
+        try {
+          const { data: userRoles } = await supabase
+            .from('user_roles')
+            .select(`
+              roles:role_id (
+                name
+              )
+            `)
+            .eq('user_id', user.id)
+            .limit(1);
+
+          const isServiceProvider = userRoles?.some(r => r.roles?.name === 'SERVICE_PROVIDER');
+          
+          if (isServiceProvider) {
+            console.log("🚀 Auth: Quick redirect - SERVICE_PROVIDER to /labr8/dashboard");
+            navigate("/labr8/dashboard", { replace: true });
+          } else {
+            console.log("🚀 Auth: Quick redirect - User to /initi8");  
+            navigate("/initi8", { replace: true });
+          }
+        } catch (error) {
+          console.error("❌ Auth: Error in quick role check:", error);
+          // Fallback to default redirect
+          navigate("/initi8", { replace: true });
+        }
+      }
+    } catch (error) {
+      console.error("❌ Auth: Error in handleAuthenticatedRedirect:", error);
       navigate("/initi8", { replace: true });
     }
-  }, [navigate]);
+  }, [currentUser, navigate]);
 
-  // Check if user is already authenticated and redirect
+  // Check for existing authenticated user and redirect
   useEffect(() => {
-    if (!isLoading && currentUser) {
-      console.log('🔍 Auth.tsx - User already authenticated, redirecting...');
-      handleAuthenticatedRedirect(currentUser);
+    console.log("🔍 Auth: Checking auth state:", { 
+      isLoading, 
+      hasSession: !!session,
+      hasCurrentUser: !!currentUser 
+    });
+
+    if (!isLoading) {
+      if (session?.user) {
+        console.log("🔍 Auth: Session found on mount, redirecting:", session.user.id);
+        handleAuthenticatedRedirect(session.user, true); // Skip profile check for speed
+      }
     }
-  }, [currentUser, isLoading, handleAuthenticatedRedirect]);
+  }, [session, isLoading, currentUser, handleAuthenticatedRedirect]);
 
   // Validate sign up form
   const validateSignUpForm = useCallback((): string | null => {
