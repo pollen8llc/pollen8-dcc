@@ -190,9 +190,9 @@ export const getCrossPlatformNotifications = async (userId: string, platform?: '
 };
 
 export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('cross_platform_notifications')
-    .update({ read_at: new Date().toISOString() })
+    .update({ is_read: true })
     .eq('id', notificationId);
 
   if (error) throw error;
@@ -217,7 +217,7 @@ export const logCrossPlatformActivity = async (data: {
 };
 
 export const getActivityLog = async (serviceRequestId: string): Promise<ActivityLogEntry[]> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('cross_platform_activity_log')
     .select('*')
     .eq('service_request_id', serviceRequestId)

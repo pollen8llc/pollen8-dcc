@@ -124,7 +124,7 @@ export async function getPlatformMetrics(): Promise<PlatformMetrics> {
       .select('*', { count: 'exact', head: true })
       .in('status', ['pending', 'countered']);
 
-    const { count: completedDeals } = await supabase
+    const { count: completedDeals } = await (supabase as any)
       .from('modul8_deals')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'completed');

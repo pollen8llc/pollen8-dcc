@@ -55,7 +55,7 @@ export const createProjectCompletion = async (data: CreateProjectCompletionData)
     .single();
 
   if (error) throw error;
-  return result as any;
+  return result as ProjectCompletion;
 };
 
 export const getProjectCompletion = async (serviceRequestId: string): Promise<ProjectCompletion | null> => {
@@ -66,11 +66,11 @@ export const getProjectCompletion = async (serviceRequestId: string): Promise<Pr
     .single();
 
   if (error && error.code !== 'PGRST116') throw error;
-  return (data as any) || null;
+  return (data as ProjectCompletion) || null;
 };
 
 export const confirmProjectCompletion = async (completionId: string, confirmerId: string): Promise<ProjectCompletion> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_project_completions')
     .update({ 
       status: 'confirmed',
@@ -86,7 +86,7 @@ export const confirmProjectCompletion = async (completionId: string, confirmerId
 };
 
 export const rejectProjectCompletion = async (completionId: string): Promise<ProjectCompletion> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_project_completions')
     .update({ status: 'rejected' })
     .eq('id', completionId)
@@ -99,7 +99,7 @@ export const rejectProjectCompletion = async (completionId: string): Promise<Pro
 
 // Project Rating Services
 export const createProjectRating = async (data: CreateProjectRatingData): Promise<ProjectRating> => {
-  const { data: result, error } = await supabase
+  const { data: result, error } = await (supabase as any)
     .from('modul8_project_ratings')
     .insert(data)
     .select()
@@ -110,7 +110,7 @@ export const createProjectRating = async (data: CreateProjectRatingData): Promis
 };
 
 export const getProjectRating = async (serviceRequestId: string): Promise<ProjectRating | null> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_project_ratings')
     .select('*')
     .eq('service_request_id', serviceRequestId)
@@ -122,7 +122,7 @@ export const getProjectRating = async (serviceRequestId: string): Promise<Projec
 
 // Project Milestone Services
 export const createProjectMilestone = async (data: CreateProjectMilestoneData): Promise<ProjectMilestone> => {
-  const { data: result, error } = await supabase
+  const { data: result, error } = await (supabase as any)
     .from('modul8_project_milestones')
     .insert(data)
     .select()
@@ -133,7 +133,7 @@ export const createProjectMilestone = async (data: CreateProjectMilestoneData): 
 };
 
 export const getProjectMilestones = async (serviceRequestId: string): Promise<ProjectMilestone[]> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_project_milestones')
     .select('*')
     .eq('service_request_id', serviceRequestId)
@@ -153,7 +153,7 @@ export const updateMilestoneStatus = async (milestoneId: string, status: 'pendin
     updateData.completed_at = new Date().toISOString();
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_project_milestones')
     .update(updateData)
     .eq('id', milestoneId)

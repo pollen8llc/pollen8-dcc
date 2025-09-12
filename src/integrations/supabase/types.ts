@@ -336,6 +336,132 @@ export type Database = {
           },
         ]
       }
+      eco8_community_posts: {
+        Row: {
+          author_id: string
+          community_id: string
+          content: string
+          created_at: string
+          id: string
+          is_pinned: boolean | null
+          post_type: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          community_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          post_type?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          community_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          post_type?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      eco8_event_registrations: {
+        Row: {
+          event_id: string
+          id: string
+          registered_at: string
+          registration_status: string
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          registered_at?: string
+          registration_status?: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          registered_at?: string
+          registration_status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      eco8_events: {
+        Row: {
+          community_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          event_date: string
+          id: string
+          location: string | null
+          max_attendees: number | null
+          registration_required: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          event_date: string
+          id?: string
+          location?: string | null
+          max_attendees?: number | null
+          registration_required?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          event_date?: string
+          id?: string
+          location?: string | null
+          max_attendees?: number | null
+          registration_required?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      eco8_post_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       knowledge_articles: {
         Row: {
           author_id: string
@@ -630,6 +756,42 @@ export type Database = {
           },
         ]
       }
+      modul8_deals: {
+        Row: {
+          created_at: string
+          deal_amount: number | null
+          deal_status: string
+          id: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          signed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deal_amount?: number | null
+          deal_status?: string
+          id?: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          signed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deal_amount?: number | null
+          deal_status?: string
+          id?: string
+          organizer_id?: string
+          service_provider_id?: string
+          service_request_id?: string
+          signed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       modul8_negotiation_status: {
         Row: {
           created_at: string
@@ -756,6 +918,153 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      modul8_project_completions: {
+        Row: {
+          completed_at: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          deliverables: Json | null
+          id: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          deliverables?: Json | null
+          id?: string
+          organizer_id: string
+          service_provider_id: string
+          service_request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          deliverables?: Json | null
+          id?: string
+          organizer_id?: string
+          service_provider_id?: string
+          service_request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      modul8_project_milestones: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          order_index: number
+          service_request_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          order_index?: number
+          service_request_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          order_index?: number
+          service_request_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      modul8_project_ratings: {
+        Row: {
+          completion_id: string
+          created_at: string
+          feedback: string | null
+          id: string
+          organizer_id: string
+          rating: number | null
+          service_provider_id: string
+          service_request_id: string
+          updated_at: string
+        }
+        Insert: {
+          completion_id: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          organizer_id: string
+          rating?: number | null
+          service_provider_id: string
+          service_request_id: string
+          updated_at?: string
+        }
+        Update: {
+          completion_id?: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          organizer_id?: string
+          rating?: number | null
+          service_provider_id?: string
+          service_request_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      modul8_project_revisions: {
+        Row: {
+          created_at: string
+          id: string
+          requested_by: string
+          revision_details: string
+          service_request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          requested_by: string
+          revision_details: string
+          service_request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          requested_by?: string
+          revision_details?: string
+          service_request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       modul8_proposal_cards: {
         Row: {
@@ -1745,6 +2054,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_community_events: {
+        Args: { community_id: string }
+        Returns: {
+          attendee_count: number
+          description: string
+          event_date: string
+          id: string
+          location: string
+          max_attendees: number
+          registration_required: boolean
+          title: string
+        }[]
+      }
       get_community_member_count: {
         Args: { community_id: string }
         Returns: number
@@ -1873,6 +2195,10 @@ export type Database = {
       }
       record_invite_use: {
         Args: { invite_code: string; used_by_id: string }
+        Returns: boolean
+      }
+      register_for_event: {
+        Args: { event_id: string }
         Returns: boolean
       }
       update_module_completion: {

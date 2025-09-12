@@ -20,8 +20,10 @@ export const createServiceProvider = async (data: CreateServiceProviderData): Pr
   if (error) throw error;
   return {
     ...provider,
-    services: Array.isArray(provider.services) ? provider.services : [],
-    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+    services: Array.isArray(provider.services_offered) ? provider.services_offered : [],
+    pricing_range: { currency: 'USD' },
+    tags: [],
+    domain_specializations: []
   } as ServiceProvider;
 };
 
@@ -36,8 +38,10 @@ export const updateServiceProvider = async (id: string, data: Partial<CreateServ
   if (error) throw error;
   return {
     ...provider,
-    services: Array.isArray(provider.services) ? provider.services : [],
-    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+    services: Array.isArray(provider.services_offered) ? provider.services_offered : [],
+    pricing_range: { currency: 'USD' },
+    tags: [],
+    domain_specializations: []
   } as ServiceProvider;
 };
 
@@ -99,9 +103,12 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
 }): Promise<ServiceRequest> => {
   console.log('Creating service request with data:', data);
   
-  const { data: request, error } = await supabase
+  const { data: request, error } = await (supabase as any)
     .from('modul8_service_requests')
-    .insert(data)
+    .insert({
+      ...data,
+      budget_range: JSON.stringify(data.budget_range)
+    })
     .select(`
       *,
       service_provider:modul8_service_providers(*),
@@ -188,9 +195,12 @@ export const getServiceRequestById = async (id: string): Promise<ServiceRequest 
     milestones: data.milestones as string[],
     service_provider: data.service_provider ? {
       ...data.service_provider,
-      services: Array.isArray(data.service_provider.services) ? data.service_provider.services : [],
-      pricing_range: data.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
-    } : undefined
+      services: Array.isArray(data.service_provider.services_offered) ? data.service_provider.services_offered : [],
+      pricing_range: data.service_provider.pricing_model ? { currency: 'USD' } : { currency: 'USD' },
+      tags: [],
+      domain_specializations: []
+    } as any : undefined,
+    organizer: data.organizer
   } as ServiceRequest;
 };
 
