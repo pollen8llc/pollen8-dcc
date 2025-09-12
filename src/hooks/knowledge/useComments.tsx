@@ -111,39 +111,6 @@ export const useComments = (articleId: string | undefined) => {
             user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
           } as any;
         });
-          const profile = authorProfileMap[comment.author_id];
-          
-          return {
-            ...comment,
-            author: profile ? {
-              id: comment.author_id,
-              name: profile.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
-              avatar_url: profile.avatar_url
-            } : {
-              id: comment.author_id,
-              name: 'Unknown User',
-              avatar_url: null
-            },
-            vote_count: voteMap.get(comment.id) || 0,
-            user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
-          } as any;
-        });
-          
-          return {
-            ...comment,
-            author: profile ? {
-              id: comment.author_id,
-              name: profile.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
-              avatar_url: profile.avatar_url
-            } : {
-              id: comment.author_id,
-              name: 'Unknown User',
-              avatar_url: null
-            },
-            vote_count: voteMap.get(comment.id) || 0,
-            user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
-          } as any;
-        });
       } catch (error) {
         console.error('Error processing comments:', error);
         throw error;
