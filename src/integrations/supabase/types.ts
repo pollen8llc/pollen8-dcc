@@ -1941,8 +1941,11 @@ export type Database = {
       rms_outreach: {
         Row: {
           created_at: string
+          description: string | null
+          due_date: string | null
           id: string
           message: string
+          priority: string | null
           scheduled_at: string | null
           status: string
           title: string
@@ -1951,8 +1954,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
+          due_date?: string | null
           id?: string
           message: string
+          priority?: string | null
           scheduled_at?: string | null
           status?: string
           title: string
@@ -1961,8 +1967,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
+          due_date?: string | null
           id?: string
           message?: string
+          priority?: string | null
           scheduled_at?: string | null
           status?: string
           title?: string

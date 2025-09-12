@@ -85,10 +85,10 @@ export function TriggersList({
                 </div>
                 
                 {/* Display scheduled time if applicable */}
-                {trigger.next_execution && (
+                {trigger.next_execution_at && (
                   <div className="flex items-center text-xs text-muted-foreground mt-1">
                     <Clock className="h-3 w-3 mr-1" />
-                    <span>Next execution: {formatDateTime(trigger.next_execution)}</span>
+                    <span>Next execution: {formatDateTime(trigger.next_execution_at)}</span>
                   </div>
                 )}
                 

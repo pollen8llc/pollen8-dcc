@@ -43,7 +43,7 @@ export interface Trigger {
   created_at?: string;
   updated_at?: string;
   execution_time?: string;
-  next_execution?: string;
+  next_execution_at?: string;
   last_executed_at?: string;
   recurrence_pattern?: RecurrencePattern | null;
 }
@@ -64,12 +64,6 @@ export const getTriggers = async (): Promise<Trigger[]> => {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    
-    // Transform database recurrence_pattern format to our RecurrencePattern type
-    const transformedData = data?.map(trigger => ({
-      ...trigger,
-      recurrence_pattern: trigger.recurrence_pattern as RecurrencePattern
-    })) || [];
     
     return ((data || []).map((trigger: any) => ({
       ...trigger,
@@ -135,7 +129,7 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
         action: trigger.action,
         condition: JSON.stringify(trigger.condition || {}),
         is_active: trigger.is_active,
-        next_execution_at: trigger.next_execution,
+        next_execution_at: trigger.next_execution_at,
         last_executed_at: trigger.last_executed_at,
         recurrence_pattern: trigger.recurrence_pattern
       }])
@@ -144,29 +138,16 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
 
     if (error) throw error;
 
-    return {
-      ...data,
-      condition: JSON.stringify(data.condition || {}),
-      recurrence_pattern: data.recurrence_pattern as RecurrencePattern
-    } as Trigger;
-
-    if (error) throw error;
-    
     toast({
       title: "Trigger created",
       description: "Automation trigger has been successfully created.",
     });
     
-    // Transform the returned data
-    if (data) {
     return {
       ...data,
       condition: JSON.stringify(data.condition || {}),
       recurrence_pattern: data.recurrence_pattern as RecurrencePattern
     } as Trigger;
-    }
-    
-    return null;
   } catch (error: any) {
     console.error("Error creating trigger:", error);
     toast({

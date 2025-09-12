@@ -65,7 +65,7 @@ export function EditTriggerDialog({
       onTriggerChange({
         ...trigger,
         execution_time: execDate.toISOString(),
-        next_execution: execDate.toISOString(),
+        next_execution_at: execDate.toISOString(),
         recurrence_pattern: isRecurring 
           ? { type: recurrenceType, startDate: execDate.toISOString() }
           : null

@@ -49,9 +49,9 @@ const getDueDateFromTrigger = (trigger: Trigger) => {
     return new Date(trigger.execution_time);
   }
   
-  // Else use next_execution
-  if (trigger.next_execution) {
-    return new Date(trigger.next_execution);
+  // Else use next_execution_at
+  if (trigger.next_execution_at) {
+    return new Date(trigger.next_execution_at);
   }
   
   // Fallback: calculate based on trigger name

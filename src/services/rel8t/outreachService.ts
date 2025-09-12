@@ -57,7 +57,7 @@ export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> =
     
     // Process and categorize the data
     const counts = (data as any)?.reduce((acc: any, item: any) => {
-      const dueDate = new Date(item.scheduled_at || item.created_at);
+      const dueDate = new Date(item.due_date || item.created_at);
       
       // Today's items (due today and pending)
       if (dueDate >= today && dueDate < tomorrow && item.status === 'pending') {
@@ -156,7 +156,7 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
         description: item.message || item.description,
         priority: priority,
         status: item.status as OutreachStatus,
-        due_date: item.scheduled_at || item.created_at,
+        due_date: item.due_date || item.created_at,
         created_at: item.created_at,
         updated_at: item.updated_at,
         contacts
@@ -251,7 +251,10 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
         user_id: user.id,
         title: outreach.title,
         message: outreach.description || '',
+        description: outreach.description || '',
+        priority: outreach.priority,
         status: outreach.status,
+        due_date: outreach.due_date,
         scheduled_at: outreach.due_date
       }])
       .select()
