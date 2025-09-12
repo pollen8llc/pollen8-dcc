@@ -90,12 +90,12 @@ export const getProfileById = async (profileId: string): Promise<ExtendedProfile
     // Parse JSON fields to ensure type compatibility
     return {
       ...data,
-      role: role,
+      role: role as UserRole,
       social_links: data.social_links ? JSON.parse(JSON.stringify(data.social_links)) : {},
       privacy_settings: data.privacy_settings ? JSON.parse(JSON.stringify(data.privacy_settings)) : {
         profile_visibility: "connections"
       }
-    };
+    } as ExtendedProfile;
   } catch (error) {
     console.error("Exception in getProfileById:", error);
     return null;
@@ -156,11 +156,12 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
     // Parse JSON fields to ensure type compatibility
     return {
       ...data,
+      role: data.role as UserRole,
       social_links: data.social_links ? JSON.parse(JSON.stringify(data.social_links)) : {},
       privacy_settings: data.privacy_settings ? JSON.parse(JSON.stringify(data.privacy_settings)) : {
         profile_visibility: "connections"
       }
-    };
+    } as ExtendedProfile;
   } catch (error) {
     console.error("Exception in updateProfile:", error);
     return null;
@@ -182,7 +183,7 @@ export const canViewProfile = async (viewerId: string, profileId: string): Promi
       return false;
     }
     
-    return data;
+    return canView;
   } catch (error) {
     console.error("Exception in canViewProfile:", error);
     return false;
@@ -296,11 +297,12 @@ export const getAllProfiles = async (): Promise<ExtendedProfile[]> => {
     // Process the returned data to ensure types match
     return data.map(profile => ({
       ...profile,
+      role: profile.role as UserRole,
       social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
       privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
         profile_visibility: "connections"
       }
-    }));
+    })) as ExtendedProfile[];
   } catch (error) {
     console.error("Exception in getAllProfiles:", error);
     return [];

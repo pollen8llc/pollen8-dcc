@@ -14,16 +14,24 @@ export const getProposalCards = async (requestId: string): Promise<ProposalCard[
     .from('modul8_proposal_cards')
     .select('*')
     .eq('request_id', requestId)
-    .order('card_number', { ascending: true });
+    .order('created_at', { ascending: true });
 
   if (error) throw error;
-  return (data || []).map(card => ({
-    ...card,
-    asset_links: Array.isArray(card.asset_links) ? card.asset_links : [],
-    negotiated_budget_range: (card as any).negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined,
-    negotiated_title: (card as any).negotiated_title as string | undefined,
-    negotiated_description: (card as any).negotiated_description as string | undefined,
-    negotiated_timeline: (card as any).negotiated_timeline as string | undefined
+  return (data || []).map((card, index) => ({
+    id: card.id,
+    request_id: card.request_id,
+    submitted_by: card.provider_id,
+    card_number: index + 1,
+    status: card.status as any,
+    asset_links: [],
+    negotiated_title: card.title,
+    negotiated_description: card.description,
+    negotiated_budget_range: card.proposed_budget ? { min: card.proposed_budget, max: card.proposed_budget, currency: 'USD' } : undefined,
+    negotiated_timeline: card.proposed_timeline,
+    is_locked: false,
+    created_at: card.created_at,
+    updated_at: card.updated_at,
+    deel_contract_url: card.deel_contract_url
   })) as ProposalCard[];
 };
 
@@ -41,39 +49,44 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
     throw new Error('Cannot create new proposals - an agreement has already been reached for this request.');
   }
 
-  // Get the next card number for this request
+  // Count existing cards for this request
   const { data: existingCards } = await supabase
     .from('modul8_proposal_cards')
-    .select('card_number')
-    .eq('request_id', data.request_id)
-    .order('card_number', { ascending: false })
-    .limit(1);
+    .select('id')
+    .eq('request_id', data.request_id);
 
-  const nextCardNumber = existingCards && existingCards.length > 0 
-    ? existingCards[0].card_number + 1 
-    : 1;
+  const nextCardNumber = (existingCards?.length || 0) + 1;
 
-  const { data: card, error } = await (supabase as any)
+  const { data: card, error } = await supabase
     .from('modul8_proposal_cards')
     .insert({
-      ...data,
-      submitted_by: (await supabase.auth.getUser()).data.user?.id,
-      asset_links: data.asset_links || []
+      request_id: data.request_id,
+      provider_id: (await supabase.auth.getUser()).data.user?.id || '',
+      title: data.negotiated_title || 'Proposal',
+      description: data.negotiated_description || '',
+      proposed_budget: data.negotiated_budget_range?.min || 0,
+      proposed_timeline: data.negotiated_timeline || ''
     })
     .select()
     .single();
 
   if (error) throw error;
   return {
-    ...card,
+    id: card.id,
+    request_id: card.request_id,
+    submitted_by: card.provider_id,
+    card_number: nextCardNumber,
+    status: card.status as any,
     asset_links: [],
-    submitted_by: card.provider_id || '',
-    card_number: 0,
-    is_locked: false,
-    negotiated_budget_range: card.proposed_budget ? { min: card.proposed_budget, max: card.proposed_budget, currency: 'USD' } : undefined,
     negotiated_title: card.title,
-    negotiated_description: card.description
-  } as any;
+    negotiated_description: card.description,
+    negotiated_budget_range: card.proposed_budget ? { min: card.proposed_budget, max: card.proposed_budget, currency: 'USD' } : undefined,
+    negotiated_timeline: card.proposed_timeline,
+    is_locked: false,
+    created_at: card.created_at,
+    updated_at: card.updated_at,
+    deel_contract_url: card.deel_contract_url
+  } as ProposalCard;
 };
 
 export const respondToProposalCard = async (data: CreateProposalResponseData): Promise<ProposalCardResponse> => {
@@ -90,11 +103,11 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
     console.log('👤 Current user:', userData.user.id);
     
     // Check if user has already responded to this card
-  const { data: existingResponse, error: checkError } = await (supabase as any)
-    .from('modul8_proposal_card_responses')
+    const { data: existingResponse, error: checkError } = await supabase
+      .from('modul8_service_request_comments')
       .select('*')
-      .eq('card_id', data.card_id)
-      .eq('responded_by', userData.user.id)
+      .eq('service_request_id', data.card_id)
+      .eq('user_id', userData.user.id)
       .single();
     
     if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found (expected)
@@ -109,14 +122,16 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
     
     // Insert the response
     const responsePayload = {
-      ...data,
-      responded_by: userData.user.id
+      service_request_id: data.card_id,
+      content: data.response_notes || `${data.response_type} proposal`,
+      user_id: userData.user.id,
+      comment_type: data.response_type
     };
     
     console.log('📝 Inserting response payload:', responsePayload);
     
-  const { data: response, error } = await (supabase as any)
-    .from('modul8_proposal_card_responses')
+    const { data: response, error } = await supabase
+      .from('modul8_service_request_comments')
       .insert(responsePayload)
       .select()
       .single();
@@ -142,7 +157,14 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
       }
     }
     
-    return response as ProposalCardResponse;
+    return {
+      id: response.id,
+      card_id: data.card_id,
+      response_type: data.response_type,
+      responded_by: userData.user.id,
+      response_notes: response.content,
+      created_at: response.created_at
+    } as ProposalCardResponse;
   } catch (error) {
     console.error('❌ Comprehensive error in respondToProposalCard:', error);
     console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
@@ -178,65 +200,46 @@ const createFinalizationCard = async (originalCardId: string): Promise<void> => 
     let serviceProviderId = serviceRequest.service_provider_id;
     
     if (!serviceProviderId) {
-      // Try to find service provider based on the proposal submitter
-      const { data: serviceProvider, error: providerError } = await supabase
-        .from('modul8_service_providers')
-        .select('id')
-        .eq('user_id', originalCard.submitted_by)
-        .single();
+    // Try to find service provider based on the proposal submitter
+    const { data: serviceProvider, error: providerError } = await supabase
+      .from('modul8_service_providers')
+      .select('id')
+      .eq('user_id', originalCard.provider_id)
+      .single();
 
-      if (providerError || !serviceProvider) {
-        console.warn('Service provider not found for user:', originalCard.submitted_by);
-        // Continue without service provider assignment - the agreement can still be created
-        serviceProviderId = null;
-      } else {
-        serviceProviderId = serviceProvider.id;
-      }
+    if (providerError || !serviceProvider) {
+      console.warn('Service provider not found for user:', originalCard.provider_id);
+      serviceProviderId = null;
+    } else {
+      serviceProviderId = serviceProvider.id;
     }
-
-    // Get next card number
-    const { data: existingCards } = await supabase
-      .from('modul8_proposal_cards')
-      .select('card_number')
-      .eq('request_id', originalCard.request_id)
-      .order('card_number', { ascending: false })
-      .limit(1);
-
-    const nextCardNumber = existingCards && existingCards.length > 0 
-      ? existingCards[0].card_number + 1 
-      : 1;
+    }
 
     // Create finalization card with enhanced messaging
     await supabase
       .from('modul8_proposal_cards')
       .insert({
         request_id: originalCard.request_id,
-        card_number: nextCardNumber,
-        submitted_by: originalCard.submitted_by, // System-generated
-        status: 'agreement',
-        is_locked: true,
-        notes: 'AGREEMENT FINALIZATION - Both parties have accepted the proposal. Please proceed with contract execution via DEEL platform.',
-        negotiated_title: originalCard.negotiated_title,
-        negotiated_description: originalCard.negotiated_description,
-        negotiated_budget_range: originalCard.negotiated_budget_range,
-        negotiated_timeline: originalCard.negotiated_timeline
+        provider_id: originalCard.provider_id,
+        title: 'AGREEMENT FINALIZATION',
+        description: 'Both parties have accepted the proposal. Please proceed with contract execution via DEEL platform.',
+        proposed_budget: originalCard.proposed_budget,
+        proposed_timeline: originalCard.proposed_timeline,
+        status: 'agreement'
       });
 
     // Lock the original card and request
     await supabase
       .from('modul8_proposal_cards')
       .update({ 
-        status: 'accepted',
-        is_locked: true,
-        updated_at: new Date().toISOString()
+        status: 'accepted'
       })
       .eq('id', originalCardId);
 
     // Update the service request status and optionally assign service provider
     const updateData: any = {
       status: 'agreed',
-      is_agreement_locked: true,
-      updated_at: new Date().toISOString()
+      is_agreement_locked: true
     };
 
     // Only update service provider if we found one
@@ -278,38 +281,21 @@ export const createCounterProposalFromCard = async (
       throw new Error(`Failed to fetch original proposal: ${fetchError.message}`);
     }
 
-    // Safely cast the asset_links and negotiated fields with proper type checking
-    const safeAssetLinks = Array.isArray(originalCard.asset_links) 
-      ? originalCard.asset_links as string[]
-      : [];
-
-    const safeBudgetRange = originalCard.negotiated_budget_range && 
-      typeof originalCard.negotiated_budget_range === 'object' &&
-      !Array.isArray(originalCard.negotiated_budget_range)
-      ? originalCard.negotiated_budget_range as { min?: number; max?: number; currency: string; }
-      : undefined;
-
     // Create counter proposal with data from original card as fallback
     const counterProposal = await createProposalCard({
       request_id: originalCard.request_id,
       response_to_card_id: originalCardId,
-      notes: counterData.notes || originalCard.notes,
-      scope_link: counterData.scope_link || originalCard.scope_link,
-      terms_link: counterData.terms_link || originalCard.terms_link,
-      asset_links: counterData.asset_links || safeAssetLinks,
-      negotiated_title: counterData.negotiated_title || (originalCard.negotiated_title as string | undefined),
-      negotiated_description: counterData.negotiated_description || (originalCard.negotiated_description as string | undefined),
-      negotiated_budget_range: counterData.negotiated_budget_range || safeBudgetRange,
-      negotiated_timeline: counterData.negotiated_timeline || (originalCard.negotiated_timeline as string | undefined)
+      negotiated_title: counterData.negotiated_title || originalCard.title,
+      negotiated_description: counterData.negotiated_description || originalCard.description,
+      negotiated_budget_range: counterData.negotiated_budget_range || (originalCard.proposed_budget ? { min: originalCard.proposed_budget, max: originalCard.proposed_budget, currency: 'USD' } : undefined),
+      negotiated_timeline: counterData.negotiated_timeline || originalCard.proposed_timeline
     });
 
     // Mark the original card as countered
     await supabase
       .from('modul8_proposal_cards')
       .update({ 
-        status: 'countered',
-        is_locked: true,
-        updated_at: new Date().toISOString()
+        status: 'countered'
       })
       .eq('id', originalCardId);
 
@@ -323,15 +309,15 @@ export const createCounterProposalFromCard = async (
 
 export const checkMutualAcceptance = async (cardId: string): Promise<boolean> => {
   const { data, error } = await supabase
-    .from('modul8_proposal_card_responses')
-    .select('responded_by')
-    .eq('card_id', cardId)
-    .eq('response_type', 'accept');
+    .from('modul8_service_request_comments')
+    .select('user_id')
+    .eq('service_request_id', cardId)
+    .eq('comment_type', 'accept');
 
   if (error) throw error;
   
   // Check if we have responses from two different users
-  const uniqueResponders = new Set(data?.map(r => r.responded_by) || []);
+  const uniqueResponders = new Set(data?.map(r => r.user_id) || []);
   return uniqueResponders.size >= 2;
 };
 
@@ -339,54 +325,62 @@ export const cancelProposalCard = async (cardId: string): Promise<void> => {
   const { error } = await supabase
     .from('modul8_proposal_cards')
     .update({ 
-      status: 'cancelled',
-      updated_at: new Date().toISOString()
+      status: 'cancelled'
     })
-    .eq('id', cardId)
-    .eq('is_locked', false);
+    .eq('id', cardId);
 
   if (error) throw error;
 };
 
 export const getRequestComments = async (requestId: string): Promise<RequestComment[]> => {
   const { data, error } = await supabase
-    .from('modul8_request_comments')
+    .from('modul8_service_request_comments')
     .select('*')
-    .eq('request_id', requestId)
+    .eq('service_request_id', requestId)
     .order('created_at', { ascending: true });
 
   if (error) throw error;
   return (data || []).map(comment => ({
-    ...comment,
-    attachment_links: Array.isArray(comment.attachment_links) ? comment.attachment_links : []
+    id: comment.id,
+    request_id: requestId,
+    user_id: comment.user_id,
+    content: comment.content,
+    attachment_links: [],
+    created_at: comment.created_at,
+    updated_at: comment.updated_at
   })) as RequestComment[];
 };
 
 export const createRequestComment = async (data: CreateCommentData): Promise<RequestComment> => {
   const { data: comment, error } = await supabase
-    .from('modul8_request_comments')
+    .from('modul8_service_request_comments')
     .insert({
-      ...data,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      attachment_links: data.attachment_links || []
+      service_request_id: data.request_id,
+      content: data.content,
+      user_id: (await supabase.auth.getUser()).data.user?.id
     })
     .select()
     .single();
 
   if (error) throw error;
   return {
-    ...comment,
-    attachment_links: Array.isArray(comment.attachment_links) ? comment.attachment_links : []
+    id: comment.id,
+    request_id: data.request_id,
+    user_id: comment.user_id,
+    content: comment.content,
+    attachment_links: [],
+    created_at: comment.created_at,
+    updated_at: comment.updated_at
   } as RequestComment;
 };
 
 export const getProposalCardResponses = async (cardId: string): Promise<ProposalCardResponse[]> => {
   console.log('🔍 Fetching responses for card:', cardId);
   
-  const { data, error } = await (supabase as any)
-    .from('modul8_proposal_card_responses')
+  const { data, error } = await supabase
+    .from('modul8_service_request_comments')
     .select('*')
-    .eq('card_id', cardId)
+    .eq('service_request_id', cardId)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -395,5 +389,12 @@ export const getProposalCardResponses = async (cardId: string): Promise<Proposal
   }
   
   console.log('📊 Found responses:', data?.length || 0, data);
-  return data as ProposalCardResponse[];
+  return (data || []).map(comment => ({
+    id: comment.id,
+    card_id: cardId,
+    response_type: 'accept' as const,
+    responded_by: comment.user_id,
+    response_notes: comment.content,
+    created_at: comment.created_at
+  })) as ProposalCardResponse[];
 };
