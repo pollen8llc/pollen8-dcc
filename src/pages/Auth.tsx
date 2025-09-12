@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/contexts/UserContext";
@@ -14,135 +13,245 @@ import { useToast } from "@/hooks/use-toast";
 import AuthLayout from "@/components/auth/AuthLayout";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
+interface AuthFormState {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface AuthStatus {
+  loading: boolean;
+  showPassword: boolean;
+  error: string | null;
+  message: string | null;
+}
+
 const Auth = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  
+  // Form state
+  const [formState, setFormState] = useState<AuthFormState>({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: ""
+  });
+
+  // Auth status state
+  const [authStatus, setAuthStatus] = useState<AuthStatus>({
+    loading: false,
+    showPassword: false,
+    error: null,
+    message: null
+  });
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { currentUser, isLoading } = useUser();
   const { toast } = useToast();
 
-  // Redirect if already authenticated with role-based logic
+  // Update form field
+  const updateFormField = useCallback((field: keyof AuthFormState, value: string) => {
+    setFormState(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  // Update auth status
+  const updateAuthStatus = useCallback((updates: Partial<AuthStatus>) => {
+    setAuthStatus(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  // Clear messages
+  const clearMessages = useCallback(() => {
+    updateAuthStatus({ error: null, message: null });
+  }, [updateAuthStatus]);
+
+  // Handle successful authentication redirect
+  const handleAuthenticatedRedirect = useCallback((user: any) => {
+    console.log('🔍 Auth.tsx - Handling authenticated redirect:', {
+      role: user.role,
+      profileComplete: user.profile_complete,
+      userId: user.id
+    });
+
+    // Service providers go to LAB-R8, others go to initi8
+    if (user.role === 'SERVICE_PROVIDER') {
+      console.log('🚀 Auth.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
+      const destination = user.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
+      navigate(destination, { replace: true });
+    } else {
+      console.log('🚀 Auth.tsx - Redirecting authenticated user to initi8 dashboard');
+      navigate("/initi8", { replace: true });
+    }
+  }, [navigate]);
+
+  // Check if user is already authenticated and redirect
   useEffect(() => {
     if (!isLoading && currentUser) {
-      console.log('🔍 Auth.tsx - User already authenticated:', {
-        role: currentUser.role,
-        profileComplete: currentUser.profile_complete,
-        userId: currentUser.id
-      });
-      
-      // Service providers go to LAB-R8, others go to initi8
-      if (currentUser.role === 'SERVICE_PROVIDER') {
-        console.log('🚀 Auth.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
-        const destination = currentUser.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
-        navigate(destination, { replace: true });
-      } else {
-        console.log('🚀 Auth.tsx - Redirecting authenticated user to initi8 dashboard');
-        navigate("/initi8", { replace: true });
-      }
+      console.log('🔍 Auth.tsx - User already authenticated, redirecting...');
+      handleAuthenticatedRedirect(currentUser);
     }
-  }, [currentUser, isLoading, navigate, searchParams]);
+  }, [currentUser, isLoading, handleAuthenticatedRedirect]);
 
+  // Validate sign up form
+  const validateSignUpForm = useCallback((): string | null => {
+    const { password, confirmPassword, firstName, lastName, email } = formState;
+    
+    if (!email.trim()) return "Email is required";
+    if (!firstName.trim()) return "First name is required";
+    if (!lastName.trim()) return "Last name is required";
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must be at least 6 characters long";
+    if (password !== confirmPassword) return "Passwords do not match";
+    
+    return null;
+  }, [formState]);
+
+  // Validate sign in form
+  const validateSignInForm = useCallback((): string | null => {
+    const { email, password } = formState;
+    
+    if (!email.trim()) return "Email is required";
+    if (!password) return "Password is required";
+    
+    return null;
+  }, [formState]);
+
+  // Handle sign in
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setMessage(null);
+    clearMessages();
+
+    // Validate form
+    const validationError = validateSignInForm();
+    if (validationError) {
+      updateAuthStatus({ error: validationError });
+      return;
+    }
+
+    updateAuthStatus({ loading: true });
 
     try {
+      console.log('🔐 Auth.tsx - Starting sign in process...');
+      
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: formState.email.trim(),
+        password: formState.password,
       });
 
       if (error) {
-        setError(error.message);
+        console.error('❌ Auth.tsx - Sign in error:', error.message);
+        updateAuthStatus({ error: error.message, loading: false });
         return;
       }
 
       if (data.user) {
         console.log('🎉 Auth.tsx - Sign in successful for user:', data.user.id);
+        
         toast({
           title: "Welcome back!",
           description: "You have successfully signed in.",
         });
         
-        // Don't immediately redirect - let useEffect handle it after user context updates
+        // Clear form on success
+        setFormState({
+          email: "",
+          password: "",
+          confirmPassword: "",
+          firstName: "",
+          lastName: ""
+        });
+        
         console.log('✅ Auth.tsx - Waiting for user context to update...');
       }
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
+      console.error('❌ Auth.tsx - Unexpected sign in error:', err);
+      updateAuthStatus({ 
+        error: err.message || "An unexpected error occurred during sign in",
+        loading: false 
+      });
     } finally {
-      setLoading(false);
+      updateAuthStatus({ loading: false });
     }
   };
 
+  // Handle sign up
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setMessage(null);
+    clearMessages();
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
+    // Validate form
+    const validationError = validateSignUpForm();
+    if (validationError) {
+      updateAuthStatus({ error: validationError });
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      setLoading(false);
-      return;
-    }
+    updateAuthStatus({ loading: true });
 
     try {
+      console.log('🔐 Auth.tsx - Starting sign up process...');
+      
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: formState.email.trim(),
+        password: formState.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            first_name: firstName,
-            last_name: lastName,
+            first_name: formState.firstName.trim(),
+            last_name: formState.lastName.trim(),
           }
         }
       });
 
       if (error) {
-        setError(error.message);
+        console.error('❌ Auth.tsx - Sign up error:', error.message);
+        updateAuthStatus({ error: error.message, loading: false });
         return;
       }
 
       if (data.user) {
+        console.log('🎉 Auth.tsx - Sign up successful for user:', data.user.id);
+        
         if (data.user.email_confirmed_at) {
-          console.log('🎉 Auth.tsx - Sign up successful for user:', data.user.id);
+          // Email already confirmed - user is immediately signed in
           toast({
             title: "Account created!",
             description: "Welcome to the community!",
           });
-          // Don't immediately redirect - let useEffect handle it after user context updates
+          
+          // Clear form on success
+          setFormState({
+            email: "",
+            password: "",
+            confirmPassword: "",
+            firstName: "",
+            lastName: ""
+          });
+          
           console.log('✅ Auth.tsx - Waiting for user context to update...');
         } else {
-          setMessage("Please check your email and click the confirmation link to complete your registration.");
+          // Email confirmation required
+          updateAuthStatus({
+            message: "Please check your email and click the confirmation link to complete your registration.",
+            loading: false
+          });
         }
       }
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
+      console.error('❌ Auth.tsx - Unexpected sign up error:', err);
+      updateAuthStatus({ 
+        error: err.message || "An unexpected error occurred during registration",
+        loading: false 
+      });
     } finally {
-      setLoading(false);
+      updateAuthStatus({ loading: false });
     }
   };
 
+  // Show loading spinner while checking auth state
   if (isLoading) {
     return (
       <AuthLayout>
@@ -162,6 +271,7 @@ const Auth = () => {
             Sign in to your account or create a new one
           </CardDescription>
         </CardHeader>
+        
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -169,18 +279,21 @@ const Auth = () => {
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 
-            {error && (
+            {/* Error Alert */}
+            {authStatus.error && (
               <Alert variant="destructive" className="mt-4">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{authStatus.error}</AlertDescription>
               </Alert>
             )}
 
-            {message && (
+            {/* Success/Info Message */}
+            {authStatus.message && (
               <Alert className="mt-4">
-                <AlertDescription>{message}</AlertDescription>
+                <AlertDescription>{authStatus.message}</AlertDescription>
               </Alert>
             )}
 
+            {/* Sign In Tab */}
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -189,30 +302,34 @@ const Auth = () => {
                     id="signin-email"
                     type="email"
                     placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formState.email}
+                    onChange={(e) => updateFormField('email', e.target.value)}
                     required
+                    disabled={authStatus.loading}
                   />
                 </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
                   <div className="relative">
                     <Input
                       id="signin-password"
-                      type={showPassword ? "text" : "password"}
+                      type={authStatus.showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={formState.password}
+                      onChange={(e) => updateFormField('password', e.target.value)}
                       required
+                      disabled={authStatus.loading}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => updateAuthStatus({ showPassword: !authStatus.showPassword })}
+                      disabled={authStatus.loading}
                     >
-                      {showPassword ? (
+                      {authStatus.showPassword ? (
                         <EyeOff className="h-4 w-4" />
                       ) : (
                         <Eye className="h-4 w-4" />
@@ -220,8 +337,9 @@ const Auth = () => {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
+                
+                <Button type="submit" className="w-full" disabled={authStatus.loading}>
+                  {authStatus.loading ? (
                     <div className="flex items-center gap-2">
                       <LoadingSpinner size="sm" />
                       Signing in...
@@ -233,6 +351,7 @@ const Auth = () => {
               </form>
             </TabsContent>
 
+            {/* Sign Up Tab */}
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -242,9 +361,10 @@ const Auth = () => {
                       id="firstName"
                       type="text"
                       placeholder="John"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      value={formState.firstName}
+                      onChange={(e) => updateFormField('firstName', e.target.value)}
                       required
+                      disabled={authStatus.loading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -253,42 +373,48 @@ const Auth = () => {
                       id="lastName"
                       type="text"
                       placeholder="Doe"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      value={formState.lastName}
+                      onChange={(e) => updateFormField('lastName', e.target.value)}
                       required
+                      disabled={authStatus.loading}
                     />
                   </div>
                 </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
                     placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formState.email}
+                    onChange={(e) => updateFormField('email', e.target.value)}
                     required
+                    disabled={authStatus.loading}
                   />
                 </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
                   <div className="relative">
                     <Input
                       id="signup-password"
-                      type={showPassword ? "text" : "password"}
+                      type={authStatus.showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={formState.password}
+                      onChange={(e) => updateFormField('password', e.target.value)}
                       required
+                      disabled={authStatus.loading}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => updateAuthStatus({ showPassword: !authStatus.showPassword })}
+                      disabled={authStatus.loading}
                     >
-                      {showPassword ? (
+                      {authStatus.showPassword ? (
                         <EyeOff className="h-4 w-4" />
                       ) : (
                         <Eye className="h-4 w-4" />
@@ -296,19 +422,22 @@ const Auth = () => {
                     </Button>
                   </div>
                 </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm Password</Label>
                   <Input
                     id="confirm-password"
                     type="password"
                     placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    value={formState.confirmPassword}
+                    onChange={(e) => updateFormField('confirmPassword', e.target.value)}
                     required
+                    disabled={authStatus.loading}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
+                
+                <Button type="submit" className="w-full" disabled={authStatus.loading}>
+                  {authStatus.loading ? (
                     <div className="flex items-center gap-2">
                       <LoadingSpinner size="sm" />
                       Creating account...
