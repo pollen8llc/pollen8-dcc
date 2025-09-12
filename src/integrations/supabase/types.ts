@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          performed_by?: string | null
+        }
+        Relationships: []
+      }
       communities: {
         Row: {
           communication_platforms: Json | null
@@ -197,6 +221,48 @@ export type Database = {
           },
         ]
       }
+      knowledge_articles: {
+        Row: {
+          author_id: string
+          category: string | null
+          community_id: string | null
+          content: string
+          created_at: string
+          id: string
+          is_published: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          author_id: string
+          category?: string | null
+          community_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          author_id?: string
+          category?: string | null
+          community_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       knowledge_base: {
         Row: {
           author_id: string
@@ -247,6 +313,36 @@ export type Database = {
           },
         ]
       }
+      knowledge_comments: {
+        Row: {
+          article_id: string
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          is_accepted_answer: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_accepted_answer?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_accepted_answer?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       knowledge_tags: {
         Row: {
           color: string | null
@@ -274,6 +370,69 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      knowledge_votes: {
+        Row: {
+          article_id: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          article_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          article_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: []
+      }
+      modul8_negotiation_status: {
+        Row: {
+          created_at: string
+          current_status: string
+          id: string
+          previous_status: string | null
+          service_provider_id: string | null
+          service_request_id: string
+          status_data: Json | null
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          current_status: string
+          id?: string
+          previous_status?: string | null
+          service_provider_id?: string | null
+          service_request_id: string
+          status_data?: Json | null
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          current_status?: string
+          id?: string
+          previous_status?: string | null
+          service_provider_id?: string | null
+          service_request_id?: string
+          status_data?: Json | null
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: []
       }
@@ -316,6 +475,39 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      modul8_service_request_comments: {
+        Row: {
+          comment_type: string
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          service_request_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_type?: string
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          service_request_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_type?: string
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          service_request_id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -519,6 +711,72 @@ export type Database = {
           },
         ]
       }
+      rms_outreach: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          scheduled_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          scheduled_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          scheduled_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rms_outreach_contacts: {
+        Row: {
+          clicked_at: string | null
+          contact_id: string
+          created_at: string
+          id: string
+          opened_at: string | null
+          outreach_id: string
+          sent_at: string | null
+          status: string | null
+        }
+        Insert: {
+          clicked_at?: string | null
+          contact_id: string
+          created_at?: string
+          id?: string
+          opened_at?: string | null
+          outreach_id: string
+          sent_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          clicked_at?: string | null
+          contact_id?: string
+          created_at?: string
+          id?: string
+          opened_at?: string | null
+          outreach_id?: string
+          sent_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       roles: {
         Row: {
           created_at: string
@@ -580,6 +838,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_request_to_provider: {
+        Args: { p_service_provider_id: string; p_service_request_id: string }
+        Returns: boolean
+      }
+      can_view_profile: {
+        Args: { profile_user_id: string; viewer_id: string }
+        Returns: boolean
+      }
       create_community: {
         Args: {
           p_description: string
@@ -594,8 +860,25 @@ export type Database = {
         }
         Returns: string
       }
+      generate_unique_invite_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_community_member_count: {
         Args: { community_id: string }
+        Returns: number
+      }
+      get_connected_profiles: {
+        Args: { user_id: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          profile_id: string
+          user_id: string
+        }[]
+      }
+      get_connection_depth: {
+        Args: { user_a: string; user_b: string }
         Returns: number
       }
       get_highest_role: {
@@ -626,6 +909,27 @@ export type Database = {
         Returns: {
           count: number
           option_index: number
+        }[]
+      }
+      get_rel8t_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_user_memberships: {
+        Args: { user_id: string }
+        Returns: {
+          community_id: string
+          community_name: string
+          role: string
+          status: string
+        }[]
+      }
+      get_user_owned_communities: {
+        Args: { user_id: string }
+        Returns: {
+          community_id: string
+          community_name: string
+          member_count: number
         }[]
       }
       get_user_profile_with_role: {
@@ -670,12 +974,24 @@ export type Database = {
         Args: { role_name: string; user_id: string }
         Returns: boolean
       }
+      increment_view_count: {
+        Args: { article_id: string }
+        Returns: undefined
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
       }
       is_community_owner: {
         Args: { community_id: string; user_id: string }
+        Returns: boolean
+      }
+      log_audit_action: {
+        Args: { action_details?: Json; action_name: string; user_id?: string }
+        Returns: string
+      }
+      record_invite_use: {
+        Args: { invite_code: string; used_by_id: string }
         Returns: boolean
       }
       update_module_completion: {

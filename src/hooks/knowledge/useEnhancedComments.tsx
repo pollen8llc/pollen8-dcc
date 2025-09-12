@@ -16,7 +16,7 @@ export const useEnhancedComments = (articleId: string | undefined) => {
       try {
         // Fetch all comments (both parent and replies)
         const { data: comments, error } = await supabase
-          .from('knowledge_comments')
+          .from('knowledge_comments' as any)
           .select('*')
           .eq('article_id', articleId)
           .order('created_at', { ascending: true });
@@ -30,79 +30,81 @@ export const useEnhancedComments = (articleId: string | undefined) => {
           return [] as KnowledgeComment[];
         }
         
-        // Fetch mentions for all comments
-        const commentIds = comments.map(c => c.id);
-        const { data: mentions } = await supabase
-          .from('knowledge_comment_mentions')
-          .select('*')
-          .in('comment_id', commentIds);
-        
         // Extract all unique user IDs
-        const userIds = [...new Set(comments.map(comment => comment.user_id))];
+        const userIds = [...new Set((comments as any[]).map((comment: any) => comment.author_id))];
         
         // Fetch all author profiles in a single query
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, username, avatar_url')
-          .in('id', userIds);
+          .select('user_id, first_name, last_name, full_name, avatar_url')
+          .in('user_id', userIds);
           
         if (profileError) {
           console.error('Error fetching comment author profiles:', profileError);
         }
         
-        // Create a map of user_id to profile for easy lookup
-        const profileMap = (profiles || []).reduce((map, profile) => {
-          map[profile.id] = profile;
-          return map;
-        }, {} as Record<string, any>);
-        
-        // Get current user id for user context
-        const { data: { user } } = await supabase.auth.getUser();
-        const currentUserId = user?.id;
-        
-        // Enhance comments with all data
-        const enhancedComments = comments.map(comment => {
-          const profile = profileMap[comment.user_id];
-          const commentMentions = mentions?.filter(m => m.comment_id === comment.id) || [];
-          
+        // Create profile map
+        const profileMap = (profiles || []).reduce((acc: any, profile: any) => {
+          acc[profile.user_id] = profile;
+          return acc;
+        }, {});
+
+        // Transform comments with authors
+        const enhancedComments = (comments as any[]).map((comment: any) => {
+          const profile = profileMap[comment.author_id];
+
           return {
             ...comment,
-            author: profile ? {
-              id: comment.user_id,
-              name: (() => {
-                const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-                return fullName || profile.username || 'Anonymous User';
-              })(),
-              avatar_url: profile.avatar_url
-            } : {
-              id: comment.user_id,
-              name: 'Anonymous User',
-              avatar_url: null
+            author: {
+              id: comment.author_id,
+              name: profile?.full_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Anonymous',
+              avatar_url: profile?.avatar_url
             },
-            mentions: commentMentions
-          } as KnowledgeComment;
+            mentions: [], // Empty for now since mention table doesn't exist
+            user_id: comment.author_id, // Add for compatibility
+            is_accepted: comment.is_accepted_answer
+          } as any;
         });
 
-        // Organize comments into parent-child structure
-        const parentComments = enhancedComments.filter(comment => !comment.parent_comment_id);
-        const replyComments = enhancedComments.filter(comment => comment.parent_comment_id);
-        
-        // Attach replies to their parent comments
-        const organizedComments = parentComments.map(parent => ({
-          ...parent,
-          replies: replyComments.filter(reply => reply.parent_comment_id === parent.id)
-        }));
-        
-        console.log('Enhanced comments organized:', organizedComments);
-        return organizedComments;
+        return enhancedComments;
       } catch (error) {
-        console.error('Error processing enhanced comments:', error);
+        console.error('Error processing comments:', error);
         throw error;
       }
     },
     enabled: !!articleId,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60, // 1 minute
     retry: 2
+  });
+};
+
+export const useUserComments = () => {
+  const { currentUser } = useUser();
+  
+  return useQuery({
+    queryKey: ['userComments', currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser) return [];
+
+      try {
+        const { data: comments, error } = await supabase
+          .from('knowledge_comments' as any)
+          .select('*')
+          .eq('author_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return (comments as any[]).filter((comment: any) => {
+          if (!currentUser) return false;
+          return comment.author_id === currentUser.id;
+        });
+      } catch (error) {
+        console.error('Error fetching user comments:', error);
+        return [];
+      }
+    },
+    enabled: !!currentUser,
   });
 };
 
@@ -112,17 +114,7 @@ export const useEnhancedCommentMutations = () => {
   const queryClient = useQueryClient();
   const { currentUser } = useUser();
   
-  const createComment = async ({ 
-    articleId, 
-    content, 
-    parentCommentId, 
-    mentions 
-  }: { 
-    articleId: string; 
-    content: string; 
-    parentCommentId?: string; 
-    mentions?: string[] 
-  }) => {
+  const createComment = async (articleId: string, content: string) => {
     if (!currentUser) {
       toast({
         title: "Authentication required",
@@ -145,53 +137,76 @@ export const useEnhancedCommentMutations = () => {
       }
       
       const { data: comment, error } = await supabase
-        .from('knowledge_comments')
+        .from('knowledge_comments' as any)
         .insert({
           article_id: articleId,
-          user_id: currentUser.id,
-          content: content.trim(),
-          parent_comment_id: parentCommentId || null
+          author_id: currentUser.id,
+          content
         })
         .select()
         .single();
-        
-      if (error) {
-        console.error('Error creating comment:', error);
-        throw error;
+
+      if (error) throw error;
+
+      // Process mentions - placeholder for now
+      const mentionedUsers = extractMentionsFromContent(content);
+      if (mentionedUsers.length > 0) {
+        console.log('Mentions detected:', mentionedUsers);
+        // Would insert to knowledge_comment_mentions table when it exists
       }
       
-      // Insert mentions if provided
-      if (mentions && mentions.length > 0) {
-        const mentionInserts = mentions.map(username => ({
-          comment_id: comment.id,
-          mentioned_user_id: null,
-          mentioned_username: username
-        }));
-
-        const { error: mentionError } = await supabase
-          .from('knowledge_comment_mentions')
-          .insert(mentionInserts);
-
-        if (mentionError) {
-          console.warn('Error creating mentions:', mentionError);
-        }
-      }
-      
-      // Invalidate related queries
       await queryClient.invalidateQueries({ queryKey: ['enhancedComments', articleId] });
-      await queryClient.invalidateQueries({ queryKey: ['articleComments', articleId] });
       
       toast({
-        title: parentCommentId ? "Reply posted" : "Comment posted",
-        description: parentCommentId ? "Your reply has been posted successfully" : "Your comment has been posted successfully"
+        title: "Comment posted",
+        description: "Your comment has been posted successfully"
       });
       
       return comment;
     } catch (error: any) {
-      console.error('Comment creation error:', error);
+      console.error('Enhanced comment creation error:', error);
       toast({
         title: "Failed to post comment",
         description: error.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const updateComment = async (commentId: string, content: string, articleId: string) => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to update a comment",
+        variant: "destructive"
+      });
+      throw new Error('Authentication required');
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      const { error } = await supabase
+        .from('knowledge_comments' as any)
+        .update({ content, updated_at: new Date().toISOString() })
+        .eq('id', commentId)
+        .eq('author_id', currentUser.id);
+
+      if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ['enhancedComments', articleId] });
+      
+      toast({
+        title: "Comment updated",
+        description: "Your comment has been updated successfully"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to update comment",
+        description: error.message,
         variant: "destructive"
       });
       throw error;
@@ -214,18 +229,13 @@ export const useEnhancedCommentMutations = () => {
       setIsSubmitting(true);
       
       const { error } = await supabase
-        .from('knowledge_comments')
+        .from('knowledge_comments' as any)
         .delete()
         .eq('id', commentId);
-        
-      if (error) {
-        console.error('Error deleting comment:', error);
-        throw error;
-      }
+
+      if (error) throw error;
       
-      // Invalidate related queries
       await queryClient.invalidateQueries({ queryKey: ['enhancedComments', articleId] });
-      await queryClient.invalidateQueries({ queryKey: ['articleComments', articleId] });
       
       toast({
         title: "Comment deleted",
@@ -257,29 +267,25 @@ export const useEnhancedCommentMutations = () => {
       setIsSubmitting(true);
       
       const { error } = await supabase
-        .from('knowledge_comments')
-        .update({ is_accepted: isAccepted })
+        .from('knowledge_comments' as any)
+        .update({ is_accepted_answer: isAccepted })
         .eq('id', commentId);
-        
-      if (error) {
-        console.error('Error accepting answer:', error);
-        throw error;
-      }
-      
+
+      if (error) throw error;
+
+      // If accepting, update the article
       if (isAccepted) {
         const { error: articleError } = await supabase
-          .from('knowledge_articles')
-          .update({ is_answered: true })
+          .from('knowledge_articles' as any)
+          .update({ has_accepted_answer: true })
           .eq('id', articleId);
-          
+
         if (articleError) {
-          console.error('Error updating article answered status:', articleError);
+          console.error('Failed to update article:', articleError);
         }
       }
       
-      // Invalidate related queries
       await queryClient.invalidateQueries({ queryKey: ['enhancedComments', articleId] });
-      await queryClient.invalidateQueries({ queryKey: ['articleComments', articleId] });
       await queryClient.invalidateQueries({ queryKey: ['knowledgeArticle', articleId] });
       
       toast({
@@ -300,34 +306,53 @@ export const useEnhancedCommentMutations = () => {
   
   return {
     createComment,
+    updateComment,
     deleteComment,
     acceptAnswer,
     isSubmitting
   };
 };
 
-// Hook to search users for mentions
+// Helper function to extract mentions from content
+const extractMentionsFromContent = (content: string): Array<{id: string, username: string}> => {
+  const mentionRegex = /@(\w+)/g;
+  const mentions: Array<{id: string, username: string}> = [];
+  let match;
+  
+  while ((match = mentionRegex.exec(content)) !== null) {
+    mentions.push({
+      id: match[1], // This would need proper user lookup
+      username: match[1]
+    });
+  }
+  
+  return mentions;
+};
+
+// Hook for searching users for mentions
 export const useUserSearch = () => {
   const searchUsers = async (query: string) => {
-    if (!query.trim() || query.length < 2) return [];
+    if (!query || query.length < 2) return [];
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, first_name, last_name, username, avatar_url')
-      .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,username.ilike.%${query}%`)
-      .limit(10);
-    
-    if (error) {
+    try {
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('user_id, first_name, last_name, full_name, avatar_url')
+        .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,full_name.ilike.%${query}%`)
+        .limit(10);
+
+      if (error) throw error;
+
+      return (users || []).map((user: any) => ({
+        id: user.user_id,
+        name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        avatar_url: user.avatar_url,
+        username: user.full_name || 'user' // Placeholder
+      }));
+    } catch (error) {
       console.error('Error searching users:', error);
       return [];
     }
-    
-    return data?.map(user => ({
-      id: user.id,
-      name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username || 'Unknown User',
-      username: user.username || '',
-      avatar_url: user.avatar_url
-    })) || [];
   };
   
   return { searchUsers };

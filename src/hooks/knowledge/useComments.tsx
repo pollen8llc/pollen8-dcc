@@ -17,7 +17,7 @@ export const useComments = (articleId: string | undefined) => {
       try {
         // First fetch the comments
         const { data: comments, error } = await supabase
-          .from('knowledge_comments')
+          .from('knowledge_comments' as any)
           .select('*')
           .eq('article_id', articleId)
           .order('created_at', { ascending: true });
@@ -32,13 +32,13 @@ export const useComments = (articleId: string | undefined) => {
         }
         
         // Extract all unique user IDs
-        const userIds = [...new Set(comments.map(comment => comment.user_id))];
+        const userIds = [...new Set((comments as any[]).map((comment: any) => comment.author_id))];
         
         // Fetch all author profiles in a single query
         const { data: profiles, error: profileError } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, avatar_url')
-          .in('id', userIds);
+          .select('id, user_id, first_name, last_name, full_name, avatar_url')
+          .in('user_id', userIds);
           
         if (profileError) {
           console.error('Error fetching comment author profiles:', profileError);
@@ -46,17 +46,17 @@ export const useComments = (articleId: string | undefined) => {
         }
         
         // Create a map of user_id to profile for easy lookup
-        const profileMap = (profiles || []).reduce((map, profile) => {
-          map[profile.id] = profile;
+        const profileMap = (profiles || []).reduce((map: any, profile: any) => {
+          map[profile.user_id] = profile;
           return map;
         }, {} as Record<string, any>);
         
         // Get vote counts for all comments in a single call
-        const commentIds = comments.map(comment => comment.id);
+        const commentIds = (comments as any[]).map((comment: any) => comment.id);
         
         // Fetch all votes in one query
         const { data: votes, error: votesError } = await supabase
-          .from('knowledge_votes')
+          .from('knowledge_votes' as any)
           .select('comment_id, vote_type, user_id')
           .in('comment_id', commentIds);
           
@@ -71,12 +71,13 @@ export const useComments = (articleId: string | undefined) => {
         
         if (votes) {
           // Calculate total votes per comment
-          votes.forEach(vote => {
+          (votes as any[]).forEach((vote: any) => {
             const commentId = vote.comment_id;
             if (!voteMap.has(commentId)) {
               voteMap.set(commentId, 0);
             }
-            voteMap.set(commentId, voteMap.get(commentId) + vote.vote_type);
+            const voteValue = vote.vote_type === 'up' ? 1 : -1;
+            voteMap.set(commentId, voteMap.get(commentId) + voteValue);
             
             // Also track each user's vote for each comment
             const key = `${vote.comment_id}_${vote.user_id}`;
@@ -89,23 +90,23 @@ export const useComments = (articleId: string | undefined) => {
         const currentUserId = user?.id;
         
         // Enhance comments with author and vote data
-        return comments.map(comment => {
-          const profile = profileMap[comment.user_id];
+        return (comments as any[]).map((comment: any) => {
+          const profile = profileMap[comment.author_id];
           
           return {
             ...comment,
             author: profile ? {
-              id: comment.user_id,
-              name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+              id: comment.author_id,
+              name: profile.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
               avatar_url: profile.avatar_url
             } : {
-              id: comment.user_id,
+              id: comment.author_id,
               name: 'Unknown User',
               avatar_url: null
             },
             vote_count: voteMap.get(comment.id) || 0,
             user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
-          } as KnowledgeComment;
+          } as any;
         });
       } catch (error) {
         console.error('Error processing comments:', error);
@@ -149,10 +150,10 @@ export const useCommentMutations = () => {
       }
       
       const { data: comment, error } = await supabase
-        .from('knowledge_comments')
+        .from('knowledge_comments' as any)
         .insert({
           article_id: articleId,
-          user_id: currentUser.id,
+          author_id: currentUser.id,
           content
         })
         .select()
@@ -219,7 +220,7 @@ export const useCommentMutations = () => {
       // Delete the comment - we no longer need to check for user_id
       // as the RLS policy will handle access control
       const { error } = await supabase
-        .from('knowledge_comments')
+        .from('knowledge_comments' as any)
         .delete()
         .eq('id', commentId);
         
@@ -262,8 +263,8 @@ export const useCommentMutations = () => {
       
       // Update the comment
       const { error } = await supabase
-        .from('knowledge_comments')
-        .update({ is_accepted: isAccepted })
+        .from('knowledge_comments' as any)
+        .update({ is_accepted_answer: isAccepted })
         .eq('id', commentId);
         
       if (error) {
@@ -274,8 +275,8 @@ export const useCommentMutations = () => {
       // If accepting an answer, also update the article to mark it as answered
       if (isAccepted) {
         const { error: articleError } = await supabase
-          .from('knowledge_articles')
-          .update({ is_answered: true })
+          .from('knowledge_articles' as any)
+          .update({ has_accepted_answer: true })
           .eq('id', articleId);
           
         if (articleError) {
