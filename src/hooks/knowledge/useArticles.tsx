@@ -116,32 +116,35 @@ export const useArticle = (id: string) => {
 export const useCreateArticle = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { currentUser } = useUser();
 
   return useMutation({
     mutationFn: async (articleData: Partial<KnowledgeArticle>) => {
-      if (!currentUser) {
-        throw new Error('Authentication required');
+      // Always resolve the authenticated user directly from Supabase to avoid stale context
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('You must be signed in to create an article.');
       }
+
+      const payload = {
+        title: articleData.title,
+        subtitle: articleData.subtitle,
+        content: articleData.content,
+        content_type: articleData.content_type || ContentType.ARTICLE,
+        author_id: user.id,
+        tags: (articleData.tags as string[]) || [],
+        is_published: articleData.is_published ?? true,
+        category: articleData.category,
+        options: articleData.options
+      };
 
       const { data: article, error } = await supabase
         .from('knowledge_articles')
-        .insert({
-          title: articleData.title,
-          subtitle: articleData.subtitle,
-          content: articleData.content,
-          content_type: articleData.content_type || ContentType.ARTICLE,
-          author_id: currentUser.id,
-          tags: articleData.tags || [],
-          is_published: articleData.is_published || false,
-          category: articleData.category,
-          options: articleData.options
-        })
+        .insert(payload)
         .select()
         .single();
 
       if (error) {
-        console.error('Error creating article:', error);
+        console.error('Error creating article:', error, payload);
         throw error;
       }
 

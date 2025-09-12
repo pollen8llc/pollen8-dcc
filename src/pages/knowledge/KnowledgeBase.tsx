@@ -30,7 +30,7 @@ const KnowledgeBase = () => {
   const { data: articles = [], isLoading } = useArticles({
     searchQuery: searchQuery || undefined,
     tag: selectedTag || undefined,
-    type: selectedType,
+    type: selectedType === 'all' ? undefined : selectedType,
     sort: sortBy
   });
 
