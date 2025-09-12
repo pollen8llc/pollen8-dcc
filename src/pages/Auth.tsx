@@ -30,11 +30,42 @@ const Auth = () => {
   const { currentUser, isLoading } = useUser();
   const { toast } = useToast();
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated with role-based logic
   useEffect(() => {
     if (!isLoading && currentUser) {
-      const redirectTo = searchParams.get("redirectTo") || "/knowledge/resources";
-      navigate(redirectTo, { replace: true });
+      console.log('🔍 Auth.tsx - User already authenticated:', {
+        role: currentUser.role,
+        profileComplete: currentUser.profile_complete,
+        userId: currentUser.id
+      });
+      
+      // Use role-based redirect logic similar to Index.tsx
+      const redirectTo = searchParams.get("redirectTo");
+      
+      if (redirectTo) {
+        console.log('🚀 Auth.tsx - Redirecting to specified path:', redirectTo);
+        navigate(redirectTo, { replace: true });
+        return;
+      }
+      
+      // Role-based redirect logic
+      if (currentUser.role === 'SERVICE_PROVIDER') {
+        console.log('🚀 Auth.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
+        const destination = currentUser.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
+        navigate(destination, { replace: true });
+      } else if (currentUser.role === 'ADMIN') {
+        console.log('🚀 Auth.tsx - Redirecting ADMIN to admin dashboard');
+        const destination = currentUser.profile_complete ? "/admin" : "/profile/setup";
+        navigate(destination, { replace: true });
+      } else if (currentUser.role === 'ORGANIZER') {
+        console.log('🚀 Auth.tsx - Redirecting ORGANIZER to organizer dashboard');
+        const destination = currentUser.profile_complete ? "/organizer" : "/profile/setup";
+        navigate(destination, { replace: true });
+      } else {
+        console.log('🚀 Auth.tsx - Redirecting MEMBER to knowledge resources');
+        const destination = currentUser.profile_complete ? "/knowledge/resources" : "/profile/setup";
+        navigate(destination, { replace: true });
+      }
     }
   }, [currentUser, isLoading, navigate, searchParams]);
 
@@ -56,13 +87,14 @@ const Auth = () => {
       }
 
       if (data.user) {
+        console.log('🎉 Auth.tsx - Sign in successful for user:', data.user.id);
         toast({
           title: "Welcome back!",
           description: "You have successfully signed in.",
         });
         
-        const redirectTo = searchParams.get("redirectTo") || "/knowledge/resources";
-        navigate(redirectTo, { replace: true });
+        // Don't immediately redirect - let useEffect handle it after user context updates
+        console.log('✅ Auth.tsx - Waiting for user context to update...');
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
@@ -90,7 +122,7 @@ const Auth = () => {
     }
 
     try {
-      const redirectUrl = `${window.location.origin}/knowledge/resources`;
+      const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -111,11 +143,13 @@ const Auth = () => {
 
       if (data.user) {
         if (data.user.email_confirmed_at) {
+          console.log('🎉 Auth.tsx - Sign up successful for user:', data.user.id);
           toast({
             title: "Account created!",
             description: "Welcome to the community!",
           });
-          navigate("/knowledge/resources", { replace: true });
+          // Don't immediately redirect - let useEffect handle it after user context updates
+          console.log('✅ Auth.tsx - Waiting for user context to update...');
         } else {
           setMessage("Please check your email and click the confirmation link to complete your registration.");
         }

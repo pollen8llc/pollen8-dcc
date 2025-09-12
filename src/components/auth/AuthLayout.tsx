@@ -17,10 +17,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
 }) => {
   const { currentUser, isLoading } = useUser();
 
-  // If user is already authenticated, redirect to home
-  if (currentUser && !isLoading) {
-    return <Navigate to="/" replace />;
-  }
+  // Note: No redirect here - let Auth.tsx handle authenticated user redirects
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
