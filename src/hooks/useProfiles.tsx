@@ -10,8 +10,8 @@ export const useProfiles = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Get a profile by ID - returns UnifiedProfile format
-  const getProfileById = async (profileId: string): Promise<UnifiedProfile | null> => {
+  // Get a profile by user ID - returns UnifiedProfile format
+  const getProfileById = async (userId: string): Promise<UnifiedProfile | null> => {
     setIsLoading(true);
     setError(null);
     
@@ -19,7 +19,7 @@ export const useProfiles = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', profileId)
+        .eq('user_id', userId)
         .maybeSingle();
       
       if (error) {
