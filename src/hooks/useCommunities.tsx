@@ -155,16 +155,29 @@ export const useCommunities = () => {
 
   const createCommunity = async (communityData: any) => {
     try {
-      // Remove owner_id from the data - let the trigger handle it
-      const { owner_id, ...dataWithoutOwner } = communityData;
-      
-      const { data, error } = await supabase
-        .from('communities')
-        .insert(dataWithoutOwner as any)
-        .select()
-        .single();
+      // Use the RPC function for consistent community creation
+      const { data: communityId, error } = await supabase.rpc('create_community', {
+        p_name: communityData.name,
+        p_description: communityData.description,
+        p_type: communityData.type || 'tech',
+        p_location: communityData.location || 'Remote',
+        p_format: communityData.format || 'hybrid',
+        p_website: communityData.website || null,
+        p_is_public: communityData.is_public !== false,
+        p_tags: communityData.tags || [],
+        p_target_audience: communityData.target_audience || [],
+        p_social_media: communityData.social_media || {},
+        p_communication_platforms: communityData.communication_platforms || {},
+      });
 
       if (error) throw error;
+
+      // Fetch the created community
+      const { data: community } = await supabase
+        .from('communities')
+        .select('*')
+        .eq('id', communityId)
+        .single();
 
       toast({
         title: 'Success',
@@ -174,7 +187,7 @@ export const useCommunities = () => {
       // Refresh user communities after creation
       await refreshUserCommunities();
 
-      return data;
+      return community || { id: communityId };
     } catch (error) {
       console.error('Error creating community:', error);
       toast({

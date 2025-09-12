@@ -94,8 +94,8 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
       
       console.log('User authenticated:', user.id);
 
-      // Use the new RPC function to create the community
-      const { data: community, error } = await supabase.rpc('create_community' as any, {
+      // Use the RPC function to create the community
+      const { data: communityId, error } = await supabase.rpc('create_community', {
         p_name: data.name.trim(),
         p_description: data.description.trim(),
         p_type: data.type,
@@ -104,9 +104,9 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
         p_website: data.website.trim() || null,
         p_is_public: data.is_public,
         p_tags: selectedTags,
-        p_target_audience: [], // Empty array as default
-        p_social_media: {}, // Empty object as default
-        p_communication_platforms: {}, // Empty object as default
+        p_target_audience: [],
+        p_social_media: {},
+        p_communication_platforms: {},
       });
 
       if (error) {
@@ -114,7 +114,14 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
         throw new Error(error.message || 'Failed to create community');
       }
 
-      console.log('Community created successfully via RPC:', community);
+      console.log('Community created successfully via RPC:', communityId);
+
+      // Fetch the created community details
+      const { data: createdCommunity } = await supabase
+        .from('communities')
+        .select('*')
+        .eq('id', communityId)
+        .single();
 
       toast({
         title: 'Community Created',
@@ -126,7 +133,7 @@ export const CommunityCreationForm: React.FC<CommunityCreationFormProps> = ({
       setSelectedTags([]);
 
       if (onSuccess) {
-        onSuccess(community);
+        onSuccess(createdCommunity || { id: communityId });
       }
     } catch (error) {
       console.error('Error creating community:', error);
