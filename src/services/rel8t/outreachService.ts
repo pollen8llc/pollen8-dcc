@@ -56,8 +56,8 @@ export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> =
     if (error) throw error;
     
     // Process and categorize the data
-    const counts = data?.reduce((acc, item) => {
-      const dueDate = new Date(item.due_date);
+    const counts = (data as any)?.reduce((acc: any, item: any) => {
+      const dueDate = new Date(item.scheduled_at || item.created_at);
       
       // Today's items (due today and pending)
       if (dueDate >= today && dueDate < tomorrow && item.status === 'pending') {
@@ -141,21 +141,24 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
     
     if (error) throw error;
     
-    // Process data to format contacts
-    const formattedData = data?.map(item => {
-      // Extract contacts from nested structure
-      const contacts = item.contacts?.map(contactItem => contactItem.contact) || [];
+    // Process data to format contacts  
+    const formattedData = (data as any)?.map((item: any) => {
+      // Extract contacts from nested structure - handle query errors gracefully
+      const contacts = Array.isArray(item.contacts) ? item.contacts.map((contactItem: any) => contactItem.contact || contactItem) : [];
       
       // Ensure priority is correctly typed
-      const priority = item.priority as OutreachPriority;
-      if (!['low', 'medium', 'high'].includes(priority)) {
-        // Default to 'medium' if invalid value
-        item.priority = 'medium';
-      }
+      const priority = (item.priority || 'medium') as OutreachPriority;
       
       return {
-        ...item,
-        priority: item.priority as OutreachPriority,
+        id: item.id,
+        user_id: item.user_id,
+        title: item.title,
+        description: item.message || item.description,
+        priority: priority,
+        status: item.status as OutreachStatus,
+        due_date: item.scheduled_at || item.created_at,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
         contacts
       } as Outreach;
     });
@@ -244,7 +247,13 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     // Create outreach
     const { data, error } = await supabase
       .from("rms_outreach")
-      .insert([{ ...outreach, user_id: user.id }])
+      .insert([{ 
+        user_id: user.id,
+        title: outreach.title,
+        message: outreach.description || '',
+        status: outreach.status,
+        scheduled_at: outreach.due_date
+      }])
       .select()
       .single();
     

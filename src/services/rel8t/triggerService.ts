@@ -71,7 +71,11 @@ export const getTriggers = async (): Promise<Trigger[]> => {
       recurrence_pattern: trigger.recurrence_pattern as RecurrencePattern
     })) || [];
     
-    return transformedData;
+    return ((data || []).map((trigger: any) => ({
+      ...trigger,
+      condition: JSON.stringify(trigger.condition || {}),
+      recurrence_pattern: trigger.recurrence_pattern as RecurrencePattern
+    })) as Trigger[]);
   } catch (error: any) {
     console.error("Error fetching triggers:", error);
     toast({
@@ -95,10 +99,11 @@ export const getTrigger = async (id: string): Promise<Trigger | null> => {
     
     // Transform the recurrence_pattern
     if (data) {
-      return {
-        ...data,
-        recurrence_pattern: data.recurrence_pattern as RecurrencePattern
-      };
+    return {
+      ...data,
+      condition: JSON.stringify(data.condition || {}),
+      recurrence_pattern: data.recurrence_pattern as RecurrencePattern
+    } as Trigger;
     }
     
     return null;
@@ -120,18 +125,30 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
     
     if (!user) throw new Error("User not authenticated");
 
-    const triggerToInsert = {
-      ...trigger,
-      user_id: user.id,
-      // Convert RecurrencePattern to Json compatible object if it exists
-      recurrence_pattern: trigger.recurrence_pattern
-    };
-
     const { data, error } = await supabase
       .from("rms_triggers")
-      .insert([triggerToInsert])
+      .insert([{
+        user_id: user.id,
+        name: trigger.name,
+        description: trigger.description,
+        trigger_type: trigger.action,
+        action: trigger.action,
+        condition: JSON.stringify(trigger.condition || {}),
+        is_active: trigger.is_active,
+        next_execution_at: trigger.next_execution,
+        last_executed_at: trigger.last_executed_at,
+        recurrence_pattern: trigger.recurrence_pattern
+      }])
       .select()
       .single();
+
+    if (error) throw error;
+
+    return {
+      ...data,
+      condition: JSON.stringify(data.condition || {}),
+      recurrence_pattern: data.recurrence_pattern as RecurrencePattern
+    } as Trigger;
 
     if (error) throw error;
     
@@ -142,10 +159,11 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
     
     // Transform the returned data
     if (data) {
-      return {
-        ...data,
-        recurrence_pattern: data.recurrence_pattern as RecurrencePattern
-      };
+    return {
+      ...data,
+      condition: JSON.stringify(data.condition || {}),
+      recurrence_pattern: data.recurrence_pattern as RecurrencePattern
+    } as Trigger;
     }
     
     return null;
@@ -185,10 +203,11 @@ export const updateTrigger = async (id: string, trigger: Partial<Trigger>): Prom
     
     // Transform the returned data
     if (data) {
-      return {
-        ...data,
-        recurrence_pattern: data.recurrence_pattern as RecurrencePattern
-      };
+    return {
+      ...data,
+      condition: JSON.stringify(data.condition || {}),
+      recurrence_pattern: data.recurrence_pattern as RecurrencePattern
+    } as Trigger;
     }
     
     return null;
@@ -326,11 +345,11 @@ export const getTriggerStatsByType = async () => {
     if (error) throw error;
     
     // Count by type manually instead of using group_by
-    const countByType = data.reduce((acc, trigger) => {
-      const condition = trigger.condition;
+    const countByType = (data || []).reduce((acc: any, trigger: any) => {
+      const condition = JSON.stringify(trigger.condition || 'unknown');
       acc[condition] = (acc[condition] || 0) + 1;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
     
     return {
       hourly: countByType[TIME_TRIGGER_TYPES.HOURLY] || 0,

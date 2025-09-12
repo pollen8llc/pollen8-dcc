@@ -314,7 +314,8 @@ export const addContactToGroup = async (
     .from("rms_contact_group_members")
     .insert([{ 
       contact_id: contactId,
-      group_id: groupId
+      group_id: groupId,
+      added_by: (await supabase.auth.getUser()).data.user?.id || ''
     }]);
   
   if (error) {

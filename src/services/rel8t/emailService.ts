@@ -102,7 +102,11 @@ export const getEmailNotifications = async (): Promise<EmailNotification[]> => {
     
     if (error) throw error;
     
-    return (data as EmailNotification[]) || [];
+    return (data || []).map(notification => ({
+      ...notification,
+      recipient_email: '',
+      metadata: notification.metadata as any
+    })) as EmailNotification[];
   } catch (error: any) {
     console.error("Error fetching email notifications:", error);
     toast({

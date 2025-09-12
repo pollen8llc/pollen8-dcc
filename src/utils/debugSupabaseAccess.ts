@@ -36,7 +36,10 @@ export async function debugSupabaseAccess() {
     // Test 5: Community creation permission
     const canCreateCommunity = userRoles && 
       Array.isArray(userRoles) && 
-      userRoles.some(role => role === 'ADMIN' || role === 'ORGANIZER');
+      userRoles.some((role: any) => 
+        (typeof role === 'string' ? role : role.role_name) === 'ADMIN' || 
+        (typeof role === 'string' ? role : role.role_name) === 'ORGANIZER'
+      );
       
     console.log('Community creation permission:', canCreateCommunity);
 
