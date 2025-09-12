@@ -4,10 +4,10 @@ import { useSession } from '@/hooks/useSession';
 import { useProfile } from '@/hooks/useProfile';
 import { User } from '@/models/types';
 import { usePermissions } from '@/hooks/usePermissions';
-
+import { Session } from '@supabase/supabase-js';
 interface UserContextType {
   currentUser: User | null;
-  session: any;
+  session: Session | null;
   isLoading: boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;

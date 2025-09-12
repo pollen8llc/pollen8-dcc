@@ -140,6 +140,19 @@ const Auth = () => {
     }
   }, [session, isLoading, currentUser, handleAuthenticatedRedirect]);
 
+  // Also perform a direct session check on mount for immediate redirect
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      const sess = data?.session;
+      if (mounted && sess?.user) {
+        console.log('🔍 Auth: Direct getSession found session, redirecting');
+        handleAuthenticatedRedirect(sess.user, true);
+      }
+    });
+    return () => { mounted = false; };
+  }, [handleAuthenticatedRedirect]);
+
   // Validate sign up form
   const validateSignUpForm = useCallback((): string | null => {
     const { password, confirmPassword, firstName, lastName, email } = formState;
