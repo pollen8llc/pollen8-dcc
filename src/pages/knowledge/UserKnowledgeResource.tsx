@@ -248,30 +248,30 @@ const UserKnowledgeResource = () => {
           </div>
         </div>
 
-        {/* Mobile/Tablet Layout - Keep Existing Tabs */}
+        {/* Mobile/Tablet Layout - Tabs for My Resources */}
         <div className="lg:hidden">
           <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
-            <TabsList className="glass-morphism border-0 bg-card/30 backdrop-blur-md w-full justify-start overflow-x-auto">
+            <TabsList className="grid w-full grid-cols-3 bg-muted/50 rounded-lg p-1">
               <TabsTrigger 
                 value="overview" 
-                className="data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:shadow-lg text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0 transition-all duration-200"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground transition-all duration-200"
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Overview</span>
+                <span className="text-xs sm:text-sm">Overview</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="my-posts" 
-                className="data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:shadow-lg text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0 transition-all duration-200"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground transition-all duration-200"
               >
                 <FileText className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">My Posts</span>
+                <span className="text-xs sm:text-sm">My Posts</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="saved" 
-                className="data-[state=active]:bg-primary data-[state=active]:text-black data-[state=active]:shadow-lg text-muted-foreground px-3 sm:px-6 py-2 flex-shrink-0 transition-all duration-200"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground transition-all duration-200"
               >
                 <Bookmark className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Saved</span>
+                <span className="text-xs sm:text-sm">Saved</span>
               </TabsTrigger>
             </TabsList>
 
