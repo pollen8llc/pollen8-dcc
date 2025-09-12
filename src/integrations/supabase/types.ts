@@ -464,46 +464,76 @@ export type Database = {
       }
       knowledge_articles: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           author_id: string
           category: string | null
+          comment_count: number | null
           community_id: string | null
           content: string
           content_type: string | null
           created_at: string
+          has_accepted_answer: boolean | null
           id: string
+          is_answered: boolean | null
+          is_featured: boolean | null
           is_published: boolean | null
+          options: Json | null
+          source: string | null
+          subtitle: string | null
           tags: string[] | null
           title: string
           updated_at: string
           view_count: number | null
+          vote_count: number | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           author_id: string
           category?: string | null
+          comment_count?: number | null
           community_id?: string | null
           content: string
           content_type?: string | null
           created_at?: string
+          has_accepted_answer?: boolean | null
           id?: string
+          is_answered?: boolean | null
+          is_featured?: boolean | null
           is_published?: boolean | null
+          options?: Json | null
+          source?: string | null
+          subtitle?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
           view_count?: number | null
+          vote_count?: number | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           author_id?: string
           category?: string | null
+          comment_count?: number | null
           community_id?: string | null
           content?: string
           content_type?: string | null
           created_at?: string
+          has_accepted_answer?: boolean | null
           id?: string
+          is_answered?: boolean | null
+          is_featured?: boolean | null
           is_published?: boolean | null
+          options?: Json | null
+          source?: string | null
+          subtitle?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
           view_count?: number | null
+          vote_count?: number | null
         }
         Relationships: []
       }
@@ -604,6 +634,8 @@ export type Database = {
           created_at: string
           id: string
           is_accepted_answer: boolean | null
+          parent_comment_id: string | null
+          reply_count: number | null
           updated_at: string
         }
         Insert: {
@@ -613,6 +645,8 @@ export type Database = {
           created_at?: string
           id?: string
           is_accepted_answer?: boolean | null
+          parent_comment_id?: string | null
+          reply_count?: number | null
           updated_at?: string
         }
         Update: {
@@ -622,6 +656,8 @@ export type Database = {
           created_at?: string
           id?: string
           is_accepted_answer?: boolean | null
+          parent_comment_id?: string | null
+          reply_count?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -638,6 +674,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "knowledge_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_comments"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2193,6 +2236,37 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      get_knowledge_articles: {
+        Args: {
+          p_content_type?: string
+          p_limit?: number
+          p_offset?: number
+          p_search_query?: string
+          p_sort_by?: string
+          p_tag?: string
+          p_user_id?: string
+        }
+        Returns: {
+          author_avatar_url: string
+          author_id: string
+          author_name: string
+          comment_count: number
+          content: string
+          content_type: string
+          created_at: string
+          id: string
+          is_answered: boolean
+          is_featured: boolean
+          is_published: boolean
+          subtitle: string
+          tags: string[]
+          title: string
+          updated_at: string
+          user_vote: string
+          view_count: number
+          vote_count: number
+        }[]
+      }
       get_managed_communities: {
         Args: { user_id: string }
         Returns: {
@@ -2305,6 +2379,14 @@ export type Database = {
       register_for_event: {
         Args: { event_id: string }
         Returns: boolean
+      }
+      update_article_vote_count: {
+        Args: { article_uuid: string }
+        Returns: undefined
+      }
+      update_comment_vote_count: {
+        Args: { comment_uuid: string }
+        Returns: number
       }
       update_module_completion: {
         Args: { is_complete?: boolean; module_name: string; user_id: string }

@@ -81,7 +81,7 @@ const ArticleView = () => {
   }, [article?.id, queryClient]);
   
   // Check if current user can edit this article - ONLY the creator can edit
-  const canEdit = currentUser && article && currentUser.id === article.user_id;
+  const canEdit = currentUser && article && currentUser.id === article.author_id;
   
   // Handle comment voting
   const handleCommentVote = (commentId: string, voteType: 'upvote' | 'downvote', currentVote?: number | null) => {
@@ -280,8 +280,8 @@ const ArticleView = () => {
                     </div>
                     <ModernPollVoting 
                       pollId={article.id} 
-                      pollData={article.options}
-                      isOwner={currentUser?.id === article.user_id}
+                      pollData={article.options as any}
+                      isOwner={currentUser?.id === article.author_id}
                     />
                   </div>
                 ) : (
@@ -365,7 +365,7 @@ const ArticleView = () => {
                 </div>
                 
                 {/* Secondary actions - dropdown on mobile, inline on desktop */}
-                {(canEdit || currentUser?.id === article.user_id) && (
+                {(canEdit || currentUser?.id === article.author_id) && (
                   <>
                     {/* Desktop view */}
                     <div className="hidden sm:flex items-center gap-2">
@@ -378,7 +378,7 @@ const ArticleView = () => {
                         </Button>
                       )}
                       
-                      {currentUser?.id === article.user_id && (
+                      {currentUser?.id === article.author_id && (
                         <Button variant="destructive" size="sm" onClick={handleDeleteArticle}>
                           Delete
                         </Button>
@@ -402,7 +402,7 @@ const ArticleView = () => {
                               </Link>
                             </DropdownMenuItem>
                           )}
-                          {currentUser?.id === article.user_id && (
+                          {currentUser?.id === article.author_id && (
                             <DropdownMenuItem 
                               onClick={handleDeleteArticle}
                               className="flex items-center text-destructive focus:text-destructive"
@@ -436,7 +436,7 @@ const ArticleView = () => {
             {/* Enhanced Comments section */}
             <EnhancedCommentSection
               articleId={id}
-              isArticleAuthor={currentUser?.id === article.user_id}
+              isArticleAuthor={currentUser?.id === article.author_id}
             />
           </div>
           

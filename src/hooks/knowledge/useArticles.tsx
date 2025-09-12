@@ -18,10 +18,37 @@ export const useArticles = (params: UseArticlesParams = {}) => {
     queryFn: async () => {
       console.log('Fetching articles with params:', params);
       
-      // For now, return empty array as knowledge_articles table doesn't exist yet
-      return [];
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data: articles, error } = await supabase.rpc('get_knowledge_articles', {
+        p_search_query: params.searchQuery || null,
+        p_tag: params.tag || null,
+        p_content_type: params.type || null,
+        p_sort_by: params.sort || 'created_at',
+        p_limit: 20,
+        p_offset: 0,
+        p_user_id: user?.id || null
+      });
+
+      if (error) {
+        console.error('Error fetching articles:', error);
+        throw error;
+      }
+
+// Transform the data to include proper author object with enhanced fields
+      return (articles || []).map((article: any) => ({
+        ...article,
+        content_type: article.content_type as ContentType,
+        author: {
+          id: article.author_id,
+          name: article.author_name || 'Anonymous',
+          avatar_url: article.author_avatar_url,
+          is_admin: false // Will be enhanced later when we add role data
+        }
+      }));
     },
-    enabled: false // Disable until knowledge_articles table is created
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
   });
 };
 
@@ -29,10 +56,60 @@ export const useArticle = (id: string) => {
   return useQuery({
     queryKey: ['knowledgeArticle', id],
     queryFn: async () => {
-      // For now, return null as knowledge_articles table doesn't exist yet
-      return null;
+      if (!id) return null;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Fetch article with author and vote info
+      const { data: article, error } = await supabase
+        .from('knowledge_articles')
+        .select(`
+          *,
+          author:profiles!author_id(user_id, full_name, first_name, last_name, avatar_url)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching article:', error);
+        throw error;
+      }
+
+      if (!article) return null;
+
+      // Get user's vote for this article
+      let userVote = null;
+      if (user) {
+        const { data: vote } = await supabase
+          .from('knowledge_votes')
+          .select('vote_type')
+          .eq('article_id', id)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        userVote = vote?.vote_type || null;
+      }
+
+      // Transform data to match KnowledgeArticle interface
+      const author = article.author as any;
+      return {
+        ...article,
+        user_vote: userVote,
+        author: author ? {
+          id: author.user_id,
+          name: author.full_name || `${author.first_name || ''} ${author.last_name || ''}`.trim() || 'Anonymous',
+          avatar_url: author.avatar_url,
+          is_admin: author.role === 'ADMIN'
+        } : {
+          id: article.author_id,
+          name: 'Unknown User',
+          avatar_url: null,
+          is_admin: false
+        }
+      };
     },
-    enabled: false // Disable until knowledge_articles table is created
+    enabled: !!id,
+    staleTime: 1000 * 60 * 2, // 2 minutes
   });
 };
 
@@ -43,8 +120,32 @@ export const useCreateArticle = () => {
 
   return useMutation({
     mutationFn: async (articleData: Partial<KnowledgeArticle>) => {
-      // For now, throw error as knowledge_articles table doesn't exist yet
-      throw new Error('Knowledge articles feature not yet implemented');
+      if (!currentUser) {
+        throw new Error('Authentication required');
+      }
+
+      const { data: article, error } = await supabase
+        .from('knowledge_articles')
+        .insert({
+          title: articleData.title,
+          subtitle: articleData.subtitle,
+          content: articleData.content,
+          content_type: articleData.content_type || ContentType.ARTICLE,
+          author_id: currentUser.id,
+          tags: articleData.tags || [],
+          is_published: articleData.is_published || false,
+          category: articleData.category,
+          options: articleData.options
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating article:', error);
+        throw error;
+      }
+
+      return article;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
@@ -70,8 +171,29 @@ export const useUpdateArticle = () => {
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<KnowledgeArticle> }) => {
-      // For now, throw error as knowledge_articles table doesn't exist yet
-      throw new Error('Knowledge articles feature not yet implemented');
+      const { data: article, error } = await supabase
+        .from('knowledge_articles')
+        .update({
+          title: updates.title,
+          subtitle: updates.subtitle,
+          content: updates.content,
+          content_type: updates.content_type,
+          tags: updates.tags,
+          is_published: updates.is_published,
+          category: updates.category,
+          options: updates.options,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating article:', error);
+        throw error;
+      }
+
+      return article;
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
@@ -98,8 +220,17 @@ export const useDeleteArticle = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // For now, throw error as knowledge_articles table doesn't exist yet
-      throw new Error('Knowledge articles feature not yet implemented');
+      const { error } = await supabase
+        .from('knowledge_articles')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting article:', error);
+        throw error;
+      }
+
+      return id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
@@ -122,11 +253,36 @@ export const useDeleteArticle = () => {
 export const useToggleBookmark = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentUser } = useUser();
 
   return useMutation({
     mutationFn: async ({ articleId, isBookmarked }: { articleId: string; isBookmarked: boolean }) => {
-      // For now, throw error as feature not implemented
-      throw new Error('Bookmark feature not yet implemented');
+      if (!currentUser) {
+        throw new Error('Authentication required');
+      }
+
+      if (isBookmarked) {
+        // Remove bookmark
+        const { error } = await supabase
+          .from('knowledge_saved_articles')
+          .delete()
+          .eq('article_id', articleId)
+          .eq('user_id', currentUser.id);
+
+        if (error) throw error;
+      } else {
+        // Add bookmark
+        const { error } = await supabase
+          .from('knowledge_saved_articles')
+          .insert({
+            article_id: articleId,
+            user_id: currentUser.id
+          });
+
+        if (error) throw error;
+      }
+
+      return { articleId, isBookmarked: !isBookmarked };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
@@ -149,8 +305,19 @@ export const useFeatureArticle = () => {
 
   return useMutation({
     mutationFn: async ({ articleId, featured }: { articleId: string; featured: boolean }) => {
-      // For now, throw error as feature not implemented
-      throw new Error('Feature article not yet implemented');
+      const { data: article, error } = await supabase
+        .from('knowledge_articles')
+        .update({ is_featured: featured })
+        .eq('id', articleId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error featuring article:', error);
+        throw error;
+      }
+
+      return article;
     },
     onSuccess: (_, { featured }) => {
       queryClient.invalidateQueries({ queryKey: ['knowledgeArticles'] });
@@ -175,9 +342,18 @@ export const useIncrementViewCount = () => {
 
   return useMutation({
     mutationFn: async (articleId: string) => {
-      // For now, just track locally
+      // Only increment if not already viewed in this session
       if (!viewedArticles.has(articleId)) {
         setViewedArticles(prev => new Set([...prev, articleId]));
+        
+        const { error } = await supabase.rpc('increment_view_count', {
+          article_id: articleId
+        });
+
+        if (error) {
+          console.error('Error incrementing view count:', error);
+          throw error;
+        }
       }
       return articleId;
     },

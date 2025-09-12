@@ -23,7 +23,7 @@ export interface KnowledgeArticle {
   title: string;
   content: string;
   content_type: ContentType;
-  user_id: string;
+  author_id: string;
   created_at: string;
   updated_at: string;
   tags?: string[];
@@ -33,10 +33,12 @@ export interface KnowledgeArticle {
   comment_count: number;
   is_answered?: boolean;
   is_featured?: boolean;
+  is_published?: boolean;
   author?: KnowledgeAuthor;
   subtitle?: string;
   source?: string;
   options?: any;
+  category?: string;
   archived_at?: string | null;
   archived_by?: string | null;
 }

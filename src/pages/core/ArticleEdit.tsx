@@ -21,7 +21,7 @@ const ArticleEdit: React.FC = () => {
   
   // Check if user can edit - only author, organizers, or admins
   const canEdit = currentUser && article && (
-    currentUser.id === article.user_id || isAdmin || isOrganizer()
+    currentUser.id === article.author_id || isAdmin || isOrganizer()
   );
   
   // Handle loading state

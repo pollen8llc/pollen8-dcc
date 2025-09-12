@@ -154,9 +154,9 @@ const ArticleView = () => {
   }
 
   // Determine if the current user can edit/delete the article
-  const canEdit = isAdmin || isOrganizer || (currentUser && currentUser.id === article.user_id);
-  const canDelete = isAdmin || (currentUser && currentUser.id === article.user_id);
-  const isArticleOwner = currentUser && currentUser.id === article.user_id;
+  const canEdit = isAdmin || isOrganizer || (currentUser && currentUser.id === article.author_id);
+  const canDelete = isAdmin || (currentUser && currentUser.id === article.author_id);
+  const isArticleOwner = currentUser && currentUser.id === article.author_id;
 
   return (
     <Shell>
@@ -212,10 +212,10 @@ const ArticleView = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center text-sm text-muted-foreground">
             <AuthorCard 
               author={{
-                id: article.user_id,
-                name: article.author?.name,
+                id: article.author_id,
+                name: article.author?.name || 'Unknown Author',
                 avatar_url: article.author?.avatar_url,
-                is_admin: article.author?.is_admin
+                is_admin: article.author?.is_admin || false
               }} 
               minimal={true} 
             />
@@ -317,7 +317,7 @@ const ArticleView = () => {
                         )}
                         
                         {/* Delete Comment Button */}
-                        {(currentUser?.id === comment.user_id || isAdmin) && (
+                        {(currentUser?.id === comment.author_id || isAdmin) && (
                           <Button 
                             size="sm" 
                             variant="outline"

@@ -45,7 +45,11 @@ export const useComments = (articleId: string | undefined) => {
           // Continue even if profile fetch fails
         }
         
-        // Create a map of user_id to profile for easy lookup
+        // Create a map of author_id to profile for easy lookup
+        const authorProfileMap = (profiles || []).reduce((map: any, profile: any) => {
+          map[profile.user_id] = profile;
+          return map;
+        }, {} as Record<string, any>);
         const profileMap = (profiles || []).reduce((map: any, profile: any) => {
           map[profile.user_id] = profile;
           return map;
@@ -89,9 +93,41 @@ export const useComments = (articleId: string | undefined) => {
         const { data: { user } } = await supabase.auth.getUser();
         const currentUserId = user?.id;
         
-        // Enhance comments with author and vote data
         return (comments as any[]).map((comment: any) => {
-          const profile = profileMap[comment.author_id];
+          const profile = authorProfileMap[comment.author_id];
+          
+          return {
+            ...comment,
+            author: profile ? {
+              id: comment.author_id,
+              name: profile.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+              avatar_url: profile.avatar_url
+            } : {
+              id: comment.author_id,
+              name: 'Unknown User',
+              avatar_url: null
+            },
+            vote_count: voteMap.get(comment.id) || 0,
+            user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
+          } as any;
+        });
+          const profile = authorProfileMap[comment.author_id];
+          
+          return {
+            ...comment,
+            author: profile ? {
+              id: comment.author_id,
+              name: profile.full_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+              avatar_url: profile.avatar_url
+            } : {
+              id: comment.author_id,
+              name: 'Unknown User',
+              avatar_url: null
+            },
+            vote_count: voteMap.get(comment.id) || 0,
+            user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
+          } as any;
+        });
           
           return {
             ...comment,
