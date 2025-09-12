@@ -18,54 +18,9 @@ const Index = () => {
         userId: currentUser.id
       });
       
-      // If user is a service provider, redirect to LAB-R8
-      if (currentUser.role === 'SERVICE_PROVIDER') {
-        console.log('🚀 Redirecting SERVICE_PROVIDER to LAB-R8');
-        if (!currentUser.profile_complete) {
-          console.log('📝 Profile incomplete, redirecting to setup');
-          navigate("/labr8/setup", { replace: true });
-        } else {
-          console.log('✅ Profile complete, redirecting to dashboard');
-          navigate("/labr8/dashboard", { replace: true });
-        }
-        return;
-      }
-      
-      // If user is an admin, redirect to admin dashboard
-      if (currentUser.role === 'ADMIN') {
-        console.log('🚀 Redirecting ADMIN to admin dashboard');
-        if (!currentUser.profile_complete) {
-          console.log('📝 Profile incomplete, redirecting to setup');
-          navigate("/profile/setup", { replace: true });
-        } else {
-          console.log('✅ Profile complete, redirecting to admin dashboard');
-          navigate("/admin", { replace: true });
-        }
-        return;
-      }
-      
-      // If user is an organizer, redirect to organizer dashboard
-      if (currentUser.role === 'ORGANIZER') {
-        console.log('🚀 Redirecting ORGANIZER to organizer dashboard');
-        if (!currentUser.profile_complete) {
-          console.log('📝 Profile incomplete, redirecting to setup');
-          navigate("/profile/setup", { replace: true });
-        } else {
-          console.log('✅ Profile complete, redirecting to organizer dashboard');
-          navigate("/organizer", { replace: true });
-        }
-        return;
-      }
-      
-      // For other users, check if profile is complete before redirecting
-      if (!currentUser.profile_complete) {
-        console.log('🚀 Redirecting to profile setup - incomplete profile');
-        navigate("/profile/setup", { replace: true });
-      } else {
-        // If user is logged in and profile is complete, redirect to knowledge resources
-        console.log('🚀 Redirecting to knowledge resources - default fallback');
-        navigate("/knowledge/resources", { replace: true });
-      }
+      // Redirect all authenticated users to initi8 dashboard
+      console.log('🚀 Index.tsx - Redirecting authenticated user to initi8 dashboard');
+      navigate("/initi8", { replace: true });
     }
   }, [currentUser, isLoading, navigate]);
   

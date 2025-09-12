@@ -39,33 +39,9 @@ const Auth = () => {
         userId: currentUser.id
       });
       
-      // Use role-based redirect logic similar to Index.tsx
-      const redirectTo = searchParams.get("redirectTo");
-      
-      if (redirectTo) {
-        console.log('🚀 Auth.tsx - Redirecting to specified path:', redirectTo);
-        navigate(redirectTo, { replace: true });
-        return;
-      }
-      
-      // Role-based redirect logic
-      if (currentUser.role === 'SERVICE_PROVIDER') {
-        console.log('🚀 Auth.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
-        const destination = currentUser.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
-        navigate(destination, { replace: true });
-      } else if (currentUser.role === 'ADMIN') {
-        console.log('🚀 Auth.tsx - Redirecting ADMIN to admin dashboard');
-        const destination = currentUser.profile_complete ? "/admin" : "/profile/setup";
-        navigate(destination, { replace: true });
-      } else if (currentUser.role === 'ORGANIZER') {
-        console.log('🚀 Auth.tsx - Redirecting ORGANIZER to organizer dashboard');
-        const destination = currentUser.profile_complete ? "/organizer" : "/profile/setup";
-        navigate(destination, { replace: true });
-      } else {
-        console.log('🚀 Auth.tsx - Redirecting MEMBER to knowledge resources');
-        const destination = currentUser.profile_complete ? "/knowledge/resources" : "/profile/setup";
-        navigate(destination, { replace: true });
-      }
+      // Redirect all authenticated users to initi8 dashboard
+      console.log('🚀 Auth.tsx - Redirecting authenticated user to initi8 dashboard');
+      navigate("/initi8", { replace: true });
     }
   }, [currentUser, isLoading, navigate, searchParams]);
 
