@@ -50,7 +50,7 @@ const OrganizerSetup = () => {
         await supabase
           .from('profiles')
           .update({ modul8_setup_complete: true })
-          .eq('id', user.user.id);
+          .eq('user_id', user.user.id);
       }
       
       toast({

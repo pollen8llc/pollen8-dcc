@@ -57,7 +57,7 @@ export function Rel8SetupWizard() {
         await supabase
           .from('profiles')
           .update({ rel8_complete: true })
-          .eq('id', user.user.id);
+          .eq('user_id', user.user.id);
       }
       
       navigate("/rel8");
@@ -164,7 +164,7 @@ export function Rel8SetupWizard() {
         await supabase
           .from('profiles')
           .update({ rel8_complete: true })
-          .eq('id', user.user.id);
+          .eq('user_id', user.user.id);
       }
       
       navigate("/rel8");

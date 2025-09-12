@@ -2185,31 +2185,19 @@ export type Database = {
         Returns: boolean
       }
       create_community: {
-        Args:
-          | {
-              p_communication_platforms?: Json
-              p_description: string
-              p_format?: string
-              p_is_public?: boolean
-              p_location?: string
-              p_name: string
-              p_social_media?: Json
-              p_tags?: string[]
-              p_target_audience?: string[]
-              p_type?: string
-              p_website?: string
-            }
-          | {
-              p_description: string
-              p_format?: string
-              p_is_public?: boolean
-              p_location?: string
-              p_name: string
-              p_tags?: string[]
-              p_target_audience?: string[]
-              p_type?: string
-              p_website?: string
-            }
+        Args: {
+          p_communication_platforms?: Json
+          p_description: string
+          p_format?: string
+          p_is_public?: boolean
+          p_location?: string
+          p_name: string
+          p_social_media?: Json
+          p_tags?: string[]
+          p_target_audience?: string[]
+          p_type?: string
+          p_website?: string
+        }
         Returns: string
       }
       generate_unique_invite_code: {

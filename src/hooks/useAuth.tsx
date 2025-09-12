@@ -87,9 +87,12 @@ export const useAuth = () => {
   useEffect(() => {
     if (sessionLoading || profileLoading || !currentUser || profileCompletionChecked.current) return;
     
-    // Skip profile completion check if we're already on setup or auth pages
+    // Skip profile completion check if we're already on setup, auth, or eco8 pages
     const currentPath = window.location.pathname;
-    if (currentPath === "/profile/setup" || currentPath === "/auth" || currentPath.startsWith("/labr8")) {
+    if (currentPath === "/profile/setup" || 
+        currentPath === "/auth" || 
+        currentPath.startsWith("/labr8") || 
+        currentPath.startsWith("/eco8")) {
       return;
     }
     
@@ -103,8 +106,8 @@ export const useAuth = () => {
         if (currentUser.role === 'SERVICE_PROVIDER') {
           const { data, error } = await supabase
             .from('profiles')
-            .select('profile_complete')
-            .eq('id', currentUser.id)
+            .select('profile_complete, is_profile_complete')
+            .eq('user_id', currentUser.id)
             .maybeSingle();
             
           if (error) {
@@ -112,7 +115,9 @@ export const useAuth = () => {
             return;
           }
           
-          if (!data || data.profile_complete === false) {
+          const isProfileComplete = data?.profile_complete || data?.is_profile_complete;
+          
+          if (!isProfileComplete) {
             console.log("Service provider profile incomplete, redirecting to LAB-R8 setup");
             navigate("/labr8/setup");
           } else {
@@ -125,8 +130,8 @@ export const useAuth = () => {
         // For non-service providers, check profile completion
         const { data, error } = await supabase
           .from('profiles')
-          .select('profile_complete, first_name, last_name')
-          .eq('id', currentUser.id)
+          .select('profile_complete, is_profile_complete, first_name, last_name')
+          .eq('user_id', currentUser.id)
           .maybeSingle();
           
         if (error) {
@@ -136,9 +141,11 @@ export const useAuth = () => {
         
         console.log("Profile completion data:", data);
         
+        const isProfileComplete = data?.profile_complete || data?.is_profile_complete;
+        
         const needsSetup = 
           !data || 
-          data.profile_complete === false || 
+          !isProfileComplete || 
           !data.first_name ||
           !data.last_name;
           

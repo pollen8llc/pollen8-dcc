@@ -9,7 +9,7 @@ import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 
 const CommunitySetup: React.FC = () => {
   const navigate = useNavigate();
-  const { eco8_complete, loading } = useModuleCompletion();
+  const { eco8_complete, loading, updateModuleCompletion } = useModuleCompletion();
 
   const handleSuccess = (community: any) => {
     console.log('Community created successfully:', community);
@@ -19,10 +19,19 @@ const CommunitySetup: React.FC = () => {
       try {
         const { data: user } = await supabase.auth.getUser();
         if (user?.user?.id && !eco8_complete) {
-          await supabase
-            .from('profiles')
-            .update({ eco8_setup_complete: true })
-            .eq('id', user.user.id);
+          // Mark eco8 as complete using module completion
+          const success = await updateModuleCompletion('eco8', true);
+          if (!success) {
+            // Fallback: update directly
+            console.warn('Module completion function failed, using direct update');
+            await supabase
+              .from('profiles')
+              .update({ 
+                eco8_complete: true, 
+                eco8_setup_complete: true 
+              })
+              .eq('user_id', user.user.id);
+          }
         }
         // Navigate to the new community page or dashboard
         navigate(`/eco8/community/${community.id}`);
