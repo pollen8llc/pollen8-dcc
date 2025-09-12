@@ -42,7 +42,7 @@ export const useProfile = (session: Session | null) => {
       const { data: profile, error: profileError } = await supabase
         .from('profiles') 
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (profileError) {
@@ -165,7 +165,7 @@ export const useProfile = (session: Session | null) => {
       const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .maybeSingle();
         
       if (checkError) {
@@ -196,7 +196,6 @@ export const useProfile = (session: Session | null) => {
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
         .insert({
-          id: userId,
           user_id: userId,
           email: email,
           first_name: firstName,

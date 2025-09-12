@@ -35,7 +35,7 @@ export const useModuleCompletion = () => {
         const { data, error } = await supabase
           .from('profiles')
           .select('rel8_complete, eco8_complete, modul8_complete, labr8_complete')
-          .eq('id', session.user.id)
+          .eq('user_id', session.user.id)
           .single();
 
         if (error) throw error;
@@ -68,7 +68,7 @@ export const useModuleCompletion = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ [`${module}_complete`]: completed })
-        .eq('id', session.user.id);
+        .eq('user_id', session.user.id);
 
       if (error) throw error;
 

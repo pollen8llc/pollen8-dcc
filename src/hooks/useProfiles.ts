@@ -105,7 +105,7 @@ export const useProfiles = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('profile_complete')
-        .eq('id', currentUser.id)
+        .eq('user_id', currentUser.id)
         .single();
         
       if (error || !data) {

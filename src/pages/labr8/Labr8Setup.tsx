@@ -138,7 +138,7 @@ const Labr8Setup = () => {
           profile_complete: true,
           labr8_complete: true 
         })
-        .eq('id', currentUser.id);
+        .eq('user_id', currentUser.id);
 
       toast({
         title: "Profile Created!",

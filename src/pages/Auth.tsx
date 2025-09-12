@@ -69,6 +69,14 @@ const Auth = () => {
   // Fast redirect for authenticated users using session
   const handleAuthenticatedRedirect = useCallback(async (user: any, skipProfileCheck = false) => {
     try {
+      // Prevent multiple redirections
+      if (hasRedirectedRef.current) {
+        console.log("🚀 Auth: Redirect already in progress, skipping");
+        return;
+      }
+      
+      hasRedirectedRef.current = true;
+      
       console.log("🚀 Auth: Handling redirect for user:", { 
         id: user.id, 
         skipProfileCheck, 
@@ -140,18 +148,13 @@ const Auth = () => {
     }
   }, [session, isLoading, currentUser, handleAuthenticatedRedirect]);
 
-  // Also perform a direct session check on mount for immediate redirect
-  useEffect(() => {
-    let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      const sess = data?.session;
-      if (mounted && sess?.user) {
-        console.log('🔍 Auth: Direct getSession found session, redirecting');
-        handleAuthenticatedRedirect(sess.user, true);
-      }
-    });
-    return () => { mounted = false; };
-  }, [handleAuthenticatedRedirect]);
+  // Use ref to prevent multiple navigation calls
+  const hasRedirectedRef = React.useRef(false);
+  
+  // Reset redirect flag when session changes
+  React.useEffect(() => {
+    hasRedirectedRef.current = false;
+  }, [session]);
 
   // Validate sign up form
   const validateSignUpForm = useCallback((): string | null => {

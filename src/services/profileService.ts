@@ -32,11 +32,11 @@ export interface ExtendedProfile {
  */
 export const getProfileById = async (profileId: string): Promise<ExtendedProfile | null> => {
   try {
-    // This will use RLS to enforce privacy
+    // This will use RLS to enforce privacy  
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', profileId)
+      .eq('user_id', profileId)
       .single();
       
     if (error) {
@@ -144,7 +144,7 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
         phone: profileData.phone,
         website: profileData.website,
       })
-      .eq('id', currentUser.id)
+      .eq('user_id', currentUser.id)
       .select()
       .single();
       

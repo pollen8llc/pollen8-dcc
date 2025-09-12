@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
-import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@/contexts/UserContext';
 
 import { 
   Users, 
@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 
 const Initi8Dashboard: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useUser();
   const [isMessageCenterOpen, setIsMessageCenterOpen] = useState(false);
 
   const quickStats = {
