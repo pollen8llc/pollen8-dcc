@@ -41,10 +41,10 @@ export const useModuleCompletion = () => {
         if (error) throw error;
 
         setStatus({
-          rel8_complete: data?.rel8_complete ?? false,
-          eco8_complete: data?.eco8_complete ?? false,
-          modul8_complete: data?.modul8_complete ?? false,
-          labr8_complete: data?.labr8_complete ?? false,
+          rel8_complete: (data as any)?.rel8_complete ?? false,
+          eco8_complete: (data as any)?.eco8_complete ?? false,
+          modul8_complete: (data as any)?.modul8_complete ?? false,
+          labr8_complete: (data as any)?.labr8_complete ?? false,
           loading: false,
           error: null,
         });

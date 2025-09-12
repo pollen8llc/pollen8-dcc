@@ -22,8 +22,7 @@ export const logAuditAction = async (entry: AuditLogEntry): Promise<void> => {
     // Use the log_audit_action function from the database
     const { error } = await supabase.rpc('log_audit_action', {
       action_name: entry.action,
-      performer_id: user.id,
-      target_id: entry.targetUserId || null,
+      user_id: user.id,
       action_details: entry.details || {}
     });
 

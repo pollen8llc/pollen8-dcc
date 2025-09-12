@@ -23,7 +23,7 @@ export const createConnection = async (
 ): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('user_connections')
+      .from('user_connections' as any)
       .insert({
         inviter_id: inviterId,
         invitee_id: inviteeId,
@@ -83,7 +83,7 @@ export const getConnectionDepth = async (userIdA: string, userIdB: string): Prom
 export const getConnectionsByUser = async (userId: string, maxDepth: number = 1): Promise<ConnectionData[]> => {
   try {
     const { data, error } = await supabase
-      .from('user_connections')
+      .from('user_connections' as any)
       .select('*')
       .or(`inviter_id.eq.${userId},invitee_id.eq.${userId}`)
       .lte('connection_depth', maxDepth);

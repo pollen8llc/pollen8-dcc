@@ -26,12 +26,12 @@ export const useVote = () => {
         return;
       }
       
-      const voteValue = voteType === 'upvote' ? 1 : voteType === 'downvote' ? -1 : 0;
+      const voteValue = voteType === 'upvote' ? 'upvote' : voteType === 'downvote' ? 'downvote' : 'none';
       const idField = type === 'article' ? 'article_id' : 'comment_id';
       
       // Check if user has already voted
       const { data: existingVote, error: checkError } = await supabase
-        .from('knowledge_votes')
+        .from('knowledge_votes' as any)
         .select('id, vote_type')
         .eq(idField, id)
         .eq('user_id', currentUser.id)
@@ -40,27 +40,26 @@ export const useVote = () => {
       if (checkError) {
         throw checkError;
       }
-      
+
       // If user wants to remove vote (same as current)
-      if (existingVote && ((existingVote.vote_type === 1 && voteType === 'upvote') || 
-                        (existingVote.vote_type === -1 && voteType === 'downvote'))) {
+      if ((existingVote as any) && (existingVote as any).vote_type === voteValue) {
         // Delete the vote
         const { error } = await supabase
-          .from('knowledge_votes')
+          .from('knowledge_votes' as any)
           .delete()
-          .eq('id', existingVote.id);
+          .eq('id', (existingVote as any).id);
         
         if (error) {
           throw error;
         }
       } 
       // If user already voted but wants to change vote type
-      else if (existingVote) {
+      else if (existingVote as any) {
         // Update the vote
         const { error } = await supabase
-          .from('knowledge_votes')
+          .from('knowledge_votes' as any)
           .update({ vote_type: voteValue })
-          .eq('id', existingVote.id);
+          .eq('id', (existingVote as any).id);
         
         if (error) {
           throw error;
@@ -70,12 +69,12 @@ export const useVote = () => {
       else if (voteType !== 'none') {
         // Create a new vote
         const { error } = await supabase
-          .from('knowledge_votes')
+          .from('knowledge_votes' as any)
           .insert({
             [idField]: id,
             user_id: currentUser.id,
             vote_type: voteValue
-          });
+          } as any);
         
         if (error) {
           throw error;

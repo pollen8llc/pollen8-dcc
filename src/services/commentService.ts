@@ -75,7 +75,7 @@ export const updateServiceRequestStatus = async (
 ): Promise<void> => {
   // Update the service request status
   const { error: updateError } = await supabase
-    .from('modul8_service_requests')
+    .from('modul8_service_requests' as any)
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', serviceRequestId);
 

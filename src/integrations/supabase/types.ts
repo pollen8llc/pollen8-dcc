@@ -260,12 +260,89 @@ export type Database = {
           },
         ]
       }
+      cross_platform_activity_log: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string
+          id: string
+          platform: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string
+          id?: string
+          platform?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string
+          id?: string
+          platform?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cross_platform_activity_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      cross_platform_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          notification_type: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          notification_type: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          notification_type?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cross_platform_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       knowledge_articles: {
         Row: {
           author_id: string
           category: string | null
           community_id: string | null
           content: string
+          content_type: string | null
           created_at: string
           id: string
           is_published: boolean | null
@@ -279,6 +356,7 @@ export type Database = {
           category?: string | null
           community_id?: string | null
           content: string
+          content_type?: string | null
           created_at?: string
           id?: string
           is_published?: boolean | null
@@ -292,6 +370,7 @@ export type Database = {
           category?: string | null
           community_id?: string | null
           content?: string
+          content_type?: string | null
           created_at?: string
           id?: string
           is_published?: boolean | null
@@ -587,6 +666,53 @@ export type Database = {
         }
         Relationships: []
       }
+      modul8_organizers: {
+        Row: {
+          budget_range: string | null
+          company_size: string | null
+          created_at: string
+          focus_areas: string[] | null
+          id: string
+          industry: string | null
+          organization_name: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          budget_range?: string | null
+          company_size?: string | null
+          created_at?: string
+          focus_areas?: string[] | null
+          id?: string
+          industry?: string | null
+          organization_name?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          budget_range?: string | null
+          company_size?: string | null
+          created_at?: string
+          focus_areas?: string[] | null
+          id?: string
+          industry?: string | null
+          organization_name?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_organizers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       modul8_proposal_cards: {
         Row: {
           created_at: string
@@ -629,6 +755,62 @@ export type Database = {
         }
         Relationships: []
       }
+      modul8_service_providers: {
+        Row: {
+          availability_status: string | null
+          business_name: string | null
+          created_at: string
+          description: string | null
+          id: string
+          portfolio_links: string[] | null
+          pricing_model: string | null
+          rating: number | null
+          services_offered: string[] | null
+          total_projects: number | null
+          updated_at: string
+          user_id: string
+          verification_status: string | null
+        }
+        Insert: {
+          availability_status?: string | null
+          business_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          portfolio_links?: string[] | null
+          pricing_model?: string | null
+          rating?: number | null
+          services_offered?: string[] | null
+          total_projects?: number | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string | null
+        }
+        Update: {
+          availability_status?: string | null
+          business_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          portfolio_links?: string[] | null
+          pricing_model?: string | null
+          rating?: number | null
+          services_offered?: string[] | null
+          total_projects?: number | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_service_providers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       modul8_service_request_comments: {
         Row: {
           comment_type: string
@@ -662,6 +844,72 @@ export type Database = {
         }
         Relationships: []
       }
+      modul8_service_requests: {
+        Row: {
+          budget_range: string | null
+          created_at: string
+          description: string
+          domain_page: number | null
+          engagement_status: string | null
+          id: string
+          is_agreement_locked: boolean | null
+          organizer_id: string
+          project_progress: number | null
+          service_provider_id: string | null
+          status: string
+          timeline: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          budget_range?: string | null
+          created_at?: string
+          description: string
+          domain_page?: number | null
+          engagement_status?: string | null
+          id?: string
+          is_agreement_locked?: boolean | null
+          organizer_id: string
+          project_progress?: number | null
+          service_provider_id?: string | null
+          status?: string
+          timeline?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          budget_range?: string | null
+          created_at?: string
+          description?: string
+          domain_page?: number | null
+          engagement_status?: string | null
+          id?: string
+          is_agreement_locked?: boolean | null
+          organizer_id?: string
+          project_progress?: number | null
+          service_provider_id?: string | null
+          status?: string
+          timeline?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modul8_service_requests_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modul8_service_requests_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_responses: {
         Row: {
           created_at: string
@@ -692,6 +940,7 @@ export type Database = {
           bio: string | null
           communities: string[] | null
           created_at: string
+          eco8_complete: boolean | null
           eco8_setup_complete: boolean | null
           email: string
           first_name: string | null
@@ -699,11 +948,13 @@ export type Database = {
           id: string
           interests: string[] | null
           is_profile_complete: boolean | null
+          labr8_complete: boolean | null
           labr8_setup_complete: boolean | null
           last_login_at: string | null
           last_name: string | null
           location: string | null
           managed_communities: string[] | null
+          modul8_complete: boolean | null
           modul8_setup_complete: boolean | null
           nmn8_setup_complete: boolean | null
           onboarding_complete: boolean | null
@@ -723,6 +974,7 @@ export type Database = {
           bio?: string | null
           communities?: string[] | null
           created_at?: string
+          eco8_complete?: boolean | null
           eco8_setup_complete?: boolean | null
           email: string
           first_name?: string | null
@@ -730,11 +982,13 @@ export type Database = {
           id?: string
           interests?: string[] | null
           is_profile_complete?: boolean | null
+          labr8_complete?: boolean | null
           labr8_setup_complete?: boolean | null
           last_login_at?: string | null
           last_name?: string | null
           location?: string | null
           managed_communities?: string[] | null
+          modul8_complete?: boolean | null
           modul8_setup_complete?: boolean | null
           nmn8_setup_complete?: boolean | null
           onboarding_complete?: boolean | null
@@ -754,6 +1008,7 @@ export type Database = {
           bio?: string | null
           communities?: string[] | null
           created_at?: string
+          eco8_complete?: boolean | null
           eco8_setup_complete?: boolean | null
           email?: string
           first_name?: string | null
@@ -761,11 +1016,13 @@ export type Database = {
           id?: string
           interests?: string[] | null
           is_profile_complete?: boolean | null
+          labr8_complete?: boolean | null
           labr8_setup_complete?: boolean | null
           last_login_at?: string | null
           last_name?: string | null
           location?: string | null
           managed_communities?: string[] | null
+          modul8_complete?: boolean | null
           modul8_setup_complete?: boolean | null
           nmn8_setup_complete?: boolean | null
           onboarding_complete?: boolean | null
@@ -1236,6 +1493,61 @@ export type Database = {
           permissions?: Json | null
         }
         Relationships: []
+      }
+      user_connections: {
+        Row: {
+          community_id: string | null
+          connection_depth: number | null
+          created_at: string
+          id: string
+          invite_id: string | null
+          invitee_id: string
+          inviter_id: string
+          status: string | null
+        }
+        Insert: {
+          community_id?: string | null
+          connection_depth?: number | null
+          created_at?: string
+          id?: string
+          invite_id?: string | null
+          invitee_id: string
+          inviter_id: string
+          status?: string | null
+        }
+        Update: {
+          community_id?: string | null
+          connection_depth?: number | null
+          created_at?: string
+          id?: string
+          invite_id?: string | null
+          invitee_id?: string
+          inviter_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_connections_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_connections_invitee_id_fkey"
+            columns: ["invitee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_connections_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

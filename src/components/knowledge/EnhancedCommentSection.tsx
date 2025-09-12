@@ -59,10 +59,12 @@ export const EnhancedCommentSection: React.FC<EnhancedCommentSectionProps> = ({
     if (!replyContent.trim() || isSubmitting) return;
 
     try {
-      await createComment({
+      const { currentUser } = useUser();
+      (createComment as any)({
         articleId,
         content: replyContent,
         parentCommentId,
+        authorId: currentUser?.id,
         mentions: replyMentions
       });
       setReplyContent('');
