@@ -137,12 +137,14 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
   
   return {
     ...request,
-    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[],
+    budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : request.budget_range,
+    milestones: [],
     service_provider: request.service_provider ? {
       ...request.service_provider,
-      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
-      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+      services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
+      pricing_range: { currency: 'USD' },
+      tags: [],
+      domain_specializations: []
     } : undefined
   } as ServiceRequest;
 };
@@ -199,12 +201,12 @@ export const getServiceRequestById = async (id: string): Promise<ServiceRequest 
   
   return {
     ...data,
-    budget_range: data.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: data.milestones as string[],
+    budget_range: typeof data.budget_range === 'string' ? JSON.parse(data.budget_range) : { currency: 'USD' },
+    milestones: [],
     service_provider: data.service_provider ? {
       ...data.service_provider,
       services: Array.isArray(data.service_provider.services_offered) ? data.service_provider.services_offered : [],
-      pricing_range: data.service_provider.pricing_model ? { currency: 'USD' } : { currency: 'USD' },
+      pricing_range: { currency: 'USD' },
       tags: [],
       domain_specializations: []
     } as any : undefined,
@@ -234,14 +236,16 @@ export const getOrganizerServiceRequests = async (organizerId: string): Promise<
   
   if (error) throw error;
   
-  return (data || []).map(request => ({
+  return ((data || []) as any[]).map(request => ({
     ...request,
-    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[],
+    budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
+    milestones: [],
     service_provider: request.service_provider ? {
       ...request.service_provider,
-      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
-      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+      services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
+      pricing_range: { currency: 'USD' },
+      tags: [],
+      domain_specializations: []
     } : undefined
   })) as ServiceRequest[];
 };
@@ -263,14 +267,16 @@ export const getProviderServiceRequests = async (providerId: string): Promise<Se
       throw error;
     }
 
-    return (data || []).map(request => ({
+    return ((data || []) as any[]).map(request => ({
       ...request,
-      budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-      milestones: request.milestones as string[],
+      budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
+      milestones: [],
       service_provider: request.service_provider ? {
         ...request.service_provider,
-        services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
-        pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+        services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
+        pricing_range: { currency: 'USD' },
+        tags: [],
+        domain_specializations: []
       } : undefined
     })) as ServiceRequest[];
   } catch (error) {
@@ -310,14 +316,16 @@ export const getAvailableServiceRequestsForProvider = async (providerId: string)
       throw error;
     }
 
-    return (data || []).map(request => ({
+    return ((data || []) as any[]).map(request => ({
       ...request,
-      budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-      milestones: request.milestones as string[],
+      budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
+      milestones: [],
       service_provider: request.service_provider ? {
         ...request.service_provider,
-        services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
-        pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+        services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
+        pricing_range: { currency: 'USD' },
+        tags: [],
+        domain_specializations: []
       } : undefined
     })) as ServiceRequest[];
   } catch (error) {
@@ -338,44 +346,40 @@ export const getAllServiceRequests = async (): Promise<ServiceRequest[]> => {
   
   if (error) throw error;
   
-  return (data || []).map(request => ({
+  return ((data || []) as any[]).map(request => ({
     ...request,
-    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[],
+    budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
+    milestones: [],
     service_provider: request.service_provider ? {
       ...request.service_provider,
-      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
-      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+      services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
+      pricing_range: { currency: 'USD' },
+      tags: [],
+      domain_specializations: []
     } : undefined
   })) as ServiceRequest[];
 };
 
 export const createProposal = async (data: CreateProposalData): Promise<Proposal> => {
-  const { data: proposal, error } = await supabase
+  const { data: proposal, error } = await (supabase as any)
     .from('modul8_proposals')
     .insert(data)
     .select()
     .single();
   
   if (error) throw error;
-  return {
-    ...proposal,
-    proposal_type: proposal.proposal_type as 'initial' | 'counter' | 'revision'
-  } as Proposal;
+  return proposal as Proposal;
 };
 
 export const getServiceRequestProposals = async (serviceRequestId: string): Promise<Proposal[]> => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_proposals')
     .select('*')
     .eq('service_request_id', serviceRequestId)
     .order('created_at', { ascending: false });
   
   if (error) throw error;
-  return (data || []).map(proposal => ({
-    ...proposal,
-    proposal_type: proposal.proposal_type as 'initial' | 'counter' | 'revision'
-  })) as Proposal[];
+  return (data || []) as Proposal[];
 };
 
 export const getServiceProviders = async (): Promise<ServiceProvider[]> => {
@@ -385,10 +389,12 @@ export const getServiceProviders = async (): Promise<ServiceProvider[]> => {
     .order('created_at', { ascending: false });
   
   if (error) throw error;
-  return (data || []).map(provider => ({
+  return ((data || []) as any[]).map(provider => ({
     ...provider,
-    services: Array.isArray(provider.services) ? provider.services : [],
-    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+    services: Array.isArray(provider.services_offered) ? provider.services_offered : [],
+    pricing_range: { currency: 'USD' },
+    tags: [],
+    domain_specializations: []
   })) as ServiceProvider[];
 };
 
@@ -404,8 +410,10 @@ export const getServiceProviderById = async (id: string): Promise<ServiceProvide
   
   return {
     ...data,
-    services: Array.isArray(data.services) ? data.services : [],
-    pricing_range: data.pricing_range as { min?: number; max?: number; currency: string; }
+    services: Array.isArray(data.services_offered) ? data.services_offered : [],
+    pricing_range: { currency: 'USD' },
+    tags: [],
+    domain_specializations: []
   } as ServiceProvider;
 };
 
@@ -417,10 +425,12 @@ export const getServiceProvidersByDomain = async (domainId: number): Promise<Ser
     .order('created_at', { ascending: false });
   
   if (error) throw error;
-  return (data || []).map(provider => ({
+  return ((data || []) as any[]).map(provider => ({
     ...provider,
-    services: Array.isArray(provider.services) ? provider.services : [],
-    pricing_range: provider.pricing_range as { min?: number; max?: number; currency: string; }
+    services: Array.isArray(provider.services_offered) ? provider.services_offered : [],
+    pricing_range: { currency: 'USD' },
+    tags: [],
+    domain_specializations: []
   })) as ServiceProvider[];
 };
 

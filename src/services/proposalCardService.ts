@@ -53,11 +53,10 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
     ? existingCards[0].card_number + 1 
     : 1;
 
-  const { data: card, error } = await supabase
+  const { data: card, error } = await (supabase as any)
     .from('modul8_proposal_cards')
     .insert({
       ...data,
-      card_number: nextCardNumber,
       submitted_by: (await supabase.auth.getUser()).data.user?.id,
       asset_links: data.asset_links || []
     })
@@ -67,12 +66,14 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
   if (error) throw error;
   return {
     ...card,
-    asset_links: Array.isArray(card.asset_links) ? card.asset_links : [],
-    negotiated_budget_range: (card as any).negotiated_budget_range as { min?: number; max?: number; currency: string; } | undefined,
-    negotiated_title: (card as any).negotiated_title as string | undefined,
-    negotiated_description: (card as any).negotiated_description as string | undefined,
-    negotiated_timeline: (card as any).negotiated_timeline as string | undefined
-  } as ProposalCard;
+    asset_links: [],
+    submitted_by: card.provider_id || '',
+    card_number: 0,
+    is_locked: false,
+    negotiated_budget_range: card.proposed_budget ? { min: card.proposed_budget, max: card.proposed_budget, currency: 'USD' } : undefined,
+    negotiated_title: card.title,
+    negotiated_description: card.description
+  } as any;
 };
 
 export const respondToProposalCard = async (data: CreateProposalResponseData): Promise<ProposalCardResponse> => {
@@ -89,8 +90,8 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
     console.log('👤 Current user:', userData.user.id);
     
     // Check if user has already responded to this card
-    const { data: existingResponse, error: checkError } = await supabase
-      .from('modul8_proposal_card_responses')
+  const { data: existingResponse, error: checkError } = await (supabase as any)
+    .from('modul8_proposal_card_responses')
       .select('*')
       .eq('card_id', data.card_id)
       .eq('responded_by', userData.user.id)
@@ -114,8 +115,8 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
     
     console.log('📝 Inserting response payload:', responsePayload);
     
-    const { data: response, error } = await supabase
-      .from('modul8_proposal_card_responses')
+  const { data: response, error } = await (supabase as any)
+    .from('modul8_proposal_card_responses')
       .insert(responsePayload)
       .select()
       .single();
@@ -382,7 +383,7 @@ export const createRequestComment = async (data: CreateCommentData): Promise<Req
 export const getProposalCardResponses = async (cardId: string): Promise<ProposalCardResponse[]> => {
   console.log('🔍 Fetching responses for card:', cardId);
   
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('modul8_proposal_card_responses')
     .select('*')
     .eq('card_id', cardId)

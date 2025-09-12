@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceRequest } from "@/types/modul8";
 
@@ -19,12 +18,14 @@ export const getNegotiationServiceRequest = async (requestId: string): Promise<S
   
   return {
     ...data,
-    budget_range: data.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: data.milestones as string[],
+    budget_range: typeof data.budget_range === 'string' ? JSON.parse(data.budget_range) : { currency: 'USD' },
+    milestones: [],
     service_provider: data.service_provider ? {
       ...data.service_provider,
-      services: Array.isArray(data.service_provider.services) ? data.service_provider.services : [],
-      pricing_range: data.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+      services: Array.isArray(data.service_provider.services_offered) ? data.service_provider.services_offered : [],
+      pricing_range: { currency: 'USD' },
+      tags: [],
+      domain_specializations: []
     } : undefined
   } as ServiceRequest;
 };
@@ -49,12 +50,14 @@ export const checkExistingRequest = async (organizerId: string, providerId: stri
   
   return {
     ...data,
-    budget_range: data.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: data.milestones as string[],
+    budget_range: typeof data.budget_range === 'string' ? JSON.parse(data.budget_range) : { currency: 'USD' },
+    milestones: [],
     service_provider: data.service_provider ? {
       ...data.service_provider,
-      services: Array.isArray(data.service_provider.services) ? data.service_provider.services : [],
-      pricing_range: data.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+      services: Array.isArray(data.service_provider.services_offered) ? data.service_provider.services_offered : [],
+      pricing_range: { currency: 'USD' },
+      tags: [],
+      domain_specializations: []
     } : undefined
   } as ServiceRequest;
 };

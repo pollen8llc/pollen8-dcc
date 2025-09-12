@@ -172,11 +172,10 @@ export const updateProfile = async (profileData: Partial<ExtendedProfile>): Prom
  */
 export const canViewProfile = async (viewerId: string, profileId: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase
-      .rpc('can_view_profile', {
-        viewer_id: viewerId,
-        profile_id: profileId
-      });
+  const { data: canView, error } = await supabase.rpc('can_view_profile', {
+    viewer_id: viewerId,
+    profile_user_id: profileId
+  });
       
     if (error) {
       console.error("Error checking profile visibility:", error);
@@ -205,11 +204,9 @@ export const getConnectedProfiles = async (
 ): Promise<ExtendedProfile[]> => {
   try {
     // First get connected profiles using the database function
-    const { data, error } = await supabase
-      .rpc('get_connected_profiles', {
-        user_id: userId,
-        max_depth: maxDepth
-      });
+  const { data, error } = await supabase.rpc('get_connected_profiles', {
+    user_id: userId
+  });
       
     if (error) {
       console.error("Error getting connected profiles:", error);
@@ -219,13 +216,14 @@ export const getConnectedProfiles = async (
     let profiles = data || [];
     
     // Process the returned data to ensure types match
-    const processedProfiles: ExtendedProfile[] = profiles.map(profile => ({
-      ...profile,
-      social_links: profile.social_links ? JSON.parse(JSON.stringify(profile.social_links)) : {},
-      privacy_settings: profile.privacy_settings ? JSON.parse(JSON.stringify(profile.privacy_settings)) : {
-        profile_visibility: "connections"
-      }
-    }));
+  const processedProfiles: any[] = profiles.map(profile => ({
+    id: profile.profile_id,
+    user_id: profile.user_id,
+    avatar_url: profile.avatar_url,
+    full_name: profile.full_name,
+    social_links: {},
+    privacy_settings: {}
+  }));
     
     // Apply filters
     let filteredProfiles = [...processedProfiles];

@@ -1352,6 +1352,111 @@ export type Database = {
           },
         ]
       }
+      nmn8_group_configs: {
+        Row: {
+          color: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          organizer_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          organizer_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organizer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      nmn8_nominations: {
+        Row: {
+          contact_id: string
+          created_at: string
+          groups: Json
+          id: string
+          notes: string | null
+          organizer_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          groups?: Json
+          id?: string
+          notes?: string | null
+          organizer_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          groups?: Json
+          id?: string
+          notes?: string | null
+          organizer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      nmn8_profiles: {
+        Row: {
+          classification: string
+          community_engagement: number
+          contact_id: string
+          created_at: string
+          events_attended: number
+          id: string
+          interests: string[] | null
+          last_active: string | null
+          notes: string | null
+          organizer_id: string
+          social_media: Json | null
+          updated_at: string
+        }
+        Insert: {
+          classification?: string
+          community_engagement?: number
+          contact_id: string
+          created_at?: string
+          events_attended?: number
+          id?: string
+          interests?: string[] | null
+          last_active?: string | null
+          notes?: string | null
+          organizer_id: string
+          social_media?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          classification?: string
+          community_engagement?: number
+          contact_id?: string
+          created_at?: string
+          events_attended?: number
+          id?: string
+          interests?: string[] | null
+          last_active?: string | null
+          notes?: string | null
+          organizer_id?: string
+          social_media?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       poll_responses: {
         Row: {
           created_at: string
