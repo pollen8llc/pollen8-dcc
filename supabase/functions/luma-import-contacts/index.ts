@@ -122,18 +122,12 @@ serve(async (req) => {
 
             if (existingContact) {
               // Update existing contact with Luma data if not already from this event
-              const { error: updateError } = await supabase
+               const { error: updateError } = await supabase
                 .from('rms_contacts')
                 .update({
-                  luma_event_id: eventId,
-                  luma_attendee_id: attendee.id,
-                  luma_import_date: new Date().toISOString(),
-                  // Update other fields if they're empty
-                  bio: existingContact.bio || attendee.bio || '',
-                  linkedin_url: existingContact.linkedin_url || attendee.linkedin_url || '',
-                  twitter_handle: existingContact.twitter_handle || attendee.twitter_handle || '',
-                  instagram_handle: existingContact.instagram_handle || attendee.instagram_handle || '',
-                  website: existingContact.website || attendee.website_url || '',
+                  notes: existingContact.notes || `Luma Event: ${eventName}`,
+                  source: existingContact.source || `Luma Event: ${eventName}`,
+                  last_contact_date: new Date().toISOString(),
                 })
                 .eq('id', existingContact.id);
 
@@ -145,21 +139,15 @@ serve(async (req) => {
               }
             } else {
               // Create new contact
-              const { error: insertError } = await supabase
+               const { error: insertError } = await supabase
                 .from('rms_contacts')
                 .insert({
                   user_id: user.id,
                   name: attendee.name || 'Unknown',
                   email: attendee.email,
-                  bio: attendee.bio || '',
-                  linkedin_url: attendee.linkedin_url || '',
-                  twitter_handle: attendee.twitter_handle || '',
-                  instagram_handle: attendee.instagram_handle || '',
-                  website: attendee.website_url || '',
+                  notes: attendee.bio || '',
                   source: `Luma Event: ${eventName}`,
-                  luma_event_id: eventId,
-                  luma_attendee_id: attendee.id,
-                  luma_import_date: new Date().toISOString(),
+                  last_contact_date: new Date().toISOString(),
                 });
 
               if (insertError) {

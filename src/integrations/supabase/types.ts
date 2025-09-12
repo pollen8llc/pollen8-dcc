@@ -1815,14 +1815,16 @@ export type Database = {
       rms_contacts: {
         Row: {
           category_id: string | null
-          company: string | null
           created_at: string
           email: string | null
           id: string
+          last_contact_date: string | null
+          location: string | null
           name: string
           notes: string | null
+          organization: string | null
           phone: string | null
-          position: string | null
+          role: string | null
           source: string | null
           tags: string[] | null
           updated_at: string
@@ -1830,14 +1832,16 @@ export type Database = {
         }
         Insert: {
           category_id?: string | null
-          company?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          last_contact_date?: string | null
+          location?: string | null
           name: string
           notes?: string | null
+          organization?: string | null
           phone?: string | null
-          position?: string | null
+          role?: string | null
           source?: string | null
           tags?: string[] | null
           updated_at?: string
@@ -1845,14 +1849,16 @@ export type Database = {
         }
         Update: {
           category_id?: string | null
-          company?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          last_contact_date?: string | null
+          location?: string | null
           name?: string
           notes?: string | null
+          organization?: string | null
           phone?: string | null
-          position?: string | null
+          role?: string | null
           source?: string | null
           tags?: string[] | null
           updated_at?: string
