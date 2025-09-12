@@ -57,8 +57,10 @@ export const getUserServiceProvider = async (userId: string): Promise<ServicePro
   
   return {
     ...data,
-    services: Array.isArray(data.services) ? data.services : [],
-    pricing_range: data.pricing_range as { min?: number; max?: number; currency: string; }
+    services: Array.isArray(data.services_offered) ? data.services_offered : [],
+    pricing_range: { currency: 'USD' },
+    tags: [],
+    domain_specializations: []
   } as ServiceProvider;
 };
 
@@ -149,9 +151,13 @@ export const updateServiceRequest = async (
   id: string, 
   data: Partial<ServiceRequest>
 ): Promise<ServiceRequest> => {
+  const updateData = {
+    ...data,
+    budget_range: data.budget_range ? JSON.stringify(data.budget_range) : undefined
+  };
   const { data: request, error } = await supabase
     .from('modul8_service_requests')
-    .update(data)
+    .update(updateData as any)
     .eq('id', id)
     .select(`
       *,
@@ -164,12 +170,14 @@ export const updateServiceRequest = async (
   
   return {
     ...request,
-    budget_range: request.budget_range as { min?: number; max?: number; currency: string; },
-    milestones: request.milestones as string[],
+    budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : request.budget_range,
+    milestones: [],
     service_provider: request.service_provider ? {
       ...request.service_provider,
-      services: Array.isArray(request.service_provider.services) ? request.service_provider.services : [],
-      pricing_range: request.service_provider.pricing_range as { min?: number; max?: number; currency: string; }
+      services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
+      pricing_range: { currency: 'USD' },
+      tags: [],
+      domain_specializations: []
     } : undefined
   } as ServiceRequest;
 };
