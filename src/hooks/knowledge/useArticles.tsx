@@ -60,13 +60,10 @@ export const useArticle = (id: string) => {
       
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Fetch article with author and vote info
+      // Fetch article first
       const { data: article, error } = await supabase
         .from('knowledge_articles')
-        .select(`
-          *,
-          author:profiles!author_id(user_id, full_name, first_name, last_name, avatar_url)
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
@@ -76,6 +73,18 @@ export const useArticle = (id: string) => {
       }
 
       if (!article) return null;
+
+      // Separately fetch author info to handle RLS policies properly
+      let authorProfile = null;
+      if (article.author_id) {
+        const { data: authorData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, first_name, last_name, avatar_url, role')
+          .eq('user_id', article.author_id)
+          .maybeSingle();
+        
+        authorProfile = authorData;
+      }
 
       // Get user's vote for this article
       let userVote = null;
@@ -91,15 +100,14 @@ export const useArticle = (id: string) => {
       }
 
       // Transform data to match KnowledgeArticle interface
-      const author = article.author as any;
       return {
         ...article,
         user_vote: userVote,
-        author: author ? {
-          id: author.user_id,
-          name: author.full_name || `${author.first_name || ''} ${author.last_name || ''}`.trim() || 'Anonymous',
-          avatar_url: author.avatar_url,
-          is_admin: author.role === 'ADMIN'
+        author: authorProfile ? {
+          id: authorProfile.user_id,
+          name: authorProfile.full_name || `${authorProfile.first_name || ''} ${authorProfile.last_name || ''}`.trim() || 'Anonymous',
+          avatar_url: authorProfile.avatar_url,
+          is_admin: authorProfile.role === 'ADMIN'
         } : {
           id: article.author_id,
           name: 'Unknown User',
