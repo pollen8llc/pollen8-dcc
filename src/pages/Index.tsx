@@ -31,9 +31,22 @@ const Index = () => {
         return;
       }
       
-      // If user is an organizer or admin, redirect to organizer dashboard
-      if (currentUser.role === 'ORGANIZER' || currentUser.role === 'ADMIN') {
-        console.log(`🚀 Redirecting ${currentUser.role} to organizer dashboard`);
+      // If user is an admin, redirect to admin dashboard
+      if (currentUser.role === 'ADMIN') {
+        console.log('🚀 Redirecting ADMIN to admin dashboard');
+        if (!currentUser.profile_complete) {
+          console.log('📝 Profile incomplete, redirecting to setup');
+          navigate("/profile/setup", { replace: true });
+        } else {
+          console.log('✅ Profile complete, redirecting to admin dashboard');
+          navigate("/admin", { replace: true });
+        }
+        return;
+      }
+      
+      // If user is an organizer, redirect to organizer dashboard
+      if (currentUser.role === 'ORGANIZER') {
+        console.log('🚀 Redirecting ORGANIZER to organizer dashboard');
         if (!currentUser.profile_complete) {
           console.log('📝 Profile incomplete, redirecting to setup');
           navigate("/profile/setup", { replace: true });
