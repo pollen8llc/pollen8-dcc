@@ -15,25 +15,34 @@ const ProtectedRoute = ({
   role,
   roleEnum 
 }: ProtectedRouteProps) => {
-  const { currentUser, isLoading } = useUser();
+  const { currentUser, session, isLoading } = useUser();
   
   // Support both role and roleEnum props for backward compatibility
   const requiredRole = role || roleEnum;
   
-  // Show loading or redirect if user isn't authenticated
-  if (isLoading) {
+  // If we're still loading OR we have a session but user profile hasn't loaded yet, show loading
+  if (isLoading || (session && !currentUser)) {
     return <div className="container mx-auto py-20 text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
       <h1 className="text-2xl font-bold mt-4">Loading...</h1>
     </div>;
   }
 
-  if (!currentUser) {
+  // If no session and no currentUser, redirect to auth
+  if (!session && !currentUser) {
     return <Navigate to="/auth" replace />;
   }
 
   // If a specific role is required, check if user has it
   if (requiredRole) {
+    // If we still don't have currentUser here, stay in loading state
+    if (!currentUser) {
+      return <div className="container mx-auto py-20 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+        <h1 className="text-2xl font-bold mt-4">Loading...</h1>
+      </div>;
+    }
+
     // For ADMIN role, strictly check for ADMIN
     if (requiredRole === UserRole.ADMIN && currentUser.role !== UserRole.ADMIN) {
       return <Navigate to="/" replace />;
