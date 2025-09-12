@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_roles_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "admin_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -743,6 +782,81 @@ export type Database = {
         }
         Relationships: []
       }
+      rms_contact_affiliations: {
+        Row: {
+          affiliated_community_id: string | null
+          affiliated_contact_id: string | null
+          affiliated_user_id: string | null
+          affiliation_type: string
+          contact_id: string
+          created_at: string
+          id: string
+          relationship: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          affiliated_community_id?: string | null
+          affiliated_contact_id?: string | null
+          affiliated_user_id?: string | null
+          affiliation_type: string
+          contact_id: string
+          created_at?: string
+          id?: string
+          relationship?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          affiliated_community_id?: string | null
+          affiliated_contact_id?: string | null
+          affiliated_user_id?: string | null
+          affiliation_type?: string
+          contact_id?: string
+          created_at?: string
+          id?: string
+          relationship?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_contact_affiliations_affiliated_community_id_fkey"
+            columns: ["affiliated_community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_contact_affiliations_affiliated_contact_id_fkey"
+            columns: ["affiliated_contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_contact_affiliations_affiliated_user_id_fkey"
+            columns: ["affiliated_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "rms_contact_affiliations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_contact_affiliations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       rms_contact_categories: {
         Row: {
           color: string | null
@@ -766,6 +880,90 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      rms_contact_group_members: {
+        Row: {
+          added_at: string
+          added_by: string
+          contact_id: string
+          group_id: string
+          id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by: string
+          contact_id: string
+          group_id: string
+          id?: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string
+          contact_id?: string
+          group_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_contact_group_members_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "rms_contact_group_members_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_contact_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contact_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_contact_groups: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_contact_groups_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       rms_contacts: {
         Row: {
@@ -820,6 +1018,76 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "rms_contact_categories"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_email_notifications: {
+        Row: {
+          body: string
+          contact_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          trigger_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          contact_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          trigger_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          contact_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          trigger_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_email_notifications_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_email_notifications_trigger_id_fkey"
+            columns: ["trigger_id"]
+            isOneToOne: false
+            referencedRelation: "rms_triggers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rms_email_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -888,6 +1156,62 @@ export type Database = {
           status?: string | null
         }
         Relationships: []
+      }
+      rms_triggers: {
+        Row: {
+          action: string
+          condition: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          last_executed_at: string | null
+          name: string
+          next_execution_at: string | null
+          recurrence_pattern: Json
+          trigger_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          condition?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_executed_at?: string | null
+          name: string
+          next_execution_at?: string | null
+          recurrence_pattern?: Json
+          trigger_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          condition?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_executed_at?: string | null
+          name?: string
+          next_execution_at?: string | null
+          recurrence_pattern?: Json
+          trigger_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_triggers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       roles: {
         Row: {

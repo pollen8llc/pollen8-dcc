@@ -18,7 +18,7 @@ const mapDbUser = async (profile: any): Promise<User> => {
   
   // Get admin role if exists
   const { data: adminRole, error: adminError } = await supabase
-    .from('admin_roles')
+    .from('admin_roles' as any)
     .select('role')
     .eq('user_id', profile.id)
     .maybeSingle();
@@ -253,7 +253,7 @@ export const createAdminUser = async (userId: string): Promise<boolean> => {
 export const removeAdminRole = async (userId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('admin_roles')
+      .from('admin_roles' as any)
       .delete()
       .eq('user_id', userId);
     

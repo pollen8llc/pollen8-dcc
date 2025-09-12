@@ -21,7 +21,7 @@ const CommunitySetup: React.FC = () => {
         if (user?.user?.id && !eco8_complete) {
           await supabase
             .from('profiles')
-            .update({ eco8_complete: true })
+            .update({ eco8_setup_complete: true })
             .eq('id', user.user.id);
         }
         // Navigate to the new community page or dashboard
