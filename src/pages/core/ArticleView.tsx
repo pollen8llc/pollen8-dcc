@@ -42,6 +42,7 @@ const ArticleView = () => {
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
   const knowledgeBase = useKnowledgeBase();
+  const deleteArticleMutation = knowledgeBase.useDeleteArticle();
 
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,7 +85,7 @@ const ArticleView = () => {
   // Handle delete article confirmation
   const confirmDeleteArticle = async () => {
     try {
-      await knowledgeBase.deleteArticle(id!);
+      await deleteArticleMutation.mutateAsync(id!);
       navigate('/knowledge');
     } catch (error) {
       console.error('Error deleting article:', error);

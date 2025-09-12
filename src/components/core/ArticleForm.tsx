@@ -43,8 +43,10 @@ const CORE_DRAFT_KEY = 'core-article-draft';
 const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { useTags, updateArticle } = useKnowledgeBase();
+  const { useTags, useCreateArticle, useUpdateArticle } = useKnowledgeBase();
   const { data: availableTags } = useTags();
+  const createArticleMutation = useCreateArticle();
+  const updateArticleMutation = useUpdateArticle();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("editor");
   
@@ -93,29 +95,22 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ article, mode }) => {
       // Sanitize HTML content before submission
       const sanitizedData = {
         ...data,
-        content: DOMPurify.sanitize(data.content)
+        content: DOMPurify.sanitize(data.content),
+        is_published: true // Auto-publish articles
       };
       
       if (mode === 'create') {
         // Clear draft on successful creation
         localStorage.removeItem(CORE_DRAFT_KEY);
-        // Handle create mode - you'll need to implement createArticle
-        console.log('Create article:', sanitizedData);
-        toast({
-          title: "Success!",
-          description: "Article created successfully",
-        });
+        
+        // Create the article using the mutation
+        await createArticleMutation.mutateAsync(sanitizedData);
         navigate('/knowledge');
       } else if (mode === 'edit' && article) {
         // Handle edit mode
-        const updatedArticle = {
-          ...article,
-          ...sanitizedData
-        };
-        await updateArticle(updatedArticle);
-        toast({
-          title: "Success",
-          description: "Article updated successfully",
+        await updateArticleMutation.mutateAsync({
+          id: article.id,
+          updates: sanitizedData
         });
         navigate(`/knowledge/article/${article.id}`);
       }

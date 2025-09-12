@@ -42,7 +42,8 @@ const PostWizard = () => {
   const postType = type as PostType | undefined;
   const validTypes: PostType[] = ['question', 'quote', 'poll', 'article'];
   
-  const { isSubmitting, createArticle } = useKnowledgeBase();
+  const { isSubmitting, useCreateArticle } = useKnowledgeBase();
+  const createArticleMutation = useCreateArticle();
   const [formData, setFormData] = useState<any>(null);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   
@@ -128,7 +129,7 @@ const PostWizard = () => {
       
       console.log('Final submission data with content type:', finalData);
       
-      await createArticle(finalData);
+      await createArticleMutation.mutateAsync(finalData);
       
       // Clear the draft on successful creation
       localStorage.removeItem('knowledge-article-draft');

@@ -52,7 +52,8 @@ const ArticleView = () => {
   const queryClient = useQueryClient();
   const { currentUser } = useUser();
   const { isOrganizer, isAdmin } = usePermissions(currentUser);
-  const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer, deleteArticle } = useKnowledgeBase();
+  const { useArticle, vote, useComments, createComment, deleteComment, acceptAnswer, useDeleteArticle } = useKnowledgeBase();
+  const deleteArticleMutation = useDeleteArticle();
   const { isArticleSaved, toggleSaveArticle } = useSavedArticles();
 
   console.log('ArticleView - Article ID from params:', id);
@@ -109,7 +110,7 @@ const ArticleView = () => {
   const handleDeleteArticle = async () => {
     if (!window.confirm('Are you sure you want to delete this article? This action cannot be undone.')) return;
     try {
-      await deleteArticle(article.id);
+      await deleteArticleMutation.mutateAsync(article.id);
       navigate('/knowledge');
     } catch (err) {
       // Error toast is handled in the hook
