@@ -2011,7 +2011,22 @@ export type Database = {
           sent_at?: string | null
           status?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_outreach_contacts_contact_id"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_outreach_contacts_outreach_id"
+            columns: ["outreach_id"]
+            isOneToOne: false
+            referencedRelation: "rms_outreach"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rms_triggers: {
         Row: {
