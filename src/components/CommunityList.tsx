@@ -2,8 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CommunityCard from "./CommunityCard";
-import { Community } from "@/hooks/useCommunities";
-import * as communityService from "@/services/communityService";
+import { Community, useCommunities } from "@/hooks/useCommunities";
 import { Button } from "@/components/ui/button";
 import { useInView } from "react-intersection-observer";
 import { Loader2 } from "lucide-react";
@@ -18,6 +17,7 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
   const [hasMore, setHasMore] = useState(true);
   const pageSize = 12;
   const prevSearchQuery = useRef(searchQuery);
+  const { getAllCommunities, searchCommunities } = useCommunities();
   
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.5,
@@ -37,9 +37,9 @@ const CommunityList = ({ searchQuery }: CommunityListProps) => {
       console.log(`Fetching page ${page} with query "${searchQuery}"`);
       
       if (searchQuery && searchQuery.trim() !== '') {
-        return communityService.searchCommunities(searchQuery);
+        return searchCommunities(searchQuery);
       } else {
-        return communityService.getAllCommunities(page);
+        return getAllCommunities(page, pageSize);
       }
     },
     staleTime: 60 * 1000, // 1 minute
