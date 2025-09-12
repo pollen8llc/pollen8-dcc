@@ -136,7 +136,7 @@ export const useCommunities = () => {
         .from('communities')
         .select('*')
         .eq('is_public', true)
-        .or(`name.ilike.%${query}%,description.ilike.%${query}%,tags.cs.{${query}}`)
+        .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
