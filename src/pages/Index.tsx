@@ -18,9 +18,15 @@ const Index = () => {
         userId: currentUser.id
       });
       
-      // Redirect all authenticated users to initi8 dashboard
-      console.log('🚀 Index.tsx - Redirecting authenticated user to initi8 dashboard');
-      navigate("/initi8", { replace: true });
+      // Service providers go to LAB-R8, others go to initi8
+      if (currentUser.role === 'SERVICE_PROVIDER') {
+        console.log('🚀 Index.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
+        const destination = currentUser.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
+        navigate(destination, { replace: true });
+      } else {
+        console.log('🚀 Index.tsx - Redirecting authenticated user to initi8 dashboard');
+        navigate("/initi8", { replace: true });
+      }
     }
   }, [currentUser, isLoading, navigate]);
   

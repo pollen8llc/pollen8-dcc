@@ -515,32 +515,24 @@ const AppRoutes = () => {
 
           {/* Initi8 routes */}
           <Route path="/initi8" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <Initi8Dashboard />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <Initi8Dashboard />
+            </ProtectedRoute>
           } />
           <Route path="/initi8/dashboard" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <Initi8Dashboard />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <Initi8Dashboard />
+            </ProtectedRoute>
           } />
           <Route path="/initi8/search" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <SearchProfiles />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <SearchProfiles />
+            </ProtectedRoute>
           } />
           <Route path="/initi8/volunteers" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <ManageVolunteers />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <ManageVolunteers />
+            </ProtectedRoute>
           } />
 
           {/* Evalu8 routes */}
