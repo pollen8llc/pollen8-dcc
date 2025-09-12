@@ -47,11 +47,7 @@ export const EnhancedCommentSection: React.FC<EnhancedCommentSectionProps> = ({
     if (!newComment.trim() || isSubmitting) return;
 
     try {
-      await createComment({
-        articleId,
-        content: newComment,
-        mentions: newCommentMentions
-      });
+      await createComment(articleId, newComment);
       setNewComment('');
       setNewCommentMentions([]);
     } catch (error) {

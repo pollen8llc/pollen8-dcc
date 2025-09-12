@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -16,67 +15,39 @@ export const useSavedArticles = () => {
     queryFn: async () => {
       if (!currentUser) return [];
 
-      const { data, error } = await supabase
-        .from('knowledge_saved_articles')
-        .select(`
-          id,
-          saved_at,
-          knowledge_articles (
-            id,
-            title,
-            content,
-            created_at,
-            updated_at,
-            view_count,
-            comment_count,
-            vote_count,
-            tags,
-            content_type,
-            user_id
-          )
-        `)
-        .eq('user_id', currentUser.id)
-        .order('saved_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('knowledge_saved_articles' as any)
+          .select('id, saved_at, article_id')
+          .eq('user_id', currentUser.id)
+          .order('saved_at', { ascending: false });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Get author information for each article
-      const articleIds = data?.map(item => item.knowledge_articles?.user_id).filter(Boolean) || [];
-      const uniqueUserIds = [...new Set(articleIds)];
-
-      let profiles = [];
-      if (uniqueUserIds.length > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, avatar_url')
-          .in('id', uniqueUserIds);
-
-        if (!profilesError) {
-          profiles = profilesData || [];
-        }
-      }
-
-      const profilesMap = profiles.reduce((map, profile) => {
-        map[profile.id] = profile;
-        return map;
-      }, {} as Record<string, any>);
-
-      return data?.map(item => {
-        const article = item.knowledge_articles;
-        if (!article) return null;
-
-        const profileData = profilesMap[article.user_id];
+        // Get articles for saved article IDs
+        const articleIds = (data as any[] || []).map((item: any) => item.article_id);
         
-        return {
-          ...article,
-          author: profileData ? {
-            id: article.user_id,
-            name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim(),
-            avatar_url: profileData.avatar_url || ''
-          } : undefined,
-          saved_at: item.saved_at
-        };
-      }).filter(Boolean) as (KnowledgeArticle & { saved_at: string })[];
+        if (articleIds.length === 0) return [];
+
+        const { data: articles, error: articlesError } = await supabase
+          .from('knowledge_articles' as any)
+          .select('*')
+          .in('id', articleIds);
+
+        if (articlesError) throw articlesError;
+
+        // Combine saved info with article data
+        return (data as any[] || []).map((savedItem: any) => {
+          const article = (articles as any[] || []).find((a: any) => a.id === savedItem.article_id);
+          return article ? {
+            ...article,
+            saved_at: savedItem.saved_at
+          } : null;
+        }).filter(Boolean);
+      } catch (error) {
+        console.error('Error fetching saved articles:', error);
+        return [];
+      }
     },
     enabled: !!currentUser
   });
@@ -87,13 +58,18 @@ export const useSavedArticles = () => {
     queryFn: async () => {
       if (!currentUser) return [];
 
-      const { data, error } = await supabase
-        .from('knowledge_saved_articles')
-        .select('article_id')
-        .eq('user_id', currentUser.id);
+      try {
+        const { data, error } = await supabase
+          .from('knowledge_saved_articles' as any)
+          .select('article_id')
+          .eq('user_id', currentUser.id);
 
-      if (error) throw error;
-      return data?.map(item => item.article_id) || [];
+        if (error) throw error;
+        return (data as any[] || []).map((item: any) => item.article_id);
+      } catch (error) {
+        console.error('Error fetching saved article IDs:', error);
+        return [];
+      }
     },
     enabled: !!currentUser
   });
@@ -104,7 +80,7 @@ export const useSavedArticles = () => {
       if (!currentUser) throw new Error('User not authenticated');
 
       const { error } = await supabase
-        .from('knowledge_saved_articles')
+        .from('knowledge_saved_articles' as any)
         .insert({
           user_id: currentUser.id,
           article_id: articleId
@@ -135,7 +111,7 @@ export const useSavedArticles = () => {
       if (!currentUser) throw new Error('User not authenticated');
 
       const { error } = await supabase
-        .from('knowledge_saved_articles')
+        .from('knowledge_saved_articles' as any)
         .delete()
         .eq('user_id', currentUser.id)
         .eq('article_id', articleId);
@@ -160,7 +136,7 @@ export const useSavedArticles = () => {
   });
 
   const isArticleSaved = (articleId: string) => {
-    return savedArticleIds?.includes(articleId) || false;
+    return (savedArticleIds || []).includes(articleId);
   };
 
   const toggleSaveArticle = (articleId: string) => {
