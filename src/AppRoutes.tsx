@@ -54,8 +54,8 @@ const Setup = lazy(() => import("@/pages/rel8/Setup"));
 
 // Nomin8 pages
 const Nomin8Dashboard = lazy(() => import("@/pages/nmn8/Nomin8Dashboard"));
+const Nomin8ContactsPage = lazy(() => import("@/pages/nmn8/Nomin8ContactsPage"));
 const Nomin8Track = lazy(() => import("@/pages/nmn8/Nomin8Track"));
-const Nomin8ManagePage = lazy(() => import("@/pages/nmn8/Nomin8ManagePage"));
 const Nomin8TrackConfig = lazy(() => import("@/pages/nmn8/Nomin8TrackConfig"));
 const Nomin8Settings = lazy(() => import("@/pages/nmn8/Nomin8Settings"));
 const Nomin8ProfileDetails = lazy(() => import("@/pages/nmn8/Nomin8ProfileDetails"));
@@ -470,10 +470,10 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
-          <Route path="/nmn8/manage" element={
+          <Route path="/nmn8/contacts" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <Nomin8ManagePage />
+                <Nomin8ContactsPage />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
