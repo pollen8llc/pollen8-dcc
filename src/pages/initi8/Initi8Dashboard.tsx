@@ -289,9 +289,9 @@ const Initi8Dashboard: React.FC = () => {
                     Community Profiles
                   </CardTitle>
                   <CardDescription>
-                    {hasExistingCommunity 
+                   {hasExistingCommunity 
                       ? "Manage your community and build connections"
-                      : "Create your first community and unlock organizer features"
+                      : "Create your first community and unlock full organizer features & dashboard access"
                     }
                   </CardDescription>
                 </CardHeader>

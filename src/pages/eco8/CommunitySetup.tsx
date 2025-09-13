@@ -44,19 +44,27 @@ const CommunitySetup: React.FC = () => {
       // Upgrade MEMBER to ORGANIZER if they just created their first community
       if (shouldUpgradeRole) {
         try {
+          console.log('Upgrading MEMBER to ORGANIZER after community creation');
           await upgradeToOrganizer(user.user.id);
           await refreshUser(); // Refresh user context
           
           toast({
-            title: "Welcome to Organizers!",
-            description: "You've been upgraded to Organizer status. You now have access to all platform features.",
+            title: "🎉 Welcome to Organizers!",
+            description: "You've been upgraded to Organizer status. You now have access to all platform features including the full organizer dashboard.",
           });
           
-          // Navigate to organizer dashboard
-          navigate('/organizer');
+          // Navigate to organizer dashboard with a small delay to ensure user context is updated
+          setTimeout(() => {
+            navigate('/organizer');
+          }, 500);
           return;
         } catch (roleError) {
           console.error('Error upgrading user role:', roleError);
+          toast({
+            title: "Community Created Successfully",
+            description: "Your community was created, but there was an issue upgrading your role. Please contact support if you need organizer access.",
+            variant: "destructive"
+          });
           // Continue with normal flow if role upgrade fails
         }
       }
