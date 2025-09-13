@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
+import { useUser } from '@/contexts/UserContext';
+import { UserRole } from '@/models/types';
 import { getUserOrganizer } from '@/services/modul8Service';
 import { DOMAIN_PAGES } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +17,7 @@ import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 const Modul8Dashboard = () => {
   const navigate = useNavigate();
   const { session } = useSession();
+  const { currentUser } = useUser();
   const [organizerData, setOrganizerData] = useState(null);
   const [loading, setLoading] = useState(true);
   const { modul8_complete, loading: completionLoading } = useModuleCompletion();
@@ -26,12 +29,14 @@ const Modul8Dashboard = () => {
   const loadData = async () => {
     if (!session?.user?.id) return;
     
-  // Check MODUL8 setup status - only use database state
-  if (!completionLoading && modul8_complete === false) {
+  // Check MODUL8 setup status - admins can bypass setup
+  if (!completionLoading && modul8_complete === false && 
+      currentUser?.role !== UserRole.ADMIN && (currentUser?.role as string) !== 'ADMIN') {
     console.log('Modul8Dashboard: Redirecting to setup because modul8_complete is false', {
       userId: session?.user?.id,
       modul8_complete,
-      completionLoading
+      completionLoading,
+      userRole: currentUser?.role
     });
     navigate('/modul8/setup/organizer');  
     return;

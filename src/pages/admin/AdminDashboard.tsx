@@ -47,8 +47,8 @@ const AdminDashboard = () => {
   }, [currentUser?.id, toast]);
 
   // Check if user is admin or organizer
-  const isAdmin = currentUser?.role === UserRole.ADMIN;
-  const isOrganizer = currentUser?.role === UserRole.ORGANIZER || 
+  const isAdmin = currentUser?.role === UserRole.ADMIN || (currentUser?.role as string) === 'ADMIN';
+  const isOrganizer = currentUser?.role === UserRole.ORGANIZER || (currentUser?.role as string) === 'ORGANIZER' ||
                      (currentUser?.managedCommunities && currentUser.managedCommunities.length > 0);
 
   console.log('AdminDashboard: User permissions check', {

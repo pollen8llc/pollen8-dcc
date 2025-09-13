@@ -52,11 +52,11 @@ export const getAllUsers = async (): Promise<User[]> => {
     
     // Map profiles to User objects without immediately loading community data
     const users: User[] = profiles.map(profile => {
-      // Find roles for this user in the new roles system
-      const userRolesForUser = userRoles?.filter(r => r.user_id === profile.id) || [];
+      // Find roles for this user in the new roles system - fix: use profile.user_id not profile.id
+      const userRolesForUser = userRoles?.filter(r => r.user_id === profile.user_id) || [];
       
-      // Check legacy admin roles
-      const adminRole = adminRoles?.find(ar => ar.user_id === profile.id);
+      // Check legacy admin roles - fix: use profile.user_id not profile.id
+      const adminRole = adminRoles?.find(ar => ar.user_id === profile.user_id);
       
       // Check for specific roles - make sure we handle both formats
       const isAdmin = userRolesForUser.some(r => 
@@ -84,7 +84,7 @@ export const getAllUsers = async (): Promise<User[]> => {
         role = UserRole.MEMBER;
       }
       
-      console.log(`User ${profile.id} role determination:`, {
+      console.log(`User ${profile.user_id} role determination:`, {
         userRoles: userRolesForUser.map(r => r.roles?.name),
         adminRole: adminRole?.role,
         finalRole: role,
@@ -93,9 +93,9 @@ export const getAllUsers = async (): Promise<User[]> => {
         isOrganizer
       });
       
-      // Create user object without community data initially
+      // Create user object without community data initially - fix: use profile.user_id as the id
       const user = {
-        id: profile.id,
+        id: profile.user_id,
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User',
         role: role,
         imageUrl: profile.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",

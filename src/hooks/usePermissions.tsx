@@ -99,7 +99,7 @@ export const usePermissions = (currentUser: User | null) => {
 
   // Helper functions for clear role checks - centralized here to avoid duplication
   const isAdmin = (): boolean => {
-    const result = currentUser?.role === UserRole.ADMIN;
+    const result = currentUser?.role === UserRole.ADMIN || (currentUser?.role as string) === 'ADMIN';
     console.log('isAdmin check:', { currentUser: currentUser?.id, role: currentUser?.role, result });
     return result;
   };
@@ -112,7 +112,7 @@ export const usePermissions = (currentUser: User | null) => {
     if (isAdmin()) return true;
     
     // Check for ORGANIZER role
-    if (currentUser.role === UserRole.ORGANIZER) return true;
+    if (currentUser.role === UserRole.ORGANIZER || (currentUser?.role as string) === 'ORGANIZER') return true;
     
     // If no communityId provided, check if user manages any communities
     if (!communityId) return Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.length > 0;
@@ -123,7 +123,7 @@ export const usePermissions = (currentUser: User | null) => {
 
   // Check if user is a service provider
   const isServiceProvider = (): boolean => {
-    const result = currentUser?.role === UserRole.SERVICE_PROVIDER;
+    const result = currentUser?.role === UserRole.SERVICE_PROVIDER || (currentUser?.role as string) === 'SERVICE_PROVIDER';
     console.log('isServiceProvider check:', { currentUser: currentUser?.id, role: currentUser?.role, result });
     return result;
   };

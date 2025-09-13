@@ -33,7 +33,7 @@ const UserManagementTab = () => {
     handleViewCommunities,
   } = useUserManagement();
 
-  const canManageUsers = currentUser?.role === UserRole.ADMIN;
+  const canManageUsers = currentUser?.role === UserRole.ADMIN || (currentUser?.role as string) === 'ADMIN';
 
   console.log('UserManagementTab: Permission check', {
     currentUser: currentUser?.id,

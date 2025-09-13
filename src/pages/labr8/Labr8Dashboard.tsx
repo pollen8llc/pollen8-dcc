@@ -28,10 +28,13 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { useUser } from '@/contexts/UserContext';
+import { UserRole } from '@/models/types';
 import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 
 const Labr8Dashboard = () => {
   const { session, logout } = useSession();
+  const { currentUser } = useUser();
   const navigate = useNavigate();
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
   const [assignedRequests, setAssignedRequests] = useState<ServiceRequest[]>([]);
@@ -46,8 +49,9 @@ const Labr8Dashboard = () => {
   const loadProviderData = async () => {
     if (!session?.user?.id) return;
     
-    // Check LABR8 setup status - only use database state
-    if (!completionLoading && labr8_complete === false) {
+    // Check LABR8 setup status - admins can bypass setup
+    if (!completionLoading && labr8_complete === false && 
+        currentUser?.role !== UserRole.ADMIN && (currentUser?.role as string) !== 'ADMIN') {
       navigate('/labr8/setup');
       return;
     }
