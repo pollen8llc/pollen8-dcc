@@ -15,6 +15,7 @@ import NotFoundState from "@/components/community/NotFoundState";
 import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
 import AdminMetrics from "@/pages/admin/AdminMetrics";
 import UserFlows from "@/pages/admin/UserFlows";
+import TechnicalDocumentationGenerator from "@/components/admin/TechnicalDocumentationGenerator";
 
 const AdminDashboard = () => {
   const { id } = useParams<{ id: string }>();
@@ -188,24 +189,29 @@ const AdminDashboard = () => {
               </TabsContent>
               
               <TabsContent value="settings" className="animate-fade-in">
-                <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                      <span className="text-black font-bold text-xl">⚙️</span>
+                <div className="space-y-6">
+                  <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
+                    <div className="flex items-center gap-3 mb-8">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                        <span className="text-black font-bold text-xl">⚙️</span>
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-foreground">System Settings</h2>
+                        <p className="text-muted-foreground">Configure platform settings and preferences</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-foreground">System Settings</h2>
-                      <p className="text-muted-foreground">Configure platform settings and preferences</p>
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                        <span className="text-primary text-2xl">🔧</span>
+                      </div>
+                      <p className="text-muted-foreground">
+                        System settings will be implemented in a future update.
+                      </p>
                     </div>
                   </div>
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                      <span className="text-primary text-2xl">🔧</span>
-                    </div>
-                    <p className="text-muted-foreground">
-                      System settings will be implemented in a future update.
-                    </p>
-                  </div>
+                  
+                  {/* Technical Documentation Generator */}
+                  <TechnicalDocumentationGenerator />
                 </div>
               </TabsContent>
             </Tabs>
