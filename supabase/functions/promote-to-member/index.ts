@@ -39,131 +39,148 @@ serve(async (req) => {
       );
     }
 
-    // Generate a random password
-    const randomPassword = crypto.randomUUID().slice(0, 12);
-
-    console.log('Creating auth user for:', contact.email);
-
-    // Create auth user
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: contact.email,
-      password: randomPassword,
-      email_confirm: true,
-      user_metadata: {
-        first_name: contact.name.split(' ')[0] || '',
-        last_name: contact.name.split(' ').slice(1).join(' ') || '',
-        role: 'MEMBER'
-      }
-    });
-
-    if (authError || !authUser.user) {
-      console.error('Failed to create auth user:', authError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to create user account' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Check if user already exists with this email
+    const { data: existingUsers, error: userCheckError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    let authUser = null;
+    let isNewUser = false;
+    
+    if (existingUsers?.users) {
+      authUser = existingUsers.users.find(user => user.email === contact.email);
     }
 
-    console.log('Auth user created:', authUser.user.id);
-
-    // Create profile with organizer reference
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .insert({
-        id: authUser.user.id,
-        user_id: authUser.user.id,
+    if (!authUser) {
+      // Create new user in Supabase Auth with a random password
+      const tempPassword = crypto.randomUUID();
+      const { data: newAuthUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: contact.email,
-        first_name: contact.name.split(' ')[0] || '',
-        last_name: contact.name.split(' ').slice(1).join(' ') || '',
-        phone: contact.phone,
-        location: contact.location,
-        bio: notes || contact.notes,
-        invited_by: contact.user_id // Associate with the organizer who nominated them
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          first_name: contact.first_name || contact.name?.split(' ')[0] || '',
+          last_name: contact.last_name || contact.name?.split(' ').slice(1).join(' ') || '',
+          full_name: contact.name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
+        }
       });
 
-    if (profileError) {
-      console.error('Failed to create profile:', profileError);
-      // Continue even if profile creation fails
+      if (authError) {
+        console.error('Error creating auth user:', authError);
+        throw new Error(`Failed to create user: ${authError.message}`);
+      }
+
+      authUser = newAuthUser.user;
+      isNewUser = true;
+      console.log('New auth user created:', authUser?.id);
+    } else {
+      console.log('Existing user found:', authUser.id);
     }
 
-    // Assign MEMBER role
-    const { data: memberRole } = await supabaseAdmin
-      .from('roles')
-      .select('id')
-      .eq('name', 'MEMBER')
-      .single();
+    if (!authUser) {
+      throw new Error('Failed to get or create user');
+    }
 
-    if (memberRole) {
-      const { error: roleError } = await supabaseAdmin
-        .from('user_roles')
-        .insert({
-          user_id: authUser.user.id,
-          role_id: memberRole.id,
-          assigned_by: authUser.user.id
-        });
+    // Create or update profile with invited_by field
+    const profileData = {
+      user_id: authUser.id,
+      email: contact.email,
+      first_name: contact.first_name || contact.name?.split(' ')[0] || '',
+      last_name: contact.last_name || contact.name?.split(' ').slice(1).join(' ') || '',
+      full_name: contact.name || `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
+      phone: contact.phone,
+      location: contact.location,
+      bio: notes || contact.notes,
+      role: 'MEMBER',
+      invited_by: contact.user_id // Set the organizer who invited them
+    };
 
-      if (roleError) {
-        console.error('Failed to assign role:', roleError);
-      } else {
-        console.log('MEMBER role assigned successfully');
+    if (isNewUser) {
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .insert(profileData);
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        throw new Error(`Failed to create profile: ${profileError.message}`);
+      }
+      console.log('Profile created successfully');
+    } else {
+      // Update existing profile with invited_by
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .update({ invited_by: contact.user_id })
+        .eq('user_id', authUser.id);
+
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
       }
     }
 
-    // Create Nomin8 profile for tracking
-    console.log('Creating Nomin8 profile for promoted member');
+    // Assign MEMBER role if new user
+    if (isNewUser) {
+      const { data: memberRole } = await supabaseAdmin
+        .from('roles')
+        .select('id')
+        .eq('name', 'MEMBER')
+        .single();
+
+      if (memberRole) {
+        const { error: roleError } = await supabaseAdmin
+          .from('user_roles')
+          .insert({
+            user_id: authUser.id,
+            role_id: memberRole.id,
+            assigned_by: authUser.id
+          });
+
+        if (roleError) {
+          console.error('Error assigning role:', roleError);
+        }
+      }
+    }
+
+    // Create nmn8 profile
     const { error: nmn8ProfileError } = await supabaseAdmin
       .from('nmn8_profiles')
       .insert({
         contact_id: contactId,
-        organizer_id: contact.user_id,
-        classification: classification || 'Volunteer',
-        community_engagement: 0,
-        events_attended: 0,
-        interests: [],
-        notes: notes || contact.notes
+        organizer_id: contact.user_id, // The organizer who had this contact
+        classification: classification || 'Volunteer'
       });
 
     if (nmn8ProfileError) {
-      console.error('Failed to create Nomin8 profile:', nmn8ProfileError);
-    } else {
-      console.log('Nomin8 profile created successfully');
+      console.error('Error creating nmn8 profile:', nmn8ProfileError);
     }
 
-    // Update existing nomination to mark as promoted (if exists)
+    // Update any existing nominations
     const { error: nominationUpdateError } = await supabaseAdmin
       .from('nmn8_nominations')
-      .update({
-        notes: `${notes || ''}\n\nPromoted to member on ${new Date().toISOString()}`,
-        updated_at: new Date().toISOString()
+      .update({ 
+        notes: notes ? `${notes}\n\nPromoted to member on ${new Date().toISOString()}` : `Promoted to member on ${new Date().toISOString()}`
       })
       .eq('contact_id', contactId)
       .eq('organizer_id', contact.user_id);
 
     if (nominationUpdateError) {
-      console.log('No existing nomination found or failed to update:', nominationUpdateError);
-    } else {
-      console.log('Updated existing nomination with promotion status');
+      console.error('Error updating nominations:', nominationUpdateError);
     }
 
-    // Log the promotion action
+    // Log the action
     const { error: auditError } = await supabaseAdmin
       .from('audit_logs')
       .insert({
-        action: 'contact_promoted_to_member',
-        performed_by: authUser.user.id,
-        target_user_id: authUser.user.id,
+        action: 'promote_contact_to_member',
+        performed_by: contact.user_id,
         details: {
           contact_id: contactId,
-          contact_name: contact.name,
-          contact_email: contact.email,
-          classification: classification,
-          generated_password: randomPassword, // Note: In production, don't log passwords
-          promotion_timestamp: new Date().toISOString()
+          new_user_id: authUser.id,
+          existing_user: !isNewUser,
+          classification: classification || 'Volunteer',
+          notes: notes || ''
         }
       });
 
     if (auditError) {
-      console.error('Failed to log audit action:', auditError);
+      console.error('Error logging audit:', auditError);
     }
 
     console.log('Contact promoted successfully');
@@ -171,10 +188,11 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        userId: authUser.user.id,
+        userId: authUser.id,
         email: contact.email,
-        temporaryPassword: randomPassword,
-        message: `${contact.name} has been promoted to member with ${classification} classification`
+        existing_user: !isNewUser,
+        message: `${contact.name} has been ${isNewUser ? 'promoted to member' : 'linked to existing member'} with ${classification} classification`,
+        ...(isNewUser && { temporaryPassword: 'Temporary password set - user should reset' })
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import { Nomin8Navigation } from '@/components/nomin8/Nomin8Navigation';
 import { useUser } from '@/contexts/UserContext';
-import { nmn8Service, defaultGroups, type Nomination, type GroupConfig } from '@/services/nmn8Service';
+import { nmn8Service, settingsService, defaultGroups, type Nomination, type GroupConfig } from '@/services/nmn8Service';
 
 // Use the service types
 type NominatedContact = Nomination;
@@ -27,22 +27,49 @@ const Nomin8Dashboard: React.FC = () => {
 
   // Load nominated contacts for current organizer
   useEffect(() => {
-    const fetchNominations = async () => {
+    const fetchData = async () => {
       if (!currentUser?.id) return;
 
       try {
         setLoading(true);
-        const data = await nmn8Service.getNominations(currentUser.id);
-        setNominations(data);
+        
+        // Fetch nominations and groups in parallel
+        const [nominationsData, groupsData] = await Promise.all([
+          nmn8Service.getNominations(currentUser.id),
+          settingsService.getGroups()
+        ]);
+        
+        setNominations(nominationsData);
+        
+        // Use database groups if available, otherwise fall back to defaults
+        if (groupsData.length > 0) {
+          setGroups(groupsData);
+        } else {
+          // If no groups exist in database, create default groups
+          try {
+            await Promise.all(defaultGroups.map(group => 
+              settingsService.createSetting('group', group.name, group.description, group.color)
+            ));
+            const newGroups = await settingsService.getGroups();
+            setGroups(newGroups.length > 0 ? newGroups : defaultGroups);
+          } catch (error) {
+            console.error('Error creating default groups:', error);
+            setGroups(defaultGroups);
+          }
+        }
       } catch (error) {
-        console.error('Failed to load nominations:', error);
-        // Error handling is done in the service
+        console.error('Failed to load data:', error);
+        toast({
+          title: "Failed to load nominations",
+          description: "There was an error loading your nominations. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNominations();
+    fetchData();
   }, [currentUser?.id]);
 
   // Group nominations by group type
@@ -109,8 +136,11 @@ const Nomin8Dashboard: React.FC = () => {
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${group.color}`}>
-                <Users className="w-5 h-5" />
+              <div 
+                className="p-2 rounded-lg"
+                style={{ backgroundColor: group.color }}
+              >
+                <Users className="w-5 h-5 text-white" />
               </div>
               <div>
                 <CardTitle className="text-lg">{group.name}</CardTitle>

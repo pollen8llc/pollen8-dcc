@@ -279,42 +279,132 @@ export const nmn8Service = {
   }
 };
 
-// Default groups configuration
+// Settings management for groups and categories
+export const settingsService = {
+  // Get all settings for current user
+  async getSettings(settingType?: 'group' | 'category'): Promise<GroupConfig[]> {
+    try {
+      let query = supabase
+        .from('nmn8_settings')
+        .select('*')
+        .eq('organizer_id', (await supabase.auth.getUser()).data.user?.id!)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      if (settingType) {
+        query = query.eq('setting_type', settingType);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching settings:', error);
+        return [];
+      }
+
+      return data.map(setting => ({
+        id: setting.name.toLowerCase(),
+        name: setting.name,
+        color: setting.color,
+        description: setting.description
+      }));
+    } catch (error) {
+      console.error('Error in getSettings:', error);
+      return [];
+    }
+  },
+
+  // Get groups specifically
+  async getGroups(): Promise<GroupConfig[]> {
+    return this.getSettings('group');
+  },
+
+  // Create a new setting
+  async createSetting(settingType: 'group' | 'category', name: string, description?: string, color?: string): Promise<void> {
+    try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      if (!userId) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('nmn8_settings')
+        .insert({
+          organizer_id: userId,
+          setting_type: settingType,
+          name,
+          description,
+          color: color || '#3B82F6'
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error creating setting:', error);
+      throw error;
+    }
+  },
+
+  // Update a setting
+  async updateSetting(settingId: string, updates: Partial<{ name: string; description: string; color: string }>): Promise<void> {
+    try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      if (!userId) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('nmn8_settings')
+        .update(updates)
+        .eq('organizer_id', userId)
+        .eq('id', settingId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      throw error;
+    }
+  },
+
+  // Delete a setting
+  async deleteSetting(settingId: string): Promise<void> {
+    try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      if (!userId) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('nmn8_settings')
+        .update({ is_active: false })
+        .eq('organizer_id', userId)
+        .eq('id', settingId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting setting:', error);
+      throw error;
+    }
+  }
+};
+
+// Default groups configuration (fallback)
 export const defaultGroups: GroupConfig[] = [
   {
-    id: 'ambassadors',
-    name: 'Ambassadors',
-    color: 'bg-blue-500',
-    description: 'Community ambassadors and advocates'
+    id: 'ambassador',
+    name: 'Ambassador',
+    color: '#10B981',
+    description: 'Community ambassadors and leaders'
   },
   {
-    id: 'moderators',
-    name: 'Moderators',
-    color: 'bg-green-500',
-    description: 'Community moderation team'
+    id: 'volunteer', 
+    name: 'Volunteer',
+    color: '#3B82F6',
+    description: 'Active volunteers helping with events'
   },
   {
-    id: 'evangelists',
-    name: 'Evangelists',
-    color: 'bg-purple-500',
-    description: 'Technical evangelists and thought leaders'
+    id: 'supporter',
+    name: 'Supporter', 
+    color: '#F59E0B',
+    description: 'Supporters and advocates'
   },
   {
-    id: 'volunteers',
-    name: 'Volunteers',
-    color: 'bg-orange-500',
-    description: 'Event and community volunteers'
-  },
-  {
-    id: 'advisors',
-    name: 'Advisors',
-    color: 'bg-indigo-500',
-    description: 'Strategic advisors and mentors'
-  },
-  {
-    id: 'supporters',
-    name: 'Supporters',
-    color: 'bg-pink-500',
-    description: 'General supporters and enthusiasts'
+    id: 'moderator',
+    name: 'Moderator',
+    color: '#8B5CF6', 
+    description: 'Content and community moderators'
   }
 ];

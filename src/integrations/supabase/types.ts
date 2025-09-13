@@ -1453,7 +1453,15 @@ export type Database = {
           organizer_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_nmn8_nominations_contact"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "rms_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nmn8_profiles: {
         Row: {
@@ -1500,6 +1508,45 @@ export type Database = {
         }
         Relationships: []
       }
+      nmn8_settings: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organizer_id: string
+          setting_type: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organizer_id: string
+          setting_type: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organizer_id?: string
+          setting_type?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       poll_responses: {
         Row: {
           created_at: string
@@ -1537,6 +1584,7 @@ export type Database = {
           full_name: string | null
           id: string
           interests: string[] | null
+          invited_by: string | null
           is_profile_complete: boolean | null
           labr8_complete: boolean | null
           labr8_setup_complete: boolean | null
@@ -1571,6 +1619,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           interests?: string[] | null
+          invited_by?: string | null
           is_profile_complete?: boolean | null
           labr8_complete?: boolean | null
           labr8_setup_complete?: boolean | null
@@ -1605,6 +1654,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           interests?: string[] | null
+          invited_by?: string | null
           is_profile_complete?: boolean | null
           labr8_complete?: boolean | null
           labr8_setup_complete?: boolean | null
