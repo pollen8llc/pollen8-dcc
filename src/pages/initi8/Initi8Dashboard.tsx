@@ -280,7 +280,7 @@ const Initi8Dashboard: React.FC = () => {
           </Card>
 
           {/* Conditional card based on user role */}
-          {currentUser?.role === 'MEMBER' ? (
+          {(currentUser?.role === 'MEMBER' || currentUser?.role === 'ADMIN') ? (
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <Link to={hasExistingCommunity ? "/eco8" : "/eco8/setup"}>
                 <CardHeader>
