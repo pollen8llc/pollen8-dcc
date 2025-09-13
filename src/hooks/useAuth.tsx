@@ -106,7 +106,7 @@ export const useAuth = () => {
         if (currentUser.role === 'SERVICE_PROVIDER') {
           const { data, error } = await supabase
             .from('profiles')
-            .select('profile_complete, is_profile_complete')
+            .select('labr8_setup_complete, profile_complete, is_profile_complete')
             .eq('user_id', currentUser.id)
             .maybeSingle();
             
@@ -115,13 +115,19 @@ export const useAuth = () => {
             return;
           }
           
-          const isProfileComplete = data?.profile_complete || data?.is_profile_complete;
+          console.log("🔍 useAuth - Service provider profile check:", {
+            labr8_setup_complete: data?.labr8_setup_complete,
+            profile_complete: data?.profile_complete,
+            is_profile_complete: data?.is_profile_complete
+          });
           
-          if (!isProfileComplete) {
-            console.log("Service provider profile incomplete, redirecting to LAB-R8 setup");
+          const isLabr8SetupComplete = data?.labr8_setup_complete;
+          
+          if (!isLabr8SetupComplete) {
+            console.log("Service provider LAB-R8 setup incomplete, redirecting to LAB-R8 setup");
             navigate("/labr8/setup");
           } else {
-            console.log("Service provider profile complete, redirecting to LAB-R8 dashboard");
+            console.log("Service provider LAB-R8 setup complete, redirecting to LAB-R8 dashboard");
             navigate("/labr8/dashboard");
           }
           return;

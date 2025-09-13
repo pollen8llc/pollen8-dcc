@@ -135,7 +135,9 @@ export const useProfile = (session: Session | null) => {
         communities,
         managedCommunities,
         createdAt: profile?.created_at || new Date().toISOString(),
-        profile_complete: profile?.profile_complete || profile?.is_profile_complete || false
+        profile_complete: profile?.profile_complete || profile?.is_profile_complete || false,
+        labr8_setup_complete: profile?.labr8_setup_complete || false,
+        modul8_setup_complete: profile?.modul8_setup_complete || false
       };
 
       console.log("User data constructed successfully:", userData);

@@ -131,14 +131,20 @@ const Labr8Setup = () => {
         logo_url: logoUrl || undefined
       });
 
-      // Update profile completion status
-      await supabase
-        .from('profiles')
-        .update({ 
-          profile_complete: true,
-          labr8_setup_complete: true 
-        })
-        .eq('user_id', currentUser.id);
+      // Update profile completion status using RPC function
+      console.log('🔧 Labr8Setup - Updating module completion for user:', currentUser.id);
+      const { error: moduleError } = await supabase.rpc('update_module_completion', {
+        user_id: currentUser.id,
+        module_name: 'labr8',
+        is_complete: true
+      });
+
+      if (moduleError) {
+        console.error('Error updating LAB-R8 module completion:', moduleError);
+        throw new Error('Failed to update setup completion status');
+      }
+
+      console.log('✅ Labr8Setup - Module completion updated successfully');
 
       // Refresh user context to avoid redirect loops
       await refreshUser();
@@ -148,7 +154,8 @@ const Labr8Setup = () => {
         description: "Your LAB-R8 service provider profile has been created successfully.",
       });
 
-      navigate("/labr8");
+      console.log('🚀 Labr8Setup - Navigating to LAB-R8 dashboard');
+      navigate("/labr8/dashboard");
     } catch (error: any) {
       console.error('Error creating service provider profile:', error);
       toast({

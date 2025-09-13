@@ -21,6 +21,8 @@ export interface User {
   createdAt?: string;
   lastLoginAt?: string;
   profile_complete?: boolean;
+  labr8_setup_complete?: boolean;
+  modul8_setup_complete?: boolean;
 }
 
 export interface Community {

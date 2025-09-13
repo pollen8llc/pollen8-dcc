@@ -21,7 +21,11 @@ const Index = () => {
       // Service providers go to LAB-R8, others go to initi8
       if (currentUser.role === 'SERVICE_PROVIDER') {
         console.log('🚀 Index.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
-        const destination = currentUser.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
+        console.log('🔍 Index.tsx - LAB-R8 setup status:', {
+          labr8_setup_complete: currentUser.labr8_setup_complete,
+          profile_complete: currentUser.profile_complete
+        });
+        const destination = currentUser.labr8_setup_complete ? "/labr8/dashboard" : "/labr8/setup";
         navigate(destination, { replace: true });
       } else {
         console.log('🚀 Index.tsx - Redirecting authenticated user to initi8 dashboard');
