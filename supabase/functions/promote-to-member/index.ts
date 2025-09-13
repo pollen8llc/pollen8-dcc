@@ -109,6 +109,42 @@ serve(async (req) => {
       }
     }
 
+    // Create Nomin8 profile for tracking
+    console.log('Creating Nomin8 profile for promoted member');
+    const { error: nmn8ProfileError } = await supabaseAdmin
+      .from('nmn8_profiles')
+      .insert({
+        contact_id: contactId,
+        organizer_id: contact.user_id,
+        classification: classification || 'Volunteer',
+        community_engagement: 0,
+        events_attended: 0,
+        interests: [],
+        notes: notes || contact.notes
+      });
+
+    if (nmn8ProfileError) {
+      console.error('Failed to create Nomin8 profile:', nmn8ProfileError);
+    } else {
+      console.log('Nomin8 profile created successfully');
+    }
+
+    // Update existing nomination to mark as promoted (if exists)
+    const { error: nominationUpdateError } = await supabaseAdmin
+      .from('nmn8_nominations')
+      .update({
+        notes: `${notes || ''}\n\nPromoted to member on ${new Date().toISOString()}`,
+        updated_at: new Date().toISOString()
+      })
+      .eq('contact_id', contactId)
+      .eq('organizer_id', contact.user_id);
+
+    if (nominationUpdateError) {
+      console.log('No existing nomination found or failed to update:', nominationUpdateError);
+    } else {
+      console.log('Updated existing nomination with promotion status');
+    }
+
     // Log the promotion action
     const { error: auditError } = await supabaseAdmin
       .from('audit_logs')
