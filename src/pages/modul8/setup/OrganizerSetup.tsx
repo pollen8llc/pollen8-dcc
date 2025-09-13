@@ -16,7 +16,7 @@ import Navbar from '@/components/Navbar';
 import { toast } from '@/hooks/use-toast';
 
 const OrganizerSetup = () => {
-  const { session } = useSession();
+  const { session, isLoading } = useSession();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,9 +28,10 @@ const OrganizerSetup = () => {
   
   const [newFocusArea, setNewFocusArea] = useState('');
 
-  // Redirect to auth if not authenticated
+  // Redirect to auth if not authenticated (only after loading is complete)
   useEffect(() => {
-    if (!session?.user?.id) {
+    if (!isLoading && !session?.user?.id) {
+      console.log("Session loading complete, no user found - redirecting to auth");
       toast({
         title: "Authentication Required",
         description: "Please sign in to set up your organizer profile",
@@ -38,7 +39,7 @@ const OrganizerSetup = () => {
       });
       navigate('/auth');
     }
-  }, [session?.user?.id, navigate]);
+  }, [isLoading, session?.user?.id, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +102,24 @@ const OrganizerSetup = () => {
     }
   };
 
-  // Show loading or auth check while session is being determined
+  // Show loading spinner while session is being determined
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading session...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth required if no session after loading is complete
   if (!session?.user?.id) {
     return (
       <div className="min-h-screen bg-background">
