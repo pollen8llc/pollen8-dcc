@@ -15,38 +15,22 @@ import { Nomin8Classification } from '@/types/nomin8';
 import { toast } from '@/hooks/use-toast';
 import { getContacts, Contact } from '@/services/rel8t/contactService';
 import { supabase } from '@/integrations/supabase/client';
+// Load Nomin8 groups from settings
+import { settingsService, nmn8Service, type GroupConfig } from '@/services/nmn8Service';
+import { useUser } from '@/contexts/UserContext';
 
-// Mock contact data (will be replaced with real contact service)
-const mockContact = {
-  id: '1',
-  name: 'Sarah Chen',
-  email: 'sarah.chen@example.com',
-  phone: '+1 (555) 123-4567',
-  organization: 'Tech Innovators Inc',
-  tags: ['tech', 'speaker', 'mentor'],
-  notes: 'Active community member, speaks at events',
-  lastContact: '2024-03-10',
-  connectionStrength: 'strong'
-};
-
-// Mock A10D groups for assignment
-const mockA10DGroups = [
-  { id: '1', name: 'Core Community Leaders', color: 'primary' },
-  { id: '2', name: 'Event Organizers', color: 'green' },
-  { id: '3', name: 'Content Moderators', color: 'blue' },
-  { id: '4', name: 'New Member Supporters', color: 'orange' },
-  { id: '5', name: 'Tech Mentors', color: 'purple' }
-];
 
 const Nomin8TrackConfig: React.FC = () => {
   const navigate = useNavigate();
   const { contactId } = useParams<{ contactId: string }>();
+  const { currentUser } = useUser();
   
   const [contact, setContact] = useState<Contact | null>(null);
   const [loading, setLoading] = useState(true);
   const [classification, setClassification] = useState<Nomin8Classification>('Supporter');
   const [selectedGroup, setSelectedGroup] = useState('');
   const [notes, setNotes] = useState('');
+  const [groups, setGroups] = useState<GroupConfig[]>([]);
 
   useEffect(() => {
     const loadContact = async () => {
@@ -77,10 +61,23 @@ const Nomin8TrackConfig: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    };
+  };
 
-    loadContact();
+  loadContact();
   }, [contactId, navigate]);
+
+  // Load Nomin8 groups
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const data = await settingsService.getGroups();
+        setGroups(data);
+      } catch (err) {
+        console.error('Failed to load Nomin8 groups:', err);
+      }
+    };
+    fetchGroups();
+  }, [currentUser?.id]);
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -127,8 +124,19 @@ const Nomin8TrackConfig: React.FC = () => {
 
       toast({
         title: "Member Created Successfully",
-        description: `${contact.name} has been promoted to member with ${classification} classification. Temporary password: ${data.temporaryPassword}`,
+        description: `${contact.name} has been promoted to member with ${classification} classification.`,
       });
+
+      // Also add to selected Nomin8 group via nominations
+      if (currentUser?.id) {
+        await nmn8Service.nominateContact(currentUser.id, contact.id, { [selectedGroup]: true }, notes);
+        toast({
+          title: "Added to Group",
+          description: `${contact.name} was added to ${groups.find(g => g.id === selectedGroup)?.name || 'selected group'}.`
+        });
+      } else {
+        console.warn('No authenticated user to assign nomination');
+      }
 
       // Navigate back to dashboard
       navigate('/nmn8');
@@ -309,10 +317,10 @@ const Nomin8TrackConfig: React.FC = () => {
                     <SelectValue placeholder="Select a Nomin8 group for tracking" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockA10DGroups.map((group) => (
+                    {groups.map((group) => (
                       <SelectItem key={group.id} value={group.id}>
                         <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full bg-${group.color}-500`} />
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: group.color }} />
                           {group.name}
                         </div>
                       </SelectItem>

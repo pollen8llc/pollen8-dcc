@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, UserPlus } from 'lucide-react';
-import { nmn8Service, defaultGroups, type GroupConfig } from '@/services/nmn8Service';
+import { nmn8Service, settingsService, type GroupConfig } from '@/services/nmn8Service';
 import { toast } from '@/hooks/use-toast';
 
 interface NominationDialogProps {
@@ -28,11 +28,15 @@ export const NominationDialog: React.FC<NominationDialogProps> = ({
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [groups, setGroups] = useState<GroupConfig[]>([]);
 
-  // Load existing nomination when dialog opens
+  // Load existing nomination and groups when dialog opens
   useEffect(() => {
     if (open && contactId && organizerId) {
       loadExistingNomination();
+      settingsService.getGroups()
+        .then(setGroups)
+        .catch((err) => console.error('Failed to load groups:', err));
     }
   }, [open, contactId, organizerId]);
 
@@ -128,7 +132,7 @@ export const NominationDialog: React.FC<NominationDialogProps> = ({
           <div className="space-y-4">
             <Label className="text-base font-semibold">Select Groups</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {defaultGroups.map((group: GroupConfig) => (
+              {groups.map((group: GroupConfig) => (
                 <div key={group.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                   <Checkbox
                     id={group.id}
@@ -141,7 +145,7 @@ export const NominationDialog: React.FC<NominationDialogProps> = ({
                       <label htmlFor={group.id} className="text-sm font-medium cursor-pointer">
                         {group.name}
                       </label>
-                      <Badge variant="outline" className={`text-xs ${group.color} text-white border-0`}>
+                      <Badge variant="secondary" className="text-xs border-0" style={{ backgroundColor: group.color }}>
                         {group.name.toLowerCase()}
                       </Badge>
                     </div>
@@ -164,9 +168,9 @@ export const NominationDialog: React.FC<NominationDialogProps> = ({
                 {Object.entries(selectedGroups)
                   .filter(([_, selected]) => selected)
                   .map(([groupId]) => {
-                    const group = defaultGroups.find(g => g.id === groupId);
+                    const group = groups.find(g => g.id === groupId);
                     return group ? (
-                      <Badge key={groupId} className={`${group.color} text-white border-0`}>
+                      <Badge key={groupId} className="border-0" variant="secondary" style={{ backgroundColor: group.color }}>
                         {group.name}
                       </Badge>
                     ) : null;
