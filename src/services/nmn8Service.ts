@@ -69,7 +69,7 @@ export const nmn8Service = {
   // Get all nominations for the current organizer
   async getNominations(organizerId: string): Promise<Nomination[]> {
     const { data, error } = await (supabase as any)
-      .from('nmn8')
+      .from('nmn8_nominations')
       .select(`
         *,
         contact:rms_contacts (
@@ -111,7 +111,7 @@ export const nmn8Service = {
     notes?: string
   ): Promise<Nomination> {
     const { data, error } = await (supabase as any)
-      .from('nmn8')
+      .from('nmn8_nominations')
       .upsert({
         organizer_id: organizerId,
         contact_id: contactId,
@@ -158,7 +158,7 @@ export const nmn8Service = {
     updates: Partial<Pick<Nomination, 'groups' | 'notes'>>
   ): Promise<void> {
     const { error } = await (supabase as any)
-      .from('nmn8')
+      .from('nmn8_nominations')
       .update(updates)
       .eq('id', nominationId);
 
@@ -182,7 +182,7 @@ export const nmn8Service = {
   async removeFromGroup(nominationId: string, groupId: string): Promise<void> {
     // First get the current nomination
     const { data: nomination, error: fetchError } = await (supabase as any)
-      .from('nmn8')
+      .from('nmn8_nominations')
       .select('groups')
       .eq('id', nominationId)
       .single();
@@ -211,7 +211,7 @@ export const nmn8Service = {
   // Delete a nomination entirely
   async deleteNomination(nominationId: string): Promise<void> {
     const { error } = await (supabase as any)
-      .from('nmn8')
+      .from('nmn8_nominations')
       .delete()
       .eq('id', nominationId);
 
@@ -234,7 +234,7 @@ export const nmn8Service = {
   // Check if a contact is already nominated
   async isContactNominated(organizerId: string, contactId: string): Promise<boolean> {
     const { data, error } = await (supabase as any)
-      .from('nmn8')
+      .from('nmn8_nominations')
       .select('id')
       .eq('organizer_id', organizerId)
       .eq('contact_id', contactId)
@@ -251,7 +251,7 @@ export const nmn8Service = {
   // Get nomination for a specific contact
   async getNominationForContact(organizerId: string, contactId: string): Promise<Nomination | null> {
     const { data, error } = await (supabase as any)
-      .from('nmn8')
+      .from('nmn8_nominations')
       .select(`
         *,
         contact:rms_contacts (
