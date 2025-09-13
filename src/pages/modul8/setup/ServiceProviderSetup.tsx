@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
+import { supabase } from '@/integrations/supabase/client';
 import { createServiceProvider } from '@/services/modul8Service';
 import { CreateServiceProviderData } from '@/types/modul8';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,6 +63,15 @@ const ServiceProviderSetup = () => {
       };
 
       await createServiceProvider(createData);
+      
+      // Mark MODUL8 setup as complete
+      const { data: user } = await supabase.auth.getUser();
+      if (user?.user?.id) {
+        await supabase
+          .from('profiles')
+          .update({ modul8_setup_complete: true })
+          .eq('user_id', user.user.id);
+      }
       
       toast({
         title: "Success!",

@@ -1240,6 +1240,45 @@ export type Database = {
           },
         ]
       }
+      modul8_proposals: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          proposed_budget: number | null
+          proposed_timeline: string | null
+          service_provider_id: string
+          service_request_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          proposed_budget?: number | null
+          proposed_timeline?: string | null
+          service_provider_id: string
+          service_request_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          proposed_budget?: number | null
+          proposed_timeline?: string | null
+          service_provider_id?: string
+          service_request_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       modul8_service_providers: {
         Row: {
           availability_status: string | null

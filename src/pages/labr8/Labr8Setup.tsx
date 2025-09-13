@@ -136,7 +136,7 @@ const Labr8Setup = () => {
         .from('profiles')
         .update({ 
           profile_complete: true,
-          labr8_complete: true 
+          labr8_setup_complete: true 
         })
         .eq('user_id', currentUser.id);
 

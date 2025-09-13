@@ -256,8 +256,8 @@ export const getProviderServiceRequests = async (providerId: string): Promise<Se
       .from('modul8_service_requests')
       .select(`
         *,
-        organizer:organizer_id(*),
-        service_provider:service_provider_id(*)
+        organizer:modul8_organizers(*),
+        service_provider:modul8_service_providers(*)
       `)
       .eq('service_provider_id', providerId)
       .order('created_at', { ascending: false });
@@ -304,8 +304,8 @@ export const getAvailableServiceRequestsForProvider = async (providerId: string)
       .from('modul8_service_requests')
       .select(`
         *,
-        organizer:organizer_id(*),
-        service_provider:service_provider_id(*)
+        organizer:modul8_organizers(*),
+        service_provider:modul8_service_providers(*)
       `)
       .is('service_provider_id', null)
       .eq('status', 'pending')

@@ -34,7 +34,7 @@ export const useModuleCompletion = () => {
         
         const { data, error } = await supabase
           .from('profiles')
-          .select('rel8_complete, eco8_complete, modul8_complete, labr8_complete')
+          .select('rel8_complete, eco8_setup_complete, modul8_setup_complete, labr8_setup_complete')
           .eq('user_id', session.user.id)
           .single();
 
@@ -42,9 +42,9 @@ export const useModuleCompletion = () => {
 
         setStatus({
           rel8_complete: (data as any)?.rel8_complete ?? false,
-          eco8_complete: (data as any)?.eco8_complete ?? false,
-          modul8_complete: (data as any)?.modul8_complete ?? false,
-          labr8_complete: (data as any)?.labr8_complete ?? false,
+          eco8_complete: (data as any)?.eco8_setup_complete ?? false,
+          modul8_complete: (data as any)?.modul8_setup_complete ?? false,
+          labr8_complete: (data as any)?.labr8_setup_complete ?? false,
           loading: false,
           error: null,
         });
@@ -65,9 +65,10 @@ export const useModuleCompletion = () => {
     if (!session?.user?.id) return false;
 
     try {
+      const columnName = module === 'rel8' ? 'rel8_complete' : `${module}_setup_complete`;
       const { error } = await supabase
         .from('profiles')
-        .update({ [`${module}_complete`]: completed })
+        .update({ [columnName]: completed })
         .eq('user_id', session.user.id);
 
       if (error) throw error;
