@@ -76,7 +76,6 @@ export const nmn8Service = {
           id,
           name,
           email,
-          avatar,
           organization
         )
       `)
@@ -124,7 +123,6 @@ export const nmn8Service = {
           id,
           name,
           email,
-          avatar,
           organization
         )
       `)
@@ -144,6 +142,34 @@ export const nmn8Service = {
       title: "Success",
       description: "Contact nominated successfully",
     });
+
+    // Create or update nmn8_profile entry
+    try {
+      await supabase
+        .from('nmn8_profiles')
+        .upsert({
+          contact_id: contactId,
+          organizer_id: organizerId,
+          classification: 'Volunteer', // Default classification
+          community_engagement: 0,
+          events_attended: 0,
+          interests: [],
+          last_active: new Date().toISOString(),
+        }, {
+          onConflict: 'contact_id,organizer_id'
+        });
+    } catch (profileError) {
+      console.warn('Warning: Failed to create/update nmn8_profile:', profileError);
+    }
+
+    // Try to link invited_by for existing users
+    try {
+      await supabase.functions.invoke('link-invited-by', {
+        body: { contactId, organizerId }
+      });
+    } catch (linkError) {
+      console.warn('Warning: Failed to link invited_by:', linkError);
+    }
 
     // Parse groups data to ensure proper typing
     return {
@@ -258,7 +284,6 @@ export const nmn8Service = {
           id,
           name,
           email,
-          avatar,
           organization
         )
       `)
@@ -303,7 +328,7 @@ export const settingsService = {
       }
 
       return data.map(setting => ({
-        id: setting.name.toLowerCase(),
+        id: setting.id, // Use actual database ID
         name: setting.name,
         color: setting.color,
         description: setting.description
