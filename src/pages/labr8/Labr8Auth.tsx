@@ -119,13 +119,8 @@ const Labr8Auth = () => {
       }
 
       if (data.user) {
-        // Assign SERVICE_PROVIDER role
-        try {
-          await updateUserRole(data.user.id, 'SERVICE_PROVIDER');
-        } catch (roleError) {
-          console.error('Error assigning SERVICE_PROVIDER role:', roleError);
-        }
-
+        // Role assignment is now handled automatically by the handle_new_user trigger
+        
         if (data.user.email_confirmed_at) {
           toast({
             title: "Welcome to LAB-R8!",
