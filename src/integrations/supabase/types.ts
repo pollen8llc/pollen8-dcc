@@ -1298,6 +1298,7 @@ export type Database = {
           pricing_model: string | null
           pricing_range: Json | null
           rating: number | null
+          services: string[] | null
           services_offered: string[] | null
           tagline: string | null
           tags: string[] | null
@@ -1318,6 +1319,7 @@ export type Database = {
           pricing_model?: string | null
           pricing_range?: Json | null
           rating?: number | null
+          services?: string[] | null
           services_offered?: string[] | null
           tagline?: string | null
           tags?: string[] | null
@@ -1338,6 +1340,7 @@ export type Database = {
           pricing_model?: string | null
           pricing_range?: Json | null
           rating?: number | null
+          services?: string[] | null
           services_offered?: string[] | null
           tagline?: string | null
           tags?: string[] | null

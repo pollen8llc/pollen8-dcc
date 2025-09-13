@@ -18,6 +18,7 @@ export const createServiceProvider = async (data: CreateServiceProviderData): Pr
     tagline: data.tagline,
     description: data.description,
     logo_url: data.logo_url,
+    services: data.services || [],
     services_offered: data.services || [],
     tags: data.tags || [],
     pricing_range: data.pricing_range || { currency: 'USD' },
@@ -35,7 +36,7 @@ export const createServiceProvider = async (data: CreateServiceProviderData): Pr
   
   return {
     ...provider,
-    services: Array.isArray(provider.services_offered) ? provider.services_offered : [],
+    services: Array.isArray(provider.services) ? provider.services : (Array.isArray(provider.services_offered) ? provider.services_offered : []),
     pricing_range: (typeof provider.pricing_range === 'object' && provider.pricing_range !== null) 
       ? provider.pricing_range as { min?: number; max?: number; currency: string; }
       : { currency: 'USD' },
@@ -51,7 +52,10 @@ export const updateServiceProvider = async (id: string, data: Partial<CreateServ
   if (data.tagline !== undefined) updateData.tagline = data.tagline;
   if (data.description !== undefined) updateData.description = data.description;
   if (data.logo_url !== undefined) updateData.logo_url = data.logo_url;
-  if (data.services !== undefined) updateData.services_offered = data.services;
+  if (data.services !== undefined) {
+    updateData.services = data.services;
+    updateData.services_offered = data.services;
+  }
   if (data.tags !== undefined) updateData.tags = data.tags;
   if (data.pricing_range !== undefined) updateData.pricing_range = data.pricing_range;
   if (data.portfolio_links !== undefined) updateData.portfolio_links = data.portfolio_links;
