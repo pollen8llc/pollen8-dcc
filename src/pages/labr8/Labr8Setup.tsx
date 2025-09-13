@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Building2, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createServiceProvider } from "@/services/modul8Service";
+import { createServiceProvider, updateServiceProvider, getUserServiceProvider } from "@/services/modul8Service";
 import { DOMAIN_PAGES } from "@/types/modul8";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
@@ -118,18 +118,42 @@ const Labr8Setup = () => {
         currency: 'USD'
       };
 
-      await createServiceProvider({
-        user_id: currentUser.id,
-        business_name: businessName,
-        tagline: tagline || undefined,
-        description: description || undefined,
-        services: services,
-        tags: tags,
-        pricing_range: pricingRange,
-        portfolio_links: portfolioLinks,
-        domain_specializations: domainSpecializations,
-        logo_url: logoUrl || undefined
-      });
+      // Check if service provider profile already exists
+      console.log('🔍 Labr8Setup - Checking for existing service provider profile for user:', currentUser.id);
+      const existingProvider = await getUserServiceProvider(currentUser.id);
+      
+      if (existingProvider) {
+        console.log('🔧 Labr8Setup - Updating existing service provider profile:', existingProvider.id);
+        // Update existing service provider profile
+        await updateServiceProvider(existingProvider.id, {
+          business_name: businessName,
+          tagline: tagline || undefined,
+          description: description || undefined,
+          services: services,
+          tags: tags,
+          pricing_range: pricingRange,
+          portfolio_links: portfolioLinks,
+          domain_specializations: domainSpecializations,
+          logo_url: logoUrl || undefined
+        });
+        console.log('✅ Labr8Setup - Service provider profile updated successfully');
+      } else {
+        console.log('🔧 Labr8Setup - Creating new service provider profile');
+        // Create new service provider profile
+        await createServiceProvider({
+          user_id: currentUser.id,
+          business_name: businessName,
+          tagline: tagline || undefined,
+          description: description || undefined,
+          services: services,
+          tags: tags,
+          pricing_range: pricingRange,
+          portfolio_links: portfolioLinks,
+          domain_specializations: domainSpecializations,
+          logo_url: logoUrl || undefined
+        });
+        console.log('✅ Labr8Setup - Service provider profile created successfully');
+      }
 
       // Update profile completion status using RPC function
       console.log('🔧 Labr8Setup - Updating module completion for user:', currentUser.id);

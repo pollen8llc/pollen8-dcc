@@ -35,10 +35,14 @@ const Labr8Auth = () => {
     if (!isLoading && currentUser) {
       // Check if user has SERVICE_PROVIDER role, if not redirect to main platform
       if (currentUser.role === 'SERVICE_PROVIDER') {
-        if (!currentUser.profile_complete) {
+        console.log('🔍 Labr8Auth - Service provider setup status:', {
+          labr8_setup_complete: currentUser.labr8_setup_complete,
+          profile_complete: currentUser.profile_complete
+        });
+        if (!currentUser.labr8_setup_complete) {
           navigate("/labr8/setup", { replace: true });
         } else {
-          navigate("/labr8/dashboard", { replace: true }); // Fixed redirect path
+          navigate("/labr8/dashboard", { replace: true });
         }
       } else {
         navigate("/", { replace: true });

@@ -86,7 +86,11 @@ const Auth = () => {
       if (!skipProfileCheck && currentUser) {
         // Use existing currentUser data for fastest redirect
         if (currentUser.role === 'SERVICE_PROVIDER') {
-          const destination = currentUser.profile_complete ? "/labr8/dashboard" : "/labr8/setup";
+          console.log('🔍 Auth - Service provider setup status:', {
+            labr8_setup_complete: currentUser.labr8_setup_complete,
+            profile_complete: currentUser.profile_complete
+          });
+          const destination = currentUser.labr8_setup_complete ? "/labr8/dashboard" : "/labr8/setup";
           console.log("🚀 Auth: Redirecting SERVICE_PROVIDER to:", destination);
           navigate(destination, { replace: true });
         } else {

@@ -22,7 +22,11 @@ const NonServiceProviderRoute = ({ children }: NonServiceProviderRouteProps) => 
 
   // If user is a service provider, redirect to LAB-R8 dashboard
   if (currentUser?.role === 'SERVICE_PROVIDER') {
-    if (!currentUser.profile_complete) {
+    console.log('🔍 NonServiceProviderRoute - Service provider setup status:', {
+      labr8_setup_complete: currentUser.labr8_setup_complete,
+      profile_complete: currentUser.profile_complete
+    });
+    if (!currentUser.labr8_setup_complete) {
       return <Navigate to="/labr8/setup" replace />;
     } else {
       return <Navigate to="/labr8/dashboard" replace />;
