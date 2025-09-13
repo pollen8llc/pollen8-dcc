@@ -140,6 +140,9 @@ const Labr8Setup = () => {
         })
         .eq('user_id', currentUser.id);
 
+      // Refresh user context to avoid redirect loops
+      await refreshUser();
+
       toast({
         title: "Profile Created!",
         description: "Your LAB-R8 service provider profile has been created successfully.",
