@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Users, Plus, Star, Shield, Heart, Trophy, Mail, Phone, Building, Tag, Loader2 } from 'lucide-react';
+import { ArrowLeft, Search, Users, Plus, Star, Shield, Heart, Trophy, Mail, Phone, Building, Tag, Loader2, Trash2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -10,26 +10,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Navbar from '@/components/Navbar';
 import { Nomin8Navigation } from '@/components/nomin8/Nomin8Navigation';
 import { Nomin8Classification } from '@/types/nomin8';
 import { toast } from '@/hooks/use-toast';
 import { getContacts, Contact } from '@/services/rel8t/contactService';
-
-// Remove mock data from dashboard - will now pull from REL8
-const mockA10DGroups = [
-  { id: '1', name: 'Core Community Leaders', color: 'primary' },
-  { id: '2', name: 'Event Organizers', color: 'green' },
-  { id: '3', name: 'Content Moderators', color: 'blue' },
-  { id: '4', name: 'New Member Supporters', color: 'orange' },
-  { id: '5', name: 'Tech Mentors', color: 'purple' }
-];
+import { useUser } from '@/contexts/UserContext';
+import { nmn8Service, defaultGroups, type Nomination, type GroupConfig } from '@/services/nmn8Service';
 
 const Nomin8Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser } = useUser();
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [nominations, setNominations] = useState<Nomination[]>([]);
+  const [groups, setGroups] = useState<GroupConfig[]>(defaultGroups);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('nominate');
 
   // Filter contacts based on search
   const filteredContacts = useMemo(() => {
@@ -40,6 +39,21 @@ const Nomin8Dashboard: React.FC = () => {
       contact.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [contacts, searchQuery]);
+
+  // Group nominations by group type
+  const nominationsByGroup = useMemo(() => {
+    const grouped: Record<string, Nomination[]> = {};
+    
+    groups.forEach(group => {
+      grouped[group.id] = nominations.filter(nomination => {
+        if (!nomination.groups || typeof nomination.groups !== 'object') {
+          return false;
+        }
+        return nomination.groups[group.id] === true;
+      });
+    });
+    return grouped;
+  }, [nominations, groups]);
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -54,18 +68,24 @@ const Nomin8Dashboard: React.FC = () => {
       default: return Trophy;
     }
   };
-  // Load contacts from REL8
+  // Load contacts and nominations
   useEffect(() => {
-    const loadContacts = async () => {
+    const loadData = async () => {
+      if (!currentUser?.id) return;
+
       try {
         setLoading(true);
-        const contactData = await getContacts();
+        const [contactData, nominationData] = await Promise.all([
+          getContacts(),
+          nmn8Service.getNominations(currentUser.id)
+        ]);
         setContacts(contactData);
+        setNominations(nominationData);
       } catch (error) {
-        console.error('Failed to load contacts:', error);
+        console.error('Failed to load data:', error);
         toast({
           title: "Error",
-          description: "Failed to load contacts from REL8.",
+          description: "Failed to load data.",
           variant: "destructive"
         });
       } finally {
@@ -73,19 +93,18 @@ const Nomin8Dashboard: React.FC = () => {
       }
     };
 
-    loadContacts();
-  }, []);
+    loadData();
+  }, [currentUser?.id]);
 
   const handleContactNominate = async (contact: Contact) => {
-    // Create member promotion via edge function
     try {
       toast({
-        title: "Promoting Contact",
-        description: `Promoting ${contact.name} to member...`,
+        title: "Nominating Contact",
+        description: `Nominating ${contact.name}...`,
       });
       
-      // Navigate to config page
-      navigate(`/nmn8/manage/config/${contact.id}`);
+      // Navigate to contact selection for nomination
+      navigate('/rel8/contacts', { state: { targetContact: contact.id } });
     } catch (error) {
       toast({
         title: "Error",
@@ -93,6 +112,114 @@ const Nomin8Dashboard: React.FC = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleContactClick = (contactId: string) => {
+    navigate(`/elavu8/${contactId}`);
+  };
+
+  const handleRemoveFromGroup = async (nominationId: string, groupId: string) => {
+    if (!currentUser?.id) return;
+
+    try {
+      await nmn8Service.removeFromGroup(nominationId, groupId);
+      
+      // Refresh nominations after successful removal
+      const data = await nmn8Service.getNominations(currentUser.id);
+      setNominations(data);
+    } catch (error) {
+      console.error('Failed to remove contact from group:', error);
+    }
+  };
+
+  const handleAddToGroup = (groupId: string) => {
+    navigate('/rel8/contacts', { state: { targetGroup: groupId } });
+  };
+
+  const renderGroupSection = (group: GroupConfig) => {
+    const groupNominations = nominationsByGroup[group.id] || [];
+    const remainingSlots = group.maxMembers ? Math.max(0, group.maxMembers - groupNominations.length) : 3;
+
+    return (
+      <Card key={group.id} className="bg-card/40 backdrop-blur-md border border-border/50 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${group.color}`}>
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">{group.name}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {groupNominations.length}{group.maxMembers ? `/${group.maxMembers}` : ''}
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            {/* Existing contacts */}
+            {groupNominations.map((nomination) => (
+              <div key={nomination.id} className="group relative">
+                <div
+                  className="flex flex-col items-center p-3 rounded-xl bg-muted/20 border border-border 
+                           hover:bg-muted/40 transition-all duration-200 cursor-pointer"
+                  onClick={() => handleContactClick(nomination.contact?.id || '')}
+                >
+                  <Avatar className="w-12 h-12 mb-2 border-2 border-primary/20">
+                    <AvatarImage src={nomination.contact?.avatar} alt={nomination.contact?.name} />
+                    <AvatarFallback className="bg-gradient-to-br from-primary/30 to-secondary/30 text-xs font-bold">
+                      {nomination.contact ? getInitials(nomination.contact.name) : '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs font-medium text-center line-clamp-2">
+                    {nomination.contact?.name || 'Unknown'}
+                  </span>
+                  {nomination.contact?.organization && (
+                    <span className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                      {nomination.contact.organization}
+                    </span>
+                  )}
+                </div>
+                
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveFromGroup(nomination.id, group.id);
+                  }}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
+            ))}
+            
+            {/* Empty slots */}
+            {Array.from({ length: remainingSlots }).map((_, index) => (
+              <div
+                key={`empty-${index}`}
+                className="flex flex-col items-center p-3 rounded-xl border-2 border-dashed border-border/50 
+                         hover:border-primary/50 hover:bg-muted/20 transition-all duration-200 cursor-pointer"
+                onClick={() => handleAddToGroup(group.id)}
+              >
+                <div className="w-12 h-12 mb-2 rounded-full bg-muted/20 flex items-center justify-center">
+                  <Plus className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <span className="text-xs text-muted-foreground text-center">
+                  Add Contact
+                </span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
   };
 
 
@@ -104,38 +231,64 @@ const Nomin8Dashboard: React.FC = () => {
         <Nomin8Navigation />
         
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Nomin8 Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Select a contact from your REL8 database to promote to A10D tracking
-          </p>
-        </div>
-
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search contacts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {/* Loading State */}
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="w-6 h-6 animate-spin" />
-              <span>Loading contacts from REL8...</span>
-            </div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Nomin8 Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Nominate contacts and manage your A10D groups
+            </p>
+            {nominations.length > 0 && (
+              <div className="flex items-center gap-4 mt-2">
+                <Badge variant="outline" className="text-sm">
+                  {nominations.length} Total Nominations
+                </Badge>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {groups.map(group => {
+                    const count = nominationsByGroup[group.id]?.length || 0;
+                    return count > 0 ? (
+                      <span key={group.id}>
+                        {group.name}: {count}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search contacts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-64"
+            />
+          </div>
+        </div>
 
-        {/* Contacts Grid */}
-        {!loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredContacts.map((contact) => (
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="nominate">Nominate Contacts</TabsTrigger>
+            <TabsTrigger value="manage">Manage Groups</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="nominate" className="space-y-6">
+            {/* Loading State */}
+            {loading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <span>Loading contacts from REL8...</span>
+                </div>
+              </div>
+            )}
+
+            {/* Contacts Grid */}
+            {!loading && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredContacts.map((contact) => (
             <div 
               key={contact.id} 
               className="h-full overflow-hidden transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
@@ -218,20 +371,67 @@ const Nomin8Dashboard: React.FC = () => {
                   </Button>
                 </div>
               </div>
-            </div>
-            ))}
-          </div>
-        )}
+                </div>
+                ))}
+              </div>
+            )}
 
-        {!loading && filteredContacts.length === 0 && (
-          <div className="text-center py-12">
-            <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-muted-foreground">No contacts found</h3>
-            <p className="text-muted-foreground mt-1">
-              Try adjusting your search or add more contacts to REL8 first
-            </p>
-          </div>
-        )}
+            {!loading && filteredContacts.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-muted-foreground">No contacts found</h3>
+                <p className="text-muted-foreground mt-1">
+                  Try adjusting your search or add more contacts to REL8 first
+                </p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="manage" className="space-y-6">
+            {/* Loading State */}
+            {loading && (
+              <div className="space-y-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="bg-card/40 backdrop-blur-md border border-border/50">
+                    <CardHeader>
+                      <Skeleton className="h-6 w-48" />
+                      <Skeleton className="h-4 w-32" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                        {Array.from({ length: 6 }).map((_, j) => (
+                          <Skeleton key={j} className="h-24 rounded-xl" />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Group Sections */}
+            {!loading && (
+              <div className="space-y-6">
+                {groups.map(renderGroupSection)}
+              </div>
+            )}
+
+            {/* No nominations message */}
+            {!loading && nominations.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-muted-foreground">No nominations yet</h3>
+                <p className="text-muted-foreground mt-1 mb-4">
+                  Start by nominating contacts from your REL8 database
+                </p>
+                <Button onClick={() => setActiveTab('nominate')}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Start Nominating
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
