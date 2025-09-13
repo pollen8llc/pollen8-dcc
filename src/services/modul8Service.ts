@@ -11,37 +11,69 @@ import {
 } from "@/types/modul8";
 
 export const createServiceProvider = async (data: CreateServiceProviderData): Promise<ServiceProvider> => {
+  // Map the data to match database column names
+  const insertData = {
+    user_id: data.user_id,
+    business_name: data.business_name,
+    tagline: data.tagline,
+    description: data.description,
+    logo_url: data.logo_url,
+    services_offered: data.services || [],
+    tags: data.tags || [],
+    pricing_range: data.pricing_range || { currency: 'USD' },
+    portfolio_links: data.portfolio_links || [],
+    domain_specializations: data.domain_specializations || []
+  };
+
   const { data: provider, error } = await supabase
     .from('modul8_service_providers')
-    .insert(data)
+    .insert(insertData)
     .select()
     .single();
   
   if (error) throw error;
+  
   return {
     ...provider,
     services: Array.isArray(provider.services_offered) ? provider.services_offered : [],
-    pricing_range: { currency: 'USD' },
-    tags: [],
-    domain_specializations: []
+    pricing_range: (typeof provider.pricing_range === 'object' && provider.pricing_range !== null) 
+      ? provider.pricing_range as { min?: number; max?: number; currency: string; }
+      : { currency: 'USD' },
+    tags: provider.tags || [],
+    domain_specializations: provider.domain_specializations || []
   } as ServiceProvider;
 };
 
 export const updateServiceProvider = async (id: string, data: Partial<CreateServiceProviderData>): Promise<ServiceProvider> => {
+  // Map the data to match database column names
+  const updateData: any = {};
+  if (data.business_name) updateData.business_name = data.business_name;
+  if (data.tagline !== undefined) updateData.tagline = data.tagline;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.logo_url !== undefined) updateData.logo_url = data.logo_url;
+  if (data.services !== undefined) updateData.services_offered = data.services;
+  if (data.tags !== undefined) updateData.tags = data.tags;
+  if (data.pricing_range !== undefined) updateData.pricing_range = data.pricing_range;
+  if (data.portfolio_links !== undefined) updateData.portfolio_links = data.portfolio_links;
+  if (data.domain_specializations !== undefined) updateData.domain_specializations = data.domain_specializations;
+
   const { data: provider, error } = await supabase
     .from('modul8_service_providers')
-    .update(data)
+    .update(updateData)
     .eq('id', id)
     .select()
     .single();
   
   if (error) throw error;
+  
   return {
     ...provider,
     services: Array.isArray(provider.services_offered) ? provider.services_offered : [],
-    pricing_range: { currency: 'USD' },
-    tags: [],
-    domain_specializations: []
+    pricing_range: (typeof provider.pricing_range === 'object' && provider.pricing_range !== null) 
+      ? provider.pricing_range as { min?: number; max?: number; currency: string; }
+      : { currency: 'USD' },
+    tags: provider.tags || [],
+    domain_specializations: provider.domain_specializations || []
   } as ServiceProvider;
 };
 
@@ -58,9 +90,11 @@ export const getUserServiceProvider = async (userId: string): Promise<ServicePro
   return {
     ...data,
     services: Array.isArray(data.services_offered) ? data.services_offered : [],
-    pricing_range: { currency: 'USD' },
-    tags: [],
-    domain_specializations: []
+    pricing_range: (typeof data.pricing_range === 'object' && data.pricing_range !== null) 
+      ? data.pricing_range as { min?: number; max?: number; currency: string; }
+      : { currency: 'USD' },
+    tags: data.tags || [],
+    domain_specializations: data.domain_specializations || []
   } as ServiceProvider;
 };
 

@@ -1291,12 +1291,16 @@ export type Database = {
           business_name: string | null
           created_at: string
           description: string | null
+          domain_specializations: number[] | null
           id: string
           logo_url: string | null
           portfolio_links: string[] | null
           pricing_model: string | null
+          pricing_range: Json | null
           rating: number | null
           services_offered: string[] | null
+          tagline: string | null
+          tags: string[] | null
           total_projects: number | null
           updated_at: string
           user_id: string
@@ -1307,12 +1311,16 @@ export type Database = {
           business_name?: string | null
           created_at?: string
           description?: string | null
+          domain_specializations?: number[] | null
           id?: string
           logo_url?: string | null
           portfolio_links?: string[] | null
           pricing_model?: string | null
+          pricing_range?: Json | null
           rating?: number | null
           services_offered?: string[] | null
+          tagline?: string | null
+          tags?: string[] | null
           total_projects?: number | null
           updated_at?: string
           user_id: string
@@ -1323,12 +1331,16 @@ export type Database = {
           business_name?: string | null
           created_at?: string
           description?: string | null
+          domain_specializations?: number[] | null
           id?: string
           logo_url?: string | null
           portfolio_links?: string[] | null
           pricing_model?: string | null
+          pricing_range?: Json | null
           rating?: number | null
           services_offered?: string[] | null
+          tagline?: string | null
+          tags?: string[] | null
           total_projects?: number | null
           updated_at?: string
           user_id?: string
