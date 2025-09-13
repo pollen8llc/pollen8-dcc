@@ -35,6 +35,13 @@ const UserManagementTab = () => {
 
   const canManageUsers = currentUser?.role === UserRole.ADMIN;
 
+  console.log('UserManagementTab: Permission check', {
+    currentUser: currentUser?.id,
+    role: currentUser?.role,
+    canManageUsers,
+    userRoleEnum: UserRole.ADMIN
+  });
+
   return (
     <div className="space-y-8">
       <UserManagementHeader

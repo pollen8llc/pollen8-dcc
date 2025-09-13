@@ -26,11 +26,16 @@ const Modul8Dashboard = () => {
   const loadData = async () => {
     if (!session?.user?.id) return;
     
-    // Check MODUL8 setup status - only use database state
-    if (!completionLoading && modul8_complete === false) {
-      navigate('/modul8/setup/organizer');
-      return;
-    }
+  // Check MODUL8 setup status - only use database state
+  if (!completionLoading && modul8_complete === false) {
+    console.log('Modul8Dashboard: Redirecting to setup because modul8_complete is false', {
+      userId: session?.user?.id,
+      modul8_complete,
+      completionLoading
+    });
+    navigate('/modul8/setup/organizer');  
+    return;
+  }
     
     if (completionLoading || modul8_complete === null) {
       return;

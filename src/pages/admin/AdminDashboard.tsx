@@ -51,6 +51,14 @@ const AdminDashboard = () => {
   const isOrganizer = currentUser?.role === UserRole.ORGANIZER || 
                      (currentUser?.managedCommunities && currentUser.managedCommunities.length > 0);
 
+  console.log('AdminDashboard: User permissions check', {
+    currentUser: currentUser?.id,
+    role: currentUser?.role,
+    isAdmin,
+    isOrganizer,
+    userRoleEnum: UserRole.ADMIN
+  });
+
   // Redirect if user doesn't have permission
   useEffect(() => {
     if (!isAdmin && !isOrganizer) {
