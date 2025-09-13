@@ -879,6 +879,7 @@ export type Database = {
           budget_range: string | null
           company_size: string | null
           created_at: string
+          description: string | null
           focus_areas: string[] | null
           id: string
           industry: string | null
@@ -892,6 +893,7 @@ export type Database = {
           budget_range?: string | null
           company_size?: string | null
           created_at?: string
+          description?: string | null
           focus_areas?: string[] | null
           id?: string
           industry?: string | null
@@ -905,6 +907,7 @@ export type Database = {
           budget_range?: string | null
           company_size?: string | null
           created_at?: string
+          description?: string | null
           focus_areas?: string[] | null
           id?: string
           industry?: string | null
