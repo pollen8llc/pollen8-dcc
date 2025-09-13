@@ -882,6 +882,7 @@ export type Database = {
           focus_areas: string[] | null
           id: string
           industry: string | null
+          logo_url: string | null
           organization_name: string | null
           updated_at: string
           user_id: string
@@ -894,6 +895,7 @@ export type Database = {
           focus_areas?: string[] | null
           id?: string
           industry?: string | null
+          logo_url?: string | null
           organization_name?: string | null
           updated_at?: string
           user_id: string
@@ -906,6 +908,7 @@ export type Database = {
           focus_areas?: string[] | null
           id?: string
           industry?: string | null
+          logo_url?: string | null
           organization_name?: string | null
           updated_at?: string
           user_id?: string
@@ -1286,6 +1289,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          logo_url: string | null
           portfolio_links: string[] | null
           pricing_model: string | null
           rating: number | null
@@ -1301,6 +1305,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          logo_url?: string | null
           portfolio_links?: string[] | null
           pricing_model?: string | null
           rating?: number | null
@@ -1316,6 +1321,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          logo_url?: string | null
           portfolio_links?: string[] | null
           pricing_model?: string | null
           rating?: number | null

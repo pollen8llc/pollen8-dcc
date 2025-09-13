@@ -82,9 +82,18 @@ const OrganizerSetup = () => {
       navigate('/modul8');
     } catch (error) {
       console.error('Error creating organizer profile:', error);
+      
+      // Get more specific error message
+      let errorMessage = "Failed to create organizer profile";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        errorMessage = String(error.message);
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to create organizer profile",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
