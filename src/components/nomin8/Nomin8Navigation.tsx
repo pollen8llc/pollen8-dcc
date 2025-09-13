@@ -14,7 +14,13 @@ export function Nomin8Navigation() {
       href: "/nmn8",
       label: "Dashboard",
       icon: Home,
-      isActive: location.pathname === "/nmn8" || location.pathname === "/nmn8/manage"
+      isActive: location.pathname === "/nmn8"
+    },
+    {
+      href: "/nmn8/manage",
+      label: "Manage",
+      icon: UserPlus,
+      isActive: location.pathname === "/nmn8/manage"
     },
     {
       href: "/nmn8/settings",
