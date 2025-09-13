@@ -30,3 +30,39 @@ export const getRoles = async () => {
   if (error) throw error;
   return data || [];
 };
+
+export const upgradeToOrganizer = async (userId: string) => {
+  // First check if user is a MEMBER and owns at least one community
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('user_id', userId)
+    .single();
+  
+  if (profileError) throw profileError;
+  
+  if (profile.role !== 'MEMBER') {
+    throw new Error('User is not a MEMBER');
+  }
+  
+  // Check if user owns any communities
+  const { data: communities, error: communitiesError } = await supabase
+    .from('communities')
+    .select('id')
+    .eq('owner_id', userId)
+    .limit(1);
+  
+  if (communitiesError) throw communitiesError;
+  
+  if (!communities || communities.length === 0) {
+    throw new Error('User does not own any communities');
+  }
+  
+  // Upgrade to ORGANIZER role
+  const { data, error } = await supabase.rpc('update_user_role_self', {
+    p_role_name: 'ORGANIZER'
+  });
+  
+  if (error) throw error;
+  return data;
+};

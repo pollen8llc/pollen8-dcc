@@ -25,8 +25,11 @@ const OrganizerDashboard = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
 
-  // Only allow ORGANIZER or ADMIN
-  if (!currentUser || ![UserRole.ORGANIZER, UserRole.ADMIN].includes(currentUser.role)) {
+  // Only allow ORGANIZER, ADMIN, or Members with communities
+  if (!currentUser || 
+      (![UserRole.ORGANIZER, UserRole.ADMIN].includes(currentUser.role) && 
+       !(currentUser.role === UserRole.MEMBER && Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.length > 0))
+  ) {
     navigate("/");
     return null;
   }

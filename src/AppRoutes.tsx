@@ -513,26 +513,34 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
 
-          {/* Initi8 routes */}
+          {/* Initi8 routes - Allow all authenticated users */}
           <Route path="/initi8" element={
-            <ProtectedRoute>
-              <Initi8Dashboard />
-            </ProtectedRoute>
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Initi8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
           } />
           <Route path="/initi8/dashboard" element={
-            <ProtectedRoute>
-              <Initi8Dashboard />
-            </ProtectedRoute>
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Initi8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
           } />
           <Route path="/initi8/search" element={
-            <ProtectedRoute>
-              <SearchProfiles />
-            </ProtectedRoute>
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <SearchProfiles />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
           } />
           <Route path="/initi8/volunteers" element={
-            <ProtectedRoute>
-              <ManageVolunteers />
-            </ProtectedRoute>
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <ManageVolunteers />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
           } />
 
           {/* Evalu8 routes */}

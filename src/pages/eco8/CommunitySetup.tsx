@@ -6,43 +6,68 @@ import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { useModuleCompletion } from '@/hooks/useModuleCompletion';
+import { upgradeToOrganizer } from '@/services/roleService';
+import { useUser } from '@/contexts/UserContext';
+import { toast } from '@/hooks/use-toast';
 
 const CommunitySetup: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser, refreshUser } = useUser();
   const { eco8_complete, loading, updateModuleCompletion } = useModuleCompletion();
 
-  const handleSuccess = (community: any) => {
+  const handleSuccess = async (community: any) => {
     console.log('Community created successfully:', community);
     
-    // Mark ECO8 setup as complete for first-time users
-    const completeSetup = async () => {
-      try {
-        const { data: user } = await supabase.auth.getUser();
-        if (user?.user?.id && !eco8_complete) {
-          // Mark eco8 as complete using module completion
-          const success = await updateModuleCompletion('eco8', true);
-          if (!success) {
-            // Fallback: update directly
-            console.warn('Module completion function failed, using direct update');
-            await supabase
-              .from('profiles')
-              .update({ 
-                eco8_complete: true, 
-                eco8_setup_complete: true 
-              })
-              .eq('user_id', user.user.id);
-          }
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user?.user?.id) throw new Error('No authenticated user');
+      
+      // Check if this is a MEMBER creating their first community
+      const shouldUpgradeRole = currentUser?.role === 'MEMBER';
+      
+      // Mark ECO8 setup as complete for first-time users
+      if (!eco8_complete) {
+        const success = await updateModuleCompletion('eco8', true);
+        if (!success) {
+          // Fallback: update directly
+          console.warn('Module completion function failed, using direct update');
+          await supabase
+            .from('profiles')
+            .update({ 
+              eco8_complete: true, 
+              eco8_setup_complete: true 
+            })
+            .eq('user_id', user.user.id);
         }
-        // Navigate to the new community page or dashboard
-        navigate(`/eco8/community/${community.id}`);
-      } catch (error) {
-        console.error('Error completing ECO8 setup:', error);
-        // Still navigate even if update fails
-        navigate(`/eco8/community/${community.id}`);
       }
-    };
-    
-    completeSetup();
+      
+      // Upgrade MEMBER to ORGANIZER if they just created their first community
+      if (shouldUpgradeRole) {
+        try {
+          await upgradeToOrganizer(user.user.id);
+          await refreshUser(); // Refresh user context
+          
+          toast({
+            title: "Welcome to Organizers!",
+            description: "You've been upgraded to Organizer status. You now have access to all platform features.",
+          });
+          
+          // Navigate to organizer dashboard
+          navigate('/organizer');
+          return;
+        } catch (roleError) {
+          console.error('Error upgrading user role:', roleError);
+          // Continue with normal flow if role upgrade fails
+        }
+      }
+      
+      // Navigate to the new community page or dashboard
+      navigate(`/eco8/community/${community.id}`);
+    } catch (error) {
+      console.error('Error in community setup completion:', error);
+      // Still navigate even if updates fail
+      navigate(`/eco8/community/${community.id}`);
+    }
   };
 
   const handleCancel = () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
 import { useUser } from '@/contexts/UserContext';
+import { supabase } from '@/integrations/supabase/client';
 
 import { 
   Users, 
@@ -23,12 +24,37 @@ import {
   Activity,
   AlertCircle,
   Edit,
-  Crown
+  Crown,
+  Building
 } from 'lucide-react';
 
 const Initi8Dashboard: React.FC = () => {
   const { currentUser } = useUser();
   const [isMessageCenterOpen, setIsMessageCenterOpen] = useState(false);
+  const [hasExistingCommunity, setHasExistingCommunity] = useState<boolean | null>(null);
+
+  // Check if user has existing communities
+  useEffect(() => {
+    const checkCommunities = async () => {
+      if (!currentUser?.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('communities')
+          .select('id')
+          .eq('owner_id', currentUser.id)
+          .limit(1);
+        
+        if (error) throw error;
+        setHasExistingCommunity(data && data.length > 0);
+      } catch (error) {
+        console.error('Error checking communities:', error);
+        setHasExistingCommunity(false);
+      }
+    };
+    
+    checkCommunities();
+  }, [currentUser?.id]);
 
   const quickStats = {
     totalProfiles: 0, // This would come from profiles data
@@ -253,24 +279,49 @@ const Initi8Dashboard: React.FC = () => {
             </Dialog>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/initi8/volunteers">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Crown className="h-6 w-6 text-primary" />
-                  Manage Volunteers (ADVC8)
-                </CardTitle>
-                <CardDescription>
-                  Coordinate with volunteers, advocates, and community ambassadors
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Manage Team
-                </Button>
-              </CardContent>
-            </Link>
-          </Card>
+          {/* Conditional card based on user role */}
+          {currentUser?.role === 'MEMBER' ? (
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Link to={hasExistingCommunity ? "/eco8" : "/eco8/setup"}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Building className="h-6 w-6 text-primary" />
+                    Community Profiles
+                  </CardTitle>
+                  <CardDescription>
+                    {hasExistingCommunity 
+                      ? "Manage your community and build connections"
+                      : "Create your first community and unlock organizer features"
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="ghost" className="w-full">
+                    {hasExistingCommunity ? "Manage Community" : "Create Community"}
+                  </Button>
+                </CardContent>
+              </Link>
+            </Card>
+          ) : (
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Link to="/initi8/volunteers">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Crown className="h-6 w-6 text-primary" />
+                    Manage Volunteers (ADVC8)
+                  </CardTitle>
+                  <CardDescription>
+                    Coordinate with volunteers, advocates, and community ambassadors
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="ghost" className="w-full">
+                    Manage Team
+                  </Button>
+                </CardContent>
+              </Link>
+            </Card>
+          )}
         </div>
 
         {/* Welcome Section */}

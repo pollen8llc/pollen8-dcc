@@ -114,6 +114,15 @@ export const usePermissions = (currentUser: User | null) => {
     // Check for ORGANIZER role
     if (currentUser.role === UserRole.ORGANIZER || (currentUser?.role as string) === 'ORGANIZER') return true;
     
+    // Check if MEMBER owns any communities (should be considered an organizer)
+    if (currentUser.role === UserRole.MEMBER || (currentUser?.role as string) === 'MEMBER') {
+      // If no communityId provided, check if user manages any communities
+      if (!communityId) return Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.length > 0;
+      
+      // Check if user manages the specific community
+      return Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.includes(communityId);
+    }
+    
     // If no communityId provided, check if user manages any communities
     if (!communityId) return Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.length > 0;
     
@@ -162,6 +171,11 @@ export const usePermissions = (currentUser: User | null) => {
     
     if (isOrganizer()) {
       return { text: "Organizer", color: "bg-blue-500 hover:bg-blue-600" };
+    }
+    
+    // Special case: Members who own communities should show as "Community Creator"
+    if (currentUser.role === UserRole.MEMBER && Array.isArray(currentUser.managedCommunities) && currentUser.managedCommunities.length > 0) {
+      return { text: "Community Creator", color: "bg-blue-500 hover:bg-blue-600" };
     }
     
     if (currentUser.role === UserRole.MEMBER) {
