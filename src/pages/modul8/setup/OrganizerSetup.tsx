@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,9 +28,29 @@ const OrganizerSetup = () => {
   
   const [newFocusArea, setNewFocusArea] = useState('');
 
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!session?.user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to set up your organizer profile",
+        variant: "destructive"
+      });
+      navigate('/auth');
+    }
+  }, [session?.user?.id, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      toast({
+        title: "Authentication Required", 
+        description: "Please sign in first",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
     
     setLoading(true);
     try {
@@ -80,6 +100,28 @@ const OrganizerSetup = () => {
       setNewFocusArea('');
     }
   };
+
+  // Show loading or auth check while session is being determined
+  if (!session?.user?.id) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold mb-4">Authentication Required</h1>
+              <p className="text-muted-foreground mb-6">
+                Please sign in to set up your organizer profile
+              </p>
+              <Button onClick={() => navigate('/auth')}>
+                Sign In
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
