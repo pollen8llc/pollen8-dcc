@@ -101,6 +101,7 @@ const Labr8Landing = lazy(() => import("@/pages/labr8/Labr8Landing"));
 const Labr8Auth = lazy(() => import("@/pages/labr8/Labr8Auth"));
 const Labr8Setup = lazy(() => import("@/pages/labr8/Labr8Setup"));
 const Labr8Dashboard = lazy(() => import("@/pages/labr8/Labr8Dashboard"));
+const Labr8Profile = lazy(() => import("@/pages/labr8/Labr8Profile"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
 const Labr8ProjectStatusNew = lazy(() => import("@/pages/labr8/Labr8ProjectStatusNew"));
 
@@ -432,6 +433,11 @@ const AppRoutes = () => {
           <Route path="/labr8/dashboard" element={
             <ServiceProviderProtectedRoute>
               <Labr8Dashboard />
+            </ServiceProviderProtectedRoute>
+          } />
+          <Route path="/labr8/profile" element={
+            <ServiceProviderProtectedRoute>
+              <Labr8Profile />
             </ServiceProviderProtectedRoute>
           } />
           <Route path="/labr8/inbox" element={

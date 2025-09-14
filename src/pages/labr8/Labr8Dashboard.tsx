@@ -241,12 +241,20 @@ const Labr8Dashboard = () => {
               <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-primary flex items-center justify-center shadow-lg">
                 <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
               </div>
-              <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground tracking-tight">LAB-R8 Dashboard</h1>
-                <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium">
-                  Welcome back, <span className="text-primary font-bold">{serviceProvider?.business_name}</span>
-                </p>
-              </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground tracking-tight">LAB-R8 Dashboard</h1>
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium">
+                Welcome back, <span className="text-primary font-bold">{serviceProvider?.business_name}</span>
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/labr8/profile')}
+              className="hidden sm:flex items-center gap-2"
+            >
+              <Building2 className="w-4 h-4" />
+              View Profile
+            </Button>
             </div>
             <Button 
               onClick={handleLogout}
