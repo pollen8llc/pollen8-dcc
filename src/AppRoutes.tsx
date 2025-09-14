@@ -5,6 +5,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ServiceProviderProtectedRoute from "@/components/auth/ServiceProviderProtectedRoute";
 import NonServiceProviderRoute from "@/components/auth/NonServiceProviderRoute";
+import OrganizerSetupGuard from "@/components/auth/OrganizerSetupGuard";
 
 // Lazy load components for better performance
 const Index = lazy(() => import("@/pages/Index"));
@@ -360,62 +361,48 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
 
-          {/* Modul8 routes */}
+          {/* Modul8 routes - Removed NonServiceProviderRoute to allow all authenticated users */}
           <Route path="/modul8" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <Modul8Dashboard />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <Modul8Dashboard />
+            </ProtectedRoute>
           } />
           <Route path="/modul8/dashboard" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <Modul8Dashboard />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <Modul8Dashboard />
+            </ProtectedRoute>
           } />
           <Route path="/modul8/projects" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <Modul8Projects />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <Modul8Projects />
+            </ProtectedRoute>
           } />
           <Route path="/modul8/partners" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <Modul8Partners />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <Modul8Partners />
+            </ProtectedRoute>
           } />
           <Route path="/modul8/dashboard/directory" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <DomainDirectory />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <DomainDirectory />
+            </ProtectedRoute>
           } />
           <Route path="/modul8/dashboard/request/new" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
+            <ProtectedRoute>
+              <OrganizerSetupGuard>
                 <ServiceRequestForm />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+              </OrganizerSetupGuard>
+            </ProtectedRoute>
           } />
           <Route path="/modul8/dashboard/request/:requestId" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <Modul8RequestDetails />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <Modul8RequestDetails />
+            </ProtectedRoute>
           } />
           <Route path="/modul8/setup/organizer" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <OrganizerSetup />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
+            <ProtectedRoute>
+              <OrganizerSetup />
+            </ProtectedRoute>
           } />
 
           {/* Lab-R8 routes */}

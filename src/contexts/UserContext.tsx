@@ -46,7 +46,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (created) {
           console.log("✅ UserContext: Profile created, refreshing user data");
           setTimeout(() => refreshUser(), 100); // Small delay to ensure DB consistency
+        } else {
+          console.log("⚠️ UserContext: Profile creation failed or profile already exists");
+          // Try refreshing anyway in case profile exists but wasn't loaded
+          setTimeout(() => refreshUser(), 100);
         }
+      }).catch((error) => {
+        console.error("❌ UserContext: Error creating profile:", error);
+        // Still try to refresh in case profile exists
+        setTimeout(() => refreshUser(), 500);
       });
     }
   }, [session, currentUser, profileLoading, createProfileIfNotExists, refreshUser]);

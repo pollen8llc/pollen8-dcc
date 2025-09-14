@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useSession } from '@/hooks/useSession';
+import { useUser } from '@/contexts/UserContext';
 import { getUserOrganizer, createServiceRequest } from '@/services/modul8Service';
 import { DOMAIN_PAGES } from '@/types/modul8';
 import Navbar from '@/components/Navbar';
@@ -28,7 +28,7 @@ const parseBudgetRange = (budgetRange: string) => {
 };
 
 const ServiceRequestForm = () => {
-  const { session } = useSession();
+  const { currentUser } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const domainId = parseInt(searchParams.get('domain') || '1');
@@ -37,47 +37,26 @@ const ServiceRequestForm = () => {
   const [loading, setLoading] = useState(false);
   const [organizerData, setOrganizerData] = useState(null);
   const [selectedProvider, setSelectedProvider] = useState(null);
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    console.log('🚀 ServiceRequestForm mounted, session:', !!session?.user);
+    console.log('🚀 ServiceRequestForm mounted, user:', !!currentUser?.id);
     
-    // Check authentication first
-    if (!session?.user?.id) {
-      console.log('❌ No session found, redirecting to auth');
-      navigate('/auth');
-      return;
-    }
-    
-    // Load data if authenticated
+    // Load data
     loadOrganizerData();
     loadSelectedProvider();
-    setIsReady(true);
-  }, [session?.user?.id]);
-
-  // Don't render the form until we've confirmed authentication
-  if (!session?.user?.id || !isReady) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  }, [currentUser?.id]);
 
   const loadOrganizerData = async () => {
-    console.log('🔍 Loading organizer data for user:', session?.user?.id);
+    console.log('🔍 Loading organizer data for user:', currentUser?.id);
     
-    if (!session?.user?.id) {
-      console.log('❌ No user session found, cannot load organizer data');
+    if (!currentUser?.id) {
+      console.log('❌ No user found, cannot load organizer data');
       return;
     }
     
     try {
       console.log('📞 Calling getUserOrganizer...');
-      const organizer = await getUserOrganizer(session.user.id);
+      const organizer = await getUserOrganizer(currentUser.id);
       console.log('📊 Organizer data result:', organizer);
       
       if (!organizer) {
@@ -111,8 +90,8 @@ const ServiceRequestForm = () => {
 
   const handleSubmit = async (formData: any) => {
     // Check if user is authenticated before proceeding
-    if (!session?.user?.id) {
-      console.error('❌ No authenticated user session');
+    if (!currentUser?.id) {
+      console.error('❌ No authenticated user');
       toast({
         title: "Authentication Required",
         description: "Please log in to create a service request",
@@ -134,7 +113,7 @@ const ServiceRequestForm = () => {
     }
     
     console.log('🚀 Starting service request creation...', {
-      userId: session.user.id,
+      userId: currentUser.id,
       organizerId: organizerData.id,
       formData
     });
@@ -185,7 +164,7 @@ const ServiceRequestForm = () => {
       console.error('Error details:', {
         message: error.message,
         stack: error.stack,
-        userId: session?.user?.id,
+        userId: currentUser?.id,
         organizerData: !!organizerData,
         organizerId: organizerData?.id
       });

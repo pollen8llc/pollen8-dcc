@@ -15,10 +15,22 @@ const Index = () => {
       console.log('🔍 Index.tsx - Current user:', {
         role: currentUser.role,
         profileComplete: currentUser.profile_complete,
-        userId: currentUser.id
+        userId: currentUser.id,
+        modul8_setup_complete: currentUser.modul8_setup_complete,
+        labr8_setup_complete: currentUser.labr8_setup_complete
       });
       
-      // Service providers go to LAB-R8, others go to initi8
+      // Check if there's a return URL from authentication
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnTo = urlParams.get('returnTo');
+      
+      if (returnTo) {
+        console.log('🔄 Index.tsx - Redirecting to return URL:', returnTo);
+        navigate(returnTo, { replace: true });
+        return;
+      }
+      
+      // Service providers go to LAB-R8 by default, but can access other platforms if they have roles
       if (currentUser.role === 'SERVICE_PROVIDER') {
         console.log('🚀 Index.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
         console.log('🔍 Index.tsx - LAB-R8 setup status:', {

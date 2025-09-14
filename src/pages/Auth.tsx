@@ -50,6 +50,9 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { currentUser, session, isLoading } = useUser();
   const { toast } = useToast();
+  
+  // Get return URL from query params
+  const returnTo = searchParams.get('returnTo');
 
   // Update form field
   const updateFormField = useCallback((field: keyof AuthFormState, value: string) => {
@@ -80,8 +83,16 @@ const Auth = () => {
       console.log("🚀 Auth: Handling redirect for user:", { 
         id: user.id, 
         skipProfileCheck, 
-        currentUserExists: !!currentUser 
+        currentUserExists: !!currentUser,
+        returnTo
       });
+
+      // If there's a return URL, use it
+      if (returnTo) {
+        console.log('🔄 Auth: Redirecting to return URL:', returnTo);
+        navigate(returnTo, { replace: true });
+        return;
+      }
 
       if (!skipProfileCheck && currentUser) {
         // Use existing currentUser data for fastest redirect

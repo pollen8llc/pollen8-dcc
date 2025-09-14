@@ -28,9 +28,11 @@ const ProtectedRoute = ({
     </div>;
   }
 
-  // If no session and no currentUser, redirect to auth
+  // If no session and no currentUser, redirect to auth with return URL
   if (!session && !currentUser) {
-    return <Navigate to="/auth" replace />;
+    const currentPath = window.location.pathname + window.location.search;
+    const returnUrl = currentPath !== '/' ? `?returnTo=${encodeURIComponent(currentPath)}` : '';
+    return <Navigate to={`/auth${returnUrl}`} replace />;
   }
 
   // If a specific role is required, check if user has it
@@ -45,6 +47,7 @@ const ProtectedRoute = ({
 
     // For ADMIN role, strictly check for ADMIN
     if (requiredRole === UserRole.ADMIN && currentUser.role !== UserRole.ADMIN) {
+      console.log('🚫 ProtectedRoute: User lacks ADMIN role, redirecting to home');
       return <Navigate to="/" replace />;
     }
     
@@ -52,6 +55,7 @@ const ProtectedRoute = ({
     if (requiredRole === UserRole.ORGANIZER && 
         currentUser.role !== UserRole.ORGANIZER && 
         currentUser.role !== UserRole.ADMIN) {
+      console.log('🚫 ProtectedRoute: User lacks ORGANIZER role, redirecting to home');
       return <Navigate to="/" replace />;
     }
     
@@ -60,6 +64,7 @@ const ProtectedRoute = ({
         currentUser.role !== UserRole.MEMBER &&
         currentUser.role !== UserRole.ORGANIZER && 
         currentUser.role !== UserRole.ADMIN) {
+      console.log('🚫 ProtectedRoute: User lacks required role, redirecting to home');
       return <Navigate to="/" replace />;
     }
   }
