@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
+import { LocationSelector } from "@/components/ui/location-selector";
 import { ExtendedProfile } from "@/services/profileService";
+import type { Location } from "@/hooks/useLocations";
 
 interface LocationInterestsStepProps {
   formData: Partial<ExtendedProfile>;
@@ -17,9 +19,14 @@ const LocationInterestsStep = ({ formData, updateFormData }: LocationInterestsSt
   const [interests, setInterests] = useState<string[]>(formData.interests || []);
   const [newInterest, setNewInterest] = useState("");
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocation(e.target.value);
-    updateFormData({ location: e.target.value });
+  const handleLocationChange = (value: string) => {
+    setLocation(value);
+    updateFormData({ location: value });
+  };
+
+  const handleLocationSelect = (selectedLocation: Location) => {
+    // Optionally store additional location metadata
+    console.log('Selected location:', selectedLocation);
   };
 
   const handleAddInterest = () => {
@@ -47,12 +54,14 @@ const LocationInterestsStep = ({ formData, updateFormData }: LocationInterestsSt
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          placeholder="City, Country"
+        <LocationSelector
           value={location}
-          onChange={handleLocationChange}
+          onValueChange={handleLocationChange}
+          onLocationSelect={handleLocationSelect}
+          label="Location"
+          placeholder="Search for your location..."
+          allowCustomInput={true}
+          showHierarchy={true}
         />
         <p className="text-xs text-muted-foreground mt-1">
           Your general location helps connect you with nearby communities

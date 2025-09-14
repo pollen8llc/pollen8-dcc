@@ -885,6 +885,71 @@ export type Database = {
           },
         ]
       }
+      locations: {
+        Row: {
+          aliases: string[] | null
+          city_name: string | null
+          country_code: string | null
+          created_at: string | null
+          formatted_address: string
+          id: string
+          is_active: boolean | null
+          latitude: number | null
+          longitude: number | null
+          metadata: Json | null
+          name: string
+          parent_location_id: string | null
+          source: string | null
+          state_code: string | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          aliases?: string[] | null
+          city_name?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          formatted_address: string
+          id?: string
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          metadata?: Json | null
+          name: string
+          parent_location_id?: string | null
+          source?: string | null
+          state_code?: string | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          aliases?: string[] | null
+          city_name?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          formatted_address?: string
+          id?: string
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          metadata?: Json | null
+          name?: string
+          parent_location_id?: string | null
+          source?: string | null
+          state_code?: string | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_parent_location_id_fkey"
+            columns: ["parent_location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modul8_deals: {
         Row: {
           created_at: string
@@ -2708,6 +2773,10 @@ export type Database = {
         Args: { action_details?: Json; action_name: string; user_id?: string }
         Returns: string
       }
+      populate_us_states_from_atlas: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       record_invite_use: {
         Args: { invite_code: string; used_by_id: string }
         Returns: boolean
@@ -2716,9 +2785,34 @@ export type Database = {
         Args: { event_id: string }
         Returns: boolean
       }
+      search_locations: {
+        Args: {
+          limit_count?: number
+          location_type?: string
+          search_query: string
+        }
+        Returns: {
+          country_code: string
+          formatted_address: string
+          id: string
+          name: string
+          parent_name: string
+          state_code: string
+          type: string
+        }[]
+      }
       sync_existing_data_to_lexicon: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      track_location_usage: {
+        Args: {
+          location_name: string
+          source_record_id: string
+          source_table: string
+          user_id: string
+        }
+        Returns: string
       }
       update_article_vote_count: {
         Args: { article_uuid: string }
