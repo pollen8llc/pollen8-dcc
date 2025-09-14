@@ -131,6 +131,12 @@ const AdminDashboard = () => {
                   User Management
                 </TabsTrigger>
                 <TabsTrigger 
+                  value="avatars" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
+                >
+                  Avatar Gallery
+                </TabsTrigger>
+                <TabsTrigger 
                   value="settings" 
                   className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
                 >
@@ -188,6 +194,29 @@ const AdminDashboard = () => {
                 <UserManagementTab />
               </TabsContent>
               
+              <TabsContent value="avatars" className="animate-fade-in">
+                <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                      <span className="text-black font-bold text-xl">👤</span>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">Avatar Gallery</h2>
+                      <p className="text-muted-foreground">Animated space-themed avatars for the platform</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 md:grid-cols-8 lg:grid-cols-10 gap-6">
+                    {/* Avatar grid will be rendered here by the component */}
+                    <div className="text-center py-8 col-span-full">
+                      <p className="text-muted-foreground">
+                        Navigate to <a href="/admin/avatars" className="text-primary hover:underline">/admin/avatars</a> to view the full gallery
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
               <TabsContent value="settings" className="animate-fade-in">
                 <div className="space-y-6">
                   <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
