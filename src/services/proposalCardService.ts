@@ -8,6 +8,7 @@ import {
   CreateProposalResponseData,
   CreateCommentData
 } from "@/types/proposalCards";
+import { logCrossPlatformActivity, createCrossPlatformNotification } from "./crossPlatformService";
 
 export const getProposalCards = async (requestId: string): Promise<ProposalCard[]> => {
   const { data, error } = await supabase
@@ -17,25 +18,37 @@ export const getProposalCards = async (requestId: string): Promise<ProposalCard[
     .order('created_at', { ascending: true });
 
   if (error) throw error;
-  return (data || []).map((card, index) => ({
+  return (data || []).map((card) => ({
     id: card.id,
     request_id: card.request_id,
-    submitted_by: card.provider_id,
-    card_number: index + 1,
+    submitted_by: card.submitted_by || card.provider_id,
+    response_to_card_id: card.response_to_card_id,
+    card_number: card.card_number || 1,
     status: card.status as any,
-    asset_links: [],
-    negotiated_title: card.title,
-    negotiated_description: card.description,
-    negotiated_budget_range: card.proposed_budget ? { min: card.proposed_budget, max: card.proposed_budget, currency: 'USD' } : undefined,
-    negotiated_timeline: card.proposed_timeline,
-    is_locked: false,
+    notes: card.notes,
+    scope_link: card.scope_link,
+    terms_link: card.terms_link,
+    asset_links: card.asset_links || [],
+    negotiated_title: card.negotiated_title || card.title,
+    negotiated_description: card.negotiated_description || card.description,
+    negotiated_budget_range: card.negotiated_budget_range || (card.proposed_budget ? { min: card.proposed_budget, max: card.proposed_budget, currency: 'USD' } : undefined),
+    negotiated_timeline: card.negotiated_timeline || card.proposed_timeline,
+    is_locked: card.is_locked || false,
     created_at: card.created_at,
     updated_at: card.updated_at,
+    responded_at: card.responded_at,
+    responded_by: card.responded_by,
     deel_contract_url: card.deel_contract_url
   })) as ProposalCard[];
 };
 
 export const createProposalCard = async (data: CreateProposalCardData): Promise<ProposalCard> => {
+  // Get current user
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) {
+    throw new Error('User not authenticated');
+  }
+
   // First check if the request is locked due to an agreement
   const { data: serviceRequest, error: requestError } = await supabase
     .from('modul8_service_requests')
@@ -49,7 +62,7 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
     throw new Error('Cannot create new proposals - an agreement has already been reached for this request.');
   }
 
-  // Count existing cards for this request
+  // Count existing cards for this request to set card number
   const { data: existingCards } = await supabase
     .from('modul8_proposal_cards')
     .select('id')
@@ -61,30 +74,96 @@ export const createProposalCard = async (data: CreateProposalCardData): Promise<
     .from('modul8_proposal_cards')
     .insert({
       request_id: data.request_id,
-      provider_id: (await supabase.auth.getUser()).data.user?.id || '',
+      provider_id: userData.user.id,
+      submitted_by: userData.user.id,
+      response_to_card_id: data.response_to_card_id,
+      card_number: nextCardNumber,
       title: data.negotiated_title || 'Proposal',
       description: data.negotiated_description || '',
       proposed_budget: data.negotiated_budget_range?.min || 0,
-      proposed_timeline: data.negotiated_timeline || ''
+      proposed_timeline: data.negotiated_timeline || '',
+      notes: data.notes,
+      scope_link: data.scope_link,
+      terms_link: data.terms_link,
+      asset_links: data.asset_links || [],
+      negotiated_title: data.negotiated_title,
+      negotiated_description: data.negotiated_description,
+      negotiated_budget_range: data.negotiated_budget_range,
+      negotiated_timeline: data.negotiated_timeline,
+      status: 'pending'
     })
     .select()
     .single();
 
   if (error) throw error;
+
+  // Log cross-platform activity
+  try {
+    await logCrossPlatformActivity({
+      service_request_id: data.request_id,
+      user_id: userData.user.id,
+      platform: 'modul8', // Could be 'labr8' if called from Lab-R8
+      activity_type: 'proposal_created',
+      activity_data: {
+        card_id: card.id,
+        proposal_title: data.negotiated_title,
+        proposal_budget: data.negotiated_budget_range,
+        proposal_timeline: data.negotiated_timeline
+      }
+    });
+
+    // Get organizer to send notification
+    const { data: serviceRequest } = await supabase
+      .from('modul8_service_requests')
+      .select('organizer_id, title')
+      .eq('id', data.request_id)
+      .single();
+
+    if (serviceRequest) {
+      const { data: organizer } = await supabase
+        .from('modul8_organizers')
+        .select('user_id')
+        .eq('id', serviceRequest.organizer_id)
+        .single();
+
+      if (organizer) {
+        await createCrossPlatformNotification({
+          recipient_id: organizer.user_id,
+          sender_id: userData.user.id,
+          service_request_id: data.request_id,
+          notification_type: 'new_proposal',
+          title: 'New Proposal Received',
+          message: `A new proposal has been submitted for "${serviceRequest.title}"`,
+          platform_context: 'both',
+          data: { card_id: card.id }
+        });
+      }
+    }
+  } catch (crossPlatformError) {
+    console.error('Cross-platform logging failed:', crossPlatformError);
+    // Don't fail the main operation if cross-platform features fail
+  }
+
   return {
     id: card.id,
     request_id: card.request_id,
-    submitted_by: card.provider_id,
-    card_number: nextCardNumber,
+    submitted_by: card.submitted_by,
+    response_to_card_id: card.response_to_card_id,
+    card_number: card.card_number,
     status: card.status as any,
-    asset_links: [],
-    negotiated_title: card.title,
-    negotiated_description: card.description,
-    negotiated_budget_range: card.proposed_budget ? { min: card.proposed_budget, max: card.proposed_budget, currency: 'USD' } : undefined,
-    negotiated_timeline: card.proposed_timeline,
-    is_locked: false,
+    notes: card.notes,
+    scope_link: card.scope_link,
+    terms_link: card.terms_link,
+    asset_links: card.asset_links || [],
+    negotiated_title: card.negotiated_title || card.title,
+    negotiated_description: card.negotiated_description || card.description,
+    negotiated_budget_range: card.negotiated_budget_range || (card.proposed_budget ? { min: card.proposed_budget, max: card.proposed_budget, currency: 'USD' } : undefined),
+    negotiated_timeline: card.negotiated_timeline || card.proposed_timeline,
+    is_locked: card.is_locked || false,
     created_at: card.created_at,
     updated_at: card.updated_at,
+    responded_at: card.responded_at,
+    responded_by: card.responded_by,
     deel_contract_url: card.deel_contract_url
   } as ProposalCard;
 };
@@ -104,9 +183,9 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
     
     // Check if user has already responded to this card
     const { data: existingResponse, error: checkError } = await supabase
-      .from('modul8_service_request_comments')
+      .from('modul8_proposal_card_responses')
       .select('*')
-      .eq('service_request_id', data.card_id)
+      .eq('card_id', data.card_id)
       .eq('user_id', userData.user.id)
       .single();
     
@@ -122,16 +201,16 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
     
     // Insert the response
     const responsePayload = {
-      service_request_id: data.card_id,
-      content: data.response_notes || `${data.response_type} proposal`,
+      card_id: data.card_id,
       user_id: userData.user.id,
-      comment_type: data.response_type
+      response_type: data.response_type,
+      response_notes: data.response_notes || `${data.response_type} proposal`
     };
     
     console.log('📝 Inserting response payload:', responsePayload);
     
     const { data: response, error } = await supabase
-      .from('modul8_service_request_comments')
+      .from('modul8_proposal_card_responses')
       .insert(responsePayload)
       .select()
       .single();
@@ -149,6 +228,44 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
 
     console.log('✅ Response created successfully:', response);
     
+    // Log cross-platform activity
+    try {
+      await logCrossPlatformActivity({
+        service_request_id: response.card_id, // Using card_id as service_request_id for activity tracking
+        user_id: userData.user.id,
+        platform: 'modul8', // Could be 'labr8' if called from Lab-R8
+        activity_type: `proposal_${data.response_type}`,
+        activity_data: {
+          card_id: data.card_id,
+          response_type: data.response_type,
+          response_notes: data.response_notes
+        }
+      });
+
+      // Send notification to the proposal submitter
+      const { data: proposalCard } = await supabase
+        .from('modul8_proposal_cards')
+        .select('submitted_by, title')
+        .eq('id', data.card_id)
+        .single();
+
+      if (proposalCard && proposalCard.submitted_by !== userData.user.id) {
+        await createCrossPlatformNotification({
+          recipient_id: proposalCard.submitted_by,
+          sender_id: userData.user.id,
+          service_request_id: data.card_id,
+          notification_type: `proposal_${data.response_type}`,
+          title: `Proposal ${data.response_type.charAt(0).toUpperCase() + data.response_type.slice(1)}ed`,
+          message: `Your proposal "${proposalCard.title}" has been ${data.response_type}ed`,
+          platform_context: 'both',
+          data: { card_id: data.card_id, response_type: data.response_type }
+        });
+      }
+    } catch (crossPlatformError) {
+      console.error('Cross-platform logging failed:', crossPlatformError);
+      // Don't fail the main operation if cross-platform features fail
+    }
+    
     // Check for mutual acceptance and create finalization card if needed
     if (data.response_type === 'accept') {
       const mutualAcceptance = await checkMutualAcceptance(data.card_id);
@@ -162,7 +279,7 @@ export const respondToProposalCard = async (data: CreateProposalResponseData): P
       card_id: data.card_id,
       response_type: data.response_type,
       responded_by: userData.user.id,
-      response_notes: response.content,
+      response_notes: response.response_notes,
       created_at: response.created_at
     } as ProposalCardResponse;
   } catch (error) {
@@ -309,10 +426,10 @@ export const createCounterProposalFromCard = async (
 
 export const checkMutualAcceptance = async (cardId: string): Promise<boolean> => {
   const { data, error } = await supabase
-    .from('modul8_service_request_comments')
+    .from('modul8_proposal_card_responses')
     .select('user_id')
-    .eq('service_request_id', cardId)
-    .eq('comment_type', 'accept');
+    .eq('card_id', cardId)
+    .eq('response_type', 'accept');
 
   if (error) throw error;
   
@@ -352,17 +469,40 @@ export const getRequestComments = async (requestId: string): Promise<RequestComm
 };
 
 export const createRequestComment = async (data: CreateCommentData): Promise<RequestComment> => {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) {
+    throw new Error('User not authenticated');
+  }
+
   const { data: comment, error } = await supabase
     .from('modul8_service_request_comments')
     .insert({
       service_request_id: data.request_id,
       content: data.content,
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      user_id: userData.user.id
     })
     .select()
     .single();
 
   if (error) throw error;
+
+  // Log cross-platform activity
+  try {
+    await logCrossPlatformActivity({
+      service_request_id: data.request_id,
+      user_id: userData.user.id,
+      platform: 'modul8', // Could be 'labr8' if called from Lab-R8
+      activity_type: 'comment_created',
+      activity_data: {
+        comment_id: comment.id,
+        content_preview: data.content.substring(0, 100)
+      }
+    });
+  } catch (crossPlatformError) {
+    console.error('Cross-platform logging failed:', crossPlatformError);
+    // Don't fail the main operation if cross-platform features fail
+  }
+
   return {
     id: comment.id,
     request_id: data.request_id,
@@ -378,9 +518,9 @@ export const getProposalCardResponses = async (cardId: string): Promise<Proposal
   console.log('🔍 Fetching responses for card:', cardId);
   
   const { data, error } = await supabase
-    .from('modul8_service_request_comments')
+    .from('modul8_proposal_card_responses')
     .select('*')
-    .eq('service_request_id', cardId)
+    .eq('card_id', cardId)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -389,12 +529,12 @@ export const getProposalCardResponses = async (cardId: string): Promise<Proposal
   }
   
   console.log('📊 Found responses:', data?.length || 0, data);
-  return (data || []).map(comment => ({
-    id: comment.id,
-    card_id: cardId,
-    response_type: 'accept' as const,
-    responded_by: comment.user_id,
-    response_notes: comment.content,
-    created_at: comment.created_at
+  return (data || []).map(response => ({
+    id: response.id,
+    card_id: response.card_id,
+    response_type: response.response_type as 'accept' | 'reject' | 'counter' | 'cancel',
+    responded_by: response.user_id,
+    response_notes: response.response_notes,
+    created_at: response.created_at
   })) as ProposalCardResponse[];
 };

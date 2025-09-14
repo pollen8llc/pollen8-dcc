@@ -114,8 +114,8 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
         {
           event: '*',
           schema: 'public',
-          table: 'modul8_request_comments',
-          filter: `request_id=eq.${requestId}`
+          table: 'modul8_service_request_comments',
+          filter: `service_request_id=eq.${requestId}`
         },
         () => {
           loadThreadData();

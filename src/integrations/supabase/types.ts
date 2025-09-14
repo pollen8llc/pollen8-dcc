@@ -1115,43 +1115,123 @@ export type Database = {
         }
         Relationships: []
       }
+      modul8_proposal_card_responses: {
+        Row: {
+          card_id: string
+          created_at: string
+          id: string
+          response_notes: string | null
+          response_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          id?: string
+          response_notes?: string | null
+          response_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          id?: string
+          response_notes?: string | null
+          response_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_proposal_card_responses_card_id"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "modul8_proposal_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modul8_proposal_cards: {
         Row: {
+          asset_links: string[] | null
+          card_number: number | null
           created_at: string
           deel_contract_url: string | null
           description: string | null
           id: string
+          is_locked: boolean | null
+          negotiated_budget_range: Json | null
+          negotiated_description: string | null
+          negotiated_timeline: string | null
+          negotiated_title: string | null
+          notes: string | null
           proposed_budget: number | null
           proposed_timeline: string | null
           provider_id: string
           request_id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_to_card_id: string | null
+          scope_link: string | null
           status: string
+          submitted_by: string | null
+          terms_link: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          asset_links?: string[] | null
+          card_number?: number | null
           created_at?: string
           deel_contract_url?: string | null
           description?: string | null
           id?: string
+          is_locked?: boolean | null
+          negotiated_budget_range?: Json | null
+          negotiated_description?: string | null
+          negotiated_timeline?: string | null
+          negotiated_title?: string | null
+          notes?: string | null
           proposed_budget?: number | null
           proposed_timeline?: string | null
           provider_id: string
           request_id: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_to_card_id?: string | null
+          scope_link?: string | null
           status?: string
+          submitted_by?: string | null
+          terms_link?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          asset_links?: string[] | null
+          card_number?: number | null
           created_at?: string
           deel_contract_url?: string | null
           description?: string | null
           id?: string
+          is_locked?: boolean | null
+          negotiated_budget_range?: Json | null
+          negotiated_description?: string | null
+          negotiated_timeline?: string | null
+          negotiated_title?: string | null
+          notes?: string | null
           proposed_budget?: number | null
           proposed_timeline?: string | null
           provider_id?: string
           request_id?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_to_card_id?: string | null
+          scope_link?: string | null
           status?: string
+          submitted_by?: string | null
+          terms_link?: string | null
           title?: string
           updated_at?: string
         }
