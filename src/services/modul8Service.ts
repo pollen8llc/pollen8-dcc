@@ -9,6 +9,7 @@ import {
   CreateServiceRequestData,
   CreateProposalData
 } from "@/types/modul8";
+import { getProjectMilestones } from "./modul8ProjectService";
 
 export const createServiceProvider = async (data: CreateServiceProviderData): Promise<ServiceProvider> => {
   // Map the data to match database column names
@@ -194,10 +195,19 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
     }
   }
   
+  // Load milestones for the request
+  let milestones: string[] = [];
+  try {
+    const projectMilestones = await getProjectMilestones(request.id);
+    milestones = projectMilestones.map(m => m.title);
+  } catch (error) {
+    console.warn('Failed to load milestones for request:', request.id, error);
+  }
+
   return {
     ...request,
     budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : request.budget_range,
-    milestones: [],
+    milestones,
     service_provider: request.service_provider ? {
       ...request.service_provider,
       services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
@@ -229,10 +239,19 @@ export const updateServiceRequest = async (
   
   if (error) throw error;
   
+  // Load milestones for the request
+  let milestones: string[] = [];
+  try {
+    const projectMilestones = await getProjectMilestones(request.id);
+    milestones = projectMilestones.map(m => m.title);
+  } catch (error) {
+    console.warn('Failed to load milestones for request:', request.id, error);
+  }
+
   return {
     ...request,
     budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : request.budget_range,
-    milestones: [],
+    milestones,
     service_provider: request.service_provider ? {
       ...request.service_provider,
       services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
@@ -258,10 +277,19 @@ export const getServiceRequestById = async (id: string): Promise<ServiceRequest 
   
   if (!data) return null;
   
+  // Load milestones for the request
+  let milestones: string[] = [];
+  try {
+    const projectMilestones = await getProjectMilestones(data.id);
+    milestones = projectMilestones.map(m => m.title);
+  } catch (error) {
+    console.warn('Failed to load milestones for request:', data.id, error);
+  }
+  
   return {
     ...data,
     budget_range: typeof data.budget_range === 'string' ? JSON.parse(data.budget_range) : { currency: 'USD' },
-    milestones: [],
+    milestones,
     service_provider: data.service_provider ? {
       ...data.service_provider,
       services: Array.isArray(data.service_provider.services_offered) ? data.service_provider.services_offered : [],
@@ -282,6 +310,46 @@ export const deleteServiceRequest = async (id: string): Promise<void> => {
   if (error) throw error;
 };
 
+// Helper function to load milestones for multiple requests
+const loadMilestonesForRequests = async (requests: any[]): Promise<ServiceRequest[]> => {
+  // Batch fetch milestones for all requests
+  const requestIds = requests.map(r => r.id);
+  const milestonesMap: Record<string, string[]> = {};
+  
+  try {
+    // Fetch milestones for all requests at once
+    const { data: allMilestones, error } = await supabase
+      .from('modul8_project_milestones')
+      .select('service_request_id, title')
+      .in('service_request_id', requestIds)
+      .order('order_index', { ascending: true });
+    
+    if (!error && allMilestones) {
+      allMilestones.forEach(milestone => {
+        if (!milestonesMap[milestone.service_request_id]) {
+          milestonesMap[milestone.service_request_id] = [];
+        }
+        milestonesMap[milestone.service_request_id].push(milestone.title);
+      });
+    }
+  } catch (error) {
+    console.warn('Failed to batch load milestones:', error);
+  }
+  
+  return requests.map(request => ({
+    ...request,
+    budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
+    milestones: milestonesMap[request.id] || [],
+    service_provider: request.service_provider ? {
+      ...request.service_provider,
+      services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
+      pricing_range: { currency: 'USD' },
+      tags: [],
+      domain_specializations: []
+    } : undefined
+  })) as ServiceRequest[];
+};
+
 export const getOrganizerServiceRequests = async (organizerId: string): Promise<ServiceRequest[]> => {
   const { data, error } = await supabase
     .from('modul8_service_requests')
@@ -295,18 +363,7 @@ export const getOrganizerServiceRequests = async (organizerId: string): Promise<
   
   if (error) throw error;
   
-  return ((data || []) as any[]).map(request => ({
-    ...request,
-    budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
-    milestones: [],
-    service_provider: request.service_provider ? {
-      ...request.service_provider,
-      services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
-      pricing_range: { currency: 'USD' },
-      tags: [],
-      domain_specializations: []
-    } : undefined
-  })) as ServiceRequest[];
+  return loadMilestonesForRequests((data || []) as any[]);
 };
 
 export const getProviderServiceRequests = async (providerId: string): Promise<ServiceRequest[]> => {
@@ -326,18 +383,7 @@ export const getProviderServiceRequests = async (providerId: string): Promise<Se
       throw error;
     }
 
-    return ((data || []) as any[]).map(request => ({
-      ...request,
-      budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
-      milestones: [],
-      service_provider: request.service_provider ? {
-        ...request.service_provider,
-        services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
-        pricing_range: { currency: 'USD' },
-        tags: [],
-        domain_specializations: []
-      } : undefined
-    })) as ServiceRequest[];
+    return loadMilestonesForRequests((data || []) as any[]);
   } catch (error) {
     console.error('Error in getProviderServiceRequests:', error);
     throw error;
@@ -375,18 +421,7 @@ export const getAvailableServiceRequestsForProvider = async (providerId: string)
       throw error;
     }
 
-    return ((data || []) as any[]).map(request => ({
-      ...request,
-      budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
-      milestones: [],
-      service_provider: request.service_provider ? {
-        ...request.service_provider,
-        services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
-        pricing_range: { currency: 'USD' },
-        tags: [],
-        domain_specializations: []
-      } : undefined
-    })) as ServiceRequest[];
+    return loadMilestonesForRequests((data || []) as any[]);
   } catch (error) {
     console.error('Error in getAvailableServiceRequestsForProvider:', error);
     throw error;
@@ -405,18 +440,7 @@ export const getAllServiceRequests = async (): Promise<ServiceRequest[]> => {
   
   if (error) throw error;
   
-  return ((data || []) as any[]).map(request => ({
-    ...request,
-    budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : { currency: 'USD' },
-    milestones: [],
-    service_provider: request.service_provider ? {
-      ...request.service_provider,
-      services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
-      pricing_range: { currency: 'USD' },
-      tags: [],
-      domain_specializations: []
-    } : undefined
-  })) as ServiceRequest[];
+  return loadMilestonesForRequests((data || []) as any[]);
 };
 
 export const createProposal = async (data: CreateProposalData): Promise<Proposal> => {
