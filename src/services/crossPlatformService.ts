@@ -47,9 +47,7 @@ const transformServiceRequest = (dbRequest: any): ServiceRequest => {
     budget_range: typeof dbRequest.budget_range === 'object' && dbRequest.budget_range !== null 
       ? dbRequest.budget_range as { min?: number; max?: number; currency: string }
       : { currency: 'USD' },
-    milestones: Array.isArray(dbRequest.milestones) 
-      ? dbRequest.milestones 
-      : [],
+    milestones: [], // Milestones will be fetched separately from modul8_project_milestones
     status: dbRequest.status as ServiceRequest['status'],
     engagement_status: dbRequest.engagement_status as ServiceRequest['engagement_status']
   };
@@ -229,7 +227,7 @@ export const getActivityLog = async (serviceRequestId: string): Promise<Activity
 
 // Enhanced service request operations with cross-platform integration
 export const getServiceRequestWithNegotiationStatus = async (serviceRequestId: string) => {
-  const [serviceRequest, negotiationStatus, activityLog] = await Promise.all([
+  const [serviceRequest, negotiationStatus, activityLog, milestones] = await Promise.all([
     supabase
       .from('modul8_service_requests')
       .select(`
@@ -240,13 +238,22 @@ export const getServiceRequestWithNegotiationStatus = async (serviceRequestId: s
       .eq('id', serviceRequestId)
       .single(),
     getNegotiationStatus(serviceRequestId),
-    getActivityLog(serviceRequestId)
+    getActivityLog(serviceRequestId),
+    supabase
+      .from('modul8_project_milestones')
+      .select('title')
+      .eq('service_request_id', serviceRequestId)
+      .order('order_index', { ascending: true })
   ]);
 
   if (serviceRequest.error) throw serviceRequest.error;
 
+  const transformedRequest = transformServiceRequest(serviceRequest.data);
+  // Add milestones from separate table
+  transformedRequest.milestones = milestones.data?.map(m => m.title) || [];
+
   return {
-    serviceRequest: transformServiceRequest(serviceRequest.data),
+    serviceRequest: transformedRequest,
     negotiationStatus,
     activityLog
   };

@@ -154,11 +154,14 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
   console.log('👤 Authenticated user:', userData.user.id);
   console.log('📝 Creating service request...');
   
+  // Sanitize data - extract milestones before inserting service request
+  const { milestones, ...sanitizedData } = data;
+  
   const { data: request, error } = await (supabase as any)
     .from('modul8_service_requests')
     .insert({
-      ...data,
-      budget_range: JSON.stringify(data.budget_range)
+      ...sanitizedData,
+      budget_range: JSON.stringify(sanitizedData.budget_range)
     })
     .select(`
       *,
@@ -180,6 +183,31 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
   
   console.log('✅ Service request created in database:', request.id);
   
+  // Create milestones if provided
+  if (milestones && Array.isArray(milestones) && milestones.length > 0) {
+    try {
+      console.log('🎯 Creating milestones for request:', request.id);
+      const milestonesToCreate = milestones.map((milestone: any, index: number) => ({
+        service_request_id: request.id,
+        title: typeof milestone === 'string' ? milestone : (milestone?.title || `Milestone ${index + 1}`),
+        description: typeof milestone === 'object' && milestone ? milestone.description : null,
+        order_index: index
+      }));
+      
+      const { error: milestonesError } = await supabase
+        .from('modul8_project_milestones')
+        .insert(milestonesToCreate);
+        
+      if (milestonesError) {
+        console.warn('⚠️ Failed to create milestones:', milestonesError);
+      } else {
+        console.log('✅ Milestones created successfully');
+      }
+    } catch (milestonesError) {
+      console.warn('⚠️ Error creating milestones:', milestonesError);
+    }
+  }
+  
   // If assigned to a specific provider, use the new assignment function
   if (data.service_provider_id) {
     console.log('Assigning request to provider:', data.service_provider_id);
@@ -196,10 +224,10 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
   }
   
   // Load milestones for the request
-  let milestones: string[] = [];
+  let requestMilestones: string[] = [];
   try {
     const projectMilestones = await getProjectMilestones(request.id);
-    milestones = projectMilestones.map(m => m.title);
+    requestMilestones = projectMilestones.map(m => m.title);
   } catch (error) {
     console.warn('Failed to load milestones for request:', request.id, error);
   }
@@ -207,7 +235,7 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
   return {
     ...request,
     budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : request.budget_range,
-    milestones,
+    milestones: requestMilestones,
     service_provider: request.service_provider ? {
       ...request.service_provider,
       services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
@@ -222,10 +250,14 @@ export const updateServiceRequest = async (
   id: string, 
   data: Partial<ServiceRequest>
 ): Promise<ServiceRequest> => {
+  // Sanitize data - remove milestones as they should not be written to service_requests table
+  const { milestones, ...sanitizedData } = data;
+  
   const updateData = {
-    ...data,
-    budget_range: data.budget_range ? JSON.stringify(data.budget_range) : undefined
+    ...sanitizedData,
+    budget_range: sanitizedData.budget_range ? JSON.stringify(sanitizedData.budget_range) : undefined
   };
+  
   const { data: request, error } = await supabase
     .from('modul8_service_requests')
     .update(updateData as any)
@@ -240,10 +272,10 @@ export const updateServiceRequest = async (
   if (error) throw error;
   
   // Load milestones for the request
-  let milestones: string[] = [];
+  let milestonesArray: string[] = [];
   try {
     const projectMilestones = await getProjectMilestones(request.id);
-    milestones = projectMilestones.map(m => m.title);
+    milestonesArray = projectMilestones.map(m => m.title);
   } catch (error) {
     console.warn('Failed to load milestones for request:', request.id, error);
   }
@@ -251,7 +283,7 @@ export const updateServiceRequest = async (
   return {
     ...request,
     budget_range: typeof request.budget_range === 'string' ? JSON.parse(request.budget_range) : request.budget_range,
-    milestones,
+    milestones: milestonesArray,
     service_provider: request.service_provider ? {
       ...request.service_provider,
       services: Array.isArray(request.service_provider.services_offered) ? request.service_provider.services_offered : [],
