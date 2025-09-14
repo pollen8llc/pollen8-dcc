@@ -799,6 +799,92 @@ export type Database = {
           },
         ]
       }
+      lexicon: {
+        Row: {
+          created_at: string | null
+          first_used_at: string | null
+          first_user_id: string | null
+          id: string
+          is_active: boolean | null
+          is_suggested: boolean | null
+          last_used_at: string | null
+          metadata: Json | null
+          source_module: string | null
+          term: string
+          term_type: string
+          updated_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          first_used_at?: string | null
+          first_user_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_suggested?: boolean | null
+          last_used_at?: string | null
+          metadata?: Json | null
+          source_module?: string | null
+          term: string
+          term_type: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          first_used_at?: string | null
+          first_user_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_suggested?: boolean | null
+          last_used_at?: string | null
+          metadata?: Json | null
+          source_module?: string | null
+          term?: string
+          term_type?: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
+      lexicon_usage: {
+        Row: {
+          id: string
+          lexicon_id: string
+          source_field: string
+          source_record_id: string
+          source_table: string
+          used_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          lexicon_id: string
+          source_field: string
+          source_record_id: string
+          source_table: string
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          lexicon_id?: string
+          source_field?: string
+          source_record_id?: string
+          source_table?: string
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lexicon_usage_lexicon_id_fkey"
+            columns: ["lexicon_id"]
+            isOneToOne: false
+            referencedRelation: "lexicon"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modul8_deals: {
         Row: {
           created_at: string
@@ -2492,6 +2578,18 @@ export type Database = {
           vote_count: number
         }[]
       }
+      get_lexicon_analytics: {
+        Args: { p_days_back?: number; p_term_type?: string }
+        Returns: {
+          first_used_at: string
+          first_user_name: string
+          recent_usage: number
+          term: string
+          term_type: string
+          total_usage: number
+          unique_users: number
+        }[]
+      }
       get_managed_communities: {
         Args: { user_id: string }
         Returns: {
@@ -2521,6 +2619,15 @@ export type Database = {
       get_rel8t_metrics: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_term_suggestions: {
+        Args: { p_limit?: number; p_search_query?: string; p_term_type: string }
+        Returns: {
+          first_user_name: string
+          id: string
+          term: string
+          usage_count: number
+        }[]
       }
       get_user_community_ids: {
         Args: { user_uuid: string }
@@ -2609,6 +2716,10 @@ export type Database = {
         Args: { event_id: string }
         Returns: boolean
       }
+      sync_existing_data_to_lexicon: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       update_article_vote_count: {
         Args: { article_uuid: string }
         Returns: undefined
@@ -2616,6 +2727,17 @@ export type Database = {
       update_comment_vote_count: {
         Args: { comment_uuid: string }
         Returns: number
+      }
+      update_lexicon_usage: {
+        Args: {
+          p_source_field: string
+          p_source_record_id: string
+          p_source_table: string
+          p_term: string
+          p_term_type: string
+          p_user_id?: string
+        }
+        Returns: string
       }
       update_module_completion: {
         Args: { is_complete?: boolean; module_name: string; user_id: string }
