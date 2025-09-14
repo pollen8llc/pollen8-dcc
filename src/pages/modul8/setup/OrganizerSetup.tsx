@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, MapPin } from 'lucide-react';
+import { LocationSelector } from '@/components/ui/location-selector';
 import Navbar from '@/components/Navbar';
 import { toast } from '@/hooks/use-toast';
 
@@ -23,6 +24,7 @@ const OrganizerSetup = () => {
     organization_name: '',
     description: '',
     logo_url: '',
+    location: '',
     focus_areas: [] as string[]
   });
   
@@ -190,6 +192,17 @@ const OrganizerSetup = () => {
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder="Describe your organization and mission..."
                     rows={4}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Location</Label>
+                  <LocationSelector
+                    value={formData.location || ''}
+                    onValueChange={(location) => setFormData(prev => ({ ...prev, location }))}
+                    placeholder="Select organization location"
+                    allowCustomInput={true}
+                    showHierarchy={true}
                   />
                 </div>
 

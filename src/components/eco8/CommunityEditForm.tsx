@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Community } from '@/hooks/useCommunities';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, X, Plus } from 'lucide-react';
+import { LocationSelector } from '@/components/ui/location-selector';
 
 interface CommunityEditFormProps {
   community: Community;
@@ -287,10 +288,12 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
 
             <div>
               <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                {...register('location')}
-                placeholder="e.g., San Francisco, Remote"
+              <LocationSelector
+                value={watch('location')}
+                onValueChange={(value) => setValue('location', value)}
+                placeholder="Select community location"
+                allowCustomInput={true}
+                showHierarchy={true}
               />
             </div>
           </div>

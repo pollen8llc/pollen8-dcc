@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, X, Save, User, Link, MapPin, Settings } from "lucide-react";
+import { PlusCircle, X, Save, User, Link, Settings } from "lucide-react";
+import { LocationSelector } from "@/components/ui/location-selector";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -289,10 +290,13 @@ const ProfileEdit: React.FC<ProfileEditProps> = ({ profile, onUpdate, onCancel }
                     <FormItem>
                       <FormLabel>Location</FormLabel>
                       <FormControl>
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <Input placeholder="San Francisco, CA" {...field} />
-                        </div>
+                        <LocationSelector
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Select your location"
+                          allowCustomInput={true}
+                          showHierarchy={true}
+                        />
                       </FormControl>
                       <FormDescription>
                         Share your city or country

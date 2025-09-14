@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, MapPin } from 'lucide-react';
+import { LocationSelector } from '@/components/ui/location-selector';
 import Navbar from '@/components/Navbar';
 import { toast } from '@/hooks/use-toast';
 
@@ -24,6 +25,7 @@ const ServiceProviderSetup = () => {
     tagline: '',
     description: '',
     logo_url: '',
+    location: '',
     services: [] as string[],
     tags: [] as string[],
     pricing_range: {
@@ -184,6 +186,17 @@ const ServiceProviderSetup = () => {
                     value={formData.logo_url}
                     onChange={(e) => setFormData(prev => ({ ...prev, logo_url: e.target.value }))}
                     placeholder="https://example.com/logo.png"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Location</Label>
+                  <LocationSelector
+                    value={formData.location || ''}
+                    onValueChange={(location) => setFormData(prev => ({ ...prev, location }))}
+                    placeholder="Select business location"
+                    allowCustomInput={true}
+                    showHierarchy={true}
                   />
                 </div>
 

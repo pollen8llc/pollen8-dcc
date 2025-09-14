@@ -22,6 +22,7 @@ import {
   Building,
   Users
 } from "lucide-react";
+import { LocationSelector } from "@/components/ui/location-selector";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -203,13 +204,12 @@ const ContactForm = ({
               <Label htmlFor="location" className="text-sm font-medium flex items-center gap-1.5">
                 <MapPin className="h-4 w-4 text-muted-foreground" /> Location
               </Label>
-              <Input
-                id="location"
-                name="location"
+              <LocationSelector
                 value={values.location || ""}
-                onChange={handleChange}
-                placeholder="City, State, Country"
-                className="mt-1"
+                onValueChange={(value) => setValues({ ...values, location: value })}
+                placeholder="Select location"
+                allowCustomInput={true}
+                showHierarchy={true}
               />
             </div>
           </div>

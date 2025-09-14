@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { LocationSelector } from "@/components/ui/location-selector";
 import { 
   Select,
   SelectContent,
@@ -73,17 +74,13 @@ export function FilterArea({ onFilterChange }: FilterAreaProps) {
             </SelectContent>
           </Select>
 
-          <Select onValueChange={(value) => handleFilterChange("location", value)}>
-            <SelectTrigger className="transition-all duration-200 hover:border-primary/50">
-              <SelectValue placeholder="Location" />
-            </SelectTrigger>
-            <SelectContent className="animate-fade-in">
-              <SelectItem value="north-america">North America</SelectItem>
-              <SelectItem value="europe">Europe</SelectItem>
-              <SelectItem value="asia">Asia</SelectItem>
-              <SelectItem value="remote">Remote</SelectItem>
-            </SelectContent>
-          </Select>
+          <LocationSelector
+            value={filters.location || ""}
+            onValueChange={(value) => handleFilterChange("location", value)}
+            placeholder="Location"
+            allowCustomInput={false}
+            showHierarchy={true}
+          />
         </div>
       </CollapsibleContent>
     </Collapsible>
