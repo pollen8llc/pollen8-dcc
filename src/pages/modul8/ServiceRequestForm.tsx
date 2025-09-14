@@ -37,24 +37,59 @@ const ServiceRequestForm = () => {
   const [loading, setLoading] = useState(false);
   const [organizerData, setOrganizerData] = useState(null);
   const [selectedProvider, setSelectedProvider] = useState(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    console.log('🚀 ServiceRequestForm mounted, session:', !!session?.user);
+    
+    // Check authentication first
+    if (!session?.user?.id) {
+      console.log('❌ No session found, redirecting to auth');
+      navigate('/auth');
+      return;
+    }
+    
+    // Load data if authenticated
     loadOrganizerData();
     loadSelectedProvider();
+    setIsReady(true);
   }, [session?.user?.id]);
 
+  // Don't render the form until we've confirmed authentication
+  if (!session?.user?.id || !isReady) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const loadOrganizerData = async () => {
-    if (!session?.user?.id) return;
+    console.log('🔍 Loading organizer data for user:', session?.user?.id);
+    
+    if (!session?.user?.id) {
+      console.log('❌ No user session found, cannot load organizer data');
+      return;
+    }
     
     try {
+      console.log('📞 Calling getUserOrganizer...');
       const organizer = await getUserOrganizer(session.user.id);
+      console.log('📊 Organizer data result:', organizer);
+      
       if (!organizer) {
+        console.log('❌ No organizer found, redirecting to setup');
         navigate('/modul8/setup/organizer');
         return;
       }
+      
+      console.log('✅ Organizer data loaded successfully:', organizer.id);
       setOrganizerData(organizer);
     } catch (error) {
-      console.error('Error loading organizer data:', error);
+      console.error('❌ Error loading organizer data:', error);
       toast({
         title: "Error",
         description: "Failed to load organizer data",
@@ -75,11 +110,50 @@ const ServiceRequestForm = () => {
   };
 
   const handleSubmit = async (formData: any) => {
-    if (!organizerData) return;
+    // Check if user is authenticated before proceeding
+    if (!session?.user?.id) {
+      console.error('❌ No authenticated user session');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to create a service request",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (!organizerData) {
+      console.error('❌ No organizer data found');
+      toast({
+        title: "Setup Required", 
+        description: "Please complete organizer setup first",
+        variant: "destructive"
+      });
+      navigate('/modul8/setup/organizer');
+      return;
+    }
+    
+    console.log('🚀 Starting service request creation...', {
+      userId: session.user.id,
+      organizerId: organizerData.id,
+      formData
+    });
     
     setLoading(true);
     try {
       const budgetRange = parseBudgetRange(formData.budgetRange);
+      
+      console.log('📝 Service request payload:', {
+        organizer_id: organizerData.id,
+        domain_page: domainId,
+        title: formData.title,
+        description: formData.description,
+        budget_range: budgetRange,
+        timeline: formData.expectedCompletion,
+        service_provider_id: providerId || undefined,
+        status: providerId ? 'assigned' : 'pending',
+        engagement_status: providerId ? 'affiliated' : 'none'
+      });
 
       const serviceRequest = await createServiceRequest({
         organizer_id: organizerData.id,
@@ -94,6 +168,8 @@ const ServiceRequestForm = () => {
         engagement_status: providerId ? 'affiliated' : 'none'
       });
       
+      console.log('✅ Service request created successfully:', serviceRequest.id);
+      
       // Clear selected provider from session
       sessionStorage.removeItem('selectedProvider');
       
@@ -105,10 +181,18 @@ const ServiceRequestForm = () => {
       // Navigate to the request details page
       navigate(`/modul8/dashboard/request/${serviceRequest.id}`);
     } catch (error) {
-      console.error('Error creating service request:', error);
+      console.error('❌ Error creating service request:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        userId: session?.user?.id,
+        organizerData: !!organizerData,
+        organizerId: organizerData?.id
+      });
+      
       toast({
         title: "Error",
-        description: "Failed to create service request",
+        description: error.message || "Failed to create service request",
         variant: "destructive"
       });
     } finally {

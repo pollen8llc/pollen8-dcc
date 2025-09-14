@@ -141,7 +141,17 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
   status?: string;
   engagement_status?: string;
 }): Promise<ServiceRequest> => {
-  console.log('Creating service request with data:', data);
+  console.log('🔥 createServiceRequest called with data:', data);
+  
+  // Check authentication first
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) {
+    console.error('❌ Authentication error in createServiceRequest:', userError);
+    throw new Error('User not authenticated. Please log in and try again.');
+  }
+  
+  console.log('👤 Authenticated user:', userData.user.id);
+  console.log('📝 Creating service request...');
   
   const { data: request, error } = await (supabase as any)
     .from('modul8_service_requests')
@@ -156,7 +166,18 @@ export const createServiceRequest = async (data: CreateServiceRequestData & {
     `)
     .single();
   
-  if (error) throw error;
+  if (error) {
+    console.error('❌ Database error in createServiceRequest:', error);
+    console.error('Error details:', {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint
+    });
+    throw new Error(`Failed to create service request: ${error.message}`);
+  }
+  
+  console.log('✅ Service request created in database:', request.id);
   
   // If assigned to a specific provider, use the new assignment function
   if (data.service_provider_id) {
