@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
-import { Search, Users, MapPin, MessageSquare, UserPlus, Loader2 } from 'lucide-react';
+import { Search, Users, MapPin, Loader2 } from 'lucide-react';
 import { getAllProfiles, ExtendedProfile } from '@/services/profileService';
 import { UserRole } from '@/models/types';
 
 const SearchProfiles: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [profiles, setProfiles] = useState<ExtendedProfile[]>([]);
@@ -51,11 +52,6 @@ const SearchProfiles: React.FC = () => {
     return matchesSearch;
   });
 
-  const getInitials = (firstName?: string, lastName?: string) => {
-    const first = firstName?.[0] || '';
-    const last = lastName?.[0] || '';
-    return (first + last).toUpperCase();
-  };
 
   const getRoleName = (role?: UserRole) => {
     switch (role) {
@@ -70,15 +66,6 @@ const SearchProfiles: React.FC = () => {
     }
   };
 
-  const getConnectionButton = (profileId: string) => {
-    // For now, show connect button - this could be enhanced with actual connection status
-    return (
-      <Button size="sm" className="bg-gradient-to-r from-primary to-accent text-white border-0">
-        <UserPlus className="h-4 w-4 mr-2" />
-        Connect
-      </Button>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
@@ -147,66 +134,36 @@ const SearchProfiles: React.FC = () => {
 
         {/* Profile Grid */}
         {!isLoading && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredProfiles.map((profile) => {
               const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
               return (
-                <Card key={profile.id} className="hover:shadow-lg transition-all duration-300 border-2 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm hover:border-primary/30 hover:shadow-primary/10 hover:shadow-2xl group relative overflow-hidden">
+                <Card 
+                  key={profile.id} 
+                  onClick={() => navigate(`/profile/${profile.id}`)}
+                  className="cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm border-2 bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-2xl group relative overflow-hidden"
+                >
                   {/* Gradient border effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
                   
-                  <CardHeader className="pb-4 relative z-10">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-16 w-16 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
-                        <AvatarImage src={profile.avatar_url || undefined} />
-                        <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-accent/20">
-                          {getInitials(profile.first_name, profile.last_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <CardTitle className="text-lg group-hover:text-primary transition-colors">{fullName}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{getRoleName(profile.role)}</p>
+                  <CardContent className="p-5 relative z-10">
+                    <div className="flex items-center">
+                      <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={profile.avatar_url || undefined} />
+                          <AvatarFallback />
+                        </Avatar>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">{fullName}</h3>
+                        <p className="text-muted-foreground text-sm">{getRoleName(profile.role)}</p>
                         {profile.location && (
                           <div className="flex items-center gap-1 mt-1">
-                            <MapPin className="h-3 w-3 text-muted-foreground" />
-                            <p className="text-xs text-muted-foreground">{profile.location}</p>
+                            <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            <p className="text-xs text-muted-foreground truncate">{profile.location}</p>
                           </div>
                         )}
                       </div>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="relative z-10">
-                    {profile.bio && (
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                        {profile.bio}
-                      </p>
-                    )}
-
-                    {/* Interests */}
-                    {profile.interests && profile.interests.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {profile.interests.slice(0, 3).map((interest, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs bg-primary/10 hover:bg-primary/20 transition-colors">
-                            {interest}
-                          </Badge>
-                        ))}
-                        {profile.interests.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{profile.interests.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <Link to={`/profile/${profile.id}`} className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full hover:bg-primary/10 transition-colors">
-                          View Profile
-                        </Button>
-                      </Link>
-                      {getConnectionButton(profile.id)}
                     </div>
                   </CardContent>
                 </Card>
