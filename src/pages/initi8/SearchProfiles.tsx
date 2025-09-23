@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,87 +7,77 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
-import { Search, Users, MapPin, Filter, ArrowLeft, MessageSquare, UserPlus } from 'lucide-react';
+import { Search, Users, MapPin, MessageSquare, UserPlus, Loader2 } from 'lucide-react';
+import { getAllProfiles, ExtendedProfile } from '@/services/profileService';
+import { UserRole } from '@/models/types';
 
 const SearchProfiles: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [profiles, setProfiles] = useState<ExtendedProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock profile data - this would come from your API
-  const mockProfiles = [
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      role: 'Community Organizer',
-      location: 'San Francisco, CA',
-      bio: 'Passionate about tech communities and sustainable development.',
-      avatar: null,
-      interests: ['Technology', 'Sustainability', 'Community Building'],
-      connectionStatus: 'not_connected'
-    },
-    {
-      id: '2',
-      name: 'Marcus Chen',
-      role: 'Event Coordinator',
-      location: 'Austin, TX',
-      bio: 'Organizing creative events and workshops for local artists.',
-      avatar: null,
-      interests: ['Arts', 'Events', 'Creative Communities'],
-      connectionStatus: 'connected'
-    },
-    {
-      id: '3',
-      name: 'Elena Rodriguez',
-      role: 'Volunteer Manager',
-      location: 'Denver, CO',
-      bio: 'Managing volunteer programs for environmental conservation.',
-      avatar: null,
-      interests: ['Environment', 'Volunteering', 'Conservation'],
-      connectionStatus: 'pending'
-    }
-  ];
+  // Load profiles on component mount
+  useEffect(() => {
+    const loadProfiles = async () => {
+      setIsLoading(true);
+      try {
+        const allProfiles = await getAllProfiles();
+        setProfiles(allProfiles);
+      } catch (error) {
+        console.error('Failed to load profiles:', error);
+        setProfiles([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const filteredProfiles = mockProfiles.filter(profile => {
-    const matchesSearch = profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         profile.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         profile.interests.some(interest => 
+    loadProfiles();
+  }, []);
+
+  // Filter profiles based on search query and selected filter
+  const filteredProfiles = profiles.filter(profile => {
+    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+    const matchesSearch = fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (profile.bio?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                         (profile.interests?.some(interest => 
                            interest.toLowerCase().includes(searchQuery.toLowerCase())
-                         );
+                         ));
     
     if (selectedFilter === 'all') return matchesSearch;
-    if (selectedFilter === 'organizers') return matchesSearch && profile.role.includes('Organizer');
-    if (selectedFilter === 'volunteers') return matchesSearch && profile.role.includes('Volunteer');
+    if (selectedFilter === 'organizers') return matchesSearch && profile.role === UserRole.ORGANIZER;
+    if (selectedFilter === 'volunteers') return matchesSearch && (profile.role === UserRole.MEMBER || !profile.role);
     
     return matchesSearch;
   });
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const getInitials = (firstName?: string, lastName?: string) => {
+    const first = firstName?.[0] || '';
+    const last = lastName?.[0] || '';
+    return (first + last).toUpperCase();
   };
 
-  const getConnectionButton = (status: string, profileId: string) => {
-    switch (status) {
-      case 'connected':
-        return (
-          <Button variant="outline" size="sm">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Message
-          </Button>
-        );
-      case 'pending':
-        return (
-          <Button variant="secondary" size="sm" disabled>
-            Request Sent
-          </Button>
-        );
+  const getRoleName = (role?: UserRole) => {
+    switch (role) {
+      case UserRole.ORGANIZER:
+        return 'Community Organizer';
+      case UserRole.SERVICE_PROVIDER:
+        return 'Service Provider';
+      case UserRole.ADMIN:
+        return 'Administrator';
       default:
-        return (
-          <Button size="sm">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Connect
-          </Button>
-        );
+        return 'Community Member';
     }
+  };
+
+  const getConnectionButton = (profileId: string) => {
+    // For now, show connect button - this could be enhanced with actual connection status
+    return (
+      <Button size="sm" className="bg-gradient-to-r from-primary to-accent text-white border-0">
+        <UserPlus className="h-4 w-4 mr-2" />
+        Connect
+      </Button>
+    );
   };
 
   return (
@@ -97,20 +87,10 @@ const SearchProfiles: React.FC = () => {
 
       <div className="w-full px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Link to="/initi8">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
-          
+        <div className="mb-8">          
           <div className="flex items-center gap-3 mb-6">
             <Search className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Search Profiles</h1>
               <p className="text-muted-foreground">Discover and connect with organizers, volunteers, and community leaders</p>
             </div>
           </div>
@@ -147,76 +127,97 @@ const SearchProfiles: React.FC = () => {
                 size="sm"
                 onClick={() => setSelectedFilter('volunteers')}
               >
-                Volunteers
+                Members
               </Button>
             </div>
           </div>
 
           {/* Results Count */}
           <p className="text-sm text-muted-foreground mb-6">
-            {filteredProfiles.length} profile{filteredProfiles.length !== 1 ? 's' : ''} found
+            {isLoading ? 'Loading...' : `${filteredProfiles.length} profile${filteredProfiles.length !== 1 ? 's' : ''} found`}
           </p>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+
         {/* Profile Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProfiles.map((profile) => (
-            <Card key={profile.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={profile.avatar || undefined} />
-                    <AvatarFallback className="text-lg font-semibold">
-                      {getInitials(profile.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{profile.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{profile.role}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <MapPin className="h-3 w-3 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">{profile.location}</p>
+        {!isLoading && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProfiles.map((profile) => {
+              const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+              return (
+                <Card key={profile.id} className="hover:shadow-lg transition-all duration-300 border-2 bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-sm hover:border-primary/30 hover:shadow-primary/10 hover:shadow-2xl group relative overflow-hidden">
+                  {/* Gradient border effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+                  
+                  <CardHeader className="pb-4 relative z-10">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-16 w-16 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+                        <AvatarImage src={profile.avatar_url || undefined} />
+                        <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-accent/20">
+                          {getInitials(profile.first_name, profile.last_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">{fullName}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{getRoleName(profile.role)}</p>
+                        {profile.location && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <MapPin className="h-3 w-3 text-muted-foreground" />
+                            <p className="text-xs text-muted-foreground">{profile.location}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </CardHeader>
+                  </CardHeader>
 
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {profile.bio}
-                </p>
+                  <CardContent className="relative z-10">
+                    {profile.bio && (
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {profile.bio}
+                      </p>
+                    )}
 
-                {/* Interests */}
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {profile.interests.slice(0, 3).map((interest, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {interest}
-                    </Badge>
-                  ))}
-                  {profile.interests.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{profile.interests.length - 3}
-                    </Badge>
-                  )}
-                </div>
+                    {/* Interests */}
+                    {profile.interests && profile.interests.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {profile.interests.slice(0, 3).map((interest, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs bg-primary/10 hover:bg-primary/20 transition-colors">
+                            {interest}
+                          </Badge>
+                        ))}
+                        {profile.interests.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{profile.interests.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
 
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Link to={`/profile/${profile.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">
-                      View Profile
-                    </Button>
-                  </Link>
-                  {getConnectionButton(profile.connectionStatus, profile.id)}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      <Link to={`/profile/${profile.id}`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full hover:bg-primary/10 transition-colors">
+                          View Profile
+                        </Button>
+                      </Link>
+                      {getConnectionButton(profile.id)}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {/* Empty State */}
-        {filteredProfiles.length === 0 && (
-          <Card className="text-center py-12">
+        {!isLoading && filteredProfiles.length === 0 && (
+          <Card className="text-center py-12 bg-gradient-to-br from-card/60 to-card/30 backdrop-blur-sm border-dashed">
             <CardContent>
               <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
               <h3 className="text-lg font-semibold mb-2">No profiles found</h3>
