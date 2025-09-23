@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, BookOpen, MessageSquare, Quote, HelpCircle, BarChart3 } from 'lucide-react';
@@ -16,18 +15,21 @@ import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
 import { ContentType } from '@/models/knowledgeTypes';
 import LoadingSpinner from '@/components/ui/loading-spinner';
-
 const KnowledgeBase = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
-  
-  const { data: tags = [] } = useTags();
-  
+  const {
+    data: tags = []
+  } = useTags();
+
   // Fetch articles with current filters - Fixed the hook usage
-  const { data: articles = [], isLoading } = useArticles({
+  const {
+    data: articles = [],
+    isLoading
+  } = useArticles({
     searchQuery: searchQuery || undefined,
     tag: selectedTag || undefined,
     type: selectedType === 'all' ? undefined : selectedType,
@@ -35,36 +37,44 @@ const KnowledgeBase = () => {
   });
 
   // Content type options with icons
-  const contentTypes = [
-    { value: 'all', label: 'All Content', icon: BookOpen },
-    { value: 'article', label: 'Articles', icon: BookOpen },
-    { value: 'question', label: 'Questions', icon: HelpCircle },
-    { value: 'quote', label: 'Quotes', icon: Quote },
-    { value: 'poll', label: 'Polls', icon: BarChart3 }
-  ];
-
+  const contentTypes = [{
+    value: 'all',
+    label: 'All Content',
+    icon: BookOpen
+  }, {
+    value: 'article',
+    label: 'Articles',
+    icon: BookOpen
+  }, {
+    value: 'question',
+    label: 'Questions',
+    icon: HelpCircle
+  }, {
+    value: 'quote',
+    label: 'Quotes',
+    icon: Quote
+  }, {
+    value: 'poll',
+    label: 'Polls',
+    icon: BarChart3
+  }];
 
   // Get top 10 tags sorted by popularity
   const topTags = useMemo(() => {
     const sortedTags = [...tags].sort((a, b) => (b.count || 0) - (a.count || 0));
     return sortedTags.slice(0, 10);
   }, [tags]);
-
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedTag('');
     setSelectedType('all');
     setSortBy('newest');
   };
-
   const hasActiveFilters = searchQuery || selectedTag || selectedType !== 'all' || sortBy !== 'newest';
-
   const handleArticleClick = (articleId: string) => {
     navigate(`/knowledge/article/${articleId}`);
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
@@ -97,12 +107,7 @@ const KnowledgeBase = () => {
               {/* Search Bar */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search articles, questions, quotes..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+                <Input placeholder="Search articles, questions, quotes..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
               </div>
               
               {/* Filter Controls */}
@@ -113,16 +118,14 @@ const KnowledgeBase = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {contentTypes.map(type => {
-                      const Icon = type.icon;
-                      return (
-                        <SelectItem key={type.value} value={type.value}>
+                    const Icon = type.icon;
+                    return <SelectItem key={type.value} value={type.value}>
                           <div className="flex items-center">
                             <Icon className="h-4 w-4 mr-2" />
                             {type.label}
                           </div>
-                        </SelectItem>
-                      );
-                    })}
+                        </SelectItem>;
+                  })}
                   </SelectContent>
                 </Select>
                 
@@ -137,67 +140,28 @@ const KnowledgeBase = () => {
                   </SelectContent>
                 </Select>
                 
-                {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters}>
+                {hasActiveFilters && <Button variant="outline" onClick={clearFilters}>
                     <Filter className="h-4 w-4 mr-2" />
                     Clear Filters
-                  </Button>
-                )}
+                  </Button>}
               </div>
               
               {/* Top 10 Tags with Pulse Functionality */}
-              {topTags.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-3 text-white">Popular Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant={selectedTag === '' ? 'default' : 'secondary'}
-                      className="cursor-pointer whitespace-nowrap"
-                      onClick={() => setSelectedTag('')}
-                    >
-                      All Tags
-                    </Badge>
-                    {topTags.map((tag, index) => {
-                      const isVeryPopular = index < 3; // Top 3 get pulse animation
-                      return (
-                        <Badge
-                          key={tag.id}
-                          variant={selectedTag === tag.name ? 'default' : 'secondary'}
-                          className={`cursor-pointer whitespace-nowrap ${
-                            isVeryPopular ? 'animate-pulse' : ''
-                          }`}
-                          onClick={() => setSelectedTag(tag.name === selectedTag ? '' : tag.name)}
-                        >
-                          {tag.name}
-                          <span className="ml-1 opacity-70">
-                            ({tag.count})
-                          </span>
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              {topTags.length > 0}
             </div>
           </CardContent>
         </Card>
 
         {/* Content Area */}
         <div className="space-y-6">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
+          {isLoading ? <div className="flex items-center justify-center py-12">
               <LoadingSpinner size="lg" text="Loading knowledge base..." />
-            </div>
-          ) : articles.length === 0 ? (
-            <Card>
+            </div> : articles.length === 0 ? <Card>
               <CardContent className="p-12 text-center">
                 <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2 text-white">No content found</h3>
                 <p className="text-muted-foreground mb-4">
-                  {hasActiveFilters 
-                    ? "Try adjusting your filters or search terms"
-                    : "Be the first to share your knowledge!"
-                  }
+                  {hasActiveFilters ? "Try adjusting your filters or search terms" : "Be the first to share your knowledge!"}
                 </p>
                 <Button asChild>
                   <Link to="/knowledge/create">
@@ -206,20 +170,13 @@ const KnowledgeBase = () => {
                   </Link>
                 </Button>
               </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {articles.map(article => (
-                <div key={article.id} onClick={() => handleArticleClick(article.id)} className="cursor-pointer">
+            </Card> : <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {articles.map(article => <div key={article.id} onClick={() => handleArticleClick(article.id)} className="cursor-pointer">
                   <ArticleCard article={article} />
-                </div>
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div>}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default KnowledgeBase;
