@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -16,16 +15,22 @@ import CommunityAuditTable from "@/components/admin/CommunityAuditTable";
 import AdminMetrics from "@/pages/admin/AdminMetrics";
 import UserFlows from "@/pages/admin/UserFlows";
 import TechnicalDocumentationGenerator from "@/components/admin/TechnicalDocumentationGenerator";
-
 const AdminDashboard = () => {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || "overview";
-  const { currentUser } = useUser();
+  const {
+    currentUser
+  } = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     const ensureAdminInDatabase = async () => {
       if (currentUser?.id === "38a18dd6-4742-419b-b2c1-70dec5c51729") {
@@ -35,7 +40,7 @@ const AdminDashboard = () => {
             toast({
               title: "Admin role setup error",
               description: result.message,
-              variant: "destructive",
+              variant: "destructive"
             });
           }
         } catch (error) {
@@ -43,15 +48,12 @@ const AdminDashboard = () => {
         }
       }
     };
-
     ensureAdminInDatabase();
   }, [currentUser?.id, toast]);
 
   // Check if user is admin or organizer
-  const isAdmin = currentUser?.role === UserRole.ADMIN || (currentUser?.role as string) === 'ADMIN';
-  const isOrganizer = currentUser?.role === UserRole.ORGANIZER || (currentUser?.role as string) === 'ORGANIZER' ||
-                     (currentUser?.managedCommunities && currentUser.managedCommunities.length > 0);
-
+  const isAdmin = currentUser?.role === UserRole.ADMIN || currentUser?.role as string === 'ADMIN';
+  const isOrganizer = currentUser?.role === UserRole.ORGANIZER || currentUser?.role as string === 'ORGANIZER' || currentUser?.managedCommunities && currentUser.managedCommunities.length > 0;
   console.log('AdminDashboard: User permissions check', {
     currentUser: currentUser?.id,
     role: currentUser?.role,
@@ -63,21 +65,24 @@ const AdminDashboard = () => {
   // Redirect if user doesn't have permission
   useEffect(() => {
     if (!isAdmin && !isOrganizer) {
-      navigate("/", { replace: true });
+      navigate("/", {
+        replace: true
+      });
     }
   }, [isAdmin, isOrganizer, navigate]);
-
   useEffect(() => {
     if (activeTab !== "overview") {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('tab', activeTab);
-      navigate({ search: newSearchParams.toString() }, { replace: true });
+      navigate({
+        search: newSearchParams.toString()
+      }, {
+        replace: true
+      });
     }
   }, [activeTab, navigate, searchParams]);
-
   if (!isAdmin && !isOrganizer) {
-    return (
-      <div className="min-h-screen">
+    return <div className="min-h-screen">
         <Navbar />
         <div className="container mx-auto py-20 text-center">
           <h1 className="text-2xl font-bold">Access Denied</h1>
@@ -85,12 +90,9 @@ const AdminDashboard = () => {
             You don't have permission to access this page.
           </p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <Navbar />
       <div className="container mx-auto py-6 px-4">
         {/* Glassmorphic Header */}
@@ -101,45 +103,26 @@ const AdminDashboard = () => {
           <p className="text-muted-foreground">Platform oversight and analytics</p>
         </div>
         
-        {isAdmin && (
-          <div className="mb-10">
+        {isAdmin && <div className="mb-10">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               {/* Glassmorphic Tab List */}
               <TabsList className="w-full mb-8 glass-morphism border border-primary/20 bg-primary/5 backdrop-blur-md p-2 rounded-2xl">
-                <TabsTrigger 
-                  value="overview" 
-                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
-                >
+                <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   Overview
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="metrics" 
-                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
-                >
+                <TabsTrigger value="metrics" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   Metrics
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="flows" 
-                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
-                >
+                <TabsTrigger value="flows" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   User Flows
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="users" 
-                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
-                >
+                <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   User Management
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="avatars" 
-                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
-                >
+                <TabsTrigger value="avatars" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   Avatar Gallery
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="settings" 
-                  className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300"
-                >
+                <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   System Settings
                 </TabsTrigger>
               </TabsList>
@@ -147,9 +130,7 @@ const AdminDashboard = () => {
               <TabsContent value="overview" className="animate-fade-in">
                 <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                      <span className="text-black font-bold text-xl">⚡</span>
-                    </div>
+                    
                     <div>
                       <h2 className="text-2xl font-bold text-foreground">System Administration</h2>
                       <p className="text-muted-foreground">Welcome to the admin dashboard. Manage platform operations with ease.</p>
@@ -161,9 +142,7 @@ const AdminDashboard = () => {
                   {/* Enhanced Community Audit Section */}
                   <div className="mt-8 glass-morphism glass-morphism-hover rounded-2xl p-6 border border-primary/10">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                        <span className="text-primary font-bold">📊</span>
-                      </div>
+                      
                       <h3 className="text-xl font-semibold text-foreground">Community Creation Audit Log</h3>
                     </div>
                     <CommunityAuditTable />
@@ -244,11 +223,9 @@ const AdminDashboard = () => {
                 </div>
               </TabsContent>
             </Tabs>
-          </div>
-        )}
+          </div>}
         
-        {!isAdmin && isOrganizer && (
-          <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20 animate-fade-in">
+        {!isAdmin && isOrganizer && <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20 animate-fade-in">
             <div className="text-center py-12">
               <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
                 <span className="text-black text-3xl font-bold">👑</span>
@@ -259,11 +236,8 @@ const AdminDashboard = () => {
               </p>
               <AdminOverviewCards onTabChange={() => navigate("/organizer")} />
             </div>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AdminDashboard;
