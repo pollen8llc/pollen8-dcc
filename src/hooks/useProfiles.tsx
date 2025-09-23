@@ -12,6 +12,9 @@ export const useProfiles = () => {
 
   // Get a profile by user ID - returns UnifiedProfile format
   const getProfileById = async (userId: string): Promise<UnifiedProfile | null> => {
+    console.log('=== getProfileById DEBUG ===');
+    console.log('Fetching profile for userId:', userId);
+    
     setIsLoading(true);
     setError(null);
     
@@ -22,6 +25,9 @@ export const useProfiles = () => {
         .eq('user_id', userId)
         .maybeSingle();
       
+      console.log('Query result - data:', data);
+      console.log('Query result - error:', error);
+      
       if (error) {
         console.error("Error fetching profile:", error);
         setError(error.message);
@@ -29,6 +35,7 @@ export const useProfiles = () => {
       }
       
       if (!data) {
+        console.log('No profile found for userId:', userId);
         return null;
       }
       // Convert to UnifiedProfile format

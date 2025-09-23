@@ -140,7 +140,7 @@ const SearchProfiles: React.FC = () => {
               return (
                 <Card 
                   key={profile.id} 
-                  onClick={() => navigate(`/profile/${profile.id}`)}
+                  onClick={() => navigate(`/profile/${profile.user_id || profile.id}`)}
                   className="cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm border-2 bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-2xl group relative overflow-hidden"
                 >
                   {/* Gradient border effect */}
