@@ -11,29 +11,42 @@ import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useModuleCompletion } from "@/hooks/useModuleCompletion";
 import { useEffect } from "react";
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("outreach");
-  const { rel8_complete, loading: completionLoading } = useModuleCompletion();
-  
+  const {
+    rel8_complete,
+    loading: completionLoading
+  } = useModuleCompletion();
+
   // Get outreach status counts with shorter staleTime
-  const { data: outreachCounts = { today: 0, upcoming: 0, overdue: 0, completed: 0 } } = useQuery({
+  const {
+    data: outreachCounts = {
+      today: 0,
+      upcoming: 0,
+      overdue: 0,
+      completed: 0
+    }
+  } = useQuery({
     queryKey: ["outreach-counts"],
     queryFn: getOutreachStatusCounts,
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 1000 * 60 // 1 minute
   });
-  
+
   // Get contact count
-  const { data: contactCount = 0 } = useQuery({
+  const {
+    data: contactCount = 0
+  } = useQuery({
     queryKey: ["contact-count"],
-    queryFn: getContactCount,
+    queryFn: getContactCount
   });
 
   // Get categories for filters
-  const { data: categories = [] } = useQuery({
+  const {
+    data: categories = []
+  } = useQuery({
     queryKey: ["contact-categories"],
-    queryFn: getCategories,
+    queryFn: getCategories
   });
 
   // Handler for building rapport (renamed from handleCreateRelationship)
@@ -55,9 +68,7 @@ const Dashboard = () => {
     completedTasks: outreachCounts.completed,
     totalCategories: categories.length
   };
-  
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Rel8Header />
 
       {/* Full-width content below the header */}
@@ -203,11 +214,7 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button 
-                variant="ghost" 
-                className="w-full"
-                onClick={handleBuildRapport}
-              >
+              <Button variant="ghost" className="w-full" onClick={handleBuildRapport}>
                 Start Building
               </Button>
             </CardContent>
@@ -264,34 +271,10 @@ const Dashboard = () => {
             </Tabs>
 
             {/* Empty state */}
-            {outreachCounts.upcoming + outreachCounts.overdue === 0 && 
-              activeTab === "outreach" && (
-              <div className="text-center py-8 mt-6 border border-dashed rounded-lg">
-                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-                <h3 className="text-lg font-medium">No outreach tasks</h3>
-                <p className="text-muted-foreground mt-2 mb-4">
-                  Build rapport with your contacts to start nurturing your network
-                </p>
-                <div className="flex gap-2 justify-center">
-                  <Button onClick={handleBuildRapport}>
-                    <Heart className="h-4 w-4 mr-2" />
-                    Build Rapport
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate("/rel8/setup")}
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Run Setup
-                  </Button>
-                </div>
-              </div>
-            )}
+            {outreachCounts.upcoming + outreachCounts.overdue === 0 && activeTab === "outreach"}
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
