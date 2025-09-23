@@ -8,28 +8,11 @@ import Navbar from '@/components/Navbar';
 import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
 import { useUser } from '@/contexts/UserContext';
 import { supabase } from '@/integrations/supabase/client';
-
-import { 
-  Users, 
-  Search, 
-  Upload, 
-  Settings, 
-  MessageSquare,
-  UserPlus,
-  HeartHandshake,
-  UserCheck,
-  Mail,
-  Plus,
-  Calendar,
-  Activity,
-  AlertCircle,
-  Edit,
-  Crown,
-  Building
-} from 'lucide-react';
-
+import { Users, Search, Upload, Settings, MessageSquare, UserPlus, HeartHandshake, UserCheck, Mail, Plus, Calendar, Activity, AlertCircle, Edit, Crown, Building } from 'lucide-react';
 const Initi8Dashboard: React.FC = () => {
-  const { currentUser } = useUser();
+  const {
+    currentUser
+  } = useUser();
   const [isMessageCenterOpen, setIsMessageCenterOpen] = useState(false);
   const [hasExistingCommunity, setHasExistingCommunity] = useState<boolean | null>(null);
 
@@ -37,14 +20,11 @@ const Initi8Dashboard: React.FC = () => {
   useEffect(() => {
     const checkCommunities = async () => {
       if (!currentUser?.id) return;
-      
       try {
-        const { data, error } = await supabase
-          .from('communities')
-          .select('id')
-          .eq('owner_id', currentUser.id)
-          .limit(1);
-        
+        const {
+          data,
+          error
+        } = await supabase.from('communities').select('id').eq('owner_id', currentUser.id).limit(1);
         if (error) throw error;
         setHasExistingCommunity(data && data.length > 0);
       } catch (error) {
@@ -52,19 +32,18 @@ const Initi8Dashboard: React.FC = () => {
         setHasExistingCommunity(false);
       }
     };
-    
     checkCommunities();
   }, [currentUser?.id]);
-
   const quickStats = {
-    totalProfiles: 0, // This would come from profiles data
-    activeVolunteers: 0, // This would come from volunteers data
-    totalMessages: 0, // This would come from messages data
+    totalProfiles: 0,
+    // This would come from profiles data
+    activeVolunteers: 0,
+    // This would come from volunteers data
+    totalMessages: 0,
+    // This would come from messages data
     completedOnboarding: 0 // This would come from onboarding completion data
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
       {/* DotConnector Header with Sliver */}
@@ -265,12 +244,7 @@ const Initi8Dashboard: React.FC = () => {
                     
                     {/* Message Input */}
                     <div className="flex gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="Type your message..." 
-                        className="flex-1 px-3 py-2 border rounded-lg text-sm"
-                        disabled
-                      />
+                      <input type="text" placeholder="Type your message..." className="flex-1 px-3 py-2 border rounded-lg text-sm" disabled />
                       <Button size="sm" disabled>Send</Button>
                     </div>
                   </div>
@@ -280,8 +254,7 @@ const Initi8Dashboard: React.FC = () => {
           </Card>
 
           {/* Conditional card based on user role */}
-          {(currentUser?.role === 'MEMBER' || currentUser?.role === 'ADMIN') ? (
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          {currentUser?.role === 'MEMBER' || currentUser?.role === 'ADMIN' ? <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <Link to={hasExistingCommunity ? "/eco8" : "/eco8/setup"}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
@@ -289,10 +262,7 @@ const Initi8Dashboard: React.FC = () => {
                     Community Profiles
                   </CardTitle>
                   <CardDescription>
-                   {hasExistingCommunity 
-                      ? "Manage your community and build connections"
-                      : "Create your first community and unlock full organizer features & dashboard access"
-                    }
+                   {hasExistingCommunity ? "Manage your community and build connections" : "Create your first community and unlock full organizer features & dashboard access"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -301,9 +271,7 @@ const Initi8Dashboard: React.FC = () => {
                   </Button>
                 </CardContent>
               </Link>
-            </Card>
-          ) : (
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            </Card> : <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <Link to="/initi8/volunteers">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
@@ -320,38 +288,14 @@ const Initi8Dashboard: React.FC = () => {
                   </Button>
                 </CardContent>
               </Link>
-            </Card>
-          )}
+            </Card>}
         </div>
 
         {/* Welcome Section */}
         <Card className="border-2 border-dashed border-primary/50 bg-primary/5">
-          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-            <UserCheck className="h-16 w-16 text-primary mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Welcome to INITI8!</h3>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              Your central hub for profile management, volunteer coordination, and community engagement. 
-              Complete your setup to unlock all features.
-            </p>
-            <div className="flex gap-4">
-              <Link to="/profile/setup">
-                <Button size="lg" className="flex items-center gap-2">
-                  <UserCheck className="h-5 w-5" />
-                  Complete Setup
-                </Button>
-              </Link>
-              <Link to="/initi8/search">
-                <Button variant="outline" size="lg" className="flex items-center gap-2">
-                  <Search className="h-5 w-5" />
-                  Explore Profiles
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
+          
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Initi8Dashboard;
