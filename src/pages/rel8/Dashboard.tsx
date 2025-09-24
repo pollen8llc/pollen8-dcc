@@ -74,49 +74,49 @@ const Dashboard = () => {
 
       <div className="container mx-auto max-w-6xl px-4 py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
-          <Card className="glassmorphic-card">
-            <CardContent className="p-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Contacts</p>
-                  <p className="text-2xl font-bold">{quickStats.totalContacts}</p>
+                  <p className="text-sm text-muted-foreground">Contacts</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.totalContacts}</p>
                 </div>
                 <Users className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glassmorphic-card">
-            <CardContent className="p-6">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Active Outreach</p>
-                  <p className="text-2xl font-bold">{quickStats.activeOutreach}</p>
+                  <p className="text-sm text-muted-foreground">Active Outreach</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.activeOutreach}</p>
                 </div>
                 <Clock className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glassmorphic-card">
-            <CardContent className="p-6">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Completed</p>
-                  <p className="text-2xl font-bold">{quickStats.completedTasks}</p>
+                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.completedTasks}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glassmorphic-card">
-            <CardContent className="p-6">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Categories</p>
-                  <p className="text-2xl font-bold">{quickStats.totalCategories}</p>
+                  <p className="text-sm text-muted-foreground">Categories</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.totalCategories}</p>
                 </div>
                 <Building2 className="h-8 w-8 text-primary" />
               </div>
@@ -125,104 +125,110 @@ const Dashboard = () => {
         </div>
 
         {/* Main Actions */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to="/rel8/contacts" className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Users className="h-6 w-6" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/rel8/contacts" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/30">
+                    <Users className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Manage Contacts</h3>
+                    <CardTitle className="text-lg font-bold">Manage Contacts</CardTitle>
                     <p className="text-sm text-muted-foreground">View, edit, and organize your contact list</p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to="/rel8/import" className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Upload className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/rel8/import" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-blue-500/15 border border-blue-500/30">
+                    <Upload className="h-6 w-6 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Import Contacts</h3>
+                    <CardTitle className="text-lg font-bold">Import Contacts</CardTitle>
                     <p className="text-sm text-muted-foreground">Import contacts from CSV, email, phone, or websites</p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to="/rel8/triggers" className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Zap className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/rel8/triggers" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-green-500/15 border border-green-500/30">
+                    <Zap className="h-6 w-6 text-green-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Manage Triggers</h3>
+                    <CardTitle className="text-lg font-bold">Manage Triggers</CardTitle>
                     <p className="text-sm text-muted-foreground">Set up automated reminders and follow-up sequences</p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to="/rel8/categories" className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Building2 className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/rel8/categories" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-purple-500/15 border border-purple-500/30">
+                    <Building2 className="h-6 w-6 text-purple-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Organize Categories</h3>
+                    <CardTitle className="text-lg font-bold">Organize Categories</CardTitle>
                     <p className="text-sm text-muted-foreground">Create and manage contact categories and tags</p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <CardContent className="p-6 flex flex-col h-full" onClick={handleBuildRapport}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                  <MessageSquare className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <CardHeader className="pb-4" onClick={handleBuildRapport}>
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-orange-500/15 border border-orange-500/30">
+                  <MessageSquare className="h-6 w-6 text-orange-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Build Rapport</h3>
+                  <CardTitle className="text-lg font-bold">Build Rapport</CardTitle>
                   <p className="text-sm text-muted-foreground">Create personalized outreach campaigns to nurture relationships</p>
                 </div>
               </div>
-            </CardContent>
+            </CardHeader>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to="/nmn8" className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Users className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/nmn8" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-teal-500/15 border border-teal-500/30">
+                    <Users className="h-6 w-6 text-teal-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Nomin8 Community</h3>
+                    <CardTitle className="text-lg font-bold">Nomin8 Community</CardTitle>
                     <p className="text-sm text-muted-foreground">Track and engage with your community members and supporters</p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
         </div>
 
         {/* Outreach Tasks Section */}
-        <Card className="glassmorphic-card">
+        <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Outreach Tasks</span>

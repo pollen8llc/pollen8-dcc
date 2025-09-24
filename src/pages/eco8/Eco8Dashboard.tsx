@@ -57,49 +57,49 @@ const Eco8Dashboard: React.FC = () => {
 
       <div className="container mx-auto max-w-6xl px-4 py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
-          <Card className="glassmorphic-card">
-            <CardContent className="p-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Network</p>
-                  <p className="text-2xl font-bold">{quickStats.networkSize}</p>
+                  <p className="text-sm text-muted-foreground">Network</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.networkSize}</p>
                 </div>
                 <Network className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glassmorphic-card">
-            <CardContent className="p-6">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Communities</p>
-                  <p className="text-2xl font-bold">{quickStats.communitiesManaged}</p>
+                  <p className="text-sm text-muted-foreground">Communities</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.communitiesManaged}</p>
                 </div>
                 <Users className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glassmorphic-card">
-            <CardContent className="p-6">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Events</p>
-                  <p className="text-2xl font-bold">{quickStats.totalEvents}</p>
+                  <p className="text-sm text-muted-foreground">Events</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.totalEvents}</p>
                 </div>
                 <Calendar className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="glassmorphic-card">
-            <CardContent className="p-6">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Contributions</p>
-                  <p className="text-2xl font-bold">{quickStats.totalContributions}</p>
+                  <p className="text-sm text-muted-foreground">Contributions</p>
+                  <p className="text-2xl font-bold text-foreground">{quickStats.totalContributions}</p>
                 </div>
                 <MessageSquare className="h-8 w-8 text-primary" />
               </div>
@@ -108,62 +108,66 @@ const Eco8Dashboard: React.FC = () => {
         </div>
 
         {/* Main Actions */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to="/eco8/directory" className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Search className="h-6 w-6" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/eco8/directory" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/30">
+                    <Search className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Browse Communities</h3>
+                    <CardTitle className="text-lg font-bold">Browse Communities</CardTitle>
                     <p className="text-sm text-muted-foreground">Discover and connect with communities in your network</p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to="/imports" className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Upload className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/imports" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-blue-500/15 border border-blue-500/30">
+                    <Upload className="h-6 w-6 text-blue-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Import Data</h3>
+                    <CardTitle className="text-lg font-bold">Import Data</CardTitle>
                     <p className="text-sm text-muted-foreground">Import contacts, members, and community data from various sources</p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <CardContent className="p-6 flex flex-col h-full">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                  <Users className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-green-500/15 border border-green-500/30">
+                  <Users className="h-6 w-6 text-green-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Community Activity</h3>
+                  <CardTitle className="text-lg font-bold">Community Activity</CardTitle>
                   <p className="text-sm text-muted-foreground">Monitor engagement, posts, and member interactions</p>
                 </div>
               </div>
-            </CardContent>
+            </CardHeader>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to={hasUserCommunities ? "/eco8" : "/eco8/setup"} className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Plus className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to={hasUserCommunities ? "/eco8" : "/eco8/setup"} className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-purple-500/15 border border-purple-500/30">
+                    <Plus className="h-6 w-6 text-purple-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">{hasUserCommunities ? 'Manage Communities' : 'Create Community'}</h3>
+                    <CardTitle className="text-lg font-bold">{hasUserCommunities ? 'Manage Communities' : 'Create Community'}</CardTitle>
                     <p className="text-sm text-muted-foreground">
                       {hasUserCommunities
                         ? 'View and manage your existing communities'
@@ -171,44 +175,46 @@ const Eco8Dashboard: React.FC = () => {
                     </p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <Link to="/eco8/invites" className="block h-full">
-              <CardContent className="p-6 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Users className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/eco8/invites" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-orange-500/15 border border-orange-500/30">
+                    <Users className="h-6 w-6 text-orange-500" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Manage Invites</h3>
+                    <CardTitle className="text-lg font-bold">Manage Invites</CardTitle>
                     <p className="text-sm text-muted-foreground">Generate and manage invitation codes for new members</p>
                   </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
-            <CardContent className="p-6 flex flex-col h-full">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                  <Settings className="h-6 w-6" />
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-teal-500/15 border border-teal-500/30">
+                  <Settings className="h-6 w-6 text-teal-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Settings</h3>
+                  <CardTitle className="text-lg font-bold">Settings</CardTitle>
                   <p className="text-sm text-muted-foreground">Manage preferences, notifications, and account settings</p>
                 </div>
               </div>
-            </CardContent>
+            </CardHeader>
           </Card>
         </div>
 
         {/* Setup Prompt if no communities */}
         {!loading && !hasUserCommunities && (
-          <Card className="glassmorphic-card border-2 border-dashed border-primary/50 bg-primary/5">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md border-2 border-dashed border-primary/50 bg-primary/5">
             <CardContent className="flex flex-col items-center justify-center p-8 text-center">
               <AlertCircle className="h-16 w-16 text-primary mb-4" />
               <h3 className="text-xl font-semibold mb-2">Welcome to ECO8!</h3>
@@ -227,7 +233,7 @@ const Eco8Dashboard: React.FC = () => {
 
         {/* Managed Communities */}
         {hasUserCommunities && (
-          <Card className="glassmorphic-card">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Managed Communities</span>
