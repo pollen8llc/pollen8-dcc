@@ -23,7 +23,7 @@ const profileSchema = z.object({
   last_name: z.string().optional(),
   bio: z.string().optional(),
   location: z.string().optional(),
-  avatar_url: z.string().optional(),
+  
   interests: z.array(z.string()).optional(),
   privacy_settings: z.object({
     profile_visibility: z.enum(["public", "connections", "connections2", "connections3", "private"])
@@ -42,7 +42,7 @@ const ProfileEdit: React.FC<ProfileEditProps> = ({ profile, onUpdate, onCancel }
   const [newInterest, setNewInterest] = useState("");
   const [newSocialPlatform, setNewSocialPlatform] = useState("");
   const [newSocialUrl, setNewSocialUrl] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
+  
   const { toast } = useToast();
 
   // Initialize the form with existing profile data
@@ -53,7 +53,7 @@ const ProfileEdit: React.FC<ProfileEditProps> = ({ profile, onUpdate, onCancel }
       last_name: profile?.last_name || "",
       bio: profile?.bio || "",
       location: profile?.location || "",
-      avatar_url: profile?.avatar_url || "",
+      
       interests: profile?.interests || [],
       privacy_settings: profile?.privacy_settings || { profile_visibility: "connections" },
       social_links: profile?.social_links || {},
@@ -68,72 +68,6 @@ const ProfileEdit: React.FC<ProfileEditProps> = ({ profile, onUpdate, onCancel }
     });
   };
 
-  // Handle avatar upload
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a JPEG, PNG, or GIF image.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 2MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Upload to Supabase Storage
-    setIsUploading(true);
-    try {
-      // Generate a unique file name
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `profiles/${profile.id}/${fileName}`;
-
-      // Upload the file
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
-      if (error) {
-        throw error;
-      }
-
-      // Get the public URL
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      if (urlData) {
-        form.setValue('avatar_url', urlData.publicUrl);
-        toast({
-          title: "Avatar uploaded",
-          description: "Your avatar has been updated.",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error uploading avatar:", error);
-      toast({
-        title: "Upload failed",
-        description: error.message || "Failed to upload avatar.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   // Handle adding a new interest
   const handleAddInterest = () => {
@@ -220,33 +154,15 @@ const ProfileEdit: React.FC<ProfileEditProps> = ({ profile, onUpdate, onCancel }
                 {/* Avatar Section */}
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src={form.watch("avatar_url") || ""} />
-                    <AvatarFallback>
+                    <AvatarFallback useDynamicAvatar={true}>
                       {form.watch("first_name")?.[0]?.toUpperCase() || "?"}
                       {form.watch("last_name")?.[0]?.toUpperCase() || ""}
                     </AvatarFallback>
                   </Avatar>
                   
                   <div className="flex flex-col gap-2">
-                    <label className="cursor-pointer">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        disabled={isUploading}
-                        className="relative"
-                      >
-                        {isUploading ? "Uploading..." : "Change Avatar"}
-                      </Button>
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        accept="image/*" 
-                        onChange={handleAvatarUpload}
-                        disabled={isUploading}
-                      />
-                    </label>
-                    <p className="text-xs text-muted-foreground">
-                      JPEG, PNG or GIF. Max 2MB.
+                    <p className="text-sm text-muted-foreground">
+                      Your avatar is managed through the dynamic avatar system
                     </p>
                   </div>
                 </div>

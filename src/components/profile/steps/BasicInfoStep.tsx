@@ -11,19 +11,13 @@ import SocialLinksInput from './SocialLinksInput';
 const BasicInfoStep = () => {
   const { register, watch, setValue, formState: { errors } } = useFormContext();
   
-  const avatarUrl = watch('avatarUrl');
+  // Avatar display only (no upload)
+  const avatarUrl = "";
   const firstName = watch('firstName');
   const lastName = watch('lastName');
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setValue('avatar', file);
-      
-      // Create a preview URL for the selected image
-      const fileUrl = URL.createObjectURL(file);
-      setValue('avatarUrl', fileUrl);
-    }
+  const handleFileChange = () => {
+    // Avatar upload removed - using dynamic avatars only
   };
   
   // Get avatar fallback (initials) based on current form values
@@ -39,24 +33,12 @@ const BasicInfoStep = () => {
       <div className="flex flex-col items-center">
         <div className="relative mb-4">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={avatarUrl && avatarUrl.trim() ? avatarUrl : undefined} />
-            <AvatarFallback>{getInitials()}</AvatarFallback>
+            <AvatarFallback useDynamicAvatar={true}>{getInitials()}</AvatarFallback>
           </Avatar>
-          
-          <label htmlFor="avatar-upload" className="absolute -bottom-2 -right-2 p-1 rounded-full bg-primary text-white cursor-pointer">
-            <Camera className="h-4 w-4" />
-            <input 
-              id="avatar-upload" 
-              type="file" 
-              accept="image/*"
-              className="sr-only"
-              onChange={handleFileChange}
-            />
-          </label>
         </div>
         
         <p className="text-sm text-muted-foreground mb-4">
-          Upload a profile picture to make your profile more personable
+          Your avatar is managed through the dynamic avatar system
         </p>
       </div>
       

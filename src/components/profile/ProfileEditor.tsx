@@ -40,7 +40,7 @@ const ProfileEditor = () => {
           setFormData({
             first_name: fetchedProfile?.first_name || currentUser?.name?.split(' ')[0] || '',
             last_name: fetchedProfile?.last_name || currentUser?.name?.split(' ').slice(1).join(' ') || '',
-            avatar_url: fetchedProfile?.avatar_url || currentUser?.imageUrl || '',
+            
             bio: fetchedProfile?.bio || '',
             location: fetchedProfile?.location || '',
             interests: fetchedProfile?.interests || [],
@@ -141,19 +141,12 @@ const ProfileEditor = () => {
               <div className="flex flex-col items-center mb-6">
                 <div className="mb-4">
                   <Avatar className="w-24 h-24">
-                    <AvatarImage src={formData.avatar_url} />
-                    <AvatarFallback userId={currentUser?.id}>{getInitials() || "??"}</AvatarFallback>
+                    <AvatarFallback userId={currentUser?.id} useDynamicAvatar={true}>{getInitials() || "??"}</AvatarFallback>
                   </Avatar>
                 </div>
-                <div className="w-full max-w-sm">
-                  <Label htmlFor="avatar">Profile Image URL</Label>
-                  <Input
-                    id="avatar"
-                    placeholder="https://example.com/avatar.jpg"
-                    value={formData.avatar_url}
-                    onChange={(e) => handleUpdateFormData({ avatar_url: e.target.value })}
-                  />
-                </div>
+                <p className="text-sm text-muted-foreground text-center">
+                  Your avatar is managed through the dynamic avatar system
+                </p>
               </div>
       
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

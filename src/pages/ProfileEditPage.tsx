@@ -16,7 +16,6 @@ const ProfileEditPage: React.FC = () => {
   const [profileData, setProfileData] = React.useState<any>(null);
   const [isFormInitialized, setIsFormInitialized] = React.useState(false);
 
-  // Initialize form with react-hook-form
   const form = useForm({
     defaultValues: {
       firstName: '',

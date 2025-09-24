@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ExtendedProfile } from "@/services/profileService";
 
 interface BasicInfoStepProps {
@@ -14,7 +14,6 @@ interface BasicInfoStepProps {
 const BasicInfoStep = ({ formData, updateFormData }: BasicInfoStepProps) => {
   const [firstName, setFirstName] = useState(formData.first_name || "");
   const [lastName, setLastName] = useState(formData.last_name || "");
-  const [avatarUrl, setAvatarUrl] = useState(formData.avatar_url || "");
   const [bio, setBio] = useState(formData.bio || "");
 
   const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,11 +24,6 @@ const BasicInfoStep = ({ formData, updateFormData }: BasicInfoStepProps) => {
   const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLastName(e.target.value);
     updateFormData({ last_name: e.target.value });
-  };
-
-  const handleAvatarUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAvatarUrl(e.target.value);
-    updateFormData({ avatar_url: e.target.value });
   };
 
   const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -48,22 +42,12 @@ const BasicInfoStep = ({ formData, updateFormData }: BasicInfoStepProps) => {
       <div className="flex flex-col items-center mb-6">
         <div className="mb-4">
           <Avatar className="w-24 h-24">
-            <AvatarImage src={avatarUrl && avatarUrl.trim() ? avatarUrl : undefined} />
-            <AvatarFallback userId={formData.user_id}>{getInitials() || "??"}</AvatarFallback>
+            <AvatarFallback userId={formData.user_id} useDynamicAvatar={true}>{getInitials() || "??"}</AvatarFallback>
           </Avatar>
         </div>
-        <div className="w-full max-w-sm">
-          <Label htmlFor="avatar">Profile Image URL</Label>
-          <Input
-            id="avatar"
-            placeholder="https://example.com/avatar.jpg"
-            value={avatarUrl}
-            onChange={handleAvatarUrlChange}
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Paste a URL to your profile picture
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground text-center">
+          Your avatar is managed through the dynamic avatar system
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

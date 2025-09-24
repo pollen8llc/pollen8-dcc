@@ -88,33 +88,6 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
     setIsSubmitting(true);
     
     try {
-      // Upload avatar if provided
-      let avatarUrl = data.avatarUrl;
-      if (data.avatar) {
-        const fileExt = data.avatar.name.split('.').pop();
-        const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
-        
-        try {
-          const { error: uploadError } = await supabase.storage
-            .from('avatars')
-            .upload(fileName, data.avatar);
-            
-          if (uploadError) {
-            console.error('Error uploading avatar:', uploadError);
-            throw new Error('Failed to upload profile image');
-          }
-          
-          // Get public URL
-          const { data: publicUrl } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(fileName);
-            
-          avatarUrl = publicUrl.publicUrl;
-        } catch (error) {
-          console.error('Error in avatar upload:', error);
-          // Continue with profile update even if avatar upload fails
-        }
-      }
       
       // Update profile data
       try {
@@ -122,7 +95,6 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
           id: currentUser.id,
           first_name: data.firstName,
           last_name: data.lastName,
-          avatar_url: avatarUrl,
           bio: data.bio,
           location: data.location,
           interests: data.interests,
