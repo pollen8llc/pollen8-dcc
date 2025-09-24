@@ -54,7 +54,7 @@ const Initi8Dashboard: React.FC = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -66,7 +66,7 @@ const Initi8Dashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -78,7 +78,7 @@ const Initi8Dashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -90,7 +90,7 @@ const Initi8Dashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -104,100 +104,75 @@ const Initi8Dashboard: React.FC = () => {
         </div>
 
         {/* Main Actions Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
             <Link to="/profile/edit">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Edit className="h-6 w-6 text-primary" />
-                  Setup Profile
-                </CardTitle>
-                <CardDescription>
-                  Complete your organizer profile and onboarding information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Edit Profile
-                </Button>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Setup</p>
+                    <p className="text-lg font-bold text-foreground">Profile</p>
+                  </div>
+                  <Edit className="h-8 w-8 text-primary" />
+                </div>
               </CardContent>
             </Link>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
             <Link to="/initi8/search">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Search className="h-6 w-6 text-primary" />
-                  Search Profiles
-                </CardTitle>
-                <CardDescription>
-                  Discover and connect with other organizers and community leaders
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Browse Profiles
-                </Button>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Search</p>
+                    <p className="text-lg font-bold text-foreground">Profiles</p>
+                  </div>
+                  <Search className="h-8 w-8 text-primary" />
+                </div>
               </CardContent>
             </Link>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
             <Link to="/invites">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <UserPlus className="h-6 w-6 text-primary" />
-                  Manage Invites
-                </CardTitle>
-                <CardDescription>
-                  Generate and manage invitation codes for new members and organizers
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Invite Users
-                </Button>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Manage</p>
+                    <p className="text-lg font-bold text-foreground">Invites</p>
+                  </div>
+                  <UserPlus className="h-8 w-8 text-primary" />
+                </div>
               </CardContent>
             </Link>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
             <Link to="/imports">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Upload className="h-6 w-6 text-primary" />
-                  Import Contacts
-                </CardTitle>
-                <CardDescription>
-                  Import contacts, members, and community data from various sources
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Import Now
-                </Button>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Import</p>
+                    <p className="text-lg font-bold text-foreground">Contacts</p>
+                  </div>
+                  <Upload className="h-8 w-8 text-primary" />
+                </div>
               </CardContent>
             </Link>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
             <Dialog open={isMessageCenterOpen} onOpenChange={setIsMessageCenterOpen}>
               <DialogTrigger asChild>
                 <div>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      <Mail className="h-6 w-6 text-primary" />
-                      Message Center
-                    </CardTitle>
-                    <CardDescription>
-                      Communicate with team members, volunteers, and community leaders
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button variant="ghost" className="w-full">
-                      Open Messages
-                    </Button>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Message</p>
+                        <p className="text-lg font-bold text-foreground">Center</p>
+                      </div>
+                      <Mail className="h-8 w-8 text-primary" />
+                    </div>
                   </CardContent>
                 </div>
               </DialogTrigger>
@@ -254,41 +229,34 @@ const Initi8Dashboard: React.FC = () => {
           </Card>
 
           {/* Conditional card based on user role */}
-          {currentUser?.role === 'MEMBER' || currentUser?.role === 'ADMIN' ? <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          {currentUser?.role === 'MEMBER' || currentUser?.role === 'ADMIN' ? 
+            <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
               <Link to={hasExistingCommunity ? "/eco8" : "/eco8/setup"}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <Building className="h-6 w-6 text-primary" />
-                    Community Profiles
-                  </CardTitle>
-                  <CardDescription>
-                   {hasExistingCommunity ? "Manage your community and build connections" : "Create your first community and unlock full organizer features & dashboard access"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="ghost" className="w-full">
-                    {hasExistingCommunity ? "Manage Community" : "Create Community"}
-                  </Button>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Community</p>
+                      <p className="text-lg font-bold text-foreground">Profiles</p>
+                    </div>
+                    <Building className="h-8 w-8 text-primary" />
+                  </div>
                 </CardContent>
               </Link>
-            </Card> : <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            </Card> : 
+            <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
               <Link to="/initi8/volunteers">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <Crown className="h-6 w-6 text-primary" />
-                    Manage Volunteers (ADVC8)
-                  </CardTitle>
-                  <CardDescription>
-                    Coordinate with volunteers, advocates, and community ambassadors
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="ghost" className="w-full">
-                    Manage Team
-                  </Button>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Manage</p>
+                      <p className="text-lg font-bold text-foreground">Volunteers</p>
+                    </div>
+                    <Crown className="h-8 w-8 text-primary" />
+                  </div>
                 </CardContent>
               </Link>
-            </Card>}
+            </Card>
+          }
         </div>
 
         {/* Welcome Section */}
