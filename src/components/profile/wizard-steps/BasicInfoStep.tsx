@@ -49,7 +49,7 @@ const BasicInfoStep = ({ formData, updateFormData }: BasicInfoStepProps) => {
         <div className="mb-4">
           <Avatar className="w-24 h-24">
             <AvatarImage src={avatarUrl} />
-            <AvatarFallback>{getInitials() || "??"}</AvatarFallback>
+            <AvatarFallback userId={formData.user_id}>{getInitials() || "??"}</AvatarFallback>
           </Avatar>
         </div>
         <div className="w-full max-w-sm">

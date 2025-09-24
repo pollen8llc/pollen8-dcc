@@ -197,7 +197,7 @@ export const MentionInput: React.FC<MentionInputProps> = ({
             >
               <Avatar className="h-6 w-6">
                 <AvatarImage src={user.avatar_url} />
-                <AvatarFallback className="text-xs">
+                <AvatarFallback userId={user.id} className="text-xs">
                   {getInitials(user.name)}
                 </AvatarFallback>
               </Avatar>

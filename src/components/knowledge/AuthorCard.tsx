@@ -70,7 +70,7 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
       <div className="flex items-center">
         <Avatar className={`h-10 w-10 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : ''}`}>
           <AvatarImage src={author.avatar_url} />
-          <AvatarFallback className={isAdmin ? "bg-[#9b87f5]/10 text-[#9b87f5]" : "bg-[#00eada]/10 text-[#00eada]"}>
+          <AvatarFallback userId={author.id} className={isAdmin ? "bg-[#9b87f5]/10 text-[#9b87f5]" : "bg-[#00eada]/10 text-[#00eada]"}>
             {getInitials(author.name)}
           </AvatarFallback>
         </Avatar>
@@ -99,7 +99,7 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
         <div className="flex items-center">
           <Avatar className={`h-12 w-12 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : 'ring-2 ring-[#00eada]/20'}`}>
             <AvatarImage src={author.avatar_url} />
-            <AvatarFallback className={isAdmin ? "bg-[#9b87f5]/10 text-[#9b87f5]" : "bg-[#00eada]/10 text-[#00eada]"}>
+            <AvatarFallback userId={author.id} className={isAdmin ? "bg-[#9b87f5]/10 text-[#9b87f5]" : "bg-[#00eada]/10 text-[#00eada]"}>
               {getInitials(author.name)}
             </AvatarFallback>
           </Avatar>

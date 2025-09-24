@@ -47,7 +47,7 @@ const DesktopProfileView = ({ user, isOwnProfile, onEdit }: DesktopProfileViewPr
                 }} />
                 <Avatar className="h-32 w-32 border-4 border-background shadow-lg relative z-10">
                   <AvatarImage src={user.imageUrl} alt={user.name} />
-                  <AvatarFallback className="text-3xl">
+                  <AvatarFallback userId={user.id} className="text-3xl">
                     {user.name ? user.name.slice(0, 2).toUpperCase() : '??'}
                   </AvatarFallback>
                 </Avatar>

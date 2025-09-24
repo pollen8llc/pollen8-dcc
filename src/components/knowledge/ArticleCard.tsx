@@ -172,7 +172,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
               <div className="flex items-center gap-2">
                 <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
                   <AvatarImage src={article.author.avatar_url} />
-                  <AvatarFallback className="text-xs">
+                  <AvatarFallback userId={article.author.id} className="text-xs">
                     {getAuthorInitials(article.author.name)}
                   </AvatarFallback>
                 </Avatar>

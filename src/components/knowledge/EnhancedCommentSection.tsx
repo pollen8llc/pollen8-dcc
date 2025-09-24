@@ -119,7 +119,7 @@ export const EnhancedCommentSection: React.FC<EnhancedCommentSectionProps> = ({
         <div className="flex items-start space-x-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={comment.author?.avatar_url} />
-            <AvatarFallback className="text-xs">
+            <AvatarFallback userId={comment.user_id} className="text-xs">
               {getInitials(comment.author?.name)}
             </AvatarFallback>
           </Avatar>

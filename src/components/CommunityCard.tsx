@@ -106,7 +106,7 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
           <div className="flex items-center space-x-2">
             <Avatar className="w-6 h-6">
               <AvatarImage src={organizerAvatar} alt={organizerName} />
-              <AvatarFallback className="text-xs">CO</AvatarFallback>
+              <AvatarFallback userId={community.owner_id} className="text-xs">CO</AvatarFallback>
             </Avatar>
             <span className="text-sm text-muted-foreground">
               by {organizerName}

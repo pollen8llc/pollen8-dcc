@@ -39,7 +39,7 @@ const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
     >
       <Avatar className="h-8 w-8 ring-1 ring-primary/20">
         <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
-        <AvatarFallback>{getUserInitials()}</AvatarFallback>
+        <AvatarFallback userId={currentUser.id}>{getUserInitials()}</AvatarFallback>
       </Avatar>
     </Button>
   );

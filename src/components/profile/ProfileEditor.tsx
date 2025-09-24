@@ -142,7 +142,7 @@ const ProfileEditor = () => {
                 <div className="mb-4">
                   <Avatar className="w-24 h-24">
                     <AvatarImage src={formData.avatar_url} />
-                    <AvatarFallback>{getInitials() || "??"}</AvatarFallback>
+                    <AvatarFallback userId={currentUser?.id}>{getInitials() || "??"}</AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="w-full max-w-sm">

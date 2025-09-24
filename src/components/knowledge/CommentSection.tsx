@@ -156,7 +156,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                   <div className="flex items-center">
                     <Avatar className="h-8 w-8 mr-2">
                       <AvatarImage src={comment.author?.avatar_url} alt={comment.author?.name} />
-                      <AvatarFallback>{getInitials(comment.author?.name)}</AvatarFallback>
+                      <AvatarFallback userId={comment.user_id}>{getInitials(comment.author?.name)}</AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-medium text-white">{comment.author?.name || 'Unknown User'}</p>
