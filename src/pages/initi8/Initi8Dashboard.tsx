@@ -244,8 +244,7 @@ const Initi8Dashboard: React.FC = () => {
           </Card>
 
           {/* Conditional card based on user role */}
-          {currentUser?.role === 'MEMBER' || currentUser?.role === 'ADMIN' ? 
-            <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+          {currentUser?.role === 'MEMBER' || currentUser?.role === 'ADMIN' ? <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
               <Link to={hasExistingCommunity ? "/eco8" : "/eco8/setup"} className="block relative">
                 <CardHeader className="pb-4">
@@ -260,8 +259,7 @@ const Initi8Dashboard: React.FC = () => {
                   </div>
                 </CardHeader>
               </Link>
-            </Card> : 
-            <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            </Card> : <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
               <Link to="/initi8/volunteers" className="block relative">
                 <CardHeader className="pb-4">
@@ -276,14 +274,11 @@ const Initi8Dashboard: React.FC = () => {
                   </div>
                 </CardHeader>
               </Link>
-            </Card>
-          }
+            </Card>}
         </div>
 
         {/* Welcome Section */}
-        <Card className="border-2 border-dashed border-primary/50 bg-primary/5">
-          
-        </Card>
+        
       </div>
     </div>;
 };
