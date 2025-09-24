@@ -42,7 +42,7 @@ export class AvatarService {
       .select('*')
       .eq('id', id)
       .eq('is_active', true)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error('Failed to fetch avatar:', error);
@@ -57,10 +57,17 @@ export class AvatarService {
       .from('profiles')
       .select('selected_avatar_id, network_score, unlocked_avatars')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error('Failed to fetch user avatar selection:', error);
+      return {
+        network_score: 0,
+        unlocked_avatars: []
+      };
+    }
+    
+    if (!data) {
       return {
         network_score: 0,
         unlocked_avatars: []
@@ -93,7 +100,7 @@ export class AvatarService {
       .from('ions_avatar')
       .insert(avatar)
       .select()
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error('Failed to create avatar:', error);
