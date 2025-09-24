@@ -50,11 +50,11 @@ const Initi8Dashboard: React.FC = () => {
       <DotConnectorHeader />
 
       {/* Full-width content below the sliver */}
-      <div className="w-full px-4 py-8">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -66,7 +66,7 @@ const Initi8Dashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -78,7 +78,7 @@ const Initi8Dashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -90,7 +90,7 @@ const Initi8Dashboard: React.FC = () => {
             </CardContent>
           </Card>
           
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -104,76 +104,91 @@ const Initi8Dashboard: React.FC = () => {
         </div>
 
         {/* Main Actions Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
-            <Link to="/profile/edit">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Setup</p>
-                    <p className="text-lg font-bold text-foreground">Profile</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/profile/edit" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/30">
+                    <Edit className="h-6 w-6 text-primary" />
                   </div>
-                  <Edit className="h-8 w-8 text-primary" />
+                  <div>
+                    <CardTitle className="text-lg font-bold">Setup Profile</CardTitle>
+                    <p className="text-sm text-muted-foreground">Complete your profile setup</p>
+                  </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
-            <Link to="/initi8/search">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Search</p>
-                    <p className="text-lg font-bold text-foreground">Profiles</p>
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/initi8/search" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-blue-500/15 border border-blue-500/30">
+                    <Search className="h-6 w-6 text-blue-500" />
                   </div>
-                  <Search className="h-8 w-8 text-primary" />
+                  <div>
+                    <CardTitle className="text-lg font-bold">Search Profiles</CardTitle>
+                    <p className="text-sm text-muted-foreground">Find and connect with members</p>
+                  </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
-            <Link to="/invites">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Manage</p>
-                    <p className="text-lg font-bold text-foreground">Invites</p>
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/invites" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-green-500/15 border border-green-500/30">
+                    <UserPlus className="h-6 w-6 text-green-500" />
                   </div>
-                  <UserPlus className="h-8 w-8 text-primary" />
+                  <div>
+                    <CardTitle className="text-lg font-bold">Manage Invites</CardTitle>
+                    <p className="text-sm text-muted-foreground">Create and track invitations</p>
+                  </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
-            <Link to="/imports">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Import</p>
-                    <p className="text-lg font-bold text-foreground">Contacts</p>
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+            <Link to="/imports" className="block relative">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-purple-500/15 border border-purple-500/30">
+                    <Upload className="h-6 w-6 text-purple-500" />
                   </div>
-                  <Upload className="h-8 w-8 text-primary" />
+                  <div>
+                    <CardTitle className="text-lg font-bold">Import Contacts</CardTitle>
+                    <p className="text-sm text-muted-foreground">Upload and manage contacts</p>
+                  </div>
                 </div>
-              </CardContent>
+              </CardHeader>
             </Link>
           </Card>
 
-          <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
+          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
             <Dialog open={isMessageCenterOpen} onOpenChange={setIsMessageCenterOpen}>
               <DialogTrigger asChild>
-                <div>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Message</p>
-                        <p className="text-lg font-bold text-foreground">Center</p>
+                <div className="relative h-full">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-orange-500/15 border border-orange-500/30">
+                        <Mail className="h-6 w-6 text-orange-500" />
                       </div>
-                      <Mail className="h-8 w-8 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg font-bold">Message Center</CardTitle>
+                        <p className="text-sm text-muted-foreground">Community communications</p>
+                      </div>
                     </div>
-                  </CardContent>
+                  </CardHeader>
                 </div>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[80vh]">
@@ -230,30 +245,36 @@ const Initi8Dashboard: React.FC = () => {
 
           {/* Conditional card based on user role */}
           {currentUser?.role === 'MEMBER' || currentUser?.role === 'ADMIN' ? 
-            <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
-              <Link to={hasExistingCommunity ? "/eco8" : "/eco8/setup"}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Community</p>
-                      <p className="text-lg font-bold text-foreground">Profiles</p>
+            <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+              <Link to={hasExistingCommunity ? "/eco8" : "/eco8/setup"} className="block relative">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-teal-500/15 border border-teal-500/30">
+                      <Building className="h-6 w-6 text-teal-500" />
                     </div>
-                    <Building className="h-8 w-8 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg font-bold">Community Profiles</CardTitle>
+                      <p className="text-sm text-muted-foreground">Manage community settings</p>
+                    </div>
                   </div>
-                </CardContent>
+                </CardHeader>
               </Link>
             </Card> : 
-            <Card className="overflow-hidden border-border/30 bg-card/60 backdrop-blur-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer">
-              <Link to="/initi8/volunteers">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Manage</p>
-                      <p className="text-lg font-bold text-foreground">Volunteers</p>
+            <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+              <Link to="/initi8/volunteers" className="block relative">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-pink-500/15 border border-pink-500/30">
+                      <Crown className="h-6 w-6 text-pink-500" />
                     </div>
-                    <Crown className="h-8 w-8 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg font-bold">Manage Volunteers</CardTitle>
+                      <p className="text-sm text-muted-foreground">Coordinate volunteer activities</p>
+                    </div>
                   </div>
-                </CardContent>
+                </CardHeader>
               </Link>
             </Card>
           }
