@@ -3,15 +3,18 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 import { UserRole } from "@/models/types"
+import { DynamicAvatar } from "./dynamic-avatar"
 
 interface ExtendedAvatarProps extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> {
   isAdmin?: boolean;
+  userId?: string;
+  useDynamicAvatar?: boolean;
 }
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   ExtendedAvatarProps
->(({ className, isAdmin, ...props }, ref) => (
+>(({ className, isAdmin, userId, useDynamicAvatar = true, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
     className={cn(
@@ -36,10 +39,15 @@ const AvatarImage = React.forwardRef<
 ))
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
 
+interface AvatarFallbackProps extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> {
+  userId?: string;
+  useDynamicAvatar?: boolean;
+}
+
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, children, ...props }, ref) => (
+  AvatarFallbackProps
+>(({ className, children, userId, useDynamicAvatar = true, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
@@ -48,7 +56,13 @@ const AvatarFallback = React.forwardRef<
     )}
     {...props}
   >
-    {children || (
+    {children || (useDynamicAvatar ? (
+      <DynamicAvatar 
+        userId={userId}
+        className="w-full h-full"
+        fallbackToMagnetosphere={true}
+      />
+    ) : (
       <svg width="100%" height="100%" viewBox="0 0 64 64" className="w-full h-full">
         <defs>
           <radialGradient id="defaultMagnetosphere" cx="50%" cy="50%" r="50%">
@@ -64,7 +78,7 @@ const AvatarFallback = React.forwardRef<
           <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" begin="0.5s" />
         </circle>
       </svg>
-    )}
+    ))}
   </AvatarPrimitive.Fallback>
 ))
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
