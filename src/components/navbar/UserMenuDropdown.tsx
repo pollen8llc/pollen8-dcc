@@ -38,7 +38,7 @@ const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
       onClick={handleAvatarClick}
     >
       <Avatar className="h-8 w-8 ring-1 ring-primary/20">
-        <AvatarImage src={currentUser.imageUrl} alt={currentUser.name} />
+        <AvatarImage src={currentUser.imageUrl && currentUser.imageUrl.trim() ? currentUser.imageUrl : undefined} alt={currentUser.name} />
         <AvatarFallback userId={currentUser.id}>{getUserInitials()}</AvatarFallback>
       </Avatar>
     </Button>

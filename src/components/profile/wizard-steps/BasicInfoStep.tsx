@@ -48,7 +48,7 @@ const BasicInfoStep = ({ formData, updateFormData }: BasicInfoStepProps) => {
       <div className="flex flex-col items-center mb-6">
         <div className="mb-4">
           <Avatar className="w-24 h-24">
-            <AvatarImage src={avatarUrl} />
+            <AvatarImage src={avatarUrl && avatarUrl.trim() ? avatarUrl : undefined} />
             <AvatarFallback userId={formData.user_id}>{getInitials() || "??"}</AvatarFallback>
           </Avatar>
         </div>

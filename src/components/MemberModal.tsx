@@ -4,6 +4,7 @@ import { Mail, Users, Shield } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 
 interface MemberModalProps {
@@ -33,13 +34,12 @@ const MemberModal = ({ member, open, onClose }: MemberModalProps) => {
       <DialogContent className="max-w-md glass dark:glass-dark border border-border/40 sm:rounded-xl shadow-xl transition-all duration-500 animate-fade-in">
         <DialogHeader className="relative">
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-aquamarine/30 mb-4">
-              <img
-                src={member.imageUrl}
-                alt={member.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <Avatar className="w-24 h-24 border-2 border-aquamarine/30 mb-4">
+              <AvatarImage src={member.imageUrl && member.imageUrl.trim() ? member.imageUrl : undefined} alt={member.name} />
+              <AvatarFallback userId={member.id} className="text-2xl font-bold">
+                {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <DialogTitle className="text-center text-xl font-semibold">
               {member.name}
             </DialogTitle>

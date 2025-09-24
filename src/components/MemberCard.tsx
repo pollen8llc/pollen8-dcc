@@ -3,6 +3,7 @@ import { User, UserRole } from "@/models/types";
 import { Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface MemberCardProps {
   member: User;
@@ -45,11 +46,19 @@ const MemberCard = ({ member, role, communityId, onClick }: MemberCardProps) => 
       <div className="w-full h-1 bg-[#00eada]"></div>
       <div className="flex flex-col p-4 h-full">
         <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium text-lg text-white">{member.name}</h3>
-            <Badge className={`mt-1 ${getBadgeColorClass(member.role)}`}>
-              {role || UserRole[member.role]}
-            </Badge>
+          <div className="flex items-center gap-3">
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={member.imageUrl && member.imageUrl.trim() ? member.imageUrl : undefined} alt={member.name} />
+              <AvatarFallback userId={member.id} className="text-sm font-semibold">
+                {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-medium text-lg text-white">{member.name}</h3>
+              <Badge className={`mt-1 ${getBadgeColorClass(member.role)}`}>
+                {role || UserRole[member.role]}
+              </Badge>
+            </div>
           </div>
           <Button
             variant="ghost"

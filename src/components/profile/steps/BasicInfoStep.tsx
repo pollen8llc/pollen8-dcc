@@ -39,7 +39,7 @@ const BasicInfoStep = () => {
       <div className="flex flex-col items-center">
         <div className="relative mb-4">
           <Avatar className="h-24 w-24">
-            <AvatarImage src={avatarUrl} />
+            <AvatarImage src={avatarUrl && avatarUrl.trim() ? avatarUrl : undefined} />
             <AvatarFallback>{getInitials()}</AvatarFallback>
           </Avatar>
           

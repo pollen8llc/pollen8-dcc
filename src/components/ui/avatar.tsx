@@ -48,8 +48,6 @@ const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
   AvatarFallbackProps
 >(({ className, children, userId, useDynamicAvatar = true, ...props }, ref) => {
-  console.log('🟡 AvatarFallback: Rendering with userId:', userId, 'useDynamicAvatar:', useDynamicAvatar);
-  
   return (
     <AvatarPrimitive.Fallback
       ref={ref}

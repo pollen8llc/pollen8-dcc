@@ -43,8 +43,8 @@ const UserTableRow = ({
     <TableRow key={user.id}>
       <TableCell>
         <Avatar className="h-10 w-10">
-          <AvatarImage src={user.imageUrl} alt={user.name} />
-          <AvatarFallback>
+          <AvatarImage src={user.imageUrl && user.imageUrl.trim() ? user.imageUrl : undefined} alt={user.name} />
+          <AvatarFallback userId={user.id}>
             {user.name.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
