@@ -104,7 +104,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-spin-slow opacity-75 blur-sm" />
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-pulse" />
                 <Avatar className="relative w-20 h-20 sm:w-24 sm:h-24 border-4 border-background shadow-2xl">
-                  <AvatarImage src={profile.avatar_url} alt={getFullName()} />
+                  <AvatarImage src={profile.avatar_url && profile.avatar_url.trim() ? profile.avatar_url : undefined} alt={getFullName()} />
                   <AvatarFallback userId={profile.user_id} className="text-xl sm:text-2xl font-bold bg-gradient-to-br from-primary/20 to-secondary/20">
                     {getInitials()}
                   </AvatarFallback>

@@ -49,7 +49,7 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-spin-slow opacity-75 blur-sm" />
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-pulse" />
                   <Avatar className="relative w-24 h-24 border-4 border-background shadow-2xl">
-                    <AvatarImage src={currentUser?.imageUrl} alt={getFullName()} />
+                    <AvatarImage src={currentUser?.imageUrl && currentUser.imageUrl.trim() ? currentUser.imageUrl : undefined} alt={getFullName()} />
                     <AvatarFallback userId={currentUser?.id} className="text-2xl font-bold bg-gradient-to-br from-primary/20 to-secondary/20">
                       {getInitials()}
                     </AvatarFallback>
