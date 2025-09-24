@@ -124,6 +124,41 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Outreach Tasks Section */}
+        <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Outreach Tasks</span>
+              <Button onClick={handleBuildRapport} size="sm">
+                <Heart className="h-4 w-4 mr-2" />
+                Build Rapport
+              </Button>
+            </CardTitle>
+            <CardDescription>
+              Manage your relationship building activities and follow-ups
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-6">
+                <TabsTrigger value="outreach">Active Tasks</TabsTrigger>
+                <TabsTrigger value="completed">Completed</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="outreach">
+                <OutreachList />
+              </TabsContent>
+              
+              <TabsContent value="completed">
+                <OutreachList defaultTab="completed" showTabs={false} />
+              </TabsContent>
+            </Tabs>
+
+            {/* Empty state */}
+            {outreachCounts.upcoming + outreachCounts.overdue === 0 && activeTab === "outreach"}
+          </CardContent>
+        </Card>
+
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
@@ -226,41 +261,6 @@ const Dashboard = () => {
             </Link>
           </Card>
         </div>
-
-        {/* Outreach Tasks Section */}
-        <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Outreach Tasks</span>
-              <Button onClick={handleBuildRapport} size="sm">
-                <Heart className="h-4 w-4 mr-2" />
-                Build Rapport
-              </Button>
-            </CardTitle>
-            <CardDescription>
-              Manage your relationship building activities and follow-ups
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-6">
-                <TabsTrigger value="outreach">Active Tasks</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="outreach">
-                <OutreachList />
-              </TabsContent>
-              
-              <TabsContent value="completed">
-                <OutreachList defaultTab="completed" showTabs={false} />
-              </TabsContent>
-            </Tabs>
-
-            {/* Empty state */}
-            {outreachCounts.upcoming + outreachCounts.overdue === 0 && activeTab === "outreach"}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

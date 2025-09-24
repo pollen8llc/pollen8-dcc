@@ -107,6 +107,66 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
         </div>
 
+        {/* Managed Communities */}
+        {hasUserCommunities && (
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Managed Communities</span>
+                <Link to="/eco8/setup">
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New
+                  </Button>
+                </Link>
+              </CardTitle>
+              <CardDescription>
+                Communities you organize and manage
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {userCommunities.map((community) => (
+                  <div key={community.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden">
+                        {community.logo_url ? (
+                          <img src={community.logo_url} alt={community.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <Users className="h-6 w-6 text-primary" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{community.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {community.type || community.community_type} • {community.location || 'Remote'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant={community.is_public ? 'default' : 'secondary'}>
+                        {community.is_public ? 'Public' : 'Private'}
+                      </Badge>
+                      <Link to={`/eco8/community/${community.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </Button>
+                      </Link>
+                      <Link to={`/eco8/community/${community.id}?edit=true`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
@@ -227,66 +287,6 @@ const Eco8Dashboard: React.FC = () => {
                   Create Your First Community
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Managed Communities */}
-        {hasUserCommunities && (
-          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Managed Communities</span>
-                <Link to="/eco8/setup">
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New
-                  </Button>
-                </Link>
-              </CardTitle>
-              <CardDescription>
-                Communities you organize and manage
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {userCommunities.map((community) => (
-                  <div key={community.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden">
-                        {community.logo_url ? (
-                          <img src={community.logo_url} alt={community.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <Users className="h-6 w-6 text-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{community.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {community.type || community.community_type} • {community.location || 'Remote'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant={community.is_public ? 'default' : 'secondary'}>
-                        {community.is_public ? 'Public' : 'Private'}
-                      </Badge>
-                      <Link to={`/eco8/community/${community.id}`}>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                      </Link>
-                      <Link to={`/eco8/community/${community.id}?edit=true`}>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </CardContent>
           </Card>
         )}
