@@ -68,56 +68,55 @@ const Dashboard = () => {
     completedTasks: outreachCounts.completed,
     totalCategories: categories.length
   };
-  return <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Rel8Header />
 
-      {/* Full-width content below the header */}
-      <div className="w-full px-4 py-8">
-
+      <div className="container mx-auto max-w-6xl px-4 py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4">
+        <div className="grid grid-cols-4 gap-6 mb-8">
+          <Card className="glassmorphic-card">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Contacts</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.totalContacts}</p>
+                  <p className="text-sm text-muted-foreground mb-1">Contacts</p>
+                  <p className="text-2xl font-bold">{quickStats.totalContacts}</p>
                 </div>
                 <Users className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
+          <Card className="glassmorphic-card">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Active Outreach</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.activeOutreach}</p>
+                  <p className="text-sm text-muted-foreground mb-1">Active Outreach</p>
+                  <p className="text-2xl font-bold">{quickStats.activeOutreach}</p>
                 </div>
                 <Clock className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
+          <Card className="glassmorphic-card">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.completedTasks}</p>
+                  <p className="text-sm text-muted-foreground mb-1">Completed</p>
+                  <p className="text-2xl font-bold">{quickStats.completedTasks}</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-4">
+          <Card className="glassmorphic-card">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Categories</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.totalCategories}</p>
+                  <p className="text-sm text-muted-foreground mb-1">Categories</p>
+                  <p className="text-2xl font-bold">{quickStats.totalCategories}</p>
                 </div>
                 <Building2 className="h-8 w-8 text-primary" />
               </div>
@@ -125,123 +124,105 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Main Actions Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/rel8/contacts">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Users className="h-6 w-6 text-primary" />
-                  Manage Contacts
-                </CardTitle>
-                <CardDescription>
-                  View, edit, and organize your contact list
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  View Contacts
-                </Button>
+        {/* Main Actions */}
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
+            <Link to="/rel8/contacts" className="block h-full">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Users className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Manage Contacts</h3>
+                    <p className="text-sm text-muted-foreground">View, edit, and organize your contact list</p>
+                  </div>
+                </div>
               </CardContent>
             </Link>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/rel8/import">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Upload className="h-6 w-6 text-primary" />
-                  Import Contacts
-                </CardTitle>
-                <CardDescription>
-                  Import contacts from CSV, email, phone, or websites
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Import Now
-                </Button>
+          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
+            <Link to="/rel8/import" className="block h-full">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Upload className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Import Contacts</h3>
+                    <p className="text-sm text-muted-foreground">Import contacts from CSV, email, phone, or websites</p>
+                  </div>
+                </div>
               </CardContent>
             </Link>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/rel8/triggers">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Zap className="h-6 w-6 text-primary" />
-                  Manage Triggers
-                </CardTitle>
-                <CardDescription>
-                  Set up automated reminders and follow-up sequences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Setup Triggers
-                </Button>
+          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
+            <Link to="/rel8/triggers" className="block h-full">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Zap className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Manage Triggers</h3>
+                    <p className="text-sm text-muted-foreground">Set up automated reminders and follow-up sequences</p>
+                  </div>
+                </div>
               </CardContent>
             </Link>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/rel8/categories">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Building2 className="h-6 w-6 text-primary" />
-                  Organize Categories
-                </CardTitle>
-                <CardDescription>
-                  Create and manage contact categories and tags
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Manage Categories
-                </Button>
+          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
+            <Link to="/rel8/categories" className="block h-full">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Building2 className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Organize Categories</h3>
+                    <p className="text-sm text-muted-foreground">Create and manage contact categories and tags</p>
+                  </div>
+                </div>
               </CardContent>
             </Link>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <MessageSquare className="h-6 w-6 text-primary" />
-                Build Rapport
-              </CardTitle>
-              <CardDescription>
-                Create personalized outreach campaigns to nurture relationships
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="ghost" className="w-full" onClick={handleBuildRapport}>
-                Start Building
-              </Button>
+          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
+            <CardContent className="p-6 flex flex-col h-full" onClick={handleBuildRapport}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                  <MessageSquare className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Build Rapport</h3>
+                  <p className="text-sm text-muted-foreground">Create personalized outreach campaigns to nurture relationships</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link to="/nmn8">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <Users className="h-6 w-6 text-primary" />
-                  Nomin8 Community
-                </CardTitle>
-                <CardDescription>
-                  Track and engage with your community members and supporters
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="ghost" className="w-full">
-                  Manage Community
-                </Button>
+          <Card className="glassmorphic-card hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group">
+            <Link to="/nmn8" className="block h-full">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Users className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Nomin8 Community</h3>
+                    <p className="text-sm text-muted-foreground">Track and engage with your community members and supporters</p>
+                  </div>
+                </div>
               </CardContent>
             </Link>
           </Card>
         </div>
 
         {/* Outreach Tasks Section */}
-        <Card>
+        <Card className="glassmorphic-card">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Outreach Tasks</span>
@@ -275,6 +256,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 };
 export default Dashboard;
