@@ -41,8 +41,6 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
   });
   const { stats } = useUserKnowledgeStats();
 
-  const FIXED_AVATAR_URL = "https://www.pollen8.app/wp-content/uploads/2025/03/larissa-avatar.gif";
-
   useEffect(() => {
     const fetchUserCommunities = async () => {
       if (!profile?.id) return;
@@ -106,7 +104,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-spin-slow opacity-75 blur-sm" />
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-pulse" />
                 <Avatar className="relative w-20 h-20 sm:w-24 sm:h-24 border-4 border-background shadow-2xl">
-                  <AvatarImage src={profile.avatar_url || FIXED_AVATAR_URL} alt={getFullName()} />
+                  <AvatarImage src={profile.avatar_url} alt={getFullName()} />
                   <AvatarFallback userId={profile.user_id} className="text-xl sm:text-2xl font-bold bg-gradient-to-br from-primary/20 to-secondary/20">
                     {getInitials()}
                   </AvatarFallback>
