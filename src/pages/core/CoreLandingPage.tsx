@@ -22,7 +22,7 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 
 const CoreLandingPage = () => {
@@ -138,10 +138,7 @@ const CoreLandingPage = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={article.author?.avatar_url} />
-                      <AvatarFallback>{article.author?.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                    <Avatar userId={article.author?.id} size={24} />
                     <span className="text-sm">
                       {article.author?.name} • {formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}
                     </span>

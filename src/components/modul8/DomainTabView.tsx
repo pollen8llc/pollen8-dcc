@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { 
   Building, 
   Star, 
@@ -72,12 +72,7 @@ const DomainTabView: React.FC<DomainTabViewProps> = ({ domainId, organizerId }) 
     <Card key={provider.id} className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src={provider.logo_url} />
-            <AvatarFallback>
-              <Building className="h-6 w-6" />
-            </AvatarFallback>
-          </Avatar>
+          <Avatar userId={provider.user_id} size={48} />
           
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-lg mb-1 truncate">

@@ -3,7 +3,7 @@ import React from 'react';
 import { ServiceRequest } from '@/types/modul8';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ArrowLeft, Building, User, Menu, Clock, DollarSign } from 'lucide-react';
@@ -60,12 +60,7 @@ export const MobileRequestLayout: React.FC<MobileRequestLayoutProps> = ({
         <CardContent className="space-y-3">
           {/* Organizer */}
           <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={serviceRequest.organizer?.logo_url} />
-              <AvatarFallback className="bg-blue-500/20 text-blue-700">
-                <Building className="h-4 w-4" />
-              </AvatarFallback>
-            </Avatar>
+            <Avatar userId={serviceRequest.organizer?.user_id} size={32} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate">
                 {serviceRequest.organizer?.organization_name || 'Organization'}
@@ -76,12 +71,7 @@ export const MobileRequestLayout: React.FC<MobileRequestLayoutProps> = ({
 
           {/* Service Provider */}
           <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={serviceProvider?.logo_url} />
-              <AvatarFallback className="bg-primary/20 text-primary">
-                <Building className="h-4 w-4" />
-              </AvatarFallback>
-            </Avatar>
+            <Avatar userId={serviceProvider?.user_id} size={32} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate">
                 {serviceProvider?.business_name || 'Service Provider'}

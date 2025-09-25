@@ -117,12 +117,7 @@ export const EnhancedCommentSection: React.FC<EnhancedCommentSectionProps> = ({
     <Card key={comment.id} className={cn("", isReply && "ml-8 mt-2")}>
       <CardContent className="p-4">
         <div className="flex items-start space-x-3">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={comment.author?.avatar_url} />
-            <AvatarFallback userId={comment.user_id} className="text-xs">
-              {getInitials(comment.author?.name)}
-            </AvatarFallback>
-          </Avatar>
+          <Avatar userId={comment.user_id} size={32} />
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">

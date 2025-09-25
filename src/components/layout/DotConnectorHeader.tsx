@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,12 +48,7 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                 <div className="relative flex-shrink-0">
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-spin-slow opacity-75 blur-sm" />
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-pulse" />
-                  <Avatar className="relative w-24 h-24 border-4 border-background shadow-2xl">
-                    <AvatarImage src={currentUser?.imageUrl && currentUser.imageUrl.trim() ? currentUser.imageUrl : undefined} alt={getFullName()} />
-                    <AvatarFallback userId={currentUser?.id} className="text-2xl font-bold bg-gradient-to-br from-primary/20 to-secondary/20">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar userId={currentUser?.id} size={96} className="relative border-4 border-background shadow-2xl" />
                 </div>
                 
                 {/* Profile Info */}

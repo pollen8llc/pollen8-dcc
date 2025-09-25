@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Tooltip,
@@ -70,12 +70,7 @@ const DomainPage: React.FC<DomainPageProps> = ({ domainId, title, description })
           <Card key={provider.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center gap-3">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={provider.logo_url} />
-                  <AvatarFallback className="bg-muted-foreground text-background">
-                    <Building className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
+                <Avatar userId={provider.user_id} size={36} />
                 <CardTitle className="text-base font-semibold">{provider.business_name}</CardTitle>
               </div>
             </CardHeader>

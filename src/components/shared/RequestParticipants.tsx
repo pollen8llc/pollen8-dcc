@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { Building, User } from 'lucide-react';
 import { ServiceRequest } from '@/types/modul8';
 
@@ -24,12 +24,7 @@ export const RequestParticipants: React.FC<RequestParticipantsProps> = ({
       <CardContent className="space-y-4">
         {/* Organizer */}
         <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={serviceRequest.organizer?.logo_url} />
-            <AvatarFallback>
-              <Building className="h-5 w-5" />
-            </AvatarFallback>
-          </Avatar>
+          <Avatar userId={serviceRequest.organizer?.user_id} size={40} />
           <div className="flex-1">
             <div className="text-sm font-medium">
               {serviceRequest.organizer?.organization_name || 'Client'}
@@ -43,12 +38,7 @@ export const RequestParticipants: React.FC<RequestParticipantsProps> = ({
         {/* Service Provider */}
         {(serviceProvider || serviceRequest.service_provider) && (
           <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={serviceProvider?.logo_url || serviceRequest.service_provider?.logo_url} />
-              <AvatarFallback>
-                <Building className="h-5 w-5" />
-              </AvatarFallback>
-            </Avatar>
+            <Avatar userId={serviceProvider?.user_id || serviceRequest.service_provider?.user_id} size={40} />
             <div className="flex-1">
               <div className="text-sm font-medium">
                 {serviceProvider?.business_name || serviceRequest.service_provider?.business_name || 'Service Provider'}

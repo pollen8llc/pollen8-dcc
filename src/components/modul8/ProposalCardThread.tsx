@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { 
   MessageSquare, 
@@ -408,12 +408,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
               INITIAL REQUEST
             </Badge>
             <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={serviceRequest.organizer?.logo_url} />
-                <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
-                  <Building className="h-3 w-3" />
-                </AvatarFallback>
-              </Avatar>
+              <Avatar userId={serviceRequest.organizer?.user_id} size={24} />
               <span className="font-medium text-gray-300">
                 {serviceRequest.organizer?.organization_name || 'Client'}
               </span>
@@ -732,11 +727,7 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             ) : (
               comments.map((comment) => (
                 <div key={comment.id} className="flex gap-3 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary/20 text-primary">
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar userId={comment.user_id} size={32} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-semibold text-white">

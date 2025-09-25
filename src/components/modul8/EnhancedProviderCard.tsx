@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { 
   Star, 
   MapPin, 
@@ -44,12 +44,7 @@ const EnhancedProviderCard: React.FC<EnhancedProviderCardProps> = ({
     <Card className={`hover:shadow-md transition-shadow ${className}`}>
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={provider.logo_url} alt={provider.business_name} />
-            <AvatarFallback>
-              <Building className="h-8 w-8" />
-            </AvatarFallback>
-          </Avatar>
+          <Avatar userId={provider.user_id} size={64} />
           
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between mb-2">

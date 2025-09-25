@@ -5,7 +5,7 @@ import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   ArrowLeft, 
@@ -197,11 +197,7 @@ const RequestStatusPage = () => {
               <CardContent className="space-y-3 sm:space-y-4">
                 {/* Organizer */}
                 <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-                    <AvatarFallback>
-                      <User className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar userId={serviceRequest.organizer?.user_id} size={40} />
                   <div className="flex-1">
                     <div className="text-xs sm:text-sm font-medium">
                       {serviceRequest.organizer?.organization_name || 'Organizer'}
@@ -213,12 +209,7 @@ const RequestStatusPage = () => {
                 {/* Service Provider */}
                 {serviceRequest.service_provider && (
                   <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-50 dark:bg-green-900/10 rounded-lg">
-                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-                      <AvatarImage src={serviceRequest.service_provider.logo_url} />
-                      <AvatarFallback>
-                        <Building className="h-4 w-4 sm:h-5 sm:w-5" />
-                      </AvatarFallback>
-                    </Avatar>
+                    <Avatar userId={serviceRequest.service_provider.user_id} size={40} />
                     <div className="flex-1">
                       <div className="text-xs sm:text-sm font-medium">
                         {serviceRequest.service_provider.business_name}

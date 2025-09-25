@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Twitter, Linkedin, Instagram, Facebook } from 'lucide-react';
@@ -66,11 +66,7 @@ const Nomin8ProfileCard: React.FC<Nomin8ProfileCardProps> = ({ profile, onClick 
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
           {/* Avatar */}
-          <Avatar className="w-12 h-12 border-2 border-white/20 shadow-lg flex-shrink-0">
-            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-secondary/30 text-sm font-bold text-white">
-              {getInitials(profile.name)}
-            </AvatarFallback>
-          </Avatar>
+          <Avatar userId={profile.contactId} size={48} className="border-2 border-white/20 shadow-lg flex-shrink-0" />
 
           {/* Main Info */}
           <div className="flex-1 min-w-0">

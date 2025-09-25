@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { 
   MessageSquare, 
@@ -234,12 +234,7 @@ const SharedProjectStatus: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={project.organizer?.logo_url} />
-                    <AvatarFallback>
-                      <Building2 className="h-5 w-5" />
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar userId={project.organizer?.user_id} size={40} />
                   <div>
                     <p className="font-medium">{project.organizer?.organization_name}</p>
                     {project.organizer?.description && (
@@ -260,12 +255,7 @@ const SharedProjectStatus: React.FC = () => {
               <CardContent>
                 {project.service_provider ? (
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={project.service_provider.logo_url} />
-                      <AvatarFallback>
-                        <User className="h-5 w-5" />
-                      </AvatarFallback>
-                    </Avatar>
+                    <Avatar userId={project.service_provider.user_id} size={40} />
                     <div>
                       <p className="font-medium">{project.service_provider.business_name}</p>
                       {project.service_provider.tagline && (
@@ -344,11 +334,7 @@ const SharedProjectStatus: React.FC = () => {
             {comments.length > 0 ? (
               comments.map((comment) => (
                 <div key={comment.id} className="flex gap-3 p-3 bg-muted/20 rounded-lg">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar userId={comment.user_id} size={32} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-medium">User</span>

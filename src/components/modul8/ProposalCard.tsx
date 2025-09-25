@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { 
   DollarSign, 
   Clock, 
@@ -93,12 +93,7 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               {proposal.service_provider && (
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={proposal.service_provider.logo_url} />
-                  <AvatarFallback>
-                    <Building className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
+                <Avatar userId={proposal.service_provider?.user_id} size={40} />
               )}
               <div>
                 <div className="font-semibold">
