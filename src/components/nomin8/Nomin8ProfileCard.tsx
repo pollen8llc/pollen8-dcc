@@ -67,7 +67,6 @@ const Nomin8ProfileCard: React.FC<Nomin8ProfileCardProps> = ({ profile, onClick 
         <div className="flex items-center gap-4">
           {/* Avatar */}
           <Avatar className="w-12 h-12 border-2 border-white/20 shadow-lg flex-shrink-0">
-            <AvatarImage src={profile.avatar} alt={profile.name} />
             <AvatarFallback className="bg-gradient-to-br from-primary/30 to-secondary/30 text-sm font-bold text-white">
               {getInitials(profile.name)}
             </AvatarFallback>

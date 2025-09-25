@@ -230,7 +230,6 @@ const Nomin8ProfileDetails: React.FC = () => {
           {/* Header Section */}
           <div className="flex items-start gap-6">
             <Avatar className="w-20 h-20 border-4 border-primary/20">
-              <AvatarImage src={profile.avatar} alt={profile.name} />
               <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-lg font-semibold">
                 {getInitials(profile.name)}
               </AvatarFallback>
