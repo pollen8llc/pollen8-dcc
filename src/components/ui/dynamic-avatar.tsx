@@ -6,14 +6,14 @@ interface DynamicAvatarProps {
   userId?: string;
   size?: number;
   className?: string;
-  fallbackToMagnetosphere?: boolean;
+  fallbackToPulsar?: boolean;
 }
 
 export const DynamicAvatar: React.FC<DynamicAvatarProps> = ({ 
   userId, 
   size = 64, 
   className = "",
-  fallbackToMagnetosphere = true 
+  fallbackToPulsar = true 
 }) => {
   const { currentUser } = useUser();
   const [selectedAvatar, setSelectedAvatar] = useState<IonsAvatar | null>(null);
@@ -35,20 +35,20 @@ export const DynamicAvatar: React.FC<DynamicAvatarProps> = ({
         if (avatarSelection.selected_avatar_id) {
           const avatar = await AvatarService.getAvatarById(avatarSelection.selected_avatar_id);
           setSelectedAvatar(avatar);
-        } else if (fallbackToMagnetosphere) {
-          // Get Magnetosphere as default
+        } else if (fallbackToPulsar) {
+          // Get Pulsar as default
           const avatars = await AvatarService.getAllActiveAvatars();
-          const magnetosphere = avatars.find(a => a.name === 'Magnetosphere');
-          setSelectedAvatar(magnetosphere || null);
+          const pulsar = avatars.find(a => a.name === 'Pulsar');
+          setSelectedAvatar(pulsar || null);
         }
       } catch (error) {
         console.error('Failed to load user avatar:', error);
-        if (fallbackToMagnetosphere) {
-          // Try to get Magnetosphere as fallback
+        if (fallbackToPulsar) {
+          // Try to get Pulsar as fallback
           try {
             const avatars = await AvatarService.getAllActiveAvatars();
-            const magnetosphere = avatars.find(a => a.name === 'Magnetosphere');
-            setSelectedAvatar(magnetosphere || null);
+            const pulsar = avatars.find(a => a.name === 'Pulsar');
+            setSelectedAvatar(pulsar || null);
           } catch (fallbackError) {
             console.error('Failed to load fallback avatar:', fallbackError);
           }
@@ -59,7 +59,7 @@ export const DynamicAvatar: React.FC<DynamicAvatarProps> = ({
     };
 
     loadUserAvatar();
-  }, [targetUserId, fallbackToMagnetosphere]);
+  }, [targetUserId, fallbackToPulsar]);
 
   if (isLoading) {
     return (
@@ -71,7 +71,7 @@ export const DynamicAvatar: React.FC<DynamicAvatarProps> = ({
   }
 
   if (!selectedAvatar) {
-    // Final fallback to hardcoded Magnetosphere
+    // Final fallback to hardcoded Pulsar
     return (
       <svg 
         width={size} 
@@ -80,17 +80,42 @@ export const DynamicAvatar: React.FC<DynamicAvatarProps> = ({
         className={className}
       >
         <defs>
-          <radialGradient id={`fallback-${uniqueId}`} cx="50%" cy="50%" r="50%">
+          <radialGradient id={`pulsar-core-${uniqueId}`} cx="50%" cy="50%" r="30%">
             <stop offset="0%" stopColor="hsl(var(--primary))" />
+            <stop offset="70%" stopColor="hsl(var(--accent))" />
             <stop offset="100%" stopColor="hsl(var(--secondary))" />
           </radialGradient>
+          <linearGradient id={`pulsar-beam-${uniqueId}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="hsl(var(--primary) / 0)" />
+            <stop offset="20%" stopColor="hsl(var(--primary) / 0.8)" />
+            <stop offset="50%" stopColor="hsl(var(--accent) / 1)" />
+            <stop offset="80%" stopColor="hsl(var(--primary) / 0.8)" />
+            <stop offset="100%" stopColor="hsl(var(--primary) / 0)" />
+          </linearGradient>
         </defs>
-        <circle cx="32" cy="32" r="8" fill={`url(#fallback-${uniqueId})`} />
-        <circle cx="32" cy="32" r="16" fill="none" stroke="hsl(var(--primary) / 0.4)" strokeWidth="2">
-          <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite" />
+        
+        <g>
+          <line x1="8" y1="32" x2="56" y2="32" stroke={`url(#pulsar-beam-${uniqueId})`} strokeWidth="2" opacity="0.6">
+            <animateTransform attributeName="transform" type="rotate" 
+                values="0 32 32;360 32 32" dur="3s" repeatCount="indefinite" />
+          </line>
+          <line x1="32" y1="8" x2="32" y2="56" stroke={`url(#pulsar-beam-${uniqueId})`} strokeWidth="2" opacity="0.6">
+            <animateTransform attributeName="transform" type="rotate" 
+                values="45 32 32;405 32 32" dur="3s" repeatCount="indefinite" />
+          </line>
+        </g>
+        
+        <circle cx="32" cy="32" r="20" fill="none" stroke="hsl(var(--primary) / 0.3)" strokeWidth="1">
+          <animate attributeName="r" values="18;22;18" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
         </circle>
-        <circle cx="32" cy="32" r="12" fill="none" stroke="hsl(var(--accent) / 0.3)" strokeWidth="1">
-          <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" begin="0.5s" />
+        
+        <circle cx="32" cy="32" r="6" fill={`url(#pulsar-core-${uniqueId})`}>
+          <animate attributeName="r" values="6;8;6" dur="1.5s" repeatCount="indefinite" />
+        </circle>
+        
+        <circle cx="32" cy="32" r="3" fill="hsl(var(--accent))">
+          <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
         </circle>
       </svg>
     );

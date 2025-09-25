@@ -61,7 +61,7 @@ const AvatarFallback = React.forwardRef<
         <DynamicAvatar 
           userId={userId}
           className="w-full h-full"
-          fallbackToMagnetosphere={true}
+          fallbackToPulsar={true}
         />
       ) : (
         <svg width="100%" height="100%" viewBox="0 0 64 64" className="w-full h-full">
