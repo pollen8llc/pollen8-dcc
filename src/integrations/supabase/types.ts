@@ -2893,6 +2893,10 @@ export type Database = {
         Args: { is_complete?: boolean; module_name: string; user_id: string }
         Returns: boolean
       }
+      update_user_avatar_admin: {
+        Args: { new_avatar_id: string; target_user_id: string }
+        Returns: boolean
+      }
       update_user_role: {
         Args: { p_assigner_id?: string; p_role_name: string; p_user_id: string }
         Returns: boolean
