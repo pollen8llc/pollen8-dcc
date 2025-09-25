@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,16 +27,6 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
     return null;
   }
 
-  // Get initials for avatar fallback
-  const getInitials = (name?: string) => {
-    if (!name) return "?";
-    
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
 
   // Format role name for display - handles both string and UserRole enum
   const formatRole = (role?: UserRole | string): string => {
@@ -68,12 +58,12 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
   if (minimal) {
     return (
       <div className="flex items-center">
-        <Avatar className={`h-10 w-10 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : ''}`}>
-          <AvatarImage src={author.avatar_url} />
-          <AvatarFallback userId={author.id} className={isAdmin ? "bg-[#9b87f5]/10 text-[#9b87f5]" : "bg-[#00eada]/10 text-[#00eada]"}>
-            {getInitials(author.name)}
-          </AvatarFallback>
-        </Avatar>
+        <Avatar 
+          userId={author.id}
+          size={40}
+          className={`h-10 w-10 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : ''}`}
+          isAdmin={isAdmin}
+        />
         
         <div className="ml-3">
           <p className="font-medium">{author.name || 'Anonymous'}</p>
@@ -97,12 +87,12 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, minimal = false }) => {
       <CardContent className="pt-6">
         <h3 className="text-lg font-medium mb-3">About the Author</h3>
         <div className="flex items-center">
-          <Avatar className={`h-12 w-12 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : 'ring-2 ring-[#00eada]/20'}`}>
-            <AvatarImage src={author.avatar_url} />
-            <AvatarFallback userId={author.id} className={isAdmin ? "bg-[#9b87f5]/10 text-[#9b87f5]" : "bg-[#00eada]/10 text-[#00eada]"}>
-              {getInitials(author.name)}
-            </AvatarFallback>
-          </Avatar>
+          <Avatar 
+            userId={author.id}
+            size={48}
+            className={`h-12 w-12 ${isAdmin ? 'ring-2 ring-[#9b87f5]/50' : 'ring-2 ring-[#00eada]/20'}`}
+            isAdmin={isAdmin}
+          />
           
           <div className="ml-3">
             <p className="font-medium">{author.name || 'Anonymous'}</p>

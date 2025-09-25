@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { User, UserRole } from "@/models/types";
 import UserTableActions from "./UserTableActions";
@@ -42,12 +42,12 @@ const UserTableRow = ({
   return (
     <TableRow key={user.id}>
       <TableCell>
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={user.imageUrl && user.imageUrl.trim() ? user.imageUrl : undefined} alt={user.name} />
-          <AvatarFallback userId={user.id}>
-            {user.name.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <Avatar 
+          userId={user.id}
+          size={40}
+          className="h-10 w-10"
+          isAdmin={user.role === UserRole.ADMIN}
+        />
       </TableCell>
       <TableCell className="font-medium">{user.name}</TableCell>
       <TableCell>{user.email}</TableCell>

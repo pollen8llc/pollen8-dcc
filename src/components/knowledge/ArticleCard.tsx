@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import {
   MessageSquare,
   Eye,
@@ -79,14 +79,6 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
     }
   };
 
-  const getAuthorInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -170,12 +162,11 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
             {/* Author */}
             {article.author && (
               <div className="flex items-center gap-2">
-                <Avatar className="h-5 w-5 sm:h-6 sm:w-6">
-                  <AvatarImage src={article.author.avatar_url} />
-                  <AvatarFallback userId={article.author.id} className="text-xs">
-                    {getAuthorInitials(article.author.name)}
-                  </AvatarFallback>
-                </Avatar>
+                <Avatar 
+                  userId={article.author.id}
+                  size={24}
+                  className="h-5 w-5 sm:h-6 sm:w-6"
+                />
                 <span className="text-xs sm:text-sm text-white">{article.author.name}</span>
               </div>
             )}

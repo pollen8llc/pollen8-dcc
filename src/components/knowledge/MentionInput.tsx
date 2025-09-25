@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useUserSearch } from '@/hooks/knowledge/useEnhancedComments';
 
@@ -35,9 +35,6 @@ export const MentionInput: React.FC<MentionInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
 
   const handleTextChange = async (newValue: string) => {
     const textarea = textareaRef.current;
@@ -195,12 +192,11 @@ export const MentionInput: React.FC<MentionInputProps> = ({
               )}
               onClick={() => insertMention(user)}
             >
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={user.avatar_url} />
-                <AvatarFallback userId={user.id} className="text-xs">
-                  {getInitials(user.name)}
-                </AvatarFallback>
-              </Avatar>
+              <Avatar 
+                userId={user.id}
+                size={24}
+                className="h-6 w-6"
+              />
               <span className="text-sm">{user.name}</span>
             </div>
           ))}

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { MapPin, Users, TrendingUp } from "lucide-react";
 import { Community } from "@/hooks/useCommunities";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { memo, useState, useEffect } from "react";
 import { useProfiles } from "@/hooks/useProfiles";
 import { ExtendedProfile } from "@/services/profileService";
@@ -104,10 +104,11 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
 
           {/* Organizer Section */}
           <div className="flex items-center space-x-2">
-            <Avatar className="w-6 h-6">
-              <AvatarImage src={organizerAvatar} alt={organizerName} />
-              <AvatarFallback userId={community.owner_id} className="text-xs">CO</AvatarFallback>
-            </Avatar>
+            <Avatar 
+              userId={community.owner_id}
+              size={24} 
+              className="w-6 h-6"
+            />
             <span className="text-sm text-muted-foreground">
               by {organizerName}
             </span>
