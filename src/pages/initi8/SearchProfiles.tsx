@@ -150,7 +150,6 @@ const SearchProfiles: React.FC = () => {
                     <div className="flex items-center">
                       <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={profile.avatar_url || undefined} />
                           <AvatarFallback userId={profile.user_id || profile.id} />
                         </Avatar>
                       </div>
