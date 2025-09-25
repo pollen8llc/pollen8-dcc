@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import Navbar from '@/components/Navbar';
 import { AvatarService, IonsAvatar } from '@/services/avatarService';
 import { AvatarDataService } from '@/services/avatarDataService';
+import { AvatarDatabaseManager } from '@/components/admin/AvatarDatabaseManager';
 import { Loader2, Plus, Edit, Trash2, Database } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -164,19 +165,28 @@ const AvatarManagement: React.FC = () => {
                 Avatar Management
               </h1>
               <p className="text-muted-foreground">
-                Manage the dynamic avatar system - add, edit, and configure space-themed avatars
+                Manage the dynamic avatar system - sync from /admin/avatars and configure individual avatars
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Database Management Section */}
+        <div className="mb-8">
+          <AvatarDatabaseManager />
+        </div>
+
+        <div className="glass-morphism glass-morphism-hover rounded-3xl p-6 mb-8">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-2">
+                Individual Avatar Management
+              </h2>
+              <p className="text-muted-foreground">
+                Create, edit, and manage individual avatars
               </p>
             </div>
             <div className="flex gap-2">
-              <Button
-                onClick={handlePopulateDatabase}
-                disabled={isPopulating}
-                variant="outline"
-              >
-                {isPopulating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Database className="h-4 w-4 mr-2" />}
-                Populate DB
-              </Button>
-              
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
