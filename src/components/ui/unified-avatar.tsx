@@ -11,18 +11,9 @@ interface UnifiedAvatarProps {
 }
 
 const PULSAR_SVG = `<svg width="100%" height="100%" viewBox="0 0 64 64" class="w-full h-full">
-  <defs>
-    <radialGradient id="pulsar-{id}" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stopColor="hsl(var(--primary))" />
-      <stop offset="100%" stopColor="hsl(var(--primary) / 0.6)" />
-    </radialGradient>
-  </defs>
-  <circle cx="32" cy="32" r="8" fill="url(#pulsar-{id})">
-    <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite" />
-  </circle>
-  <circle cx="32" cy="32" r="20" fill="none" stroke="hsl(var(--accent))" strokeWidth="2" opacity="0.3">
-    <animate attributeName="r" values="20;30;20" dur="1s" repeatCount="indefinite" />
-    <animate attributeName="opacity" values="0.3;0;0.3" dur="1s" repeatCount="indefinite" />
+  <circle cx="32" cy="32" r="20" fill="none" stroke="hsl(var(--primary))" stroke-width="2" opacity="0.6">
+    <animate attributeName="r" values="18;22;18" dur="2s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite" />
   </circle>
 </svg>`;
 
@@ -45,35 +36,24 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   useEffect(() => {
     const loadAvatar = async () => {
       if (!targetUserId) {
-        setAvatarSvg(PULSAR_SVG.replace(/{id}/g, uniqueId));
         setIsLoading(false);
         return;
       }
 
       try {
-        // Try to get user's selected avatar
         const avatarSelection = await AvatarService.getUserAvatarSelection(targetUserId);
         
         if (avatarSelection.selected_avatar_id) {
           const avatar = await AvatarService.getAvatarById(avatarSelection.selected_avatar_id);
           if (avatar) {
-            console.log(`✓ Avatar loaded: ${avatar.name} for user ${targetUserId}`);
             setAvatarSvg(AvatarService.renderAvatarSvg(avatar, uniqueId));
-            setIsLoading(false);
-            return;
           }
         }
-        
-        // Fallback to Pulsar (default avatar)
-        console.log(`→ Using fallback Pulsar for user ${targetUserId}`);
-        setAvatarSvg(PULSAR_SVG.replace(/{id}/g, uniqueId));
       } catch (error) {
-        console.error('Avatar loading failed:', error);
-        // Always fallback to Pulsar on any error
-        setAvatarSvg(PULSAR_SVG.replace(/{id}/g, uniqueId));
-      } finally {
-        setIsLoading(false);
+        // If avatar doesn't load, leave blank (no fallback)
       }
+      
+      setIsLoading(false);
     };
 
     loadAvatar();
@@ -85,10 +65,11 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
     className
   );
 
-  if (isLoading) {
+  // If loading or no avatar, render blank
+  if (isLoading || !avatarSvg) {
     return (
       <div 
-        className={cn("animate-pulse bg-muted", containerClasses)}
+        className={containerClasses}
         style={{ width: size, height: size }}
       />
     );
