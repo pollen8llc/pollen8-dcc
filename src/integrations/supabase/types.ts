@@ -2741,6 +2741,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_selected_avatar_id: {
+        Args: { target_user: string }
+        Returns: string
+      }
       get_term_suggestions: {
         Args: { p_limit?: number; p_search_query?: string; p_term_type: string }
         Returns: {

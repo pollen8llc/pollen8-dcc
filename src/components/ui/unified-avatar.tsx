@@ -2,6 +2,7 @@ import React, { useEffect, useState, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { AvatarService, IonsAvatar } from '@/services/avatarService';
 import { useUser } from '@/contexts/UserContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UnifiedAvatarProps {
   userId?: string;
@@ -36,6 +37,7 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   useEffect(() => {
     const loadAvatar = async () => {
       if (!targetUserId) {
+        // For unauthenticated/no user, show blank 
         setIsLoading(false);
         return;
       }
@@ -47,10 +49,31 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
           const avatar = await AvatarService.getAvatarById(avatarSelection.selected_avatar_id);
           if (avatar) {
             setAvatarSvg(AvatarService.renderAvatarSvg(avatar, uniqueId));
+            setIsLoading(false);
+            return;
+          }
+        }
+        
+        // If no assigned avatar found, check if user exists and assign default
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', targetUserId)
+          .maybeSingle();
+          
+        if (profile) {
+          // User exists but no avatar assigned - set default Pulsar
+          const pulsarId = 'f82017c3-a2b1-46c4-b1fb-d100b1c8b5ad';
+          await AvatarService.updateUserSelectedAvatar(targetUserId, pulsarId);
+          
+          // Load the Pulsar avatar
+          const pulsarAvatar = await AvatarService.getAvatarById(pulsarId);
+          if (pulsarAvatar) {
+            setAvatarSvg(AvatarService.renderAvatarSvg(pulsarAvatar, uniqueId));
           }
         }
       } catch (error) {
-        // If avatar doesn't load, leave blank (no fallback)
+        // Silent fail - leave blank
       }
       
       setIsLoading(false);
