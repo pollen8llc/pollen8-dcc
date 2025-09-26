@@ -10,45 +10,19 @@ interface UnifiedAvatarProps {
   isAdmin?: boolean;
 }
 
-const PULSAR_SVG = `
-<svg width="100%" height="100%" viewBox="0 0 64 64">
+const PULSAR_SVG = `<svg width="100%" height="100%" viewBox="0 0 64 64" class="w-full h-full">
   <defs>
-    <radialGradient id="pulsar-core-{id}" cx="50%" cy="50%" r="30%">
-      <stop offset="0%" stop-color="hsl(174 100% 46%)" />
-      <stop offset="70%" stop-color="hsl(174 100% 46%)" />
-      <stop offset="100%" stop-color="hsl(215 25% 16%)" />
+    <radialGradient id="pulsar-{id}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stopColor="hsl(var(--primary))" />
+      <stop offset="100%" stopColor="hsl(var(--primary) / 0.6)" />
     </radialGradient>
-    <linearGradient id="pulsar-beam-{id}" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="hsl(174 100% 46% / 0)" />
-      <stop offset="20%" stop-color="hsl(174 100% 46% / 0.8)" />
-      <stop offset="50%" stop-color="hsl(174 100% 46% / 1)" />
-      <stop offset="80%" stop-color="hsl(174 100% 46% / 0.8)" />
-      <stop offset="100%" stop-color="hsl(174 100% 46% / 0)" />
-    </linearGradient>
   </defs>
-  
-  <g>
-    <line x1="8" y1="32" x2="56" y2="32" stroke="url(#pulsar-beam-{id})" stroke-width="2" opacity="0.6">
-      <animateTransform attributeName="transform" type="rotate" 
-          values="0 32 32;360 32 32" dur="3s" repeatCount="indefinite" />
-    </line>
-    <line x1="32" y1="8" x2="32" y2="56" stroke="url(#pulsar-beam-{id})" stroke-width="2" opacity="0.6">
-      <animateTransform attributeName="transform" type="rotate" 
-          values="45 32 32;405 32 32" dur="3s" repeatCount="indefinite" />
-    </line>
-  </g>
-  
-  <circle cx="32" cy="32" r="20" fill="none" stroke="hsl(174 100% 46% / 0.3)" stroke-width="1">
-    <animate attributeName="r" values="18;22;18" dur="2s" repeatCount="indefinite" />
-    <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" />
+  <circle cx="32" cy="32" r="8" fill="url(#pulsar-{id})">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite" />
   </circle>
-  
-  <circle cx="32" cy="32" r="6" fill="url(#pulsar-core-{id})">
-    <animate attributeName="r" values="6;8;6" dur="1.5s" repeatCount="indefinite" />
-  </circle>
-  
-  <circle cx="32" cy="32" r="3" fill="hsl(174 100% 46%)">
-    <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
+  <circle cx="32" cy="32" r="20" fill="none" stroke="hsl(var(--accent))" strokeWidth="2" opacity="0.3">
+    <animate attributeName="r" values="20;30;20" dur="1s" repeatCount="indefinite" />
+    <animate attributeName="opacity" values="0.3;0;0.3" dur="1s" repeatCount="indefinite" />
   </circle>
 </svg>`;
 
@@ -83,6 +57,7 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
         if (avatarSelection.selected_avatar_id) {
           const avatar = await AvatarService.getAvatarById(avatarSelection.selected_avatar_id);
           if (avatar) {
+            console.log(`✓ Avatar loaded: ${avatar.name} for user ${targetUserId}`);
             setAvatarSvg(AvatarService.renderAvatarSvg(avatar, uniqueId));
             setIsLoading(false);
             return;
@@ -90,6 +65,7 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
         }
         
         // Fallback to Pulsar (default avatar)
+        console.log(`→ Using fallback Pulsar for user ${targetUserId}`);
         setAvatarSvg(PULSAR_SVG.replace(/{id}/g, uniqueId));
       } catch (error) {
         console.error('Avatar loading failed:', error);
