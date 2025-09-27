@@ -495,6 +495,233 @@ h6 {
   }
 }
 
+/* CSS Avatar Styles */
+.avatar-base {
+  @apply relative w-full h-full rounded-full overflow-hidden;
+}
+
+.avatar-pulsar {
+  background: radial-gradient(circle, hsl(var(--primary)), hsl(var(--primary) / 0.6));
+  animation: avatar-pulse 1.5s ease-in-out infinite;
+}
+
+.avatar-pulsar::after {
+  content: '';
+  @apply absolute inset-0 rounded-full border-2 border-accent/30;
+  animation: avatar-ring-expand 1s ease-in-out infinite;
+}
+
+.avatar-black-hole {
+  background: radial-gradient(circle, hsl(var(--foreground)), hsl(var(--foreground)), transparent);
+}
+
+.avatar-black-hole::before,
+.avatar-black-hole::after {
+  content: '';
+  @apply absolute inset-0 rounded-full border border-primary/50;
+}
+
+.avatar-black-hole::before {
+  animation: avatar-rotate 2s linear infinite;
+}
+
+.avatar-black-hole::after {
+  @apply border-accent/30;
+  animation: avatar-counter-rotate 1s linear infinite;
+}
+
+.avatar-supernova {
+  background: radial-gradient(circle, hsl(var(--destructive)), hsl(var(--accent)), transparent);
+}
+
+.avatar-supernova::before,
+.avatar-supernova::after {
+  content: '';
+  @apply absolute inset-0 rounded-full;
+  background: radial-gradient(circle, hsl(var(--destructive)), hsl(var(--accent)), transparent);
+}
+
+.avatar-supernova::before {
+  animation: avatar-explode 2s ease-in-out infinite;
+}
+
+.avatar-supernova::after {
+  animation: avatar-explode 3s ease-in-out infinite 0.5s;
+}
+
+.avatar-nebula {
+  background: conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary) / 0.3));
+  animation: avatar-fast-rotate 6s linear infinite;
+}
+
+.avatar-red-giant {
+  background: radial-gradient(circle, hsl(var(--destructive)), hsl(var(--primary)));
+  animation: avatar-pulse 3s ease-in-out infinite;
+}
+
+.avatar-red-giant::after {
+  content: '';
+  @apply absolute inset-0 rounded-full bg-destructive/30;
+  animation: avatar-glow 4s ease-in-out infinite;
+}
+
+.avatar-white-dwarf {
+  background: radial-gradient(circle, hsl(var(--background)), hsl(var(--primary)));
+  animation: avatar-pulse 2s ease-in-out infinite;
+}
+
+.avatar-white-dwarf::after {
+  content: '';
+  @apply absolute inset-0 rounded-full border border-background/60;
+  animation: avatar-slow-rotate 10s linear infinite;
+}
+
+.avatar-blue-giant {
+  background: radial-gradient(circle, #60a5fa, #06b6d4);
+  animation: avatar-pulse 2s ease-in-out infinite;
+}
+
+.avatar-blue-giant::after {
+  content: '';
+  @apply absolute inset-0 rounded-full;
+  background: radial-gradient(circle, #60a5fa, #06b6d4);
+  opacity: 0.3;
+  animation: avatar-glow 3s ease-in-out infinite;
+}
+
+.avatar-magnetosphere {
+  background: radial-gradient(circle, hsl(var(--primary)), hsl(var(--secondary)));
+}
+
+.avatar-magnetosphere::before,
+.avatar-magnetosphere::after {
+  content: '';
+  @apply absolute inset-0 rounded-full border-2;
+}
+
+.avatar-magnetosphere::before {
+  @apply border-primary/40;
+  animation: avatar-pulse 2s ease-in-out infinite;
+}
+
+.avatar-magnetosphere::after {
+  @apply border-accent/30;
+  animation: avatar-pulse 2s ease-in-out infinite 0.5s;
+}
+
+.avatar-exoplanet {
+  background: radial-gradient(circle, hsl(var(--secondary)), hsl(var(--accent)));
+  animation: avatar-pulse 4s ease-in-out infinite;
+}
+
+.avatar-exoplanet::before {
+  content: '';
+  @apply absolute inset-0 rounded-full border border-primary/30;
+  animation: avatar-slow-rotate 12s linear infinite;
+}
+
+.avatar-exoplanet::after {
+  content: '';
+  @apply absolute w-2 h-2 bg-primary rounded-full;
+  top: 10%;
+  left: 50%;
+  margin-left: -4px;
+  animation: avatar-orbit 4s linear infinite;
+}
+
+.avatar-dark-matter {
+  background: radial-gradient(circle, hsl(var(--foreground) / 0.3), hsl(var(--muted) / 0.5));
+  animation: avatar-slow-pulse 4s ease-in-out infinite;
+}
+
+.avatar-dark-matter::after {
+  content: '';
+  @apply absolute inset-0 rounded-full border border-foreground/20;
+  animation: avatar-rotate 8s linear infinite;
+}
+
+.avatar-time-dilation {
+  background: radial-gradient(circle, hsl(var(--foreground)), hsl(var(--primary)));
+}
+
+.avatar-time-dilation::before,
+.avatar-time-dilation::after {
+  content: '';
+  @apply absolute inset-0 rounded-full border-2;
+}
+
+.avatar-time-dilation::before {
+  @apply border-foreground/40;
+  animation: avatar-rotate 3s linear infinite;
+}
+
+.avatar-time-dilation::after {
+  @apply border-primary/60;
+  animation: avatar-counter-rotate 2s linear infinite;
+}
+
+.avatar-purple-giant {
+  background: radial-gradient(circle, #a855f7, #7c3aed);
+  animation: avatar-pulse 3s ease-in-out infinite;
+}
+
+.avatar-purple-giant::after {
+  content: '';
+  @apply absolute inset-0 rounded-full;
+  background: radial-gradient(circle, #a855f7, #7c3aed);
+  opacity: 0.4;
+  animation: avatar-glow 4s ease-in-out infinite;
+}
+
+.avatar-orange-dwarf {
+  background: radial-gradient(circle, #fb923c, #ef4444);
+  animation: avatar-pulse 4s ease-in-out infinite;
+}
+
+.avatar-orange-dwarf::after {
+  content: '';
+  @apply absolute inset-0 rounded-full border border-orange-300/40;
+  animation: avatar-rotate 8s linear infinite;
+}
+
+.avatar-hydrogen {
+  background: radial-gradient(circle, #22d3ee, #3b82f6);
+}
+
+.avatar-hydrogen::before {
+  content: '';
+  @apply absolute inset-0 rounded-full border border-cyan-400;
+  animation: avatar-rotate 3s linear infinite;
+}
+
+.avatar-hydrogen::after {
+  content: '';
+  @apply absolute w-2 h-2 bg-blue-500 rounded-full;
+  top: 50%;
+  right: 20%;
+  margin-top: -4px;
+  animation: avatar-orbit 3s linear infinite;
+}
+
+.avatar-helium {
+  background: radial-gradient(circle, #4ade80, #10b981);
+}
+
+.avatar-helium::before {
+  content: '';
+  @apply absolute inset-0 rounded-full border border-green-400;
+  animation: avatar-rotate 3s linear infinite;
+}
+
+.avatar-helium::after {
+  content: '';
+  @apply absolute w-2 h-2 bg-emerald-500 rounded-full;
+  top: 50%;
+  right: 20%;
+  margin-top: -4px;
+  animation: avatar-orbit 3s linear infinite;
+}
+
 /* Improvements for app-like feel */
 .card {
   @apply transition-all duration-200;

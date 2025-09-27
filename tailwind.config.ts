@@ -94,11 +94,62 @@ export default {
             "background-position": "right center"
           }
         },
+        // Avatar animations
+        "avatar-pulse": {
+          "0%, 100%": { opacity: "0.6", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.05)" }
+        },
+        "avatar-ring-expand": {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.3" },
+          "50%": { transform: "scale(1.2)", opacity: "0" }
+        },
+        "avatar-rotate": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" }
+        },
+        "avatar-counter-rotate": {
+          "0%": { transform: "rotate(360deg)" },
+          "100%": { transform: "rotate(0deg)" }
+        },
+        "avatar-explode": {
+          "0%": { transform: "scale(0.8)", opacity: "0.5" },
+          "50%": { transform: "scale(1.3)", opacity: "0" },
+          "100%": { transform: "scale(0.8)", opacity: "0.5" }
+        },
+        "avatar-glow": {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.4" },
+          "50%": { transform: "scale(1.15)", opacity: "0" }
+        },
+        "avatar-orbit": {
+          "0%": { transform: "rotate(0deg) translateX(20px) rotate(0deg)" },
+          "100%": { transform: "rotate(360deg) translateX(20px) rotate(-360deg)" }
+        },
+        "avatar-slow-pulse": {
+          "0%, 100%": { opacity: "0.3" },
+          "50%": { opacity: "0.7" }
+        },
+        "avatar-shimmer": {
+          "0%": { "background-position": "-200% 0" },
+          "100%": { "background-position": "200% 0" }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "gradient-x": "gradient-x 15s ease infinite",
+        // Avatar animations
+        "avatar-pulse": "avatar-pulse 1.5s ease-in-out infinite",
+        "avatar-ring-expand": "avatar-ring-expand 1s ease-in-out infinite",
+        "avatar-rotate": "avatar-rotate 2s linear infinite",
+        "avatar-counter-rotate": "avatar-counter-rotate 1s linear infinite",
+        "avatar-explode": "avatar-explode 2s ease-in-out infinite",
+        "avatar-glow": "avatar-glow 4s ease-in-out infinite",
+        "avatar-orbit": "avatar-orbit 3s linear infinite",
+        "avatar-slow-pulse": "avatar-slow-pulse 4s ease-in-out infinite",
+        "avatar-shimmer": "avatar-shimmer 3s ease-in-out infinite",
+        "avatar-fast-rotate": "avatar-rotate 6s linear infinite",
+        "avatar-slow-rotate": "avatar-rotate 10s linear infinite",
+        "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s"
       },
       typography: {
         DEFAULT: {
