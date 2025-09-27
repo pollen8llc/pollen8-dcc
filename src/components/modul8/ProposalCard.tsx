@@ -93,7 +93,9 @@ const ProposalCard: React.FC<ProposalCardProps> = ({
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               {proposal.service_provider && (
-                <Avatar userId={proposal.service_provider?.user_id} size={40} />
+                <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+                  <Avatar userId={proposal.service_provider?.user_id} size={32} />
+                </div>
               )}
               <div>
                 <div className="font-semibold">

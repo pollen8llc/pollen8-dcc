@@ -172,7 +172,9 @@ const RequestCard = ({ request, type, onDelete }: RequestCardProps) => {
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground mb-3">
               {request.organizer && (
                 <div className="flex items-center gap-2">
-                  <Avatar userId={request.organizer.user_id} size={20} />
+                  <div className="bg-primary/10 rounded-full p-1 mr-2 group-hover:bg-primary/20 transition-colors">
+                    <Avatar userId={request.organizer.user_id} size={20} />
+                  </div>
                   <span className="line-clamp-1 text-xs sm:text-sm">{request.organizer.organization_name}</span>
                 </div>
               )}

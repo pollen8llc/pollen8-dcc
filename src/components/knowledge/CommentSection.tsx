@@ -154,7 +154,9 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center">
-                    <Avatar userId={comment.user_id} size={32} className="mr-2" />
+                    <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+                      <Avatar userId={comment.user_id} size={32} />
+                    </div>
                     <div>
                       <p className="font-medium text-white">{comment.author?.name || 'Unknown User'}</p>
                       <p className="text-xs text-muted-foreground">

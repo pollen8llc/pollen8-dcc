@@ -24,7 +24,9 @@ export const RequestParticipants: React.FC<RequestParticipantsProps> = ({
       <CardContent className="space-y-4">
         {/* Organizer */}
         <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-          <Avatar userId={serviceRequest.organizer?.user_id} size={40} />
+          <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+            <Avatar userId={serviceRequest.organizer?.user_id} size={32} />
+          </div>
           <div className="flex-1">
             <div className="text-sm font-medium">
               {serviceRequest.organizer?.organization_name || 'Client'}
@@ -38,7 +40,9 @@ export const RequestParticipants: React.FC<RequestParticipantsProps> = ({
         {/* Service Provider */}
         {(serviceProvider || serviceRequest.service_provider) && (
           <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg">
-            <Avatar userId={serviceProvider?.user_id || serviceRequest.service_provider?.user_id} size={40} />
+            <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+              <Avatar userId={serviceProvider?.user_id || serviceRequest.service_provider?.user_id} size={32} />
+            </div>
             <div className="flex-1">
               <div className="text-sm font-medium">
                 {serviceProvider?.business_name || serviceRequest.service_provider?.business_name || 'Service Provider'}

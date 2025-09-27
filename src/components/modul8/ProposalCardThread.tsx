@@ -408,7 +408,9 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
               INITIAL REQUEST
             </Badge>
             <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Avatar userId={serviceRequest.organizer?.user_id} size={24} />
+              <div className="bg-primary/10 rounded-full p-1.5 mr-2 group-hover:bg-primary/20 transition-colors">
+                <Avatar userId={serviceRequest.organizer?.user_id} size={20} />
+              </div>
               <span className="font-medium text-gray-300">
                 {serviceRequest.organizer?.organization_name || 'Client'}
               </span>
@@ -727,7 +729,9 @@ const ProposalCardThread: React.FC<ProposalCardThreadProps> = ({
             ) : (
               comments.map((comment) => (
                 <div key={comment.id} className="flex gap-3 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                  <Avatar userId={comment.user_id} size={32} />
+                  <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+                    <Avatar userId={comment.user_id} size={32} />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-semibold text-white">

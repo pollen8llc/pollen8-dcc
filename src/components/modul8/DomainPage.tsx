@@ -70,7 +70,9 @@ const DomainPage: React.FC<DomainPageProps> = ({ domainId, title, description })
           <Card key={provider.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center gap-3">
-                <Avatar userId={provider.user_id} size={36} />
+                <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+                  <Avatar userId={provider.user_id} size={32} />
+                </div>
                 <CardTitle className="text-base font-semibold">{provider.business_name}</CardTitle>
               </div>
             </CardHeader>

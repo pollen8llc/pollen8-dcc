@@ -72,7 +72,9 @@ const DomainTabView: React.FC<DomainTabViewProps> = ({ domainId, organizerId }) 
     <Card key={provider.id} className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <Avatar userId={provider.user_id} size={48} />
+          <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+            <Avatar userId={provider.user_id} size={40} />
+          </div>
           
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-lg mb-1 truncate">

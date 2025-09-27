@@ -60,7 +60,9 @@ export const MobileRequestLayout: React.FC<MobileRequestLayoutProps> = ({
         <CardContent className="space-y-3">
           {/* Organizer */}
           <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <Avatar userId={serviceRequest.organizer?.user_id} size={32} />
+            <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+              <Avatar userId={serviceRequest.organizer?.user_id} size={32} />
+            </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate">
                 {serviceRequest.organizer?.organization_name || 'Organization'}
@@ -71,7 +73,9 @@ export const MobileRequestLayout: React.FC<MobileRequestLayoutProps> = ({
 
           {/* Service Provider */}
           <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
-            <Avatar userId={serviceProvider?.user_id} size={32} />
+            <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+              <Avatar userId={serviceProvider?.user_id} size={32} />
+            </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate">
                 {serviceProvider?.business_name || 'Service Provider'}
