@@ -186,7 +186,7 @@ const AdminDashboard = () => {
                   </div>
                   
                   <div className="grid grid-cols-3 md:grid-cols-8 lg:grid-cols-10 gap-6">
-                    {/* Avatar grid will be rendered here by the component */}
+                    {/* Avatar showcase - static display */}
                     <div className="text-center py-8 col-span-full">
                       <p className="text-muted-foreground">
                         Navigate to <a href="/admin/avatars" className="text-primary hover:underline">/admin/avatars</a> to view the full gallery

@@ -462,45 +462,6 @@ export type Database = {
         }
         Relationships: []
       }
-      ions_avatar: {
-        Row: {
-          animation_type: string | null
-          color_scheme: Json | null
-          created_at: string
-          id: string
-          is_active: boolean
-          name: string
-          network_score_threshold: number
-          rarity_tier: string
-          svg_definition: string
-          updated_at: string
-        }
-        Insert: {
-          animation_type?: string | null
-          color_scheme?: Json | null
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name: string
-          network_score_threshold?: number
-          rarity_tier?: string
-          svg_definition: string
-          updated_at?: string
-        }
-        Update: {
-          animation_type?: string | null
-          color_scheme?: Json | null
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          network_score_threshold?: number
-          rarity_tier?: string
-          svg_definition?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       knowledge_articles: {
         Row: {
           archived_at: string | null
@@ -1935,10 +1896,8 @@ export type Database = {
           profile_complete: boolean | null
           rel8_complete: boolean | null
           role: string | null
-          selected_avatar_id: string | null
           skills: string[] | null
           social_links: Json | null
-          unlocked_avatars: string[] | null
           updated_at: string
           user_id: string
           website: string | null
@@ -1973,10 +1932,8 @@ export type Database = {
           profile_complete?: boolean | null
           rel8_complete?: boolean | null
           role?: string | null
-          selected_avatar_id?: string | null
           skills?: string[] | null
           social_links?: Json | null
-          unlocked_avatars?: string[] | null
           updated_at?: string
           user_id: string
           website?: string | null
@@ -2011,23 +1968,13 @@ export type Database = {
           profile_complete?: boolean | null
           rel8_complete?: boolean | null
           role?: string | null
-          selected_avatar_id?: string | null
           skills?: string[] | null
           social_links?: Json | null
-          unlocked_avatars?: string[] | null
           updated_at?: string
           user_id?: string
           website?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_selected_avatar_id_fkey"
-            columns: ["selected_avatar_id"]
-            isOneToOne: false
-            referencedRelation: "ions_avatar"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       rms_contact_affiliations: {
         Row: {
@@ -2741,10 +2688,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
-      get_selected_avatar_id: {
-        Args: { target_user: string }
-        Returns: string
-      }
       get_term_suggestions: {
         Args: { p_limit?: number; p_search_query?: string; p_term_type: string }
         Returns: {
@@ -2895,10 +2838,6 @@ export type Database = {
       }
       update_module_completion: {
         Args: { is_complete?: boolean; module_name: string; user_id: string }
-        Returns: boolean
-      }
-      update_user_avatar_admin: {
-        Args: { new_avatar_id: string; target_user_id: string }
         Returns: boolean
       }
       update_user_role: {
