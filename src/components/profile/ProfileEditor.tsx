@@ -140,9 +140,7 @@ const ProfileEditor = () => {
             <div className="space-y-6">
               <div className="flex flex-col items-center mb-6">
                 <div className="mb-4">
-                  <Avatar className="w-24 h-24">
-                    <AvatarFallback userId={currentUser?.id} useDynamicAvatar={true}>{getInitials() || "??"}</AvatarFallback>
-                  </Avatar>
+                  <Avatar userId={currentUser?.id} size={96} />
                 </div>
                 <p className="text-sm text-muted-foreground text-center">
                   Your avatar is managed through the dynamic avatar system

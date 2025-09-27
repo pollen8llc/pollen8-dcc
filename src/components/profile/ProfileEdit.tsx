@@ -153,12 +153,7 @@ const ProfileEdit: React.FC<ProfileEditProps> = ({ profile, onUpdate, onCancel }
               <div className="space-y-6">
                 {/* Avatar Section */}
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <Avatar className="h-24 w-24">
-                    <AvatarFallback useDynamicAvatar={true}>
-                      {form.watch("first_name")?.[0]?.toUpperCase() || "?"}
-                      {form.watch("last_name")?.[0]?.toUpperCase() || ""}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar userId={profile?.user_id || profile?.id} size={96} />
                   
                   <div className="flex flex-col gap-2">
                     <p className="text-sm text-muted-foreground">

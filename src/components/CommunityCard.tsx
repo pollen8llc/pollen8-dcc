@@ -44,7 +44,7 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
   const organizerName = organizer 
     ? `${organizer.first_name} ${organizer.last_name}`.trim() || organizer.email || "Community Organizer"
     : "Community Organizer";
-  const organizerAvatar = organizer?.avatar_url;
+  const organizerAvatar = null; // Simplified avatar system
   
   // Mock growth status since it's not in current interface
   const growthStatus = 'active';

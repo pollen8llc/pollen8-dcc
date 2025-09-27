@@ -33,7 +33,7 @@ const ProfileSetupWizard = () => {
     defaultValues: {
       firstName: currentUser?.name?.split(' ')[0] || '',
       lastName: currentUser?.name?.split(' ').slice(1).join(' ') || '',
-      avatarUrl: currentUser?.imageUrl || '',
+      // avatarUrl: removed - using simplified avatar system
       avatar: null,
       bio: currentUser?.bio || '',
       location: '',
@@ -111,7 +111,7 @@ const ProfileSetupWizard = () => {
         last_name: formData.lastName,
         bio: formData.bio,
         location: formData.location,
-        avatar_url: formData.avatarUrl,
+        // avatar_url: removed - using simplified avatar system
         interests: formData.interests,
         privacy_settings: {
           profile_visibility: formData.profileVisibility

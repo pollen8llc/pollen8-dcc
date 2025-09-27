@@ -149,9 +149,7 @@ const SearchProfiles: React.FC = () => {
                   <CardContent className="p-5 relative z-10">
                     <div className="flex items-center">
                       <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback userId={profile.user_id || profile.id} />
-                        </Avatar>
+                        <Avatar userId={profile.user_id || profile.id} size={32} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">{fullName}</h3>

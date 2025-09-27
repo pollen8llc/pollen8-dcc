@@ -273,12 +273,7 @@ const ContactEvaluationPage: React.FC = () => {
             <Card className="glassmorphic-card">
               <CardHeader>
                 <div className="flex items-center gap-4">
-                  <Avatar className="w-16 h-16 border-2 border-white/20">
-                    <AvatarImage src={contact.avatar_url} alt={contact.name} />
-                    <AvatarFallback className="bg-gradient-to-br from-primary/30 to-secondary/30 text-lg font-bold">
-                      {getInitials(contact.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Avatar userId={contact.id || contact.name} size={64} className="border-2 border-white/20" />
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h2 className="text-2xl font-bold text-foreground">{contact.name}</h2>

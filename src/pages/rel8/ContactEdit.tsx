@@ -261,12 +261,7 @@ const ContactEdit = () => {
           <div className="space-y-6">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-primary/20 mx-auto sm:mx-0">
-                <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${contact.name}`} alt={contact.name} />
-                <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-lg font-semibold">
-                  {getInitials(contact.name)}
-                </AvatarFallback>
-              </Avatar>
+              <Avatar userId={contact.name} size={80} className="border-4 border-primary/20 mx-auto sm:mx-0" />
               
               <div className="flex-1 space-y-3 w-full text-center sm:text-left">
                 <div>

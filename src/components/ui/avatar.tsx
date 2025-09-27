@@ -51,12 +51,10 @@ const AvatarImage: React.FC<{ src?: string; alt?: string; className?: string }> 
   return null;
 };
 
-// AvatarFallback component for backward compatibility - renders nothing but passes userId if available
+// AvatarFallback component for backward compatibility - renders nothing 
 const AvatarFallback: React.FC<{ 
   children?: React.ReactNode; 
   className?: string;
-  userId?: string;
-  useDynamicAvatar?: boolean;
 }> = () => {
   return null;
 };

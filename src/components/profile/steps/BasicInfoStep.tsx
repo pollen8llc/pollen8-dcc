@@ -12,7 +12,7 @@ const BasicInfoStep = () => {
   const { register, watch, setValue, formState: { errors } } = useFormContext();
   
   // Avatar display only (no upload)
-  const avatarUrl = "";
+  // Simplified avatar system - no avatar URL needed
   const firstName = watch('firstName');
   const lastName = watch('lastName');
 
@@ -32,9 +32,7 @@ const BasicInfoStep = () => {
     <div className="space-y-6">
       <div className="flex flex-col items-center">
         <div className="relative mb-4">
-          <Avatar className="h-24 w-24">
-            <AvatarFallback useDynamicAvatar={true}>{getInitials()}</AvatarFallback>
-          </Avatar>
+          <Avatar size={96} />
         </div>
         
         <p className="text-sm text-muted-foreground mb-4">

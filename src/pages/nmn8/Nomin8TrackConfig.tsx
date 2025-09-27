@@ -208,10 +208,7 @@ const Nomin8TrackConfig: React.FC = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${contact.name}`} />
-                  <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
-                </Avatar>
+                <Avatar userId={contact.name} size={64} />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">{contact.name}</h3>
                   <div className="space-y-1">

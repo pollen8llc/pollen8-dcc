@@ -72,11 +72,7 @@ const ReviewCompleteStep = ({ formData }: ReviewCompleteStepProps) => {
 
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-shrink-0 flex flex-col items-center">
-          <Avatar className="h-24 w-24 md:h-32 md:w-32">
-            <AvatarFallback userId={formData.user_id}>
-              <UserCircle className="h-12 w-12 opacity-50" />
-            </AvatarFallback>
-          </Avatar>
+          <Avatar userId={formData.user_id} size={128} />
         </div>
 
         <div className="flex-grow space-y-4">

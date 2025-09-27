@@ -34,7 +34,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
     id: profile.id,
     name: `${profile.first_name} ${profile.last_name}`,
     role: profile.role,
-    imageUrl: profile.avatar_url || '',
+    imageUrl: '', // Simplified avatar system
     email: profile.email,
     bio: profile.bio || '',
     communities: []
@@ -103,9 +103,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
               <div className="relative flex-shrink-0">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-spin-slow opacity-75 blur-sm" />
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-pulse" />
-                <Avatar className="relative w-20 h-20 sm:w-24 sm:h-24 border-4 border-background shadow-2xl">
-                  <AvatarFallback userId={profile.user_id} className="text-xl sm:text-2xl font-bold bg-gradient-to-br from-primary/20 to-secondary/20" />
-                </Avatar>
+                <Avatar userId={profile.user_id} size={96} className="relative border-4 border-background shadow-2xl" />
               </div>
               
               {/* Profile Info - Name and Location Only */}
