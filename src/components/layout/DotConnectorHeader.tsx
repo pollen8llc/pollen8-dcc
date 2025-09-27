@@ -44,12 +44,12 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
           <CardContent className="p-0">
             <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
-                {/* Avatar with animated gradient border */}
-                <div className="relative flex-shrink-0">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-spin-slow opacity-75 blur-sm" />
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full animate-pulse" />
-                  <Avatar userId={currentUser?.id} size={96} className="relative border-4 border-background shadow-2xl" />
-                </div>
+               {/* Avatar with consistent styling */}
+               <div className="relative flex-shrink-0">
+                 <div className="bg-primary/10 rounded-full p-3 hover:bg-primary/20 transition-colors">
+                   <Avatar userId={currentUser?.id} size={96} />
+                 </div>
+               </div>
                 
                 {/* Profile Info */}
                 <div className="flex-1 min-w-0 text-center sm:text-left">

@@ -36,16 +36,10 @@ const DesktopProfileView = ({ user, isOwnProfile, onEdit }: DesktopProfileViewPr
       <Card>
         <CardContent className="p-8">
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Avatar with animated border */}
+            {/* Avatar with consistent styling */}
             <div className="flex-shrink-0">
-              <div className="relative h-32 w-32">
-                <span className="absolute inset-0 rounded-full animate-gradient-spin border-4 border-transparent" style={{
-                  background: 'conic-gradient(from 180deg at 50% 50%, #3b82f6, #fff, #00eada, #3b82f6)',
-                  padding: 0,
-                  borderWidth: '3px',
-                  zIndex: 1
-                }} />
-                <Avatar userId={user.id} size={128} className="relative z-10 border-4 border-background shadow-lg" />
+              <div className="bg-primary/10 rounded-full p-3 hover:bg-primary/20 transition-colors">
+                <Avatar userId={user.id} size={128} />
               </div>
             </div>
 
