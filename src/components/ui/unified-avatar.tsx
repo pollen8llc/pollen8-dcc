@@ -46,7 +46,7 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   }, [targetUserId]);
 
   const containerClasses = cn(
-    "relative flex shrink-0 overflow-hidden rounded-full",
+    "relative flex-shrink-0 overflow-hidden rounded-full aspect-square",
     isAdmin && "ring-2 ring-primary/50",
     className
   );
@@ -62,11 +62,13 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   }
 
   return (
-    <div className={containerClasses}>
+    <div 
+      className={containerClasses}
+      style={{ width: size, height: size }}
+    >
       <SolarSystem 
         systemId={solarSystemId}
         size={size}
-        className="w-full h-full"
       />
     </div>
   );
