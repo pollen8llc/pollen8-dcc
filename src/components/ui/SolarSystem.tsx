@@ -48,6 +48,43 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
     };
   }, [config, uniqueId]);
 
+  // Helper function to create enhanced sun gradient and glow
+  const getSunStyle = (color: string, size: number) => {
+    return {
+      width: size,
+      height: size,
+      background: `radial-gradient(circle, ${color} 0%, ${color}dd 40%, ${color}aa 70%, ${color}77 100%)`,
+      marginLeft: -size / 2,
+      marginTop: -size / 2,
+      boxShadow: `
+        0 0 ${size * 0.5}px ${color}ff,
+        0 0 ${size * 1}px ${color}cc,
+        0 0 ${size * 1.5}px ${color}88,
+        inset 0 0 ${size * 0.3}px ${color}ff
+      `,
+      filter: 'brightness(1.3)',
+      animation: 'pulse 2s ease-in-out infinite alternate'
+    };
+  };
+
+  // Helper function to create enhanced planet gradient and glow
+  const getPlanetStyle = (color: string, size: number) => {
+    return {
+      width: size,
+      height: size,
+      background: `radial-gradient(circle at 30% 30%, ${color}ff 0%, ${color}dd 50%, ${color}99 100%)`,
+      marginLeft: -size / 2,
+      marginTop: -size / 2,
+      boxShadow: `
+        0 0 ${size * 1.5}px ${color}dd,
+        0 0 ${size * 2.5}px ${color}77,
+        inset 0 0 ${size * 0.4}px ${color}ff
+      `,
+      filter: 'brightness(1.2)',
+      animation: 'pulse 3s ease-in-out infinite alternate'
+    };
+  };
+
   return (
     <div 
       className={cn(
@@ -84,15 +121,8 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
       
       {/* Sun */}
       <div
-        className="absolute top-1/2 left-1/2 rounded-full animate-pulse z-20"
-        style={{
-          width: config.sunSize,
-          height: config.sunSize,
-          backgroundColor: config.sunColor,
-          marginLeft: -config.sunSize / 2,
-          marginTop: -config.sunSize / 2,
-          boxShadow: `0 0 ${config.sunSize / 2}px ${config.sunColor}`
-        }}
+        className="absolute top-1/2 left-1/2 rounded-full z-20"
+        style={getSunStyle(config.sunColor, config.sunSize)}
       />
       
       {/* Planets */}
@@ -109,14 +139,7 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
           >
             <div
               className="rounded-full"
-              style={{
-                width: planet.size,
-                height: planet.size,
-                backgroundColor: planet.color,
-                marginLeft: -planet.size / 2,
-                marginTop: -planet.size / 2,
-                boxShadow: `0 0 ${planet.size}px ${planet.color}`
-              }}
+              style={getPlanetStyle(planet.color, planet.size)}
             />
           </div>
         );
