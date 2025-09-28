@@ -131,6 +131,46 @@ export default {
         "avatar-shimmer": {
           "0%": { "background-position": "-200% 0" },
           "100%": { "background-position": "200% 0" }
+        },
+        // Psychedelic admin animations
+        "psychedelic-sun": {
+          "0%": { 
+            "background": "hsl(0, 100%, 70%)",
+            "box-shadow": "0 0 20px hsl(0, 100%, 70% / 0.6)"
+          },
+          "16.66%": { 
+            "background": "hsl(60, 100%, 70%)",
+            "box-shadow": "0 0 20px hsl(60, 100%, 70% / 0.6)"
+          },
+          "33.33%": { 
+            "background": "hsl(120, 100%, 70%)",
+            "box-shadow": "0 0 20px hsl(120, 100%, 70% / 0.6)"
+          },
+          "50%": { 
+            "background": "hsl(180, 100%, 70%)",
+            "box-shadow": "0 0 20px hsl(180, 100%, 70% / 0.6)"
+          },
+          "66.66%": { 
+            "background": "hsl(240, 100%, 70%)",
+            "box-shadow": "0 0 20px hsl(240, 100%, 70% / 0.6)"
+          },
+          "83.33%": { 
+            "background": "hsl(300, 100%, 70%)",
+            "box-shadow": "0 0 20px hsl(300, 100%, 70% / 0.6)"
+          },
+          "100%": { 
+            "background": "hsl(0, 100%, 70%)",
+            "box-shadow": "0 0 20px hsl(0, 100%, 70% / 0.6)"
+          }
+        },
+        "psychedelic-border": {
+          "0%": { "border-color": "hsl(0, 100%, 70%)" },
+          "16.66%": { "border-color": "hsl(60, 100%, 70%)" },
+          "33.33%": { "border-color": "hsl(120, 100%, 70%)" },
+          "50%": { "border-color": "hsl(180, 100%, 70%)" },
+          "66.66%": { "border-color": "hsl(240, 100%, 70%)" },
+          "83.33%": { "border-color": "hsl(300, 100%, 70%)" },
+          "100%": { "border-color": "hsl(0, 100%, 70%)" }
         }
       },
       animation: {
@@ -149,7 +189,10 @@ export default {
         "avatar-shimmer": "avatar-shimmer 3s ease-in-out infinite",
         "avatar-fast-rotate": "avatar-rotate 6s linear infinite",
         "avatar-slow-rotate": "avatar-rotate 10s linear infinite",
-        "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s"
+        "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s",
+        // Psychedelic admin animations
+        "psychedelic-sun": "psychedelic-sun 3s ease-in-out infinite",
+        "psychedelic-border": "psychedelic-border 3s ease-in-out infinite"
       },
       typography: {
         DEFAULT: {

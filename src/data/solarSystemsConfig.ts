@@ -20,6 +20,36 @@ export interface SolarSystemConfig {
 }
 
 export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
+  // Special teal base system for new users/members (no sun, no planets)
+  UXI8000: {
+    name: "Teal Base",
+    sunColor: "hsl(180, 60%, 50%)",
+    sunSize: 0, // No visible sun
+    planets: [], // No planets
+    avatarStyle: {
+      background: "radial-gradient(circle at 30% 30%, rgba(0, 128, 128, 0.1) 0%, transparent 50%), rgba(26, 40, 40, 0.9)",
+      borderColor: "hsl(180, 60%, 50%)",
+      boxShadow: "0 0 8px hsl(180, 60%, 50% / 0.3), inset 0 0 8px hsl(180, 60%, 50% / 0.1)"
+    }
+  },
+  
+  // Psychedelic admin system with rainbow sun and white planets
+  UXI9000: {
+    name: "Psychedelic Admin",
+    sunColor: "hsl(0, 100%, 70%)", // This will be animated via CSS
+    sunSize: 18,
+    planets: [
+      { distance: 20, size: 3, speed: 6, color: "hsl(0, 0%, 90%)", delay: 0 },
+      { distance: 28, size: 2.5, speed: 8, color: "hsl(0, 0%, 85%)", delay: 1 },
+      { distance: 36, size: 3.5, speed: 11, color: "hsl(0, 0%, 80%)", delay: 2 },
+      { distance: 44, size: 2, speed: 14, color: "hsl(0, 0%, 75%)", delay: 3 }
+    ],
+    avatarStyle: {
+      background: "conic-gradient(from 0deg, rgba(255, 0, 0, 0.2), rgba(255, 255, 0, 0.2), rgba(0, 255, 0, 0.2), rgba(0, 255, 255, 0.2), rgba(0, 0, 255, 0.2), rgba(255, 0, 255, 0.2), rgba(255, 0, 0, 0.2)), rgba(30, 30, 30, 0.9)",
+      borderColor: "hsl(0, 100%, 70%)",
+      boxShadow: "0 0 20px hsl(0, 100%, 70% / 0.6), inset 0 0 20px rgba(255, 255, 255, 0.1)"
+    }
+  },
   UXI8001: {
     name: "Aquamarine Single",
     sunColor: "hsl(180, 100%, 70%)",

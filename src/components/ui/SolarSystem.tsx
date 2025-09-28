@@ -52,6 +52,7 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
     <div 
       className={cn(
         "relative cursor-pointer transition-all duration-300 hover:scale-110",
+        systemId === "UXI9000" && "animate-psychedelic-border",
         className
       )}
       style={{
@@ -84,14 +85,17 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
       
       {/* Sun */}
       <div
-        className="absolute top-1/2 left-1/2 rounded-full animate-pulse z-20"
+        className={cn(
+          "absolute top-1/2 left-1/2 rounded-full z-20",
+          systemId === "UXI9000" ? "animate-psychedelic-sun" : "animate-pulse"
+        )}
         style={{
           width: config.sunSize,
           height: config.sunSize,
-          backgroundColor: config.sunColor,
+          backgroundColor: systemId === "UXI9000" ? undefined : config.sunColor,
           marginLeft: -config.sunSize / 2,
           marginTop: -config.sunSize / 2,
-          boxShadow: `0 0 ${config.sunSize / 2}px ${config.sunColor}`
+          boxShadow: systemId === "UXI9000" ? undefined : `0 0 ${config.sunSize / 2}px ${config.sunColor}`
         }}
       />
       
