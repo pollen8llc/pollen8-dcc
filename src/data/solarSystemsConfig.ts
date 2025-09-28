@@ -20,6 +20,20 @@ export interface SolarSystemConfig {
 }
 
 export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
+  UXI8000: {
+    name: "Base System",
+    sunColor: "hsl(174, 100%, 46%)", // Not rendered since sunSize is 0
+    sunSize: 0, // No sun for base system
+    planets: [
+      { distance: 18, size: 2.5, speed: 6, color: "hsl(174, 100%, 46%)", delay: 0 },
+      { distance: 25, size: 2, speed: 9, color: "hsl(174, 80%, 60%)", delay: 3 }
+    ],
+    avatarStyle: {
+      background: "radial-gradient(circle at 30% 30%, hsl(174, 100%, 46% / 0.15) 0%, transparent 50%), rgba(26, 26, 46, 0.9)",
+      borderColor: "hsl(174, 100%, 46%)",
+      boxShadow: "0 0 12px hsl(174, 100%, 46% / 0.4), inset 0 0 12px hsl(174, 100%, 46% / 0.15)"
+    }
+  },
   UXI8001: {
     name: "Aquamarine Single",
     sunColor: "hsl(180, 100%, 70%)",
