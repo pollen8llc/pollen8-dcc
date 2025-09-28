@@ -131,6 +131,15 @@ export default {
         "avatar-shimmer": {
           "0%": { "background-position": "-200% 0" },
           "100%": { "background-position": "200% 0" }
+        },
+        // Solar system animations
+        "pulse": {
+          "0%, 100%": { opacity: "0.6", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.05)" }
+        },
+        "solar-glow": {
+          "0%, 100%": { filter: "brightness(1.2)" },
+          "50%": { filter: "brightness(1.5)" }
         }
       },
       animation: {
@@ -149,7 +158,10 @@ export default {
         "avatar-shimmer": "avatar-shimmer 3s ease-in-out infinite",
         "avatar-fast-rotate": "avatar-rotate 6s linear infinite",
         "avatar-slow-rotate": "avatar-rotate 10s linear infinite",
-        "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s"
+        "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s",
+        // Solar system animations
+        "pulse": "pulse 2s ease-in-out infinite alternate",
+        "solar-glow": "solar-glow 3s ease-in-out infinite"
       },
       typography: {
         DEFAULT: {
