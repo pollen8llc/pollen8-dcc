@@ -495,6 +495,77 @@ h6 {
   }
 }
 
+/* Solar System Gallery Styles */
+.solar-system-gallery {
+  min-height: 100vh;
+  background: var(--background);
+  padding: 2rem;
+}
+
+.solar-system-container {
+  max-width: 1152px;
+  margin: 0 auto;
+}
+
+.solar-system-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.solar-system-subtitle {
+  color: var(--muted-foreground);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.solar-system-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 1rem;
+  place-items: center;
+}
+
+.solar-system-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.solar-system-code {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--primary);
+}
+
+.solar-system-name {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .solar-system-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .solar-system-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .solar-system-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* CSS Avatar Styles */
 .avatar-base {
   @apply relative w-full h-full rounded-full overflow-hidden;
