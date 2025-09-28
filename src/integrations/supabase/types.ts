@@ -462,6 +462,47 @@ export type Database = {
         }
         Relationships: []
       }
+      iotas: {
+        Row: {
+          created_at: string
+          cultiv8_posts: number
+          eco8_communities: number
+          id: string
+          rel8_contacts: number
+          total_network_value: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cultiv8_posts?: number
+          eco8_communities?: number
+          id?: string
+          rel8_contacts?: number
+          total_network_value?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cultiv8_posts?: number
+          eco8_communities?: number
+          id?: string
+          rel8_contacts?: number
+          total_network_value?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iotas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       knowledge_articles: {
         Row: {
           archived_at: string | null
@@ -1889,6 +1930,7 @@ export type Database = {
           modul8_complete: boolean | null
           modul8_setup_complete: boolean | null
           network_score: number | null
+          network_value: number
           nmn8_setup_complete: boolean | null
           onboarding_complete: boolean | null
           phone: string | null
@@ -1925,6 +1967,7 @@ export type Database = {
           modul8_complete?: boolean | null
           modul8_setup_complete?: boolean | null
           network_score?: number | null
+          network_value?: number
           nmn8_setup_complete?: boolean | null
           onboarding_complete?: boolean | null
           phone?: string | null
@@ -1961,6 +2004,7 @@ export type Database = {
           modul8_complete?: boolean | null
           modul8_setup_complete?: boolean | null
           network_score?: number | null
+          network_value?: number
           nmn8_setup_complete?: boolean | null
           onboarding_complete?: boolean | null
           phone?: string | null
@@ -2677,6 +2721,19 @@ export type Database = {
           type: string
         }[]
       }
+      get_or_create_iotas: {
+        Args: { p_user_id: string }
+        Returns: {
+          created_at: string
+          cultiv8_posts: number
+          eco8_communities: number
+          id: string
+          rel8_contacts: number
+          total_network_value: number | null
+          updated_at: string
+          user_id: string
+        }
+      }
       get_poll_counts: {
         Args: { poll_id: string }
         Returns: {
@@ -2760,6 +2817,10 @@ export type Database = {
         Args: { role_name: string; user_id: string }
         Returns: boolean
       }
+      increment_iota_metric: {
+        Args: { p_increment?: number; p_metric_type: string; p_user_id: string }
+        Returns: boolean
+      }
       increment_view_count: {
         Args: { article_id: string }
         Returns: undefined
@@ -2839,6 +2900,10 @@ export type Database = {
       update_module_completion: {
         Args: { is_complete?: boolean; module_name: string; user_id: string }
         Returns: boolean
+      }
+      update_network_value: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
       update_user_role: {
         Args: { p_assigner_id?: string; p_role_name: string; p_user_id: string }
