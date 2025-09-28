@@ -1,7 +1,6 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
-import { SolarSystem } from './SolarSystem';
-import { SolarSystemAvatarService } from '@/services/solarSystemAvatarService';
+import { SimpleAvatarService } from '@/services/simpleAvatarService';
 import { useUser } from '@/contexts/UserContext';
 
 interface UnifiedAvatarProps {
@@ -18,19 +17,24 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   isAdmin = false 
 }) => {
   const { currentUser } = useUser();
-  const [solarSystemId, setSolarSystemId] = useState<string>('UXI8000');
   
   const targetUserId = userId || currentUser?.id;
-
-  // Get the appropriate solar system for this user
-  useEffect(() => {
-    const getSolarSystem = async () => {
-      const systemId = await SolarSystemAvatarService.getSolarSystemForUser(targetUserId);
-      setSolarSystemId(systemId);
-    };
-
-    getSolarSystem();
-  }, [targetUserId]);
+  
+  // Get user info for generating avatar
+  let firstName: string | undefined;
+  let lastName: string | undefined;
+  const email = currentUser?.email;
+  
+  // Parse name if it exists
+  if (currentUser?.name) {
+    const nameParts = currentUser.name.trim().split(' ');
+    firstName = nameParts[0];
+    lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined;
+  }
+  
+  // Generate simple initials-based avatar
+  const initials = SimpleAvatarService.getInitials(firstName, lastName, email);
+  const avatarSvg = SimpleAvatarService.generateInitialsAvatar(initials, size, targetUserId);
 
   const containerClasses = cn(
     "relative flex shrink-0 overflow-hidden rounded-full",
@@ -39,13 +43,11 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   );
 
   return (
-    <div className={containerClasses}>
-      <SolarSystem 
-        systemId={solarSystemId}
-        size={size}
-        className="rounded-full"
-      />
-    </div>
+    <div 
+      className={containerClasses}
+      style={{ width: size, height: size }}
+      dangerouslySetInnerHTML={{ __html: avatarSvg }}
+    />
   );
 });
 
