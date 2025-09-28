@@ -36,11 +36,9 @@ const DesktopProfileView = ({ user, isOwnProfile, onEdit }: DesktopProfileViewPr
       <Card>
         <CardContent className="p-8">
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Avatar with consistent styling */}
+            {/* Avatar */}
             <div className="flex-shrink-0">
-              <div className="bg-primary/10 rounded-full p-3 hover:bg-primary/20 transition-colors">
-                <Avatar userId={user.id} size={128} />
-              </div>
+              <Avatar userId={user.id} size={128} />
             </div>
 
             {/* Main Info */}

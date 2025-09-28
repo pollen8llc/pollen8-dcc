@@ -62,8 +62,7 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
   return (
     <div 
       className={cn(
-        "relative cursor-pointer transition-all duration-300 hover:scale-110 rounded-full overflow-hidden",
-        systemId === "UXI9000" && "animate-admin-border-pulse",
+    "relative rounded-full overflow-hidden",
         className
       )}
       style={{
@@ -105,17 +104,14 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
       
         {/* Sun */}
         <div
-          className={cn(
-            "absolute top-1/2 left-1/2 rounded-full z-20",
-            systemId === "UXI9000" ? "animate-admin-sun-pulse" : "animate-pulse"
-          )}
+          className="absolute top-1/2 left-1/2 rounded-full z-20 animate-pulse"
           style={{
             width: config.sunSize * (innerSize / 56),
             height: config.sunSize * (innerSize / 56),
-            backgroundColor: systemId === "UXI9000" ? undefined : config.sunColor,
+            backgroundColor: config.sunColor,
             marginLeft: -(config.sunSize * (innerSize / 56)) / 2,
             marginTop: -(config.sunSize * (innerSize / 56)) / 2,
-            boxShadow: systemId === "UXI9000" ? undefined : `0 0 ${(config.sunSize * (innerSize / 56)) / 2}px ${config.sunColor}`
+            boxShadow: `0 0 ${(config.sunSize * (innerSize / 56)) / 2}px ${config.sunColor}`
           }}
         />
       

@@ -46,7 +46,7 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
   }, [targetUserId]);
 
   const containerClasses = cn(
-    "relative flex-shrink-0 overflow-hidden rounded-full aspect-square",
+    "relative flex-shrink-0 overflow-hidden rounded-full aspect-square bg-muted/20",
     isAdmin && "ring-2 ring-primary/50",
     className
   );

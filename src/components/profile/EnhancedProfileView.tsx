@@ -99,11 +99,9 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
         <CardContent className="p-0">
           <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-4 sm:p-6 lg:p-8">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 lg:gap-8">
-              {/* Avatar with consistent styling */}
+              {/* Avatar */}
               <div className="relative flex-shrink-0">
-                <div className="bg-primary/10 rounded-full p-3 hover:bg-primary/20 transition-colors">
-                  <Avatar userId={profile.user_id} size={96} />
-                </div>
+                <Avatar userId={profile.user_id} size={96} />
               </div>
               
               {/* Profile Info - Name and Location Only */}

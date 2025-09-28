@@ -33,21 +33,20 @@ export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
     }
   },
   
-  // Admin ethereal system with subtle purple-teal gradient and white planets
+  // Admin simple system - similar to UXI8008 structure but with white sun
   UXI9000: {
-    name: "Admin Prime",
-    sunSize: 18,
-    sunColor: "#00ffa3",
+    name: "Admin Avatar",
+    sunSize: 12,
+    sunColor: "hsl(0, 0%, 90%)",
     planets: [
-      { distance: 20, size: 4, speed: 6, color: "#ff6b6b", delay: 0 },
-      { distance: 26, size: 3.5, speed: 8, color: "#4ecdc4", delay: 1 },
-      { distance: 32, size: 3, speed: 10, color: "#45b7d1", delay: 2 },
-      { distance: 38, size: 2.5, speed: 12, color: "#f9ca24", delay: 3 }
+      { distance: 16, size: 2.5, speed: 8, color: "hsl(280, 70%, 60%)", delay: 0 },
+      { distance: 22, size: 2, speed: 12, color: "hsl(280, 50%, 70%)", delay: 2 },
+      { distance: 28, size: 1.5, speed: 6, color: "hsl(260, 60%, 65%)", delay: 1 },
     ],
     avatarStyle: {
-      background: "linear-gradient(135deg, rgba(0, 255, 163, 0.15), rgba(0, 255, 163, 0.05))",
-      borderColor: "#00ffa3",
-      boxShadow: "0 0 25px rgba(0, 255, 163, 0.4), 0 0 50px rgba(0, 255, 163, 0.2)"
+      background: "linear-gradient(135deg, hsl(280, 20%, 15%), hsl(260, 25%, 20%))",
+      borderColor: "hsl(280, 60%, 50%)",
+      boxShadow: "0 0 15px hsl(280, 60%, 50% / 0.3)"
     }
   },
   UXI8001: {

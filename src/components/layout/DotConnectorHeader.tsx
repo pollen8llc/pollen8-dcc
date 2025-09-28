@@ -44,11 +44,9 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
           <CardContent className="p-0">
             <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
-               {/* Avatar with consistent styling */}
+               {/* Avatar */}
                <div className="relative flex-shrink-0">
-                 <div className="bg-primary/10 rounded-full p-3 hover:bg-primary/20 transition-colors">
-                   <Avatar userId={currentUser?.id} size={96} />
-                 </div>
+                 <Avatar userId={currentUser?.id} size={96} />
                </div>
                 
                 {/* Profile Info */}

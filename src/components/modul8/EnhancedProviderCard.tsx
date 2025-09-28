@@ -44,7 +44,7 @@ const EnhancedProviderCard: React.FC<EnhancedProviderCardProps> = ({
     <Card className={`hover:shadow-md transition-shadow ${className}`}>
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <div className="bg-primary/10 rounded-full p-3 mr-4 group-hover:bg-primary/20 transition-colors">
+          <div className="flex-shrink-0 mr-4">
             <Avatar userId={provider.user_id} size={48} />
           </div>
           
