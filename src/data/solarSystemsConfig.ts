@@ -33,21 +33,20 @@ export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
     }
   },
   
-  // Psychedelic admin system with rainbow sun and white planets
+  // Admin ethereal system with subtle purple-teal gradient and white planets
   UXI9000: {
-    name: "Psychedelic Admin",
-    sunColor: "hsl(0, 100%, 70%)", // This will be animated via CSS
-    sunSize: 18,
+    name: "Admin Ethereal System",
+    sunSize: 8,
+    sunColor: "transparent", // Will use gradient animation
     planets: [
-      { distance: 20, size: 3, speed: 6, color: "hsl(0, 0%, 90%)", delay: 0 },
-      { distance: 28, size: 2.5, speed: 8, color: "hsl(0, 0%, 85%)", delay: 1 },
-      { distance: 36, size: 3.5, speed: 11, color: "hsl(0, 0%, 80%)", delay: 2 },
-      { distance: 44, size: 2, speed: 14, color: "hsl(0, 0%, 75%)", delay: 3 }
+      { distance: 12, size: 3, speed: 8, color: "hsl(280, 70%, 60%)", delay: 0 },
+      { distance: 18, size: 2, speed: 12, color: "hsl(180, 70%, 60%)", delay: 2 },
+      { distance: 24, size: 2.5, speed: 6, color: "hsl(0, 0%, 90%)", delay: 1 },
     ],
     avatarStyle: {
-      background: "conic-gradient(from 0deg, rgba(255, 0, 0, 0.2), rgba(255, 255, 0, 0.2), rgba(0, 255, 0, 0.2), rgba(0, 255, 255, 0.2), rgba(0, 0, 255, 0.2), rgba(255, 0, 255, 0.2), rgba(255, 0, 0, 0.2)), rgba(30, 30, 30, 0.9)",
-      borderColor: "hsl(0, 100%, 70%)",
-      boxShadow: "0 0 20px hsl(0, 100%, 70% / 0.6), inset 0 0 20px rgba(255, 255, 255, 0.1)"
+      background: "linear-gradient(135deg, hsl(280, 40%, 20% / 0.2), hsl(180, 40%, 20% / 0.2), hsl(0, 0%, 95% / 0.1))",
+      borderColor: "hsl(280, 70%, 60%)",
+      boxShadow: "0 0 20px hsl(280, 70%, 60% / 0.2), inset 0 0 20px hsl(180, 70%, 60% / 0.1)"
     }
   },
   UXI8001: {

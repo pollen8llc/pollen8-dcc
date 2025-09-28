@@ -32,10 +32,11 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
     let keyframes = '';
     config.planets.forEach((planet, index) => {
       const animationName = `orbit-${uniqueId}-${index}`;
+      const scaledDistance = planet.distance * (size / 56); // Scale distance for keyframes
       keyframes += `
         @keyframes ${animationName} {
-          from { transform: rotate(0deg) translateX(${planet.distance}px) rotate(0deg); }
-          to { transform: rotate(360deg) translateX(${planet.distance}px) rotate(-360deg); }
+          from { transform: rotate(0deg) translateX(${scaledDistance}px) rotate(0deg); }
+          to { transform: rotate(360deg) translateX(${scaledDistance}px) rotate(-360deg); }
         }
       `;
     });
@@ -52,15 +53,15 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
     <div 
       className={cn(
         "relative cursor-pointer transition-all duration-300 hover:scale-110",
-        systemId === "UXI9000" && "animate-psychedelic-border",
+        systemId === "UXI9000" && "animate-admin-border-pulse",
         className
       )}
       style={{
         width: size,
         height: size,
-        padding: '12px',
+        padding: `${size * 0.15}px`, // Proportional padding (15% of size)
         borderRadius: '50%',
-        border: '2px solid',
+        border: `${Math.max(1, size * 0.04)}px solid`, // Proportional border width
         borderColor: config.avatarStyle.borderColor,
         background: config.avatarStyle.background,
         boxShadow: config.avatarStyle.boxShadow,
@@ -70,38 +71,43 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
       onClick={onClick}
     >
       {/* Orbital paths */}
-      {config.planets.map((planet, index) => (
-        <div
-          key={`orbit-${index}`}
-          className="absolute top-1/2 left-1/2 rounded-full border border-white/10"
-          style={{
-            width: planet.distance * 2,
-            height: planet.distance * 2,
-            marginLeft: -planet.distance,
-            marginTop: -planet.distance,
-          }}
-        />
-      ))}
+      {config.planets.map((planet, index) => {
+        const scaledDistance = planet.distance * (size / 56); // Scale relative to default size
+        return (
+          <div
+            key={`orbit-${index}`}
+            className="absolute top-1/2 left-1/2 rounded-full border border-white/10"
+            style={{
+              width: scaledDistance * 2,
+              height: scaledDistance * 2,
+              marginLeft: -scaledDistance,
+              marginTop: -scaledDistance,
+            }}
+          />
+        );
+      })}
       
       {/* Sun */}
       <div
         className={cn(
           "absolute top-1/2 left-1/2 rounded-full z-20",
-          systemId === "UXI9000" ? "animate-psychedelic-sun" : "animate-pulse"
+          systemId === "UXI9000" ? "animate-admin-sun-pulse" : "animate-pulse"
         )}
         style={{
-          width: config.sunSize,
-          height: config.sunSize,
+          width: config.sunSize * (size / 56), // Scale sun size
+          height: config.sunSize * (size / 56),
           backgroundColor: systemId === "UXI9000" ? undefined : config.sunColor,
-          marginLeft: -config.sunSize / 2,
-          marginTop: -config.sunSize / 2,
-          boxShadow: systemId === "UXI9000" ? undefined : `0 0 ${config.sunSize / 2}px ${config.sunColor}`
+          marginLeft: -(config.sunSize * (size / 56)) / 2,
+          marginTop: -(config.sunSize * (size / 56)) / 2,
+          boxShadow: systemId === "UXI9000" ? undefined : `0 0 ${(config.sunSize * (size / 56)) / 2}px ${config.sunColor}`
         }}
       />
       
       {/* Planets */}
       {config.planets.map((planet, index) => {
         const animationName = `orbit-${uniqueId}-${index}`;
+        const scaledDistance = planet.distance * (size / 56);
+        const scaledSize = planet.size * (size / 56);
         return (
           <div
             key={`planet-${index}`}
@@ -114,12 +120,12 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
             <div
               className="rounded-full"
               style={{
-                width: planet.size,
-                height: planet.size,
+                width: scaledSize,
+                height: scaledSize,
                 backgroundColor: planet.color,
-                marginLeft: -planet.size / 2,
-                marginTop: -planet.size / 2,
-                boxShadow: `0 0 ${planet.size}px ${planet.color}`
+                marginLeft: -scaledSize / 2,
+                marginTop: -scaledSize / 2,
+                boxShadow: `0 0 ${scaledSize}px ${planet.color}`
               }}
             />
           </div>

@@ -132,45 +132,34 @@ export default {
           "0%": { "background-position": "-200% 0" },
           "100%": { "background-position": "200% 0" }
         },
-        // Psychedelic admin animations
-        "psychedelic-sun": {
+        // Admin avatar animations - subtle purple-teal-white gradients
+        "admin-sun-pulse": {
           "0%": { 
-            "background": "hsl(0, 100%, 70%)",
-            "box-shadow": "0 0 20px hsl(0, 100%, 70% / 0.6)"
-          },
-          "16.66%": { 
-            "background": "hsl(60, 100%, 70%)",
-            "box-shadow": "0 0 20px hsl(60, 100%, 70% / 0.6)"
-          },
-          "33.33%": { 
-            "background": "hsl(120, 100%, 70%)",
-            "box-shadow": "0 0 20px hsl(120, 100%, 70% / 0.6)"
+            "background": "linear-gradient(135deg, hsl(280, 70%, 60%), hsl(180, 70%, 60%))",
+            "box-shadow": "0 0 20px hsl(280, 70%, 60% / 0.4)"
           },
           "50%": { 
-            "background": "hsl(180, 100%, 70%)",
-            "box-shadow": "0 0 20px hsl(180, 100%, 70% / 0.6)"
-          },
-          "66.66%": { 
-            "background": "hsl(240, 100%, 70%)",
-            "box-shadow": "0 0 20px hsl(240, 100%, 70% / 0.6)"
-          },
-          "83.33%": { 
-            "background": "hsl(300, 100%, 70%)",
-            "box-shadow": "0 0 20px hsl(300, 100%, 70% / 0.6)"
+            "background": "linear-gradient(135deg, hsl(180, 70%, 60%), hsl(280, 50%, 80%))",
+            "box-shadow": "0 0 25px hsl(180, 70%, 60% / 0.6)"
           },
           "100%": { 
-            "background": "hsl(0, 100%, 70%)",
-            "box-shadow": "0 0 20px hsl(0, 100%, 70% / 0.6)"
+            "background": "linear-gradient(135deg, hsl(280, 70%, 60%), hsl(180, 70%, 60%))",
+            "box-shadow": "0 0 20px hsl(280, 70%, 60% / 0.4)"
           }
         },
-        "psychedelic-border": {
-          "0%": { "border-color": "hsl(0, 100%, 70%)" },
-          "16.66%": { "border-color": "hsl(60, 100%, 70%)" },
-          "33.33%": { "border-color": "hsl(120, 100%, 70%)" },
-          "50%": { "border-color": "hsl(180, 100%, 70%)" },
-          "66.66%": { "border-color": "hsl(240, 100%, 70%)" },
-          "83.33%": { "border-color": "hsl(300, 100%, 70%)" },
-          "100%": { "border-color": "hsl(0, 100%, 70%)" }
+        "admin-border-pulse": {
+          "0%": { 
+            "border-color": "hsl(280, 70%, 60%)",
+            "box-shadow": "0 0 0 1px hsl(280, 70%, 60% / 0.3)"
+          },
+          "50%": { 
+            "border-color": "hsl(180, 70%, 60%)",
+            "box-shadow": "0 0 0 2px hsl(180, 70%, 60% / 0.4)"
+          },
+          "100%": { 
+            "border-color": "hsl(280, 70%, 60%)",
+            "box-shadow": "0 0 0 1px hsl(280, 70%, 60% / 0.3)"
+          }
         }
       },
       animation: {
@@ -190,9 +179,9 @@ export default {
         "avatar-fast-rotate": "avatar-rotate 6s linear infinite",
         "avatar-slow-rotate": "avatar-rotate 10s linear infinite",
         "avatar-delayed-orbit": "avatar-orbit 3s linear infinite 1.5s",
-        // Psychedelic admin animations
-        "psychedelic-sun": "psychedelic-sun 3s ease-in-out infinite",
-        "psychedelic-border": "psychedelic-border 3s ease-in-out infinite"
+        // Admin avatar animations - slow and subtle
+        "admin-sun-pulse": "admin-sun-pulse 6s ease-in-out infinite",
+        "admin-border-pulse": "admin-border-pulse 8s ease-in-out infinite"
       },
       typography: {
         DEFAULT: {
