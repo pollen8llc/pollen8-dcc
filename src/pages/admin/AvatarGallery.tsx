@@ -27,10 +27,10 @@ const SolarSystemAvatar = ({ systemId, title }: SolarSystemAvatarProps) => {
       />
       
       <div className="solar-system-info">
-        <Badge variant="secondary" className="solar-system-code">
+        <Badge variant="outline" className="solar-system-code border-rel8-primary/20 text-rel8-primary bg-rel8-primary/5">
           {systemId}
         </Badge>
-        <p className="solar-system-name">
+        <p className="solar-system-name text-rel8-muted">
           {title}
         </p>
       </div>
@@ -57,20 +57,20 @@ const SolarSystemAvatar = ({ systemId, title }: SolarSystemAvatarProps) => {
 
 export default function AvatarGallery() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-rel8-primary/5">
       <Navbar />
       <div className="container mx-auto py-6 px-4">
         {/* Glassmorphic Header */}
-        <div className="glass-morphism glass-morphism-hover rounded-3xl p-6 mb-8 animate-fade-in">
-          <h1 className="solar-system-title bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+        <div className="glass-morphism glass-morphism-hover rounded-3xl p-6 mb-8 animate-fade-in border border-rel8-primary/10">
+          <h1 className="solar-system-title bg-gradient-to-r from-rel8-primary to-rel8-primary/80 bg-clip-text text-transparent">
             Solar System Gallery
           </h1>
-          <p className="solar-system-subtitle">
+          <p className="solar-system-subtitle text-rel8-muted">
             40 unique animated solar system configurations with predefined styles and identifiers
           </p>
         </div>
 
-        <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
+        <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-rel8-primary/20">
           <div className="solar-system-grid">
             {Object.entries(SOLAR_SYSTEMS).map(([systemId, config]) => (
               <SolarSystemAvatar 

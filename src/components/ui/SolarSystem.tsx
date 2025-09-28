@@ -63,7 +63,8 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
         borderColor: config.avatarStyle.borderColor,
         background: config.avatarStyle.background,
         boxShadow: config.avatarStyle.boxShadow,
-        backdropFilter: 'blur(12px)'
+        backdropFilter: 'blur(12px)',
+        overflow: 'hidden'
       }}
       onClick={onClick}
     >

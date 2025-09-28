@@ -47,6 +47,16 @@
     --royal-blue-800: 226 67% 33%;
     --royal-blue-900: 224 64% 28%;
     --royal-blue-950: 226 67% 18%;
+    
+    /* Rel8 Colors - Relationship Management Theme */
+    --rel8-primary: 174 100% 46%;
+    --rel8-primary-foreground: 0 0% 0%;
+    --rel8-secondary: 215 25% 16%;
+    --rel8-secondary-foreground: 0 0% 100%;
+    --rel8-muted: 0 0% 70%;
+    --rel8-muted-foreground: 0 0% 45%;
+    --rel8-accent: 180 100% 60%;
+    --rel8-accent-foreground: 0 0% 0%;
   }
  
   .dark {
@@ -91,6 +101,16 @@
     --royal-blue-800: 224 90% 70%;
     --royal-blue-900: 223 95% 85%;
     --royal-blue-950: 223 100% 95%;
+    
+    /* Rel8 Colors - Relationship Management Theme */
+    --rel8-primary: 174 100% 46%;
+    --rel8-primary-foreground: 0 0% 0%;
+    --rel8-secondary: 215 25% 16%;
+    --rel8-secondary-foreground: 0 0% 100%;
+    --rel8-muted: 0 0% 70%;
+    --rel8-muted-foreground: 0 0% 45%;
+    --rel8-accent: 180 100% 60%;
+    --rel8-accent-foreground: 0 0% 0%;
   }
 }
  
