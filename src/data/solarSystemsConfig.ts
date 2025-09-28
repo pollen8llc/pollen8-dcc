@@ -35,18 +35,19 @@ export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
   
   // Admin ethereal system with subtle purple-teal gradient and white planets
   UXI9000: {
-    name: "Admin Ethereal System",
-    sunSize: 8,
-    sunColor: "transparent", // Will use gradient animation
+    name: "Admin Prime",
+    sunSize: 18,
+    sunColor: "#00ffa3",
     planets: [
-      { distance: 12, size: 3, speed: 8, color: "hsl(280, 70%, 60%)", delay: 0 },
-      { distance: 18, size: 2, speed: 12, color: "hsl(180, 70%, 60%)", delay: 2 },
-      { distance: 24, size: 2.5, speed: 6, color: "hsl(0, 0%, 90%)", delay: 1 },
+      { distance: 20, size: 4, speed: 6, color: "#ff6b6b", delay: 0 },
+      { distance: 26, size: 3.5, speed: 8, color: "#4ecdc4", delay: 1 },
+      { distance: 32, size: 3, speed: 10, color: "#45b7d1", delay: 2 },
+      { distance: 38, size: 2.5, speed: 12, color: "#f9ca24", delay: 3 }
     ],
     avatarStyle: {
-      background: "linear-gradient(135deg, hsl(280, 40%, 20% / 0.2), hsl(180, 40%, 20% / 0.2), hsl(0, 0%, 95% / 0.1))",
-      borderColor: "hsl(280, 70%, 60%)",
-      boxShadow: "0 0 20px hsl(280, 70%, 60% / 0.2), inset 0 0 20px hsl(180, 70%, 60% / 0.1)"
+      background: "linear-gradient(135deg, rgba(0, 255, 163, 0.15), rgba(0, 255, 163, 0.05))",
+      borderColor: "#00ffa3",
+      boxShadow: "0 0 25px rgba(0, 255, 163, 0.4), 0 0 50px rgba(0, 255, 163, 0.2)"
     }
   },
   UXI8001: {

@@ -30,7 +30,7 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
     styleSheet.type = 'text/css';
     
     let keyframes = '';
-    const borderWidth = Math.max(1, size * 0.02);
+  const borderWidth = Math.max(2, size * 0.04);
     const contentSize = size - (borderWidth * 2);
     const padding = Math.max(2, contentSize * 0.08);
     const innerSize = contentSize - (padding * 2);
@@ -54,7 +54,7 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
     };
   }, [config, uniqueId]);
 
-  const borderWidth = Math.max(1, size * 0.02);
+  const borderWidth = Math.max(2, size * 0.04);
   const contentSize = size - (borderWidth * 2);
   const padding = Math.max(2, contentSize * 0.08);
   const innerSize = contentSize - (padding * 2);
