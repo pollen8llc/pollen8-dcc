@@ -20,11 +20,11 @@ export interface SolarSystemConfig {
 }
 
 export const SOLAR_SYSTEMS: Record<string, SolarSystemConfig> = {
-  // Special teal base system for new users/members (no sun, no planets)
+  // Special teal base system for new users/members (with teal star)
   UXI8000: {
     name: "Teal Base",
     sunColor: "hsl(180, 60%, 50%)",
-    sunSize: 0, // No visible sun
+    sunSize: 12, // Visible teal star
     planets: [], // No planets
     avatarStyle: {
       background: "radial-gradient(circle at 30% 30%, rgba(0, 128, 128, 0.1) 0%, transparent 50%), rgba(26, 40, 40, 0.9)",
