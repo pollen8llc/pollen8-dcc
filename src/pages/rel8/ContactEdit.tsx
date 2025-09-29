@@ -261,7 +261,7 @@ const ContactEdit = () => {
           <div className="space-y-6">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-              <Avatar userId={contact.name} size={80} className="border-4 border-primary/20 mx-auto sm:mx-0" />
+              <Avatar userId={contact.name} size={80} className="mx-auto sm:mx-0" />
               
               <div className="flex-1 space-y-3 w-full text-center sm:text-left">
                 <div>

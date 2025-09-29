@@ -174,7 +174,7 @@ const Nomin8Dashboard: React.FC = () => {
                            hover:bg-muted/40 transition-all duration-200 cursor-pointer"
                   onClick={() => handleContactClick(nomination.contact?.id || '')}
                 >
-                  <Avatar userId={nomination.contact?.name || nomination.contact?.id} size={48} className="mb-2 border-2 border-primary/20" />
+                  <Avatar userId={nomination.contact?.name || nomination.contact?.id} size={48} className="mb-2" />
                   <span className="text-xs font-medium text-center line-clamp-2">
                     {nomination.contact?.name || 'Unknown'}
                   </span>

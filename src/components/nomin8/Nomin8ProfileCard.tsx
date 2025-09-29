@@ -66,9 +66,7 @@ const Nomin8ProfileCard: React.FC<Nomin8ProfileCardProps> = ({ profile, onClick 
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
           {/* Avatar */}
-          <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
-            <Avatar userId={profile.contactId} size={40} />
-          </div>
+          <Avatar userId={profile.contactId} size={40} />
 
           {/* Main Info */}
           <div className="flex-1 min-w-0">
