@@ -30,10 +30,8 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
     styleSheet.type = 'text/css';
     
     let keyframes = '';
-  const borderWidth = Math.max(2, size * 0.04);
-    const contentSize = size - (borderWidth * 2);
-    const padding = Math.max(2, contentSize * 0.08);
-    const innerSize = contentSize - (padding * 2);
+    const borderWidth = Math.max(2, size * 0.04);
+    const innerSize = size - (borderWidth * 4);
     
     config.planets.forEach((planet, index) => {
       const animationName = `orbit-${uniqueId}-${index}`;
@@ -55,14 +53,12 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
   }, [config, uniqueId]);
 
   const borderWidth = Math.max(2, size * 0.04);
-  const contentSize = size - (borderWidth * 2);
-  const padding = Math.max(2, contentSize * 0.08);
-  const innerSize = contentSize - (padding * 2);
+  const innerSize = size - (borderWidth * 4); // Simple calculation for inner space
 
   return (
     <div 
       className={cn(
-    "relative rounded-full overflow-hidden",
+        "relative rounded-full overflow-hidden flex items-center justify-center",
         className
       )}
       style={{
@@ -77,12 +73,10 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
       onClick={onClick}
     >
       <div 
-        className="absolute inset-0 rounded-full"
+        className="relative rounded-full"
         style={{
-          margin: borderWidth,
-          padding: padding,
-          width: contentSize,
-          height: contentSize
+          width: innerSize,
+          height: innerSize
         }}
       >
         {/* Orbital paths */}
