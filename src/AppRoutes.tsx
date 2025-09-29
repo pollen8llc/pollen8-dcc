@@ -107,6 +107,14 @@ const Labr8Profile = lazy(() => import("@/pages/labr8/Labr8Profile"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
 const Labr8ProjectStatusNew = lazy(() => import("@/pages/labr8/Labr8ProjectStatusNew"));
 
+// Ecosystem Builder pages
+const EcosystemBuilderLanding = lazy(() => import("@/pages/ecosystem-builder/EcosystemBuilderLanding"));
+const OnboardingExisting = lazy(() => import("@/pages/ecosystem-builder/OnboardingExisting"));
+const OnboardingNew = lazy(() => import("@/pages/ecosystem-builder/OnboardingNew"));
+const DashboardAnalytics = lazy(() => import("@/pages/ecosystem-builder/DashboardAnalytics"));
+const DashboardMilestones = lazy(() => import("@/pages/ecosystem-builder/DashboardMilestones"));
+const PlatformsRecommendations = lazy(() => import("@/pages/ecosystem-builder/PlatformsRecommendations"));
+
 // Loading component
 const AppLoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -462,6 +470,14 @@ const AppRoutes = () => {
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
+          {/* Ecosystem Builder routes */}
+          <Route path="/ecosystem-builder" element={<EcosystemBuilderLanding />} />
+          <Route path="/ecosystem-builder/onboarding/existing" element={<OnboardingExisting />} />
+          <Route path="/ecosystem-builder/onboarding/new" element={<OnboardingNew />} />
+          <Route path="/ecosystem-builder/dashboard/analytics" element={<DashboardAnalytics />} />
+          <Route path="/ecosystem-builder/dashboard/milestones" element={<DashboardMilestones />} />
+          <Route path="/ecosystem-builder/platforms" element={<PlatformsRecommendations />} />
+
           <Route path="/nmn8/dashboard" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
