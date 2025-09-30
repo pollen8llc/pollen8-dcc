@@ -151,91 +151,96 @@ const P8Loc8 = () => {
           <p className="text-muted-foreground">Rotate the globe to explore time zones</p>
         </div>
 
-        {/* Globe Container */}
-        <Card className="p-4 md:p-8 bg-background/40 backdrop-blur-xl border-primary/20 space-y-6">
-          <div className="relative w-full h-[300px] md:h-[500px] rounded-lg overflow-hidden bg-black/20">
+        {/* Globe Container with Overlays */}
+        <Card className="p-4 md:p-8 bg-background/40 backdrop-blur-xl border-primary/20">
+          <div className="relative w-full h-[400px] md:h-[600px] rounded-lg overflow-hidden bg-gradient-to-br from-background via-primary/5 to-primary/10">
+            {/* Globe */}
             <Globe
               ref={globeEl}
-              globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+              globeImageUrl={null}
               backgroundColor="rgba(0,0,0,0)"
-              width={typeof window !== 'undefined' ? Math.min(window.innerWidth - 40, 1000) : 800}
-              height={typeof window !== 'undefined' && window.innerWidth < 768 ? 300 : 500}
+              showGlobe={true}
+              showAtmosphere={true}
+              atmosphereColor="hsl(var(--primary))"
+              atmosphereAltitude={0.15}
+              width={typeof window !== 'undefined' ? Math.min(window.innerWidth - 80, 1000) : 800}
+              height={typeof window !== 'undefined' && window.innerWidth < 768 ? 400 : 600}
               animateIn={true}
               waitForGlobeReady={true}
               onGlobeReady={() => setIsReady(true)}
             />
-          </div>
 
-          {/* Zone Navigation */}
-          <div className="flex items-center justify-between gap-4 py-4 border-y border-primary/20">
+            {/* Navigation Arrows - Overlaid like Windows Photos */}
             <Button
               variant="outline"
               size="icon"
               onClick={() => navigateToZone("prev")}
-              className="shrink-0"
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-md hover:bg-background/90 border-primary/30 z-10"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-6 w-6" />
             </Button>
-
-            <div className="flex items-center gap-2 flex-1 justify-center">
-              <Clock className="h-5 w-5 text-primary shrink-0" />
-              <h3 className="text-base md:text-lg font-semibold text-primary text-center">
-                {activeZone.name}
-              </h3>
-            </div>
 
             <Button
               variant="outline"
               size="icon"
               onClick={() => navigateToZone("next")}
-              className="shrink-0"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-md hover:bg-background/90 border-primary/30 z-10"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-6 w-6" />
             </Button>
-          </div>
 
-          {/* City Selection */}
-          <div className="space-y-3 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Select cities ({selectedCities.length} selected):
-              </p>
-              {selectedCities.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedCities([])}
-                  className="text-xs"
-                >
-                  Clear all
-                </Button>
-              )}
+            {/* Time Zone Badge - Top Center */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+              <Badge className="bg-background/80 backdrop-blur-md border-primary/30 text-primary px-4 py-2 text-sm md:text-base flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                {activeZone.name}
+              </Badge>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {activeZone.cities.map((city) => {
-                const isSelected = selectedCities.includes(city);
-                return (
-                  <Badge
-                    key={city}
-                    variant={isSelected ? "default" : "secondary"}
-                    className={`cursor-pointer transition-all ${
-                      isSelected 
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90 scale-105" 
-                        : "bg-primary/10 text-foreground hover:bg-primary/20"
-                    }`}
-                    onClick={() => toggleCity(city)}
-                  >
-                    {city}
-                  </Badge>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Instructions */}
-          <div className="text-center text-xs md:text-sm text-muted-foreground space-y-1">
-            <p>Click and drag to rotate • Scroll to zoom</p>
-            <p className="text-primary/70">Use arrows or rotate manually to explore zones</p>
+            {/* City Selection - Bottom Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-md p-4 md:p-6 z-10">
+              <div className="space-y-3 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs md:text-sm text-muted-foreground">
+                    Select cities ({selectedCities.length} selected)
+                  </p>
+                  {selectedCities.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedCities([])}
+                      className="text-xs h-7"
+                    >
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+                  {activeZone.cities.map((city) => {
+                    const isSelected = selectedCities.includes(city);
+                    return (
+                      <Badge
+                        key={city}
+                        variant={isSelected ? "default" : "secondary"}
+                        className={`cursor-pointer transition-all ${
+                          isSelected 
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90 scale-105" 
+                            : "bg-background/60 backdrop-blur-sm text-foreground hover:bg-primary/20 border-primary/20"
+                        }`}
+                        onClick={() => toggleCity(city)}
+                      >
+                        {city}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Instructions - Bottom Left */}
+            <div className="absolute bottom-4 left-4 text-xs text-muted-foreground/70 z-10">
+              <p>Drag to rotate • Scroll to zoom</p>
+            </div>
           </div>
         </Card>
 
