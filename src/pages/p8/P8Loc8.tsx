@@ -157,9 +157,8 @@ const P8Loc8 = () => {
             {/* Globe */}
             <Globe
               ref={globeEl}
-              globeImageUrl={null}
+              globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
               backgroundColor="rgba(0,0,0,0)"
-              showGlobe={true}
               showAtmosphere={true}
               atmosphereColor="hsl(var(--primary))"
               atmosphereAltitude={0.15}
@@ -190,41 +189,39 @@ const P8Loc8 = () => {
             </Button>
 
             {/* Time Zone Badge - Top Center */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3 max-w-[90%]">
               <Badge className="bg-background/80 backdrop-blur-md border-primary/30 text-primary px-4 py-2 text-sm md:text-base flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 {activeZone.name}
               </Badge>
-            </div>
-
-            {/* City Selection - Bottom Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-md p-4 md:p-6 z-10">
-              <div className="space-y-3 animate-fade-in">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                    Select cities ({selectedCities.length} selected)
+              
+              {/* City Selection - Below Time Zone Badge */}
+              <div className="bg-background/80 backdrop-blur-md border border-primary/30 rounded-lg px-4 py-3 space-y-2 animate-fade-in">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-xs text-muted-foreground whitespace-nowrap">
+                    {selectedCities.length} selected
                   </p>
                   {selectedCities.length > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelectedCities([])}
-                      className="text-xs h-7"
+                      className="text-xs h-6 px-2"
                     >
-                      Clear all
+                      Clear
                     </Button>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+                <div className="flex flex-wrap gap-2 max-w-[80vw] md:max-w-[600px]">
                   {activeZone.cities.map((city) => {
                     const isSelected = selectedCities.includes(city);
                     return (
                       <Badge
                         key={city}
                         variant={isSelected ? "default" : "secondary"}
-                        className={`cursor-pointer transition-all ${
+                        className={`cursor-pointer transition-all text-xs ${
                           isSelected 
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90 scale-105" 
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90" 
                             : "bg-background/60 backdrop-blur-sm text-foreground hover:bg-primary/20 border-primary/20"
                         }`}
                         onClick={() => toggleCity(city)}
