@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, Gamepad2, Laptop, Heart, Users } from "lucide-react";
@@ -41,8 +42,9 @@ const P8Class = () => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 p-6">
-      <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <Navbar />
+      <div className="max-w-5xl mx-auto space-y-8 animate-fade-in p-6">
         {/* Progress */}
         <div className="flex items-center space-x-2">
           <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30">

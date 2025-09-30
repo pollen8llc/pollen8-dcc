@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, Clock, ChevronLeft, ChevronRight } from "lucide-react";
@@ -186,8 +187,9 @@ const P8Loc8 = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 p-2 md:p-4">
-      <div className="max-w-7xl mx-auto space-y-3 md:space-y-4 animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <Navbar />
+      <div className="max-w-7xl mx-auto space-y-3 md:space-y-4 animate-fade-in p-2 md:p-4">
         {/* Progress */}
         <div className="flex items-center space-x-2 px-2">
           <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30">
