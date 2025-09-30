@@ -139,13 +139,13 @@ const P8Loc8 = () => {
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [isReady, setIsReady] = useState(false);
 
-  // Memoized points data for selected cities
+  // Memoized points data for selected cities with pulsing effect
   const pointsData = useMemo(() => {
     return selectedCities.map(city => ({
       lat: cityCoordinates[city]?.lat || 0,
       lng: cityCoordinates[city]?.lng || 0,
-      size: 0.5,
-      color: 'hsl(var(--primary))',
+      size: 0.8,
+      color: '#14b8a6', // teal color
       city: city
     }));
   }, [selectedCities]);
@@ -155,31 +155,13 @@ const P8Loc8 = () => {
 
     // Set initial camera position
     globeEl.current.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 0);
+    
+    // Enable auto-rotation
+    globeEl.current.controls().autoRotate = true;
+    globeEl.current.controls().autoRotateSpeed = 0.5;
+    
     setIsReady(true);
-
-    // Detect longitude changes
-    const interval = setInterval(() => {
-      if (globeEl.current) {
-        const pov = globeEl.current.pointOfView();
-        const lng = pov.lng;
-
-        // Normalize longitude to -180 to 180
-        const normalizedLng = ((lng + 180) % 360) - 180;
-
-        // Find matching time zone
-        const zoneIndex = timeZones.findIndex(
-          (tz) => normalizedLng >= tz.range[0] && normalizedLng < tz.range[1]
-        );
-
-        if (zoneIndex !== -1 && zoneIndex !== activeZoneIndex) {
-          setActiveZone(timeZones[zoneIndex]);
-          setActiveZoneIndex(zoneIndex);
-        }
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [activeZoneIndex]);
+  }, []);
 
   const navigateToZone = (direction: "prev" | "next") => {
     let newIndex = direction === "next" ? activeZoneIndex + 1 : activeZoneIndex - 1;
@@ -191,12 +173,8 @@ const P8Loc8 = () => {
     const newZone = timeZones[newIndex];
     setActiveZone(newZone);
     setActiveZoneIndex(newIndex);
-
-    // Rotate globe to center of new zone with smooth animation
-    if (globeEl.current) {
-      const centerLng = (newZone.range[0] + newZone.range[1]) / 2;
-      globeEl.current.pointOfView({ lat: 20, lng: centerLng, altitude: 2.5 }, 1500);
-    }
+    
+    // Only update the overlay, globe keeps rotating
   };
 
   const toggleCity = (city: string) => {
@@ -233,13 +211,14 @@ const P8Loc8 = () => {
               animateIn={true}
               waitForGlobeReady={true}
               onGlobeReady={() => setIsReady(true)}
-              // Selected city points
+              // Selected city points with pulsing animation
               pointsData={pointsData}
               pointAltitude={0.01}
-              pointRadius={0.5}
+              pointRadius={0.8}
               pointColor="color"
               pointLabel={(d: any) => d.city}
               pointsMerge={false}
+              pointsTransitionDuration={0}
             />
             
             {/* Pulsing animation for selected cities */}
