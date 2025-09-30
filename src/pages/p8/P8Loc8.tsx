@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, ArrowLeft, Clock } from "lucide-react";
+import { ArrowRight, ArrowLeft, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Globe from "react-globe.gl";
 
@@ -74,6 +74,8 @@ const P8Loc8 = () => {
   const navigate = useNavigate();
   const globeEl = useRef<any>();
   const [activeZone, setActiveZone] = useState(timeZones[5]); // Default to UTC
+  const [activeZoneIndex, setActiveZoneIndex] = useState(5);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -93,18 +95,45 @@ const P8Loc8 = () => {
         const normalizedLng = ((lng + 180) % 360) - 180;
 
         // Find matching time zone
-        const zone = timeZones.find(
+        const zoneIndex = timeZones.findIndex(
           (tz) => normalizedLng >= tz.range[0] && normalizedLng < tz.range[1]
         );
 
-        if (zone && zone !== activeZone) {
-          setActiveZone(zone);
+        if (zoneIndex !== -1 && zoneIndex !== activeZoneIndex) {
+          setActiveZone(timeZones[zoneIndex]);
+          setActiveZoneIndex(zoneIndex);
         }
       }
     }, 500);
 
     return () => clearInterval(interval);
-  }, [activeZone]);
+  }, [activeZoneIndex]);
+
+  const navigateToZone = (direction: "prev" | "next") => {
+    let newIndex = direction === "next" ? activeZoneIndex + 1 : activeZoneIndex - 1;
+    
+    // Wrap around
+    if (newIndex < 0) newIndex = timeZones.length - 1;
+    if (newIndex >= timeZones.length) newIndex = 0;
+
+    const newZone = timeZones[newIndex];
+    setActiveZone(newZone);
+    setActiveZoneIndex(newIndex);
+
+    // Rotate globe to center of new zone
+    if (globeEl.current) {
+      const centerLng = (newZone.range[0] + newZone.range[1]) / 2;
+      globeEl.current.pointOfView({ lat: 20, lng: centerLng, altitude: 2.5 }, 1000);
+    }
+  };
+
+  const toggleCity = (city: string) => {
+    setSelectedCities(prev => 
+      prev.includes(city) 
+        ? prev.filter(c => c !== city)
+        : [...prev, city]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 p-4 md:p-6">
@@ -124,45 +153,89 @@ const P8Loc8 = () => {
 
         {/* Globe Container */}
         <Card className="p-4 md:p-8 bg-background/40 backdrop-blur-xl border-primary/20 space-y-6">
-          <div className="relative w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden bg-black/20">
+          <div className="relative w-full h-[300px] md:h-[500px] rounded-lg overflow-hidden bg-black/20">
             <Globe
               ref={globeEl}
               globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
               backgroundColor="rgba(0,0,0,0)"
-              width={typeof window !== 'undefined' ? Math.min(window.innerWidth - 80, 1000) : 800}
-              height={500}
+              width={typeof window !== 'undefined' ? Math.min(window.innerWidth - 40, 1000) : 800}
+              height={typeof window !== 'undefined' && window.innerWidth < 768 ? 300 : 500}
               animateIn={true}
               waitForGlobeReady={true}
               onGlobeReady={() => setIsReady(true)}
             />
           </div>
 
-          {/* Active Time Zone Display */}
-          <div className="pt-6 border-t border-primary/20 animate-fade-in">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold text-primary">{activeZone.name}</h3>
+          {/* Zone Navigation */}
+          <div className="flex items-center justify-between gap-4 py-4 border-y border-primary/20">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigateToZone("prev")}
+              className="shrink-0"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+
+            <div className="flex items-center gap-2 flex-1 justify-center">
+              <Clock className="h-5 w-5 text-primary shrink-0" />
+              <h3 className="text-base md:text-lg font-semibold text-primary text-center">
+                {activeZone.name}
+              </h3>
             </div>
-            
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Major cities in this zone:</p>
-              <div className="flex flex-wrap gap-2">
-                {activeZone.cities.map((city) => (
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigateToZone("next")}
+              className="shrink-0"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* City Selection */}
+          <div className="space-y-3 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Select cities ({selectedCities.length} selected):
+              </p>
+              {selectedCities.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedCities([])}
+                  className="text-xs"
+                >
+                  Clear all
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {activeZone.cities.map((city) => {
+                const isSelected = selectedCities.includes(city);
+                return (
                   <Badge
                     key={city}
-                    variant="secondary"
-                    className="bg-primary/10 text-foreground hover:bg-primary/20 transition-colors"
+                    variant={isSelected ? "default" : "secondary"}
+                    className={`cursor-pointer transition-all ${
+                      isSelected 
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 scale-105" 
+                        : "bg-primary/10 text-foreground hover:bg-primary/20"
+                    }`}
+                    onClick={() => toggleCity(city)}
                   >
                     {city}
                   </Badge>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Instructions */}
-          <div className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-xs md:text-sm text-muted-foreground space-y-1">
             <p>Click and drag to rotate • Scroll to zoom</p>
+            <p className="text-primary/70">Use arrows or rotate manually to explore zones</p>
           </div>
         </Card>
 
