@@ -107,6 +107,14 @@ const Labr8Profile = lazy(() => import("@/pages/labr8/Labr8Profile"));
 const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails"));
 const Labr8ProjectStatusNew = lazy(() => import("@/pages/labr8/Labr8ProjectStatusNew"));
 
+// P8 Ecosystem Builder Pages
+const P8Landing = lazy(() => import("@/pages/p8/P8Landing"));
+const P8Loc8 = lazy(() => import("@/pages/p8/P8Loc8"));
+const P8Asl = lazy(() => import("@/pages/p8/P8Asl"));
+const P8Class = lazy(() => import("@/pages/p8/P8Class"));
+const P8Intgr8 = lazy(() => import("@/pages/p8/P8Intgr8"));
+const P8Dashboard = lazy(() => import("@/pages/p8/P8Dashboard"));
+
 // Loading component
 const AppLoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -598,6 +606,50 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <CommunityDashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+
+          {/* P8 Ecosystem Builder Routes */}
+          <Route path="/p8" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <P8Landing />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/p8/loc8" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <P8Loc8 />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/p8/asl" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <P8Asl />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/p8/class" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <P8Class />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/p8/intgr8" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <P8Intgr8 />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/p8/dashboard" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <P8Dashboard />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
