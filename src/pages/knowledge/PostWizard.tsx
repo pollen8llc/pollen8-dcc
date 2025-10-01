@@ -5,7 +5,6 @@ import Navbar from '@/components/Navbar';
 import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  ChevronLeft,
   BookOpen,
   MessageSquare,
   Quote,
@@ -21,7 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CoreNavigation } from '@/components/rel8t/CoreNavigation';
+import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
 import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
@@ -174,14 +173,9 @@ const PostWizard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-6">
-        <CoreNavigation />
-        
         {/* Navigation */}
         <div className="mb-4 sm:mb-6">
-          <Button variant="ghost" className="pl-0 hover-scale" onClick={handleBack}>
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            {currentStep === 1 ? 'Back to Type Selection' : 'Back'}
-          </Button>
+          <KnowledgeNavigation />
         </div>
         
         <div className="max-w-3xl mx-auto animate-fade-in">

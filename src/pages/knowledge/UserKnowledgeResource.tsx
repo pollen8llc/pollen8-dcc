@@ -83,7 +83,6 @@ const UserKnowledgeResource = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <Button 
               onClick={() => navigate('/knowledge/create')}
-              className="glass-morphism border-0 bg-primary/20 hover:bg-primary/30 text-primary-foreground backdrop-blur-md"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">Create New Post</span>
@@ -93,7 +92,7 @@ const UserKnowledgeResource = () => {
         </div>
 
         {/* Desktop Layout with Tabs */}
-        <div className="hidden lg:block">
+        <div className="hidden md:block">
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3 bg-muted/50 rounded-lg p-1 max-w-md">
               <TabsTrigger 
@@ -211,7 +210,6 @@ const UserKnowledgeResource = () => {
                           </p>
                           <Button 
                             onClick={() => navigate('/knowledge/create')}
-                            className="glass-morphism border-0 bg-primary/20 hover:bg-primary/30 text-primary-foreground backdrop-blur-md"
                           >
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Create Your First Post
@@ -286,7 +284,6 @@ const UserKnowledgeResource = () => {
                 </h2>
                 <Button 
                   onClick={() => navigate('/knowledge/create')}
-                  className="glass-morphism border-0 bg-primary/20 hover:bg-primary/30 text-primary-foreground backdrop-blur-md"
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create New Post
@@ -318,7 +315,6 @@ const UserKnowledgeResource = () => {
                   </p>
                   <Button 
                     onClick={() => navigate('/knowledge/create')}
-                    className="glass-morphism border-0 bg-primary/20 hover:bg-primary/30 text-primary-foreground backdrop-blur-md"
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create Your First Post
@@ -358,7 +354,6 @@ const UserKnowledgeResource = () => {
                   </p>
                   <Button 
                     onClick={() => navigate('/knowledge')}
-                    className="glass-morphism border-0 bg-primary/20 hover:bg-primary/30 text-primary-foreground backdrop-blur-md"
                   >
                     Browse Knowledge Base
                   </Button>
@@ -405,36 +400,9 @@ const UserKnowledgeResource = () => {
                 </div>
               ) : (
                 <>
-                  <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-                    {/* Content Type Breakdown */}
-                    <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md">
-                      <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
-                        <CardTitle className="flex items-center gap-2 text-foreground text-base sm:text-lg">
-                          <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                          Content Types
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-                        <div className="flex flex-wrap gap-2">
-                          {Object.entries(stats?.contentTypeStats || {}).map(([type, count]) => (
-                            <Badge 
-                              key={type} 
-                              variant="secondary"
-                              className="bg-primary text-black border-0 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
-                            >
-                              <TagIcon className="h-3 w-3 mr-1" />
-                              {type.toLowerCase()}: {count}
-                            </Badge>
-                          ))}
-                          {Object.keys(stats?.contentTypeStats || {}).length === 0 && (
-                            <p className="text-sm text-muted-foreground">No content types yet</p>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Recent Activity */}
-                    <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md">
+                  <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
+                    {/* Recent Activity - First on mobile */}
+                    <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md order-2 sm:order-2">
                       <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
                         <CardTitle className="flex items-center gap-2 text-foreground text-base sm:text-lg">
                           <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -524,6 +492,33 @@ const UserKnowledgeResource = () => {
                         )}
                       </CardContent>
                     </Card>
+
+                    {/* Content Type Breakdown - Last on mobile */}
+                    <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md order-1 sm:order-1">
+                      <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+                        <CardTitle className="flex items-center gap-2 text-foreground text-base sm:text-lg">
+                          <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                          Content Types
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(stats?.contentTypeStats || {}).map(([type, count]) => (
+                            <Badge 
+                              key={type} 
+                              variant="secondary"
+                              className="bg-primary text-black border-0 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                            >
+                              <TagIcon className="h-3 w-3 mr-1" />
+                              {type.toLowerCase()}: {count}
+                            </Badge>
+                          ))}
+                          {Object.keys(stats?.contentTypeStats || {}).length === 0 && (
+                            <p className="text-sm text-muted-foreground">No content types yet</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </>
               )}
@@ -537,7 +532,7 @@ const UserKnowledgeResource = () => {
                 </h2>
                 <Button 
                   onClick={() => navigate('/knowledge/create')}
-                  className="glass-morphism border-0 bg-primary/20 hover:bg-primary/30 text-primary-foreground backdrop-blur-md self-start sm:self-auto"
+                  className="self-start sm:self-auto"
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Create New Post</span>
@@ -570,7 +565,6 @@ const UserKnowledgeResource = () => {
                   </p>
                   <Button 
                     onClick={() => navigate('/knowledge/create')}
-                    className="glass-morphism border-0 bg-primary/20 hover:bg-primary/30 text-primary-foreground backdrop-blur-md"
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     <span className="hidden sm:inline">Create Your First Post</span>
@@ -611,7 +605,6 @@ const UserKnowledgeResource = () => {
                   </p>
                   <Button 
                     onClick={() => navigate('/knowledge')}
-                    className="glass-morphism border-0 bg-primary/20 hover:bg-primary/30 text-primary-foreground backdrop-blur-md"
                   >
                     <span className="hidden sm:inline">Browse Knowledge Base</span>
                     <span className="sm:hidden">Browse</span>

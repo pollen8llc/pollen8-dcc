@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
-  ChevronLeft,
   PlusCircle,
   BookOpen
 } from 'lucide-react';
@@ -12,6 +13,7 @@ import {
 // UI Components
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
 
 // Content Type Selector
 import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
@@ -22,7 +24,15 @@ import { ContentType } from '@/models/knowledgeTypes';
 const ContentCreator = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { currentUser } = useAuth();
+  const { checkPermission } = usePermissions(currentUser);
   const [selectedType, setSelectedType] = useState<string>('all');
+  
+  // Filter content types based on permissions
+  const isAdmin = checkPermission('knowledge', 'manage_content_types');
+  const availableTypes = isAdmin 
+    ? ['all', 'question', 'article', 'quote', 'poll'] 
+    : ['all', 'article', 'poll']; // Default: only articles and polls for non-admins
   
   const handleTypeChange = (type: string) => {
     setSelectedType(type);
@@ -48,12 +58,7 @@ const ContentCreator = () => {
       <div className="container mx-auto px-4 py-6">
         {/* Navigation */}
         <div className="mb-6">
-          <Button variant="ghost" className="pl-0" asChild>
-            <div onClick={() => navigate('/knowledge')}>
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Knowledge Base
-            </div>
-          </Button>
+          <KnowledgeNavigation />
         </div>
         
         <div className="max-w-3xl mx-auto">
@@ -72,7 +77,11 @@ const ContentCreator = () => {
             </CardHeader>
             
             <CardContent>
-              <ContentTypeSelector selected={selectedType} onChange={handleTypeChange} />
+              <ContentTypeSelector 
+                selected={selectedType} 
+                onChange={handleTypeChange}
+                availableTypes={availableTypes}
+              />
             </CardContent>
             
             <CardFooter className="flex justify-between">

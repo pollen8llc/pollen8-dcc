@@ -13,19 +13,24 @@ import {
 export interface ContentTypeSelectorProps {
   selected: string;
   onChange: (type: string) => void;
+  availableTypes?: string[];
 }
 
 export const ContentTypeSelector: React.FC<ContentTypeSelectorProps> = ({ 
   selected, 
-  onChange 
+  onChange,
+  availableTypes = ['all', 'question', 'article', 'quote', 'poll']
 }) => {
-  const contentTypes = [
+  const allContentTypes = [
     { id: 'all', name: 'All Types', icon: Newspaper },
     { id: 'question', name: 'Questions', icon: MessageSquare },
     { id: 'article', name: 'Articles', icon: BookOpen },
     { id: 'quote', name: 'Quotes', icon: Quote },
     { id: 'poll', name: 'Polls', icon: BarChart2 },
   ];
+  
+  // Filter content types based on availableTypes
+  const contentTypes = allContentTypes.filter(type => availableTypes.includes(type.id));
 
   return (
     <div className="space-y-2">
