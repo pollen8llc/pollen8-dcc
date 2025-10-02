@@ -144,6 +144,17 @@ const P8Loc8 = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+  // Auto-open panel when search or timezone changes
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      setIsPanelOpen(true);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setIsPanelOpen(true);
+  }, [activeZoneIndex]);
+
   // Memoized points data for selected cities with pulsing effect
   const pointsData = useMemo(() => {
     return selectedCities.map(city => ({
@@ -244,7 +255,7 @@ const P8Loc8 = () => {
               {/* Expandable Content - Opens Upward */}
               <CollapsibleContent className="animate-accordion-up data-[state=open]:animate-accordion-down">
                 <div className="p-3 md:p-4 space-y-3 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-lg">
-                  <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3">
+                  <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Selected Cities - Always Visible */}
                     <div className="px-3 md:px-4 py-2.5 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg shadow-lg">
                       <div className="flex items-center justify-between mb-2">
@@ -282,20 +293,6 @@ const P8Loc8 = () => {
                       )}
                     </div>
 
-                    {/* Search Bar - Centered */}
-                    <div className="relative flex items-center justify-center">
-                      <div className="relative w-full md:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                        <Input
-                          type="text"
-                          placeholder="Search cities..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-9 bg-background/30 backdrop-blur-lg border-primary/10 shadow-lg text-sm"
-                        />
-                      </div>
-                    </div>
-
                     {/* Cities Badge Cloud */}
                     <div className="px-3 md:px-4 py-2.5 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg max-h-32 md:max-h-40 overflow-y-auto shadow-lg scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                       <h3 className="text-xs md:text-sm font-semibold text-foreground/90 mb-2">
@@ -331,48 +328,64 @@ const P8Loc8 = () => {
                 </div>
               </CollapsibleContent>
 
-              {/* Timezone Switch - Always Visible at Bottom as Trigger */}
-              <CollapsibleTrigger asChild>
-                <div className="p-3 md:p-4 bg-gradient-to-t from-background/95 to-transparent backdrop-blur-lg">
-                  <div className="max-w-6xl mx-auto flex items-center justify-between px-3 md:px-6 py-2 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg shadow-lg cursor-pointer hover:bg-background/40 transition-all">
+              {/* Unified Search + Timezone Bar - Always Visible at Bottom */}
+              <div className="p-3 md:p-4 bg-gradient-to-t from-background/95 to-transparent backdrop-blur-lg">
+                <div className="max-w-6xl mx-auto flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg shadow-lg">
+                  {/* Timezone Previous */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigateToZone("prev")}
+                    className="h-8 w-8 md:h-9 md:w-9 shrink-0"
+                  >
+                    <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+                  </Button>
+                  
+                  {/* Timezone Badge */}
+                  <Badge className="bg-background/80 backdrop-blur-md border-primary/10 text-primary px-2 md:px-3 py-1.5 md:py-2 text-xs flex items-center gap-1 md:gap-2 shrink-0 whitespace-nowrap">
+                    <Clock className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden sm:inline">{activeZone.name}</span>
+                    <span className="sm:hidden">{activeZone.name.split(' ')[0]}</span>
+                  </Badge>
+
+                  {/* Search Bar - Expanded */}
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                    <Input
+                      type="text"
+                      placeholder="Search cities..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 bg-background/50 backdrop-blur-lg border-primary/10 text-sm h-8 md:h-9"
+                    />
+                  </div>
+
+                  {/* Timezone Next */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigateToZone("next")}
+                    className="h-8 w-8 md:h-9 md:w-9 shrink-0"
+                  >
+                    <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
+                  </Button>
+
+                  {/* Toggle Panel Button */}
+                  <CollapsibleTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigateToZone("prev");
-                      }}
-                      className="h-8 w-8 md:h-9 md:w-9"
+                      className="h-8 w-8 md:h-9 md:w-9 shrink-0"
                     >
-                      <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
-                    </Button>
-                    
-                    <div className="flex items-center gap-2 md:gap-3">
-                      <Badge className="bg-background/80 backdrop-blur-md border-primary/10 text-primary px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm flex items-center gap-2">
-                        <Clock className="h-3 w-3 md:h-4 md:w-4" />
-                        {activeZone.name}
-                      </Badge>
                       <ChevronUp 
                         className={`h-4 w-4 md:h-5 md:w-5 text-muted-foreground transition-transform duration-200 ${
                           isPanelOpen ? 'rotate-180' : ''
                         }`} 
                       />
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigateToZone("next");
-                      }}
-                      className="h-8 w-8 md:h-9 md:w-9"
-                    >
-                      <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
                     </Button>
-                  </div>
+                  </CollapsibleTrigger>
                 </div>
-              </CollapsibleTrigger>
+              </div>
             </Collapsible>
 
             {/* Instructions - Bottom Left */}
