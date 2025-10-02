@@ -144,16 +144,12 @@ const P8Loc8 = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-  // Auto-open panel when search or timezone changes
+  // Auto-open panel when search is active
   useEffect(() => {
     if (searchQuery.trim()) {
       setIsPanelOpen(true);
     }
   }, [searchQuery]);
-
-  useEffect(() => {
-    setIsPanelOpen(true);
-  }, [activeZoneIndex]);
 
   // Memoized points data for selected cities with pulsing effect
   const pointsData = useMemo(() => {
@@ -395,16 +391,18 @@ const P8Loc8 = () => {
           </div>
         </Card>
 
-        {/* Navigation */}
-        <div className="flex justify-between px-2">
-          <Button variant="outline" onClick={() => navigate("/p8")} className="group">
-            <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            Back
-          </Button>
-          <Button onClick={() => navigate("/p8/asl")} className="group">
-            Continue
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+        {/* Navigation - Sticky on all screens */}
+        <div className="sticky bottom-0 z-30 bg-background/80 backdrop-blur-lg border-t border-primary/10 -mx-2 md:-mx-4 px-4 py-3 mt-4">
+          <div className="max-w-7xl mx-auto flex justify-between">
+            <Button variant="outline" onClick={() => navigate("/p8")} className="group">
+              <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+              Back
+            </Button>
+            <Button onClick={() => navigate("/p8/asl")} className="group">
+              Continue
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

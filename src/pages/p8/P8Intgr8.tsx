@@ -158,16 +158,18 @@ const P8Intgr8 = () => {
           </div>
         )}
 
-        {/* Navigation */}
-        <div className="flex justify-between pb-8">
-          <Button variant="outline" onClick={() => navigate("/p8/class")} className="group hover:shadow-md hover:shadow-primary/20">
-            <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            Back
-          </Button>
-          <Button onClick={() => navigate("/p8/dashboard")} className="group shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40">
-            View Dashboard
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+        {/* Navigation - Sticky on all screens */}
+        <div className="sticky bottom-0 z-30 bg-background/80 backdrop-blur-lg border-t border-primary/10 -mx-6 px-6 py-3 mt-8">
+          <div className="max-w-7xl mx-auto flex justify-between">
+            <Button variant="outline" onClick={() => navigate("/p8/class")} className="group hover:shadow-md hover:shadow-primary/20">
+              <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+              Back
+            </Button>
+            <Button onClick={() => navigate("/p8/dashboard")} className="group shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40">
+              View Dashboard
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
