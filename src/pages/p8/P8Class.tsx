@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,36 +14,37 @@ const psychographics = [
   {
     id: "interest",
     label: "Interest",
-    color: "hsl(var(--chart-1))",
+    color: "#00eada",
     options: ["Gaming", "Technology", "Sports", "Arts & Culture", "Business", "Health & Fitness", "Entertainment", "Education"],
   },
   {
     id: "lifestyle",
     label: "Lifestyle",
-    color: "hsl(var(--chart-2))",
+    color: "#8b5cf6",
     options: ["Urban", "Suburban", "Rural", "Nomadic", "Minimalist", "Luxury", "Active", "Relaxed"],
   },
   {
     id: "values",
     label: "Values",
-    color: "hsl(var(--chart-3))",
+    color: "#f97316",
     options: ["Innovation", "Community", "Sustainability", "Achievement", "Creativity", "Security", "Freedom", "Tradition"],
   },
   {
     id: "attitudes",
     label: "Attitudes",
-    color: "hsl(var(--chart-4))",
+    color: "#06b6d4",
     options: ["Optimistic", "Pragmatic", "Adventurous", "Cautious", "Collaborative", "Independent", "Progressive", "Conservative"],
   },
 ];
 
-interface ImportanceState {
-  [key: string]: number;
-}
-
-interface SelectedOptionsState {
-  [key: string]: string;
-}
+// Importance level labels
+const importanceLevels = [
+  { value: 0, label: "Low" },
+  { value: 25, label: "Moderate" },
+  { value: 50, label: "Important" },
+  { value: 75, label: "Critical" },
+  { value: 100, label: "Essential" },
+];
 
 interface RadarDataPoint {
   category: string;
@@ -58,14 +59,14 @@ const P8Class = () => {
   const [aslData, setAslData] = useState<RadarDataPoint[]>([]);
   
   // Class psychographics state
-  const [importance, setImportance] = useState<ImportanceState>({
+  const [importance, setImportance] = useState<Record<string, number>>({
     interest: 50,
     lifestyle: 50,
     values: 50,
     attitudes: 50,
   });
   
-  const [selectedOptions, setSelectedOptions] = useState<SelectedOptionsState>({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
   useEffect(() => {
     // Load ASL demographics data
@@ -73,10 +74,10 @@ const P8Class = () => {
     if (savedAslImportance) {
       const aslImportance = JSON.parse(savedAslImportance);
       const demographics = [
-        { id: "age", label: "Age", color: "hsl(var(--chart-1))" },
-        { id: "status", label: "Status", color: "hsl(var(--chart-2))" },
-        { id: "gender", label: "Gender", color: "hsl(var(--chart-3))" },
-        { id: "race", label: "Race", color: "hsl(var(--chart-4))" },
+        { id: "age", label: "Age Range", color: "#00eada" },
+        { id: "status", label: "Professional Status", color: "#8b5cf6" },
+        { id: "gender", label: "Gender", color: "#f97316" },
+        { id: "race", label: "Ethnicity", color: "#06b6d4" },
       ];
       
       const aslRadarData = demographics.map(demo => ({
@@ -86,6 +87,16 @@ const P8Class = () => {
       }));
       setAslData(aslRadarData);
     }
+
+    // Load saved Class data
+    const savedImportance = localStorage.getItem("p8_class_importance");
+    const savedOptions = localStorage.getItem("p8_class_options");
+    if (savedImportance) {
+      setImportance(JSON.parse(savedImportance));
+    }
+    if (savedOptions) {
+      setSelectedOptions(JSON.parse(savedOptions));
+    }
   }, []);
 
   useEffect(() => {
@@ -94,229 +105,275 @@ const P8Class = () => {
     localStorage.setItem("p8_class_options", JSON.stringify(selectedOptions));
   }, [importance, selectedOptions]);
 
-  const classRadarData: RadarDataPoint[] = psychographics.map(psycho => ({
-    category: psycho.label,
-    importance: importance[psycho.id],
-    color: psycho.color,
-  }));
+  const updateImportance = (categoryId: string, value: number[]) => {
+    // Snap to nearest step
+    const snappedValue = Math.round(value[0] / 25) * 25;
+    setImportance({ ...importance, [categoryId]: snappedValue });
+  };
 
-  const totalScore = Object.values(importance).reduce((sum, val) => sum + val, 0);
-  const isComplete = Object.keys(selectedOptions).length === psychographics.length;
+  // Generate radar chart data based on importance levels
+  const classRadarData = useMemo(() => {
+    return psychographics.map(psycho => ({
+      category: psycho.label,
+      importance: importance[psycho.id] || 0,
+      color: psycho.color,
+    }));
+  }, [importance]);
+
+  // Calculate total importance
+  const totalImportance = useMemo(() => {
+    return Object.values(importance).reduce((sum, val) => sum + val, 0);
+  }, [importance]);
+
+  // Get importance label
+  const getImportanceLabel = (value: number) => {
+    const level = importanceLevels.find(l => l.value === value);
+    return level?.label || "Not Set";
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-3 md:space-y-4 animate-fade-in p-2 md:p-4">
         {/* Progress */}
-        <div className="flex items-center space-x-2 mb-6">
+        <div className="flex items-center space-x-2 px-2">
           <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30">
             Step 3 of 4
           </Badge>
         </div>
 
-        {/* Header */}
-        <div className="text-center space-y-2 mb-8">
-          <h1 className="text-4xl font-bold">Psychographic Classification</h1>
-          <p className="text-muted-foreground">Define the psychographic profile of your community</p>
-        </div>
-
-        {/* Main Canvas - Overlaid Radar Charts */}
-        <div className="relative flex items-center justify-center mb-8">
-          <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent blur-3xl" />
-          <Card className="relative bg-background/40 backdrop-blur-xl border-primary/20 p-8 w-full max-w-2xl">
-            <div className="flex flex-col items-center">
-              {/* Overlay both charts */}
-              <div className="relative w-full h-[500px]">
-                {/* ASL Demographics (background layer) */}
-                {aslData.length > 0 && (
-                  <div className="absolute inset-0 opacity-40">
-                    <RadarChart data={aslData} width={500} height={500} />
+        {/* Canvas Container */}
+        <Card className="p-2 md:p-4 bg-background/20 backdrop-blur-sm border-primary/10">
+          <div className="relative w-full h-[calc(100vh-200px)] md:h-[calc(100vh-180px)] max-h-[700px] rounded-lg overflow-hidden bg-gradient-to-br from-background/10 via-primary/5 to-primary/10">
+            
+            {/* Center Overlaid Radar Charts */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
+                <div className="relative w-full h-[500px] flex items-center justify-center">
+                  {/* ASL Demographics (background layer) */}
+                  {aslData.length > 0 && (
+                    <div className="absolute inset-0 opacity-30">
+                      <RadarChart data={aslData} width={500} height={500} />
+                    </div>
+                  )}
+                  
+                  {/* Class Psychographics (foreground layer) */}
+                  <div className="absolute inset-0">
+                    <RadarChart data={classRadarData} width={500} height={500} />
                   </div>
-                )}
+                </div>
                 
-                {/* Class Psychographics (foreground layer) */}
-                <div className="absolute inset-0">
-                  <RadarChart data={classRadarData} width={500} height={500} />
-                </div>
-              </div>
-              
-              {/* Legend */}
-              <div className="mt-4 flex gap-6 items-center justify-center flex-wrap">
-                {aslData.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-primary/40 border-2 border-primary/60" />
-                    <span className="text-sm text-muted-foreground">Demographics (ASL)</span>
+                {/* Legend & Total Score */}
+                <div className="text-center mt-2 bg-background/70 backdrop-blur-xl px-6 py-3 rounded-lg border border-primary/20 shadow-lg">
+                  <div className="flex gap-4 items-center justify-center mb-2">
+                    {aslData.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-primary/30 border-2 border-primary/50" />
+                        <span className="text-xs text-muted-foreground">Demographics</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-primary border-2 border-primary" />
+                      <span className="text-xs font-medium">Psychographics</span>
+                    </div>
                   </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-primary border-2 border-primary" />
-                  <span className="text-sm font-medium">Psychographics (Class)</span>
+                  <p className="text-sm text-muted-foreground">Total Priority Score</p>
+                  <p className="text-3xl font-bold text-primary">{totalImportance}</p>
                 </div>
               </div>
+            </div>
 
-              {/* Total Score */}
-              <div className="mt-6 text-center">
-                <p className="text-sm text-muted-foreground">Total Priority Score</p>
-                <p className="text-3xl font-bold text-primary">{totalScore}</p>
+            {/* Top Header - Mobile only */}
+            <div className="lg:hidden absolute top-3 left-1/2 -translate-x-1/2 z-20 animate-fade-in">
+              <Badge className="bg-background/80 backdrop-blur-md border-primary/20 text-primary px-4 py-2 text-sm flex items-center gap-2 shadow-lg">
+                <Brain className="h-4 w-4" />
+                Define Psychographics
+              </Badge>
+            </div>
+
+            {/* Left Side Overlay Panel - Desktop Only */}
+            <div className="hidden lg:flex absolute left-4 top-4 bottom-4 w-80 flex-col gap-3 z-20 animate-fade-in overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              {/* Header */}
+              <div className="px-4 py-3 bg-background/80 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg">
+                <h3 className="text-lg font-semibold text-foreground/90 flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  Psychographic Settings
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Adjust importance levels for each category
+                </p>
               </div>
-            </div>
-          </Card>
-        </div>
 
-        {/* Desktop Controls - Left Overlay */}
-        <div className="hidden md:block fixed left-4 top-1/2 -translate-y-1/2 w-80 max-h-[70vh] overflow-y-auto z-20">
-          <Card className="bg-background/95 backdrop-blur-xl border-primary/30 shadow-2xl">
-            <div className="p-6 border-b border-primary/20">
-              <h2 className="text-xl font-bold">Psychographic Controls</h2>
-              <p className="text-sm text-muted-foreground mt-1">Define each dimension</p>
-            </div>
-            
-            <Accordion type="single" collapsible className="w-full">
-              {psychographics.map((psycho) => (
-                <AccordionItem key={psycho.id} value={psycho.id} className="border-b border-primary/10">
-                  <AccordionTrigger className="px-6 py-4 hover:bg-primary/5">
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: psycho.color }}
-                      />
-                      <span className="font-medium">{psycho.label}</span>
-                      {selectedOptions[psycho.id] && (
-                        <Badge variant="secondary" className="ml-2 text-xs">
-                          {selectedOptions[psycho.id]}
-                        </Badge>
-                      )}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-4 space-y-4">
-                    {/* Dropdown */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Select Option</label>
+              {/* Psychographic Accordion */}
+              <Accordion type="single" collapsible className="space-y-2">
+                {psychographics.map((category, index) => (
+                  <AccordionItem
+                    key={category.id}
+                    value={category.id}
+                    className="bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg overflow-hidden animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <AccordionTrigger className="px-4 py-3 hover:bg-background/75 hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full flex-shrink-0" 
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="text-sm font-semibold text-foreground/90">
+                          {category.label}
+                        </span>
+                        {selectedOptions[category.id] && (
+                          <Badge variant="secondary" className="ml-auto text-xs">
+                            {selectedOptions[category.id]}
+                          </Badge>
+                        )}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-3 space-y-3">
+                      {/* Dropdown Selection */}
                       <Select
-                        value={selectedOptions[psycho.id] || ""}
-                        onValueChange={(value) => 
-                          setSelectedOptions(prev => ({ ...prev, [psycho.id]: value }))
-                        }
+                        value={selectedOptions[category.id] || ""}
+                        onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [category.id]: value })}
                       >
-                        <SelectTrigger className="bg-background/50">
-                          <SelectValue placeholder={`Choose ${psycho.label.toLowerCase()}`} />
+                        <SelectTrigger className="w-full bg-background/50 border-primary/20">
+                          <SelectValue placeholder={`Select ${category.label.toLowerCase()}`} />
                         </SelectTrigger>
-                        <SelectContent>
-                          {psycho.options.map(option => (
+                        <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
+                          {category.options.map((option) => (
                             <SelectItem key={option} value={option}>
                               {option}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                    </div>
 
-                    {/* Importance Slider */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <label className="text-sm font-medium">Importance</label>
-                        <span className="text-sm font-bold" style={{ color: psycho.color }}>
-                          {importance[psycho.id]}%
-                        </span>
-                      </div>
-                      <Slider
-                        value={[importance[psycho.id]]}
-                        onValueChange={(value) => 
-                          setImportance(prev => ({ ...prev, [psycho.id]: value[0] }))
-                        }
-                        max={100}
-                        step={1}
-                        className="w-full"
-                      />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </Card>
-        </div>
-
-        {/* Mobile Controls - Bottom Overlay */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 max-h-[50vh] overflow-y-auto z-20">
-          <Card className="bg-background/95 backdrop-blur-xl border-t-2 border-primary/30 rounded-t-3xl shadow-2xl">
-            <div className="p-4 border-b border-primary/20">
-              <div className="w-12 h-1 bg-primary/30 rounded-full mx-auto mb-4" />
-              <h2 className="text-lg font-bold">Psychographic Controls</h2>
-            </div>
-            
-            <Accordion type="single" collapsible className="w-full">
-              {psychographics.map((psycho) => (
-                <AccordionItem key={psycho.id} value={psycho.id} className="border-b border-primary/10">
-                  <AccordionTrigger className="px-4 py-3 hover:bg-primary/5">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-2 h-2 rounded-full" 
-                        style={{ backgroundColor: psycho.color }}
-                      />
-                      <span className="text-sm font-medium">{psycho.label}</span>
-                      {selectedOptions[psycho.id] && (
-                        <Badge variant="secondary" className="ml-2 text-xs">
-                          {selectedOptions[psycho.id]}
+                      {/* Importance Label */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Importance</span>
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs"
+                          style={{ 
+                            backgroundColor: `${category.color}20`,
+                            color: category.color,
+                            borderColor: `${category.color}40`
+                          }}
+                        >
+                          {getImportanceLabel(importance[category.id])}
                         </Badge>
-                      )}
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4 pb-3 space-y-3">
-                    {/* Dropdown */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium">Select Option</label>
+                      </div>
+
+                      {/* Tactile Slider with Steps */}
+                      <div className="space-y-2">
+                        <Slider
+                          value={[importance[category.id]]}
+                          onValueChange={(value) => updateImportance(category.id, value)}
+                          max={100}
+                          step={25}
+                          className="w-full"
+                        />
+                        {/* Step Indicators */}
+                        <div className="flex justify-between text-[10px] text-muted-foreground/60 px-1">
+                          {importanceLevels.map(level => (
+                            <span 
+                              key={level.value}
+                              className={importance[category.id] === level.value ? 'text-primary font-semibold' : ''}
+                            >
+                              {level.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            {/* Bottom Overlay Panel - Mobile Only */}
+            <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 animate-fade-in p-3 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-xl pt-6 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              <Accordion type="single" collapsible className="space-y-2">
+                {psychographics.map((category, index) => (
+                  <AccordionItem
+                    key={category.id}
+                    value={category.id}
+                    className="bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg overflow-hidden"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <AccordionTrigger className="px-3 py-2.5 hover:bg-background/75 hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="text-xs font-semibold text-foreground/90">
+                          {category.label}
+                        </span>
+                        {selectedOptions[category.id] && (
+                          <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">
+                            {selectedOptions[category.id]}
+                          </Badge>
+                        )}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-3 pb-2.5 space-y-2">
+                      {/* Dropdown Selection */}
                       <Select
-                        value={selectedOptions[psycho.id] || ""}
-                        onValueChange={(value) => 
-                          setSelectedOptions(prev => ({ ...prev, [psycho.id]: value }))
-                        }
+                        value={selectedOptions[category.id] || ""}
+                        onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [category.id]: value })}
                       >
-                        <SelectTrigger className="bg-background/50 h-9">
-                          <SelectValue placeholder={`Choose ${psycho.label.toLowerCase()}`} />
+                        <SelectTrigger className="w-full bg-background/50 border-primary/20 h-8 text-xs">
+                          <SelectValue placeholder={`Select ${category.label.toLowerCase()}`} />
                         </SelectTrigger>
-                        <SelectContent>
-                          {psycho.options.map(option => (
-                            <SelectItem key={option} value={option}>
+                        <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
+                          {category.options.map((option) => (
+                            <SelectItem key={option} value={option} className="text-xs">
                               {option}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                    </div>
 
-                    {/* Importance Slider */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs font-medium">Importance</label>
-                        <span className="text-xs font-bold" style={{ color: psycho.color }}>
-                          {importance[psycho.id]}%
-                        </span>
+                      {/* Importance Badge & Slider */}
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant="secondary" 
+                          className="text-[10px] px-2 py-0.5 flex-shrink-0"
+                          style={{ 
+                            backgroundColor: `${category.color}20`,
+                            color: category.color,
+                          }}
+                        >
+                          {getImportanceLabel(importance[category.id])}
+                        </Badge>
+                        <Slider
+                          value={[importance[category.id]]}
+                          onValueChange={(value) => updateImportance(category.id, value)}
+                          max={100}
+                          step={25}
+                          className="flex-1"
+                        />
                       </div>
-                      <Slider
-                        value={[importance[psycho.id]]}
-                        onValueChange={(value) => 
-                          setImportance(prev => ({ ...prev, [psycho.id]: value[0] }))
-                        }
-                        max={100}
-                        step={1}
-                        className="w-full"
-                      />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </Card>
-        </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            {/* Instructions - Bottom Right */}
+            <div className="absolute bottom-3 right-3 text-[10px] md:text-xs text-muted-foreground/60 z-10 bg-background/40 backdrop-blur-sm px-2 py-1 rounded">
+              <p>Slide to adjust importance</p>
+            </div>
+          </div>
+        </Card>
 
         {/* Navigation */}
-        <div className="flex justify-between mt-8 mb-20 md:mb-8">
+        <div className="flex justify-between px-2">
           <Button variant="outline" onClick={() => navigate("/p8/asl")} className="group">
             <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Back
           </Button>
-          <Button onClick={() => navigate("/p8/intgr8")} disabled={!isComplete} className="group">
+          <Button onClick={() => navigate("/p8/intgr8")} className="group">
             Continue
             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>
