@@ -125,7 +125,7 @@ const ProfilePage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         <h1 className="sr-only">Profile of {profileData.first_name || ''} {profileData.last_name || ''}</h1>
         <EnhancedProfileView 
           profile={profileData}

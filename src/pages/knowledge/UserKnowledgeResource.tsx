@@ -402,7 +402,7 @@ const UserKnowledgeResource = () => {
                 <>
                   <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
                     {/* Recent Activity - First on mobile */}
-                    <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md order-2 sm:order-2">
+                    <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md order-1 sm:order-1">
                       <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
                         <CardTitle className="flex items-center gap-2 text-foreground text-base sm:text-lg">
                           <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -494,7 +494,7 @@ const UserKnowledgeResource = () => {
                     </Card>
 
                     {/* Content Type Breakdown - Last on mobile */}
-                    <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md order-1 sm:order-1">
+                    <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md order-2 sm:order-2">
                       <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
                         <CardTitle className="flex items-center gap-2 text-foreground text-base sm:text-lg">
                           <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
