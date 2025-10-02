@@ -12,15 +12,13 @@ interface App {
   name: string;
   category: string;
   icon: LucideIcon;
+  recommended?: boolean;
 }
 
-const suggestedApps: App[] = [
-  { id: "discord", name: "Discord", category: "Communication", icon: MessageSquare },
-  { id: "eventbrite", name: "Eventbrite", category: "Events", icon: Calendar },
-  { id: "mailchimp", name: "Mailchimp", category: "Email", icon: Mail },
-];
-
 const allApps: App[] = [
+  { id: "discord", name: "Discord", category: "Communication", icon: MessageSquare, recommended: true },
+  { id: "eventbrite", name: "Eventbrite", category: "Events", icon: Calendar, recommended: true },
+  { id: "mailchimp", name: "Mailchimp", category: "Email", icon: Mail, recommended: true },
   { id: "slack", name: "Slack", category: "Communication", icon: MessageCircle },
   { id: "notion", name: "Notion", category: "Knowledge", icon: FileText },
   { id: "zoom", name: "Zoom", category: "Video", icon: Video },
@@ -71,59 +69,15 @@ const P8Intgr8 = () => {
           </p>
         </div>
 
-        {/* Suggested Apps Panel */}
-        <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20 space-y-6">
-          <div className="flex items-center gap-3">
-            <Badge variant="teal" className="shadow-lg shadow-primary/20">
-              Recommended
-            </Badge>
-            <h3 className="text-xl font-semibold">Suggested for your network</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {suggestedApps.map((app) => {
-              const isSelected = selectedApps.includes(app.id);
-              const Icon = app.icon;
-              return (
-                <button
-                  key={app.id}
-                  onClick={() => toggleApp(app.id)}
-                  className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-105 ${
-                    isSelected
-                      ? "glass-morphism border-primary shadow-lg shadow-primary/30 bg-primary/10"
-                      : "glass-morphism border-white/10 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20"
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`p-3 rounded-xl transition-all duration-300 ${
-                      isSelected 
-                        ? "bg-primary/20 shadow-lg shadow-primary/30" 
-                        : "bg-primary/10 group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/20"
-                    }`}>
-                      <Icon className={`h-8 w-8 ${isSelected ? "text-primary" : "text-primary/80 group-hover:text-primary"}`} />
-                    </div>
-                    {isSelected && (
-                      <div className="p-1.5 rounded-full bg-primary/20">
-                        <Check className="h-5 w-5 text-primary" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2 text-left">
-                    <Badge variant="outline" className="border-primary/30">
-                      {app.name}
-                    </Badge>
-                    <p className="text-sm text-muted-foreground">{app.category}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* All Integrations Panel */}
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h3 className="text-xl font-semibold">All Integrations</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-xl font-semibold">All Integrations</h3>
+              <Badge variant="teal" className="shadow-lg shadow-primary/20">
+                3 Recommended
+              </Badge>
+            </div>
             <Input
               placeholder="Filter by name or category..."
               value={filter}
@@ -142,11 +96,22 @@ const P8Intgr8 = () => {
                     key={app.id}
                     onClick={() => toggleApp(app.id)}
                     className={`group relative p-4 rounded-xl border transition-all duration-300 hover:scale-105 ${
-                      isSelected
+                      app.recommended
+                        ? isSelected
+                          ? "glass-morphism border-primary shadow-lg shadow-primary/30 bg-primary/10 animate-pulse"
+                          : "glass-morphism border-primary/50 hover:border-primary shadow-lg shadow-primary/20 animate-pulse hover:shadow-primary/30"
+                        : isSelected
                         ? "glass-morphism border-primary shadow-lg shadow-primary/30 bg-primary/10"
                         : "glass-morphism border-white/10 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20"
                     }`}
                   >
+                    {app.recommended && (
+                      <div className="absolute -top-2 -right-2 z-10">
+                        <Badge variant="teal" className="text-[10px] px-1.5 py-0.5 shadow-lg shadow-primary/30">
+                          ⭐
+                        </Badge>
+                      </div>
+                    )}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className={`p-2 rounded-lg transition-all duration-300 ${
