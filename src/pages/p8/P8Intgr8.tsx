@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, Check, MessageSquare, Calendar, Mail, MessageCircle, FileText, Video, CreditCard, Sparkles, CircleDot, Users, Database, ClipboardList, CalendarClock, Twitter, Linkedin, LucideIcon, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface App {
   id: string;
@@ -13,6 +14,21 @@ interface App {
   category: string;
   icon: LucideIcon;
 }
+
+const categoryColors: Record<string, string> = {
+  Communication: "bg-blue-500/20 text-blue-400 border-blue-500/50",
+  Events: "bg-purple-500/20 text-purple-400 border-purple-500/50",
+  Email: "bg-primary/20 text-primary border-primary/50",
+  Video: "bg-white/20 text-white border-white/50",
+  Payments: "bg-white/20 text-white border-white/50",
+  Knowledge: "bg-white/20 text-white border-white/50",
+  Community: "bg-purple-500/20 text-purple-400 border-purple-500/50",
+  Membership: "bg-blue-500/20 text-blue-400 border-blue-500/50",
+  Database: "bg-primary/20 text-primary border-primary/50",
+  Forms: "bg-white/20 text-white border-white/50",
+  Scheduling: "bg-purple-500/20 text-purple-400 border-purple-500/50",
+  Social: "bg-blue-500/20 text-blue-400 border-blue-500/50",
+};
 
 const allApps: App[] = [
   { id: "discord", name: "Discord", category: "Communication", icon: MessageSquare },
@@ -36,45 +52,54 @@ const P8Intgr8 = () => {
   const navigate = useNavigate();
   const [selectedApps, setSelectedApps] = useState<string[]>(["discord", "eventbrite", "mailchimp"]);
   const [filter, setFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+
+  const categories = ["all", ...Array.from(new Set(allApps.map(app => app.category)))];
 
   const toggleApp = (id: string) => {
     setSelectedApps((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
   };
 
-  const filteredApps = allApps.filter(
-    (app) =>
-      app.name.toLowerCase().includes(filter.toLowerCase()) ||
-      app.category.toLowerCase().includes(filter.toLowerCase())
-  );
+  const filteredApps = allApps.filter((app) => {
+    const matchesSearch = app.name.toLowerCase().includes(filter.toLowerCase()) ||
+      app.category.toLowerCase().includes(filter.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || app.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <Navbar />
       <div className="max-w-7xl mx-auto space-y-8 animate-fade-in p-6">
-        {/* Progress Badge */}
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="border-primary/30 text-primary">
-            Step 4 of 4
-          </Badge>
+        {/* Minimal Header */}
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold">Select your stack</h1>
+          <p className="text-sm text-muted-foreground">Step 4 of 4</p>
         </div>
 
-        {/* Header Section */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Select your stack</h1>
-          <p className="text-muted-foreground">
-            Connect your existing tools or explore recommendations
-          </p>
-        </div>
-
-        {/* Search/Filter */}
-        <div className="relative max-w-3xl">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Filter by name or category..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="pl-10 bg-card/80 backdrop-blur-sm border-primary/20 focus:border-primary/50"
-          />
+        {/* Search and Filter Bar */}
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search integrations..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="pl-10 bg-card/80 backdrop-blur-sm border-primary/20 focus:border-primary/50"
+            />
+          </div>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[180px] bg-card/80 backdrop-blur-sm border-primary/20">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent className="bg-card/95 backdrop-blur-sm">
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat === "all" ? "All Categories" : cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Apps Grid */}
@@ -112,7 +137,9 @@ const P8Intgr8 = () => {
                       <Badge variant="outline" className="text-xs border-primary/30 truncate w-full justify-start">
                         {app.name}
                       </Badge>
-                      <p className="text-xs text-muted-foreground truncate">{app.category}</p>
+                      <Badge variant="outline" className={`text-xs truncate w-full justify-start ${categoryColors[app.category]}`}>
+                        {app.category}
+                      </Badge>
                     </div>
                   </div>
                 </button>
