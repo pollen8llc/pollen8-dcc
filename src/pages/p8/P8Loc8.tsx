@@ -210,94 +210,118 @@ const P8Loc8 = () => {
 
         {/* Globe Container - Full Width */}
         <Card className="p-2 md:p-4 bg-background/20 backdrop-blur-sm border-primary/10">
-          <div className="relative w-full h-[calc(100vh-200px)] md:h-[calc(100vh-180px)] max-h-[700px] rounded-lg overflow-hidden bg-gradient-to-br from-background/10 via-primary/5 to-primary/10">
-            {/* Globe - Full Canvas */}
-            <Globe
-              ref={globeEl}
-              globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-              backgroundColor="rgba(0,0,0,0)"
-              showAtmosphere={true}
-              atmosphereColor="hsl(var(--primary))"
-              atmosphereAltitude={0.15}
-              width={typeof window !== 'undefined' ? window.innerWidth - 64 : 800}
-              height={typeof window !== 'undefined' ? Math.min(window.innerHeight - 200, 700) : 600}
-              animateIn={true}
-              waitForGlobeReady={true}
-              onGlobeReady={() => setIsReady(true)}
-              pointsData={pointsData}
-              pointAltitude={0.01}
-              pointRadius={0.8}
-              pointColor="color"
-              pointLabel={(d: any) => d.city}
-              pointsMerge={false}
-              pointsTransitionDuration={0}
-            />
-              
-            
-            {/* Pulsing animation */}
-            <style>{`
-              @keyframes pulse-dot {
-                0%, 100% {
-                  opacity: 1;
-                  transform: scale(1);
+          <div className="relative w-full lg:flex lg:gap-4">
+            {/* Globe - Left Side on Desktop */}
+            <div className="relative w-full lg:w-[60%] h-[calc(100vh-200px)] md:h-[calc(100vh-180px)] max-h-[700px] rounded-lg overflow-hidden bg-gradient-to-br from-background/10 via-primary/5 to-primary/10">
+              <Globe
+                ref={globeEl}
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+                backgroundColor="rgba(0,0,0,0)"
+                showAtmosphere={true}
+                atmosphereColor="hsl(var(--primary))"
+                atmosphereAltitude={0.15}
+                width={typeof window !== 'undefined' ? (window.innerWidth > 1024 ? (window.innerWidth * 0.6) - 96 : window.innerWidth - 64) : 800}
+                height={typeof window !== 'undefined' ? Math.min(window.innerHeight - 200, 700) : 600}
+                animateIn={true}
+                waitForGlobeReady={true}
+                onGlobeReady={() => setIsReady(true)}
+                pointsData={pointsData}
+                pointAltitude={0.01}
+                pointRadius={0.8}
+                pointColor="color"
+                pointLabel={(d: any) => d.city}
+                pointsMerge={false}
+                pointsTransitionDuration={0}
+              />
+                
+              {/* Pulsing animation */}
+              <style>{`
+                @keyframes pulse-dot {
+                  0%, 100% {
+                    opacity: 1;
+                    transform: scale(1);
+                  }
+                  50% {
+                    opacity: 0.5;
+                    transform: scale(1.5);
+                  }
                 }
-                50% {
-                  opacity: 0.5;
-                  transform: scale(1.5);
-                }
-              }
-            `}</style>
+              `}</style>
 
-            {/* Navigation Arrows - Overlaid */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => navigateToZone("prev")}
-              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-background/70 backdrop-blur-md hover:bg-background/90 border-primary/20 z-20 h-10 w-10 md:h-12 md:w-12 transition-all"
-            >
-              <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
-            </Button>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => navigateToZone("next")}
-              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-background/70 backdrop-blur-md hover:bg-background/90 border-primary/20 z-20 h-10 w-10 md:h-12 md:w-12 transition-all"
-            >
-              <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
-            </Button>
-
-            {/* Time Zone Badge - Top Center (Mobile) / Top Right (Desktop) */}
-            <div className="absolute top-3 md:top-4 left-1/2 lg:left-auto lg:right-4 -translate-x-1/2 lg:translate-x-0 z-20 animate-fade-in">
-              <Badge className="bg-background/80 backdrop-blur-md border-primary/20 text-primary px-4 py-2 text-sm flex items-center gap-2 shadow-lg">
-                <Clock className="h-4 w-4" />
-                {activeZone.name}
-              </Badge>
-            </div>
-
-            {/* Right Side Overlay Panel - Desktop Only */}
-            <div className="hidden lg:flex absolute right-4 top-20 bottom-4 w-80 flex-col gap-3 z-20 animate-fade-in">
-              {/* Selected Cities Count */}
-              <div className="flex items-center justify-between px-4 py-2.5 bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg transition-all hover:bg-background/80">
-                <p className="text-sm text-foreground/90">
-                  {selectedCities.length} {selectedCities.length === 1 ? 'city' : 'cities'} selected
-                </p>
-                {selectedCities.length > 0 && (
+              {/* Time Zone Switch Badge - Top Center */}
+              <div className="absolute top-3 md:top-4 left-1/2 -translate-x-1/2 z-20 animate-fade-in">
+                <div className="flex items-center gap-2 bg-background/80 backdrop-blur-md border border-primary/20 rounded-full shadow-lg px-2 py-2">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedCities([])}
-                    className="text-xs h-7 px-2 hover:bg-primary/20"
+                    size="icon"
+                    onClick={() => navigateToZone("prev")}
+                    className="h-8 w-8 rounded-full hover:bg-primary/20 transition-all"
                   >
-                    Clear All
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
-                )}
+                  
+                  <Badge className="bg-transparent border-0 text-primary px-3 py-1.5 text-sm flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    {activeZone.name}
+                  </Badge>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigateToZone("next")}
+                    className="h-8 w-8 rounded-full hover:bg-primary/20 transition-all"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side Panels - Desktop Only */}
+            <div className="hidden lg:flex w-[38%] flex-col gap-3 animate-fade-in">
+              {/* Selected Cities Panel */}
+              <div className="bg-background/60 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg p-4 space-y-3 flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                    Selected Cities
+                  </h3>
+                  {selectedCities.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedCities([])}
+                      className="text-xs h-7 px-2 hover:bg-primary/20"
+                    >
+                      Clear All
+                    </Button>
+                  )}
+                </div>
+                
+                <div className="flex flex-wrap gap-2 min-h-[100px] max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+                  {selectedCities.length > 0 ? (
+                    selectedCities.map((city) => (
+                      <Badge
+                        key={city}
+                        variant="default"
+                        className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-sm"
+                        onClick={() => toggleCity(city)}
+                      >
+                        {city} ×
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground w-full text-center pt-8">
+                      No cities selected yet
+                    </p>
+                  )}
+                </div>
               </div>
 
-              {/* Cities Badge Cloud */}
-              <div className="px-4 py-3 bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg space-y-2.5 flex-1 overflow-y-auto shadow-lg scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:bg-background/75 transition-all">
-                <h3 className="text-sm font-semibold text-foreground/90">Suggested Cities</h3>
-                <div className="flex flex-wrap gap-2">
+              {/* Suggested Cities Panel */}
+              <div className="bg-background/60 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg p-4 space-y-3 flex-1">
+                <h3 className="text-sm font-semibold text-foreground">Suggested for {activeZone.name}</h3>
+                <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                   {activeZone.cities.map((city) => {
                     const isSelected = selectedCities.includes(city);
                     return (
@@ -306,8 +330,8 @@ const P8Loc8 = () => {
                         variant={isSelected ? "default" : "secondary"}
                         className={`cursor-pointer transition-all text-xs shadow-sm ${
                           isSelected 
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90 scale-105" 
-                            : "bg-background/60 text-foreground hover:bg-primary/20 border-primary/20 hover:scale-105"
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                            : "bg-background/80 text-foreground hover:bg-primary/20 border-primary/30 hover:scale-105"
                         }`}
                         onClick={() => toggleCity(city)}
                       >
@@ -316,76 +340,74 @@ const P8Loc8 = () => {
                     );
                   })}
                 </div>
-              </div>
 
-              {/* Search Bar */}
-              <div className="space-y-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                  <Input
-                    type="text"
-                    placeholder="Search for a city..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-background/70 backdrop-blur-xl border-primary/20 shadow-lg hover:bg-background/80 focus:bg-background/90 transition-all"
-                  />
-                </div>
-                
-                {/* Search Results */}
-                {searchQuery && (
-                  <div className="p-3 bg-background/80 backdrop-blur-xl border border-primary/20 rounded-lg max-h-48 overflow-y-auto shadow-lg animate-fade-in scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-                    {filteredCities.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {filteredCities.slice(0, 20).map((city) => {
-                          const isSelected = selectedCities.includes(city);
-                          return (
-                            <Badge
-                              key={city}
-                              variant={isSelected ? "default" : "secondary"}
-                              className={`cursor-pointer transition-all text-xs shadow-sm ${
-                                isSelected 
-                                  ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                                  : "bg-background/60 text-foreground hover:bg-primary/20 border-primary/20 hover:scale-105"
-                              }`}
-                              onClick={() => {
-                                toggleCity(city);
-                                setSearchQuery("");
-                              }}
-                            >
-                              {city}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground text-center">No cities found</p>
-                    )}
+                {/* Search Bar */}
+                <div className="space-y-2 pt-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                    <Input
+                      type="text"
+                      placeholder="Search for any city..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 bg-background/80 backdrop-blur-sm border-primary/30 hover:bg-background/90 focus:bg-background transition-all text-sm"
+                    />
                   </div>
-                )}
+                  
+                  {/* Search Results */}
+                  {searchQuery && (
+                    <div className="p-3 bg-background/90 backdrop-blur-sm border border-primary/20 rounded-lg max-h-40 overflow-y-auto shadow-md animate-fade-in scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+                      {filteredCities.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {filteredCities.slice(0, 20).map((city) => {
+                            const isSelected = selectedCities.includes(city);
+                            return (
+                              <Badge
+                                key={city}
+                                variant={isSelected ? "default" : "secondary"}
+                                className={`cursor-pointer transition-all text-xs shadow-sm ${
+                                  isSelected 
+                                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                                    : "bg-background/60 text-foreground hover:bg-primary/20 border-primary/30 hover:scale-105"
+                                }`}
+                                onClick={() => {
+                                  toggleCity(city);
+                                  setSearchQuery("");
+                                }}
+                              >
+                                {city}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center">No cities found</p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Bottom Overlay Panel - Mobile Only */}
             <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 animate-fade-in p-3 space-y-3 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-xl pt-8">
-              {/* Selected Count */}
-              <div className="flex items-center justify-between px-3 py-2 bg-background/70 backdrop-blur-md border border-primary/20 rounded-lg shadow-lg">
-                <p className="text-xs text-foreground/90">
-                  {selectedCities.length} selected
-                </p>
-                {selectedCities.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedCities([])}
-                    className="text-xs h-6 px-2"
-                  >
-                    Clear
-                  </Button>
-                )}
-              </div>
-
               {/* Cities Badge Cloud - Mobile */}
-              <div className="px-3 py-2.5 bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg max-h-32 overflow-y-auto shadow-lg scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              <div className="px-3 py-2.5 bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg max-h-32 overflow-y-auto shadow-lg scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-foreground/90 font-medium">
+                    {selectedCities.length} selected
+                  </p>
+                  {selectedCities.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedCities([])}
+                      className="text-xs h-6 px-2 hover:bg-primary/20"
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {activeZone.cities.map((city) => {
                     const isSelected = selectedCities.includes(city);
@@ -421,7 +443,7 @@ const P8Loc8 = () => {
                 </div>
                 
                 {searchQuery && (
-                  <div className="p-2.5 bg-background/80 backdrop-blur-xl border border-primary/20 rounded-lg max-h-32 overflow-y-auto shadow-lg animate-fade-in">
+                  <div className="p-2.5 bg-background/80 backdrop-blur-xl border border-primary/20 rounded-lg max-h-32 overflow-y-auto shadow-lg animate-fade-in scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                     {filteredCities.length > 0 ? (
                       <div className="flex flex-wrap gap-1.5">
                         {filteredCities.slice(0, 15).map((city) => {
@@ -454,7 +476,7 @@ const P8Loc8 = () => {
             </div>
 
             {/* Instructions - Bottom Left */}
-            <div className="absolute bottom-3 left-3 text-[10px] md:text-xs text-muted-foreground/60 z-10 bg-background/40 backdrop-blur-sm px-2 py-1 rounded">
+            <div className="absolute bottom-3 left-3 text-[10px] md:text-xs text-muted-foreground/60 z-10 bg-background/40 backdrop-blur-sm px-2 py-1 rounded lg:hidden">
               <p>Drag to rotate • Scroll to zoom</p>
             </div>
           </div>
