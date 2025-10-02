@@ -7,7 +7,8 @@ import { ArrowRight, ArrowLeft, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from "recharts";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { RadarChart } from "@/components/ui/radar-chart";
 
 const demographics = [
   { id: "age", label: "Age Range", options: ["18-24", "25-34", "35-44", "45-54", "55+"], color: "#00eada" },
@@ -85,40 +86,9 @@ const P8Asl = () => {
             {/* Center Radar Chart */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
-                <ResponsiveContainer width="100%" height="80%">
-                  <RadarChart data={radarData}>
-                    <PolarGrid stroke="hsl(var(--primary) / 0.3)" />
-                    <PolarAngleAxis 
-                      dataKey="category" 
-                      tick={{ fill: 'hsl(var(--foreground) / 0.7)', fontSize: 12 }}
-                    />
-                    <PolarRadiusAxis 
-                      angle={90} 
-                      domain={[0, 100]} 
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                    />
-                    <Radar 
-                      dataKey="importance" 
-                      stroke="hsl(var(--primary))" 
-                      fill="hsl(var(--primary))" 
-                      fillOpacity={0.3} 
-                      strokeWidth={2}
-                    />
-                    <Tooltip
-                      content={({ payload }) => {
-                        if (!payload || !payload[0]) return null;
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-background/95 backdrop-blur-xl border border-primary/20 rounded-lg p-3 shadow-lg">
-                            <p className="font-semibold text-sm text-foreground">{data.category}</p>
-                            <p className="text-xs text-muted-foreground">Selected: {selectedOptions[demographics.find(d => d.label === data.category)?.id || '']}</p>
-                            <p className="text-xs text-primary font-semibold">Importance: {data.importance}%</p>
-                          </div>
-                        );
-                      }}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
+                <div className="w-full h-[500px] flex items-center justify-center">
+                  <RadarChart data={radarData} width={500} height={500} />
+                </div>
                 <div className="text-center mt-2 bg-background/70 backdrop-blur-xl px-6 py-3 rounded-lg border border-primary/20 shadow-lg">
                   <p className="text-sm text-muted-foreground">Total Priority Score</p>
                   <p className="text-3xl font-bold text-primary">{totalImportance}</p>
@@ -147,138 +117,150 @@ const P8Asl = () => {
                 </p>
               </div>
 
-              {/* Demographic Controls */}
-              {demographics.map((category, index) => (
-                <div
-                  key={category.id}
-                  className="px-4 py-3 bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg space-y-3 transition-all hover:bg-background/75 animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full flex-shrink-0" 
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <h4 className="text-sm font-semibold text-foreground/90">
-                      {category.label}
-                    </h4>
-                  </div>
-
-                  {/* Dropdown Selection */}
-                  <Select
-                    value={selectedOptions[category.id]}
-                    onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [category.id]: value })}
+              {/* Demographic Accordion */}
+              <Accordion type="single" collapsible className="space-y-2">
+                {demographics.map((category, index) => (
+                  <AccordionItem
+                    key={category.id}
+                    value={category.id}
+                    className="bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg overflow-hidden animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <SelectTrigger className="w-full bg-background/50 border-primary/20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
-                      {category.options.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Importance Label */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Importance</span>
-                    <Badge 
-                      variant="secondary" 
-                      className="text-xs"
-                      style={{ 
-                        backgroundColor: `${category.color}20`,
-                        color: category.color,
-                        borderColor: `${category.color}40`
-                      }}
-                    >
-                      {getImportanceLabel(importance[category.id])}
-                    </Badge>
-                  </div>
-
-                  {/* Tactile Slider with Steps */}
-                  <div className="space-y-2">
-                    <Slider
-                      value={[importance[category.id]]}
-                      onValueChange={(value) => updateImportance(category.id, value)}
-                      max={100}
-                      step={25}
-                      className="w-full"
-                    />
-                    {/* Step Indicators */}
-                    <div className="flex justify-between text-[10px] text-muted-foreground/60 px-1">
-                      {importanceLevels.map(level => (
-                        <span 
-                          key={level.value}
-                          className={importance[category.id] === level.value ? 'text-primary font-semibold' : ''}
-                        >
-                          {level.label}
+                    <AccordionTrigger className="px-4 py-3 hover:bg-background/75 hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full flex-shrink-0" 
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="text-sm font-semibold text-foreground/90">
+                          {category.label}
                         </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-3 space-y-3">
+                      {/* Dropdown Selection */}
+                      <Select
+                        value={selectedOptions[category.id]}
+                        onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [category.id]: value })}
+                      >
+                        <SelectTrigger className="w-full bg-background/50 border-primary/20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
+                          {category.options.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Importance Label */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Importance</span>
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs"
+                          style={{ 
+                            backgroundColor: `${category.color}20`,
+                            color: category.color,
+                            borderColor: `${category.color}40`
+                          }}
+                        >
+                          {getImportanceLabel(importance[category.id])}
+                        </Badge>
+                      </div>
+
+                      {/* Tactile Slider with Steps */}
+                      <div className="space-y-2">
+                        <Slider
+                          value={[importance[category.id]]}
+                          onValueChange={(value) => updateImportance(category.id, value)}
+                          max={100}
+                          step={25}
+                          className="w-full"
+                        />
+                        {/* Step Indicators */}
+                        <div className="flex justify-between text-[10px] text-muted-foreground/60 px-1">
+                          {importanceLevels.map(level => (
+                            <span 
+                              key={level.value}
+                              className={importance[category.id] === level.value ? 'text-primary font-semibold' : ''}
+                            >
+                              {level.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
 
             {/* Bottom Overlay Panel - Mobile Only */}
-            <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 animate-fade-in p-3 space-y-2 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-xl pt-6 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-              {demographics.map((category, index) => (
-                <div
-                  key={category.id}
-                  className="px-3 py-2.5 bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg space-y-2"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <h4 className="text-xs font-semibold text-foreground/90">
-                      {category.label}
-                    </h4>
-                  </div>
-
-                  {/* Dropdown Selection */}
-                  <Select
-                    value={selectedOptions[category.id]}
-                    onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [category.id]: value })}
+            <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 animate-fade-in p-3 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-xl pt-6 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+              <Accordion type="single" collapsible className="space-y-2">
+                {demographics.map((category, index) => (
+                  <AccordionItem
+                    key={category.id}
+                    value={category.id}
+                    className="bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg overflow-hidden"
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <SelectTrigger className="w-full bg-background/50 border-primary/20 h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
-                      {category.options.map((option) => (
-                        <SelectItem key={option} value={option} className="text-xs">
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <AccordionTrigger className="px-3 py-2.5 hover:bg-background/75 hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="text-xs font-semibold text-foreground/90">
+                          {category.label}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-3 pb-2.5 space-y-2">
+                      {/* Dropdown Selection */}
+                      <Select
+                        value={selectedOptions[category.id]}
+                        onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [category.id]: value })}
+                      >
+                        <SelectTrigger className="w-full bg-background/50 border-primary/20 h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
+                          {category.options.map((option) => (
+                            <SelectItem key={option} value={option} className="text-xs">
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
 
-                  {/* Importance Badge & Slider */}
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      variant="secondary" 
-                      className="text-[10px] px-2 py-0.5 flex-shrink-0"
-                      style={{ 
-                        backgroundColor: `${category.color}20`,
-                        color: category.color,
-                      }}
-                    >
-                      {getImportanceLabel(importance[category.id])}
-                    </Badge>
-                    <Slider
-                      value={[importance[category.id]]}
-                      onValueChange={(value) => updateImportance(category.id, value)}
-                      max={100}
-                      step={25}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-              ))}
+                      {/* Importance Badge & Slider */}
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant="secondary" 
+                          className="text-[10px] px-2 py-0.5 flex-shrink-0"
+                          style={{ 
+                            backgroundColor: `${category.color}20`,
+                            color: category.color,
+                          }}
+                        >
+                          {getImportanceLabel(importance[category.id])}
+                        </Badge>
+                        <Slider
+                          value={[importance[category.id]]}
+                          onValueChange={(value) => updateImportance(category.id, value)}
+                          max={100}
+                          step={25}
+                          className="flex-1"
+                        />
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
 
             {/* Instructions - Bottom Right */}
