@@ -21,6 +21,9 @@ export const RadarChart = ({ data, width = 500, height = 500 }: RadarChartProps)
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
+    
+    // Set viewBox for responsive scaling
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
 
     const margin = { top: 60, right: 60, bottom: 60, left: 60 };
     const radius = Math.min(width, height) / 2 - Math.max(...Object.values(margin));
