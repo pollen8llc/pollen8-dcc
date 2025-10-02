@@ -244,14 +244,14 @@ const P8Loc8 = () => {
               {/* Expandable Content - Opens Upward */}
               <CollapsibleContent className="animate-accordion-up data-[state=open]:animate-accordion-down">
                 <div className="p-3 md:p-4 space-y-3 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-lg">
-                  <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-3">
-                    {/* Selected Cities - Persistent */}
-                    {selectedCities.length > 0 && (
-                      <div className="px-3 md:px-4 py-2.5 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg shadow-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-xs md:text-sm font-semibold text-foreground/90">
-                            Selected ({selectedCities.length})
-                          </p>
+                  <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3">
+                    {/* Selected Cities - Always Visible */}
+                    <div className="px-3 md:px-4 py-2.5 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg shadow-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs md:text-sm font-semibold text-foreground/90">
+                          Selected ({selectedCities.length})
+                        </p>
+                        {selectedCities.length > 0 && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -260,7 +260,9 @@ const P8Loc8 = () => {
                           >
                             Clear
                           </Button>
-                        </div>
+                        )}
+                      </div>
+                      {selectedCities.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5 md:gap-2 max-h-24 md:max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                           {selectedCities.map((city) => (
                             <Badge
@@ -273,23 +275,29 @@ const P8Loc8 = () => {
                             </Badge>
                           ))}
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <p className="text-xs md:text-sm text-muted-foreground/60 text-center py-4">
+                          No cities selected yet
+                        </p>
+                      )}
+                    </div>
 
-                    {/* Search Bar */}
-                    <div className={`relative ${selectedCities.length > 0 ? '' : 'md:col-span-1'}`}>
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                      <Input
-                        type="text"
-                        placeholder="Search cities..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 bg-background/30 backdrop-blur-lg border-primary/10 shadow-lg text-sm"
-                      />
+                    {/* Search Bar - Centered */}
+                    <div className="relative flex items-center justify-center">
+                      <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                        <Input
+                          type="text"
+                          placeholder="Search cities..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-9 bg-background/30 backdrop-blur-lg border-primary/10 shadow-lg text-sm"
+                        />
+                      </div>
                     </div>
 
                     {/* Cities Badge Cloud */}
-                    <div className={`px-3 md:px-4 py-2.5 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg max-h-32 md:max-h-40 overflow-y-auto shadow-lg scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent ${selectedCities.length > 0 ? '' : 'md:col-span-2'}`}>
+                    <div className="px-3 md:px-4 py-2.5 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg max-h-32 md:max-h-40 overflow-y-auto shadow-lg scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
                       <h3 className="text-xs md:text-sm font-semibold text-foreground/90 mb-2">
                         {searchQuery ? 'Search Results' : 'Suggested Cities'}
                       </h3>

@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from "recharts";
 
 const demographics = [
   { id: "age", label: "Age Range", options: ["18-24", "25-34", "35-44", "45-54", "55+"], color: "#00eada" },
@@ -32,6 +33,12 @@ const P8Asl = () => {
     gender: 50,
     race: 50,
   });
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({
+    age: "18-24",
+    status: "Student",
+    gender: "All",
+    race: "All",
+  });
 
   const updateImportance = (categoryId: string, value: number[]) => {
     // Snap to nearest step
@@ -39,13 +46,14 @@ const P8Asl = () => {
     setImportance({ ...importance, [categoryId]: snappedValue });
   };
 
-  // Generate chart data based on importance levels
-  const chartData = useMemo(() => {
+  // Generate radar chart data based on importance levels
+  const radarData = useMemo(() => {
     return demographics.map(demo => ({
-      name: demo.label,
-      value: importance[demo.id] || 0,
+      category: demo.label,
+      importance: importance[demo.id] || 0,
       color: demo.color,
-    })).filter(d => d.value > 0);
+      fullMark: 100,
+    }));
   }, [importance]);
 
   // Calculate total importance
@@ -74,52 +82,47 @@ const P8Asl = () => {
         <Card className="p-2 md:p-4 bg-background/20 backdrop-blur-sm border-primary/10">
           <div className="relative w-full h-[calc(100vh-200px)] md:h-[calc(100vh-180px)] max-h-[700px] rounded-lg overflow-hidden bg-gradient-to-br from-background/10 via-primary/5 to-primary/10">
             
-            {/* Center Chart */}
+            {/* Center Radar Chart */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-full max-w-md h-full flex flex-col items-center justify-center p-4">
-                {chartData.length > 0 ? (
-                  <>
-                    <ResponsiveContainer width="100%" height="70%">
-                      <PieChart>
-                        <Pie
-                          data={chartData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={120}
-                          paddingAngle={2}
-                          dataKey="value"
-                          animationBegin={0}
-                          animationDuration={800}
-                        >
-                          {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} opacity={0.8} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: 'hsl(var(--background) / 0.9)',
-                            border: '1px solid hsl(var(--primary) / 0.2)',
-                            borderRadius: '8px',
-                            backdropFilter: 'blur(12px)',
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="text-center mt-4 bg-background/70 backdrop-blur-xl px-6 py-3 rounded-lg border border-primary/20 shadow-lg">
-                      <p className="text-sm text-muted-foreground">Total Priority Score</p>
-                      <p className="text-3xl font-bold text-primary">{totalImportance}</p>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center space-y-4 bg-background/70 backdrop-blur-xl px-8 py-12 rounded-lg border border-primary/20 shadow-lg">
-                    <Users className="h-16 w-16 text-primary/60 mx-auto" />
-                    <h3 className="text-xl font-semibold text-foreground/90">Configure Your Demographics</h3>
-                    <p className="text-sm text-muted-foreground max-w-sm">
-                      Adjust the importance sliders to define your target audience. The chart will update dynamically.
-                    </p>
-                  </div>
-                )}
+              <div className="w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
+                <ResponsiveContainer width="100%" height="80%">
+                  <RadarChart data={radarData}>
+                    <PolarGrid stroke="hsl(var(--primary) / 0.3)" />
+                    <PolarAngleAxis 
+                      dataKey="category" 
+                      tick={{ fill: 'hsl(var(--foreground) / 0.7)', fontSize: 12 }}
+                    />
+                    <PolarRadiusAxis 
+                      angle={90} 
+                      domain={[0, 100]} 
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                    />
+                    <Radar 
+                      dataKey="importance" 
+                      stroke="hsl(var(--primary))" 
+                      fill="hsl(var(--primary))" 
+                      fillOpacity={0.3} 
+                      strokeWidth={2}
+                    />
+                    <Tooltip
+                      content={({ payload }) => {
+                        if (!payload || !payload[0]) return null;
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-background/95 backdrop-blur-xl border border-primary/20 rounded-lg p-3 shadow-lg">
+                            <p className="font-semibold text-sm text-foreground">{data.category}</p>
+                            <p className="text-xs text-muted-foreground">Selected: {selectedOptions[demographics.find(d => d.label === data.category)?.id || '']}</p>
+                            <p className="text-xs text-primary font-semibold">Importance: {data.importance}%</p>
+                          </div>
+                        );
+                      }}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+                <div className="text-center mt-2 bg-background/70 backdrop-blur-xl px-6 py-3 rounded-lg border border-primary/20 shadow-lg">
+                  <p className="text-sm text-muted-foreground">Total Priority Score</p>
+                  <p className="text-3xl font-bold text-primary">{totalImportance}</p>
+                </div>
               </div>
             </div>
 
@@ -151,16 +154,36 @@ const P8Asl = () => {
                   className="px-4 py-3 bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg space-y-3 transition-all hover:bg-background/75 animate-fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full flex-shrink-0" 
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <h4 className="text-sm font-semibold text-foreground/90">
+                      {category.label}
+                    </h4>
+                  </div>
+
+                  {/* Dropdown Selection */}
+                  <Select
+                    value={selectedOptions[category.id]}
+                    onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [category.id]: value })}
+                  >
+                    <SelectTrigger className="w-full bg-background/50 border-primary/20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
+                      {category.options.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Importance Label */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: category.color }}
-                      />
-                      <h4 className="text-sm font-semibold text-foreground/90">
-                        {category.label}
-                      </h4>
-                    </div>
+                    <span className="text-xs text-muted-foreground">Importance</span>
                     <Badge 
                       variant="secondary" 
                       className="text-xs"
@@ -200,26 +223,45 @@ const P8Asl = () => {
             </div>
 
             {/* Bottom Overlay Panel - Mobile Only */}
-            <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 animate-fade-in p-3 space-y-2 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-xl pt-6 max-h-[45vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+            <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 animate-fade-in p-3 space-y-2 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-xl pt-6 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
               {demographics.map((category, index) => (
                 <div
                   key={category.id}
                   className="px-3 py-2.5 bg-background/70 backdrop-blur-xl border border-primary/20 rounded-lg shadow-lg space-y-2"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-2.5 h-2.5 rounded-full" 
-                        style={{ backgroundColor: category.color }}
-                      />
-                      <h4 className="text-xs font-semibold text-foreground/90">
-                        {category.label}
-                      </h4>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
+                      style={{ backgroundColor: category.color }}
+                    />
+                    <h4 className="text-xs font-semibold text-foreground/90">
+                      {category.label}
+                    </h4>
+                  </div>
+
+                  {/* Dropdown Selection */}
+                  <Select
+                    value={selectedOptions[category.id]}
+                    onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [category.id]: value })}
+                  >
+                    <SelectTrigger className="w-full bg-background/50 border-primary/20 h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
+                      {category.options.map((option) => (
+                        <SelectItem key={option} value={option} className="text-xs">
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Importance Badge & Slider */}
+                  <div className="flex items-center gap-2">
                     <Badge 
                       variant="secondary" 
-                      className="text-[10px] px-2 py-0.5"
+                      className="text-[10px] px-2 py-0.5 flex-shrink-0"
                       style={{ 
                         backgroundColor: `${category.color}20`,
                         color: category.color,
@@ -227,16 +269,14 @@ const P8Asl = () => {
                     >
                       {getImportanceLabel(importance[category.id])}
                     </Badge>
+                    <Slider
+                      value={[importance[category.id]]}
+                      onValueChange={(value) => updateImportance(category.id, value)}
+                      max={100}
+                      step={25}
+                      className="flex-1"
+                    />
                   </div>
-
-                  {/* Tactile Slider */}
-                  <Slider
-                    value={[importance[category.id]]}
-                    onValueChange={(value) => updateImportance(category.id, value)}
-                    max={100}
-                    step={25}
-                    className="w-full"
-                  />
                 </div>
               ))}
             </div>
