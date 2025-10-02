@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, ArrowLeft, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowRight, ArrowLeft, Clock, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Globe from "react-globe.gl";
 
@@ -139,6 +140,7 @@ const P8Loc8 = () => {
   const [activeZoneIndex, setActiveZoneIndex] = useState(5);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [isReady, setIsReady] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Memoized points data for selected cities with pulsing effect
   const pointsData = useMemo(() => {
@@ -186,6 +188,15 @@ const P8Loc8 = () => {
     );
   };
 
+  // Filter all cities based on search query
+  const allCities = Object.keys(cityCoordinates);
+  const filteredCities = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return allCities.filter(city => 
+      city.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
@@ -197,90 +208,109 @@ const P8Loc8 = () => {
           </Badge>
         </div>
 
-        {/* Globe Container with Overlays */}
+        {/* Main Content */}
         <Card className="p-2 md:p-4 bg-background/40 backdrop-blur-xl border-primary/20">
-          <div className="relative w-full h-[calc(100vh-200px)] md:h-[calc(100vh-180px)] max-h-[700px] rounded-lg overflow-hidden bg-gradient-to-br from-background via-primary/5 to-primary/10">
-            {/* Globe */}
-            <Globe
-              ref={globeEl}
-              globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-              backgroundColor="rgba(0,0,0,0)"
-              showAtmosphere={true}
-              atmosphereColor="hsl(var(--primary))"
-              atmosphereAltitude={0.15}
-              width={typeof window !== 'undefined' ? window.innerWidth - 32 : 800}
-              height={typeof window !== 'undefined' ? Math.min(window.innerHeight - 200, 700) : 600}
-              animateIn={true}
-              waitForGlobeReady={true}
-              onGlobeReady={() => setIsReady(true)}
-              // Selected city points with pulsing animation
-              pointsData={pointsData}
-              pointAltitude={0.01}
-              pointRadius={0.8}
-              pointColor="color"
-              pointLabel={(d: any) => d.city}
-              pointsMerge={false}
-              pointsTransitionDuration={0}
-            />
-            
-            {/* Pulsing animation for selected cities */}
-            <style>{`
-              @keyframes pulse-dot {
-                0%, 100% {
-                  opacity: 1;
-                  transform: scale(1);
-                }
-                50% {
-                  opacity: 0.5;
-                  transform: scale(1.5);
-                }
-              }
-            `}</style>
-
-            {/* Navigation Arrows - Overlaid like Windows Photos */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => navigateToZone("prev")}
-              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-md hover:bg-background border-primary/30 z-20 h-10 w-10 md:h-12 md:w-12"
-            >
-              <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
-            </Button>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => navigateToZone("next")}
-              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-md hover:bg-background border-primary/30 z-20 h-10 w-10 md:h-12 md:w-12"
-            >
-              <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
-            </Button>
-
-            {/* Time Zone Badge - Top Center */}
-            <div className="absolute top-2 md:top-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 md:gap-3 max-w-[90%]">
-              <Badge className="bg-background/90 backdrop-blur-md border-primary/30 text-primary px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm flex items-center gap-2">
-                <Clock className="h-3 w-3 md:h-4 md:w-4" />
-                {activeZone.name}
-              </Badge>
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Globe Container - Left side on desktop */}
+            <div className="relative w-full lg:w-[65%] h-[50vh] lg:h-[calc(100vh-180px)] max-h-[600px] lg:max-h-[700px] rounded-lg overflow-hidden bg-gradient-to-br from-background via-primary/5 to-primary/10">
+              {/* Globe */}
+              <Globe
+                ref={globeEl}
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+                backgroundColor="rgba(0,0,0,0)"
+                showAtmosphere={true}
+                atmosphereColor="hsl(var(--primary))"
+                atmosphereAltitude={0.15}
+                width={typeof window !== 'undefined' ? Math.min(window.innerWidth * (window.innerWidth >= 1024 ? 0.6 : 0.95), 900) : 800}
+                height={typeof window !== 'undefined' ? Math.min(window.innerHeight * 0.5, window.innerWidth >= 1024 ? 700 : 400) : 600}
+                animateIn={true}
+                waitForGlobeReady={true}
+                onGlobeReady={() => setIsReady(true)}
+                pointsData={pointsData}
+                pointAltitude={0.01}
+                pointRadius={0.8}
+                pointColor="color"
+                pointLabel={(d: any) => d.city}
+                pointsMerge={false}
+                pointsTransitionDuration={0}
+              />
               
-              {/* City Selection - Below Time Zone Badge */}
-              <div className="bg-background/90 backdrop-blur-md border border-primary/30 rounded-lg px-3 py-2 md:px-4 md:py-3 space-y-2 animate-fade-in max-h-[30vh] overflow-y-auto">
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-xs text-muted-foreground whitespace-nowrap">
-                    {selectedCities.length} selected
-                  </p>
-                  {selectedCities.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedCities([])}
-                      className="text-xs h-6 px-2"
-                    >
-                      Clear
-                    </Button>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1.5 md:gap-2 max-w-[85vw] md:max-w-[600px]">
+              {/* Pulsing animation */}
+              <style>{`
+                @keyframes pulse-dot {
+                  0%, 100% {
+                    opacity: 1;
+                    transform: scale(1);
+                  }
+                  50% {
+                    opacity: 0.5;
+                    transform: scale(1.5);
+                  }
+                }
+              `}</style>
+
+              {/* Navigation Arrows */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navigateToZone("prev")}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-md hover:bg-background border-primary/30 z-20 h-10 w-10"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navigateToZone("next")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-md hover:bg-background border-primary/30 z-20 h-10 w-10"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+
+              {/* Time Zone Badge - Mobile only */}
+              <div className="lg:hidden absolute top-2 left-1/2 -translate-x-1/2 z-20">
+                <Badge className="bg-background/90 backdrop-blur-md border-primary/30 text-primary px-3 py-1.5 text-xs flex items-center gap-2">
+                  <Clock className="h-3 w-3" />
+                  {activeZone.name}
+                </Badge>
+              </div>
+
+              {/* Instructions - Bottom Left */}
+              <div className="absolute bottom-2 left-2 text-[10px] text-muted-foreground/70 z-10">
+                <p>Drag to rotate • Scroll to zoom</p>
+              </div>
+            </div>
+
+            {/* Right Side Panel - Desktop / Bottom on Mobile */}
+            <div className="w-full lg:w-[35%] flex flex-col gap-4">
+              {/* Time Zone Info - Desktop only */}
+              <div className="hidden lg:flex items-center justify-center gap-2 p-3 bg-background/60 backdrop-blur-md border border-primary/30 rounded-lg">
+                <Clock className="h-5 w-5 text-primary" />
+                <span className="font-medium">{activeZone.name}</span>
+              </div>
+
+              {/* Selected Cities Count */}
+              <div className="flex items-center justify-between p-3 bg-background/60 backdrop-blur-md border border-primary/30 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  {selectedCities.length} {selectedCities.length === 1 ? 'city' : 'cities'} selected
+                </p>
+                {selectedCities.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedCities([])}
+                    className="text-xs h-7 px-2"
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </div>
+
+              {/* Cities Badge Cloud */}
+              <div className="p-4 bg-background/60 backdrop-blur-md border border-primary/30 rounded-lg space-y-3 flex-1 overflow-y-auto max-h-[300px] lg:max-h-none">
+                <h3 className="text-sm font-medium text-foreground">Suggested Cities</h3>
+                <div className="flex flex-wrap gap-2">
                   {activeZone.cities.map((city) => {
                     const isSelected = selectedCities.includes(city);
                     return (
@@ -290,7 +320,7 @@ const P8Loc8 = () => {
                         className={`cursor-pointer transition-all text-xs ${
                           isSelected 
                             ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                            : "bg-background/60 backdrop-blur-sm text-foreground hover:bg-primary/20 border-primary/20"
+                            : "bg-background/60 text-foreground hover:bg-primary/20 border-primary/20"
                         }`}
                         onClick={() => toggleCity(city)}
                       >
@@ -300,11 +330,52 @@ const P8Loc8 = () => {
                   })}
                 </div>
               </div>
-            </div>
 
-            {/* Instructions - Bottom Left */}
-            <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 text-[10px] md:text-xs text-muted-foreground/70 z-10">
-              <p>Drag to rotate • Scroll to zoom</p>
+              {/* Search Bar */}
+              <div className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search for a city..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 bg-background/60 backdrop-blur-md border-primary/30"
+                  />
+                </div>
+                
+                {/* Search Results */}
+                {searchQuery && (
+                  <div className="p-3 bg-background/60 backdrop-blur-md border border-primary/30 rounded-lg max-h-[200px] overflow-y-auto">
+                    {filteredCities.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {filteredCities.slice(0, 20).map((city) => {
+                          const isSelected = selectedCities.includes(city);
+                          return (
+                            <Badge
+                              key={city}
+                              variant={isSelected ? "default" : "secondary"}
+                              className={`cursor-pointer transition-all text-xs ${
+                                isSelected 
+                                  ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                                  : "bg-background/60 text-foreground hover:bg-primary/20 border-primary/20"
+                              }`}
+                              onClick={() => {
+                                toggleCity(city);
+                                setSearchQuery("");
+                              }}
+                            >
+                              {city}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center">No cities found</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </Card>
