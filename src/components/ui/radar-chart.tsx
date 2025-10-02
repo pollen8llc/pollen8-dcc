@@ -11,9 +11,19 @@ interface RadarChartProps {
   data: RadarDataPoint[];
   width?: number;
   height?: number;
+  angleOffset?: number; // Rotation offset in degrees
+  strokeColor?: string;
+  fillColor?: string;
 }
 
-export const RadarChart = ({ data, width = 500, height = 500 }: RadarChartProps) => {
+export const RadarChart = ({ 
+  data, 
+  width = 500, 
+  height = 500,
+  angleOffset = 0,
+  strokeColor = 'hsl(var(--primary))',
+  fillColor = 'hsl(var(--primary))'
+}: RadarChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -31,6 +41,7 @@ export const RadarChart = ({ data, width = 500, height = 500 }: RadarChartProps)
     const centerY = height / 2;
 
     const angleSlice = (Math.PI * 2) / data.length;
+    const offsetRadians = (angleOffset * Math.PI) / 180;
 
     // Create scales
     const rScale = d3.scaleLinear()
@@ -62,7 +73,7 @@ export const RadarChart = ({ data, width = 500, height = 500 }: RadarChartProps)
 
     // Draw axes
     data.forEach((d, i) => {
-      const angle = angleSlice * i - Math.PI / 2;
+      const angle = angleSlice * i - Math.PI / 2 + offsetRadians;
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
 
@@ -92,21 +103,21 @@ export const RadarChart = ({ data, width = 500, height = 500 }: RadarChartProps)
 
     // Draw data area
     const radarLine = d3.lineRadial<RadarDataPoint>()
-      .angle((d, i) => angleSlice * i)
+      .angle((d, i) => angleSlice * i + offsetRadians)
       .radius(d => rScale(d.importance))
       .curve(d3.curveLinearClosed);
 
     g.append('path')
       .datum(data)
       .attr('d', radarLine)
-      .attr('fill', 'hsl(var(--primary))')
+      .attr('fill', fillColor)
       .attr('fill-opacity', 0.25)
-      .attr('stroke', 'hsl(var(--primary))')
+      .attr('stroke', strokeColor)
       .attr('stroke-width', 2);
 
     // Draw data points
     data.forEach((d, i) => {
-      const angle = angleSlice * i - Math.PI / 2;
+      const angle = angleSlice * i - Math.PI / 2 + offsetRadians;
       const r = rScale(d.importance);
       const x = Math.cos(angle) * r;
       const y = Math.sin(angle) * r;
@@ -123,7 +134,7 @@ export const RadarChart = ({ data, width = 500, height = 500 }: RadarChartProps)
         .text(`${d.category}: ${d.importance}%`);
     });
 
-  }, [data, width, height]);
+  }, [data, width, height, angleOffset, strokeColor, fillColor]);
 
   return (
     <svg

@@ -14,25 +14,25 @@ const psychographics = [
   {
     id: "interest",
     label: "Interest",
-    color: "#00eada",
+    color: "#3b82f6",
     options: ["Gaming", "Technology", "Sports", "Arts & Culture", "Business", "Health & Fitness", "Entertainment", "Education"],
   },
   {
     id: "lifestyle",
     label: "Lifestyle",
-    color: "#8b5cf6",
+    color: "#60a5fa",
     options: ["Urban", "Suburban", "Rural", "Nomadic", "Minimalist", "Luxury", "Active", "Relaxed"],
   },
   {
     id: "values",
     label: "Values",
-    color: "#f97316",
+    color: "#2563eb",
     options: ["Innovation", "Community", "Sustainability", "Achievement", "Creativity", "Security", "Freedom", "Tradition"],
   },
   {
     id: "attitudes",
     label: "Attitudes",
-    color: "#06b6d4",
+    color: "#1d4ed8",
     options: ["Optimistic", "Pragmatic", "Adventurous", "Cautious", "Collaborative", "Independent", "Progressive", "Conservative"],
   },
 ];
@@ -150,16 +150,30 @@ const P8Class = () => {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
                 <div className="relative w-full h-[500px] flex items-center justify-center">
-                  {/* ASL Demographics (background layer) */}
+                  {/* ASL Demographics (background layer - + layout) */}
                   {aslData.length > 0 && (
-                    <div className="absolute inset-0 opacity-30">
-                      <RadarChart data={aslData} width={500} height={500} />
+                    <div className="absolute inset-0 opacity-40">
+                      <RadarChart 
+                        data={aslData} 
+                        width={500} 
+                        height={500}
+                        angleOffset={0}
+                        strokeColor="hsl(var(--primary))"
+                        fillColor="hsl(var(--primary))"
+                      />
                     </div>
                   )}
                   
-                  {/* Class Psychographics (foreground layer) */}
+                  {/* Class Psychographics (foreground layer - X layout, blue) */}
                   <div className="absolute inset-0">
-                    <RadarChart data={classRadarData} width={500} height={500} />
+                    <RadarChart 
+                      data={classRadarData} 
+                      width={500} 
+                      height={500}
+                      angleOffset={45}
+                      strokeColor="#3b82f6"
+                      fillColor="#3b82f6"
+                    />
                   </div>
                 </div>
                 
@@ -168,13 +182,13 @@ const P8Class = () => {
                   <div className="flex gap-4 items-center justify-center mb-2">
                     {aslData.length > 0 && (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-primary/30 border-2 border-primary/50" />
-                        <span className="text-xs text-muted-foreground">Demographics</span>
+                        <div className="w-3 h-3 rounded-full bg-primary/40 border-2 border-primary" />
+                        <span className="text-xs text-muted-foreground">Demographics (+)</span>
                       </div>
                     )}
                     <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-primary border-2 border-primary" />
-                      <span className="text-xs font-medium">Psychographics</span>
+                      <div className="w-3 h-3 rounded-full bg-blue-500 border-2 border-blue-500" />
+                      <span className="text-xs font-medium">Psychographics (X)</span>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">Total Priority Score</p>
