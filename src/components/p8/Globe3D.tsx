@@ -1,5 +1,5 @@
-import { useEffect, useRef, useMemo } from 'react';
-import Globe from 'react-globe.gl';
+import { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
 
 interface Globe3DProps {
   cities?: string[];
@@ -7,57 +7,99 @@ interface Globe3DProps {
   height?: number;
 }
 
-// City coordinates for selected cities
-const cityCoordinates: Record<string, { lat: number; lng: number }> = {
-  "San Francisco": { lat: 37.7749, lng: -122.4194 },
-  "New York": { lat: 40.7128, lng: -74.0060 },
-  "Austin": { lat: 30.2672, lng: -97.7431 },
-  "Seattle": { lat: 47.6062, lng: -122.3321 },
-  "Boston": { lat: 42.3601, lng: -71.0589 },
-  "Los Angeles": { lat: 34.0522, lng: -118.2437 },
-  "Chicago": { lat: 41.8781, lng: -87.6298 },
-  "Miami": { lat: 25.7617, lng: -80.1918 },
-};
-
-export const Globe3D = ({ cities = [], width = 140, height = 140 }: Globe3DProps) => {
-  const globeEl = useRef<any>();
-
-  const pointsData = useMemo(() => {
-    return cities.map(city => ({
-      lat: cityCoordinates[city]?.lat || 0,
-      lng: cityCoordinates[city]?.lng || 0,
-      size: 0.5,
-      color: 'hsl(var(--primary))',
-      city: city
-    }));
-  }, [cities]);
+export const Globe3D = ({ cities = [], width = 200, height = 200 }: Globe3DProps) => {
+  const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    if (!globeEl.current) return;
+    if (!svgRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('*').remove();
     
-    globeEl.current.pointOfView({ lat: 20, lng: -40, altitude: 2.5 }, 0);
-    globeEl.current.controls().autoRotate = true;
-    globeEl.current.controls().autoRotateSpeed = 0.5;
-    globeEl.current.controls().enableZoom = false;
-  }, []);
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    const projection = d3.geoOrthographic()
+      .scale(width / 2.5)
+      .translate([width / 2, height / 2])
+      .rotate([0, -20]);
+
+    const path = d3.geoPath().projection(projection);
+
+    // Create gradient for globe
+    const defs = svg.append('defs');
+    const gradient = defs.append('radialGradient')
+      .attr('id', 'globe-gradient')
+      .attr('cx', '35%')
+      .attr('cy', '35%');
+    
+    gradient.append('stop')
+      .attr('offset', '5%')
+      .attr('stop-color', 'hsl(var(--primary))')
+      .attr('stop-opacity', 0.8);
+    
+    gradient.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', 'hsl(var(--primary))')
+      .attr('stop-opacity', 0.2);
+
+    const g = svg.append('g');
+
+    // Draw globe sphere
+    g.append('circle')
+      .attr('cx', width / 2)
+      .attr('cy', height / 2)
+      .attr('r', width / 2.5)
+      .attr('fill', 'url(#globe-gradient)')
+      .attr('stroke', 'hsl(var(--primary))')
+      .attr('stroke-width', 2)
+      .attr('opacity', 0.9);
+
+    // Draw graticule (grid lines)
+    const graticule = d3.geoGraticule();
+    g.append('path')
+      .datum(graticule)
+      .attr('d', path)
+      .attr('fill', 'none')
+      .attr('stroke', 'hsl(var(--primary) / 0.3)')
+      .attr('stroke-width', 0.5);
+
+    // Add rotating animation
+    let angle = 0;
+    const rotate = () => {
+      angle += 0.5;
+      projection.rotate([angle, -20]);
+      g.selectAll('path').attr('d', path as any);
+    };
+
+    const interval = setInterval(rotate, 50);
+
+    // Add city markers (simplified as dots)
+    const numMarkers = Math.min(cities.length || 5, 8);
+    for (let i = 0; i < numMarkers; i++) {
+      const theta = (i / numMarkers) * 2 * Math.PI;
+      const phi = Math.PI / 4;
+      const x = width / 2 + (width / 2.5) * Math.sin(phi) * Math.cos(theta) * 0.7;
+      const y = height / 2 - (width / 2.5) * Math.cos(phi) * 0.7;
+
+      g.append('circle')
+        .attr('cx', x)
+        .attr('cy', y)
+        .attr('r', 3)
+        .attr('fill', 'hsl(var(--primary))')
+        .attr('stroke', 'hsl(var(--background))')
+        .attr('stroke-width', 1.5)
+        .style('filter', 'drop-shadow(0 0 4px hsl(var(--primary)))');
+    }
+
+    return () => clearInterval(interval);
+  }, [cities, width, height]);
 
   return (
-    <div style={{ width, height }}>
-      <Globe
-        ref={globeEl}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-        backgroundColor="rgba(0,0,0,0)"
-        showAtmosphere={true}
-        atmosphereColor="hsl(var(--primary))"
-        atmosphereAltitude={0.15}
-        width={width}
-        height={height}
-        pointsData={pointsData}
-        pointAltitude={0.01}
-        pointRadius={0.5}
-        pointColor="color"
-        pointsMerge={false}
-      />
-    </div>
+    <svg
+      ref={svgRef}
+      width={width}
+      height={height}
+      style={{ maxWidth: '100%', height: 'auto' }}
+    />
   );
 };

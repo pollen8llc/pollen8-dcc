@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Globe3D } from "./Globe3D";
-import { CompactRadarChart } from "@/components/ui/compact-radar-chart";
+import { RadarChart } from "@/components/ui/radar-chart";
 import { MapPin, Users, Brain, Network } from "lucide-react";
 
 const EcosystemOverviewCards = () => {
@@ -39,28 +39,28 @@ const EcosystemOverviewCards = () => {
   const activePercentage = (activeRelationships / totalContacts) * 100;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
       {/* Card 1: Locations */}
-      <Card className="overflow-hidden bg-card/60 backdrop-blur-sm border-primary/10 hover:border-primary/20 transition-all">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+      <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
             {/* Globe on left */}
             <div className="flex-shrink-0">
               <Globe3D cities={selectedCities} width={140} height={140} />
             </div>
             
-            {/* Content on right */}
-            <div className="flex-1 min-w-0 space-y-3">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold">Locations</h3>
+            {/* Badges on right */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Locations</h3>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {selectedCities.map((city, idx) => (
                   <Badge 
                     key={idx} 
                     variant="secondary" 
-                    className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0.5"
+                    className="bg-primary/10 text-primary border-primary/20"
                   >
                     {city.split(',')[0]}
                   </Badge>
@@ -72,12 +72,12 @@ const EcosystemOverviewCards = () => {
       </Card>
 
       {/* Card 2: Demographics */}
-      <Card className="overflow-hidden bg-card/60 backdrop-blur-sm border-primary/10 hover:border-primary/20 transition-all">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+      <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
             {/* Radar chart on left */}
             <div className="flex-shrink-0">
-              <CompactRadarChart 
+              <RadarChart 
                 data={demographicsData} 
                 width={140} 
                 height={140}
@@ -86,22 +86,22 @@ const EcosystemOverviewCards = () => {
               />
             </div>
             
-            {/* Content on right */}
-            <div className="flex-1 min-w-0 space-y-3">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold">Demographics</h3>
+            {/* Badges on right */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Demographics</h3>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {demographicsData.map((demo, idx) => (
-                  <div key={idx} className="flex items-center justify-between gap-2">
+                  <div key={idx} className="flex items-center justify-between">
                     <Badge 
                       variant="secondary" 
-                      className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0.5"
+                      className="bg-primary/10 text-primary border-primary/20"
                     >
-                      {demo.category}
+                      Age {demo.category}
                     </Badge>
-                    <span className="text-xs font-medium text-muted-foreground">{demo.importance}%</span>
+                    <span className="text-sm text-muted-foreground">{demo.importance}%</span>
                   </div>
                 ))}
               </div>
@@ -111,12 +111,12 @@ const EcosystemOverviewCards = () => {
       </Card>
 
       {/* Card 3: Culture */}
-      <Card className="overflow-hidden bg-card/60 backdrop-blur-sm border-primary/10 hover:border-primary/20 transition-all">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+      <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
             {/* Psychographic chart on left */}
             <div className="flex-shrink-0">
-              <CompactRadarChart 
+              <RadarChart 
                 data={cultureData} 
                 width={140} 
                 height={140}
@@ -125,26 +125,28 @@ const EcosystemOverviewCards = () => {
               />
             </div>
             
-            {/* Content on right */}
-            <div className="flex-1 min-w-0 space-y-3">
-              <div className="flex items-center gap-2">
-                <Brain className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold">Culture</h3>
+            {/* Badges on right */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-3">
+                <Brain className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Culture</h3>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {cultureBadges.map((badge, idx) => (
                   <Badge 
                     key={idx} 
                     variant="secondary" 
-                    className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0.5"
+                    className="bg-primary/10 text-primary border-primary/20"
                   >
                     {badge}
                   </Badge>
                 ))}
               </div>
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <div className="mt-3 space-y-1">
                 {cultureData.slice(0, 3).map((item, idx) => (
-                  <span key={idx}>{item.category} {item.importance}%</span>
+                  <div key={idx} className="text-xs text-muted-foreground">
+                    {item.category}: {item.importance}%
+                  </div>
                 ))}
               </div>
             </div>
@@ -153,9 +155,9 @@ const EcosystemOverviewCards = () => {
       </Card>
 
       {/* Card 4: Network */}
-      <Card className="overflow-hidden bg-card/60 backdrop-blur-sm border-primary/10 hover:border-primary/20 transition-all">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+      <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
             {/* Ring chart on left */}
             <div className="flex-shrink-0 relative" style={{ width: 140, height: 140 }}>
               <svg width="140" height="140" viewBox="0 0 140 140">
@@ -166,6 +168,7 @@ const EcosystemOverviewCards = () => {
                   </linearGradient>
                 </defs>
                 
+                {/* Background ring */}
                 <circle
                   cx="70"
                   cy="70"
@@ -175,6 +178,7 @@ const EcosystemOverviewCards = () => {
                   strokeWidth="20"
                 />
                 
+                {/* Active ring */}
                 <circle
                   cx="70"
                   cy="70"
@@ -185,49 +189,66 @@ const EcosystemOverviewCards = () => {
                   strokeDasharray={`${(activePercentage / 100) * 2 * Math.PI * 50} ${2 * Math.PI * 50}`}
                   strokeLinecap="round"
                   transform="rotate(-90 70 70)"
-                  style={{ filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.5))' }}
+                  style={{
+                    filter: 'drop-shadow(0 0 8px hsl(var(--primary) / 0.5))'
+                  }}
                 />
                 
+                {/* Center text */}
                 <text
                   x="70"
-                  y="70"
+                  y="65"
                   textAnchor="middle"
                   fill="hsl(var(--foreground))"
-                  fontSize="24"
+                  fontSize="20"
                   fontWeight="bold"
-                  dominantBaseline="middle"
                 >
                   {Math.round(activePercentage)}%
+                </text>
+                <text
+                  x="70"
+                  y="80"
+                  textAnchor="middle"
+                  fill="hsl(var(--muted-foreground))"
+                  fontSize="10"
+                >
+                  Active
                 </text>
               </svg>
             </div>
             
-            {/* Content on right */}
-            <div className="flex-1 min-w-0 space-y-3">
-              <div className="flex items-center gap-2">
-                <Network className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold">Network</h3>
+            {/* Stats on right */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-3">
+                <Network className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Network</h3>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Total</span>
-                  <Badge variant="outline" className="border-primary/20 text-xs px-2 py-0.5">
-                    {totalContacts.toLocaleString()}
-                  </Badge>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-muted-foreground">Total Contacts</span>
+                    <Badge variant="outline" className="border-primary/20">
+                      {totalContacts.toLocaleString()}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Active</span>
-                  <Badge 
-                    variant="secondary" 
-                    className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0.5"
-                  >
-                    {activeRelationships.toLocaleString()}
-                  </Badge>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-muted-foreground">Active Relations</span>
+                    <Badge 
+                      variant="secondary" 
+                      className="bg-primary/10 text-primary border-primary/20"
+                    >
+                      {activeRelationships.toLocaleString()}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-border/50">
+                  <p className="text-xs text-muted-foreground">
+                    {Math.round(activePercentage)}% engagement rate
+                  </p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground pt-2 border-t border-border/50">
-                {Math.round(activePercentage)}% engagement rate
-              </p>
             </div>
           </div>
         </CardContent>
