@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, Activity, Zap, Globe, Target, CheckCircle2 } from "lucide-react";
+import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 
 const P8Dashboard = () => {
   const metrics = [
@@ -37,15 +38,8 @@ const P8Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
+      <DotConnectorHeader />
       <div className="max-w-7xl mx-auto space-y-6 animate-fade-in p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold">Ecosystem Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Your network at a glance</p>
-          </div>
-          <Badge className="bg-primary/20 text-primary border-primary/30">Live</Badge>
-        </div>
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
