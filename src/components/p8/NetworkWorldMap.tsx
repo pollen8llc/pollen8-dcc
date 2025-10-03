@@ -133,9 +133,8 @@ const NetworkWorldMap = () => {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Position ring chart - centered on mobile, left-aligned on desktop
-      const isMobile = width < 640; // sm breakpoint
-      const centerX = isMobile ? width / 2 : 96;
+      // Position ring chart on the left, aligned with spacer (matches avatar position)
+      const centerX = 48; // Center of the 96px spacer (w-24)
       const centerY = height / 2;
       const size = 96; // Same as avatar size
       const outerRadius = size / 2;
@@ -256,44 +255,38 @@ const NetworkWorldMap = () => {
                 className="absolute inset-0 w-full h-full pointer-events-none"
               />
 
-              {/* Content Layout */}
-              <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
-                {/* Ring Chart Space (left) - hidden on mobile since canvas handles it */}
-                <div className="hidden sm:block flex-shrink-0 w-24 h-24" />
+              {/* Content Layout - matches profile card structure */}
+              <div className="relative z-10 flex items-center gap-4 sm:gap-6">
+                {/* Ring Chart Space (left) - matches avatar size */}
+                <div className="flex-shrink-0 w-24 h-24" />
 
-                {/* Network Info (center-left) */}
-                <div className="flex-1 min-w-0 text-center sm:text-left">
-                  <h2 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight mb-3">
+                {/* Network Info (center) - matches profile info */}
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-1">
                     Network
                   </h2>
-                  <p className="text-lg text-muted-foreground">
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     Social Connection Analysis
                   </p>
                 </div>
 
-                {/* Stats (right) */}
-                <div className="flex-shrink-0 w-full sm:w-auto bg-background/60 backdrop-blur-sm rounded-lg p-4 lg:p-6 border border-primary/20">
-                  <div className="flex sm:flex-col gap-4 sm:gap-3 justify-around sm:justify-start">
-                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
-                      <div className="w-3 h-3 rounded-full bg-[rgba(20,184,166,0.9)] flex-shrink-0"></div>
-                      <div className="text-center sm:text-left">
-                        <div className="text-sm text-muted-foreground">
-                          Active
-                        </div>
-                        <div className="text-xl sm:text-2xl font-bold text-foreground">
-                          842
-                        </div>
+                {/* Stats (right) - matches settings button position */}
+                <div className="flex-shrink-0 bg-background/60 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-primary/20">
+                  <div className="flex gap-4 sm:gap-6">
+                    <div className="text-center">
+                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">
+                        Active
+                      </div>
+                      <div className="text-lg sm:text-xl font-bold text-[rgba(20,184,166,0.9)]">
+                        842
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
-                      <div className="w-3 h-3 rounded-full bg-[rgba(59,130,246,0.5)] flex-shrink-0"></div>
-                      <div className="text-center sm:text-left">
-                        <div className="text-sm text-muted-foreground">
-                          Total
-                        </div>
-                        <div className="text-xl sm:text-2xl font-bold text-foreground">
-                          1,247
-                        </div>
+                    <div className="text-center">
+                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">
+                        Total
+                      </div>
+                      <div className="text-lg sm:text-xl font-bold text-[rgba(59,130,246,0.7)]">
+                        1,247
                       </div>
                     </div>
                   </div>
