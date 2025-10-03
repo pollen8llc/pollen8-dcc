@@ -22,10 +22,10 @@ const NetworkWorldMap = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Particle system for plexus
+    // Particle system for plexus - slower and brighter
     const particlesArray: Particle[] = [];
-    const numberOfParticles = 50;
-    const maxDistance = 120;
+    const numberOfParticles = 60;
+    const maxDistance = 140;
 
     class Particle {
       x: number;
@@ -37,9 +37,9 @@ const NetworkWorldMap = () => {
       constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.directionX = Math.random() * 0.3 - 0.15;
-        this.directionY = Math.random() * 0.3 - 0.15;
-        this.size = Math.random() * 2 + 1;
+        this.directionX = Math.random() * 0.15 - 0.075; // Slower movement
+        this.directionY = Math.random() * 0.15 - 0.075; // Slower movement
+        this.size = Math.random() * 2.5 + 1;
       }
 
       update() {
@@ -57,7 +57,7 @@ const NetworkWorldMap = () => {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 234, 218, 0.1)";
+        ctx.fillStyle = "rgba(0, 234, 218, 0.25)"; // Brighter particles
         ctx.fill();
       }
     }
@@ -79,7 +79,7 @@ const NetworkWorldMap = () => {
           if (distance < maxDistance) {
             const opacity = 1 - distance / maxDistance;
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(0, 234, 218, ${opacity * 0.15})`;
+            ctx.strokeStyle = `rgba(0, 234, 218, ${opacity * 0.3})`; // Brighter lines
             ctx.lineWidth = 1;
             ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
             ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
@@ -136,10 +136,10 @@ const NetworkWorldMap = () => {
         .getPropertyValue("--primary")
         .trim();
 
-      // Draw centered glowing ring chart
-      const centerX = width / 2;
+      // Position ring chart on the left side at 96px from left, vertically centered
+      const centerX = 96;
       const centerY = height / 2;
-      const outerRadius = Math.min(width, height) * 0.15;
+      const outerRadius = 40;
       const innerRadius = outerRadius * 0.6;
 
       // Network data
@@ -224,7 +224,7 @@ const NetworkWorldMap = () => {
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
           <CardContent className="p-0">
-            <div className="relative min-h-[300px] lg:min-h-[350px]">
+            <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
               {/* Plexus Background */}
               <canvas
                 ref={plexusCanvasRef}
@@ -235,27 +235,52 @@ const NetworkWorldMap = () => {
                 }}
               />
 
-              {/* Ring Chart Overlay */}
+              {/* Ring Chart Canvas */}
               <canvas
                 ref={chartCanvasRef}
-                className="absolute inset-0 w-full h-full"
-                style={{ pointerEvents: "none" }}
+                className="absolute inset-0 w-full h-full pointer-events-none"
               />
 
-              {/* Legend */}
-              <div className="absolute bottom-6 right-6 bg-background/80 backdrop-blur-sm rounded-lg p-4 border border-primary/20 z-10">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-primary"></div>
-                    <span className="text-foreground font-medium">
-                      Active Connections: 842
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-primary/20"></div>
-                    <span className="text-muted-foreground">
-                      Total Contacts: 1,247
-                    </span>
+              {/* Content Layout */}
+              <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
+                {/* Ring Chart Space (left) */}
+                <div className="flex-shrink-0 w-24 h-24" />
+
+                {/* Network Info (center-left) */}
+                <div className="flex-1 min-w-0 text-center sm:text-left">
+                  <h2 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight mb-3">
+                    Network
+                  </h2>
+                  <p className="text-lg text-muted-foreground">
+                    Social Connection Analysis
+                  </p>
+                </div>
+
+                {/* Stats (right) */}
+                <div className="flex-shrink-0 bg-background/60 backdrop-blur-sm rounded-lg p-4 lg:p-6 border border-primary/20">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-primary flex-shrink-0"></div>
+                      <div className="text-left">
+                        <div className="text-sm text-muted-foreground">
+                          Active Connections
+                        </div>
+                        <div className="text-2xl font-bold text-foreground">
+                          842
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-primary/20 flex-shrink-0"></div>
+                      <div className="text-left">
+                        <div className="text-sm text-muted-foreground">
+                          Total Contacts
+                        </div>
+                        <div className="text-2xl font-bold text-foreground">
+                          1,247
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
