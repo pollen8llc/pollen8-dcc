@@ -1078,3 +1078,70 @@ button a {
 .ui-popover-content a {
   @apply text-foreground hover:text-foreground;
 }
+
+/* Leaflet teal styling */
+.leaflet-container {
+  font-family: 'Inter', sans-serif;
+  background: #0a0a0a !important;
+}
+
+.leaflet-teal-tiles {
+  filter: hue-rotate(120deg) saturate(1.8) brightness(1.3);
+}
+
+/* Mapbox teal styling */
+.mapboxgl-canvas-container {
+  filter: brightness(0.9);
+}
+
+.mapboxgl-canvas {
+  outline: none;
+}
+
+/* Location marker pulsing animation */
+.location-marker {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.marker-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: rgba(20, 184, 166, 0.3);
+  border-radius: 50%;
+  animation: pulse-marker 2s ease-out infinite;
+}
+
+.marker-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: rgba(20, 184, 166, 0.9);
+  border: 2px solid rgba(20, 184, 166, 1);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(20, 184, 166, 0.6);
+}
+
+@keyframes pulse-marker {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
