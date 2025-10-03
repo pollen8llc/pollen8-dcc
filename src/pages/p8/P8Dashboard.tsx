@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, Activity, Zap, Globe, Target, CheckCircle2 } from "lucide-react";
 import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
-import EcosystemOverviewCards from "@/components/p8/EcosystemOverviewCards";
 
 const P8Dashboard = () => {
   const metrics = [
@@ -41,9 +40,6 @@ const P8Dashboard = () => {
       <Navbar />
       <DotConnectorHeader />
       <div className="max-w-7xl mx-auto space-y-6 animate-fade-in p-6">
-        
-        {/* Ecosystem Overview Cards */}
-        <EcosystemOverviewCards />
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
