@@ -1,76 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useRef } from "react";
 
-// Inline SVG Ring Chart Component
-const RingChart = () => {
-  const totalContacts = 1247;
-  const activeConnections = 842;
-  const activePercentage = (activeConnections / totalContacts) * 100;
-  
-  const size = 96;
-  const strokeWidth = 10;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const activeStrokeDashoffset = circumference - (activePercentage / 100) * circumference;
-
-  return (
-    <div className="relative w-24 h-24 flex-shrink-0">
-      {/* Glassmorphic background circle */}
-      <div className="absolute inset-0 rounded-full bg-white/5 backdrop-blur-sm" />
-      
-      <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
-        {/* Inactive ring (blue) */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="rgba(59, 130, 246, 0.3)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
-        
-        {/* Active ring (teal with flashing animation) */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="rgba(20, 184, 166, 0.9)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={activeStrokeDashoffset}
-          className="transition-all duration-300"
-          style={{
-            filter: "drop-shadow(0 0 8px rgba(20, 184, 166, 0.4))",
-            animation: "pulse-glow 3s ease-in-out infinite"
-          }}
-        />
-      </svg>
-      
-      {/* Center text */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <div className="text-lg font-bold text-[rgba(20,184,166,0.9)]">
-          {Math.round(activePercentage)}%
-        </div>
-        <div className="text-[10px] text-muted-foreground">
-          Active
-        </div>
-      </div>
-      
-      <style>{`
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.9; }
-          50% { opacity: 1; }
-        }
-      `}</style>
-    </div>
-  );
-};
-
 const NetworkWorldMap = () => {
   const plexusCanvasRef = useRef<HTMLCanvasElement>(null);
+  const chartCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Plexus animation effect
   useEffect(() => {
@@ -175,6 +108,130 @@ const NetworkWorldMap = () => {
     };
   }, []);
 
+  // Ring chart effect with slow flashing
+  useEffect(() => {
+    const canvas = chartCanvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrame: number;
+    let flashProgress = 0;
+
+    const updateSize = () => {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    };
+
+    const draw = () => {
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Position ring chart on the left, aligned with spacer (matches avatar position)
+      const centerX = 48; // Center of the 96px spacer (w-24)
+      const centerY = height / 2;
+      const size = 96; // Same as avatar size
+      const outerRadius = size / 2;
+      const innerRadius = outerRadius * 0.75; // Thinner ring for minimal look
+
+      // Network data
+      const totalContacts = 1247;
+      const activeConnections = 842;
+      const activePercentage = (activeConnections / totalContacts) * 100;
+      const activeAngle = (activePercentage / 100) * Math.PI * 2;
+
+      // Slow flashing effect (3 second cycle)
+      flashProgress += 0.005;
+      const flashIntensity = (Math.sin(flashProgress) + 1) / 2; // 0 to 1
+
+      // Glassmorphic background
+      ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, outerRadius + 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw inactive portion (blue) - smaller side
+      const inactiveAngle = Math.PI * 2 - activeAngle;
+      ctx.strokeStyle = "rgba(59, 130, 246, 0.3)"; // Blue
+      ctx.lineWidth = outerRadius - innerRadius;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.arc(
+        centerX,
+        centerY,
+        (outerRadius + innerRadius) / 2,
+        -Math.PI / 2 + activeAngle,
+        -Math.PI / 2 + Math.PI * 2
+      );
+      ctx.stroke();
+
+      // Draw active portion (teal) - bigger side with flash
+      const flashOpacity = 0.6 + flashIntensity * 0.4; // 0.6 to 1.0
+      ctx.strokeStyle = `rgba(20, 184, 166, ${flashOpacity})`; // Teal with flashing
+      ctx.lineWidth = outerRadius - innerRadius;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.arc(
+        centerX,
+        centerY,
+        (outerRadius + innerRadius) / 2,
+        -Math.PI / 2,
+        -Math.PI / 2 + activeAngle
+      );
+      ctx.stroke();
+
+      // Subtle glow on active portion during flash
+      if (flashIntensity > 0.5) {
+        ctx.shadowBlur = 15 * flashIntensity;
+        ctx.shadowColor = "rgba(20, 184, 166, 0.5)";
+        ctx.strokeStyle = `rgba(20, 184, 166, ${flashIntensity * 0.3})`;
+        ctx.lineWidth = outerRadius - innerRadius + 2;
+        ctx.beginPath();
+        ctx.arc(
+          centerX,
+          centerY,
+          (outerRadius + innerRadius) / 2,
+          -Math.PI / 2,
+          -Math.PI / 2 + activeAngle
+        );
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
+      // Draw center text
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      
+      // Percentage
+      ctx.fillStyle = "rgba(20, 184, 166, 0.9)";
+      ctx.font = `bold ${size * 0.2}px sans-serif`;
+      ctx.fillText(`${Math.round(activePercentage)}%`, centerX, centerY - size * 0.08);
+      
+      // Label
+      ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+      ctx.font = `${size * 0.1}px sans-serif`;
+      ctx.fillText("Active", centerX, centerY + size * 0.1);
+
+      animationFrame = requestAnimationFrame(draw);
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    draw();
+
+    return () => {
+      window.removeEventListener("resize", updateSize);
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, []);
 
   return (
     <div className="w-full">
@@ -192,10 +249,16 @@ const NetworkWorldMap = () => {
                 }}
               />
 
+              {/* Ring Chart Canvas */}
+              <canvas
+                ref={chartCanvasRef}
+                className="absolute inset-0 w-full h-full pointer-events-none"
+              />
+
               {/* Content Layout - matches profile card structure */}
               <div className="relative z-10 flex items-center gap-4 sm:gap-6">
-                {/* Ring Chart (left) - inline like avatar */}
-                <RingChart />
+                {/* Ring Chart Space (left) - matches avatar size */}
+                <div className="flex-shrink-0 w-24 h-24" />
 
                 {/* Network Info (center) - matches profile info */}
                 <div className="flex-1 min-w-0">
