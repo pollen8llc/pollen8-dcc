@@ -17,8 +17,76 @@ interface LocationWorldMapProps {
 }
 
 const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const globeEl = useRef<any>();
   const [isGlobeReady, setIsGlobeReady] = useState(false);
+
+  // Starry sky background effect
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Star particles
+    const stars: Array<{
+      x: number;
+      y: number;
+      radius: number;
+      alpha: number;
+      twinkleSpeed: number;
+      maxAlpha: number;
+    }> = [];
+
+    // Create stars
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 1.5 + 0.5,
+        alpha: Math.random() * 0.5,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        maxAlpha: Math.random() * 0.3 + 0.1,
+      });
+    }
+
+    let animationFrame: number;
+    const animate = () => {
+      if (!ctx || !canvas) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw stars with twinkling effect
+      stars.forEach(star => {
+        star.alpha += star.twinkleSpeed;
+        if (star.alpha > star.maxAlpha || star.alpha < 0.05) {
+          star.twinkleSpeed *= -1;
+        }
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(234, 234, 255, ${star.alpha})`;
+        ctx.fill();
+      });
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      cancelAnimationFrame(animationFrame);
+    };
+  }, []);
 
   // Globe setup
   useEffect(() => {
@@ -47,24 +115,26 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
   }, []);
 
   return (
-    <Card className={`relative overflow-hidden bg-card/40 backdrop-blur-md border-0 ${className}`}>
-      {/* Glassmorphic overlay with teal tint */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50" />
-      <div className="absolute inset-0 opacity-5" style={{ backgroundColor: 'hsl(168 76% 42%)' }} />
+    <Card className={`relative overflow-hidden ${className}`}>
+      {/* Starry sky background */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ background: 'linear-gradient(135deg, rgb(10, 10, 20) 0%, rgb(20, 20, 40) 100%)' }}
+      />
 
       {/* Content */}
       <div className="relative z-10 p-6">
-        <div className="flex items-start gap-6">
-          {/* Left: D3 Grid Globe */}
+        <div className="flex items-center gap-6">
+          {/* Left: Mini Globe */}
           <div className="shrink-0">
             <div className="w-24 h-24 rounded-full overflow-hidden bg-background/5 backdrop-blur-sm">
               <Globe
                 ref={globeEl}
-                globeImageUrl={null}
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
                 backgroundColor="rgba(0,0,0,0)"
-                showGlobe={true}
                 showAtmosphere={true}
-                atmosphereColor="rgba(20, 184, 166, 0.8)"
+                atmosphereColor="#14b8a6"
                 atmosphereAltitude={0.15}
                 width={96}
                 height={96}
@@ -82,12 +152,10 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
             </div>
           </div>
 
-          {/* Center: Title, Description and Location badges */}
-          <div className="flex-1 min-w-0 space-y-3">
-            <div>
-              <h2 className="text-2xl font-bold mb-1">Locations</h2>
-              <p className="text-sm text-muted-foreground">Your global presence</p>
-            </div>
+          {/* Center: Title and Description */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl font-bold text-white mb-1">Locations</h2>
+            <p className="text-sm text-white/70 mb-3">Your global presence</p>
             
             {/* Location badges */}
             <div className="flex flex-wrap gap-2">
@@ -106,10 +174,10 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
           {/* Right: Stats */}
           <div className="shrink-0 text-right">
             <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
-              <div className="text-3xl font-bold mb-1">
+              <div className="text-3xl font-bold text-white mb-1">
                 {selectedLocations.length}
               </div>
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-white/60">
                 Cities
               </div>
             </div>
@@ -117,9 +185,9 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
         </div>
       </div>
 
-      {/* Subtle teal glow accents */}
-      <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* Decorative gradient overlay */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
     </Card>
   );
 };
