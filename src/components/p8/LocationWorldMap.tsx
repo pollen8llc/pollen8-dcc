@@ -1,11 +1,8 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useRef as useThreeRef } from 'react';
-import * as THREE from 'three';
 
 // Sample city data
 const selectedLocations = [
@@ -16,69 +13,101 @@ const selectedLocations = [
   { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
 ];
 
-// React Three Fiber 3D Globe of Dots
-const DotGlobe = () => {
-  const meshRef = useThreeRef<THREE.Points>(null);
+// Canvas 2D Rotating Globe of Dots
+const CanvasGlobe = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Generate dots in spherical pattern
-  const particles = useMemo(() => {
-    const count = 2000;
-    const positions = new Float32Array(count * 3);
-    const radius = 1.8;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    for (let i = 0; i < count; i++) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size
+    const size = 96;
+    canvas.width = size;
+    canvas.height = size;
+
+    // Globe parameters
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const radius = 36;
+    const dotCount = 800;
+    let rotation = 0;
+
+    // Generate dots on sphere surface
+    const dots: Array<{ x: number; y: number; z: number }> = [];
+    for (let i = 0; i < dotCount; i++) {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(Math.random() * 2 - 1);
       
-      const x = radius * Math.sin(phi) * Math.cos(theta);
-      const y = radius * Math.sin(phi) * Math.sin(theta);
-      const z = radius * Math.cos(phi);
-
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      dots.push({
+        x: Math.sin(phi) * Math.cos(theta),
+        y: Math.sin(phi) * Math.sin(theta),
+        z: Math.cos(phi),
+      });
     }
 
-    return positions;
+    // Animation loop
+    const animate = () => {
+      // Clear canvas
+      ctx.fillStyle = 'transparent';
+      ctx.clearRect(0, 0, size, size);
+
+      // Update rotation
+      rotation += 0.005;
+
+      // Draw dots
+      dots.forEach(dot => {
+        // Rotate around Y axis (horizontal rotation)
+        const rotatedX = dot.x * Math.cos(rotation) - dot.z * Math.sin(rotation);
+        const rotatedZ = dot.x * Math.sin(rotation) + dot.z * Math.cos(rotation);
+        
+        // Project to 2D
+        const scale = radius / (radius + rotatedZ * 20);
+        const x2d = centerX + rotatedX * radius * scale;
+        const y2d = centerY + dot.y * radius * scale;
+
+        // Only draw dots on visible hemisphere
+        if (rotatedZ > -0.3) {
+          // Size based on depth
+          const dotSize = 1.5 * scale;
+          
+          // Opacity based on depth (closer = brighter)
+          const opacity = 0.3 + scale * 0.7;
+
+          // Draw dot with glow
+          ctx.beginPath();
+          ctx.arc(x2d, y2d, dotSize, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(20, 184, 166, ${opacity})`;
+          ctx.fill();
+
+          // Add glow effect for closer dots
+          if (scale > 0.8) {
+            ctx.beginPath();
+            ctx.arc(x2d, y2d, dotSize * 2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(20, 184, 166, ${opacity * 0.2})`;
+            ctx.fill();
+          }
+        }
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    animate();
   }, []);
 
-  // Horizontal rotation animation
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.002;
-    }
-  });
-
-  return (
-    <points ref={meshRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particles.length / 3}
-          array={particles}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.03}
-        color="#14b8a6"
-        transparent
-        opacity={0.8}
-        sizeAttenuation
-      />
-    </points>
-  );
-};
-
-// 3D Globe Container
-const ThreeDGlobe = () => {
   return (
     <div className="w-24 h-24 flex-shrink-0">
-      <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} color="#14b8a6" />
-        <DotGlobe />
-      </Canvas>
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full"
+        style={{ 
+          filter: 'drop-shadow(0 0 12px rgba(20, 184, 166, 0.5))'
+        }}
+      />
     </div>
   );
 };
@@ -165,8 +194,8 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
               {/* Content Layout - Mapbox clearly visible underneath */}
               <div className="relative z-10 p-6 lg:p-8 flex flex-col justify-between h-full min-h-[400px] bg-gradient-to-br from-black/20 via-transparent to-black/20">
                 <div className="flex items-center gap-4 sm:gap-6">
-                  {/* 3D React Three Fiber Globe (left) */}
-                  <ThreeDGlobe />
+                  {/* Canvas 2D Rotating Globe of Dots */}
+                  <CanvasGlobe />
 
                   {/* Location Info (center) */}
                   <div className="flex-1 min-w-0">
