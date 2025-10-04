@@ -3,6 +3,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Sphere } from '@react-three/drei';
+import * as THREE from 'three';
 
 // Sample city data
 const selectedLocations = [
@@ -13,32 +16,53 @@ const selectedLocations = [
   { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
 ];
 
-// 3D Teal Grid Globe Component
-const GridGlobe = () => {
+// 3D Wireframe Globe with React Three Fiber
+const ThreeGlobe = () => {
+  return (
+    <Canvas className="w-24 h-24">
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} intensity={1} color="#14b8a6" />
+      <Sphere args={[1, 32, 32]} rotation={[0, 0, 0]}>
+        <meshBasicMaterial 
+          color="#14b8a6" 
+          wireframe 
+          transparent 
+          opacity={0.6}
+        />
+      </Sphere>
+      <OrbitControls 
+        enableZoom={false} 
+        enablePan={false}
+        autoRotate
+        autoRotateSpeed={2}
+      />
+    </Canvas>
+  );
+};
+
+// CSS-based 3D Teal Grid Globe (inspired by Three.js design)
+const CSSGridGlobe = () => {
   const [rotation, setRotation] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setRotation(prev => (prev + 0.8) % 360);
-    }, 50);
+      setRotation(prev => (prev + 1) % 360);
+    }, 30);
     return () => clearInterval(interval);
   }, []);
 
   const size = 96;
   const center = size / 2;
-  const radius = 40;
+  const radius = 38;
 
   return (
     <div className="relative w-24 h-24 flex-shrink-0">
-      {/* Glassmorphic background circle */}
-      <div className="absolute inset-0 rounded-full bg-white/5 backdrop-blur-sm" />
-      
       <svg 
         className="w-full h-full" 
         viewBox={`0 0 ${size} ${size}`}
         style={{ 
-          filter: "drop-shadow(0 0 8px rgba(20, 184, 166, 0.4))",
-          transform: `perspective(400px) rotateY(${rotation}deg) rotateX(15deg)`
+          filter: "drop-shadow(0 0 12px rgba(20, 184, 166, 0.5))",
+          transform: `rotateX(15deg)`
         }}
       >
         {/* Main sphere outline */}
@@ -47,71 +71,48 @@ const GridGlobe = () => {
           cy={center} 
           r={radius} 
           fill="none" 
-          stroke="rgba(20, 184, 166, 0.5)" 
+          stroke="#14b8a6" 
           strokeWidth="1.5" 
+          opacity="0.6"
         />
         
-        {/* Latitude lines (horizontal circles) */}
-        {[-30, -15, 0, 15, 30].map((offset, i) => {
+        {/* Latitude lines (horizontal circles) - wireframe style */}
+        {[-25, -12.5, 0, 12.5, 25].map((offset, i) => {
           const y = center + offset;
           const latRadius = radius * Math.cos((offset / radius) * (Math.PI / 2));
+          const rotationOffset = (rotation + i * 20) % 360;
           return (
             <ellipse
               key={`lat-${i}`}
               cx={center}
               cy={y}
               rx={latRadius}
-              ry={latRadius * 0.3}
+              ry={latRadius * 0.25}
               fill="none"
-              stroke="rgba(20, 184, 166, 0.4)"
+              stroke="#14b8a6"
               strokeWidth="0.8"
+              opacity="0.5"
+              transform={`rotate(${rotationOffset} ${center} ${center})`}
             />
           );
         })}
         
-        {/* Longitude lines (vertical ellipses) */}
+        {/* Longitude lines (vertical ellipses) - wireframe style */}
         {[0, 30, 60, 90, 120, 150].map((angle, i) => {
-          const rotateAngle = angle + rotation * 0.3;
+          const rotateAngle = (angle + rotation * 0.5) % 360;
           return (
             <ellipse
               key={`lon-${i}`}
               cx={center}
               cy={center}
-              rx={radius * 0.3}
+              rx={radius * 0.25}
               ry={radius}
               fill="none"
-              stroke="rgba(20, 184, 166, 0.4)"
+              stroke="#14b8a6"
               strokeWidth="0.8"
+              opacity="0.5"
               transform={`rotate(${rotateAngle} ${center} ${center})`}
             />
-          );
-        })}
-        
-        {/* Pulsing location dots */}
-        {selectedLocations.map((loc, i) => {
-          const angle = (i / selectedLocations.length) * 360 + rotation;
-          const depth = Math.cos((angle * Math.PI) / 180);
-          const x = center + radius * 0.7 * Math.sin((angle * Math.PI) / 180);
-          const y = center - radius * 0.5 * Math.sin(((i * 60) * Math.PI) / 180);
-          const scale = depth > 0 ? 1 : 0.6;
-          const opacity = depth > 0 ? 0.9 : 0.3;
-          
-          return (
-            <g key={loc.name}>
-              <circle
-                cx={x}
-                cy={y}
-                r={3 * scale}
-                fill="rgba(20, 184, 166, 0.3)"
-                className="animate-pulse"
-              />
-              <circle
-                cx={x}
-                cy={y}
-                r={1.5 * scale}
-                fill={`rgba(20, 184, 166, ${opacity})`}
-              />
-            </g>
           );
         })}
         
@@ -119,11 +120,11 @@ const GridGlobe = () => {
         <circle 
           cx={center} 
           cy={center} 
-          r={radius + 2} 
+          r={radius + 3} 
           fill="none" 
-          stroke="rgba(20, 184, 166, 0.6)" 
-          strokeWidth="1" 
-          opacity="0.4" 
+          stroke="#14b8a6" 
+          strokeWidth="1.5" 
+          opacity="0.3" 
           className="animate-pulse"
         />
       </svg>
@@ -204,20 +205,17 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
           <CardContent className="p-0">
-            <div className="relative min-h-[400px] bg-gradient-to-r from-background via-background/50 to-background">
-              {/* Mapbox World Map Background */}
-              <div className="absolute inset-0 z-0 opacity-60">
-                <div ref={mapContainer} className="w-full h-full" style={{ filter: 'hue-rotate(100deg) saturate(1.3) brightness(1.1)' }} />
+            <div className="relative min-h-[400px] bg-black/90">
+              {/* Mapbox World Map Background - Fully Visible */}
+              <div className="absolute inset-0 z-0">
+                <div ref={mapContainer} className="w-full h-full" />
               </div>
-
-              {/* Glassmorphic overlay with teal tint */}
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-background/60 to-background/80 z-0" />
               
               {/* Content Layout - matches NetworkWorldMap structure */}
-              <div className="relative z-10 p-6 lg:p-8 flex flex-col justify-between h-full min-h-[400px]">
+              <div className="relative z-10 p-6 lg:p-8 flex flex-col justify-between h-full min-h-[400px] bg-gradient-to-br from-black/40 via-transparent to-black/40">
                 <div className="flex items-center gap-4 sm:gap-6">
-                  {/* 3D Grid Globe (left) */}
-                  <GridGlobe />
+                  {/* 3D CSS Grid Globe (left) */}
+                  <CSSGridGlobe />
 
                   {/* Location Info (center) */}
                   <div className="flex-1 min-w-0">
@@ -230,12 +228,12 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
                   </div>
 
                   {/* Location Count (right) */}
-                  <div className="flex-shrink-0 bg-background/60 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-primary/20">
+                  <div className="flex-shrink-0 bg-black/60 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-teal-500/30">
                     <div className="text-center">
-                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">
+                      <div className="text-xs sm:text-sm text-teal-400/80 mb-1">
                         Locations
                       </div>
-                      <div className="text-2xl sm:text-3xl font-bold text-[rgba(20,184,166,0.9)]">
+                      <div className="text-2xl sm:text-3xl font-bold text-teal-400">
                         {selectedLocations.length}
                       </div>
                     </div>
@@ -248,17 +246,13 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
                     <Badge
                       key={location.name}
                       variant="secondary"
-                      className="bg-teal-500/20 text-teal-300 border-teal-500/30 hover:bg-teal-500/30 transition-colors backdrop-blur-sm"
+                      className="bg-black/60 text-teal-300 border-teal-500/40 hover:bg-black/80 transition-colors backdrop-blur-sm"
                     >
                       {location.name}
                     </Badge>
                   ))}
                 </div>
               </div>
-
-              {/* Subtle teal glow accents */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
             </div>
           </CardContent>
         </Card>
