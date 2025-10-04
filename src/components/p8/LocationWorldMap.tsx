@@ -1,8 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useRef as useThreeRef } from 'react';
+import * as THREE from 'three';
 
 // Sample city data
 const selectedLocations = [
@@ -13,94 +16,69 @@ const selectedLocations = [
   { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
 ];
 
-// CSS-based 3D Teal Grid Globe with rotation animation
-const CSSGridGlobe = () => {
-  const [rotation, setRotation] = useState(0);
+// React Three Fiber 3D Globe of Dots
+const DotGlobe = () => {
+  const meshRef = useThreeRef<THREE.Points>(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRotation(prev => (prev + 1) % 360);
-    }, 30);
-    return () => clearInterval(interval);
+  // Generate dots in spherical pattern
+  const particles = useMemo(() => {
+    const count = 2000;
+    const positions = new Float32Array(count * 3);
+    const radius = 1.8;
+
+    for (let i = 0; i < count; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(Math.random() * 2 - 1);
+      
+      const x = radius * Math.sin(phi) * Math.cos(theta);
+      const y = radius * Math.sin(phi) * Math.sin(theta);
+      const z = radius * Math.cos(phi);
+
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+    }
+
+    return positions;
   }, []);
 
-  const size = 96;
-  const center = size / 2;
-  const radius = 38;
+  // Horizontal rotation animation
+  useFrame(() => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.002;
+    }
+  });
 
   return (
-    <div className="relative w-24 h-24 flex-shrink-0">
-      <svg 
-        className="w-full h-full" 
-        viewBox={`0 0 ${size} ${size}`}
-        style={{ 
-          filter: "drop-shadow(0 0 12px rgba(20, 184, 166, 0.5))",
-          transform: `rotateX(15deg)`
-        }}
-      >
-        {/* Main sphere outline */}
-        <circle 
-          cx={center} 
-          cy={center} 
-          r={radius} 
-          fill="none" 
-          stroke="#14b8a6" 
-          strokeWidth="1.5" 
-          opacity="0.6"
+    <points ref={meshRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={particles.length / 3}
+          array={particles}
+          itemSize={3}
         />
-        
-        {/* Latitude lines (horizontal circles) - wireframe style */}
-        {[-25, -12.5, 0, 12.5, 25].map((offset, i) => {
-          const y = center + offset;
-          const latRadius = radius * Math.cos((offset / radius) * (Math.PI / 2));
-          const rotationOffset = (rotation + i * 20) % 360;
-          return (
-            <ellipse
-              key={`lat-${i}`}
-              cx={center}
-              cy={y}
-              rx={latRadius}
-              ry={latRadius * 0.25}
-              fill="none"
-              stroke="#14b8a6"
-              strokeWidth="0.8"
-              opacity="0.5"
-              transform={`rotate(${rotationOffset} ${center} ${center})`}
-            />
-          );
-        })}
-        
-        {/* Longitude lines (vertical ellipses) - wireframe style */}
-        {[0, 30, 60, 90, 120, 150].map((angle, i) => {
-          const rotateAngle = (angle + rotation * 0.5) % 360;
-          return (
-            <ellipse
-              key={`lon-${i}`}
-              cx={center}
-              cy={center}
-              rx={radius * 0.25}
-              ry={radius}
-              fill="none"
-              stroke="#14b8a6"
-              strokeWidth="0.8"
-              opacity="0.5"
-              transform={`rotate(${rotateAngle} ${center} ${center})`}
-            />
-          );
-        })}
-        
-        {/* Outer glow ring */}
-        <circle 
-          cx={center} 
-          cy={center} 
-          r={radius + 3} 
-          fill="none" 
-          stroke="#14b8a6" 
-          strokeWidth="1.5" 
-          opacity="0.3" 
-          className="animate-pulse"
-        />
-      </svg>
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.03}
+        color="#14b8a6"
+        transparent
+        opacity={0.8}
+        sizeAttenuation
+      />
+    </points>
+  );
+};
+
+// 3D Globe Container
+const ThreeDGlobe = () => {
+  return (
+    <div className="w-24 h-24 flex-shrink-0">
+      <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} intensity={1} color="#14b8a6" />
+        <DotGlobe />
+      </Canvas>
     </div>
   );
 };
@@ -184,11 +162,11 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
                 <div ref={mapContainer} className="w-full h-full" />
               </div>
               
-              {/* Content Layout - matches NetworkWorldMap structure */}
-              <div className="relative z-10 p-6 lg:p-8 flex flex-col justify-between h-full min-h-[400px] bg-gradient-to-br from-black/40 via-transparent to-black/40">
+              {/* Content Layout - Mapbox clearly visible underneath */}
+              <div className="relative z-10 p-6 lg:p-8 flex flex-col justify-between h-full min-h-[400px] bg-gradient-to-br from-black/20 via-transparent to-black/20">
                 <div className="flex items-center gap-4 sm:gap-6">
-                  {/* 3D CSS Grid Globe (left) */}
-                  <CSSGridGlobe />
+                  {/* 3D React Three Fiber Globe (left) */}
+                  <ThreeDGlobe />
 
                   {/* Location Info (center) */}
                   <div className="flex-1 min-w-0">
