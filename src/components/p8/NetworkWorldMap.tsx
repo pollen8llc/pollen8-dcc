@@ -108,7 +108,7 @@ const NetworkWorldMap = () => {
     };
   }, []);
 
-  // Ring chart effect
+  // Ring chart effect with slow flashing
   useEffect(() => {
     const canvas = chartCanvasRef.current;
     if (!canvas) return;
@@ -116,12 +116,14 @@ const NetworkWorldMap = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let animationFrame: number;
+    let flashProgress = 0;
+
     const updateSize = () => {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * window.devicePixelRatio;
       canvas.height = rect.height * window.devicePixelRatio;
       ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      draw();
     };
 
     const draw = () => {
@@ -131,16 +133,12 @@ const NetworkWorldMap = () => {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Get primary color from CSS variable
-      const primaryColor = getComputedStyle(document.documentElement)
-        .getPropertyValue("--primary")
-        .trim();
-
       // Position ring chart on the left side at 96px from left, vertically centered
       const centerX = 96;
       const centerY = height / 2;
-      const outerRadius = 40;
-      const innerRadius = outerRadius * 0.6;
+      const size = 96; // Same as avatar size
+      const outerRadius = size / 2;
+      const innerRadius = outerRadius * 0.75; // Thinner ring for minimal look
 
       // Network data
       const totalContacts = 1247;
@@ -148,42 +146,34 @@ const NetworkWorldMap = () => {
       const activePercentage = (activeConnections / totalContacts) * 100;
       const activeAngle = (activePercentage / 100) * Math.PI * 2;
 
-      // Draw glow effect
-      const gradient = ctx.createRadialGradient(
-        centerX,
-        centerY,
-        innerRadius,
-        centerX,
-        centerY,
-        outerRadius + 30
-      );
-      gradient.addColorStop(0, `hsl(${primaryColor} / 0)`);
-      gradient.addColorStop(0.5, `hsl(${primaryColor} / 0.2)`);
-      gradient.addColorStop(1, `hsl(${primaryColor} / 0)`);
-      
-      ctx.fillStyle = gradient;
+      // Slow flashing effect (3 second cycle)
+      flashProgress += 0.005;
+      const flashIntensity = (Math.sin(flashProgress) + 1) / 2; // 0 to 1
+
+      // Glassmorphic background
+      ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
       ctx.beginPath();
-      ctx.arc(centerX, centerY, outerRadius + 30, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, outerRadius + 5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Draw inactive portion (background ring)
-      ctx.strokeStyle = `hsl(${primaryColor} / 0.2)`;
+      // Draw inactive portion (blue) - smaller side
+      const inactiveAngle = Math.PI * 2 - activeAngle;
+      ctx.strokeStyle = "rgba(59, 130, 246, 0.3)"; // Blue
       ctx.lineWidth = outerRadius - innerRadius;
+      ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.arc(centerX, centerY, (outerRadius + innerRadius) / 2, 0, Math.PI * 2);
+      ctx.arc(
+        centerX,
+        centerY,
+        (outerRadius + innerRadius) / 2,
+        -Math.PI / 2 + activeAngle,
+        -Math.PI / 2 + Math.PI * 2
+      );
       ctx.stroke();
 
-      // Draw active portion (glowing ring)
-      const activeGradient = ctx.createLinearGradient(
-        centerX - outerRadius,
-        centerY,
-        centerX + outerRadius,
-        centerY
-      );
-      activeGradient.addColorStop(0, `hsl(${primaryColor})`);
-      activeGradient.addColorStop(1, `hsl(${primaryColor} / 0.7)`);
-      
-      ctx.strokeStyle = activeGradient;
+      // Draw active portion (teal) - bigger side with flash
+      const flashOpacity = 0.6 + flashIntensity * 0.4; // 0.6 to 1.0
+      ctx.strokeStyle = `rgba(20, 184, 166, ${flashOpacity})`; // Teal with flashing
       ctx.lineWidth = outerRadius - innerRadius;
       ctx.lineCap = "round";
       ctx.beginPath();
@@ -196,26 +186,50 @@ const NetworkWorldMap = () => {
       );
       ctx.stroke();
 
+      // Subtle glow on active portion during flash
+      if (flashIntensity > 0.5) {
+        ctx.shadowBlur = 15 * flashIntensity;
+        ctx.shadowColor = "rgba(20, 184, 166, 0.5)";
+        ctx.strokeStyle = `rgba(20, 184, 166, ${flashIntensity * 0.3})`;
+        ctx.lineWidth = outerRadius - innerRadius + 2;
+        ctx.beginPath();
+        ctx.arc(
+          centerX,
+          centerY,
+          (outerRadius + innerRadius) / 2,
+          -Math.PI / 2,
+          -Math.PI / 2 + activeAngle
+        );
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+
       // Draw center text
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       
       // Percentage
-      ctx.fillStyle = `hsl(${primaryColor})`;
-      ctx.font = `bold ${outerRadius * 0.35}px sans-serif`;
-      ctx.fillText(`${Math.round(activePercentage)}%`, centerX, centerY - outerRadius * 0.15);
+      ctx.fillStyle = "rgba(20, 184, 166, 0.9)";
+      ctx.font = `bold ${size * 0.2}px sans-serif`;
+      ctx.fillText(`${Math.round(activePercentage)}%`, centerX, centerY - size * 0.08);
       
       // Label
-      ctx.fillStyle = `hsl(${primaryColor} / 0.7)`;
-      ctx.font = `${outerRadius * 0.15}px sans-serif`;
-      ctx.fillText("Active", centerX, centerY + outerRadius * 0.2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+      ctx.font = `${size * 0.1}px sans-serif`;
+      ctx.fillText("Active", centerX, centerY + size * 0.1);
+
+      animationFrame = requestAnimationFrame(draw);
     };
 
     updateSize();
     window.addEventListener("resize", updateSize);
+    draw();
 
     return () => {
       window.removeEventListener("resize", updateSize);
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
     };
   }, []);
 
