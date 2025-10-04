@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, Activity, Zap, Globe, Target, CheckCircle2 } from "lucide-react";
 import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 import NetworkWorldMap from "@/components/p8/NetworkWorldMap";
+import LocationWorldMap from "@/components/p8/LocationWorldMap";
 
 const P8Dashboard = () => {
   const metrics = [
@@ -41,6 +42,9 @@ const P8Dashboard = () => {
       <Navbar />
       <DotConnectorHeader />
       <div className="max-w-7xl mx-auto space-y-6 animate-fade-in p-6">
+
+        {/* Location World Map - Full width, double height */}
+        <LocationWorldMap className="min-h-[400px]" />
 
         {/* Network World Map */}
         <NetworkWorldMap />

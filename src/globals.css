@@ -1078,3 +1078,21 @@ button a {
 .ui-popover-content a {
   @apply text-foreground hover:text-foreground;
 }
+
+/* Custom Leaflet teal outline styling */
+.leaflet-teal-outline {
+  filter: hue-rotate(150deg) saturate(2) brightness(1.5);
+}
+
+/* Override Leaflet default styles for dark background with teal outline */
+.leaflet-container {
+  font-family: 'Inter', sans-serif;
+  background: #0a0a0a !important;
+}
+
+.leaflet-layer,
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out,
+.leaflet-control-attribution {
+  filter: hue-rotate(150deg) saturate(1.5) brightness(1.2);
+}
