@@ -43,11 +43,11 @@ const P8Dashboard = () => {
       <DotConnectorHeader />
       <div className="max-w-7xl mx-auto space-y-6 animate-fade-in p-6">
 
+        {/* Location World Map - Full width, double height */}
+        <LocationWorldMap className="min-h-[400px]" />
+
         {/* Network World Map */}
         <NetworkWorldMap />
-
-        {/* Location World Map */}
-        <LocationWorldMap />
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
