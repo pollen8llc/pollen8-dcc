@@ -17,76 +17,9 @@ interface LocationWorldMapProps {
 }
 
 const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const globeEl = useRef<any>();
   const [isGlobeReady, setIsGlobeReady] = useState(false);
 
-  // Starry sky background effect
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // Star particles
-    const stars: Array<{
-      x: number;
-      y: number;
-      radius: number;
-      alpha: number;
-      twinkleSpeed: number;
-      maxAlpha: number;
-    }> = [];
-
-    // Create stars
-    for (let i = 0; i < 100; i++) {
-      stars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 1.5 + 0.5,
-        alpha: Math.random() * 0.5,
-        twinkleSpeed: Math.random() * 0.02 + 0.005,
-        maxAlpha: Math.random() * 0.3 + 0.1,
-      });
-    }
-
-    let animationFrame: number;
-    const animate = () => {
-      if (!ctx || !canvas) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw stars with twinkling effect
-      stars.forEach(star => {
-        star.alpha += star.twinkleSpeed;
-        if (star.alpha > star.maxAlpha || star.alpha < 0.05) {
-          star.twinkleSpeed *= -1;
-        }
-
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(234, 234, 255, ${star.alpha})`;
-        ctx.fill();
-      });
-
-      animationFrame = requestAnimationFrame(animate);
-    };
-    animate();
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      cancelAnimationFrame(animationFrame);
-    };
-  }, []);
 
   // Globe setup
   useEffect(() => {
@@ -115,20 +48,13 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
   }, []);
 
   return (
-    <Card className={`relative overflow-hidden ${className}`}>
-      {/* Starry sky background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ background: 'linear-gradient(135deg, rgb(10, 10, 20) 0%, rgb(20, 20, 40) 100%)' }}
-      />
-
+    <Card className={`relative overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl ${className}`}>
       {/* Content */}
-      <div className="relative z-10 p-6">
-        <div className="flex items-center gap-6">
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6">
           {/* Left: Mini Globe */}
-          <div className="shrink-0">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-background/5 backdrop-blur-sm">
+          <div className="shrink-0 mx-auto lg:mx-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-background/50 backdrop-blur-sm border border-primary/20">
               <Globe
                 ref={globeEl}
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
@@ -153,17 +79,17 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
           </div>
 
           {/* Center: Title and Description */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-2xl font-bold text-white mb-1">Locations</h2>
-            <p className="text-sm text-white/70 mb-3">Your global presence</p>
+          <div className="flex-1 min-w-0 text-center lg:text-left">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-1 sm:mb-2">Locations</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">Your global presence</p>
             
             {/* Location badges */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center lg:justify-start">
               {selectedLocations.map((location) => (
                 <Badge
                   key={location.name}
                   variant="secondary"
-                  className="bg-teal-500/20 text-teal-300 border-teal-500/30 hover:bg-teal-500/30 transition-colors"
+                  className="text-xs sm:text-sm font-medium"
                 >
                   {location.name}
                 </Badge>
@@ -172,12 +98,12 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
           </div>
 
           {/* Right: Stats */}
-          <div className="shrink-0 text-right">
-            <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
-              <div className="text-3xl font-bold text-white mb-1">
+          <div className="shrink-0 text-center lg:text-right mx-auto lg:mx-0">
+            <div className="bg-muted/30 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-border/50">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
                 {selectedLocations.length}
               </div>
-              <div className="text-xs text-white/60">
+              <div className="text-xs text-muted-foreground">
                 Cities
               </div>
             </div>
@@ -186,8 +112,8 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
       </div>
 
       {/* Decorative gradient overlay */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl pointer-events-none" />
     </Card>
   );
 };

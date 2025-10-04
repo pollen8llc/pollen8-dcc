@@ -41,13 +41,13 @@ const P8Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       <DotConnectorHeader />
-      <div className="max-w-7xl mx-auto space-y-6 animate-fade-in p-6">
-
-        {/* Network World Map */}
-        <NetworkWorldMap />
+      <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
 
         {/* Location World Map */}
         <LocationWorldMap />
+
+        {/* Network World Map */}
+        <NetworkWorldMap />
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

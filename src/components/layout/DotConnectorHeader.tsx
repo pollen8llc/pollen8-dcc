@@ -39,7 +39,7 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
   return (
     <div className={`w-full ${className}`}>
       {/* Header Content */}
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="container mx-auto px-4 py-6 max-w-6xl lg:px-6">
         <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
           <CardContent className="p-0">
             <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
