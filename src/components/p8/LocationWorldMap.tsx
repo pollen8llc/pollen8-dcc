@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useEffect, useRef, useMemo, useState } from 'react';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import Globe from 'react-globe.gl';
 
 // Sample city data
 const selectedLocations = [
@@ -13,263 +12,183 @@ const selectedLocations = [
   { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
 ];
 
-// 3D Teal Grid Globe Component
-const GridGlobe = () => {
-  const [rotation, setRotation] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRotation(prev => (prev + 0.8) % 360);
-    }, 50);
-    return () => clearInterval(interval);
-  }, []);
-
-  const size = 96;
-  const center = size / 2;
-  const radius = 40;
-
-  return (
-    <div className="relative w-24 h-24 flex-shrink-0">
-      {/* Glassmorphic background circle */}
-      <div className="absolute inset-0 rounded-full bg-white/5 backdrop-blur-sm" />
-      
-      <svg 
-        className="w-full h-full" 
-        viewBox={`0 0 ${size} ${size}`}
-        style={{ 
-          filter: "drop-shadow(0 0 8px rgba(20, 184, 166, 0.4))",
-          transform: `perspective(400px) rotateY(${rotation}deg) rotateX(15deg)`
-        }}
-      >
-        {/* Main sphere outline */}
-        <circle 
-          cx={center} 
-          cy={center} 
-          r={radius} 
-          fill="none" 
-          stroke="rgba(20, 184, 166, 0.5)" 
-          strokeWidth="1.5" 
-        />
-        
-        {/* Latitude lines (horizontal circles) */}
-        {[-30, -15, 0, 15, 30].map((offset, i) => {
-          const y = center + offset;
-          const latRadius = radius * Math.cos((offset / radius) * (Math.PI / 2));
-          return (
-            <ellipse
-              key={`lat-${i}`}
-              cx={center}
-              cy={y}
-              rx={latRadius}
-              ry={latRadius * 0.3}
-              fill="none"
-              stroke="rgba(20, 184, 166, 0.4)"
-              strokeWidth="0.8"
-            />
-          );
-        })}
-        
-        {/* Longitude lines (vertical ellipses) */}
-        {[0, 30, 60, 90, 120, 150].map((angle, i) => {
-          const rotateAngle = angle + rotation * 0.3;
-          return (
-            <ellipse
-              key={`lon-${i}`}
-              cx={center}
-              cy={center}
-              rx={radius * 0.3}
-              ry={radius}
-              fill="none"
-              stroke="rgba(20, 184, 166, 0.4)"
-              strokeWidth="0.8"
-              transform={`rotate(${rotateAngle} ${center} ${center})`}
-            />
-          );
-        })}
-        
-        {/* Pulsing location dots */}
-        {selectedLocations.map((loc, i) => {
-          const angle = (i / selectedLocations.length) * 360 + rotation;
-          const depth = Math.cos((angle * Math.PI) / 180);
-          const x = center + radius * 0.7 * Math.sin((angle * Math.PI) / 180);
-          const y = center - radius * 0.5 * Math.sin(((i * 60) * Math.PI) / 180);
-          const scale = depth > 0 ? 1 : 0.6;
-          const opacity = depth > 0 ? 0.9 : 0.3;
-          
-          return (
-            <g key={loc.name}>
-              <circle
-                cx={x}
-                cy={y}
-                r={3 * scale}
-                fill="rgba(20, 184, 166, 0.3)"
-                className="animate-pulse"
-              />
-              <circle
-                cx={x}
-                cy={y}
-                r={1.5 * scale}
-                fill={`rgba(20, 184, 166, ${opacity})`}
-              />
-            </g>
-          );
-        })}
-        
-        {/* Outer glow ring */}
-        <circle 
-          cx={center} 
-          cy={center} 
-          r={radius + 2} 
-          fill="none" 
-          stroke="rgba(20, 184, 166, 0.6)" 
-          strokeWidth="1" 
-          opacity="0.4" 
-          className="animate-pulse"
-        />
-      </svg>
-    </div>
-  );
-};
-
 interface LocationWorldMapProps {
   className?: string;
 }
 
 const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const globeEl = useRef<any>();
+  const [isGlobeReady, setIsGlobeReady] = useState(false);
 
-  // Initialize Mapbox
+  // Starry sky background effect
   useEffect(() => {
-    if (!mapContainer.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      projection: { name: 'globe' } as any,
-      zoom: 1.3,
-      center: [20, 20],
-      interactive: false,
-    });
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    // Disable all interactions
-    map.current.scrollZoom.disable();
-    map.current.boxZoom.disable();
-    map.current.dragRotate.disable();
-    map.current.dragPan.disable();
-    map.current.keyboard.disable();
-    map.current.doubleClickZoom.disable();
-    map.current.touchZoomRotate.disable();
+    // Set canvas size
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-    // Apply teal atmosphere and add markers
-    map.current.on('style.load', () => {
-      map.current?.setFog({
-        color: 'rgb(10, 10, 10)',
-        'high-color': 'rgb(20, 184, 166)',
-        'horizon-blend': 0.15,
-        'space-color': 'rgb(10, 10, 10)',
-        'star-intensity': 0.3,
+    // Star particles
+    const stars: Array<{
+      x: number;
+      y: number;
+      radius: number;
+      alpha: number;
+      twinkleSpeed: number;
+      maxAlpha: number;
+    }> = [];
+
+    // Create stars
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 1.5 + 0.5,
+        alpha: Math.random() * 0.5,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        maxAlpha: Math.random() * 0.3 + 0.1,
+      });
+    }
+
+    let animationFrame: number;
+    const animate = () => {
+      if (!ctx || !canvas) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw stars with twinkling effect
+      stars.forEach(star => {
+        star.alpha += star.twinkleSpeed;
+        if (star.alpha > star.maxAlpha || star.alpha < 0.05) {
+          star.twinkleSpeed *= -1;
+        }
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(234, 234, 255, ${star.alpha})`;
+        ctx.fill();
       });
 
-      // Add pulsing markers for each location
-      selectedLocations.forEach((location) => {
-        const el = document.createElement('div');
-        el.className = 'location-marker';
-        el.innerHTML = `
-          <div class="marker-pulse"></div>
-          <div class="marker-dot"></div>
-        `;
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animate();
 
-        const marker = new mapboxgl.Marker({ element: el })
-          .setLngLat([location.lng, location.lat])
-          .addTo(map.current!);
-        
-        markers.current.push(marker);
-      });
-    });
-
-    // Cleanup
     return () => {
-      markers.current.forEach(marker => marker.remove());
-      markers.current = [];
-      map.current?.remove();
+      window.removeEventListener('resize', resizeCanvas);
+      cancelAnimationFrame(animationFrame);
     };
   }, []);
 
+  // Globe setup
+  useEffect(() => {
+    if (!globeEl.current) return;
+
+    // Set initial camera position
+    globeEl.current.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 0);
+    
+    // Enable auto-rotation
+    globeEl.current.controls().autoRotate = true;
+    globeEl.current.controls().autoRotateSpeed = 1;
+    globeEl.current.controls().enableZoom = false;
+    
+    setIsGlobeReady(true);
+  }, []);
+
+  // Points data for selected locations
+  const pointsData = useMemo(() => {
+    return selectedLocations.map(location => ({
+      lat: location.lat,
+      lng: location.lng,
+      size: 0.5,
+      color: '#14b8a6',
+      city: location.name
+    }));
+  }, []);
+
   return (
-    <div className="w-full">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
-          <CardContent className="p-0">
-            <div className="relative min-h-[400px] bg-gradient-to-r from-background via-background/50 to-background">
-              {/* Mapbox World Map Background */}
-              <div className="absolute inset-0 z-0 opacity-60">
-                <div ref={mapContainer} className="w-full h-full" style={{ filter: 'hue-rotate(100deg) saturate(1.3) brightness(1.1)' }} />
-              </div>
+    <Card className={`relative overflow-hidden ${className}`}>
+      {/* Starry sky background */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ background: 'linear-gradient(135deg, rgb(10, 10, 20) 0%, rgb(20, 20, 40) 100%)' }}
+      />
 
-              {/* Glassmorphic overlay with teal tint */}
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-background/60 to-background/80 z-0" />
-              
-              {/* Content Layout - matches NetworkWorldMap structure */}
-              <div className="relative z-10 p-6 lg:p-8 flex flex-col justify-between h-full min-h-[400px]">
-                <div className="flex items-center gap-4 sm:gap-6">
-                  {/* 3D Grid Globe (left) */}
-                  <GridGlobe />
-
-                  {/* Location Info (center) */}
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-1">
-                      Locations
-                    </h2>
-                    <p className="text-sm sm:text-base text-muted-foreground">
-                      Your global presence
-                    </p>
-                  </div>
-
-                  {/* Location Count (right) */}
-                  <div className="flex-shrink-0 bg-background/60 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-primary/20">
-                    <div className="text-center">
-                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">
-                        Locations
-                      </div>
-                      <div className="text-2xl sm:text-3xl font-bold text-[rgba(20,184,166,0.9)]">
-                        {selectedLocations.length}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Location badges at bottom */}
-                <div className="flex flex-wrap gap-2 mt-6">
-                  {selectedLocations.map((location) => (
-                    <Badge
-                      key={location.name}
-                      variant="secondary"
-                      className="bg-teal-500/20 text-teal-300 border-teal-500/30 hover:bg-teal-500/30 transition-colors backdrop-blur-sm"
-                    >
-                      {location.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Subtle teal glow accents */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* Content */}
+      <div className="relative z-10 p-6">
+        <div className="flex items-center gap-6">
+          {/* Left: Mini Globe */}
+          <div className="shrink-0">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-background/5 backdrop-blur-sm">
+              <Globe
+                ref={globeEl}
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+                backgroundColor="rgba(0,0,0,0)"
+                showAtmosphere={true}
+                atmosphereColor="#14b8a6"
+                atmosphereAltitude={0.15}
+                width={96}
+                height={96}
+                animateIn={false}
+                waitForGlobeReady={true}
+                onGlobeReady={() => setIsGlobeReady(true)}
+                pointsData={pointsData}
+                pointAltitude={0.01}
+                pointRadius={0.6}
+                pointColor="color"
+                pointLabel={(d: any) => d.city}
+                pointsMerge={false}
+                pointsTransitionDuration={0}
+              />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Center: Title and Description */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl font-bold text-white mb-1">Locations</h2>
+            <p className="text-sm text-white/70 mb-3">Your global presence</p>
+            
+            {/* Location badges */}
+            <div className="flex flex-wrap gap-2">
+              {selectedLocations.map((location) => (
+                <Badge
+                  key={location.name}
+                  variant="secondary"
+                  className="bg-teal-500/20 text-teal-300 border-teal-500/30 hover:bg-teal-500/30 transition-colors"
+                >
+                  {location.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Stats */}
+          <div className="shrink-0 text-right">
+            <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+              <div className="text-3xl font-bold text-white mb-1">
+                {selectedLocations.length}
+              </div>
+              <div className="text-xs text-white/60">
+                Cities
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Glowing Sliver */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-[2px] opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-[4px] opacity-40" />
-      </div>
-    </div>
+      {/* Decorative gradient overlay */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-teal-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+    </Card>
   );
 };
 
