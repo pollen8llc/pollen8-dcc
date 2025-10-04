@@ -3,9 +3,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Sphere } from '@react-three/drei';
-import * as THREE from 'three';
 
 // Sample city data
 const selectedLocations = [
@@ -16,31 +13,7 @@ const selectedLocations = [
   { name: 'Dubai', lat: 25.2048, lng: 55.2708 },
 ];
 
-// 3D Wireframe Globe with React Three Fiber
-const ThreeGlobe = () => {
-  return (
-    <Canvas className="w-24 h-24">
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} color="#14b8a6" />
-      <Sphere args={[1, 32, 32]} rotation={[0, 0, 0]}>
-        <meshBasicMaterial 
-          color="#14b8a6" 
-          wireframe 
-          transparent 
-          opacity={0.6}
-        />
-      </Sphere>
-      <OrbitControls 
-        enableZoom={false} 
-        enablePan={false}
-        autoRotate
-        autoRotateSpeed={2}
-      />
-    </Canvas>
-  );
-};
-
-// CSS-based 3D Teal Grid Globe (inspired by Three.js design)
+// CSS-based 3D Teal Grid Globe with rotation animation
 const CSSGridGlobe = () => {
   const [rotation, setRotation] = useState(0);
 
