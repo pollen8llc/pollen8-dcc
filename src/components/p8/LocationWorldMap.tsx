@@ -2,8 +2,6 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Globe from 'react-globe.gl';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
 
 // Sample city data
 const selectedLocations = [
@@ -50,41 +48,16 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
 
   return (
     <Card className={`relative overflow-hidden bg-card/40 backdrop-blur-md border-0 ${className}`}>
-      {/* Leaflet World Map Background */}
-      <div className="absolute inset-0 opacity-20">
-        <MapContainer
-          center={[20, 0]}
-          zoom={1.5}
-          style={{ height: '100%', width: '100%', background: '#0a0a0a' }}
-          zoomControl={false}
-          dragging={false}
-          scrollWheelZoom={false}
-          doubleClickZoom={false}
-          touchZoom={false}
-          keyboard={false}
-          attributionControl={false}
-        >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-            opacity={0.6}
-          />
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
-            opacity={0.8}
-            className="leaflet-teal-outline"
-          />
-        </MapContainer>
-      </div>
-
       {/* Glassmorphic overlay with teal tint */}
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-background/80 to-background/90" />
-      
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50" />
+      <div className="absolute inset-0 opacity-5" style={{ backgroundColor: 'hsl(168 76% 42%)' }} />
+
       {/* Content */}
       <div className="relative z-10 p-6">
         <div className="flex items-start gap-6">
           {/* Left: D3 Grid Globe */}
           <div className="shrink-0">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-background/20 backdrop-blur-sm border border-teal-500/30">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-background/5 backdrop-blur-sm">
               <Globe
                 ref={globeEl}
                 globeImageUrl={null}
@@ -127,6 +100,18 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
                   {location.name}
                 </Badge>
               ))}
+            </div>
+          </div>
+
+          {/* Right: Stats */}
+          <div className="shrink-0 text-right">
+            <div className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border border-white/10">
+              <div className="text-3xl font-bold mb-1">
+                {selectedLocations.length}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Cities
+              </div>
             </div>
           </div>
         </div>
