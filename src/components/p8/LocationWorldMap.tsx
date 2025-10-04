@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Sample city data
 const selectedLocations = [
@@ -19,6 +19,52 @@ interface LocationWorldMapProps {
 
 const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
   const [rotation, setRotation] = useState(0);
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+
+  // Initialize Mapbox
+  useEffect(() => {
+    if (!mapContainer.current) return;
+
+    // Note: Replace 'YOUR_MAPBOX_TOKEN' with your actual Mapbox public token
+    // Get it from https://account.mapbox.com/access-tokens/
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+    
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/dark-v11',
+      projection: { name: 'globe' } as any,
+      zoom: 1.2,
+      center: [20, 20],
+      interactive: false,
+    });
+
+    // Disable all interactions
+    map.current.scrollZoom.disable();
+    map.current.boxZoom.disable();
+    map.current.dragRotate.disable();
+    map.current.dragPan.disable();
+    map.current.keyboard.disable();
+    map.current.doubleClickZoom.disable();
+    map.current.touchZoomRotate.disable();
+
+    // Apply teal color filter to map
+    map.current.on('style.load', () => {
+      // Add teal atmosphere
+      map.current?.setFog({
+        color: 'rgb(10, 10, 10)',
+        'high-color': 'rgb(20, 184, 166)',
+        'horizon-blend': 0.1,
+        'space-color': 'rgb(10, 10, 10)',
+        'star-intensity': 0.2,
+      });
+    });
+
+    // Cleanup
+    return () => {
+      map.current?.remove();
+    };
+  }, []);
 
   // Auto-rotate the SVG globe
   useEffect(() => {
@@ -30,25 +76,9 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
 
   return (
     <Card className={`relative overflow-hidden bg-card/40 backdrop-blur-md border-0 ${className}`}>
-      {/* Leaflet World Map Background */}
-      <div className="absolute inset-0 opacity-20 z-0">
-        <MapContainer
-          center={[20, 0]}
-          zoom={1.5}
-          style={{ height: '100%', width: '100%', background: '#0a0a0a' }}
-          zoomControl={false}
-          dragging={false}
-          scrollWheelZoom={false}
-          doubleClickZoom={false}
-          touchZoom={false}
-          keyboard={false}
-          attributionControl={false}
-        >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-            className="leaflet-teal-tiles"
-          />
-        </MapContainer>
+      {/* Mapbox World Map Background */}
+      <div className="absolute inset-0 z-0 opacity-30">
+        <div ref={mapContainer} className="w-full h-full" style={{ filter: 'hue-rotate(120deg) saturate(1.5)' }} />
       </div>
 
       {/* Glassmorphic overlay with teal tint */}
