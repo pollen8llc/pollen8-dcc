@@ -48,13 +48,12 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
   }, []);
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl ${className}`}>
-      {/* Content */}
-      <div className="relative z-10 p-4 sm:p-6 lg:p-8">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6">
-          {/* Left: Mini Globe */}
-          <div className="shrink-0 mx-auto lg:mx-0">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-background/50 backdrop-blur-sm border border-primary/20">
+    <Card className={`group overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary/30 ${className}`}>
+      <div className="p-6 lg:p-8">
+        <div className="flex flex-row items-center gap-6 lg:gap-8">
+          {/* Left: Globe (same size as avatar - 96px) */}
+          <div className="shrink-0">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-background/50 backdrop-blur-sm border border-primary/20 group-hover:border-primary/40 transition-colors duration-300">
               <Globe
                 ref={globeEl}
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
@@ -78,18 +77,16 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
             </div>
           </div>
 
-          {/* Center: Title and Description */}
-          <div className="flex-1 min-w-0 text-center lg:text-left">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-1 sm:mb-2">Locations</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">Your global presence</p>
+          {/* Center: Title and Badges */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-2">Locations</h2>
             
             {/* Location badges */}
-            <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center lg:justify-start">
+            <div className="flex flex-wrap gap-1.5">
               {selectedLocations.map((location) => (
                 <Badge
                   key={location.name}
-                  variant="secondary"
-                  className="text-xs sm:text-sm font-medium"
+                  className="text-xs bg-[#00eada]/10 text-[#00eada] border border-[#00eada]/30 hover:bg-[#00eada]/20 transition-colors"
                 >
                   {location.name}
                 </Badge>
@@ -98,22 +95,16 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
           </div>
 
           {/* Right: Stats */}
-          <div className="shrink-0 text-center lg:text-right mx-auto lg:mx-0">
-            <div className="bg-muted/30 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-border/50">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
-                {selectedLocations.length}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Cities
-              </div>
+          <div className="shrink-0 text-right">
+            <div className="text-3xl font-bold text-foreground mb-1">
+              {selectedLocations.length}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Cities
             </div>
           </div>
         </div>
       </div>
-
-      {/* Decorative gradient overlay */}
-      <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl pointer-events-none" />
     </Card>
   );
 };

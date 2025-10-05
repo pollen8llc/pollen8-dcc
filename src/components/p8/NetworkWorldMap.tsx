@@ -1,4 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef } from "react";
 
 // Inline SVG Ring Chart Component
@@ -8,7 +9,7 @@ const RingChart = () => {
   const activePercentage = (activeConnections / totalContacts) * 100;
   
   const size = 96;
-  const strokeWidth = 10;
+  const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const activeStrokeDashoffset = circumference - (activePercentage / 100) * circumference;
@@ -16,55 +17,45 @@ const RingChart = () => {
   return (
     <div className="relative w-24 h-24 flex-shrink-0">
       {/* Glassmorphic background circle */}
-      <div className="absolute inset-0 rounded-full bg-white/5 backdrop-blur-sm" />
+      <div className="absolute inset-0 rounded-full bg-background/50 backdrop-blur-sm border border-primary/20" />
       
       <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
-        {/* Inactive ring (blue) */}
+        {/* Inactive ring */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(59, 130, 246, 0.3)"
+          stroke="hsl(var(--muted))"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
+          opacity={0.3}
         />
         
-        {/* Active ring (teal with flashing animation) */}
+        {/* Active ring (teal with glow) */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(20, 184, 166, 0.9)"
+          stroke="#00eada"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={activeStrokeDashoffset}
-          className="transition-all duration-300"
+          className="drop-shadow-[0_0_8px_rgba(0,234,218,0.5)]"
           style={{
-            filter: "drop-shadow(0 0 8px rgba(20, 184, 166, 0.4))",
-            animation: "pulse-glow 3s ease-in-out infinite"
+            transition: 'stroke-dashoffset 1s ease-in-out',
           }}
         />
       </svg>
       
       {/* Center text */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <div className="text-lg font-bold text-[rgba(20,184,166,0.9)]">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-sm font-bold text-foreground">
           {Math.round(activePercentage)}%
-        </div>
-        <div className="text-[10px] text-muted-foreground">
-          Active
-        </div>
+        </span>
       </div>
-      
-      <style>{`
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.9; }
-          50% { opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 };
@@ -177,69 +168,59 @@ const NetworkWorldMap = () => {
 
 
   return (
-    <div className="w-full">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
-          <CardContent className="p-0">
-            <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
-              {/* Plexus Background */}
-              <canvas
-                ref={plexusCanvasRef}
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background:
-                    "radial-gradient(circle at 50% 50%, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
-                }}
-              />
+    <Card className="group relative overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary/30">
+      {/* Plexus Background */}
+      <canvas
+        ref={plexusCanvasRef}
+        className="absolute inset-0 w-full h-full opacity-20 pointer-events-none"
+        style={{ mixBlendMode: 'screen' }}
+      />
 
-              {/* Content Layout - matches profile card structure */}
-              <div className="relative z-10 flex items-center gap-4 sm:gap-6">
-                {/* Ring Chart (left) - inline like avatar */}
-                <RingChart />
+      {/* Content */}
+      <div className="relative z-10 p-6 lg:p-8">
+        <div className="flex flex-row items-center gap-6 lg:gap-8">
+          {/* Left: Ring Chart (same size as avatar - 96px) */}
+          <div className="shrink-0">
+            <RingChart />
+          </div>
 
-                {/* Network Info (center) - matches profile info */}
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-1">
-                    Network
-                  </h2>
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    Social Connection Analysis
-                  </p>
-                </div>
-
-                {/* Stats (right) - matches settings button position */}
-                <div className="flex-shrink-0 bg-background/60 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-primary/20">
-                  <div className="flex gap-4 sm:gap-6">
-                    <div className="text-center">
-                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">
-                        Active
-                      </div>
-                      <div className="text-lg sm:text-xl font-bold text-[rgba(20,184,166,0.9)]">
-                        842
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">
-                        Total
-                      </div>
-                      <div className="text-lg sm:text-xl font-bold text-[rgba(59,130,246,0.7)]">
-                        1,247
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          {/* Center: Title and Badges */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-2">Network</h2>
+            
+            {/* Connection badges */}
+            <div className="flex flex-wrap gap-1.5">
+              <Badge
+                className="text-xs bg-[#00eada]/10 text-[#00eada] border border-[#00eada]/30 hover:bg-[#00eada]/20 transition-colors"
+              >
+                Strong Ties
+              </Badge>
+              <Badge
+                className="text-xs bg-[#00eada]/10 text-[#00eada] border border-[#00eada]/30 hover:bg-[#00eada]/20 transition-colors"
+              >
+                Weak Ties
+              </Badge>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
 
-      {/* Glowing Sliver */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-[2px] opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-[4px] opacity-40" />
+          {/* Right: Stats */}
+          <div className="shrink-0 text-right">
+            <div className="text-2xl font-bold text-[#00eada] mb-1">
+              842
+            </div>
+            <div className="text-sm text-muted-foreground mb-2">
+              Active
+            </div>
+            <div className="text-xl font-semibold text-foreground">
+              1,247
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Total
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
