@@ -1,7 +1,7 @@
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import Globe from 'react-globe.gl';
+import { MapPin } from 'lucide-react';
 
 // Sample city data
 const selectedLocations = [
@@ -16,77 +16,109 @@ interface LocationWorldMapProps {
   className?: string;
 }
 
+// Convert lat/lng to SVG coordinates (Mercator projection)
+const projectToMap = (lat: number, lng: number, width: number, height: number) => {
+  const x = ((lng + 180) / 360) * width;
+  const latRad = (lat * Math.PI) / 180;
+  const mercN = Math.log(Math.tan(Math.PI / 4 + latRad / 2));
+  const y = height / 2 - (mercN * width) / (2 * Math.PI);
+  return { x, y };
+};
+
 const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
-  const globeEl = useRef<any>();
-  const [isGlobeReady, setIsGlobeReady] = useState(false);
+  const mapWidth = 800;
+  const mapHeight = 400;
 
-
-  // Globe setup
-  useEffect(() => {
-    if (!globeEl.current) return;
-
-    // Set initial camera position
-    globeEl.current.pointOfView({ lat: 20, lng: 0, altitude: 2.5 }, 0);
-    
-    // Enable auto-rotation
-    globeEl.current.controls().autoRotate = true;
-    globeEl.current.controls().autoRotateSpeed = 1;
-    globeEl.current.controls().enableZoom = false;
-    
-    setIsGlobeReady(true);
-  }, []);
-
-  // Points data for selected locations
-  const pointsData = useMemo(() => {
+  const locationPoints = useMemo(() => {
     return selectedLocations.map(location => ({
-      lat: location.lat,
-      lng: location.lng,
-      size: 0.5,
-      color: '#14b8a6',
-      city: location.name
+      ...location,
+      coords: projectToMap(location.lat, location.lng, mapWidth, mapHeight)
     }));
   }, []);
 
   return (
     <Card className={`group overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary/30 ${className}`}>
-      <div className="p-6 lg:p-8">
-        <div className="flex flex-row items-center gap-6 lg:gap-8">
-          {/* Left: Globe (same size as avatar - 96px) */}
-          <div className="shrink-0">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-background/50 backdrop-blur-sm border border-primary/20 group-hover:border-primary/40 transition-colors duration-300">
-              <Globe
-                ref={globeEl}
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-                backgroundColor="rgba(0,0,0,0)"
-                showAtmosphere={true}
-                atmosphereColor="#14b8a6"
-                atmosphereAltitude={0.15}
-                width={96}
-                height={96}
-                animateIn={false}
-                waitForGlobeReady={true}
-                onGlobeReady={() => setIsGlobeReady(true)}
-                pointsData={pointsData}
-                pointAltitude={0.01}
-                pointRadius={0.6}
-                pointColor="color"
-                pointLabel={(d: any) => d.city}
-                pointsMerge={false}
-                pointsTransitionDuration={0}
-              />
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 lg:gap-8">
+          {/* Left: World Map (same width as avatar - 96px on desktop, full width on mobile) */}
+          <div className="shrink-0 w-full sm:w-24">
+            <div className="relative w-full sm:w-24 aspect-[2/1] sm:aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 group-hover:border-primary/40 transition-colors duration-300">
+              <svg
+                viewBox={`0 0 ${mapWidth} ${mapHeight}`}
+                className="w-full h-full"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                {/* Simplified world map outline */}
+                <path
+                  d="M 50 100 Q 100 80 150 100 T 250 100 Q 300 90 350 100 T 450 100 Q 500 110 550 100 T 650 100 Q 700 90 750 100 M 100 150 Q 150 140 200 150 T 300 150 Q 350 160 400 150 T 500 150 Q 550 140 600 150 T 700 150 M 150 200 Q 200 190 250 200 T 350 200 Q 400 210 450 200 T 550 200 M 200 250 Q 250 240 300 250 T 400 250 Q 450 260 500 250 M 250 300 Q 300 290 350 300 T 450 300"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="1"
+                  fill="none"
+                  opacity="0.2"
+                  className="animate-pulse"
+                />
+                
+                {/* Location markers */}
+                {locationPoints.map((location, index) => (
+                  <g key={location.name}>
+                    {/* Pulsing circle */}
+                    <circle
+                      cx={location.coords.x}
+                      cy={location.coords.y}
+                      r="8"
+                      fill="hsl(var(--primary))"
+                      opacity="0.2"
+                      className="animate-ping"
+                      style={{ animationDelay: `${index * 200}ms` }}
+                    />
+                    {/* Main marker */}
+                    <circle
+                      cx={location.coords.x}
+                      cy={location.coords.y}
+                      r="4"
+                      fill="hsl(var(--primary))"
+                      className="transition-all duration-300 hover:r-6"
+                    />
+                  </g>
+                ))}
+                
+                {/* Connection lines */}
+                {locationPoints.map((location, i) => 
+                  i < locationPoints.length - 1 ? (
+                    <line
+                      key={`line-${i}`}
+                      x1={location.coords.x}
+                      y1={location.coords.y}
+                      x2={locationPoints[i + 1].coords.x}
+                      y2={locationPoints[i + 1].coords.y}
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="0.5"
+                      opacity="0.3"
+                      strokeDasharray="4,4"
+                      className="animate-pulse"
+                    />
+                  ) : null
+                )}
+              </svg>
+              
+              {/* Map pin icon overlay (desktop only) */}
+              <div className="hidden sm:flex absolute inset-0 items-center justify-center pointer-events-none">
+                <MapPin className="w-8 h-8 text-primary/20" />
+              </div>
             </div>
           </div>
 
           {/* Center: Title and Badges */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-2">Locations</h2>
+          <div className="flex-1 min-w-0 w-full sm:w-auto">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground mb-2">Locations</h2>
             
             {/* Location badges */}
             <div className="flex flex-wrap gap-1.5">
               {selectedLocations.map((location) => (
                 <Badge
                   key={location.name}
-                  className="text-xs bg-[#00eada]/10 text-[#00eada] border border-[#00eada]/30 hover:bg-[#00eada]/20 transition-colors"
+                  variant="teal"
+                  className="text-xs"
                 >
                   {location.name}
                 </Badge>
@@ -95,11 +127,11 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
           </div>
 
           {/* Right: Stats */}
-          <div className="shrink-0 text-right">
-            <div className="text-3xl font-bold text-foreground mb-1">
+          <div className="shrink-0 text-left sm:text-right w-full sm:w-auto">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
               {selectedLocations.length}
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground">
               Cities
             </div>
           </div>
