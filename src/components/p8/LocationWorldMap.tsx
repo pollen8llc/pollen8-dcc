@@ -54,22 +54,22 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6">
           {/* Left: Mini Globe */}
           <div className="shrink-0 mx-auto lg:mx-0">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-background/50 backdrop-blur-sm border border-primary/20">
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-background/50 backdrop-blur-sm border border-primary/20 flex items-center justify-center">
               <Globe
                 ref={globeEl}
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+                globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                 backgroundColor="rgba(0,0,0,0)"
                 showAtmosphere={true}
                 atmosphereColor="#14b8a6"
-                atmosphereAltitude={0.15}
-                width={96}
-                height={96}
+                atmosphereAltitude={0.2}
+                width={128}
+                height={128}
                 animateIn={false}
                 waitForGlobeReady={true}
                 onGlobeReady={() => setIsGlobeReady(true)}
                 pointsData={pointsData}
-                pointAltitude={0.01}
-                pointRadius={0.6}
+                pointAltitude={0.02}
+                pointRadius={1.2}
                 pointColor="color"
                 pointLabel={(d: any) => d.city}
                 pointsMerge={false}
