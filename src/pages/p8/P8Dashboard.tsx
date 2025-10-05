@@ -41,7 +41,7 @@ const P8Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       <DotConnectorHeader />
-      <div className="container mx-auto px-4 py-6 max-w-6xl lg:px-6 space-y-6 animate-fade-in">
+      <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
 
         {/* Location World Map */}
         <LocationWorldMap />
@@ -56,18 +56,18 @@ const P8Dashboard = () => {
             return (
               <Card
                 key={metric.label}
-                className="group p-6 bg-background/40 backdrop-blur-xl border-primary/20 hover:border-primary/40 transition-all duration-300 hover:scale-[1.02] animate-fade-in hover:shadow-lg"
+                className="p-6 bg-background/40 backdrop-blur-xl border-primary/20 hover:border-primary/40 transition-all duration-300 hover:scale-105 animate-fade-in"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="flex items-center gap-4">
-                  <Icon className={`h-8 w-8 shrink-0 ${metric.color} transition-transform duration-300 group-hover:scale-110`} />
-                  <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
                     <p className="text-sm text-muted-foreground mb-1">{metric.label}</p>
-                    <p className="text-2xl lg:text-3xl font-bold">{metric.value}</p>
+                    <p className="text-3xl font-bold">{metric.value}</p>
+                    <Badge variant="secondary" className="mt-2 bg-primary/10 text-primary">
+                      {metric.change}
+                    </Badge>
                   </div>
-                  <Badge className="shrink-0 bg-[#00eada]/10 text-[#00eada] border border-[#00eada]/30">
-                    {metric.change}
-                  </Badge>
+                  <Icon className={`h-8 w-8 ${metric.color}`} />
                 </div>
               </Card>
             );
