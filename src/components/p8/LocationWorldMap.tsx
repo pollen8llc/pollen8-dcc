@@ -1,6 +1,8 @@
 import { useEffect, useRef, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import Globe from 'react-globe.gl';
 
 // Sample city data
@@ -19,6 +21,7 @@ interface LocationWorldMapProps {
 const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
   const globeEl = useRef<any>();
   const [isGlobeReady, setIsGlobeReady] = useState(false);
+  const navigate = useNavigate();
 
 
   // Globe setup
@@ -97,16 +100,16 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
             </div>
           </div>
 
-          {/* Right: Stats */}
-          <div className="shrink-0 text-center lg:text-right mx-auto lg:mx-0">
-            <div className="bg-muted/30 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-border/50">
-              <div className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
-                {selectedLocations.length}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Cities
-              </div>
-            </div>
+          {/* Right: Manage Button */}
+          <div className="shrink-0 mx-auto lg:mx-0">
+            <Button
+              onClick={() => navigate('/p8/loc8')}
+              variant="outline"
+              size="sm"
+              className="font-medium"
+            >
+              Manage
+            </Button>
           </div>
         </div>
       </div>
