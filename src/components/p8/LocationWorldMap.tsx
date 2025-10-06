@@ -94,7 +94,7 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
 
                   {/* Title and Description */}
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-2xl font-bold text-foreground mb-1">Locations</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-1">Locations</h2>
                     <p className="text-sm text-muted-foreground">Your global presence across 5 cities</p>
                   </div>
                 </div>
@@ -117,9 +117,6 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="secondary" className="bg-teal-500/10 text-teal-400 border-teal-500/20">
-                          {communities.reduce((sum, community) => sum + parseInt(community.size), 0)} members
-                        </Badge>
                         {isCommunitiesExpanded ? (
                           <ChevronUp className="w-5 h-5 text-teal-400" />
                         ) : (
@@ -165,13 +162,12 @@ const LocationWorldMap = ({ className = '' }: LocationWorldMapProps) => {
 
                 {/* Section 3: City Badges Grid */}
                 <div className="space-y-3">
-                  <h3 className="text-lg font-semibold">City Network</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
                     {selectedLocations.map((location) => (
                       <Badge
                         key={location.name}
-                        variant="secondary"
-                        className="text-xs font-medium justify-center p-2 h-auto"
+                        variant="tag"
+                        className="text-xs font-medium justify-center px-3 py-1.5 h-auto"
                       >
                         {location.name}
                       </Badge>
