@@ -1,5 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { MultiProgress } from "@/components/ui/multi-progress";
+import { useQuery } from "@tanstack/react-query";
+import { getCategories } from "@/services/rel8t/contactService";
 
 // Inline SVG Ring Chart Component
 const RingChart = () => {
@@ -71,6 +75,16 @@ const RingChart = () => {
 
 const NetworkWorldMap = () => {
   const plexusCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
+  
+  const totalContacts = 1247;
+  const activeConnections = 842;
+  const activePercentage = (activeConnections / totalContacts) * 100;
+  
+  const { data: categories = [] } = useQuery({
+    queryKey: ["contact-categories"],
+    queryFn: getCategories,
+  });
 
   // Plexus animation effect
   useEffect(() => {
@@ -199,35 +213,65 @@ const NetworkWorldMap = () => {
 
                 {/* Network Info (center) - matches profile info */}
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-1">
+                  <h2 className="text-lg font-semibold text-foreground mb-1">
                     Network
                   </h2>
-                  <p className="text-sm sm:text-base text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Social Connection Analysis
                   </p>
                 </div>
+              </div>
 
-                {/* Stats (right) - matches settings button position */}
-                <div className="flex-shrink-0 bg-background/60 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-primary/20">
-                  <div className="flex gap-4 sm:gap-6">
-                    <div className="text-center">
-                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">
-                        Active
+              {/* Categories Accordion Section */}
+              <div className="relative z-10 mt-4">
+                <button
+                  onClick={() => setIsCategoriesExpanded(!isCategoriesExpanded)}
+                  className="w-full bg-background/40 backdrop-blur-sm rounded-lg p-4 border border-primary/20 hover:bg-background/60 transition-all"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 flex-1">
+                        <div className="flex-1">
+                          <MultiProgress
+                            setupValue={0}
+                            usageValue={(activeConnections / totalContacts) * 40}
+                            premiumValue={((totalContacts - activeConnections) / totalContacts) * 50}
+                          />
+                        </div>
                       </div>
-                      <div className="text-lg sm:text-xl font-bold text-[rgba(20,184,166,0.9)]">
-                        842
+                      <div className="flex items-center space-x-2">
+                        {isCategoriesExpanded ? (
+                          <ChevronUp className="w-5 h-5 text-teal-400" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-teal-400" />
+                        )}
                       </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-xs sm:text-sm text-muted-foreground mb-1">
-                        Total
-                      </div>
-                      <div className="text-lg sm:text-xl font-bold text-[rgba(59,130,246,0.7)]">
-                        1,247
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-teal-400 font-medium">{activeConnections} Active</span>
+                      <span className="text-blue-400/70 font-medium">{totalContacts} Total</span>
+                    </div>
+                  </div>
+                </button>
+
+                {isCategoriesExpanded && (
+                  <div className="mt-3 bg-background/40 backdrop-blur-sm rounded-lg p-4 border border-primary/20 animate-accordion-down">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground mb-3">Contact Categories</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {categories.slice(0, 8).map((category) => (
+                          <div
+                            key={category.id}
+                            className="flex items-center justify-between p-2 rounded bg-background/60 border border-border/30"
+                          >
+                            <span className="text-sm text-foreground truncate">{category.name}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </CardContent>
