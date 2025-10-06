@@ -1,9 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { MultiProgress } from "@/components/ui/multi-progress";
+import { ChevronDown, ChevronUp, Mail, Phone, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getCategories } from "@/services/rel8t/contactService";
+import { getCategories, getContacts, Contact } from "@/services/rel8t/contactService";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Inline SVG Ring Chart Component
 const RingChart = () => {
@@ -84,6 +85,11 @@ const NetworkWorldMap = () => {
   const { data: categories = [] } = useQuery({
     queryKey: ["contact-categories"],
     queryFn: getCategories,
+  });
+
+  const { data: contacts = [] } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: () => getContacts(),
   });
 
   // Plexus animation effect
@@ -193,9 +199,9 @@ const NetworkWorldMap = () => {
   return (
     <div className="w-full">
       <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
+        <Card className="overflow-hidden glass-morphism border-0 bg-card/30 backdrop-blur-md">
           <CardContent className="p-0">
-            <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
+            <div className="relative p-6 lg:p-8">
               {/* Plexus Background */}
               <canvas
                 ref={plexusCanvasRef}
@@ -226,52 +232,129 @@ const NetworkWorldMap = () => {
               <div className="relative z-10 mt-4">
                 <button
                   onClick={() => setIsCategoriesExpanded(!isCategoriesExpanded)}
-                  className="w-full bg-background/40 backdrop-blur-sm rounded-lg p-4 border border-primary/20 hover:bg-background/60 transition-all"
+                  className="w-full glass-morphism bg-card/20 backdrop-blur-sm rounded-lg p-4 border-0 hover:bg-card/30 transition-all"
                 >
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 flex-1">
-                        <div className="flex-1">
-                          <MultiProgress
-                            setupValue={0}
-                            usageValue={(activeConnections / totalContacts) * 40}
-                            premiumValue={((totalContacts - activeConnections) / totalContacts) * 50}
-                          />
+                    {/* Gradient percentage bar */}
+                    <div className="relative h-10 rounded-lg overflow-hidden">
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-teal-500/80 to-blue-500/60 transition-all duration-500"
+                        style={{ width: `${activePercentage}%` }}
+                      />
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-blue-500/40 to-blue-500/20"
+                        style={{ left: `${activePercentage}%` }}
+                      />
+                      
+                      {/* Overlay content */}
+                      <div className="relative h-full flex items-center justify-between px-4">
+                        <span className="text-sm font-medium text-white drop-shadow-lg">
+                          {activeConnections} Active
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium text-white/90 drop-shadow-lg">
+                            {totalContacts} Total
+                          </span>
+                          {isCategoriesExpanded ? (
+                            <ChevronUp className="w-5 h-5 text-white" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-white" />
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        {isCategoriesExpanded ? (
-                          <ChevronUp className="w-5 h-5 text-teal-400" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-teal-400" />
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-teal-400 font-medium">{activeConnections} Active</span>
-                      <span className="text-blue-400/70 font-medium">{totalContacts} Total</span>
                     </div>
                   </div>
                 </button>
 
                 {isCategoriesExpanded && (
-                  <div className="mt-3 bg-background/40 backdrop-blur-sm rounded-lg p-4 border border-primary/20 animate-accordion-down">
-                    <div className="space-y-2">
+                  <div className="mt-3 glass-morphism bg-card/20 backdrop-blur-sm rounded-lg p-4 border-0 animate-accordion-down">
+                    <div className="space-y-3">
                       <h4 className="text-sm font-semibold text-muted-foreground mb-3">Contact Categories</h4>
                       <div className="grid grid-cols-2 gap-2">
                         {categories.slice(0, 8).map((category) => (
-                          <div
+                          <Badge
                             key={category.id}
-                            className="flex items-center justify-between p-2 rounded bg-background/60 border border-border/30"
+                            variant="tag"
+                            className="px-3 py-1.5 justify-center truncate"
+                            style={{ 
+                              backgroundColor: `${category.color}20`,
+                              borderColor: category.color,
+                              color: category.color
+                            }}
                           >
-                            <span className="text-sm text-foreground truncate">{category.name}</span>
-                          </div>
+                            {category.name}
+                          </Badge>
                         ))}
                       </div>
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Contact Cards Section */}
+              <div className="relative z-10 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {contacts.slice(0, 8).map((contact) => (
+                  <Card
+                    key={contact.id}
+                    className="glass-morphism border-0 bg-card/20 backdrop-blur-sm hover:bg-card/30 transition-all cursor-pointer group"
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-12 w-12 border-2 border-primary/20">
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                            {contact.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                            {contact.name}
+                          </h3>
+                          
+                          {contact.organization && (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {contact.organization}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                            {contact.email && (
+                              <div className="flex items-center gap-1">
+                                <Mail className="h-3 w-3" />
+                                <span className="truncate max-w-[100px]">{contact.email}</span>
+                              </div>
+                            )}
+                            {contact.location && (
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                <span className="truncate">{contact.location}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {contact.category && (
+                            <Badge
+                              variant="tag"
+                              className="mt-2 px-2 py-0.5 text-xs"
+                              style={{ 
+                                backgroundColor: `${contact.category.color}20`,
+                                borderColor: contact.category.color,
+                                color: contact.category.color
+                              }}
+                            >
+                              {contact.category.name}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </div>
           </CardContent>
