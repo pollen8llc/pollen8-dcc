@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getCategories, getContacts, Contact } from "@/services/rel8t/contactService";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 // Inline SVG Ring Chart Component
 const RingChart = () => {
@@ -77,6 +79,7 @@ const RingChart = () => {
 const NetworkWorldMap = () => {
   const plexusCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
+  const navigate = useNavigate();
   
   const totalContacts = 1247;
   const activeConnections = 842;
@@ -271,7 +274,7 @@ const NetworkWorldMap = () => {
                     <div className="space-y-3">
                       <h4 className="text-sm font-semibold text-muted-foreground mb-3">Contact Categories</h4>
                       <div className="grid grid-cols-2 gap-2">
-                        {categories.slice(0, 8).map((category) => (
+                        {categories.slice(0, 6).map((category) => (
                           <Badge
                             key={category.id}
                             variant="tag"
@@ -285,6 +288,19 @@ const NetworkWorldMap = () => {
                             {category.name}
                           </Badge>
                         ))}
+                        {/* Always show 2 blank + slots */}
+                        <Badge
+                          variant="outline"
+                          className="px-3 py-1.5 justify-center cursor-pointer hover:bg-card/40 transition-colors"
+                        >
+                          +
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className="px-3 py-1.5 justify-center cursor-pointer hover:bg-card/40 transition-colors"
+                        >
+                          +
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -355,6 +371,17 @@ const NetworkWorldMap = () => {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+
+              {/* Manage Contacts Button */}
+              <div className="relative z-10 mt-4">
+                <Button
+                  onClick={() => navigate("/rel8/contacts")}
+                  className="w-full"
+                  variant="outline"
+                >
+                  Manage Contacts
+                </Button>
               </div>
             </div>
           </CardContent>
