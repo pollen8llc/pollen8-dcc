@@ -96,10 +96,9 @@ const NetworkWorldMap = () => {
 
   return (
     <div className="w-full">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <Card className="relative overflow-hidden glass-morphism border-0 backdrop-blur-md" style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)' }}>
-          <CardContent className="p-0">
-            <div className="relative p-6 lg:p-8">
+      <Card className="relative overflow-hidden glass-morphism border-0 backdrop-blur-md" style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)' }}>
+        <CardContent className="p-0">
+          <div className="relative p-6 lg:p-8">
 
               {/* Content Layout - matches profile card structure */}
               <div className="relative z-10 flex items-center gap-4 sm:gap-6">
@@ -275,7 +274,6 @@ const NetworkWorldMap = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
 
       {/* Glowing Sliver */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent relative">
