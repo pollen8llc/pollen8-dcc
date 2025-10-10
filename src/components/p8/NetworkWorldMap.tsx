@@ -133,11 +133,16 @@ const NetworkWorldMap = () => {
       }
 
       update() {
-        if (this.x < 0 || this.x > canvas.width) {
+        // Bounce off borders
+        if (this.x <= 0 || this.x >= canvas.width) {
           this.directionX = -this.directionX;
+          // Clamp position to prevent sticking
+          this.x = Math.max(0, Math.min(canvas.width, this.x));
         }
-        if (this.y < 0 || this.y > canvas.height) {
+        if (this.y <= 0 || this.y >= canvas.height) {
           this.directionY = -this.directionY;
+          // Clamp position to prevent sticking
+          this.y = Math.max(0, Math.min(canvas.height, this.y));
         }
 
         this.x += this.directionX;
@@ -202,18 +207,19 @@ const NetworkWorldMap = () => {
   return (
     <div className="w-full">
       <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <Card className="overflow-hidden glass-morphism border-0 bg-card/30 backdrop-blur-md">
+        <Card className="relative overflow-hidden glass-morphism border-0 bg-card/30 backdrop-blur-md">
+          {/* Plexus Background - Full Card */}
+          <canvas
+            ref={plexusCanvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 50%, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
+            }}
+          />
+          
           <CardContent className="p-0">
             <div className="relative p-6 lg:p-8">
-              {/* Plexus Background */}
-              <canvas
-                ref={plexusCanvasRef}
-                className="absolute inset-0 w-full h-full"
-                style={{
-                  background:
-                    "radial-gradient(circle at 50% 50%, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
-                }}
-              />
 
               {/* Content Layout - matches profile card structure */}
               <div className="relative z-10 flex items-center gap-4 sm:gap-6">
