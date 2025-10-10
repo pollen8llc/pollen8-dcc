@@ -114,7 +114,8 @@ const NetworkWorldMap = () => {
 
     // Particle system for plexus - slower and brighter
     const particlesArray: Particle[] = [];
-    const numberOfParticles = 60;
+    // Responsive particle count
+    const numberOfParticles = canvas.width < 768 ? 30 : 60;
     const maxDistance = 140;
 
     class Particle {
@@ -133,20 +134,15 @@ const NetworkWorldMap = () => {
       }
 
       update() {
-        // Bounce off borders
-        if (this.x <= 0 || this.x >= canvas.width) {
-          this.directionX = -this.directionX;
-          // Clamp position to prevent sticking
-          this.x = Math.max(0, Math.min(canvas.width, this.x));
-        }
-        if (this.y <= 0 || this.y >= canvas.height) {
-          this.directionY = -this.directionY;
-          // Clamp position to prevent sticking
-          this.y = Math.max(0, Math.min(canvas.height, this.y));
-        }
-
+        // Move particles - let them overflow and wrap around
         this.x += this.directionX;
         this.y += this.directionY;
+
+        // Wrap around borders instead of bouncing
+        if (this.x < -10) this.x = canvas.width + 10;
+        if (this.x > canvas.width + 10) this.x = -10;
+        if (this.y < -10) this.y = canvas.height + 10;
+        if (this.y > canvas.height + 10) this.y = -10;
       }
 
       draw() {
@@ -159,7 +155,8 @@ const NetworkWorldMap = () => {
 
     const init = () => {
       particlesArray.length = 0;
-      for (let i = 0; i < numberOfParticles; i++) {
+      const count = canvas.width < 768 ? 30 : 60;
+      for (let i = 0; i < count; i++) {
         particlesArray.push(new Particle());
       }
     };
