@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronUp, Mail, Phone, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getCategories, getContacts, Contact } from "@/services/rel8t/contactService";
@@ -77,7 +77,6 @@ const RingChart = () => {
 };
 
 const NetworkWorldMap = () => {
-  const plexusCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
   const navigate = useNavigate();
   
@@ -95,126 +94,10 @@ const NetworkWorldMap = () => {
     queryFn: () => getContacts(),
   });
 
-  // Plexus animation effect
-  useEffect(() => {
-    const canvas = plexusCanvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const resizeCanvas = () => {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-    };
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
-    // Particle system for plexus - slower and brighter
-    const particlesArray: Particle[] = [];
-    // Responsive particle count
-    const numberOfParticles = canvas.width < 768 ? 30 : 60;
-    const maxDistance = 140;
-
-    class Particle {
-      x: number;
-      y: number;
-      directionX: number;
-      directionY: number;
-      size: number;
-
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.directionX = Math.random() * 0.15 - 0.075; // Slower movement
-        this.directionY = Math.random() * 0.15 - 0.075; // Slower movement
-        this.size = Math.random() * 2.5 + 1;
-      }
-
-      update() {
-        // Move particles - let them overflow and wrap around
-        this.x += this.directionX;
-        this.y += this.directionY;
-
-        // Wrap around borders instead of bouncing
-        if (this.x < -10) this.x = canvas.width + 10;
-        if (this.x > canvas.width + 10) this.x = -10;
-        if (this.y < -10) this.y = canvas.height + 10;
-        if (this.y > canvas.height + 10) this.y = -10;
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 234, 218, 0.25)"; // Brighter particles
-        ctx.fill();
-      }
-    }
-
-    const init = () => {
-      particlesArray.length = 0;
-      const count = canvas.width < 768 ? 30 : 60;
-      for (let i = 0; i < count; i++) {
-        particlesArray.push(new Particle());
-      }
-    };
-
-    const connect = () => {
-      for (let a = 0; a < particlesArray.length; a++) {
-        for (let b = a; b < particlesArray.length; b++) {
-          const dx = particlesArray[a].x - particlesArray[b].x;
-          const dy = particlesArray[a].y - particlesArray[b].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < maxDistance) {
-            const opacity = 1 - distance / maxDistance;
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(0, 234, 218, ${opacity * 0.3})`; // Brighter lines
-            ctx.lineWidth = 1;
-            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-            ctx.stroke();
-          }
-        }
-      }
-    };
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      for (let i = 0; i < particlesArray.length; i++) {
-        particlesArray[i].update();
-        particlesArray[i].draw();
-      }
-      connect();
-    };
-
-    init();
-    animate();
-
-    return () => {
-      window.removeEventListener("resize", resizeCanvas);
-    };
-  }, []);
-
-
   return (
     <div className="w-full">
       <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <Card className="relative overflow-hidden glass-morphism border-0 bg-card/30 backdrop-blur-md">
-          {/* Plexus Background - Full Card */}
-          <canvas
-            ref={plexusCanvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle at 50% 50%, hsl(var(--background)) 0%, hsl(var(--background)) 100%)",
-            }}
-          />
-          
+        <Card className="relative overflow-hidden glass-morphism border-0 backdrop-blur-md" style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)' }}>
           <CardContent className="p-0">
             <div className="relative p-6 lg:p-8">
 
