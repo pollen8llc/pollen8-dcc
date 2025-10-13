@@ -58,10 +58,7 @@ export function Rel8OnlyNavigation() {
       {/* Avatar Link */}
       <Link
         to="/p8/dashboard"
-        className={cn(
-          "flex items-center justify-center transition-all duration-200",
-          "hover:scale-105"
-        )}
+        className="flex items-center justify-center"
       >
         <UnifiedAvatar
           userId={currentUser?.id}
