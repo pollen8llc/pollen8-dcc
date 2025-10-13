@@ -2,9 +2,9 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail, Phone, Trash2, Edit, Building, MapPin, Tag } from "lucide-react";
+import { Mail, Phone, Trash2, Edit, MapPin } from "lucide-react";
 import { Contact } from "@/services/rel8t/contactService";
 import { deleteContact } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
@@ -71,11 +71,8 @@ const ContactCard = ({
   const primaryGroup = contact.groups && contact.groups.length > 0 ? contact.groups[0] : null;
 
   return (
-    <div 
-      className={`h-full overflow-hidden transition-all duration-300 cursor-pointer rounded-2xl backdrop-blur-md 
-        bg-card/40 border border-border/50 shadow-lg hover:shadow-xl hover:shadow-primary/10 hover:bg-card/60
-        hover:scale-[1.02] group
-        ${isSelected ? 'ring-2 ring-primary ring-inset bg-primary/10 scale-[1.02]' : ''}`}
+    <Card 
+      className={`h-[220px] flex flex-col cursor-pointer relative ${isSelected ? 'ring-2 ring-primary' : ''}`}
       onClick={handleCardClick}
     >
       {/* Selection checkbox */}
@@ -84,155 +81,150 @@ const ContactCard = ({
           <Checkbox
             checked={isSelected}
             onCheckedChange={(checked) => onSelect?.(contact.id, checked as boolean)}
-            className="bg-white/90 border-2"
+            className="bg-background/90 border-2"
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
       )}
 
-      {/* Section 1: Header with name and category */}
-      <div className={`p-4 pb-2 relative ${isSelectionMode ? 'pt-12' : ''}`}>
-        <div className="flex justify-between items-start">
-          <h3 className="text-base font-medium mb-1 line-clamp-1">{contact.name}</h3>
+      {/* Group tag display at top right */}
+      {primaryGroup && (
+        <div 
+          className="absolute -top-2 -right-2 rotate-12 px-3 py-1 rounded shadow-sm z-10"
+          style={{
+            backgroundColor: primaryGroup.color || '#9b87f5'
+          }}
+        >
+          <div className="text-[10px] font-semibold text-black">
+            {primaryGroup.name}
+          </div>
+        </div>
+      )}
+
+      <CardHeader className={`flex-col gap-1 items-start ${isSelectionMode ? 'pt-10' : ''}`}>
+        <div className="flex justify-between w-full items-start">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium text-lg truncate">{contact.name}</h3>
+            {contact.organization && (
+              <p className="text-xs text-muted-foreground truncate">{contact.organization}</p>
+            )}
+          </div>
           
           {contact.category && (
             <Badge 
               variant="outline" 
-              className="text-xs px-1.5 py-0"
-              style={{
-                backgroundColor: `${getCategoryColor()}20`,
-                borderColor: `${getCategoryColor()}40`,
-                color: getCategoryColor()
-              }}
+              className="ml-2 bg-[#00eada]/10 text-[#00eada] border-[#00eada]/30 flex-shrink-0"
             >
               {contact.category.name}
             </Badge>
           )}
         </div>
         
-        {contact.organization && (
+        {contact.location && (
           <div className="flex items-center text-xs text-muted-foreground">
-            <Building className="h-3 w-3 mr-1.5 flex-shrink-0" />
-            <span className="truncate">{contact.organization}</span>
+            <MapPin className="h-3 w-3 mr-1" />
+            <span className="truncate">{contact.location}</span>
           </div>
         )}
-        
-        {/* Group tag display at top */}
-        {primaryGroup && (
-          <div 
-            className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 rotate-12 w-24 z-10"
-            style={{
-              backgroundColor: primaryGroup.color || '#9b87f5'
-            }}
-          >
-            <div className="text-[10px] font-semibold py-0.5 text-center text-black">
-              {primaryGroup.name}
-            </div>
+
+        {(contact.email || contact.phone) && (
+          <div className="flex flex-col gap-0.5 w-full">
+            {contact.email && (
+              <div className="flex items-center text-xs text-muted-foreground">
+                <Mail className="h-3 w-3 mr-1 flex-shrink-0" />
+                <span className="truncate">{contact.email}</span>
+              </div>
+            )}
+            {contact.phone && (
+              <div className="flex items-center text-xs text-muted-foreground">
+                <Phone className="h-3 w-3 mr-1 flex-shrink-0" />
+                <span className="truncate">{contact.phone}</span>
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </CardHeader>
       
-      {/* Section 2: Contact information */}
-      <div className="px-4 py-2 border-t border-border/20 flex-grow">
-        <div className="space-y-1.5">
-          {contact.email && (
-            <div className="flex items-center text-xs text-muted-foreground">
-              <Mail className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              <span className="truncate">{contact.email}</span>
-            </div>
-          )}
-          
-          {contact.phone && (
-            <div className="flex items-center text-xs text-muted-foreground">
-              <Phone className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              <span className="truncate">{contact.phone}</span>
-            </div>
-          )}
-          
-          {contact.location && (
-            <div className="flex items-center text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3 mr-1.5 flex-shrink-0" />
-              <span className="truncate">{contact.location}</span>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Section 3: Tags and action buttons */}
-      <div className="px-4 pt-2 pb-3 border-t border-border/20">
+      <CardContent className="flex-grow">
         {contact.tags && contact.tags.length > 0 && (
-          <div className="flex items-start text-xs mb-3">
-            <Tag className="h-3 w-3 mr-1.5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+          <div className="mt-2">
+            <p className="text-xs text-muted-foreground mb-1">Tags</p>
             <div className="flex flex-wrap gap-1">
-              {contact.tags.slice(0, 2).map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-primary/20 text-primary px-1.5 py-0.5 rounded-full text-xs"
+              {contact.tags.slice(0, 3).map((tag, i) => (
+                <Badge 
+                  key={i} 
+                  variant="outline" 
+                  className="text-xs bg-[#00eada]/10 text-[#00eada] border-[#00eada]/30"
                 >
                   {tag}
-                </span>
+                </Badge>
               ))}
-              {contact.tags.length > 2 && (
-                <span className="text-xs text-muted-foreground">
-                  +{contact.tags.length - 2} more
-                </span>
+              {contact.tags.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{contact.tags.length - 3}
+                </Badge>
               )}
             </div>
           </div>
         )}
-        
-        <div className="flex justify-between items-center">
-          <div className="flex-1">
-            {contact.groups && contact.groups.length > 1 && (
-              <div className="flex gap-1 flex-wrap">
-                {contact.groups.slice(1, 2).map((group) => (
-                  <Badge 
-                    key={group.id} 
-                    variant="secondary" 
-                    className="text-xs px-1.5 py-0 h-5"
-                    style={{
-                      backgroundColor: group.color ? `${group.color}30` : 'rgba(255, 255, 255, 0.1)',
-                      color: group.color || '#ffffff'
-                    }}
-                  >
-                    {group.name}
-                  </Badge>
-                ))}
-                {contact.groups.length > 2 && (
-                   <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 border-border/30 text-muted-foreground">
-                    +{contact.groups.length - 2}
-                  </Badge>
-                )}
-              </div>
-            )}
-          </div>
-          
-          {!isSelectionMode && (
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-110"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit();
-                }}
-              >
-                <Edit className="h-3.5 w-3.5" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 hover:scale-110"
-                onClick={handleDelete}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+
+        {contact.groups && contact.groups.length > 1 && (
+          <div className="mt-2">
+            <p className="text-xs text-muted-foreground mb-1">Groups</p>
+            <div className="flex flex-wrap gap-1">
+              {contact.groups.slice(1, 3).map((group) => (
+                <Badge 
+                  key={group.id} 
+                  variant="outline" 
+                  className="text-xs"
+                  style={{
+                    backgroundColor: group.color ? `${group.color}20` : 'rgba(0, 234, 218, 0.1)',
+                    borderColor: group.color ? `${group.color}40` : 'rgba(0, 234, 218, 0.3)',
+                    color: group.color || '#00eada'
+                  }}
+                >
+                  {group.name}
+                </Badge>
+              ))}
+              {contact.groups.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{contact.groups.length - 3}
+                </Badge>
+              )}
             </div>
-          )}
-        </div>
-      </div>
-    </div>
+          </div>
+        )}
+      </CardContent>
+      
+      <CardFooter className="flex justify-between items-center">
+        <div className="flex-1" />
+        
+        {!isSelectionMode && (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 
