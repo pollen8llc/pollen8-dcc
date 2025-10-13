@@ -159,7 +159,7 @@ const NetworkWorldMap = () => {
                   className="w-full glass-morphism bg-card/20 backdrop-blur-sm rounded-full p-1 border-0 hover:bg-card/30 transition-all group"
                 >
                   {/* Sleek gradient bar */}
-                  <div className="relative h-12 sm:h-10 rounded-full overflow-hidden">
+                  <div className="relative h-12 sm:h-11 rounded-full overflow-hidden">
                     {/* Active segment */}
                     <div 
                       className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500 shadow-lg"
@@ -177,32 +177,32 @@ const NetworkWorldMap = () => {
                     {/* Content overlay */}
                     <div className="relative h-full flex items-center justify-between px-4 sm:px-5">
                       {/* Left side - Active contacts */}
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
-                          <span className="text-base sm:text-lg font-bold text-white leading-none">
+                      <div className="flex items-center gap-2 h-full">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-lg" />
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-base sm:text-lg font-bold text-white leading-none" style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 0 2px rgba(0, 0, 0, 0.8)' }}>
                             {activeConnections}
                           </span>
-                          <span className="text-[10px] sm:text-xs font-medium text-white/80 uppercase tracking-wide">
+                          <span className="text-[11px] sm:text-xs font-semibold text-white uppercase tracking-wide leading-none" style={{ textShadow: '0 2px 6px rgba(0, 0, 0, 0.5), 0 0 2px rgba(0, 0, 0, 0.8)' }}>
                             Active
                           </span>
                         </div>
                       </div>
                       
                       {/* Right side - Total contacts + chevron */}
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
-                          <span className="text-sm sm:text-base font-semibold text-white/90 leading-none">
+                      <div className="flex items-center gap-2 sm:gap-3 h-full">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-base sm:text-lg font-bold text-white leading-none" style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 0 2px rgba(0, 0, 0, 0.8)' }}>
                             {totalContacts}
                           </span>
-                          <span className="text-[10px] sm:text-xs font-medium text-white/70 uppercase tracking-wide">
+                          <span className="text-[11px] sm:text-xs font-semibold text-white uppercase tracking-wide leading-none" style={{ textShadow: '0 2px 6px rgba(0, 0, 0, 0.5), 0 0 2px rgba(0, 0, 0, 0.8)' }}>
                             Total
                           </span>
                         </div>
                         {isCategoriesExpanded ? (
-                          <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-y-[-2px] transition-transform" />
+                          <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-lg group-hover:translate-y-[-2px] transition-transform" />
                         ) : (
-                          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-y-[2px] transition-transform" />
+                          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow-lg group-hover:translate-y-[2px] transition-transform" />
                         )}
                       </div>
                     </div>
