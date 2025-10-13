@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -78,21 +78,43 @@ const eventPlatforms = [
 const EventsCard = ({
   className = ''
 }: EventsCardProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [autoRotate, setAutoRotate] = useState(true);
+  
   const totalPages = Math.ceil(events.length / EVENTS_PER_PAGE);
   const startIndex = currentPage * EVENTS_PER_PAGE;
   const endIndex = startIndex + EVENTS_PER_PAGE;
   const currentEvents = events.slice(startIndex, endIndex);
   const minSwipeDistance = 50;
+  
+  // Auto-rotation effect
+  useEffect(() => {
+    if (!autoRotate || !isOpen) return;
+    
+    const interval = setInterval(() => {
+      setCurrentPage((prev) => {
+        if (prev >= totalPages - 1) {
+          return 0; // Loop back to first page
+        }
+        return prev + 1;
+      });
+    }, 4000); // Rotate every 4 seconds
+    
+    return () => clearInterval(interval);
+  }, [autoRotate, isOpen, totalPages]);
+  
   const goToNextPage = () => {
+    setAutoRotate(false); // Pause auto-rotation on manual interaction
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
+  
   const goToPreviousPage = () => {
+    setAutoRotate(false); // Pause auto-rotation on manual interaction
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
@@ -109,11 +131,24 @@ const EventsCard = ({
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe || isRightSwipe) {
+      setAutoRotate(false); // Pause auto-rotation on swipe
+    }
+    
     if (isLeftSwipe) {
-      goToNextPage();
+      if (currentPage < totalPages - 1) {
+        setCurrentPage(currentPage + 1);
+      } else {
+        setCurrentPage(0); // Loop to first page
+      }
     }
     if (isRightSwipe) {
-      goToPreviousPage();
+      if (currentPage > 0) {
+        setCurrentPage(currentPage - 1);
+      } else {
+        setCurrentPage(totalPages - 1); // Loop to last page
+      }
     }
   };
   return <Card className={`relative overflow-hidden glass-morphism border-0 backdrop-blur-md transition-all ${className}`} style={{ background: 'linear-gradient(to bottom, rgba(20, 184, 166, 0.08), rgba(59, 130, 246, 0.08))' }}>
@@ -128,20 +163,38 @@ const EventsCard = ({
                 <div className="w-full p-4 bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-blue-500/10 backdrop-blur-xl border border-teal-500/20 rounded-lg">
                   <div className="flex items-center justify-between gap-4">
                     {/* Left Arrow */}
-                    <Button variant="ghost" size="icon" onClick={goToPreviousPage} disabled={currentPage === 0} className="h-10 w-10 shrink-0 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
+                    <Button variant="ghost" size="icon" onClick={goToPreviousPage} className="h-10 w-10 shrink-0 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20">
                       <ChevronLeft className="w-5 h-5" />
                     </Button>
                     
                     {/* Center Content */}
-                    <div className="flex items-center justify-center space-x-3 flex-1">
+                    <div className="flex flex-col items-center justify-center space-y-2 flex-1">
                       <div className="text-center">
                         <h3 className="text-lg font-semibold text-foreground">Latest Events</h3>
                         <p className="text-sm text-muted-foreground">{events.length} total events</p>
                       </div>
+                      {/* Page indicators */}
+                      <div className="flex items-center gap-1.5">
+                        {Array.from({ length: totalPages }).map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setCurrentPage(idx);
+                              setAutoRotate(false);
+                            }}
+                            className={`h-1.5 rounded-full transition-all ${
+                              idx === currentPage 
+                                ? 'w-6 bg-teal-400' 
+                                : 'w-1.5 bg-teal-400/30 hover:bg-teal-400/50'
+                            }`}
+                            aria-label={`Go to page ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
                     </div>
                     
                     {/* Right Arrow */}
-                    <Button variant="ghost" size="icon" onClick={goToNextPage} disabled={currentPage === totalPages - 1} className="h-10 w-10 shrink-0 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
+                    <Button variant="ghost" size="icon" onClick={goToNextPage} className="h-10 w-10 shrink-0 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20">
                       <ChevronRight className="w-5 h-5" />
                     </Button>
                   </div>
