@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, MapPin, ChevronLeft, ChevronRight, Bell } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getContacts } from "@/services/rel8t/contactService";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -193,8 +193,8 @@ const NetworkWorldMap = () => {
                   {/* Top Section */}
                   <div className="flex items-center justify-between p-4 border-b border-border/50">
                     <div className="flex items-center gap-2">
-                      <Bell className="h-4 w-4 text-primary" />
-                      <h4 className="text-sm font-semibold text-foreground">Outreach Tasks</h4>
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <h4 className="text-sm font-semibold text-foreground">Relationships</h4>
                     </div>
                     <Button
                       variant="outline"
