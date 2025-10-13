@@ -116,7 +116,7 @@ const EventsCard = ({
       goToPreviousPage();
     }
   };
-  return <Card className={`relative overflow-hidden glass-morphism border-0 backdrop-blur-md hover:bg-green-500/10 transition-all ${className}`} style={{ backgroundColor: 'rgba(34, 197, 94, 0.08)' }}>
+  return <Card className={`relative overflow-hidden glass-morphism border-0 backdrop-blur-md transition-all ${className}`} style={{ background: 'linear-gradient(to bottom, rgba(20, 184, 166, 0.08), rgba(59, 130, 246, 0.08))' }}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="p-0">
           <div className="relative p-6 lg:p-8 pb-0">
@@ -125,10 +125,10 @@ const EventsCard = ({
               {/* Header with Navigation Only */}
               <div className="space-y-3">
                 {/* Glassmorphic Header with Navigation */}
-                <div className="w-full p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 backdrop-blur-xl border border-green-500/20 rounded-lg">
+                <div className="w-full p-4 bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-blue-500/10 backdrop-blur-xl border border-teal-500/20 rounded-lg">
                   <div className="flex items-center justify-between gap-4">
                     {/* Left Arrow */}
-                    <Button variant="ghost" size="icon" onClick={goToPreviousPage} disabled={currentPage === 0} className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
+                    <Button variant="ghost" size="icon" onClick={goToPreviousPage} disabled={currentPage === 0} className="h-10 w-10 shrink-0 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
                       <ChevronLeft className="w-5 h-5" />
                     </Button>
                     
@@ -141,7 +141,7 @@ const EventsCard = ({
                     </div>
                     
                     {/* Right Arrow */}
-                    <Button variant="ghost" size="icon" onClick={goToNextPage} disabled={currentPage === totalPages - 1} className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
+                    <Button variant="ghost" size="icon" onClick={goToNextPage} disabled={currentPage === totalPages - 1} className="h-10 w-10 shrink-0 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
                       <ChevronRight className="w-5 h-5" />
                     </Button>
                   </div>
@@ -156,14 +156,14 @@ const EventsCard = ({
                 >
                   {/* Events List */}
                   <div className="space-y-2 animate-fade-in pt-3">
-                    {currentEvents.map(event => <div key={event.id} className="flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md hover:shadow-green-500/10 transition-all duration-300 cursor-pointer group">
+                    {currentEvents.map(event => <div key={event.id} className="flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md hover:shadow-teal-500/10 transition-all duration-300 cursor-pointer group">
                         {/* Left side: Event info */}
                         <div className="flex items-start space-x-3 flex-1 min-w-0">
-                          <div className={`w-2 h-2 rounded-full ${event.status === 'upcoming' ? 'bg-green-400 animate-pulse' : 'bg-muted-foreground/50'} group-hover:bg-green-300 transition-colors mt-1.5`} />
+                          <div className={`w-2 h-2 rounded-full ${event.status === 'upcoming' ? 'bg-teal-400 animate-pulse' : 'bg-muted-foreground/50'} group-hover:bg-teal-300 transition-colors mt-1.5`} />
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium group-hover:text-green-100 transition-colors truncate">{event.title}</h4>
+                            <h4 className="text-sm font-medium group-hover:text-teal-100 transition-colors truncate">{event.title}</h4>
                             <div className="flex items-center gap-3 mt-1">
-                              <span className="text-xs text-muted-foreground group-hover:text-green-200 transition-colors flex items-center gap-1">
+                              <span className="text-xs text-muted-foreground group-hover:text-teal-200 transition-colors flex items-center gap-1">
                                 <Calendar className="w-3 h-3 hidden sm:block" />
                                 <span className="sm:hidden">{format(event.date, 'MMM dd')}</span>
                                 <span className="hidden sm:inline">{format(event.date, 'MMM dd, yyyy')}</span>
@@ -177,8 +177,8 @@ const EventsCard = ({
 
                         {/* Right side: Attendee count */}
                         <div className="flex items-center space-x-2 ml-4 shrink-0">
-                          <Users className="w-4 h-4 text-muted-foreground group-hover:text-green-300 transition-colors" />
-                          <span className="text-sm font-medium text-muted-foreground group-hover:text-green-200 transition-colors">
+                          <Users className="w-4 h-4 text-muted-foreground group-hover:text-teal-300 transition-colors" />
+                          <span className="text-sm font-medium text-muted-foreground group-hover:text-teal-200 transition-colors">
                             {event.attendees}
                           </span>
                         </div>
@@ -186,7 +186,7 @@ const EventsCard = ({
                   </div>
 
                   {/* Event Platforms Badge Grid */}
-                  <div className="mt-6 pt-6 border-t border-green-500/20">
+                  <div className="mt-6 pt-6 border-t border-teal-500/20">
                     <h4 className="text-sm font-semibold text-muted-foreground mb-3">Event Data Sources</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {eventPlatforms.map((platform) => (
@@ -206,19 +206,19 @@ const EventsCard = ({
                       {/* Always show 3 blank + slots */}
                       <Badge
                         variant="outline"
-                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-green-500/20 transition-colors"
+                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-teal-500/20 transition-colors"
                       >
                         +
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-green-500/20 transition-colors"
+                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-teal-500/20 transition-colors"
                       >
                         +
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-green-500/20 transition-colors"
+                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-teal-500/20 transition-colors"
                       >
                         +
                       </Badge>
@@ -232,7 +232,7 @@ const EventsCard = ({
 
           {/* Full Width Collapse Toggle at Bottom */}
           <CollapsibleTrigger asChild>
-            <button className="w-full py-3 flex items-center justify-center text-sm text-muted-foreground hover:text-green-400 hover:bg-green-500/10 transition-all border-t border-green-500/20">
+            <button className="w-full py-3 flex items-center justify-center text-sm text-muted-foreground hover:text-teal-400 hover:bg-teal-500/10 transition-all border-t border-teal-500/20">
               {isOpen ? (
                 <>
                   <span>Show Less</span>
