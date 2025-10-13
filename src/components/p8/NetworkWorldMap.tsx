@@ -167,7 +167,16 @@ const NetworkWorldMap = () => {
                         width: `${activePercentage}%`,
                         boxShadow: '0 0 20px rgba(20, 184, 166, 0.4)'
                       }}
-                    />
+                    >
+                      {/* Shimmer effect */}
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"
+                        style={{
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 2s infinite linear'
+                        }}
+                      />
+                    </div>
                     {/* Inactive segment - darker */}
                     <div 
                       className="absolute inset-0 bg-gradient-to-r from-blue-600/50 to-blue-700/40"
@@ -207,6 +216,14 @@ const NetworkWorldMap = () => {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Shimmer keyframe animation */}
+                  <style>{`
+                    @keyframes shimmer {
+                      0% { background-position: -200% 0; }
+                      100% { background-position: 200% 0; }
+                    }
+                  `}</style>
                 </button>
 
                 {isCategoriesExpanded && (
