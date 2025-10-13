@@ -8,9 +8,12 @@ import {
   Upload,
   Calendar,
 } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
+import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 
 export function Rel8OnlyNavigation() {
   const location = useLocation();
+  const { currentUser } = useUser();
   
   const navItems = [
     {
@@ -52,6 +55,21 @@ export function Rel8OnlyNavigation() {
 
   return (
     <nav className="flex flex-wrap gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
+      {/* Avatar Link */}
+      <Link
+        to="/p8/dashboard"
+        className={cn(
+          "flex items-center justify-center p-1 rounded-xl transition-all duration-200",
+          "hover:scale-105 hover:shadow-[#00eada]/20 bg-white/5 border border-white/5",
+          "hover:bg-white/10 hover:border-white/15"
+        )}
+      >
+        <UnifiedAvatar
+          userId={currentUser?.id}
+          size={32}
+        />
+      </Link>
+      
       {navItems.map((item) => {
         const Icon = item.icon;
         return (
