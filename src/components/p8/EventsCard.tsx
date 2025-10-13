@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { Calendar, Users, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { format } from 'date-fns';
 
@@ -70,9 +70,9 @@ interface EventsCardProps {
 }
 // Event platform badges
 const eventPlatforms = [
-  { name: 'Luma', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
-  { name: 'Eventbrite', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
-  { name: 'Meetup', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
+  { name: 'Luma', color: '#9333ea' },
+  { name: 'Eventbrite', color: '#f97316' },
+  { name: 'Meetup', color: '#ef4444' },
 ];
 
 const EventsCard = ({
@@ -187,22 +187,41 @@ const EventsCard = ({
 
                   {/* Event Platforms Badge Grid */}
                   <div className="mt-6 pt-6 border-t border-green-500/20">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-medium text-muted-foreground">Event Platforms</h4>
-                      <Button variant="ghost" size="sm" className="h-7 text-xs text-green-400 hover:text-green-300 hover:bg-green-500/20">
-                        <Plus className="w-3 h-3 mr-1" />
-                        Add Source
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-3">Event Data Sources</h4>
+                    <div className="grid grid-cols-2 gap-2">
                       {eventPlatforms.map((platform) => (
-                        <Badge 
-                          key={platform.name} 
-                          className={`${platform.color} border cursor-pointer hover:scale-105 transition-transform`}
+                        <Badge
+                          key={platform.name}
+                          variant="tag"
+                          className="px-3 py-1.5 justify-center truncate cursor-pointer hover:scale-105 transition-transform"
+                          style={{ 
+                            backgroundColor: `${platform.color}20`,
+                            borderColor: platform.color,
+                            color: platform.color
+                          }}
                         >
                           {platform.name}
                         </Badge>
                       ))}
+                      {/* Always show 3 blank + slots */}
+                      <Badge
+                        variant="outline"
+                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-green-500/20 transition-colors"
+                      >
+                        +
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-green-500/20 transition-colors"
+                      >
+                        +
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-green-500/20 transition-colors"
+                      >
+                        +
+                      </Badge>
                     </div>
                   </div>
                 </CollapsibleContent>
