@@ -59,14 +59,13 @@ export function Rel8OnlyNavigation() {
       <Link
         to="/p8/dashboard"
         className={cn(
-          "flex items-center justify-center p-1 rounded-xl transition-all duration-200",
-          "hover:scale-105 hover:shadow-[#00eada]/20 bg-white/5 border border-white/5",
-          "hover:bg-white/10 hover:border-white/15"
+          "flex items-center justify-center transition-all duration-200",
+          "hover:scale-105 hover:shadow-[#00eada]/20"
         )}
       >
         <UnifiedAvatar
           userId={currentUser?.id}
-          size={32}
+          size={48}
         />
       </Link>
       
