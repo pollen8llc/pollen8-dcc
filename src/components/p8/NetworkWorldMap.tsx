@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Mail, Phone, MapPin } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getCategories, getContacts, Contact } from "@/services/rel8t/contactService";
 import { Badge } from "@/components/ui/badge";
@@ -210,65 +210,47 @@ const NetworkWorldMap = () => {
                 </button>
 
                 {isCategoriesExpanded && (
-                  <div className="mt-3 glass-morphism bg-card/20 backdrop-blur-sm rounded-lg p-4 border-0 animate-accordion-down">
+                  <div className="mt-3 glass-morphism bg-card/20 backdrop-blur-sm rounded-lg p-4 border-0 animate-accordion-down space-y-4">
                     {/* Contact Cards Section */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {contacts.slice(0, 8).map((contact) => (
                         <Card
                           key={contact.id}
-                          className="glass-morphism border-0 bg-card/20 backdrop-blur-sm hover:bg-card/30 transition-all cursor-pointer group"
+                          onClick={() => navigate(`/rel8/contacts`)}
+                          className="cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm border-2 bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-2xl group relative overflow-hidden"
                         >
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                              <Avatar className="h-12 w-12 border-2 border-primary/20">
-                                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                                  {contact.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")
-                                    .toUpperCase()
-                                    .slice(0, 2)}
-                                </AvatarFallback>
-                              </Avatar>
+                          {/* Gradient border effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+                          
+                          <CardContent className="p-5 relative z-10">
+                            <div className="flex items-center">
+                              <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback className="bg-transparent text-primary font-semibold text-sm">
+                                    {contact.name
+                                      .split(" ")
+                                      .map((n) => n[0])
+                                      .join("")
+                                      .toUpperCase()
+                                      .slice(0, 2)}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </div>
                               
                               <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                                <h3 className="font-medium text-base truncate group-hover:text-primary transition-colors">
                                   {contact.name}
                                 </h3>
-                                
-                                {contact.organization && (
-                                  <p className="text-xs text-muted-foreground truncate">
-                                    {contact.organization}
+                                {contact.category && (
+                                  <p className="text-muted-foreground text-sm truncate">
+                                    {contact.category.name}
                                   </p>
                                 )}
-                                
-                                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                                  {contact.email && (
-                                    <div className="flex items-center gap-1">
-                                      <Mail className="h-3 w-3" />
-                                      <span className="truncate max-w-[100px]">{contact.email}</span>
-                                    </div>
-                                  )}
-                                  {contact.location && (
-                                    <div className="flex items-center gap-1">
-                                      <MapPin className="h-3 w-3" />
-                                      <span className="truncate">{contact.location}</span>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                {contact.category && (
-                                  <Badge
-                                    variant="tag"
-                                    className="mt-2 px-2 py-0.5 text-xs"
-                                    style={{ 
-                                      backgroundColor: `${contact.category.color}20`,
-                                      borderColor: contact.category.color,
-                                      color: contact.category.color
-                                    }}
-                                  >
-                                    {contact.category.name}
-                                  </Badge>
+                                {contact.location && (
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                    <p className="text-xs text-muted-foreground truncate">{contact.location}</p>
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -276,19 +258,20 @@ const NetworkWorldMap = () => {
                         </Card>
                       ))}
                     </div>
+
+                    {/* Manage Contacts Button */}
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/rel8/contacts");
+                      }}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      Manage Contacts
+                    </Button>
                   </div>
                 )}
-              </div>
-
-              {/* Manage Contacts Button */}
-              <div className="relative z-10 mt-4">
-                <Button
-                  onClick={() => navigate("/rel8/contacts")}
-                  className="w-full"
-                  variant="outline"
-                >
-                  Manage Contacts
-                </Button>
               </div>
             </div>
           </CardContent>
