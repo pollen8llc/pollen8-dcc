@@ -107,9 +107,9 @@ const EventsCard = ({
       goToPreviousPage();
     }
   };
-  return <Card className={`overflow-hidden border-0 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all shadow-2xl ${className}`} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+  return <Card className={`relative overflow-hidden glass-morphism border-0 backdrop-blur-md hover:bg-blue-500/10 transition-all ${className}`} style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)' }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
       <div className="p-0">
-        <div className="relative bg-gradient-to-br from-white/2 via-white/1 to-white/2 p-6 lg:p-8">
+        <div className="relative p-6 lg:p-8">
           <div className="space-y-6">
 
             {/* Header with Navigation */}
