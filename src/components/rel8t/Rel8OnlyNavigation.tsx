@@ -60,7 +60,7 @@ export function Rel8OnlyNavigation() {
         to="/p8/dashboard"
         className={cn(
           "flex items-center justify-center transition-all duration-200",
-          "hover:scale-105 hover:shadow-[#00eada]/20"
+          "hover:scale-105"
         )}
       >
         <UnifiedAvatar
