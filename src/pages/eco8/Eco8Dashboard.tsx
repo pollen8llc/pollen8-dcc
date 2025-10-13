@@ -13,14 +13,8 @@ import {
   Users, 
   Search, 
   Upload, 
-  Settings, 
-  Activity, 
   Plus,
   Eye,
-  Download,
-  Network,
-  Calendar,
-  MessageSquare,
   AlertCircle,
   Edit
 } from 'lucide-react';
@@ -43,70 +37,11 @@ const Eco8Dashboard: React.FC = () => {
   console.log('Eco8Dashboard - User communities:', userCommunities);
   console.log('Eco8Dashboard - Has user communities:', hasUserCommunities);
 
-  const quickStats = {
-    networkSize: 0, // This would come from actual network connections
-    communitiesManaged: userCommunities.length,
-    totalEvents: 0, // This would come from events data
-    totalContributions: 0 // This would come from contributions data
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <DotConnectorHeader />
 
       <div className="container mx-auto max-w-6xl px-4 py-8">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Network</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.networkSize}</p>
-                </div>
-                <Network className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Communities</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.communitiesManaged}</p>
-                </div>
-                <Users className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Events</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.totalEvents}</p>
-                </div>
-                <Calendar className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Contributions</p>
-                  <p className="text-2xl font-bold text-foreground">{quickStats.totalContributions}</p>
-                </div>
-                <MessageSquare className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Managed Communities */}
         {hasUserCommunities && (
           <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mb-8">
@@ -205,21 +140,6 @@ const Eco8Dashboard: React.FC = () => {
 
           <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-green-500/15 border border-green-500/30">
-                  <Users className="h-6 w-6 text-green-500" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg font-bold">Community Activity</CardTitle>
-                  <p className="text-sm text-muted-foreground">Monitor engagement, posts, and member interactions</p>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
             <Link to={hasUserCommunities ? "/eco8" : "/eco8/setup"} className="block relative">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
@@ -256,20 +176,6 @@ const Eco8Dashboard: React.FC = () => {
             </Link>
           </Card>
 
-          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-teal-500/15 border border-teal-500/30">
-                  <Settings className="h-6 w-6 text-teal-500" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg font-bold">Settings</CardTitle>
-                  <p className="text-sm text-muted-foreground">Manage preferences, notifications, and account settings</p>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
         </div>
 
         {/* Setup Prompt if no communities */}
