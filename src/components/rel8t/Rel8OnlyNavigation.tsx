@@ -59,7 +59,7 @@ export function Rel8OnlyNavigation() {
       <Link
         to="/p8/dashboard"
         className={cn(
-          "flex items-center justify-center transition-all duration-200 bg-black rounded-full",
+          "flex items-center justify-center transition-all duration-200",
           "hover:scale-105 hover:shadow-[#00eada]/20"
         )}
       >
