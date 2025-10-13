@@ -40,11 +40,6 @@ const Eco8Dashboard: React.FC = () => {
       <Navbar />
 
       <div className="container mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">ECO8 Dashboard</h1>
-          <p className="text-muted-foreground">Manage your communities and explore new connections</p>
-        </div>
-
         {/* Navigation Component */}
         <Eco8Navigation hasUserCommunities={hasUserCommunities} />
 

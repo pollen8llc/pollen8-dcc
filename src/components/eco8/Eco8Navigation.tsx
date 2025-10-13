@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Upload, Plus, Users } from 'lucide-react';
+import { Search, Upload, Edit, Link as LinkIcon } from 'lucide-react';
 import { UnifiedAvatar } from '@/components/ui/unified-avatar';
 import { useUser } from '@/contexts/UserContext';
 
@@ -30,14 +30,14 @@ export const Eco8Navigation: React.FC<Eco8NavigationProps> = ({ hasUserCommuniti
     {
       href: hasUserCommunities ? '/eco8' : '/eco8/setup',
       label: hasUserCommunities ? 'Manage Communities' : 'Create Community',
-      icon: Plus,
+      icon: Edit,
       iconColor: 'text-purple-500',
       isActive: location.pathname === '/eco8/setup' || (location.pathname === '/eco8' && hasUserCommunities)
     },
     {
       href: '/eco8/invites',
       label: 'Manage Invites',
-      icon: Users,
+      icon: LinkIcon,
       iconColor: 'text-orange-500',
       isActive: location.pathname === '/eco8/invites'
     }
@@ -45,7 +45,7 @@ export const Eco8Navigation: React.FC<Eco8NavigationProps> = ({ hasUserCommuniti
 
   return (
     <nav className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg p-2 mb-8">
-      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+      <div className="grid grid-cols-5 gap-2">
         {/* Avatar Column */}
         <Link
           to="/p8/dashboard"
