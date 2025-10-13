@@ -5,6 +5,7 @@ import { TrendingUp, Users, Activity, Zap, Globe, Target, CheckCircle2 } from "l
 import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 import NetworkWorldMap from "@/components/p8/NetworkWorldMap";
 import LocationWorldMap from "@/components/p8/LocationWorldMap";
+import EventsCard from "@/components/p8/EventsCard";
 const P8Dashboard = () => {
   const metrics = [{
     label: "Total Members",
@@ -101,6 +102,9 @@ const P8Dashboard = () => {
 
         {/* Location World Map */}
         <LocationWorldMap />
+
+        {/* Events Card */}
+        <EventsCard />
 
         {/* Network World Map */}
         <NetworkWorldMap />
