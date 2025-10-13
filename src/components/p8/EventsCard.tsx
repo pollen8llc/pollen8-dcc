@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Users, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { format } from 'date-fns';
 
 // Sample events data - mix of upcoming and previous
@@ -67,9 +68,17 @@ const EVENTS_PER_PAGE = 4;
 interface EventsCardProps {
   className?: string;
 }
+// Event platform badges
+const eventPlatforms = [
+  { name: 'Luma', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
+  { name: 'Eventbrite', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+  { name: 'Meetup', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
+];
+
 const EventsCard = ({
   className = ''
 }: EventsCardProps) => {
+  const [isOpen, setIsOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
@@ -107,72 +116,109 @@ const EventsCard = ({
       goToPreviousPage();
     }
   };
-  return <Card className={`relative overflow-hidden glass-morphism border-0 backdrop-blur-md hover:bg-green-500/10 transition-all ${className}`} style={{ backgroundColor: 'rgba(34, 197, 94, 0.08)' }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-      <div className="p-0">
-        <div className="relative p-6 lg:p-8">
-          <div className="space-y-6">
+  return <Card className={`relative overflow-hidden glass-morphism border-0 backdrop-blur-md hover:bg-green-500/10 transition-all ${className}`} style={{ backgroundColor: 'rgba(34, 197, 94, 0.08)' }}>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <div className="p-0">
+          <div className="relative p-6 lg:p-8">
+            <div className="space-y-6">
 
-            {/* Header with Navigation */}
-            <div className="space-y-3">
-              {/* Glassmorphic Header with Navigation */}
-              <div className="w-full p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 backdrop-blur-xl border border-green-500/20 rounded-lg">
-                <div className="flex items-center justify-between gap-4">
-                  {/* Left Arrow */}
-                  <Button variant="ghost" size="icon" onClick={goToPreviousPage} disabled={currentPage === 0} className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
-                    <ChevronLeft className="w-5 h-5" />
-                  </Button>
-                  
-                  {/* Center Content */}
-                  <div className="flex items-center justify-center space-x-3 flex-1">
+              {/* Header with Navigation and Collapse */}
+              <div className="space-y-3">
+                {/* Glassmorphic Header with Navigation */}
+                <div className="w-full p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 backdrop-blur-xl border border-green-500/20 rounded-lg">
+                  <div className="flex items-center justify-between gap-4">
+                    {/* Left Arrow */}
+                    <Button variant="ghost" size="icon" onClick={goToPreviousPage} disabled={currentPage === 0} className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
+                      <ChevronLeft className="w-5 h-5" />
+                    </Button>
                     
-                    <div className="text-center">
-                      <h3 className="text-lg font-semibold text-foreground">Latest Events</h3>
-                      <p className="text-sm text-muted-foreground">{events.length} total events</p>
-                    </div>
-                  </div>
-                  
-                  {/* Right Arrow */}
-                  <Button variant="ghost" size="icon" onClick={goToNextPage} disabled={currentPage === totalPages - 1} className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Events List - Always Visible */}
-              <div className="space-y-2 animate-fade-in">
-                {currentEvents.map(event => <div key={event.id} className="flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md hover:shadow-green-500/10 transition-all duration-300 cursor-pointer group">
-                    {/* Left side: Event info */}
-                    <div className="flex items-start space-x-3 flex-1 min-w-0">
-                      <div className={`w-2 h-2 rounded-full ${event.status === 'upcoming' ? 'bg-green-400 animate-pulse' : 'bg-muted-foreground/50'} group-hover:bg-green-300 transition-colors mt-1.5`} />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium group-hover:text-green-100 transition-colors truncate">{event.title}</h4>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-xs text-muted-foreground group-hover:text-green-200 transition-colors flex items-center gap-1">
-                            <Calendar className="w-3 h-3 hidden sm:block" />
-                            <span className="sm:hidden">{format(event.date, 'MMM dd')}</span>
-                            <span className="hidden sm:inline">{format(event.date, 'MMM dd, yyyy')}</span>
-                          </span>
-                          <Badge variant="tag" className="text-xs">
-                            {event.location}
-                          </Badge>
-                        </div>
+                    {/* Center Content */}
+                    <div className="flex items-center justify-center space-x-3 flex-1">
+                      <div className="text-center">
+                        <h3 className="text-lg font-semibold text-foreground">Latest Events</h3>
+                        <p className="text-sm text-muted-foreground">{events.length} total events</p>
                       </div>
                     </div>
+                    
+                    {/* Right Arrow */}
+                    <Button variant="ghost" size="icon" onClick={goToNextPage} disabled={currentPage === totalPages - 1} className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
+                      <ChevronRight className="w-5 h-5" />
+                    </Button>
 
-                    {/* Right side: Attendee count */}
-                    <div className="flex items-center space-x-2 ml-4 shrink-0">
-                      <Users className="w-4 h-4 text-muted-foreground group-hover:text-green-300 transition-colors" />
-                      <span className="text-sm font-medium text-muted-foreground group-hover:text-green-200 transition-colors">
-                        {event.attendees}
-                      </span>
+                    {/* Collapse Toggle */}
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20">
+                        {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                </div>
+
+                {/* Collapsible Content */}
+                <CollapsibleContent 
+                  className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+                  onTouchStart={onTouchStart} 
+                  onTouchMove={onTouchMove} 
+                  onTouchEnd={onTouchEnd}
+                >
+                  {/* Events List */}
+                  <div className="space-y-2 animate-fade-in">
+                    {currentEvents.map(event => <div key={event.id} className="flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md hover:shadow-green-500/10 transition-all duration-300 cursor-pointer group">
+                        {/* Left side: Event info */}
+                        <div className="flex items-start space-x-3 flex-1 min-w-0">
+                          <div className={`w-2 h-2 rounded-full ${event.status === 'upcoming' ? 'bg-green-400 animate-pulse' : 'bg-muted-foreground/50'} group-hover:bg-green-300 transition-colors mt-1.5`} />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium group-hover:text-green-100 transition-colors truncate">{event.title}</h4>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-xs text-muted-foreground group-hover:text-green-200 transition-colors flex items-center gap-1">
+                                <Calendar className="w-3 h-3 hidden sm:block" />
+                                <span className="sm:hidden">{format(event.date, 'MMM dd')}</span>
+                                <span className="hidden sm:inline">{format(event.date, 'MMM dd, yyyy')}</span>
+                              </span>
+                              <Badge variant="tag" className="text-xs">
+                                {event.location}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right side: Attendee count */}
+                        <div className="flex items-center space-x-2 ml-4 shrink-0">
+                          <Users className="w-4 h-4 text-muted-foreground group-hover:text-green-300 transition-colors" />
+                          <span className="text-sm font-medium text-muted-foreground group-hover:text-green-200 transition-colors">
+                            {event.attendees}
+                          </span>
+                        </div>
+                      </div>)}
+                  </div>
+
+                  {/* Event Platforms Badge Grid */}
+                  <div className="mt-6 pt-6 border-t border-green-500/20">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-medium text-muted-foreground">Event Platforms</h4>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs text-green-400 hover:text-green-300 hover:bg-green-500/20">
+                        <Plus className="w-3 h-3 mr-1" />
+                        Add Source
+                      </Button>
                     </div>
-                  </div>)}
+                    <div className="flex flex-wrap gap-2">
+                      {eventPlatforms.map((platform) => (
+                        <Badge 
+                          key={platform.name} 
+                          className={`${platform.color} border cursor-pointer hover:scale-105 transition-transform`}
+                        >
+                          {platform.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </CollapsibleContent>
               </div>
-            </div>
 
+            </div>
           </div>
         </div>
-      </div>
+      </Collapsible>
 
       {/* Decorative gradient overlay */}
       <div className="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl pointer-events-none" />
