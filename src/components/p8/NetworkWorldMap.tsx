@@ -1,12 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useState } from "react";
-import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, ChevronUp, MapPin, ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getCategories, getContacts, Contact } from "@/services/rel8t/contactService";
-import { Badge } from "@/components/ui/badge";
+import { getContacts } from "@/services/rel8t/contactService";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { getEmailNotifications, EmailNotification } from "@/services/rel8t/emailService";
 
 // Inline SVG Ring Chart Component
 const RingChart = () => {
@@ -78,21 +78,91 @@ const RingChart = () => {
 
 const NetworkWorldMap = () => {
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
   const navigate = useNavigate();
   
   const totalContacts = 1247;
   const activeConnections = 842;
   const activePercentage = (activeConnections / totalContacts) * 100;
-  
-  const { data: categories = [] } = useQuery({
-    queryKey: ["contact-categories"],
-    queryFn: getCategories,
-  });
 
   const { data: contacts = [] } = useQuery({
     queryKey: ["contacts"],
     queryFn: () => getContacts(),
   });
+
+  const { data: emailNotifications = [] } = useQuery({
+    queryKey: ["email-notifications"],
+    queryFn: getEmailNotifications,
+  });
+
+  // Slider configuration
+  const NOTIFICATIONS_PER_PAGE = 3;
+  const totalPages = Math.max(1, Math.ceil(emailNotifications.length / NOTIFICATIONS_PER_PAGE));
+
+  // Auto-rotate slider
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isDragging && emailNotifications.length > NOTIFICATIONS_PER_PAGE) {
+        goToNextPage();
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [currentPage, isDragging, emailNotifications.length]);
+
+  const goToNextPage = () => {
+    setIsTransitioning(true);
+    setCurrentPage((prev) => (prev + 1) % totalPages);
+    setTimeout(() => setIsTransitioning(false), 300);
+  };
+
+  const goToPreviousPage = () => {
+    setIsTransitioning(true);
+    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+    setTimeout(() => setIsTransitioning(false), 300);
+  };
+
+  const goToPage = (page: number) => {
+    setIsTransitioning(true);
+    setCurrentPage(page);
+    setTimeout(() => setIsTransitioning(false), 300);
+  };
+
+  // Touch/Mouse handlers
+  const handleDragStart = (clientX: number) => {
+    setIsDragging(true);
+    setDragStart(clientX);
+    setDragOffset(0);
+  };
+
+  const handleDragMove = (clientX: number) => {
+    if (!isDragging) return;
+    const offset = clientX - dragStart;
+    setDragOffset(offset);
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    const threshold = 50;
+    if (Math.abs(dragOffset) > threshold) {
+      if (dragOffset > 0) {
+        goToPreviousPage();
+      } else {
+        goToNextPage();
+      }
+    }
+
+    setIsTransitioning(true);
+    setDragOffset(0);
+    setTimeout(() => setIsTransitioning(false), 300);
+  };
 
   return (
     <div className="w-full">
@@ -116,39 +186,108 @@ const NetworkWorldMap = () => {
                 </div>
               </div>
 
-              {/* Categories Section - Always Visible */}
+              {/* Contact Reminders Slider - Always Visible */}
               <div className="relative z-10 mt-4">
                 <div className="glass-morphism bg-card/20 backdrop-blur-sm rounded-lg p-4 border-0">
-                  <h4 className="text-sm font-semibold text-muted-foreground mb-3">Contact Categories</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {categories.slice(0, 6).map((category) => (
-                      <Badge
-                        key={category.id}
-                        variant="tag"
-                        className="px-3 py-1.5 justify-center truncate"
-                        style={{ 
-                          backgroundColor: `${category.color}20`,
-                          borderColor: category.color,
-                          color: category.color
-                        }}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4 text-primary" />
+                      <h4 className="text-sm font-semibold text-muted-foreground">Contact Reminders</h4>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={goToPreviousPage}
                       >
-                        {category.name}
-                      </Badge>
-                    ))}
-                    {/* Always show 2 blank + slots */}
-                    <Badge
-                      variant="outline"
-                      className="px-3 py-1.5 justify-center cursor-pointer hover:bg-card/40 transition-colors"
-                    >
-                      +
-                    </Badge>
-                    <Badge
-                      variant="outline"
-                      className="px-3 py-1.5 justify-center cursor-pointer hover:bg-card/40 transition-colors"
-                    >
-                      +
-                    </Badge>
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={goToNextPage}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
+                  
+                  {/* Slider Container */}
+                  <div 
+                    className="overflow-hidden relative"
+                    onMouseDown={(e) => handleDragStart(e.clientX)}
+                    onMouseMove={(e) => handleDragMove(e.clientX)}
+                    onMouseUp={handleDragEnd}
+                    onMouseLeave={handleDragEnd}
+                    onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+                    onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
+                    onTouchEnd={handleDragEnd}
+                  >
+                    <div 
+                      className="flex"
+                      style={{
+                        transform: `translateX(calc(-${currentPage * 100}% + ${dragOffset}px))`,
+                        transition: isDragging ? 'none' : isTransitioning ? 'transform 0.3s ease-out' : 'none',
+                        cursor: isDragging ? 'grabbing' : 'grab'
+                      }}
+                    >
+                      {Array.from({ length: totalPages }).map((_, pageIndex) => (
+                        <div
+                          key={pageIndex}
+                          className="w-full flex-shrink-0 grid grid-cols-1 gap-2"
+                        >
+                          {emailNotifications
+                            .slice(pageIndex * NOTIFICATIONS_PER_PAGE, (pageIndex + 1) * NOTIFICATIONS_PER_PAGE)
+                            .map((notification) => (
+                              <div
+                                key={notification.id}
+                                className="p-3 rounded-lg bg-card/40 hover:bg-card/60 transition-colors border border-border/50"
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">
+                                      {notification.subject}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                      To: {notification.recipient_email}
+                                    </p>
+                                  </div>
+                                  <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                    notification.status === 'sent' 
+                                      ? 'bg-green-500/20 text-green-400'
+                                      : notification.status === 'pending'
+                                      ? 'bg-yellow-500/20 text-yellow-400'
+                                      : 'bg-red-500/20 text-red-400'
+                                  }`}>
+                                    {notification.status}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Page Indicators */}
+                  {totalPages > 1 && (
+                    <div className="flex justify-center gap-1.5 mt-3">
+                      {Array.from({ length: totalPages }).map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => goToPage(index)}
+                          className={`h-1.5 rounded-full transition-all ${
+                            index === currentPage
+                              ? 'w-6 bg-primary'
+                              : 'w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                          }`}
+                          aria-label={`Go to page ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
