@@ -81,11 +81,15 @@ interface EventsCardProps {
 
 const EventsCard = ({ className = '' }: EventsCardProps) => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
   
   const totalPages = Math.ceil(events.length / EVENTS_PER_PAGE);
   const startIndex = currentPage * EVENTS_PER_PAGE;
   const endIndex = startIndex + EVENTS_PER_PAGE;
   const currentEvents = events.slice(startIndex, endIndex);
+  
+  const minSwipeDistance = 50;
   
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -98,9 +102,38 @@ const EventsCard = ({ className = '' }: EventsCardProps) => {
       setCurrentPage(currentPage - 1);
     }
   };
+  
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(0);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      goToNextPage();
+    }
+    if (isRightSwipe) {
+      goToPreviousPage();
+    }
+  };
 
   return (
-    <Card className={`overflow-hidden border-0 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all shadow-2xl ${className}`}>
+    <Card 
+      className={`overflow-hidden border-0 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all shadow-2xl ${className}`}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       <div className="p-0">
         <div className="relative bg-gradient-to-br from-white/2 via-white/1 to-white/2 p-6 lg:p-8">
           <div className="space-y-6">
