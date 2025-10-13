@@ -48,24 +48,8 @@ const EventsCard = ({ className = '' }: EventsCardProps) => {
       <div className="p-0">
         <div className="relative bg-gradient-to-br from-blue-500/2 via-teal-500/2 to-blue-600/2 p-6 lg:p-8">
           <div className="space-y-6">
-                
-            {/* Section 1: Header */}
-            <div className="flex items-center gap-4">
-              {/* Calendar Icon */}
-              <div className="shrink-0">
-                <div className="w-[105px] h-[105px] rounded-full overflow-hidden bg-background/50 backdrop-blur-sm flex items-center justify-center" style={{ border: '3.84px solid hsl(var(--primary) / 0.2)' }}>
-                  <Calendar className="w-14 h-14 text-primary" />
-                </div>
-              </div>
 
-              {/* Title and Description */}
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold text-foreground mb-1">Events</h2>
-                <p className="text-sm text-muted-foreground">Upcoming events across your communities</p>
-              </div>
-            </div>
-
-            {/* Section 2: Events Accordion */}
+            {/* Events Accordion */}
             <div className="space-y-3">
               {/* Glassmorphic Events Button */}
               <button
