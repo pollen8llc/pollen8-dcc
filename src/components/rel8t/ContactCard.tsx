@@ -3,12 +3,12 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MapPin, Trash2, Edit } from "lucide-react";
 import { Contact } from "@/services/rel8t/contactService";
 import { deleteContact } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
+import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 
 interface ContactCardProps {
   contact: Contact;
@@ -68,13 +68,12 @@ const ContactCard = ({
     return contact.category.color || "#00eada";
   };
   
-  const getInitials = () => {
-    return contact.name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  // Use UXI8000 avatar for contacts that aren't platform users or have no member role
+  const getAvatarUserId = () => {
+    // Check if contact has a member role or is a platform user
+    // If not, use the default avatar UXI8000
+    const isMember = contact.role && contact.role.toLowerCase().includes('member');
+    return isMember ? contact.user_id : "UXI8000";
   };
 
   return (
@@ -101,9 +100,7 @@ const ContactCard = ({
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="bg-primary/10 rounded-full p-2 group-hover:bg-primary/20 transition-colors flex-shrink-0">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-sm bg-transparent">{getInitials()}</AvatarFallback>
-              </Avatar>
+              <UnifiedAvatar userId={getAvatarUserId()} size={32} />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">{contact.name}</h3>
