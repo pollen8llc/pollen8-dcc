@@ -138,6 +138,34 @@ serve(async (req) => {
       }
     }
 
+    // Create affiliation record linking contact to user profile
+    const { data: existingAffiliation } = await supabaseAdmin
+      .from('rms_contact_affiliations')
+      .select('id')
+      .eq('contact_id', contactId)
+      .eq('affiliation_type', 'user')
+      .maybeSingle();
+
+    if (!existingAffiliation) {
+      const { error: affiliationError } = await supabaseAdmin
+        .from('rms_contact_affiliations')
+        .insert({
+          contact_id: contactId,
+          user_id: contact.user_id, // The organizer who owns the contact
+          affiliation_type: 'user',
+          affiliated_user_id: authUser.id, // The new/existing platform member
+          relationship: 'platform_member'
+        });
+
+      if (affiliationError) {
+        console.error('Error creating affiliation:', affiliationError);
+      } else {
+        console.log('Affiliation record created successfully');
+      }
+    } else {
+      console.log('Affiliation record already exists');
+    }
+
     // Create nmn8 profile
     const { error: nmn8ProfileError } = await supabaseAdmin
       .from('nmn8_profiles')
@@ -165,6 +193,7 @@ serve(async (req) => {
     }
 
     // Log the action
+    const affiliationCreated = !existingAffiliation;
     const { error: auditError } = await supabaseAdmin
       .from('audit_logs')
       .insert({
@@ -175,7 +204,8 @@ serve(async (req) => {
           new_user_id: authUser.id,
           existing_user: !isNewUser,
           classification: classification || 'Volunteer',
-          notes: notes || ''
+          notes: notes || '',
+          affiliation_created: affiliationCreated
         }
       });
 
