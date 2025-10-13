@@ -156,35 +156,54 @@ const NetworkWorldMap = () => {
               <div className="relative z-10 mt-4">
                 <button
                   onClick={() => setIsCategoriesExpanded(!isCategoriesExpanded)}
-                  className="w-full glass-morphism bg-card/20 backdrop-blur-sm rounded-lg p-4 border-0 hover:bg-card/30 transition-all"
+                  className="w-full glass-morphism bg-card/20 backdrop-blur-sm rounded-full p-1 border-0 hover:bg-card/30 transition-all group"
                 >
-                  <div className="space-y-3">
-                    {/* Gradient percentage bar */}
-                    <div className="relative h-10 rounded-lg overflow-hidden">
-                      <div 
-                        className="absolute inset-0 bg-gradient-to-r from-teal-500/80 to-blue-500/60 transition-all duration-500"
-                        style={{ width: `${activePercentage}%` }}
-                      />
-                      <div 
-                        className="absolute inset-0 bg-gradient-to-r from-blue-500/40 to-blue-500/20"
-                        style={{ left: `${activePercentage}%` }}
-                      />
-                      
-                      {/* Overlay content */}
-                      <div className="relative h-full flex items-center justify-between px-4">
-                        <span className="text-sm font-medium text-white drop-shadow-lg">
-                          {activeConnections} Active
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm font-medium text-white/90 drop-shadow-lg">
-                            {totalContacts} Total
+                  {/* Sleek gradient bar */}
+                  <div className="relative h-12 sm:h-10 rounded-full overflow-hidden">
+                    {/* Active segment */}
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500 shadow-lg"
+                      style={{ 
+                        width: `${activePercentage}%`,
+                        boxShadow: '0 0 20px rgba(20, 184, 166, 0.4)'
+                      }}
+                    />
+                    {/* Inactive segment */}
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-r from-blue-500/30 to-blue-600/20"
+                      style={{ left: `${activePercentage}%` }}
+                    />
+                    
+                    {/* Content overlay */}
+                    <div className="relative h-full flex items-center justify-between px-4 sm:px-5">
+                      {/* Left side - Active contacts */}
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
+                          <span className="text-base sm:text-lg font-bold text-white leading-none">
+                            {activeConnections}
                           </span>
-                          {isCategoriesExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-white" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-white" />
-                          )}
+                          <span className="text-[10px] sm:text-xs font-medium text-white/80 uppercase tracking-wide">
+                            Active
+                          </span>
                         </div>
+                      </div>
+                      
+                      {/* Right side - Total contacts + chevron */}
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
+                          <span className="text-sm sm:text-base font-semibold text-white/90 leading-none">
+                            {totalContacts}
+                          </span>
+                          <span className="text-[10px] sm:text-xs font-medium text-white/70 uppercase tracking-wide">
+                            Total
+                          </span>
+                        </div>
+                        {isCategoriesExpanded ? (
+                          <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-y-[-2px] transition-transform" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-y-[2px] transition-transform" />
+                        )}
                       </div>
                     </div>
                   </div>
