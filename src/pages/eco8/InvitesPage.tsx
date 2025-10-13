@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
+import { useCommunities } from "@/hooks/useCommunities";
+import { Eco8Navigation } from "@/components/eco8/Eco8Navigation";
 import InviteGenerator from "@/components/invites/InviteGenerator";
 import InviteList from "@/components/invites/InviteList";
 import Navbar from "@/components/Navbar";
@@ -12,6 +14,7 @@ import { Plus, Users } from "lucide-react";
 const InvitesPage: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, isLoading } = useUser();
+  const { hasUserCommunities } = useCommunities();
 
   if (isLoading) {
     return (
@@ -39,12 +42,7 @@ const InvitesPage: React.FC = () => {
         <Navbar />
         
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Manage Invites</h1>
-            <p className="text-muted-foreground">
-              Generate invitation codes and links to invite new members to your communities.
-            </p>
-          </div>
+          <Eco8Navigation hasUserCommunities={hasUserCommunities} />
 
           <div className="space-y-6">
             {/* Invite Generation Section */}

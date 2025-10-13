@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Navbar from '@/components/Navbar';
+import { Eco8Navigation } from '@/components/eco8/Eco8Navigation';
 import { 
   Users, 
   MapPin, 
@@ -24,7 +26,7 @@ import { useAuth } from '@/hooks/useAuth';
 const CommunityDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { userCommunities, loading, refreshUserCommunities } = useCommunities();
+  const { userCommunities, hasUserCommunities, loading, refreshUserCommunities } = useCommunities();
 
   useEffect(() => {
     // Refresh data when component mounts
@@ -81,29 +83,9 @@ const CommunityDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <Navbar />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">My Communities</h1>
-            <p className="text-muted-foreground">Manage and grow your community presence</p>
-          </div>
-          
-          <div className="flex gap-3">
-            <Button variant="outline" asChild>
-              <Link to="/eco8">
-                <Eye className="h-4 w-4 mr-2" />
-                Browse All
-              </Link>
-            </Button>
-            <Button asChild>
-              <Link to="/eco8/setup">
-                <Plus className="h-4 w-4 mr-2" />
-                New Community
-              </Link>
-            </Button>
-          </div>
-        </div>
+        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Navbar from '@/components/Navbar';
+import { Eco8Navigation } from '@/components/eco8/Eco8Navigation';
 import { CommunityEditForm } from '@/components/eco8/CommunityEditForm';
 import { useCommunities, Community } from '@/hooks/useCommunities';
 import { useAuth } from '@/hooks/useAuth';
@@ -37,7 +38,7 @@ import {
 const CommunityProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getCommunityById } = useCommunities();
+  const { getCommunityById, hasUserCommunities } = useCommunities();
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const [community, setCommunity] = useState<Community | null>(null);
@@ -144,12 +145,10 @@ const CommunityProfile: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <Navbar />
-        <div className="w-full px-4 py-8">
+        <div className="container mx-auto max-w-6xl px-4 py-8">
+          <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+          
           <div className="max-w-4xl mx-auto">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold mb-2">Edit Community</h1>
-              <p className="text-muted-foreground">Update your community information</p>
-            </div>
             <CommunityEditForm
               community={community}
               onSave={handleSave}
@@ -164,7 +163,9 @@ const CommunityProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <div className="w-full px-4 py-8">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+        
         {/* LinkedIn-style Community Header */}
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}

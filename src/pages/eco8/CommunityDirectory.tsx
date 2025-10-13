@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Search, Users, Plus, Filter, X } from 'lucide-react';
 import CommunityCard from '@/components/CommunityCard';
 import Navbar from '@/components/Navbar';
+import { Eco8Navigation } from '@/components/eco8/Eco8Navigation';
 import { FilterDialog } from '@/components/eco8/FilterDialog';
 import { useCommunities, Community } from '@/hooks/useCommunities';
 
@@ -29,7 +30,7 @@ const GROWTH_STATUS = [
 ];
 
 const CommunityDirectory: React.FC = () => {
-  const { getAllCommunities } = useCommunities();
+  const { getAllCommunities, hasUserCommunities } = useCommunities();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
@@ -129,14 +130,8 @@ const CommunityDirectory: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="w-full px-4 py-8">
-        {/* Header Navigation & Page Hero Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Community Directory</h1>
-          <p className="text-muted-foreground text-lg">
-            Discover and connect with communities that share your interests
-          </p>
-        </div>
+      <main className="container mx-auto max-w-6xl px-4 py-8">
+        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
 
         {/* Search & Filter Bar */}
         <Card className="bg-card border rounded-2xl p-6 mb-6">
