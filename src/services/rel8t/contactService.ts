@@ -20,6 +20,8 @@ export interface Contact {
   category?: ContactCategory;
   // Include groups when joined
   groups?: ContactGroup[];
+  // Include affiliations when joined
+  affiliations?: ContactAffiliation[];
 }
 
 export interface ContactCategory {
@@ -67,6 +69,16 @@ export const getContacts = async (options?: { searchQuery?: string }): Promise<C
         id,
         name,
         color
+      ),
+      affiliations:rms_contact_affiliations!contact_id (
+        id,
+        contact_id,
+        user_id,
+        affiliation_type,
+        affiliated_user_id,
+        relationship,
+        created_at,
+        updated_at
       )
     `);
   
@@ -87,7 +99,19 @@ export const getContacts = async (options?: { searchQuery?: string }): Promise<C
     throw new Error(error.message);
   }
   
-  return data || [];
+  // Map the data to properly type the affiliations
+  const contacts = (data || []).map(contact => ({
+    ...contact,
+    affiliations: contact.affiliations?.map((aff: any) => ({
+      ...aff,
+      affiliation_type: aff.affiliation_type as 'user' | 'contact' | 'community',
+      affiliated_user: null,
+      affiliated_contact: null,
+      affiliated_community: null
+    })) || []
+  }));
+  
+  return contacts;
 };
 
 // Get contact count

@@ -70,8 +70,16 @@ const ContactCard = ({
   
   // Use UXI8000 avatar for contacts that aren't platform users or have no member role
   const getAvatarUserId = () => {
-    // Check if contact has a member role or is a platform user
-    // If not, use the default avatar UXI8000
+    // First check if contact has an affiliated user (nominated member)
+    const userAffiliation = contact.affiliations?.find(
+      aff => aff.affiliation_type === 'user' && aff.affiliated_user_id
+    );
+    
+    if (userAffiliation?.affiliated_user_id) {
+      return userAffiliation.affiliated_user_id;
+    }
+    
+    // Fallback: check if contact has a member role
     const isMember = contact.role && contact.role.toLowerCase().includes('member');
     return isMember ? contact.user_id : "UXI8000";
   };
