@@ -78,7 +78,7 @@ const eventPlatforms = [
 const EventsCard = ({
   className = ''
 }: EventsCardProps) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
@@ -119,10 +119,10 @@ const EventsCard = ({
   return <Card className={`relative overflow-hidden glass-morphism border-0 backdrop-blur-md hover:bg-green-500/10 transition-all ${className}`} style={{ backgroundColor: 'rgba(34, 197, 94, 0.08)' }}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="p-0">
-          <div className="relative p-6 lg:p-8">
+          <div className="relative p-6 lg:p-8 pb-0">
             <div className="space-y-6">
 
-              {/* Header with Navigation and Collapse */}
+              {/* Header with Navigation Only */}
               <div className="space-y-3">
                 {/* Glassmorphic Header with Navigation */}
                 <div className="w-full p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 backdrop-blur-xl border border-green-500/20 rounded-lg">
@@ -144,25 +144,18 @@ const EventsCard = ({
                     <Button variant="ghost" size="icon" onClick={goToNextPage} disabled={currentPage === totalPages - 1} className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20 disabled:opacity-30 disabled:cursor-not-allowed">
                       <ChevronRight className="w-5 h-5" />
                     </Button>
-
-                    {/* Collapse Toggle */}
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 text-green-400 hover:text-green-300 hover:bg-green-500/20">
-                        {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                      </Button>
-                    </CollapsibleTrigger>
                   </div>
                 </div>
 
                 {/* Collapsible Content */}
                 <CollapsibleContent 
-                  className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+                  className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down px-6 lg:px-8"
                   onTouchStart={onTouchStart} 
                   onTouchMove={onTouchMove} 
                   onTouchEnd={onTouchEnd}
                 >
                   {/* Events List */}
-                  <div className="space-y-2 animate-fade-in">
+                  <div className="space-y-2 animate-fade-in pt-3">
                     {currentEvents.map(event => <div key={event.id} className="flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md hover:shadow-green-500/10 transition-all duration-300 cursor-pointer group">
                         {/* Left side: Event info */}
                         <div className="flex items-start space-x-3 flex-1 min-w-0">
@@ -217,6 +210,23 @@ const EventsCard = ({
 
             </div>
           </div>
+
+          {/* Full Width Collapse Toggle at Bottom */}
+          <CollapsibleTrigger asChild>
+            <button className="w-full py-3 flex items-center justify-center text-sm text-muted-foreground hover:text-green-400 hover:bg-green-500/10 transition-all border-t border-green-500/20">
+              {isOpen ? (
+                <>
+                  <span>Show Less</span>
+                  <ChevronUp className="w-4 h-4 ml-2" />
+                </>
+              ) : (
+                <>
+                  <span>Show Events</span>
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </button>
+          </CollapsibleTrigger>
         </div>
       </Collapsible>
 
