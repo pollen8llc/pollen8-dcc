@@ -38,7 +38,8 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
     };
     
     fetchOrganizer();
-  }, [community.owner_id, getProfileById]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [community.owner_id]);
   
   // Fallback data
   const organizerName = organizer 
