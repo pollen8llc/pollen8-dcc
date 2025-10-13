@@ -54,7 +54,7 @@ export function Rel8OnlyNavigation() {
   ];
 
   return (
-    <nav className="flex flex-wrap gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
+    <nav className="grid grid-cols-6 gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
       {/* Avatar Link */}
       <Link
         to="/p8/dashboard"
