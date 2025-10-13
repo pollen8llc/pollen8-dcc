@@ -158,6 +158,24 @@ const ContactEdit = () => {
       .toUpperCase();
   };
 
+  // Determine the correct user ID for avatar display
+  const getAvatarUserId = () => {
+    if (!contact) return "UXI8000";
+    
+    // First check if contact has an affiliated user (nominated member)
+    const userAffiliation = contact.affiliations?.find(
+      (aff: any) => aff.affiliation_type === 'user' && aff.affiliated_user_id
+    );
+    
+    if (userAffiliation?.affiliated_user_id) {
+      return userAffiliation.affiliated_user_id;
+    }
+    
+    // Fallback: check if contact has a member role
+    const isMember = contact.role && contact.role.toLowerCase().includes('member');
+    return isMember ? contact.user_id : "UXI8000";
+  };
+
   const handleModeChange = (mode: 'view' | 'edit' | 'manage' | 'engage') => {
     setCurrentMode(mode);
   };
@@ -261,7 +279,7 @@ const ContactEdit = () => {
           <div className="space-y-6">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-              <Avatar userId={contact.name} size={80} className="mx-auto sm:mx-0" />
+              <Avatar userId={getAvatarUserId()} size={80} className="mx-auto sm:mx-0" />
               
               <div className="flex-1 space-y-3 w-full text-center sm:text-left">
                 <div>
