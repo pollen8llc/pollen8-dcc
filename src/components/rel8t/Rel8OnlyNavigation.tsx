@@ -59,16 +59,14 @@ export function Rel8OnlyNavigation() {
       <Link
         to="/p8/dashboard"
         className={cn(
-          "group inline-flex items-center justify-center rounded-full p-[1px] bg-black",
-          "transition-transform duration-200 will-change-transform"
+          "flex items-center justify-center transition-all duration-200",
+          "hover:scale-105"
         )}
       >
-        <div className="transform-gpu transition-transform duration-200 group-hover:scale-105 rounded-full">
-          <UnifiedAvatar
-            userId={currentUser?.id}
-            size={48}
-          />
-        </div>
+        <UnifiedAvatar
+          userId={currentUser?.id}
+          size={48}
+        />
       </Link>
       
       {navItems.map((item) => {
