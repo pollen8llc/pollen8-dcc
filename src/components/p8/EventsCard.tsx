@@ -44,9 +44,9 @@ const EventsCard = ({ className = '' }: EventsCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Card className={`overflow-hidden border-0 bg-gradient-to-br from-blue-500/5 via-teal-500/5 to-blue-600/5 backdrop-blur-md shadow-2xl ${className}`}>
+    <Card className={`overflow-hidden border-0 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all shadow-2xl ${className}`}>
       <div className="p-0">
-        <div className="relative bg-gradient-to-br from-blue-500/2 via-teal-500/2 to-blue-600/2 p-6 lg:p-8">
+        <div className="relative bg-gradient-to-br from-white/2 via-white/1 to-white/2 p-6 lg:p-8">
           <div className="space-y-6">
 
             {/* Events Accordion */}
@@ -62,7 +62,7 @@ const EventsCard = ({ className = '' }: EventsCardProps) => {
                       <Calendar className="w-5 h-5 text-teal-400" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-lg font-semibold text-foreground">Upcoming Events</h3>
+                      <h3 className="text-lg font-semibold text-foreground">Latest Events</h3>
                       <p className="text-sm text-muted-foreground">{events.length} events scheduled</p>
                     </div>
                   </div>
