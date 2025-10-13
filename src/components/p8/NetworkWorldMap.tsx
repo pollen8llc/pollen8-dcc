@@ -6,7 +6,8 @@ import { getContacts } from "@/services/rel8t/contactService";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { getEmailNotifications, EmailNotification } from "@/services/rel8t/emailService";
+import { getOutreach, Outreach } from "@/services/rel8t/outreachService";
+import { format } from "date-fns";
 
 // Inline SVG Ring Chart Component
 const RingChart = () => {
@@ -95,25 +96,25 @@ const NetworkWorldMap = () => {
     queryFn: () => getContacts(),
   });
 
-  const { data: emailNotifications = [] } = useQuery({
-    queryKey: ["email-notifications"],
-    queryFn: getEmailNotifications,
+  const { data: upcomingOutreach = [] } = useQuery({
+    queryKey: ["upcoming-outreach"],
+    queryFn: () => getOutreach("upcoming"),
   });
 
   // Slider configuration
-  const NOTIFICATIONS_PER_PAGE = 3;
-  const totalPages = Math.max(1, Math.ceil(emailNotifications.length / NOTIFICATIONS_PER_PAGE));
+  const TASKS_PER_PAGE = 3;
+  const totalPages = Math.max(1, Math.ceil(upcomingOutreach.length / TASKS_PER_PAGE));
 
   // Auto-rotate slider
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!isDragging && emailNotifications.length > NOTIFICATIONS_PER_PAGE) {
+      if (!isDragging && upcomingOutreach.length > TASKS_PER_PAGE) {
         goToNextPage();
       }
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [currentPage, isDragging, emailNotifications.length]);
+  }, [currentPage, isDragging, upcomingOutreach.length]);
 
   const goToNextPage = () => {
     setIsTransitioning(true);
@@ -186,108 +187,136 @@ const NetworkWorldMap = () => {
                 </div>
               </div>
 
-              {/* Contact Reminders Slider - Always Visible */}
+              {/* Contact Reminders Card */}
               <div className="relative z-10 mt-4">
-                <div className="glass-morphism bg-card/20 backdrop-blur-sm rounded-lg p-4 border-0">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="glass-morphism bg-card/20 backdrop-blur-sm rounded-lg border-0 overflow-hidden">
+                  {/* Top Section */}
+                  <div className="flex items-center justify-between p-4 border-b border-border/50">
                     <div className="flex items-center gap-2">
                       <Bell className="h-4 w-4 text-primary" />
-                      <h4 className="text-sm font-semibold text-muted-foreground">Contact Reminders</h4>
+                      <h4 className="text-sm font-semibold text-foreground">Outreach Tasks</h4>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={goToPreviousPage}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={goToNextPage}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {/* Slider Container */}
-                  <div 
-                    className="overflow-hidden relative"
-                    onMouseDown={(e) => handleDragStart(e.clientX)}
-                    onMouseMove={(e) => handleDragMove(e.clientX)}
-                    onMouseUp={handleDragEnd}
-                    onMouseLeave={handleDragEnd}
-                    onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
-                    onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
-                    onTouchEnd={handleDragEnd}
-                  >
-                    <div 
-                      className="flex"
-                      style={{
-                        transform: `translateX(calc(-${currentPage * 100}% + ${dragOffset}px))`,
-                        transition: isDragging ? 'none' : isTransitioning ? 'transform 0.3s ease-out' : 'none',
-                        cursor: isDragging ? 'grabbing' : 'grab'
-                      }}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate("/rel8/contacts")}
                     >
-                      {Array.from({ length: totalPages }).map((_, pageIndex) => (
-                        <div
-                          key={pageIndex}
-                          className="w-full flex-shrink-0 grid grid-cols-1 gap-2"
-                        >
-                          {emailNotifications
-                            .slice(pageIndex * NOTIFICATIONS_PER_PAGE, (pageIndex + 1) * NOTIFICATIONS_PER_PAGE)
-                            .map((notification) => (
-                              <div
-                                key={notification.id}
-                                className="p-3 rounded-lg bg-card/40 hover:bg-card/60 transition-colors border border-border/50"
-                              >
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-foreground truncate">
-                                      {notification.subject}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                      To: {notification.recipient_email}
-                                    </p>
-                                  </div>
-                                  <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    notification.status === 'sent' 
-                                      ? 'bg-green-500/20 text-green-400'
-                                      : notification.status === 'pending'
-                                      ? 'bg-yellow-500/20 text-yellow-400'
-                                      : 'bg-red-500/20 text-red-400'
-                                  }`}>
-                                    {notification.status}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                        </div>
-                      ))}
-                    </div>
+                      Manage
+                    </Button>
                   </div>
 
-                  {/* Page Indicators */}
-                  {totalPages > 1 && (
-                    <div className="flex justify-center gap-1.5 mt-3">
-                      {Array.from({ length: totalPages }).map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => goToPage(index)}
-                          className={`h-1.5 rounded-full transition-all ${
-                            index === currentPage
-                              ? 'w-6 bg-primary'
-                              : 'w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                          }`}
-                          aria-label={`Go to page ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  {/* Bottom Section - Slider or Empty State */}
+                  <div className="p-4">
+                    {upcomingOutreach.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-muted-foreground">
+                          No upcoming outreach tasks scheduled
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Navigation Buttons */}
+                        <div className="flex items-center justify-end gap-2 mb-3">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={goToPreviousPage}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={goToNextPage}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        {/* Slider Container */}
+                        <div 
+                          className="overflow-hidden relative"
+                          onMouseDown={(e) => handleDragStart(e.clientX)}
+                          onMouseMove={(e) => handleDragMove(e.clientX)}
+                          onMouseUp={handleDragEnd}
+                          onMouseLeave={handleDragEnd}
+                          onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+                          onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
+                          onTouchEnd={handleDragEnd}
+                        >
+                          <div 
+                            className="flex"
+                            style={{
+                              transform: `translateX(calc(-${currentPage * 100}% + ${dragOffset}px))`,
+                              transition: isDragging ? 'none' : isTransitioning ? 'transform 0.3s ease-out' : 'none',
+                              cursor: isDragging ? 'grabbing' : 'grab'
+                            }}
+                          >
+                            {Array.from({ length: totalPages }).map((_, pageIndex) => (
+                              <div
+                                key={pageIndex}
+                                className="w-full flex-shrink-0 grid grid-cols-1 gap-2"
+                              >
+                                {upcomingOutreach
+                                  .slice(pageIndex * TASKS_PER_PAGE, (pageIndex + 1) * TASKS_PER_PAGE)
+                                  .map((task) => (
+                                    <div
+                                      key={task.id}
+                                      className="p-3 rounded-lg bg-card/40 hover:bg-card/60 transition-colors border border-border/50"
+                                    >
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-medium text-foreground truncate">
+                                            {task.title}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                            Due: {format(new Date(task.due_date), "MMM d, yyyy")}
+                                          </p>
+                                          {task.contacts && task.contacts.length > 0 && (
+                                            <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                              Contact: {task.contacts[0].name}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                          task.priority === 'high' 
+                                            ? 'bg-red-500/20 text-red-400'
+                                            : task.priority === 'medium'
+                                            ? 'bg-yellow-500/20 text-yellow-400'
+                                            : 'bg-green-500/20 text-green-400'
+                                        }`}>
+                                          {task.priority}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Page Indicators */}
+                        {totalPages > 1 && (
+                          <div className="flex justify-center gap-1.5 mt-3">
+                            {Array.from({ length: totalPages }).map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => goToPage(index)}
+                                className={`h-1.5 rounded-full transition-all ${
+                                  index === currentPage
+                                    ? 'w-6 bg-primary'
+                                    : 'w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                                }`}
+                                aria-label={`Go to page ${index + 1}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
