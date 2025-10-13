@@ -52,7 +52,7 @@ export const SolarSystem: React.FC<SolarSystemProps> = ({
     };
   }, [config, uniqueId]);
 
-  const borderWidth = Math.max(2, size * 0.04);
+  const borderWidth = Math.max(2, size * 0.06);
   const innerSize = size - (borderWidth * 4); // Simple calculation for inner space
 
   return (
