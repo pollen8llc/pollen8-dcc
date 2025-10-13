@@ -6,7 +6,7 @@ interface Rel8HeaderProps {
   showProfileBanner?: boolean;
 }
 
-export function Rel8Header({ showProfileBanner = true }: Rel8HeaderProps) {
+export function Rel8Header({ showProfileBanner = false }: Rel8HeaderProps) {
   return (
     <div className="w-full">
       <Navbar />
