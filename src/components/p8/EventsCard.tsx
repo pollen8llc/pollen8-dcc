@@ -109,39 +109,39 @@ const EventsCard = ({ className = '' }: EventsCardProps) => {
             <div className="space-y-3">
               {/* Glassmorphic Header with Navigation */}
               <div className="w-full p-4 bg-gradient-to-r from-teal-500/10 via-aquamarine-500/10 to-teal-500/10 backdrop-blur-xl border border-teal-500/20 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                <div className="flex items-center justify-between gap-4">
+                  {/* Left Arrow */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 0}
+                    className="h-10 w-10 shrink-0 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                  
+                  {/* Center Content */}
+                  <div className="flex items-center justify-center space-x-3 flex-1">
                     <div className="p-2 bg-teal-500/20 rounded-lg">
                       <Calendar className="w-5 h-5 text-teal-400" />
                     </div>
-                    <div className="text-left">
+                    <div className="text-center">
                       <h3 className="text-lg font-semibold text-foreground">Latest Events</h3>
                       <p className="text-sm text-muted-foreground">{events.length} total events</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={goToPreviousPage}
-                      disabled={currentPage === 0}
-                      className="h-8 w-8 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20 disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </Button>
-                    <span className="text-xs text-muted-foreground min-w-[60px] text-center">
-                      {currentPage + 1} / {totalPages}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={goToNextPage}
-                      disabled={currentPage === totalPages - 1}
-                      className="h-8 w-8 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20 disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </Button>
-                  </div>
+                  
+                  {/* Right Arrow */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages - 1}
+                    className="h-10 w-10 shrink-0 text-teal-400 hover:text-teal-300 hover:bg-teal-500/20 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
                 </div>
               </div>
 
