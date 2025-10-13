@@ -54,37 +54,41 @@ export function Rel8OnlyNavigation() {
   ];
 
   return (
-    <nav className="grid grid-cols-6 gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
-      {/* Avatar Link */}
+    <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg">
+      {/* Avatar Link - scales down on smaller screens */}
       <Link
         to="/p8/dashboard"
-        className="flex items-center justify-center"
+        className="flex items-center justify-center flex-shrink-0"
       >
         <UnifiedAvatar
           userId={currentUser?.id}
-          size={48}
+          size={40}
+          className="sm:w-10 sm:h-10 md:w-10 md:h-10"
         />
       </Link>
       
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.href}
-            to={item.href}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
-              "hover:scale-105 hover:shadow-[#00eada]/20",
-              item.isActive
-                ? "bg-white/10 border border-white/20 text-foreground shadow-lg"
-                : "bg-white/5 border border-white/5 text-muted-foreground hover:bg-white/10 hover:border-white/15"
-            )}
-          >
-            <Icon className={cn("h-4 w-4", item.iconColor)} />
-            <span className="hidden sm:inline">{item.label}</span>
-          </Link>
-        );
-      })}
+      {/* Navigation Items - maintain consistent size */}
+      <div className="flex-1 grid grid-cols-5 gap-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
+                "hover:scale-105 hover:shadow-[#00eada]/20",
+                item.isActive
+                  ? "bg-white/10 border border-white/20 text-foreground shadow-lg"
+                  : "bg-white/5 border border-white/5 text-muted-foreground hover:bg-white/10 hover:border-white/15"
+              )}
+            >
+              <Icon className={cn("h-4 w-4", item.iconColor)} />
+              <span className="hidden sm:inline">{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

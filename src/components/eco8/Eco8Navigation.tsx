@@ -45,36 +45,38 @@ export const Eco8Navigation: React.FC<Eco8NavigationProps> = ({ hasUserCommuniti
 
   return (
     <nav className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg p-2 mb-8">
-      <div className="grid grid-cols-5 gap-2">
-        {/* Avatar Column */}
+      <div className="flex items-center gap-2">
+        {/* Avatar Column - scales down on smaller screens */}
         <Link
           to="/p8/dashboard"
-          className="flex items-center justify-center"
+          className="flex items-center justify-center flex-shrink-0"
         >
-          <UnifiedAvatar userId={currentUser?.id} size={48} />
+          <UnifiedAvatar userId={currentUser?.id} size={40} className="sm:w-10 sm:h-10 md:w-10 md:h-10" />
         </Link>
 
-        {/* Navigation Items */}
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const baseClasses = "flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 p-3 rounded-xl transition-all duration-300 border";
-          const activeClasses = item.isActive
-            ? "bg-white/10 border-white/20 text-foreground shadow-lg"
-            : "bg-white/5 border-white/5 text-muted-foreground hover:scale-105 hover:bg-white/10 hover:border-white/15";
+        {/* Navigation Items - maintain consistent size */}
+        <div className="flex-1 grid grid-cols-4 gap-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const baseClasses = "flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 p-3 rounded-xl transition-all duration-300 border";
+            const activeClasses = item.isActive
+              ? "bg-white/10 border-white/20 text-foreground shadow-lg"
+              : "bg-white/5 border-white/5 text-muted-foreground hover:scale-105 hover:bg-white/10 hover:border-white/15";
 
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={`${baseClasses} ${activeClasses}`}
-            >
-              <Icon className={`h-5 w-5 ${item.iconColor}`} />
-              <span className="text-xs sm:text-sm font-medium whitespace-nowrap hidden sm:block">
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`${baseClasses} ${activeClasses}`}
+              >
+                <Icon className={`h-5 w-5 ${item.iconColor}`} />
+                <span className="text-xs sm:text-sm font-medium whitespace-nowrap hidden sm:block">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
