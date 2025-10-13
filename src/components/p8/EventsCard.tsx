@@ -148,8 +148,9 @@ const EventsCard = ({
                         <h4 className="text-sm font-medium group-hover:text-teal-100 transition-colors truncate">{event.title}</h4>
                         <div className="flex items-center gap-3 mt-1">
                           <span className="text-xs text-muted-foreground group-hover:text-teal-200 transition-colors flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {format(event.date, 'MMM dd, yyyy')}
+                            <Calendar className="w-3 h-3 hidden sm:block" />
+                            <span className="sm:hidden">{format(event.date, 'MMM dd')}</span>
+                            <span className="hidden sm:inline">{format(event.date, 'MMM dd, yyyy')}</span>
                           </span>
                           <Badge variant="tag" className="text-xs">
                             {event.location}
