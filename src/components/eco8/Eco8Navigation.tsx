@@ -1,81 +1,81 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { 
-  LayoutDashboard, 
-  Search, 
-  Users, 
-  Settings,
-  Plus,
-  Building2
-} from 'lucide-react';
+import { Search, Upload, Plus, Users } from 'lucide-react';
+import { UnifiedAvatar } from '@/components/ui/unified-avatar';
+import { useUser } from '@/contexts/UserContext';
 
-export const Eco8Navigation: React.FC = () => {
+interface Eco8NavigationProps {
+  hasUserCommunities?: boolean;
+}
+
+export const Eco8Navigation: React.FC<Eco8NavigationProps> = ({ hasUserCommunities = false }) => {
   const location = useLocation();
+  const { currentUser } = useUser();
 
-  const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
-  };
+  const navItems = [
+    {
+      href: '/eco8/directory',
+      label: 'Browse Communities',
+      icon: Search,
+      iconColor: 'text-cyan-500',
+      isActive: location.pathname === '/eco8/directory'
+    },
+    {
+      href: '/imports',
+      label: 'Import Data',
+      icon: Upload,
+      iconColor: 'text-blue-500',
+      isActive: location.pathname === '/imports'
+    },
+    {
+      href: hasUserCommunities ? '/eco8' : '/eco8/setup',
+      label: hasUserCommunities ? 'Manage Communities' : 'Create Community',
+      icon: Plus,
+      iconColor: 'text-purple-500',
+      isActive: location.pathname === '/eco8/setup' || (location.pathname === '/eco8' && hasUserCommunities)
+    },
+    {
+      href: '/eco8/invites',
+      label: 'Manage Invites',
+      icon: Users,
+      iconColor: 'text-orange-500',
+      isActive: location.pathname === '/eco8/invites'
+    }
+  ];
 
   return (
-    <div className="flex items-center gap-2 mb-6">
-      <div className="flex items-center gap-2 mr-4">
-        <Building2 className="h-6 w-6 text-primary" />
-        <span className="text-xl font-bold">ECO8</span>
+    <nav className="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg p-2 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+        {/* Avatar Column */}
+        <Link
+          to="/p8/dashboard"
+          className="flex items-center justify-center"
+        >
+          <UnifiedAvatar userId={currentUser?.id} size={48} />
+        </Link>
+
+        {/* Navigation Items */}
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const baseClasses = "flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 p-3 rounded-xl transition-all duration-300 border";
+          const activeClasses = item.isActive
+            ? "bg-white/10 border-white/20 text-foreground shadow-lg"
+            : "bg-white/5 border-white/5 text-muted-foreground hover:scale-105 hover:bg-white/10 hover:border-white/15";
+
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={`${baseClasses} ${activeClasses}`}
+            >
+              <Icon className={`h-5 w-5 ${item.iconColor}`} />
+              <span className="text-xs sm:text-sm font-medium whitespace-nowrap hidden sm:block">
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
-      
-      <nav className="flex gap-1">
-        <Button
-          asChild
-          variant={isActive('/eco8/dashboard') ? 'default' : 'ghost'}
-          size="sm"
-        >
-          <Link to="/eco8/dashboard">
-            <LayoutDashboard className="h-4 w-4 mr-2" />
-            Dashboard
-          </Link>
-        </Button>
-
-        <Button
-          asChild
-          variant={isActive('/eco8') && !isActive('/eco8/dashboard') ? 'default' : 'ghost'}
-          size="sm"
-        >
-          <Link to="/eco8">
-            <Search className="h-4 w-4 mr-2" />
-            Directory
-          </Link>
-        </Button>
-
-        <Button
-          asChild
-          variant={isActive('/eco8/members') ? 'default' : 'ghost'}
-          size="sm"
-        >
-          <Link to="/eco8/members">
-            <Users className="h-4 w-4 mr-2" />
-            Members
-          </Link>
-        </Button>
-
-        <Button
-          asChild
-          variant={isActive('/eco8/settings') ? 'default' : 'ghost'}
-          size="sm"
-        >
-          <Link to="/eco8/settings">
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </Link>
-        </Button>
-
-        <Button asChild size="sm">
-          <Link to="/eco8/setup">
-            <Plus className="h-4 w-4 mr-2" />
-            New Community
-          </Link>
-        </Button>
-      </nav>
-    </div>
+    </nav>
   );
 };

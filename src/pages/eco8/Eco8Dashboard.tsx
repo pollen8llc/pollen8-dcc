@@ -4,15 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Navbar from '@/components/Navbar';
-import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
+import { Eco8Navigation } from '@/components/eco8/Eco8Navigation';
 import { useCommunities } from '@/hooks/useCommunities';
 import { useAuth } from '@/hooks/useAuth';
 import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 
 import { 
   Users, 
-  Search, 
-  Upload, 
   Plus,
   Eye,
   AlertCircle,
@@ -42,9 +40,36 @@ const Eco8Dashboard: React.FC = () => {
       <Navbar />
 
       <div className="container mx-auto max-w-6xl px-4 py-8">
-        {/* Managed Communities */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">ECO8 Dashboard</h1>
+          <p className="text-muted-foreground">Manage your communities and explore new connections</p>
+        </div>
+
+        {/* Navigation Component */}
+        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+
+        {/* Setup Prompt if no communities */}
+        {!loading && !hasUserCommunities && (
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md border-2 border-dashed border-primary/50 bg-primary/5">
+            <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+              <AlertCircle className="h-16 w-16 text-primary mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Welcome to ECO8!</h3>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                You haven't created any communities yet. Start building your network by creating your first community.
+              </p>
+              <Link to="/eco8/setup">
+                <Button size="lg" className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  Create Your First Community
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Managed Communities - Moved to Bottom */}
         {hasUserCommunities && (
-          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mb-8">
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mt-8">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Managed Communities</span>
@@ -98,101 +123,6 @@ const Eco8Dashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Main Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-            <Link to="/eco8/directory" className="block relative">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/30">
-                    <Search className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold">Browse Communities</CardTitle>
-                    <p className="text-sm text-muted-foreground">Discover and connect with communities in your network</p>
-                  </div>
-                </div>
-              </CardHeader>
-            </Link>
-          </Card>
-
-          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-            <Link to="/imports" className="block relative">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-blue-500/15 border border-blue-500/30">
-                    <Upload className="h-6 w-6 text-blue-500" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold">Import Data</CardTitle>
-                    <p className="text-sm text-muted-foreground">Import contacts, members, and community data from various sources</p>
-                  </div>
-                </div>
-              </CardHeader>
-            </Link>
-          </Card>
-
-          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-            <Link to={hasUserCommunities ? "/eco8" : "/eco8/setup"} className="block relative">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-purple-500/15 border border-purple-500/30">
-                    <Plus className="h-6 w-6 text-purple-500" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold">{hasUserCommunities ? 'Manage Communities' : 'Create Community'}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {hasUserCommunities
-                        ? 'View and manage your existing communities'
-                        : 'Start a new community and invite members'}
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-            </Link>
-          </Card>
-
-          <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 cursor-pointer hover:scale-[1.02]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-            <Link to="/eco8/invites" className="block relative">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-orange-500/15 border border-orange-500/30">
-                    <Users className="h-6 w-6 text-orange-500" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold">Manage Invites</CardTitle>
-                    <p className="text-sm text-muted-foreground">Generate and manage invitation codes for new members</p>
-                  </div>
-                </div>
-              </CardHeader>
-            </Link>
-          </Card>
-
-        </div>
-
-        {/* Setup Prompt if no communities */}
-        {!loading && !hasUserCommunities && (
-          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md border-2 border-dashed border-primary/50 bg-primary/5">
-            <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-              <AlertCircle className="h-16 w-16 text-primary mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Welcome to ECO8!</h3>
-              <p className="text-muted-foreground mb-6 max-w-md">
-                You haven't created any communities yet. Start building your network by creating your first community.
-              </p>
-              <Link to="/eco8/setup">
-                <Button size="lg" className="flex items-center gap-2">
-                  <Plus className="h-5 w-5" />
-                  Create Your First Community
-                </Button>
-              </Link>
             </CardContent>
           </Card>
         )}
