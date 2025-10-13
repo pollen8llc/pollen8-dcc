@@ -64,7 +64,7 @@ const events = [{
   location: 'Austin',
   status: 'previous'
 }];
-const EVENTS_PER_PAGE = 4;
+const EVENTS_PER_PAGE = 3;
 interface EventsCardProps {
   className?: string;
 }
@@ -83,11 +83,12 @@ const EventsCard = ({
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   const totalPages = Math.ceil(events.length / EVENTS_PER_PAGE);
-  const startIndex = currentPage * EVENTS_PER_PAGE;
-  const endIndex = startIndex + EVENTS_PER_PAGE;
-  const currentEvents = events.slice(startIndex, endIndex);
   const minSwipeDistance = 50;
   
   // Auto-rotation effect
@@ -107,17 +108,25 @@ const EventsCard = ({
   }, [autoRotate, isOpen, totalPages]);
   
   const goToNextPage = () => {
-    setAutoRotate(false); // Pause auto-rotation on manual interaction
+    setAutoRotate(false);
+    setIsTransitioning(true);
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
+    } else {
+      setCurrentPage(0);
     }
+    setTimeout(() => setIsTransitioning(false), 300);
   };
   
   const goToPreviousPage = () => {
-    setAutoRotate(false); // Pause auto-rotation on manual interaction
+    setAutoRotate(false);
+    setIsTransitioning(true);
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
+    } else {
+      setCurrentPage(totalPages - 1);
     }
+    setTimeout(() => setIsTransitioning(false), 300);
   };
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(0);
@@ -133,22 +142,73 @@ const EventsCard = ({
     const isRightSwipe = distance < -minSwipeDistance;
     
     if (isLeftSwipe || isRightSwipe) {
-      setAutoRotate(false); // Pause auto-rotation on swipe
+      setAutoRotate(false);
+      setIsTransitioning(true);
     }
     
     if (isLeftSwipe) {
       if (currentPage < totalPages - 1) {
         setCurrentPage(currentPage + 1);
       } else {
-        setCurrentPage(0); // Loop to first page
+        setCurrentPage(0);
       }
     }
     if (isRightSwipe) {
       if (currentPage > 0) {
         setCurrentPage(currentPage - 1);
       } else {
-        setCurrentPage(totalPages - 1); // Loop to last page
+        setCurrentPage(totalPages - 1);
       }
+    }
+    setTimeout(() => setIsTransitioning(false), 300);
+  };
+
+  // Mouse drag handlers
+  const onMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart(e.clientX);
+    setAutoRotate(false);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const currentPosition = e.clientX;
+    const diff = currentPosition - dragStart;
+    setDragOffset(diff);
+  };
+
+  const onMouseUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const threshold = 50;
+    if (Math.abs(dragOffset) > threshold) {
+      setIsTransitioning(true);
+      if (dragOffset < 0) {
+        // Dragged left - go to next
+        if (currentPage < totalPages - 1) {
+          setCurrentPage(currentPage + 1);
+        } else {
+          setCurrentPage(0);
+        }
+      } else {
+        // Dragged right - go to previous
+        if (currentPage > 0) {
+          setCurrentPage(currentPage - 1);
+        } else {
+          setCurrentPage(totalPages - 1);
+        }
+      }
+      setTimeout(() => setIsTransitioning(false), 300);
+    }
+    
+    setDragOffset(0);
+  };
+
+  const onMouseLeave = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      setDragOffset(0);
     }
   };
   return <Card className={`relative overflow-hidden glass-morphism border-0 backdrop-blur-md transition-all ${className}`} style={{ background: 'linear-gradient(to bottom, rgba(20, 184, 166, 0.08), rgba(59, 130, 246, 0.08))' }}>
@@ -203,39 +263,65 @@ const EventsCard = ({
                 {/* Collapsible Content */}
                 <CollapsibleContent 
                   className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down px-6 lg:px-8"
-                  onTouchStart={onTouchStart} 
-                  onTouchMove={onTouchMove} 
-                  onTouchEnd={onTouchEnd}
                 >
-                  {/* Events List */}
-                  <div className="space-y-2 animate-fade-in pt-3">
-                    {currentEvents.map(event => <div key={event.id} className="flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md hover:shadow-teal-500/10 transition-all duration-300 cursor-pointer group">
-                        {/* Left side: Event info */}
-                        <div className="flex items-start space-x-3 flex-1 min-w-0">
-                          <div className={`w-2 h-2 rounded-full ${event.status === 'upcoming' ? 'bg-teal-400 animate-pulse' : 'bg-muted-foreground/50'} group-hover:bg-teal-300 transition-colors mt-1.5`} />
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium group-hover:text-teal-100 transition-colors truncate">{event.title}</h4>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="text-xs text-muted-foreground group-hover:text-teal-200 transition-colors flex items-center gap-1">
-                                <Calendar className="w-3 h-3 hidden sm:block" />
-                                <span className="sm:hidden">{format(event.date, 'MMM dd')}</span>
-                                <span className="hidden sm:inline">{format(event.date, 'MMM dd, yyyy')}</span>
-                              </span>
-                              <Badge variant="tag" className="text-xs">
-                                {event.location}
-                              </Badge>
+                  {/* Events List with Slider */}
+                  <div 
+                    className="relative overflow-hidden pt-3"
+                    onMouseDown={onMouseDown}
+                    onMouseMove={onMouseMove}
+                    onMouseUp={onMouseUp}
+                    onMouseLeave={onMouseLeave}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                    style={{ cursor: isDragging ? 'grabbing' : 'grab', userSelect: 'none' }}
+                  >
+                    <div 
+                      className="flex"
+                      style={{
+                        transform: `translateX(calc(-${currentPage * 100}% + ${isDragging ? dragOffset : 0}px))`,
+                        transition: isDragging ? 'none' : 'transform 0.3s ease-out'
+                      }}
+                    >
+                      {Array.from({ length: totalPages }).map((_, pageIdx) => {
+                        const pageEvents = events.slice(pageIdx * EVENTS_PER_PAGE, (pageIdx + 1) * EVENTS_PER_PAGE);
+                        return (
+                          <div key={pageIdx} className="w-full flex-shrink-0 px-1">
+                            <div className="space-y-2">
+                              {pageEvents.map(event => (
+                                <div key={event.id} className="flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md hover:shadow-teal-500/10 transition-all duration-300 cursor-pointer group">
+                                  {/* Left side: Event info */}
+                                  <div className="flex items-start space-x-3 flex-1 min-w-0">
+                                    <div className={`w-2 h-2 rounded-full ${event.status === 'upcoming' ? 'bg-teal-400 animate-pulse' : 'bg-muted-foreground/50'} group-hover:bg-teal-300 transition-colors mt-1.5`} />
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="text-sm font-medium group-hover:text-teal-100 transition-colors truncate">{event.title}</h4>
+                                      <div className="flex items-center gap-3 mt-1">
+                                        <span className="text-xs text-muted-foreground group-hover:text-teal-200 transition-colors flex items-center gap-1">
+                                          <Calendar className="w-3 h-3 hidden sm:block" />
+                                          <span className="sm:hidden">{format(event.date, 'MMM dd')}</span>
+                                          <span className="hidden sm:inline">{format(event.date, 'MMM dd, yyyy')}</span>
+                                        </span>
+                                        <Badge variant="tag" className="text-xs">
+                                          {event.location}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Right side: Attendee count */}
+                                  <div className="flex items-center space-x-2 ml-4 shrink-0">
+                                    <Users className="w-4 h-4 text-muted-foreground group-hover:text-teal-300 transition-colors" />
+                                    <span className="text-sm font-medium text-muted-foreground group-hover:text-teal-200 transition-colors">
+                                      {event.attendees}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        </div>
-
-                        {/* Right side: Attendee count */}
-                        <div className="flex items-center space-x-2 ml-4 shrink-0">
-                          <Users className="w-4 h-4 text-muted-foreground group-hover:text-teal-300 transition-colors" />
-                          <span className="text-sm font-medium text-muted-foreground group-hover:text-teal-200 transition-colors">
-                            {event.attendees}
-                          </span>
-                        </div>
-                      </div>)}
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Event Platforms Badge Grid */}
