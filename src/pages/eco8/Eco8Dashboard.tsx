@@ -62,7 +62,7 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
         )}
 
-        {/* Managed Communities - Moved to Bottom */}
+        {/* Managed Communities */}
         {hasUserCommunities && (
           <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mt-8">
             <CardHeader>
@@ -80,43 +80,124 @@ const Eco8Dashboard: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userCommunities.map((community) => (
-                  <div key={community.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden">
-                        {community.logo_url ? (
-                          <img src={community.logo_url} alt={community.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <Users className="h-6 w-6 text-primary" />
-                        )}
+                  <div key={community.id} className="group relative overflow-hidden rounded-lg border border-border/50 bg-card/60 backdrop-blur-sm p-4 transition-all duration-300 hover:shadow-lg hover:border-primary/30">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-primary/20">
+                          {community.logo_url ? (
+                            <img src={community.logo_url} alt={community.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Users className="h-7 w-7 text-primary" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground truncate">{community.name}</h3>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {community.type || community.community_type} • {community.location || 'Remote'}
+                          </p>
+                          <Badge variant={community.is_public ? 'default' : 'secondary'} className="mt-1">
+                            {community.is_public ? 'Public' : 'Private'}
+                          </Badge>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{community.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {community.type || community.community_type} • {community.location || 'Remote'}
-                        </p>
+                      <div className="flex flex-col gap-2 flex-shrink-0">
+                        <Link to={`/eco8/community/${community.id}`}>
+                          <Button variant="outline" size="sm" className="w-full">
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </Link>
+                        <Link to={`/eco8/community/${community.id}?edit=true`}>
+                          <Button variant="outline" size="sm" className="w-full">
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                        </Link>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant={community.is_public ? 'default' : 'secondary'}>
-                        {community.is_public ? 'Public' : 'Private'}
-                      </Badge>
-                      <Link to={`/eco8/community/${community.id}`}>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                      </Link>
-                      <Link to={`/eco8/community/${community.id}?edit=true`}>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
-                      </Link>
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Community Metrics */}
+        {hasUserCommunities && (
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mt-8">
+            <CardHeader>
+              <CardTitle>Community Metrics</CardTitle>
+              <CardDescription>
+                Overview of your community performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <Users className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-2xl font-bold">1,234</p>
+                    <p className="text-xs text-muted-foreground">Total Members</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <Eye className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-2xl font-bold">5,678</p>
+                    <p className="text-xs text-muted-foreground">Profile Views</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <AlertCircle className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-2xl font-bold">92%</p>
+                    <p className="text-xs text-muted-foreground">Engagement Rate</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <Plus className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-2xl font-bold">+156</p>
+                    <p className="text-xs text-muted-foreground">New This Month</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <Users className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-2xl font-bold">847</p>
+                    <p className="text-xs text-muted-foreground">Active Members</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <Eye className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-2xl font-bold">3.2k</p>
+                    <p className="text-xs text-muted-foreground">Monthly Visits</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <AlertCircle className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-2xl font-bold">4.8</p>
+                    <p className="text-xs text-muted-foreground">Avg Rating</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/30 bg-card/60 backdrop-blur-sm">
+                  <CardContent className="p-4 text-center">
+                    <Edit className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-2xl font-bold">234</p>
+                    <p className="text-xs text-muted-foreground">Updates Posted</p>
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>
