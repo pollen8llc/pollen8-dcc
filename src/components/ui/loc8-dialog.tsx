@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Search, ChevronUp, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import Globe from "react-globe.gl";
 import { toast } from "sonner";
 
@@ -94,20 +93,12 @@ export const Loc8Dialog = ({
   const [selectedCities, setSelectedCities] = useState<string[]>(value);
   const [isReady, setIsReady] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
   const MAX_LOCATIONS = 2;
 
   // Sync with external value
   useEffect(() => {
     setSelectedCities(value);
   }, [value]);
-
-  // Auto-open panel when search is active
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      setIsPanelOpen(true);
-    }
-  }, [searchQuery]);
 
   // Memoized points data for selected cities
   const pointsData = useMemo(() => {
@@ -133,7 +124,7 @@ export const Loc8Dialog = ({
     setIsReady(true);
   }, [open]);
 
-  const toggleCity = (city: string) => {
+  const selectCity = (city: string) => {
     let newSelection: string[];
     
     if (mode === 'single') {
@@ -152,6 +143,13 @@ export const Loc8Dialog = ({
     
     setSelectedCities(newSelection);
     onValueChange?.(newSelection);
+    setSearchQuery("");
+  };
+
+  const removeCity = (city: string) => {
+    const newSelection = selectedCities.filter(c => c !== city);
+    setSelectedCities(newSelection);
+    onValueChange?.(newSelection);
   };
 
   const handleConfirm = () => {
@@ -164,13 +162,13 @@ export const Loc8Dialog = ({
     onOpenChange(false);
   };
 
-  // Filter all cities based on search query
+  // Filter cities based on search query for mid-canvas display
   const allCities = Object.keys(cityCoordinates);
   const filteredCities = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    return allCities.filter(city => 
-      city.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return allCities
+      .filter(city => city.toLowerCase().includes(searchQuery.toLowerCase()))
+      .slice(0, 8); // Limit to 8 for clean mid-canvas display
   }, [searchQuery]);
 
   return (
@@ -217,124 +215,70 @@ export const Loc8Dialog = ({
             pointsTransitionDuration={0}
           />
 
-          {/* Bottom Overlay Panel */}
-          <Collapsible
-            open={isPanelOpen}
-            onOpenChange={setIsPanelOpen}
-            className="absolute bottom-0 left-0 right-0 z-20"
-          >
-            <CollapsibleContent className="animate-accordion-up data-[state=open]:animate-accordion-down">
-              <div className="p-3 md:p-4 space-y-3 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-lg">
-                <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {/* Selected Cities */}
-                  <div className="px-3 md:px-4 py-2.5 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg shadow-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs md:text-sm font-semibold text-foreground/90">
-                        Selected ({selectedCities.length}/{MAX_LOCATIONS})
-                      </p>
-                      {selectedCities.length > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedCities([]);
-                            onValueChange?.([]);
-                          }}
-                          className="text-xs h-6 px-2"
-                        >
-                          Clear
-                        </Button>
-                      )}
-                    </div>
-                    {selectedCities.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5 md:gap-2 max-h-24 md:max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-                        {selectedCities.map((city) => (
-                          <Badge
-                            key={city}
-                            variant="default"
-                            className="cursor-pointer bg-primary text-primary-foreground text-xs"
-                            onClick={() => toggleCity(city)}
-                          >
-                            {city}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs md:text-sm text-muted-foreground/60 text-center py-4">
-                        No cities selected yet
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Cities Badge Cloud */}
-                  <div className="px-3 md:px-4 py-2.5 md:py-3 bg-background/30 backdrop-blur-lg border border-primary/10 rounded-lg max-h-32 md:max-h-40 overflow-y-auto shadow-lg scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-                    <h3 className="text-xs md:text-sm font-semibold text-foreground/90 mb-2">
-                      {searchQuery ? 'Search Results' : 'All Cities'}
-                    </h3>
-                    <div className="flex flex-wrap gap-1.5 md:gap-2">
-                      {(searchQuery ? filteredCities.slice(0, 20) : allCities).map((city) => {
-                        const isSelected = selectedCities.includes(city);
-                        return (
-                          <Badge
-                            key={city}
-                            variant={isSelected ? "default" : "secondary"}
-                            className={`cursor-pointer transition-all text-xs ${
-                              isSelected 
-                                ? "bg-primary text-primary-foreground" 
-                                : "bg-background/60 text-foreground hover:bg-primary/20 border-primary/20"
-                            }`}
-                            onClick={() => {
-                              toggleCity(city);
-                              if (searchQuery) setSearchQuery("");
-                            }}
-                          >
-                            {city}
-                          </Badge>
-                        );
-                      })}
-                      {searchQuery && filteredCities.length === 0 && (
-                        <p className="text-xs md:text-sm text-muted-foreground">No cities found</p>
-                      )}
-                    </div>
-                  </div>
+          {/* Mid-Canvas Search Results */}
+          {searchQuery.trim() && filteredCities.length > 0 && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
+              <div className="bg-background/20 backdrop-blur-md border border-primary/30 rounded-2xl p-3 md:p-4 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-300 pointer-events-auto">
+                <div className="flex flex-wrap gap-2 md:gap-2.5 justify-center max-w-xs md:max-w-md">
+                  {filteredCities.map((city) => (
+                    <Badge
+                      key={city}
+                      variant="secondary"
+                      className="cursor-pointer bg-background/80 backdrop-blur-sm text-foreground hover:bg-primary/80 hover:text-primary-foreground border border-primary/20 transition-all duration-200 text-sm md:text-base px-3 md:px-4 py-1.5 md:py-2 min-h-[44px] flex items-center justify-center"
+                      onClick={() => selectCity(city)}
+                    >
+                      {city}
+                    </Badge>
+                  ))}
                 </div>
-              </div>
-            </CollapsibleContent>
-
-            {/* Search Bar - Prominent */}
-            <div className="p-4 md:p-6 bg-gradient-to-t from-background/95 to-transparent backdrop-blur-lg">
-              <div className="max-w-4xl mx-auto flex items-center gap-3 px-4 md:px-6 py-3 md:py-4 bg-background/50 backdrop-blur-lg border-2 border-primary/20 rounded-xl shadow-2xl">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-primary z-10" />
-                  <Input
-                    type="text"
-                    placeholder="Search for cities..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 md:pl-14 pr-4 bg-background/70 backdrop-blur-lg border-primary/20 text-base md:text-lg h-12 md:h-14 font-medium focus:border-primary/40"
-                  />
-                </div>
-
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 md:h-12 md:w-12 shrink-0"
-                  >
-                    <ChevronUp 
-                      className={`h-5 w-5 md:h-6 md:w-6 text-muted-foreground transition-transform duration-200 ${
-                        isPanelOpen ? 'rotate-180' : ''
-                      }`} 
-                    />
-                  </Button>
-                </CollapsibleTrigger>
               </div>
             </div>
-          </Collapsible>
+          )}
+
+          {/* Search Bar - Prominent & Standalone */}
+          <div className="absolute bottom-0 left-0 right-0 z-20 p-4 md:p-6 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-lg">
+            <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
+              {/* Selected Cities Display */}
+              {selectedCities.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-center px-2">
+                  {selectedCities.map((city) => (
+                    <Badge
+                      key={city}
+                      variant="default"
+                      className="bg-primary text-primary-foreground text-sm md:text-base px-3 md:px-4 py-1.5 md:py-2 cursor-pointer hover:bg-primary/80 transition-colors"
+                      onClick={() => removeCity(city)}
+                    >
+                      {city}
+                      <X className="ml-1.5 h-3 w-3 md:h-4 md:w-4" />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {/* Search Input */}
+              <div className="relative px-2">
+                <Search className="absolute left-6 md:left-8 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-primary z-10 pointer-events-none" />
+                <Input
+                  type="text"
+                  placeholder="Search for cities..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && filteredCities.length > 0) {
+                      selectCity(filteredCities[0]);
+                    }
+                  }}
+                  className="w-full pl-12 md:pl-16 pr-4 md:pr-6 bg-background/90 backdrop-blur-lg border-2 border-primary/30 text-base md:text-xl h-14 md:h-16 font-medium focus:border-primary/60 rounded-xl shadow-2xl transition-all"
+                  style={{ fontSize: '16px' }} // Prevent iOS zoom
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Instructions */}
-          <div className="absolute bottom-20 left-3 text-[10px] md:text-xs text-muted-foreground/60 z-10 bg-background/40 backdrop-blur-sm px-2 py-1 rounded">
-            <p>Drag to rotate • Scroll to zoom</p>
+          <div className="absolute top-4 left-4 text-xs md:text-sm text-muted-foreground/70 z-10 bg-background/40 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+            <p className="hidden md:block">Drag to rotate • Scroll to zoom</p>
+            <p className="md:hidden">Drag to rotate</p>
           </div>
         </div>
 
