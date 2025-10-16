@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
 
 // Combined vectors: 4 Demographics + 4 Psychographics
 const allVectors = [
@@ -187,19 +187,27 @@ const P8Asl = () => {
     localStorage.setItem("p8_stage2_complete", JSON.stringify(Array.from(stage2Complete)));
   }, [importance, selectedOptions, stage1Complete, stage2Complete]);
 
+  const handleReset = () => {
+    const resetImportance = Object.fromEntries(allVectors.map(v => [v.id, 0]));
+    const resetOptions = Object.fromEntries(allVectors.map(v => [v.id, v.options[0].value]));
+    
+    setImportance(resetImportance);
+    setSelectedOptions(resetOptions);
+    setStage1Complete(new Set());
+    setStage2Complete(new Set());
+    setPulsingNode(null);
+    setSelectedVector(null);
+    
+    localStorage.removeItem("p8_combined_importance");
+    localStorage.removeItem("p8_combined_options");
+    localStorage.removeItem("p8_stage1_complete");
+    localStorage.removeItem("p8_stage2_complete");
+  };
+
   const handleNodeClick = (index: number) => {
     const vectorId = allVectors[index].id;
     
-    // If clicking a completed node, allow reconfiguration
-    if (stage2Complete.has(vectorId)) {
-      setStage2Complete(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(vectorId);
-        return newSet;
-      });
-      setPulsingNode(null);
-    }
-    
+    // Always allow clicking to open the modal
     setSelectedVector(index);
   };
 
@@ -344,7 +352,18 @@ const P8Asl = () => {
           </Button>
 
           {/* Center Section - Indicators */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Reset Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              className="h-9"
+              title="Reset all selections"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+
             {/* Completion Counter */}
             <div className="backdrop-blur-md bg-background/30 border border-primary/20 rounded-full px-4 py-2">
               <p className="text-sm font-medium text-foreground/80">
