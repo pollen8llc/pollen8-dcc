@@ -31,10 +31,8 @@ import {
   Eye
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { VoteType } from '@/models/knowledgeTypes';
 import DOMPurify from 'dompurify';
 import AuthorCard from '@/components/knowledge/AuthorCard';
-import { VotingButtons } from '@/components/knowledge/VotingButtons';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,17 +52,6 @@ const ArticleView = () => {
   
   // Fetch comments
   const { data: comments, isLoading: commentsLoading } = knowledgeBase.useComments(id);
-
-  // Handle voting on comment
-  const handleCommentVote = (commentId: string, voteType: VoteType, currentVote?: number | null) => {
-    if (currentVote === 1 && voteType === 'upvote') {
-      knowledgeBase.vote('comment', commentId, 'none');
-    } else if (currentVote === -1 && voteType === 'downvote') {
-      knowledgeBase.vote('comment', commentId, 'none');
-    } else {
-      knowledgeBase.vote('comment', commentId, voteType);
-    }
-  };
 
   // Handle comment submission
   const handleCommentSubmit = async (e: React.FormEvent) => {
@@ -246,15 +233,7 @@ const ArticleView = () => {
           
           <CardFooter className="flex flex-col md:flex-row justify-between border-t pt-4 gap-4">
             <div className="flex items-center">
-              <span className="mr-2">Was this helpful?</span>
-              <VotingButtons
-                itemType="article"
-                itemId={article.id}
-                voteCount={article.vote_count}
-                userVote={article.user_vote}
-                size="sm"
-                showCount={true}
-              />
+              {/* Voting removed */}
             </div>
             
             <div className="flex items-center text-sm text-muted-foreground">

@@ -37,7 +37,6 @@ import {
 import { EnhancedCommentSection } from '@/components/knowledge/EnhancedCommentSection';
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
-import { VotingButtons } from '@/components/knowledge/VotingButtons';
 import { ModernPollVoting } from '@/components/knowledge/ModernPollVoting';
 
 // Types
@@ -244,15 +243,6 @@ const ArticleView = () => {
             
             {/* Actions bar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 mb-8">
-              <VotingButtons
-                itemType="article"
-                itemId={article.id}
-                voteCount={article.vote_count || 0}
-                userVote={article.user_vote}
-                size="default"
-                showCount={true}
-              />
-              
               {/* Action buttons */}
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div className="flex items-center gap-2">

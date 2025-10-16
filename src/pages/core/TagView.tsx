@@ -13,7 +13,6 @@ import {
   X, 
   RefreshCcw, 
   PlusCircle, 
-  ThumbsUp, 
   MessageSquare, 
   Eye, 
   Calendar 
@@ -125,11 +124,6 @@ const TagView = () => {
                   
                   <CardFooter className="flex justify-between text-sm text-muted-foreground">
                     <div className="flex items-center gap-6">
-                      <div className="flex items-center">
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        <span>{article.vote_count || 0}</span>
-                      </div>
-                      
                       <div className="flex items-center">
                         <MessageSquare className="h-4 w-4 mr-1" />
                         <span>0</span>

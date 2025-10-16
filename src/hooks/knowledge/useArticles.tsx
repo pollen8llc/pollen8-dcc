@@ -87,24 +87,10 @@ export const useArticle = (id: string) => {
         authorProfile = authorData;
       }
 
-      // Get user's vote for this article
-      let userVote = null;
-      if (user) {
-        const { data: vote } = await supabase
-          .from('knowledge_votes')
-          .select('vote_type')
-          .eq('article_id', id)
-          .eq('user_id', user.id)
-          .maybeSingle();
-        
-        userVote = vote?.vote_type || null;
-      }
-
       // Transform data to match KnowledgeArticle interface
       return {
         ...article,
         tags: Array.isArray(article.tags) ? article.tags : [],
-        user_vote: userVote,
         author: authorProfile ? {
           id: authorProfile.user_id,
           name: authorProfile.full_name || `${authorProfile.first_name || ''} ${authorProfile.last_name || ''}`.trim() || 'Anonymous',

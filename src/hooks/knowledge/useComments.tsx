@@ -55,43 +55,6 @@ export const useComments = (articleId: string | undefined) => {
           return map;
         }, {} as Record<string, any>);
         
-        // Get vote counts for all comments in a single call
-        const commentIds = (comments as any[]).map((comment: any) => comment.id);
-        
-        // Fetch all votes in one query
-        const { data: votes, error: votesError } = await supabase
-          .from('knowledge_votes' as any)
-          .select('comment_id, vote_type, user_id')
-          .in('comment_id', commentIds);
-          
-        if (votesError) {
-          console.error('Error fetching comment votes:', votesError);
-          // Continue even if vote fetch fails
-        }
-        
-        // Calculate vote totals and user votes
-        const voteMap = new Map();
-        const userVoteMap = new Map();
-        
-        if (votes) {
-          // Calculate total votes per comment
-          (votes as any[]).forEach((vote: any) => {
-            const commentId = vote.comment_id;
-            if (!voteMap.has(commentId)) {
-              voteMap.set(commentId, 0);
-            }
-            const voteValue = vote.vote_type === 'up' ? 1 : -1;
-            voteMap.set(commentId, voteMap.get(commentId) + voteValue);
-            
-            // Also track each user's vote for each comment
-            const key = `${vote.comment_id}_${vote.user_id}`;
-            userVoteMap.set(key, vote.vote_type);
-          });
-        }
-        
-        // Get current user id for user votes
-        const { data: { user } } = await supabase.auth.getUser();
-        const currentUserId = user?.id;
         
         return (comments as any[]).map((comment: any) => {
           const profile = authorProfileMap[comment.author_id];
@@ -106,9 +69,7 @@ export const useComments = (articleId: string | undefined) => {
               id: comment.author_id,
               name: 'Unknown User',
               avatar_url: null
-            },
-            vote_count: voteMap.get(comment.id) || 0,
-            user_vote: userVoteMap.get(`${comment.id}_${currentUserId}`) || null
+            }
           } as any;
         });
       } catch (error) {

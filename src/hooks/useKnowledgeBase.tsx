@@ -8,11 +8,9 @@ import {
 } from './knowledge/useArticles';
 import { useComments } from './knowledge/useComments';
 import { useTags } from './knowledge/useTags';
-import { useVote } from './knowledge/useVote';
 
 export const useKnowledgeBase = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { vote } = useVote();
   
   console.log("useKnowledgeBase - Initialized");
   
@@ -29,7 +27,6 @@ export const useKnowledgeBase = () => {
     useDeleteArticle,
     
     // Legacy mutations 
-    vote,
     createComment: (...args: any[]) => Promise.resolve(),
     deleteComment: (...args: any[]) => Promise.resolve(), 
     acceptAnswer: (...args: any[]) => Promise.resolve(),
