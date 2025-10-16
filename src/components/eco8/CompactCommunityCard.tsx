@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
-import { MapPin, Users, TrendingUp } from "lucide-react";
+import { MapPin, Users, TrendingUp, Check } from "lucide-react";
 import { Community } from "@/hooks/useCommunities";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { Checkbox } from "@/components/ui/checkbox";
 import { memo, useState, useEffect } from "react";
 import { useProfiles } from "@/hooks/useProfiles";
 import { ExtendedProfile } from "@/services/profileService";
@@ -67,10 +66,10 @@ const CompactCommunityCard = memo(({
 
   const CardContent = (
     <div 
-      className={`relative h-full overflow-hidden rounded-2xl bg-card/40 backdrop-blur-md border-0 transition-all duration-300 ${
+      className={`relative h-full overflow-hidden rounded-2xl bg-card/40 backdrop-blur-md transition-all duration-300 ${
         isSelected 
-          ? 'bg-primary/10 shadow-md shadow-primary/10 scale-[1.02]' 
-          : 'hover:bg-card/60 hover:shadow-xl hover:shadow-black/10'
+          ? 'bg-primary/10 shadow-md shadow-primary/10 scale-[1.02] border-2 border-primary' 
+          : 'hover:bg-card/60 hover:shadow-xl hover:shadow-black/10 border-0'
       } ${isSelectionMode ? 'cursor-pointer' : 'group hover:scale-[1.02]'}`}
       onClick={handleClick}
     >
@@ -82,20 +81,18 @@ const CompactCommunityCard = memo(({
         className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
         style={{ backgroundColor: 'hsl(var(--primary))' }}
       />
+
+      {/* Selection checkmark overlay */}
+      {isSelected && (
+        <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+          <Check className="w-4 h-4 text-white" />
+        </div>
+      )}
       
       {/* Content Container - No banner section */}
       <div className="p-4 space-y-3 relative">
         {/* First Section: Logo, Title, Location */}
         <div className="flex items-start space-x-3">
-          {isSelectionMode && (
-            <div className="pt-0.5 flex-shrink-0">
-              <Checkbox 
-                checked={isSelected}
-                onCheckedChange={() => onToggleSelection?.(community.id)}
-                className="h-5 w-5"
-              />
-            </div>
-          )}
           <div 
             className="w-12 h-12 rounded-xl backdrop-blur-sm flex items-center justify-center flex-shrink-0 border"
             style={{ 
