@@ -7,12 +7,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import Navbar from '@/components/Navbar';
 import { Eco8Navigation } from '@/components/eco8/Eco8Navigation';
+import CompactCommunityCard from '@/components/eco8/CompactCommunityCard';
 import { useCommunities } from '@/hooks/useCommunities';
 import { useAuth } from '@/hooks/useAuth';
 import { useModuleCompletion } from '@/hooks/useModuleCompletion';
 
 import { 
-  Users, 
+  Users,
   Plus,
   Eye,
   AlertCircle,
@@ -177,55 +178,16 @@ const Eco8Dashboard: React.FC = () => {
               
               <CollapsibleContent className="animate-accordion-down data-[state=closed]:animate-accordion-up">
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {userCommunities.map((community) => {
-                      const isSelected = selectedCommunities.includes(community.id);
-                      return (
-                        <div 
-                          key={community.id} 
-                          className={`group relative overflow-hidden rounded-lg border bg-card/60 backdrop-blur-sm p-3 transition-all duration-200 cursor-pointer ${
-                            isSelected 
-                              ? 'border-primary/60 bg-primary/5 shadow-md shadow-primary/10' 
-                              : 'border-border/50 hover:border-primary/30 hover:shadow-md'
-                          }`}
-                          onClick={() => isSelectionMode && toggleCommunitySelection(community.id)}
-                        >
-                          <div className="flex items-start gap-3">
-                            {isSelectionMode && (
-                              <div className="pt-1">
-                                <Checkbox 
-                                  checked={isSelected}
-                                  onCheckedChange={() => toggleCommunitySelection(community.id)}
-                                  className="h-5 w-5"
-                                />
-                              </div>
-                            )}
-                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-primary/20">
-                              {community.logo_url ? (
-                                <img src={community.logo_url} alt={community.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <Users className="h-6 w-6 text-primary" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-sm text-foreground truncate">{community.name}</h3>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {community.type || community.community_type}
-                              </p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {community.location || 'Remote'}
-                              </p>
-                              <Badge 
-                                variant={community.is_public ? 'default' : 'secondary'} 
-                                className="mt-1.5 text-xs py-0 h-5"
-                              >
-                                {community.is_public ? 'Public' : 'Private'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {userCommunities.map((community) => (
+                      <CompactCommunityCard
+                        key={community.id}
+                        community={community}
+                        isSelectionMode={isSelectionMode}
+                        isSelected={selectedCommunities.includes(community.id)}
+                        onToggleSelection={toggleCommunitySelection}
+                      />
+                    ))}
                   </div>
                 </CardContent>
               </CollapsibleContent>
