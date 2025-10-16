@@ -69,7 +69,7 @@ export class SolarSystemAvatarService {
     const networkData = await this.getUserNetworkData(userId);
     
     if (!networkData) {
-      return "UXI8000"; // Default teal base system
+      return "UXI8018"; // Default member system (Copper Harmony)
     }
 
     // Admin users get the psychedelic system
@@ -79,6 +79,10 @@ export class SolarSystemAvatarService {
 
     // Network value based assignment
     if (networkData.networkValue < 1000) {
+      // Members get UXI8018, other roles get UXI8001
+      if (networkData.role === UserRole.MEMBER || !networkData.role) {
+        return "UXI8018"; // Copper Harmony
+      }
       return "UXI8001"; // Aquamarine Single
     }
 
@@ -105,6 +109,10 @@ export class SolarSystemAvatarService {
     }
 
     // Default to basic member system
+    // Members get UXI8018, other roles get UXI8000
+    if (networkData.role === UserRole.MEMBER || !networkData.role) {
+      return "UXI8018"; // Copper Harmony
+    }
     return "UXI8000"; // Teal Base
   }
 
