@@ -161,7 +161,7 @@ const P8Intgr8 = () => {
         {/* Navigation - Sticky on all screens */}
         <div className="sticky bottom-0 z-30 bg-background/80 backdrop-blur-lg border-t border-primary/10 -mx-6 px-6 py-3 mt-8">
           <div className="max-w-7xl mx-auto flex justify-between">
-            <Button variant="outline" onClick={() => navigate("/p8/class")} className="group hover:shadow-md hover:shadow-primary/20">
+            <Button variant="outline" onClick={() => navigate("/p8/asl")} className="group hover:shadow-md hover:shadow-primary/20">
               <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
               Back
             </Button>

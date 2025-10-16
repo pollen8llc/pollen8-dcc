@@ -14,6 +14,8 @@ interface RadarChartProps {
   angleOffset?: number; // Rotation offset in degrees
   strokeColor?: string;
   fillColor?: string;
+  activeVector?: number; // Index of currently active vector
+  completedVectors?: Set<number>; // Set of completed vector indices
 }
 
 export const RadarChart = ({ 
@@ -22,7 +24,9 @@ export const RadarChart = ({
   height = 500,
   angleOffset = 0,
   strokeColor = 'hsl(var(--primary))',
-  fillColor = 'hsl(var(--primary))'
+  fillColor = 'hsl(var(--primary))',
+  activeVector,
+  completedVectors = new Set()
 }: RadarChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -113,7 +117,8 @@ export const RadarChart = ({
       .attr('fill', fillColor)
       .attr('fill-opacity', 0.25)
       .attr('stroke', strokeColor)
-      .attr('stroke-width', 2);
+      .attr('stroke-width', 2)
+      .style('transition', 'd 0.3s ease-out');
 
     // Draw data points
     data.forEach((d, i) => {
@@ -122,19 +127,35 @@ export const RadarChart = ({
       const x = Math.cos(angle) * r;
       const y = Math.sin(angle) * r;
 
-      g.append('circle')
+      const isActive = activeVector === i;
+      const isCompleted = completedVectors.has(i);
+      const opacity = isCompleted || activeVector === undefined ? 1 : 0.3;
+
+      const circle = g.append('circle')
         .attr('cx', x)
         .attr('cy', y)
-        .attr('r', 4)
+        .attr('r', isActive ? 6 : 4)
         .attr('fill', d.color)
         .attr('stroke', 'hsl(var(--background))')
         .attr('stroke-width', 2)
+        .attr('opacity', opacity)
         .style('cursor', 'pointer')
-        .append('title')
+        .style('transition', 'all 0.3s ease-out');
+
+      // Add pulse animation to active vector
+      if (isActive) {
+        circle.append('animate')
+          .attr('attributeName', 'r')
+          .attr('values', '6;8;6')
+          .attr('dur', '2s')
+          .attr('repeatCount', 'indefinite');
+      }
+
+      circle.append('title')
         .text(`${d.category}: ${d.importance}%`);
     });
 
-  }, [data, width, height, angleOffset, strokeColor, fillColor]);
+  }, [data, width, height, angleOffset, strokeColor, fillColor, activeVector, completedVectors]);
 
   return (
     <svg
