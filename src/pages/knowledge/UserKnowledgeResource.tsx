@@ -33,7 +33,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MetricCard } from '@/components/rel8t/MetricCard';
-import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
+import { Eco8OnlyNavigation } from '@/components/knowledge/Eco8OnlyNavigation';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -69,7 +69,7 @@ const UserKnowledgeResource = () => {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-full">
         {/* Knowledge Navigation */}
         <div className="mb-6">
-          <KnowledgeNavigation />
+          <Eco8OnlyNavigation />
         </div>
         
         {/* Header */}

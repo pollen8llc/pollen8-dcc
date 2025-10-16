@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
+import { Eco8OnlyNavigation } from '@/components/knowledge/Eco8OnlyNavigation';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
 import { ArticleForm } from '@/components/knowledge/forms/ArticleForm';
@@ -175,7 +175,7 @@ const PostWizard = () => {
       <div className="container mx-auto px-4 py-4 sm:py-6">
         {/* Navigation */}
         <div className="mb-4 sm:mb-6">
-          <KnowledgeNavigation />
+          <Eco8OnlyNavigation />
         </div>
         
         <div className="max-w-3xl mx-auto animate-fade-in">

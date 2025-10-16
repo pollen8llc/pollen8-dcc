@@ -9,7 +9,7 @@ import { Search, Tag as TagIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { KnowledgeTag } from '@/models/knowledgeTypes';
-import { KnowledgeNavigation } from '@/components/knowledge/KnowledgeNavigation';
+import { Eco8OnlyNavigation } from '@/components/knowledge/Eco8OnlyNavigation';
 
 const TopicsPage = () => {
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ const TopicsPage = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
-        <KnowledgeNavigation />
+        <Eco8OnlyNavigation />
         
         {/* Header */}
         <div className="mb-8 mt-6">
