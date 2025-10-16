@@ -91,15 +91,6 @@ export const RadarChart = ({
         .attr('fill', 'none')
         .attr('stroke', 'hsl(var(--primary) / 0.2)')
         .attr('stroke-width', 1);
-
-      if (i === levels) {
-        g.append('text')
-          .attr('x', 5)
-          .attr('y', -levelRadius)
-          .attr('fill', 'hsl(var(--muted-foreground))')
-          .attr('font-size', '10px')
-          .text('100%');
-      }
     }
 
     // Draw axes
