@@ -21,6 +21,8 @@ interface RadarChartProps {
   pulsingNode?: number | null;
   onNodeClick?: (index: number) => void;
   onNodeDrag?: (index: number, importance: number) => void;
+  onDragUpdate?: (importance: number) => void;
+  onDragStart?: () => void;
 }
 
 export const RadarChart = ({ 
@@ -35,7 +37,9 @@ export const RadarChart = ({
   stage2Complete = new Set(),
   pulsingNode = null,
   onNodeClick,
-  onNodeDrag
+  onNodeDrag,
+  onDragUpdate,
+  onDragStart
 }: RadarChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -223,6 +227,7 @@ export const RadarChart = ({
         const drag = d3.drag()
           .on('start', function() {
             d3.select(this).style('cursor', 'grabbing');
+            onDragStart?.();
           })
           .on('drag', function(event) {
             const dx = event.x;
@@ -247,6 +252,9 @@ export const RadarChart = ({
               idx === i ? { ...item, importance: snapped } : item
             );
             updateRadarPath(updatedData);
+            
+            // Notify parent of drag update
+            onDragUpdate?.(snapped);
           })
           .on('end', function(event) {
             d3.select(this).style('cursor', isStage2Complete ? 'pointer' : 'grab');
@@ -265,7 +273,7 @@ export const RadarChart = ({
         .text(`${d.category}: ${d.importance}%`);
     });
 
-  }, [data, width, height, angleOffset, strokeColor, fillColor, stage1Complete, stage2Complete, pulsingNode, onNodeClick, onNodeDrag]);
+  }, [data, width, height, angleOffset, strokeColor, fillColor, stage1Complete, stage2Complete, pulsingNode, onNodeClick, onNodeDrag, onDragUpdate, onDragStart]);
 
   return (
     <svg

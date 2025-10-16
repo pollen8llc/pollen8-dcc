@@ -176,6 +176,8 @@ const P8Asl = () => {
     return new Set();
   });
   const [pulsingNode, setPulsingNode] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragImportance, setDragImportance] = useState(0);
 
   // Save to localStorage on changes
   useEffect(() => {
@@ -210,6 +212,16 @@ const P8Asl = () => {
       setStage2Complete(prev => new Set(prev).add(vectorId));
       setPulsingNode(null);
     }
+    
+    setIsDragging(false);
+  };
+
+  const handleDragUpdate = (importance: number) => {
+    setDragImportance(importance);
+  };
+
+  const handleDragStart = () => {
+    setIsDragging(true);
   };
 
   const handleOptionChange = (vectorId: string, optionValue: string) => {
@@ -255,6 +267,8 @@ const P8Asl = () => {
           pulsingNode={pulsingNode}
           onNodeClick={handleNodeClick}
           onNodeDrag={handleNodeDrag}
+          onDragUpdate={handleDragUpdate}
+          onDragStart={handleDragStart}
         />
         
       </div>
@@ -269,12 +283,25 @@ const P8Asl = () => {
       </div>
 
       {/* Pulsing Node Instruction */}
-      {pulsingNode !== null && (
+      {pulsingNode !== null && !isDragging && (
         <div className="fixed bottom-32 left-1/2 -translate-x-1/2 pointer-events-none z-10 animate-fade-in">
           <div className="px-6 py-3 rounded-full backdrop-blur-md bg-primary/20 border border-primary/40">
             <p className="text-sm font-medium text-primary">
               Drag the pulsing node to set importance
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Drag Importance Indicator */}
+      {isDragging && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 animate-fade-in">
+          <div className="backdrop-blur-lg bg-background/95 border-2 border-primary rounded-2xl px-8 py-6 shadow-2xl">
+            <p className="text-sm text-muted-foreground mb-2 text-center">Importance Level</p>
+            <p className="text-6xl font-bold text-primary text-center tabular-nums">
+              {Math.round(dragImportance / 10)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2 text-center">out of 10</p>
           </div>
         </div>
       )}
