@@ -165,18 +165,25 @@ const P8Asl = () => {
     if (saved) return JSON.parse(saved);
     return Object.fromEntries(allVectors.map(v => [v.id, v.options[0].value]));
   });
-  const [completedVectors, setCompletedVectors] = useState<string[]>(() => {
-    const saved = localStorage.getItem("p8_combined_progress");
-    if (saved) return JSON.parse(saved);
-    return [];
+  const [stage1Complete, setStage1Complete] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem("p8_stage1_complete");
+    if (saved) return new Set(JSON.parse(saved));
+    return new Set();
   });
+  const [stage2Complete, setStage2Complete] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem("p8_stage2_complete");
+    if (saved) return new Set(JSON.parse(saved));
+    return new Set();
+  });
+  const [pulsingNode, setPulsingNode] = useState<number | null>(null);
 
   // Save to localStorage on changes
   useEffect(() => {
     localStorage.setItem("p8_combined_importance", JSON.stringify(importance));
     localStorage.setItem("p8_combined_options", JSON.stringify(selectedOptions));
-    localStorage.setItem("p8_combined_progress", JSON.stringify(completedVectors));
-  }, [importance, selectedOptions, completedVectors]);
+    localStorage.setItem("p8_stage1_complete", JSON.stringify(Array.from(stage1Complete)));
+    localStorage.setItem("p8_stage2_complete", JSON.stringify(Array.from(stage2Complete)));
+  }, [importance, selectedOptions, stage1Complete, stage2Complete]);
 
   const handleNodeClick = (index: number) => {
     setSelectedVector(index);
@@ -186,19 +193,31 @@ const P8Asl = () => {
     const vectorId = allVectors[index].id;
     setImportance((prev) => ({ ...prev, [vectorId]: newImportance }));
 
-    if (newImportance > 0 && !completedVectors.includes(vectorId)) {
-      setCompletedVectors((prev) => [...prev, vectorId]);
+    // Mark Stage 2 as complete (only if Stage 1 is complete and importance > 0)
+    if (stage1Complete.has(vectorId) && newImportance > 0) {
+      setStage2Complete(prev => new Set(prev).add(vectorId));
+      setPulsingNode(null);
     }
   };
 
   const handleOptionChange = (vectorId: string, optionValue: string) => {
     setSelectedOptions((prev) => ({ ...prev, [vectorId]: optionValue }));
+    
+    // Mark Stage 1 as complete
+    setStage1Complete(prev => new Set(prev).add(vectorId));
+    
+    // Set this node as pulsing
+    setPulsingNode(selectedVector);
+    
+    // Close modal after short delay
+    setTimeout(() => setSelectedVector(null), 300);
   };
 
   // Generate radar chart data
   const radarData = useMemo(() => {
     return allVectors.map(vector => ({
       category: vector.label,
+      id: vector.id,
       importance: importance[vector.id] || 0,
       color: vector.color,
     }));
@@ -209,7 +228,7 @@ const P8Asl = () => {
     return Object.values(importance).reduce((sum, val) => sum + val, 0);
   }, [importance]);
 
-  const allCompleted = completedVectors.length === allVectors.length;
+  const allCompleted = stage2Complete.size === allVectors.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center p-8 relative">
@@ -219,23 +238,36 @@ const P8Asl = () => {
           data={radarData}
           width={600}
           height={600}
-          completedVectors={new Set(completedVectors.map(id => 
-            allVectors.findIndex(v => v.id === id)
-          ))}
+          stage1Complete={stage1Complete}
+          stage2Complete={stage2Complete}
+          pulsingNode={pulsingNode}
           onNodeClick={handleNodeClick}
           onNodeDrag={handleNodeDrag}
         />
         
         {/* Center Badge */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
           <div className="bg-background/95 backdrop-blur-lg border border-primary/20 rounded-2xl px-6 py-4 shadow-2xl text-center">
             <p className="text-sm text-muted-foreground mb-1">
-              {allCompleted ? "All Vectors Complete!" : "Click nodes to configure"}
+              {stage2Complete.size === 0 && "Click any node to begin"}
+              {stage2Complete.size > 0 && stage2Complete.size < allVectors.length && "Click nodes to configure"}
+              {allCompleted && "All Vectors Complete! ✨"}
             </p>
-            <p className="text-2xl font-bold text-primary">{completedVectors.length} / {allVectors.length}</p>
+            <p className="text-2xl font-bold text-primary">{stage2Complete.size} / {allVectors.length}</p>
           </div>
         </div>
       </div>
+
+      {/* Pulsing Node Instruction */}
+      {pulsingNode !== null && (
+        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 pointer-events-none z-10 animate-fade-in">
+          <div className="px-6 py-3 rounded-full backdrop-blur-md bg-primary/20 border border-primary/40">
+            <p className="text-sm font-medium text-primary">
+              Drag the pulsing node to set importance
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Glassmorphic Option Modal */}
       {selectedVector !== null && (
@@ -262,10 +294,7 @@ const P8Asl = () => {
               </label>
               <Select
                 value={selectedOptions[allVectors[selectedVector].id] || ""}
-                onValueChange={(value) => {
-                  handleOptionChange(allVectors[selectedVector].id, value);
-                  setTimeout(() => setSelectedVector(null), 300);
-                }}
+                onValueChange={(value) => handleOptionChange(allVectors[selectedVector].id, value)}
               >
                 <SelectTrigger className="w-full h-12 text-base">
                   <SelectValue placeholder="Choose an option..." />
