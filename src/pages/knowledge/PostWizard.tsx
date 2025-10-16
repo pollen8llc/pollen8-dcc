@@ -227,13 +227,18 @@ const PostWizard = () => {
           
           {/* Form Card */}
           <Card className="border-0 bg-card/50 backdrop-blur-sm shadow-lg">
-            <CardHeader>
-              <CardTitle>{getSteps()[currentStep - 1]}</CardTitle>
-              <CardDescription>
-                {currentStep === 2
-                  ? "Review your content before publishing"
-                  : "Complete the information below"}
-              </CardDescription>
+            <CardHeader className="bg-muted/40 border-b border-border/50 rounded-t-lg">
+              <div className="flex items-start gap-3">
+                <div className="w-1 h-12 bg-gradient-to-b from-teal-500 to-blue-500 rounded-full flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg font-medium">{getSteps()[currentStep - 1]}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-1">
+                    {currentStep === 2
+                      ? "Review your content before publishing"
+                      : "Complete the information below"}
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             
             <CardContent>

@@ -186,7 +186,7 @@ export const ArticleForm: React.FC<ArticleFormProps> = ({
   
   return (
     <Form {...form}>
-      <form id="content-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form id="content-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 sm:space-y-6">
         {/* Title field */}
         <FormField
           control={form.control}

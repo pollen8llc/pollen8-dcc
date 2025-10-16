@@ -86,7 +86,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       <form 
         id="content-form" 
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-6"
+        className="space-y-4 sm:space-y-6"
       >
         {step === 1 && (
           <>
