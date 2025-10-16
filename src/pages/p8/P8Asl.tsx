@@ -255,13 +255,13 @@ const P8Asl = () => {
   const allCompleted = stage2Complete.size === allVectors.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center p-8 relative">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center pb-24 relative">
       {/* Centered Radar Chart */}
       <div className="flex flex-col items-center gap-8">
         <RadarChart
           data={radarData}
-          width={480}
-          height={480}
+          width={420}
+          height={420}
           stage1Complete={stage1Complete}
           stage2Complete={stage2Complete}
           pulsingNode={pulsingNode}
@@ -273,35 +273,13 @@ const P8Asl = () => {
         
       </div>
 
-      {/* Bottom Completion Counter */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 pointer-events-none z-0">
-        <div className="backdrop-blur-md bg-background/30 border border-primary/20 rounded-full px-4 py-2">
-          <p className="text-sm font-medium text-foreground/80">
-            {stage2Complete.size} / {allVectors.length}
-          </p>
-        </div>
-      </div>
-
       {/* Pulsing Node Instruction */}
       {pulsingNode !== null && !isDragging && (
-        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 pointer-events-none z-10 animate-fade-in">
+        <div className="fixed top-32 left-1/2 -translate-x-1/2 pointer-events-none z-10 animate-fade-in">
           <div className="px-6 py-3 rounded-full backdrop-blur-md bg-primary/20 border border-primary/40">
             <p className="text-sm font-medium text-primary">
               Drag the pulsing node to set importance
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* Drag Importance Indicator */}
-      {isDragging && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 animate-fade-in">
-          <div className="backdrop-blur-lg bg-background/95 border-2 border-primary rounded-2xl px-8 py-6 shadow-2xl">
-            <p className="text-sm text-muted-foreground mb-2 text-center">Importance Level</p>
-            <p className="text-6xl font-bold text-primary text-center tabular-nums">
-              {Math.round(dragImportance / 10)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-2 text-center">out of 10</p>
           </div>
         </div>
       )}
@@ -353,26 +331,50 @@ const P8Asl = () => {
         </div>
       )}
 
-      {/* Continue Button */}
-      {allCompleted && (
-        <Button
-          onClick={() => navigate("/p8/intgr8")}
-          size="lg"
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 min-w-48 animate-fade-in shadow-2xl"
-        >
-          <Check className="mr-2 h-5 w-5" />
-          Continue
-        </Button>
-      )}
+      {/* Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/80 backdrop-blur-lg border-t border-primary/10">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          {/* Back Button */}
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/p8/loc8")}
+            className="group"
+          >
+            Back
+          </Button>
 
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        onClick={() => navigate("/p8/loc8")}
-        className="fixed top-8 left-8"
-      >
-        Back
-      </Button>
+          {/* Center Section - Indicators */}
+          <div className="flex items-center gap-4">
+            {/* Completion Counter */}
+            <div className="backdrop-blur-md bg-background/30 border border-primary/20 rounded-full px-4 py-2">
+              <p className="text-sm font-medium text-foreground/80">
+                {stage2Complete.size} / {allVectors.length}
+              </p>
+            </div>
+
+            {/* Importance Level Indicator */}
+            <div className="backdrop-blur-md bg-primary/20 border border-primary/30 rounded-full px-4 py-2 min-w-[120px] text-center">
+              <p className="text-sm font-medium text-primary">
+                {isDragging 
+                  ? `Level: ${Math.round(dragImportance / 10)}/10`
+                  : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
+                    ? `Level: ${Math.round(importance[allVectors[selectedVector].id] / 10)}/10`
+                    : "Level: -"}
+              </p>
+            </div>
+          </div>
+
+          {/* Next Button */}
+          <Button
+            onClick={() => navigate("/p8/intgr8")}
+            disabled={!allCompleted}
+            className="group"
+          >
+            Continue
+            <Check className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
