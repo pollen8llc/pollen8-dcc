@@ -83,7 +83,7 @@ export const RadarChart = ({
       .attr('transform', `translate(${centerX}, ${centerY})`);
 
     // Draw circular grid
-    const levels = 5;
+    const levels = 10;
     for (let i = 1; i <= levels; i++) {
       const levelRadius = (radius / levels) * i;
       g.append('circle')
