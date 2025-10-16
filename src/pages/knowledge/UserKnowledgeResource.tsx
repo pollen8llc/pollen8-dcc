@@ -20,7 +20,9 @@ import {
   Tag as TagIcon,
   Quote,
   HelpCircle,
-  BarChart
+  BarChart,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 // UI Components
@@ -31,7 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavigation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -40,6 +42,32 @@ const UserKnowledgeResource = () => {
   const { savedArticles, isLoading: savedLoading } = useSavedArticles();
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity();
   const [isStatsOpen, setIsStatsOpen] = React.useState(true);
+  const [expandedCard, setExpandedCard] = React.useState<string | null>(null);
+  const [timePeriod, setTimePeriod] = React.useState<'week' | 'month' | 'year'>('week');
+
+  // Generate mock data for charts
+  const generateChartData = (type: string) => {
+    if (timePeriod === 'week') {
+      return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => ({
+        name: day,
+        count: Math.floor(Math.random() * 10)
+      }));
+    } else if (timePeriod === 'month') {
+      return Array.from({ length: 30 }, (_, i) => ({
+        name: `${i + 1}`,
+        count: Math.floor(Math.random() * 15)
+      }));
+    } else {
+      return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => ({
+        name: month,
+        count: Math.floor(Math.random() * 30)
+      }));
+    }
+  };
+
+  const toggleCard = (label: string) => {
+    setExpandedCard(expandedCard === label ? null : label);
+  };
 
   const statItems = [
     {
@@ -48,7 +76,8 @@ const UserKnowledgeResource = () => {
       value: stats?.totalArticles || 0,
       iconColor: "text-blue-500",
       bgColor: "bg-blue-500/10",
-      borderColor: "border-blue-500/20"
+      borderColor: "border-blue-500/20",
+      chartColor: "#3b82f6"
     },
     {
       icon: HelpCircle,
@@ -56,7 +85,8 @@ const UserKnowledgeResource = () => {
       value: stats?.totalQuestions || 0,
       iconColor: "text-green-500",
       bgColor: "bg-green-500/10",
-      borderColor: "border-green-500/20"
+      borderColor: "border-green-500/20",
+      chartColor: "#22c55e"
     },
     {
       icon: Quote,
@@ -64,7 +94,8 @@ const UserKnowledgeResource = () => {
       value: stats?.totalQuotes || 0,
       iconColor: "text-purple-500",
       bgColor: "bg-purple-500/10",
-      borderColor: "border-purple-500/20"
+      borderColor: "border-purple-500/20",
+      chartColor: "#a855f7"
     },
     {
       icon: BarChart,
@@ -72,7 +103,8 @@ const UserKnowledgeResource = () => {
       value: stats?.totalPolls || 0,
       iconColor: "text-orange-500",
       bgColor: "bg-orange-500/10",
-      borderColor: "border-orange-500/20"
+      borderColor: "border-orange-500/20",
+      chartColor: "#f97316"
     }
   ];
 
@@ -119,32 +151,95 @@ const UserKnowledgeResource = () => {
                 <div className="p-4 space-y-2">
                   {statItems.map((stat, index) => {
                     const Icon = stat.icon;
+                    const isExpanded = expandedCard === stat.label;
                     return (
                       <div
                         key={index}
-                        className={`flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md transition-all duration-300 cursor-pointer group border ${stat.borderColor}`}
+                        className={`bg-background/60 rounded-lg border ${stat.borderColor} transition-all duration-300`}
                       >
-                        {/* Left side: Icon and Label */}
-                        <div className="flex items-center space-x-3 flex-1">
-                          <div className={`w-10 h-10 rounded-full ${stat.bgColor} flex items-center justify-center shrink-0`}>
-                            <Icon className={`h-5 w-5 ${stat.iconColor}`} />
+                        <div
+                          onClick={() => toggleCard(stat.label)}
+                          className="flex items-center justify-between p-4 hover:bg-background/80 hover:shadow-md transition-all duration-300 cursor-pointer group"
+                        >
+                          {/* Left side: Icon and Label */}
+                          <div className="flex items-center space-x-3 flex-1">
+                            <div className={`w-10 h-10 rounded-full ${stat.bgColor} flex items-center justify-center shrink-0`}>
+                              <Icon className={`h-5 w-5 ${stat.iconColor}`} />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-medium group-hover:text-primary transition-colors">
+                                {stat.label}
+                              </h4>
+                              <p className="text-xs text-muted-foreground">
+                                Total {stat.label.toLowerCase()} created
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="text-sm font-medium group-hover:text-primary transition-colors">
-                              {stat.label}
-                            </h4>
-                            <p className="text-xs text-muted-foreground">
-                              Total {stat.label.toLowerCase()} created
-                            </p>
+
+                          {/* Right side: Value and Chevron */}
+                          <div className="flex items-center space-x-3 ml-4 shrink-0">
+                            <span className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
+                              {stat.value}
+                            </span>
+                            {isExpanded ? (
+                              <ChevronUp className={`h-5 w-5 ${stat.iconColor}`} />
+                            ) : (
+                              <ChevronDown className={`h-5 w-5 ${stat.iconColor}`} />
+                            )}
                           </div>
                         </div>
 
-                        {/* Right side: Value */}
-                        <div className="flex items-center space-x-2 ml-4 shrink-0">
-                          <span className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
-                            {stat.value}
-                          </span>
-                        </div>
+                        {/* Expandable Chart Section */}
+                        {isExpanded && (
+                          <div className="px-4 pb-4 pt-2 border-t border-border/50 animate-accordion-down">
+                            {/* Time Period Selector */}
+                            <div className="flex justify-end mb-4">
+                              <Tabs value={timePeriod} onValueChange={(v) => setTimePeriod(v as any)}>
+                                <TabsList className="bg-card/60">
+                                  <TabsTrigger value="week" className="text-xs">Week</TabsTrigger>
+                                  <TabsTrigger value="month" className="text-xs">Month</TabsTrigger>
+                                  <TabsTrigger value="year" className="text-xs">Year</TabsTrigger>
+                                </TabsList>
+                              </Tabs>
+                            </div>
+
+                            {/* Chart */}
+                            <ResponsiveContainer width="100%" height={200}>
+                              <LineChart data={generateChartData(stat.label)}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                <XAxis 
+                                  dataKey="name" 
+                                  stroke="hsl(var(--muted-foreground))"
+                                  fontSize={12}
+                                />
+                                <YAxis 
+                                  stroke="hsl(var(--muted-foreground))"
+                                  fontSize={12}
+                                />
+                                <Tooltip
+                                  contentStyle={{
+                                    backgroundColor: 'hsl(var(--card))',
+                                    border: '1px solid hsl(var(--border))',
+                                    borderRadius: '8px',
+                                    fontSize: '12px'
+                                  }}
+                                />
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="count" 
+                                  stroke={stat.chartColor}
+                                  strokeWidth={2}
+                                  dot={{ fill: stat.chartColor, r: 4 }}
+                                  activeDot={{ r: 6 }}
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+
+                            <p className="text-xs text-muted-foreground text-center mt-2">
+                              Activity over the past {timePeriod}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
