@@ -21,7 +21,6 @@ import {
   Tag as TagIcon,
   Quote,
   HelpCircle,
-  BarChart,
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
@@ -34,7 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavigation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -64,44 +63,50 @@ const UserKnowledgeResource = () => {
 
   const statItems = [
     {
-      icon: FileText,
-      label: "Articles",
-      value: stats?.totalArticles || 0,
+      icon: Activity,
+      label: "My Activity",
+      value: (stats?.totalArticles || 0) + (stats?.savedArticlesCount || 0) + (stats?.totalPolls || 0) + (stats?.commentsLeftCount || 0),
       iconColor: "text-blue-500",
       bgColor: "bg-blue-500/10",
       borderColor: "border-blue-500/20",
       chartColor: "#3b82f6",
-      contentType: ContentType.ARTICLE
+      isBarChart: true,
+      barData: [
+        { name: 'Articles', count: stats?.totalArticles || 0, fill: '#3b82f6' },
+        { name: 'Saved', count: stats?.savedArticlesCount || 0, fill: '#22c55e' },
+        { name: 'Polls', count: stats?.totalPolls || 0, fill: '#f97316' },
+        { name: 'Comments', count: stats?.commentsLeftCount || 0, fill: '#a855f7' }
+      ]
     },
     {
-      icon: HelpCircle,
-      label: "Questions",
-      value: stats?.totalQuestions || 0,
+      icon: FileText,
+      label: "Post Views",
+      value: stats?.totalViews || 0,
       iconColor: "text-green-500",
       bgColor: "bg-green-500/10",
       borderColor: "border-green-500/20",
       chartColor: "#22c55e",
-      contentType: ContentType.QUESTION
+      contentType: 'views' as any
     },
     {
-      icon: Quote,
-      label: "Quotes",
-      value: stats?.totalQuotes || 0,
+      icon: MessageSquare,
+      label: "Post Replies",
+      value: stats?.totalComments || 0,
       iconColor: "text-purple-500",
       bgColor: "bg-purple-500/10",
       borderColor: "border-purple-500/20",
       chartColor: "#a855f7",
-      contentType: ContentType.QUOTE
+      contentType: 'comments' as any
     },
     {
-      icon: BarChart,
-      label: "Polls",
-      value: stats?.totalPolls || 0,
+      icon: ThumbsUp,
+      label: "Poll Votes",
+      value: stats?.pollVotesCount || 0,
       iconColor: "text-orange-500",
       bgColor: "bg-orange-500/10",
       borderColor: "border-orange-500/20",
       chartColor: "#f97316",
-      contentType: ContentType.POLL
+      contentType: 'votes' as any
     }
   ];
 
@@ -149,11 +154,13 @@ const UserKnowledgeResource = () => {
                   {statItems.map((stat, index) => {
                     const Icon = stat.icon;
                     const isExpanded = expandedCard === stat.label;
-                    const { data: chartData, loading: chartLoading } = useKnowledgeTimeSeriesData(
-                      currentUser?.id,
-                      stat.contentType,
-                      timePeriod
-                    );
+                    const { data: chartData, loading: chartLoading } = stat.isBarChart 
+                      ? { data: [], loading: false }
+                      : useKnowledgeTimeSeriesData(
+                          currentUser?.id,
+                          stat.contentType,
+                          timePeriod
+                        );
                     
                     return (
                       <div
@@ -174,7 +181,7 @@ const UserKnowledgeResource = () => {
                                 {stat.label}
                               </h4>
                               <p className="text-xs text-muted-foreground">
-                                Total {stat.label.toLowerCase()} created
+                                {stat.isBarChart ? 'Total contributions' : `Total ${stat.label.toLowerCase()}`}
                               </p>
                             </div>
                           </div>
@@ -196,27 +203,62 @@ const UserKnowledgeResource = () => {
                         {isExpanded && (
                           <div className="pb-4 pt-2 border-t border-border/50 animate-accordion-down">
                             {/* Date Badge and Time Period Selector */}
-                            <div className="flex justify-between items-center mb-4 px-4">
-                              <Badge 
-                                variant="teal" 
-                                className="text-xs px-2 py-1"
-                              >
-                                {getCurrentDateRange()}
-                              </Badge>
-                              <Tabs value={timePeriod} onValueChange={(v) => setTimePeriod(v as any)}>
-                                <TabsList className="bg-card/60">
-                                  <TabsTrigger value="week" className="text-xs">Week</TabsTrigger>
-                                  <TabsTrigger value="month" className="text-xs">Month</TabsTrigger>
-                                  <TabsTrigger value="year" className="text-xs">Year</TabsTrigger>
-                                </TabsList>
-                              </Tabs>
-                            </div>
+                            {!stat.isBarChart && (
+                              <div className="flex justify-between items-center mb-4 px-4">
+                                <Badge 
+                                  variant="teal" 
+                                  className="text-xs px-2 py-1"
+                                >
+                                  {getCurrentDateRange()}
+                                </Badge>
+                                <Tabs value={timePeriod} onValueChange={(v) => setTimePeriod(v as any)}>
+                                  <TabsList className="bg-card/60">
+                                    <TabsTrigger value="week" className="text-xs">Week</TabsTrigger>
+                                    <TabsTrigger value="month" className="text-xs">Month</TabsTrigger>
+                                    <TabsTrigger value="year" className="text-xs">Year</TabsTrigger>
+                                  </TabsList>
+                                </Tabs>
+                              </div>
+                            )}
 
                             {/* Chart - Full Width */}
                             {chartLoading ? (
                               <div className="flex items-center justify-center h-[200px]">
                                 <Skeleton className="h-full w-full" />
                               </div>
+                            ) : stat.isBarChart ? (
+                              <ResponsiveContainer width="100%" height={250}>
+                                <RechartsBarChart 
+                                  data={stat.barData}
+                                  margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                                >
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                  <XAxis 
+                                    dataKey="name" 
+                                    stroke="hsl(var(--muted-foreground))"
+                                    fontSize={12}
+                                  />
+                                  <YAxis 
+                                    stroke="hsl(var(--muted-foreground))"
+                                    fontSize={11}
+                                    orientation="left"
+                                    mirror={true}
+                                    tick={{ dx: 10 }}
+                                  />
+                                  <Tooltip
+                                    contentStyle={{
+                                      backgroundColor: 'hsl(var(--card))',
+                                      border: '1px solid hsl(var(--border))',
+                                      borderRadius: '8px',
+                                      fontSize: '12px'
+                                    }}
+                                  />
+                                  <Bar 
+                                    dataKey="count" 
+                                    radius={[8, 8, 0, 0]}
+                                  />
+                                </RechartsBarChart>
+                              </ResponsiveContainer>
                             ) : (
                               <ResponsiveContainer width="100%" height={200}>
                                 <LineChart 
@@ -257,7 +299,7 @@ const UserKnowledgeResource = () => {
                             )}
 
                             <p className="text-xs text-muted-foreground text-center mt-2 px-4">
-                              Activity over the past {timePeriod}
+                              {stat.isBarChart ? 'Your content activity breakdown' : `Activity over the past ${timePeriod}`}
                             </p>
                           </div>
                         )}

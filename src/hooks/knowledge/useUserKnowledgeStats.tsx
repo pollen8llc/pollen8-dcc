@@ -12,6 +12,8 @@ interface UserKnowledgeStats {
   totalComments?: number;
   totalVotes?: number;
   savedArticlesCount?: number;
+  commentsLeftCount?: number;
+  pollVotesCount?: number;
   recentArticlesCount?: number;
   recentActivity: any[];
   contentTypeStats: Record<string, number>;
@@ -121,6 +123,25 @@ export const useUserKnowledgeStats = (userId?: string) => {
           return sum + (vote.vote_type === 'upvote' ? 1 : vote.vote_type === 'downvote' ? -1 : 0);
         }, 0) || 0;
 
+        // Get saved articles count
+        const { data: savedArticles } = await supabase
+          .from('knowledge_saved_articles')
+          .select('id')
+          .eq('user_id', userId);
+
+        // Get comments left by user
+        const { data: commentsLeft } = await supabase
+          .from('knowledge_comments')
+          .select('id')
+          .eq('author_id', userId);
+
+        // Get poll votes by user
+        const { data: pollVotes } = await supabase
+          .from('knowledge_votes')
+          .select('id')
+          .eq('user_id', userId)
+          .not('article_id', 'is', null);
+
         setStats({
           totalArticles: articles.length,
           totalQuestions: questions.length,
@@ -129,7 +150,9 @@ export const useUserKnowledgeStats = (userId?: string) => {
           totalViews: (userArticles || []).reduce((sum, article) => sum + (article.view_count || 0), 0),
           totalComments: (userArticles || []).reduce((sum, article) => sum + (article.comment_count || 0), 0),
           totalVotes: Math.abs(totalVotes),
-          savedArticlesCount: 0, // Will be fetched separately
+          savedArticlesCount: savedArticles?.length || 0,
+          commentsLeftCount: commentsLeft?.length || 0,
+          pollVotesCount: pollVotes?.length || 0,
           recentArticlesCount: (userArticles || []).filter(article => {
             const created = new Date(article.created_at);
             const weekAgo = new Date();
