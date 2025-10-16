@@ -67,15 +67,24 @@ const CompactCommunityCard = memo(({
 
   const CardContent = (
     <div 
-      className={`relative h-full overflow-hidden rounded-2xl bg-card border transition-all duration-300 ${
+      className={`relative h-full overflow-hidden rounded-2xl bg-card/40 backdrop-blur-md border-0 transition-all duration-300 ${
         isSelected 
-          ? 'border-primary/60 bg-primary/5 shadow-md shadow-primary/10 scale-[1.02]' 
-          : 'border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10'
+          ? 'bg-primary/10 shadow-md shadow-primary/10 scale-[1.02]' 
+          : 'hover:bg-card/60 hover:shadow-xl hover:shadow-black/10'
       } ${isSelectionMode ? 'cursor-pointer' : 'group hover:scale-[1.02]'}`}
       onClick={handleClick}
     >
+      {/* Glassmorphic overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+      
+      {/* Teal colored background */}
+      <div 
+        className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300"
+        style={{ backgroundColor: 'hsl(var(--primary))' }}
+      />
+      
       {/* Content Container - No banner section */}
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-3 relative">
         {/* First Section: Logo, Title, Location */}
         <div className="flex items-start space-x-3">
           {isSelectionMode && (
@@ -87,7 +96,13 @@ const CompactCommunityCard = memo(({
               />
             </div>
           )}
-          <div className="w-12 h-12 rounded-xl bg-black/80 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+          <div 
+            className="w-12 h-12 rounded-xl backdrop-blur-sm flex items-center justify-center flex-shrink-0 border"
+            style={{ 
+              backgroundColor: 'color-mix(in srgb, hsl(var(--primary)) 15%, transparent)',
+              borderColor: 'color-mix(in srgb, hsl(var(--primary)) 30%, transparent)'
+            }}
+          >
             {community.logo_url ? (
               <img 
                 src={community.logo_url} 
@@ -95,7 +110,7 @@ const CompactCommunityCard = memo(({
                 className="w-full h-full object-cover rounded-xl"
               />
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm"></div>
+              <div className="w-8 h-8 rounded-lg" style={{ backgroundColor: 'hsl(var(--primary))' }}></div>
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -117,7 +132,11 @@ const CompactCommunityCard = memo(({
             <Badge 
               key={tag} 
               variant="secondary" 
-              className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-0"
+              className="text-xs px-2 py-0.5 border-0"
+              style={{
+                backgroundColor: 'color-mix(in srgb, hsl(var(--primary)) 20%, transparent)',
+                color: 'hsl(var(--primary))'
+              }}
             >
               {tag}
             </Badge>
