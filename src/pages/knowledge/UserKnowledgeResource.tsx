@@ -164,14 +164,8 @@ const UserKnowledgeResource = () => {
                           onClick={() => toggleCard(stat.label)}
                           className="flex items-center justify-between p-4 hover:bg-background/80 hover:shadow-md transition-all duration-300 cursor-pointer group"
                         >
-                          {/* Left side: Date badge, Icon and Label */}
+                          {/* Left side: Icon and Label */}
                           <div className="flex items-center space-x-3 flex-1">
-                            <Badge 
-                              variant="outline" 
-                              className="text-xs px-2 py-1 bg-background/80 border-border/50"
-                            >
-                              {getCurrentDateRange()}
-                            </Badge>
                             <div className={`w-10 h-10 rounded-full ${stat.bgColor} flex items-center justify-center shrink-0`}>
                               <Icon className={`h-5 w-5 ${stat.iconColor}`} />
                             </div>
@@ -201,8 +195,14 @@ const UserKnowledgeResource = () => {
                         {/* Expandable Chart Section */}
                         {isExpanded && (
                           <div className="pb-4 pt-2 border-t border-border/50 animate-accordion-down">
-                            {/* Time Period Selector */}
-                            <div className="flex justify-end mb-4 px-4">
+                            {/* Date Badge and Time Period Selector */}
+                            <div className="flex justify-between items-center mb-4 px-4">
+                              <Badge 
+                                variant="teal" 
+                                className="text-xs px-2 py-1"
+                              >
+                                {getCurrentDateRange()}
+                              </Badge>
                               <Tabs value={timePeriod} onValueChange={(v) => setTimePeriod(v as any)}>
                                 <TabsList className="bg-card/60">
                                   <TabsTrigger value="week" className="text-xs">Week</TabsTrigger>
