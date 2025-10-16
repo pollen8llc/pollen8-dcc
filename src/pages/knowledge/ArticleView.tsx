@@ -38,6 +38,7 @@ import { EnhancedCommentSection } from '@/components/knowledge/EnhancedCommentSe
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles';
 import AuthorCard from '@/components/knowledge/AuthorCard';
 import { ModernPollVoting } from '@/components/knowledge/ModernPollVoting';
+import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavigation';
 
 // Types
 import { ContentType } from '@/models/knowledgeTypes';
@@ -158,37 +159,23 @@ const ArticleView = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
-        {/* Navigation */}
-        <div className="mb-4 sm:mb-6">
-          <Button variant="ghost" className="pl-0" asChild>
-            <Link to="/knowledge">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Knowledge Base
-            </Link>
-          </Button>
-        </div>
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Main content */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 space-y-6">
+            {/* Navigation */}
+            <Cultiva8OnlyNavigation />
+            
             {/* Content type badge */}
-            <div className="mb-4">
-              <Badge variant="outline" className="text-xs capitalize">
+            <div>
+              <Badge variant="outline" className="text-xs capitalize mb-4">
                 {article.content_type?.toLowerCase() || 'article'}
               </Badge>
+              
+              {/* Article title */}
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#00eada] leading-tight">
+                {article.title}
+              </h1>
             </div>
-            
-            {/* Article title */}
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6 text-[#00eada] leading-tight">
-              {article.title}
-            </h1>
-            
-            {/* Author and metadata */}
-            {article.author && (
-              <div className="flex items-center mb-8">
-                <AuthorCard author={article.author} minimal={true} />
-              </div>
-            )}
             
             {/* Article content */}
             <Card>
