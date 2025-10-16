@@ -77,6 +77,11 @@ export class SolarSystemAvatarService {
       return "UXI9000";
     }
 
+    // Service Provider users get the Jade Triple system
+    if (networkData.role === UserRole.SERVICE_PROVIDER) {
+      return "UXI8035"; // Jade Triple
+    }
+
     // Network value based assignment
     if (networkData.networkValue < 1000) {
       // Members get UXI8018, other roles get UXI8001
