@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 import { Edit, MapPin, Globe, User, Users, Mail, Phone, ExternalLink, Settings, BarChart2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { UnifiedProfile } from "@/types/unifiedProfile";
@@ -13,7 +13,7 @@ import { UserRole } from "@/models/types";
 import { usePermissions } from "@/hooks/usePermissions";
 import { supabase } from "@/integrations/supabase/client";
 import RoleChangeDialog from "./RoleChangeDialog";
-import PublicContactForm from "./PublicContactForm";
+
 import { useUserKnowledgeStats } from "@/hooks/knowledge/useUserKnowledgeStats";
 
 interface EnhancedProfileViewProps {
@@ -159,25 +159,6 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
         </CardContent>
       </Card>
 
-      {/* Contact Form for non-own profiles */}
-      {!isOwnProfile && (
-        <Accordion type="single" collapsible className="mb-4 sm:mb-6 lg:mb-8">
-          <AccordionItem value="contact" className="border border-border/50 rounded-lg px-3 sm:px-4">
-            <AccordionTrigger className="text-lg sm:text-xl font-semibold hover:no-underline py-4 sm:py-6">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                Contact {getFullName()}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 sm:pb-6">
-              <PublicContactForm 
-                profileUserId={profile.id}
-                profileUserName={getFullName()}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      )}
 
       {/* Enhanced Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
