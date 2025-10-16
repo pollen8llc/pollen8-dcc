@@ -303,8 +303,17 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
 
   if (loading && !showResults) {
     return (
-      <Card>
-        <CardContent className="p-6">
+      <Card className="relative overflow-hidden border-0 bg-card/40 backdrop-blur-md">
+        {/* Glassmorphic overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50" />
+        
+        {/* Blue colored background */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{ backgroundColor: 'hsl(221 83% 53%)' }}
+        />
+        
+        <CardContent className="p-6 relative">
           <div className="animate-pulse space-y-4">
             <div className="h-6 bg-muted rounded w-1/3"></div>
             <div className="space-y-3">
@@ -318,12 +327,31 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
     );
   }
 
+  const blueColor = 'hsl(221 83% 53%)'; // rel8 blue
+
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-4">
+    <Card className="relative overflow-hidden border-0 bg-card/40 backdrop-blur-md">
+      {/* Glassmorphic overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50" />
+      
+      {/* Blue colored background */}
+      <div 
+        className="absolute inset-0 opacity-10"
+        style={{ backgroundColor: blueColor }}
+      />
+      
+      <CardHeader className="pb-4 relative">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-3">
+            <div 
+              className="p-2.5 rounded-xl backdrop-blur-sm border"
+              style={{ 
+                backgroundColor: `color-mix(in srgb, ${blueColor} 15%, transparent)`,
+                borderColor: `color-mix(in srgb, ${blueColor} 30%, transparent)`
+              }}
+            >
+              <BarChart3 className="h-5 w-5" style={{ color: blueColor }} />
+            </div>
             <h3 className="font-semibold text-lg">Poll Results</h3>
           </div>
           
@@ -343,7 +371,7 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 relative">
         <div className="space-y-3">
           <AnimatePresence>
             {pollData.options.map((option, index) => (
