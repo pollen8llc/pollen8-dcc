@@ -162,21 +162,21 @@ const ArticleView = () => {
         {/* Navigation - Full Width */}
         <Cultiva8OnlyNavigation />
         
+        {/* Content type badge and title - Full Width */}
+        <div>
+          <Badge variant="outline" className="text-xs capitalize mb-4">
+            {article.content_type?.toLowerCase() || 'article'}
+          </Badge>
+          
+          {/* Article title */}
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#00eada] leading-tight">
+            {article.title}
+          </h1>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Main content */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Content type badge and title */}
-            <div>
-              <Badge variant="outline" className="text-xs capitalize mb-4">
-                {article.content_type?.toLowerCase() || 'article'}
-              </Badge>
-              
-              {/* Article title */}
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#00eada] leading-tight">
-                {article.title}
-              </h1>
-            </div>
-            
+          <div className="md:col-span-2">
             {/* Article content */}
             <Card>
               <CardContent className="pt-8 pb-8">
