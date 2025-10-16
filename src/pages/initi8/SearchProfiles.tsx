@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Navbar from '@/components/Navbar';
-import { DotConnectorHeader } from '@/components/layout/DotConnectorHeader';
 import { Search, Users, MapPin, Loader2 } from 'lucide-react';
 import { getAllProfiles, ExtendedProfile } from '@/services/profileService';
 import { UserRole } from '@/models/types';
@@ -70,7 +69,6 @@ const SearchProfiles: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <DotConnectorHeader />
 
       <div className="w-full px-4 py-8">
         {/* Header */}
@@ -94,25 +92,37 @@ const SearchProfiles: React.FC = () => {
               />
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button
-                variant={selectedFilter === 'all' ? 'default' : 'outline'}
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedFilter('all')}
+                className={selectedFilter === 'all' 
+                  ? 'bg-gradient-to-br from-primary/10 to-primary/20 border-primary/30 text-primary font-semibold hover:from-primary/20 hover:to-primary/30'
+                  : 'hover:bg-white/5'
+                }
               >
                 All Profiles
               </Button>
               <Button
-                variant={selectedFilter === 'organizers' ? 'default' : 'outline'}
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedFilter('organizers')}
+                className={selectedFilter === 'organizers'
+                  ? 'bg-gradient-to-br from-blue-500/10 to-blue-500/20 border-blue-500/30 text-blue-500 font-semibold hover:from-blue-500/20 hover:to-blue-500/30'
+                  : 'hover:bg-white/5'
+                }
               >
                 Organizers
               </Button>
               <Button
-                variant={selectedFilter === 'volunteers' ? 'default' : 'outline'}
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedFilter('volunteers')}
+                className={selectedFilter === 'volunteers'
+                  ? 'bg-gradient-to-br from-green-500/10 to-green-500/20 border-green-500/30 text-green-500 font-semibold hover:from-green-500/20 hover:to-green-500/30'
+                  : 'hover:bg-white/5'
+                }
               >
                 Members
               </Button>
