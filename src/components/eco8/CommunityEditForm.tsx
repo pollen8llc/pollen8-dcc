@@ -202,6 +202,7 @@ export const CommunityEditForm: React.FC<CommunityEditFormProps> = ({
 
       const updateData = {
         ...data,
+        location: watch('location'), // Explicitly include location from form watch
         target_audience: targetAudience,
         tags: tags,
         social_media: socialPlatforms,
