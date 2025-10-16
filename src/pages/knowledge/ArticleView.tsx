@@ -158,14 +158,14 @@ const ArticleView = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
+      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full space-y-6">
+        {/* Navigation - Full Width */}
+        <Cultiva8OnlyNavigation />
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Main content */}
           <div className="md:col-span-2 space-y-6">
-            {/* Navigation */}
-            <Cultiva8OnlyNavigation />
-            
-            {/* Content type badge */}
+            {/* Content type badge and title */}
             <div>
               <Badge variant="outline" className="text-xs capitalize mb-4">
                 {article.content_type?.toLowerCase() || 'article'}
