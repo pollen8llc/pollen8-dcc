@@ -222,7 +222,7 @@ const PostWizard = () => {
               <span className="text-xs sm:text-sm text-muted-foreground">Step {currentStep} of 2</span>
               <span className="text-xs sm:text-sm text-muted-foreground">{getSteps()[currentStep - 1]}</span>
             </div>
-            <Progress value={getProgressValue()} indicatorClassName="bg-primary" />
+            <Progress value={getProgressValue()} indicatorClassName="bg-gradient-to-r from-teal-500 to-blue-500" />
           </div>
           
           {/* Form Card */}

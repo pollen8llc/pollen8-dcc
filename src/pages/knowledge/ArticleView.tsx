@@ -169,7 +169,7 @@ const ArticleView = () => {
           </Badge>
           
           {/* Article title */}
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#00eada] leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#00eada] leading-tight">
             {article.title}
           </h1>
         </div>

@@ -74,7 +74,7 @@ const TagView = () => {
           <div className="flex items-center gap-3">
             <Tag className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-[#00eada]">{decodedTag}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#00eada]">{decodedTag}</h1>
               <p className="text-muted-foreground">Browse all content tagged with "{decodedTag}"</p>
             </div>
           </div>
