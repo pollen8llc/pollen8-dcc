@@ -102,20 +102,34 @@ export const RadarChart = ({
         .attr('stroke', 'hsl(var(--primary) / 0.3)')
         .attr('stroke-width', 1);
 
-      // Add labels
-      const labelRadius = radius * 1.15;
+      // Add labels with badge styling
+      const labelRadius = radius * 1.2;
       const labelX = Math.cos(angle) * labelRadius;
       const labelY = Math.sin(angle) * labelRadius;
 
-      g.append('text')
-        .attr('x', labelX)
-        .attr('y', labelY)
+      const labelGroup = g.append('g')
+        .attr('transform', `translate(${labelX}, ${labelY})`);
+
+      // Add badge background
+      const textElement = labelGroup.append('text')
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
-        .attr('fill', 'hsl(var(--foreground) / 0.8)')
-        .attr('font-size', '12px')
-        .attr('font-weight', '500')
+        .attr('fill', 'hsl(var(--foreground))')
+        .attr('font-size', '14px')
+        .attr('font-weight', '600')
         .text(d.category);
+
+      const bbox = (textElement.node() as SVGTextElement).getBBox();
+      
+      labelGroup.insert('rect', 'text')
+        .attr('x', bbox.x - 8)
+        .attr('y', bbox.y - 4)
+        .attr('width', bbox.width + 16)
+        .attr('height', bbox.height + 8)
+        .attr('rx', 12)
+        .attr('fill', 'hsl(var(--background) / 0.9)')
+        .attr('stroke', 'hsl(var(--primary) / 0.3)')
+        .attr('stroke-width', 1);
     });
 
     // Draw data area

@@ -260,8 +260,8 @@ const P8Asl = () => {
       <div className="flex flex-col items-center gap-8">
         <RadarChart
           data={radarData}
-          width={600}
-          height={600}
+          width={480}
+          height={480}
           stage1Complete={stage1Complete}
           stage2Complete={stage2Complete}
           pulsingNode={pulsingNode}
