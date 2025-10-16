@@ -122,7 +122,12 @@ export const RadarChart = ({
       const labelY = Math.sin(angle) * labelRadius;
 
       const labelGroup = g.append('g')
-        .attr('transform', `translate(${labelX}, ${labelY})`);
+        .attr('transform', `translate(${labelX}, ${labelY})`)
+        .style('cursor', 'pointer')
+        .on('click', (event) => {
+          event.stopPropagation();
+          onNodeClickRef.current?.(i);
+        });
 
       // Add badge background
       const textElement = labelGroup.append('text')

@@ -26,7 +26,7 @@ const allVectors = [
       { value: "45-54", label: "45-54" },
       { value: "55+", label: "55+" },
     ],
-    color: "#00eada",
+    color: "#3b82f6",
   },
   { 
     id: "status", 
@@ -40,7 +40,7 @@ const allVectors = [
       { value: "freelancer", label: "Freelancer" },
       { value: "executive", label: "Executive" },
     ],
-    color: "#8b5cf6",
+    color: "#3b82f6",
   },
   { 
     id: "gender", 
@@ -54,7 +54,7 @@ const allVectors = [
       { value: "non-binary", label: "Non-binary" },
       { value: "prefer-not", label: "Prefer not to specify" },
     ],
-    color: "#f97316",
+    color: "#3b82f6",
   },
   { 
     id: "race", 
@@ -70,7 +70,7 @@ const allVectors = [
       { value: "mixed", label: "Mixed" },
       { value: "other", label: "Other" },
     ],
-    color: "#06b6d4",
+    color: "#3b82f6",
   },
   // Psychographics
   {
@@ -105,7 +105,7 @@ const allVectors = [
       { value: "active", label: "Active" },
       { value: "relaxed", label: "Relaxed" },
     ],
-    color: "#60a5fa",
+    color: "#3b82f6",
   },
   {
     id: "values",
@@ -122,7 +122,7 @@ const allVectors = [
       { value: "freedom", label: "Freedom" },
       { value: "tradition", label: "Tradition" },
     ],
-    color: "#2563eb",
+    color: "#3b82f6",
   },
   {
     id: "attitudes",
@@ -139,7 +139,7 @@ const allVectors = [
       { value: "progressive", label: "Progressive" },
       { value: "conservative", label: "Conservative" },
     ],
-    color: "#1d4ed8",
+    color: "#3b82f6",
   },
 ];
 
