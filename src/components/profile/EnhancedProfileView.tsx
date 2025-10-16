@@ -184,10 +184,23 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           {/* Enhanced Activity & Stats Card */}
           <Card className="border-border/50 shadow-lg">
             <CardHeader className="pb-4 sm:pb-6">
-              <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
-                <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                Activity & Stats
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
+                  <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  Activity & Stats
+                </CardTitle>
+                {isOwnProfile && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.location.href = '/knowledge/my-resources'}
+                    className="gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Manage
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
