@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Contact } from "@/services/rel8t/contactService";
 import { deleteContact } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContactCardProps {
   contact: Contact;
@@ -27,6 +28,40 @@ const ContactCard = ({
   isSelected = false,
   isSelectionMode = false
 }: ContactCardProps) => {
+  const [avatarUserId, setAvatarUserId] = useState<string>("UXI8000");
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      // First check if contact has an affiliated user (nominated member)
+      const userAffiliation = contact.affiliations?.find(
+        aff => aff.affiliation_type === 'user' && aff.affiliated_user_id
+      );
+      
+      if (userAffiliation?.affiliated_user_id) {
+        // Check if the affiliated user has any role in user_roles table
+        const { data: userRole } = await supabase
+          .from('user_roles')
+          .select('id')
+          .eq('user_id', userAffiliation.affiliated_user_id)
+          .limit(1)
+          .maybeSingle();
+        
+        if (userRole) {
+          // User has a role, use their avatar
+          setAvatarUserId(userAffiliation.affiliated_user_id);
+        } else {
+          // User has no role, use default
+          setAvatarUserId("UXI8000");
+        }
+      } else {
+        // No user affiliation, use default
+        setAvatarUserId("UXI8000");
+      }
+    };
+
+    checkUserRole();
+  }, [contact.affiliations]);
+
   const handleEdit = () => {
     if (onEdit) onEdit(contact);
   };
@@ -67,22 +102,6 @@ const ContactCard = ({
     if (!contact.category) return "#00eada";
     return contact.category.color || "#00eada";
   };
-  
-  // Use UXI8000 avatar for contacts that aren't platform users or have no member role
-  const getAvatarUserId = () => {
-    // First check if contact has an affiliated user (nominated member)
-    const userAffiliation = contact.affiliations?.find(
-      aff => aff.affiliation_type === 'user' && aff.affiliated_user_id
-    );
-    
-    if (userAffiliation?.affiliated_user_id) {
-      return userAffiliation.affiliated_user_id;
-    }
-    
-    // Fallback: check if contact has a member role
-    const isMember = contact.role && contact.role.toLowerCase().includes('member');
-    return isMember ? contact.user_id : "UXI8000";
-  };
 
   return (
     <Card 
@@ -108,7 +127,7 @@ const ContactCard = ({
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="bg-primary/10 rounded-full p-2 group-hover:bg-primary/20 transition-colors flex-shrink-0">
-              <UnifiedAvatar userId={getAvatarUserId()} size={32} />
+              <UnifiedAvatar userId={avatarUserId} size={32} />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">{contact.name}</h3>
