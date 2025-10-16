@@ -41,7 +41,7 @@ const UserKnowledgeResource = () => {
   const { stats, loading: statsLoading } = useUserKnowledgeStats(currentUser?.id);
   const { savedArticles, isLoading: savedLoading } = useSavedArticles();
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity();
-  const [isStatsOpen, setIsStatsOpen] = React.useState(true);
+  const [isStatsOpen, setIsStatsOpen] = React.useState(false);
   const [expandedCard, setExpandedCard] = React.useState<string | null>(null);
   const [timePeriod, setTimePeriod] = React.useState<'week' | 'month' | 'year'>('week');
 
