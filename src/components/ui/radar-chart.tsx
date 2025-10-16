@@ -11,11 +11,13 @@ interface RadarChartProps {
   data: RadarDataPoint[];
   width?: number;
   height?: number;
-  angleOffset?: number; // Rotation offset in degrees
+  angleOffset?: number;
   strokeColor?: string;
   fillColor?: string;
-  activeVector?: number; // Index of currently active vector
-  completedVectors?: Set<number>; // Set of completed vector indices
+  activeVector?: number;
+  completedVectors?: Set<number>;
+  onNodeClick?: (index: number) => void;
+  onNodeDrag?: (index: number, importance: number) => void;
 }
 
 export const RadarChart = ({ 
@@ -26,7 +28,9 @@ export const RadarChart = ({
   strokeColor = 'hsl(var(--primary))',
   fillColor = 'hsl(var(--primary))',
   activeVector,
-  completedVectors = new Set()
+  completedVectors = new Set(),
+  onNodeClick,
+  onNodeDrag
 }: RadarChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -120,7 +124,7 @@ export const RadarChart = ({
       .attr('stroke-width', 2)
       .style('transition', 'd 0.3s ease-out');
 
-    // Draw data points
+    // Draw data points with drag & click
     data.forEach((d, i) => {
       const angle = angleSlice * i - Math.PI / 2 + offsetRadians;
       const r = rScale(d.importance);
@@ -134,28 +138,71 @@ export const RadarChart = ({
       const circle = g.append('circle')
         .attr('cx', x)
         .attr('cy', y)
-        .attr('r', isActive ? 6 : 4)
+        .attr('r', isActive ? 8 : 6)
         .attr('fill', d.color)
         .attr('stroke', 'hsl(var(--background))')
         .attr('stroke-width', 2)
         .attr('opacity', opacity)
-        .style('cursor', 'pointer')
+        .style('cursor', 'grab')
         .style('transition', 'all 0.3s ease-out');
 
       // Add pulse animation to active vector
       if (isActive) {
         circle.append('animate')
           .attr('attributeName', 'r')
-          .attr('values', '6;8;6')
+          .attr('values', '8;10;8')
           .attr('dur', '2s')
           .attr('repeatCount', 'indefinite');
+      }
+
+      // Click handler
+      circle.on('click', (event) => {
+        event.stopPropagation();
+        onNodeClick?.(i);
+      });
+
+      // Drag behavior
+      if (onNodeDrag) {
+        const drag = d3.drag()
+          .on('start', function() {
+            d3.select(this).style('cursor', 'grabbing');
+          })
+          .on('drag', function(event) {
+            const dx = event.x;
+            const dy = event.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const importance = Math.min(100, Math.max(0, (distance / radius) * 100));
+            
+            // Snap to 25% increments
+            const snapped = Math.round(importance / 25) * 25;
+            
+            // Update visual position
+            const newR = rScale(snapped);
+            const newX = Math.cos(angle) * newR;
+            const newY = Math.sin(angle) * newR;
+            
+            d3.select(this)
+              .attr('cx', newX)
+              .attr('cy', newY);
+          })
+          .on('end', function(event) {
+            d3.select(this).style('cursor', 'grab');
+            const dx = event.x;
+            const dy = event.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const importance = Math.min(100, Math.max(0, (distance / radius) * 100));
+            const snapped = Math.round(importance / 25) * 25;
+            onNodeDrag(i, snapped);
+          });
+
+        circle.call(drag as any);
       }
 
       circle.append('title')
         .text(`${d.category}: ${d.importance}%`);
     });
 
-  }, [data, width, height, angleOffset, strokeColor, fillColor, activeVector, completedVectors]);
+  }, [data, width, height, angleOffset, strokeColor, fillColor, completedVectors, onNodeClick, onNodeDrag]);
 
   return (
     <svg

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { RadarChart } from "@/components/ui/radar-chart";
 import {
   Select,
@@ -10,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Users, Brain } from "lucide-react";
+import { Check } from "lucide-react";
 
 // Combined vectors: 4 Demographics + 4 Psychographics
 const allVectors = [
@@ -28,7 +27,6 @@ const allVectors = [
       { value: "55+", label: "55+" },
     ],
     color: "#00eada",
-    icon: Users 
   },
   { 
     id: "status", 
@@ -43,7 +41,6 @@ const allVectors = [
       { value: "executive", label: "Executive" },
     ],
     color: "#8b5cf6",
-    icon: Users 
   },
   { 
     id: "gender", 
@@ -58,7 +55,6 @@ const allVectors = [
       { value: "prefer-not", label: "Prefer not to specify" },
     ],
     color: "#f97316",
-    icon: Users 
   },
   { 
     id: "race", 
@@ -75,7 +71,6 @@ const allVectors = [
       { value: "other", label: "Other" },
     ],
     color: "#06b6d4",
-    icon: Users 
   },
   // Psychographics
   {
@@ -94,7 +89,6 @@ const allVectors = [
       { value: "education", label: "Education" },
     ],
     color: "#3b82f6",
-    icon: Brain
   },
   {
     id: "lifestyle",
@@ -112,7 +106,6 @@ const allVectors = [
       { value: "relaxed", label: "Relaxed" },
     ],
     color: "#60a5fa",
-    icon: Brain
   },
   {
     id: "values",
@@ -130,7 +123,6 @@ const allVectors = [
       { value: "tradition", label: "Tradition" },
     ],
     color: "#2563eb",
-    icon: Brain
   },
   {
     id: "attitudes",
@@ -148,7 +140,6 @@ const allVectors = [
       { value: "conservative", label: "Conservative" },
     ],
     color: "#1d4ed8",
-    icon: Brain
   },
 ];
 
@@ -163,7 +154,7 @@ const importanceLevels = [
 
 const P8Asl = () => {
   const navigate = useNavigate();
-  const [currentVector, setCurrentVector] = useState(0);
+  const [selectedVector, setSelectedVector] = useState<number | null>(null);
   const [importance, setImportance] = useState<Record<string, number>>(() => {
     const saved = localStorage.getItem("p8_combined_importance");
     if (saved) return JSON.parse(saved);
@@ -187,37 +178,16 @@ const P8Asl = () => {
     localStorage.setItem("p8_combined_progress", JSON.stringify(completedVectors));
   }, [importance, selectedOptions, completedVectors]);
 
-  const updateImportance = (vectorId: string, value: number[]) => {
-    const snappedValue = importanceLevels.reduce((prev, curr) =>
-      Math.abs(curr.value - value[0]) < Math.abs(prev.value - value[0])
-        ? curr
-        : prev
-    ).value;
+  const handleNodeClick = (index: number) => {
+    setSelectedVector(index);
+  };
 
-    setImportance((prev) => ({ ...prev, [vectorId]: snappedValue }));
+  const handleNodeDrag = (index: number, newImportance: number) => {
+    const vectorId = allVectors[index].id;
+    setImportance((prev) => ({ ...prev, [vectorId]: newImportance }));
 
-    if (snappedValue > 0 && !completedVectors.includes(vectorId)) {
+    if (newImportance > 0 && !completedVectors.includes(vectorId)) {
       setCompletedVectors((prev) => [...prev, vectorId]);
-      
-      // Auto-advance to next vector if not the last one
-      const currentIndex = allVectors.findIndex((v) => v.id === vectorId);
-      if (currentIndex < allVectors.length - 1) {
-        setTimeout(() => {
-          setCurrentVector(currentIndex + 1);
-        }, 500);
-      }
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentVector > 0) {
-      setCurrentVector(currentVector - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentVector < allVectors.length - 1) {
-      setCurrentVector(currentVector + 1);
     }
   };
 
@@ -239,78 +209,70 @@ const P8Asl = () => {
     return Object.values(importance).reduce((sum, val) => sum + val, 0);
   }, [importance]);
 
-  const getImportanceLabel = (value: number) => {
-    return (
-      importanceLevels.find((level) => level.value === value)?.label || "Not Set"
-    );
-  };
-
-  const currentVectorData = allVectors[currentVector];
-  const currentStep = currentVector < 4 ? 2 : 3;
-  const totalSteps = 4;
+  const allCompleted = completedVectors.length === allVectors.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col">
-      {/* Progress Bar */}
-      <div className="w-full bg-secondary/30 h-2">
-        <div
-          className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${(completedVectors.length / allVectors.length) * 100}%` }}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center p-8 relative">
+      {/* Centered Radar Chart */}
+      <div className="flex flex-col items-center gap-8">
+        <RadarChart
+          data={radarData}
+          width={600}
+          height={600}
+          completedVectors={new Set(completedVectors.map(id => 
+            allVectors.findIndex(v => v.id === id)
+          ))}
+          onNodeClick={handleNodeClick}
+          onNodeDrag={handleNodeDrag}
         />
-      </div>
-
-      {/* Main Content - Centered Radar Chart */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 pb-48 md:pb-56">
-        <div className="flex flex-col items-center gap-4 md:gap-6">
-          <RadarChart
-            data={radarData}
-            width={500}
-            height={500}
-            activeVector={currentVector}
-            completedVectors={new Set(completedVectors.map(id => 
-              allVectors.findIndex(v => v.id === id)
-            ))}
-          />
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">Total Importance</p>
-            <p className="text-3xl font-bold text-primary">{totalImportance}</p>
+        
+        {/* Center Badge */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          <div className="bg-background/95 backdrop-blur-lg border border-primary/20 rounded-2xl px-6 py-4 shadow-2xl text-center">
+            <p className="text-sm text-muted-foreground mb-1">
+              {allCompleted ? "All Vectors Complete!" : "Click nodes to configure"}
+            </p>
+            <p className="text-2xl font-bold text-primary">{completedVectors.length} / {allVectors.length}</p>
           </div>
         </div>
       </div>
 
-      {/* Bottom Control Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-primary/20 shadow-2xl z-50">
-        <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-4">
-          {/* Header Row */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-xs font-medium text-muted-foreground px-2 py-1 rounded-md bg-primary/10">
-              Step {currentStep} of {totalSteps}
-            </span>
-            <span className="text-sm md:text-base font-semibold">
-              Question {currentVector + 1} of {allVectors.length}: {currentVectorData.name}
-            </span>
-            <span className="text-xs text-muted-foreground px-2 py-1 rounded-md bg-secondary/50">
-              {currentVector < 4 ? "Demographics" : "Psychographics"}
-            </span>
-          </div>
-
-          {/* Control Row */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr,2fr,auto] gap-4 items-end">
-            {/* Dropdown */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">
-                Select Option
+      {/* Glassmorphic Option Modal */}
+      {selectedVector !== null && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedVector(null)}
+        >
+          <div 
+            className="bg-background/95 backdrop-blur-lg border border-primary/20 rounded-3xl p-8 shadow-2xl max-w-md w-full animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold mb-2">
+                {allVectors[selectedVector].name}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {allVectors[selectedVector].category}
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <label className="text-sm font-medium text-muted-foreground">
+                Select your option
               </label>
               <Select
-                value={selectedOptions[currentVectorData.id] || ""}
-                onValueChange={(value) => handleOptionChange(currentVectorData.id, value)}
+                value={selectedOptions[allVectors[selectedVector].id] || ""}
+                onValueChange={(value) => {
+                  handleOptionChange(allVectors[selectedVector].id, value);
+                  setTimeout(() => setSelectedVector(null), 300);
+                }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full h-12 text-base">
                   <SelectValue placeholder="Choose an option..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {currentVectorData.options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                  {allVectors[selectedVector].options.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-base py-3">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -318,88 +280,33 @@ const P8Asl = () => {
               </Select>
             </div>
 
-            {/* Importance Slider */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">
-                Importance Level: {" "}
-                <span style={{ color: currentVectorData.color }} className="font-semibold">
-                  {getImportanceLabel(importance[currentVectorData.id] || 0)}
-                </span>
-              </label>
-              <div className="space-y-1">
-                <Slider
-                  value={[importance[currentVectorData.id] || 0]}
-                  onValueChange={(value) =>
-                    updateImportance(currentVectorData.id, value)
-                  }
-                  max={100}
-                  step={25}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-[10px] text-muted-foreground">
-                  <span>Low</span>
-                  <span>Moderate</span>
-                  <span>Important</span>
-                  <span>Critical</span>
-                  <span>Essential</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handlePrevious}
-                disabled={currentVector === 0}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleNext}
-                disabled={currentVector === allVectors.length - 1}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Progress Dots */}
-          <div className="flex justify-center gap-1.5 pt-2">
-            {allVectors.map((vector, index) => (
-              <button
-                key={vector.id}
-                onClick={() => setCurrentVector(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === currentVector
-                    ? "w-6 bg-primary"
-                    : completedVectors.includes(vector.id)
-                    ? "bg-primary/60"
-                    : "bg-border"
-                }`}
-                aria-label={`Go to question ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          {/* Footer Buttons */}
-          <div className="flex justify-between gap-4 pt-2 border-t border-primary/10">
-            <Button variant="ghost" onClick={() => navigate("/p8/loc8")}>
-              Back
-            </Button>
-            <Button
-              onClick={() => navigate("/p8/intgr8")}
-              disabled={completedVectors.length < allVectors.length}
-              className="min-w-32"
-            >
-              {completedVectors.length === allVectors.length ? "Continue" : `Complete ${allVectors.length - completedVectors.length} more`}
-            </Button>
+            <p className="text-xs text-center text-muted-foreground mt-6">
+              After selecting, drag the node closer or further from the center to set importance
+            </p>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Continue Button */}
+      {allCompleted && (
+        <Button
+          onClick={() => navigate("/p8/intgr8")}
+          size="lg"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 min-w-48 animate-fade-in shadow-2xl"
+        >
+          <Check className="mr-2 h-5 w-5" />
+          Continue
+        </Button>
+      )}
+
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        onClick={() => navigate("/p8/loc8")}
+        className="fixed top-8 left-8"
+      >
+        Back
+      </Button>
     </div>
   );
 };
