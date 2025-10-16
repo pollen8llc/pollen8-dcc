@@ -31,6 +31,13 @@ const UnifiedAvatar: React.FC<UnifiedAvatarProps> = memo(({
         return;
       }
 
+      // Check if the userId is already a solar system ID (starts with UXI)
+      if (targetUserId.startsWith("UXI")) {
+        setSolarSystemId(targetUserId);
+        setLoading(false);
+        return;
+      }
+
       try {
         const systemId = await SolarSystemAvatarService.getCachedSolarSystemId(targetUserId);
         setSolarSystemId(systemId);
