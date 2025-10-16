@@ -453,7 +453,7 @@ const ArticleView = () => {
             />
             
             {/* Popular tags */}
-            {article.tags && article.tags.length > 0 && (
+            {Array.isArray(article.tags) && article.tags.length > 0 && (
               <Card>
                 <CardContent className="pt-6">
                   <h3 className="text-lg font-medium mb-3 text-white">Tags</h3>

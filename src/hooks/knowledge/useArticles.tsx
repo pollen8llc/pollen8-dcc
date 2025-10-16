@@ -39,6 +39,7 @@ export const useArticles = (params: UseArticlesParams = {}) => {
       return (articles || []).map((article: any) => ({
         ...article,
         content_type: article.content_type as ContentType,
+        tags: Array.isArray(article.tags) ? article.tags : [],
         author: {
           id: article.author_id,
           name: article.author_name || 'Anonymous',
@@ -65,7 +66,7 @@ export const useArticle = (id: string) => {
         .from('knowledge_articles')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching article:', error);
@@ -102,6 +103,7 @@ export const useArticle = (id: string) => {
       // Transform data to match KnowledgeArticle interface
       return {
         ...article,
+        tags: Array.isArray(article.tags) ? article.tags : [],
         user_vote: userVote,
         author: authorProfile ? {
           id: authorProfile.user_id,
