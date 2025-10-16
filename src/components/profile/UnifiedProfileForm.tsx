@@ -7,8 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Steps } from '@/components/ui/steps';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from 'lucide-react';
+import { Loader2, User, FileText, Heart, Lock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
 // Import step components
@@ -202,7 +202,34 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
     );
   }
   
-  // Edit mode with tabs
+  // Edit mode with navigation
+  const navItems = [
+    {
+      value: "basic",
+      label: "Basic Info",
+      icon: User,
+      iconColor: "text-blue-500"
+    },
+    {
+      value: "bio",
+      label: "Bio & Location",
+      icon: FileText,
+      iconColor: "text-green-500"
+    },
+    {
+      value: "interests",
+      label: "Interests",
+      icon: Heart,
+      iconColor: "text-pink-500"
+    },
+    {
+      value: "privacy",
+      label: "Privacy",
+      icon: Lock,
+      iconColor: "text-orange-500"
+    }
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -213,20 +240,38 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
       </CardHeader>
       
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="basic">Basic Info</TabsTrigger>
-            <TabsTrigger value="bio">Bio & Location</TabsTrigger>
-            <TabsTrigger value="interests">Interests</TabsTrigger>
-            <TabsTrigger value="privacy">Privacy</TabsTrigger>
-          </TabsList>
-          
-          <div className="mt-6">
-            <form id="profile-form" onSubmit={form.handleSubmit(onSubmit)}>
-              {renderTabContent()}
-            </form>
+        {/* Navigation Bar */}
+        <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-accent/50 border border-border rounded-2xl shadow-lg mb-6">
+          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => setActiveTab(item.value)}
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
+                    "hover:scale-105",
+                    activeTab === item.value
+                      ? "bg-primary/10 border border-primary/20 text-foreground shadow-lg"
+                      : "bg-background/50 border border-border text-muted-foreground hover:bg-background hover:border-border"
+                  )}
+                >
+                  <Icon className={cn("h-4 w-4", item.iconColor)} />
+                  <span className="hidden sm:inline">{item.label}</span>
+                </button>
+              );
+            })}
           </div>
-        </Tabs>
+        </nav>
+        
+        {/* Content Area */}
+        <div className="mt-6">
+          <form id="profile-form" onSubmit={form.handleSubmit(onSubmit)}>
+            {renderTabContent()}
+          </form>
+        </div>
       </CardContent>
       
       <CardFooter className="flex justify-between">
