@@ -65,13 +65,12 @@ const UserKnowledgeResource = () => {
       
       <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
         {/* Page Title */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center backdrop-blur-sm border border-primary/20">
-            <BarChart3 className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">My Knowledge Hub</h1>
-            <p className="text-sm text-muted-foreground">Track your contributions and saved resources</p>
+        <div className="mb-8 mt-6">
+          <div className="flex items-center gap-3">
+            <BarChart3 className="h-8 w-8 text-primary" />
+            <div>
+              <p className="text-muted-foreground">Track your contributions and saved resources</p>
+            </div>
           </div>
         </div>
 
