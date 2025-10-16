@@ -259,8 +259,8 @@ export const RadarChart = ({
             const distance = Math.sqrt(dx * dx + dy * dy);
             const importance = Math.min(100, Math.max(0, (distance / radius) * 100));
             
-            // Snap to 25% increments
-            const snapped = Math.round(importance / 25) * 25;
+            // Snap to 10% increments (matching 10 segments)
+            const snapped = Math.round(importance / 10) * 10;
             
             // Update visual position
             const newR = rScale(snapped);
@@ -286,7 +286,7 @@ export const RadarChart = ({
             const dy = event.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
             const importance = Math.min(100, Math.max(0, (distance / radius) * 100));
-            const snapped = Math.round(importance / 25) * 25;
+            const snapped = Math.round(importance / 10) * 10;
             onNodeDragRef.current?.(i, snapped);
           });
 
