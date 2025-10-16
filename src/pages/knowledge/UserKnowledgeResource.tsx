@@ -100,7 +100,12 @@ const UserKnowledgeResource = () => {
               <div className="p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-xl border-b border-primary/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <BarChart3 className="h-5 w-5 text-primary" />
+                    <div className="relative flex items-center justify-center w-5 h-5">
+                      {/* Pulsing ring */}
+                      <div className="absolute w-5 h-5 rounded-full bg-teal-400/30 animate-ping" style={{ animationDuration: '2s' }} />
+                      {/* Static dot */}
+                      <div className="relative w-2.5 h-2.5 rounded-full bg-teal-400" />
+                    </div>
                     <div>
                       <h3 className="text-lg font-semibold">Content Statistics</h3>
                       <p className="text-sm text-muted-foreground">Your contribution breakdown</p>
