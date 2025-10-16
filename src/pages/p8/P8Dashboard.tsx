@@ -102,10 +102,14 @@ const P8Dashboard = () => {
 
         {/* Location World Map */}
         <LocationWorldMap />
+      </div>
 
-        {/* Events Card */}
+      {/* Events Card - Full Width */}
+      <div className="w-full px-4 py-6 animate-fade-in">
         <EventsCard />
+      </div>
 
+      <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
         {/* Network World Map */}
         <NetworkWorldMap />
       </div>
