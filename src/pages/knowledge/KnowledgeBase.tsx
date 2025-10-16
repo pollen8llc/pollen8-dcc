@@ -81,14 +81,20 @@ const KnowledgeBase = () => {
         <Eco8OnlyNavigation />
         
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6 mt-6">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center backdrop-blur-sm border border-primary/20">
-            <BookOpen className="h-6 w-6 text-primary" />
+        <div className="flex items-center justify-between gap-4 mb-6 mt-6">
+          <div className="flex items-center gap-3">
+            <BookOpen className="h-8 w-8 text-primary" />
+            <div>
+              <p className="text-muted-foreground">Discover, share, and contribute to our collective knowledge</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">Knowledge Hub</h1>
-            <p className="text-sm text-muted-foreground">Discover, share, and contribute to our collective knowledge</p>
-          </div>
+          
+          <Button asChild className="shrink-0">
+            <Link to="/knowledge/create">
+              <Plus className="h-4 w-4 mr-2" />
+              Create
+            </Link>
+          </Button>
         </div>
 
 
