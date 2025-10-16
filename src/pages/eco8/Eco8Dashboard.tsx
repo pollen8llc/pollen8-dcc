@@ -109,43 +109,46 @@ const Eco8Dashboard: React.FC = () => {
 
         {/* Communities Accordion */}
         {hasUserCommunities && (
-          <Collapsible open={isPanelOpen} onOpenChange={setIsPanelOpen}>
-            <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="sm" className="p-0 h-auto hover:bg-transparent">
+          <Collapsible open={isPanelOpen} onOpenChange={setIsPanelOpen} className="mt-6">
+            <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
+              
+              <CollapsibleTrigger asChild>
+                <CardHeader className="relative cursor-pointer hover:bg-card/60 transition-all">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="transition-transform duration-200">
                         {isPanelOpen ? (
                           <ChevronUp className="h-5 w-5 text-muted-foreground" />
                         ) : (
                           <ChevronDown className="h-5 w-5 text-muted-foreground" />
                         )}
-                      </Button>
-                    </CollapsibleTrigger>
-                    <div className="flex-1">
-                      <CardTitle>Communities</CardTitle>
-                      <CardDescription>
-                        {isSelectionMode 
-                          ? `${selectedCommunities.length} selected`
-                          : 'Communities you organize and manage'
-                        }
-                      </CardDescription>
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="text-lg font-bold">Communities</CardTitle>
+                        <CardDescription className="text-sm">
+                          {isSelectionMode 
+                            ? `${selectedCommunities.length} selected`
+                            : `${userCommunities.length} ${userCommunities.length === 1 ? 'community' : 'communities'}`
+                          }
+                        </CardDescription>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
+              </CollapsibleTrigger>
               
-              <CollapsibleContent className="animate-accordion-down data-[state=closed]:animate-accordion-up">
-                <CardContent>
+              <CollapsibleContent className="relative animate-accordion-down data-[state=closed]:animate-accordion-up">
+                <CardContent className="pt-0">
                   {/* Action Buttons */}
-                  <div className="flex items-center justify-end gap-2 mb-4">
+                  <div className="flex flex-wrap items-center justify-end gap-2 mb-6 pb-4 border-b border-border/50">
                     {isSelectionMode ? (
                       <>
                         <Button 
                           variant="outline" 
                           size="sm"
                           onClick={handleSelectAll}
+                          className="backdrop-blur-sm"
                         >
                           {selectedCommunities.length === userCommunities.length ? (
                             <>
@@ -174,6 +177,7 @@ const Eco8Dashboard: React.FC = () => {
                           variant="outline" 
                           size="sm"
                           onClick={toggleSelectionMode}
+                          className="backdrop-blur-sm"
                         >
                           <CheckSquare className="h-4 w-4 mr-2" />
                           Select
