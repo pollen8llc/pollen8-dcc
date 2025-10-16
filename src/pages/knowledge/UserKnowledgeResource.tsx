@@ -2,12 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { useUserKnowledgeStats } from '@/hooks/knowledge/useUserKnowledgeStats';
+import { useKnowledgeTimeSeriesData } from '@/hooks/knowledge/useKnowledgeTimeSeriesData';
 import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
 import { useRecentActivity } from '@/hooks/knowledge/useRecentActivity';
 import { useAuth } from '@/hooks/useAuth';
 import { ArticleCard } from '@/components/knowledge/ArticleCard';
-import { formatDistanceToNow } from 'date-fns';
-import { KnowledgeArticle } from '@/models/knowledgeTypes';
+import { formatDistanceToNow, format } from 'date-fns';
+import { KnowledgeArticle, ContentType } from '@/models/knowledgeTypes';
 import {
   BarChart3,
   MessageSquare,
@@ -45,28 +46,20 @@ const UserKnowledgeResource = () => {
   const [expandedCard, setExpandedCard] = React.useState<string | null>(null);
   const [timePeriod, setTimePeriod] = React.useState<'week' | 'month' | 'year'>('week');
 
-  // Generate mock data for charts
-  const generateChartData = (type: string) => {
-    if (timePeriod === 'week') {
-      return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => ({
-        name: day,
-        count: Math.floor(Math.random() * 10)
-      }));
-    } else if (timePeriod === 'month') {
-      return Array.from({ length: 30 }, (_, i) => ({
-        name: `${i + 1}`,
-        count: Math.floor(Math.random() * 15)
-      }));
-    } else {
-      return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => ({
-        name: month,
-        count: Math.floor(Math.random() * 30)
-      }));
-    }
-  };
-
   const toggleCard = (label: string) => {
     setExpandedCard(expandedCard === label ? null : label);
+  };
+
+  // Get current date/time for badge
+  const getCurrentDateRange = () => {
+    const now = new Date();
+    if (timePeriod === 'week') {
+      return format(now, 'MMM d, yyyy');
+    } else if (timePeriod === 'month') {
+      return format(now, 'MMMM yyyy');
+    } else {
+      return format(now, 'yyyy');
+    }
   };
 
   const statItems = [
@@ -77,7 +70,8 @@ const UserKnowledgeResource = () => {
       iconColor: "text-blue-500",
       bgColor: "bg-blue-500/10",
       borderColor: "border-blue-500/20",
-      chartColor: "#3b82f6"
+      chartColor: "#3b82f6",
+      contentType: ContentType.ARTICLE
     },
     {
       icon: HelpCircle,
@@ -86,7 +80,8 @@ const UserKnowledgeResource = () => {
       iconColor: "text-green-500",
       bgColor: "bg-green-500/10",
       borderColor: "border-green-500/20",
-      chartColor: "#22c55e"
+      chartColor: "#22c55e",
+      contentType: ContentType.QUESTION
     },
     {
       icon: Quote,
@@ -95,7 +90,8 @@ const UserKnowledgeResource = () => {
       iconColor: "text-purple-500",
       bgColor: "bg-purple-500/10",
       borderColor: "border-purple-500/20",
-      chartColor: "#a855f7"
+      chartColor: "#a855f7",
+      contentType: ContentType.QUOTE
     },
     {
       icon: BarChart,
@@ -104,7 +100,8 @@ const UserKnowledgeResource = () => {
       iconColor: "text-orange-500",
       bgColor: "bg-orange-500/10",
       borderColor: "border-orange-500/20",
-      chartColor: "#f97316"
+      chartColor: "#f97316",
+      contentType: ContentType.POLL
     }
   ];
 
@@ -152,6 +149,12 @@ const UserKnowledgeResource = () => {
                   {statItems.map((stat, index) => {
                     const Icon = stat.icon;
                     const isExpanded = expandedCard === stat.label;
+                    const { data: chartData, loading: chartLoading } = useKnowledgeTimeSeriesData(
+                      currentUser?.id,
+                      stat.contentType,
+                      timePeriod
+                    );
+                    
                     return (
                       <div
                         key={index}
@@ -161,8 +164,14 @@ const UserKnowledgeResource = () => {
                           onClick={() => toggleCard(stat.label)}
                           className="flex items-center justify-between p-4 hover:bg-background/80 hover:shadow-md transition-all duration-300 cursor-pointer group"
                         >
-                          {/* Left side: Icon and Label */}
+                          {/* Left side: Date badge, Icon and Label */}
                           <div className="flex items-center space-x-3 flex-1">
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs px-2 py-1 bg-background/80 border-border/50"
+                            >
+                              {getCurrentDateRange()}
+                            </Badge>
                             <div className={`w-10 h-10 rounded-full ${stat.bgColor} flex items-center justify-center shrink-0`}>
                               <Icon className={`h-5 w-5 ${stat.iconColor}`} />
                             </div>
@@ -204,42 +213,48 @@ const UserKnowledgeResource = () => {
                             </div>
 
                             {/* Chart - Full Width */}
-                            <ResponsiveContainer width="100%" height={200}>
-                              <LineChart 
-                                data={generateChartData(stat.label)}
-                                margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
-                              >
-                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                                <XAxis 
-                                  dataKey="name" 
-                                  stroke="hsl(var(--muted-foreground))"
-                                  fontSize={12}
-                                />
-                                <YAxis 
-                                  stroke="hsl(var(--muted-foreground))"
-                                  fontSize={11}
-                                  orientation="left"
-                                  mirror={true}
-                                  tick={{ dx: 10 }}
-                                />
-                                <Tooltip
-                                  contentStyle={{
-                                    backgroundColor: 'hsl(var(--card))',
-                                    border: '1px solid hsl(var(--border))',
-                                    borderRadius: '8px',
-                                    fontSize: '12px'
-                                  }}
-                                />
-                                <Line 
-                                  type="monotone" 
-                                  dataKey="count" 
-                                  stroke={stat.chartColor}
-                                  strokeWidth={2}
-                                  dot={{ fill: stat.chartColor, r: 4 }}
-                                  activeDot={{ r: 6 }}
-                                />
-                              </LineChart>
-                            </ResponsiveContainer>
+                            {chartLoading ? (
+                              <div className="flex items-center justify-center h-[200px]">
+                                <Skeleton className="h-full w-full" />
+                              </div>
+                            ) : (
+                              <ResponsiveContainer width="100%" height={200}>
+                                <LineChart 
+                                  data={chartData}
+                                  margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                                >
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                                  <XAxis 
+                                    dataKey="name" 
+                                    stroke="hsl(var(--muted-foreground))"
+                                    fontSize={12}
+                                  />
+                                  <YAxis 
+                                    stroke="hsl(var(--muted-foreground))"
+                                    fontSize={11}
+                                    orientation="left"
+                                    mirror={true}
+                                    tick={{ dx: 10 }}
+                                  />
+                                  <Tooltip
+                                    contentStyle={{
+                                      backgroundColor: 'hsl(var(--card))',
+                                      border: '1px solid hsl(var(--border))',
+                                      borderRadius: '8px',
+                                      fontSize: '12px'
+                                    }}
+                                  />
+                                  <Line 
+                                    type="monotone" 
+                                    dataKey="count" 
+                                    stroke={stat.chartColor}
+                                    strokeWidth={2}
+                                    dot={{ fill: stat.chartColor, r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            )}
 
                             <p className="text-xs text-muted-foreground text-center mt-2 px-4">
                               Activity over the past {timePeriod}
