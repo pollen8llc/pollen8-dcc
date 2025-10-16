@@ -265,7 +265,7 @@ const P8Asl = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center pb-24 relative">
       {/* Centered Radar Chart */}
-      <div className="flex flex-col items-center gap-8">
+      <div className="flex flex-col items-center gap-8 w-full max-w-2xl px-4">
         {/* Instructions */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
@@ -273,18 +273,20 @@ const P8Asl = () => {
           </p>
         </div>
 
-        <RadarChart
-          data={radarData}
-          width={420}
-          height={420}
-          stage1Complete={stage1Complete}
-          stage2Complete={stage2Complete}
-          pulsingNode={pulsingNode}
-          onNodeClick={handleNodeClick}
-          onNodeDrag={handleNodeDrag}
-          onDragUpdate={handleDragUpdate}
-          onDragStart={handleDragStart}
-        />
+        <div className="w-full max-w-md">
+          <RadarChart
+            data={radarData}
+            width={420}
+            height={420}
+            stage1Complete={stage1Complete}
+            stage2Complete={stage2Complete}
+            pulsingNode={pulsingNode}
+            onNodeClick={handleNodeClick}
+            onNodeDrag={handleNodeDrag}
+            onDragUpdate={handleDragUpdate}
+            onDragStart={handleDragStart}
+          />
+        </div>
         
       </div>
 
@@ -346,6 +348,44 @@ const P8Asl = () => {
         </div>
       )}
 
+      {/* Importance Indicator - Above Nav Bar */}
+      {(isDragging || (selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id))) && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-30 animate-fade-in">
+          <div 
+            className="backdrop-blur-md border rounded-full px-6 py-3 shadow-lg transition-all duration-300"
+            style={{
+              backgroundColor: isDragging 
+                ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)}, 0.2)`
+                : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
+                  ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)}, 0.2)`
+                  : 'rgba(59, 130, 246, 0.2)',
+              borderColor: isDragging 
+                ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)}, 0.3)`
+                : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
+                  ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)}, 0.3)`
+                  : 'rgba(59, 130, 246, 0.3)'
+            }}
+          >
+            <p 
+              className="text-base font-semibold transition-colors duration-300"
+              style={{
+                color: isDragging 
+                  ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)})`
+                  : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
+                    ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)})`
+                    : 'rgb(59, 130, 246)'
+              }}
+            >
+              {isDragging 
+                ? `Importance: ${Math.round(dragImportance / 10)}/10`
+                : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
+                  ? `Importance: ${Math.round(importance[allVectors[selectedVector].id] / 10)}/10`
+                  : "Importance: -"}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Bottom Navigation Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/80 backdrop-blur-lg border-t border-primary/10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
@@ -375,40 +415,6 @@ const P8Asl = () => {
             <div className="backdrop-blur-md bg-background/30 border border-primary/20 rounded-full px-4 py-2">
               <p className="text-sm font-medium text-foreground/80">
                 {stage2Complete.size} / {allVectors.length}
-              </p>
-            </div>
-
-            {/* Importance Level Indicator */}
-            <div 
-              className="backdrop-blur-md border rounded-full px-4 py-2 min-w-[140px] text-center transition-all duration-300"
-              style={{
-                backgroundColor: isDragging 
-                  ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)}, 0.2)`
-                  : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
-                    ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)}, 0.2)`
-                    : 'rgba(59, 130, 246, 0.2)',
-                borderColor: isDragging 
-                  ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)}, 0.3)`
-                  : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
-                    ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)}, 0.3)`
-                    : 'rgba(59, 130, 246, 0.3)'
-              }}
-            >
-              <p 
-                className="text-sm font-medium transition-colors duration-300"
-                style={{
-                  color: isDragging 
-                    ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)})`
-                    : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
-                      ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)})`
-                      : 'rgb(59, 130, 246)'
-                }}
-              >
-                {isDragging 
-                  ? `Importance: ${Math.round(dragImportance / 10)}/10`
-                  : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
-                    ? `Importance: ${Math.round(importance[allVectors[selectedVector].id] / 10)}/10`
-                    : "Importance: -"}
               </p>
             </div>
           </div>
