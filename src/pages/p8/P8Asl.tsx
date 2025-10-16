@@ -290,9 +290,9 @@ const P8Asl = () => {
         
       </div>
 
-      {/* Pulsing Node Instruction */}
+      {/* Pulsing Node Instruction - Above Nav Bar */}
       {pulsingNode !== null && !isDragging && (
-        <div className="fixed top-32 left-1/2 -translate-x-1/2 pointer-events-none z-10 animate-fade-in">
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 pointer-events-none z-30 animate-fade-in">
           <div className="px-6 py-3 rounded-full backdrop-blur-md bg-primary/20 border border-primary/40">
             <p className="text-sm font-medium text-primary">
               Drag the pulsing node to set importance
