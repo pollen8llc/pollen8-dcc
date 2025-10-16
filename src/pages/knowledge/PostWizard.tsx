@@ -19,7 +19,7 @@ import {
   CardDescription 
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { GlassmorphicProgress } from '@/components/ui/glassmorphic-progress';
 import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavigation';
 
 import { QuestionForm } from '@/components/knowledge/forms/QuestionForm';
@@ -218,11 +218,11 @@ const PostWizard = () => {
           
           {/* Progress Indicator */}
           <div className="mb-6 sm:mb-8 animate-fade-in">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs sm:text-sm text-muted-foreground">Step {currentStep} of 2</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs sm:text-sm font-medium text-foreground/80">Step {currentStep} of 2</span>
               <span className="text-xs sm:text-sm text-muted-foreground">{getSteps()[currentStep - 1]}</span>
             </div>
-            <Progress value={getProgressValue()} indicatorClassName="bg-gradient-to-r from-teal-500 to-blue-500" />
+            <GlassmorphicProgress value={getProgressValue()} />
           </div>
           
           {/* Form Card */}
