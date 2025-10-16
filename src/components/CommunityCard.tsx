@@ -71,65 +71,64 @@ const CommunityCard = memo(({ community }: CommunityCardProps) => {
 
         {/* Content Container */}
         <div className="p-4 space-y-3">
-          {/* Header Section */}
+          {/* First Section: Logo, Title, Location */}
           <div className="flex items-start space-x-3">
             <div className="w-12 h-12 rounded-xl bg-black/80 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm"></div>
+              {community.logo_url ? (
+                <img 
+                  src={community.logo_url} 
+                  alt={community.name} 
+                  className="w-full h-full object-cover rounded-xl"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm"></div>
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-foreground line-clamp-1">
                 {community.name}
               </h3>
-              {/* Topic badges */}
-              <div className="flex flex-wrap gap-1 mt-1">
-                {(community.tags || []).slice(0, 2).map((tag) => (
-                  <Badge 
-                    key={tag} 
-                    variant="secondary" 
-                    className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-0"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-                {(community.tags || []).length > 2 && (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs px-2 py-0.5 bg-muted/50 text-muted-foreground border-0"
-                  >
-                    +{(community.tags || []).length - 2}
-                  </Badge>
-                )}
+              <div className="flex items-center space-x-1 mt-1">
+                <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                <span className="text-sm text-muted-foreground truncate">
+                  {community.location}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Organizer Section */}
-          <div className="flex items-center space-x-2">
-            <Avatar 
-              userId={community.owner_id}
-              size={24} 
-              className="w-6 h-6"
-            />
-            <span className="text-sm text-muted-foreground">
-              by {organizerName}
-            </span>
+          {/* Middle Section: Interest Category Badges */}
+          <div className="flex flex-wrap gap-1.5 py-2">
+            {(community.tags || []).slice(0, 3).map((tag) => (
+              <Badge 
+                key={tag} 
+                variant="secondary" 
+                className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-0"
+              >
+                {tag}
+              </Badge>
+            ))}
+            {(community.tags || []).length > 3 && (
+              <Badge 
+                variant="secondary" 
+                className="text-xs px-2 py-0.5 bg-muted/50 text-muted-foreground border-0"
+              >
+                +{(community.tags || []).length - 3}
+              </Badge>
+            )}
           </div>
 
-          {/* Stats Footer */}
-          <div className="flex justify-between items-center pt-2 border-t border-border/50">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <Users className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  {community.community_size || '1'}
-                </span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <MapPin className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground truncate max-w-20">
-                  {community.location}
-                </span>
-              </div>
+          {/* Bottom Section: Owner Info and Activity */}
+          <div className="flex items-center justify-between pt-2 border-t border-border/50">
+            <div className="flex items-center space-x-2">
+              <Avatar 
+                userId={community.owner_id}
+                size={28} 
+                className="w-7 h-7"
+              />
+              <span className="text-sm text-muted-foreground truncate">
+                {organizerName}
+              </span>
             </div>
             <div className="flex items-center space-x-1">
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
