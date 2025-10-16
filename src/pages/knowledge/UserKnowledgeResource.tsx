@@ -191,9 +191,9 @@ const UserKnowledgeResource = () => {
 
                         {/* Expandable Chart Section */}
                         {isExpanded && (
-                          <div className="px-4 pb-4 pt-2 border-t border-border/50 animate-accordion-down">
+                          <div className="pb-4 pt-2 border-t border-border/50 animate-accordion-down">
                             {/* Time Period Selector */}
-                            <div className="flex justify-end mb-4">
+                            <div className="flex justify-end mb-4 px-4">
                               <Tabs value={timePeriod} onValueChange={(v) => setTimePeriod(v as any)}>
                                 <TabsList className="bg-card/60">
                                   <TabsTrigger value="week" className="text-xs">Week</TabsTrigger>
@@ -203,9 +203,12 @@ const UserKnowledgeResource = () => {
                               </Tabs>
                             </div>
 
-                            {/* Chart */}
+                            {/* Chart - Full Width */}
                             <ResponsiveContainer width="100%" height={200}>
-                              <LineChart data={generateChartData(stat.label)}>
+                              <LineChart 
+                                data={generateChartData(stat.label)}
+                                margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                              >
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                                 <XAxis 
                                   dataKey="name" 
@@ -214,7 +217,10 @@ const UserKnowledgeResource = () => {
                                 />
                                 <YAxis 
                                   stroke="hsl(var(--muted-foreground))"
-                                  fontSize={12}
+                                  fontSize={11}
+                                  orientation="left"
+                                  mirror={true}
+                                  tick={{ dx: 10 }}
                                 />
                                 <Tooltip
                                   contentStyle={{
@@ -235,7 +241,7 @@ const UserKnowledgeResource = () => {
                               </LineChart>
                             </ResponsiveContainer>
 
-                            <p className="text-xs text-muted-foreground text-center mt-2">
+                            <p className="text-xs text-muted-foreground text-center mt-2 px-4">
                               Activity over the past {timePeriod}
                             </p>
                           </div>
