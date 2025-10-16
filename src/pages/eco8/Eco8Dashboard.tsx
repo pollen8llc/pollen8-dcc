@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import Navbar from '@/components/Navbar';
 import { Eco8Navigation } from '@/components/eco8/Eco8Navigation';
 import CompactCommunityCard from '@/components/eco8/CompactCommunityCard';
+import Eco8WorldMap from '@/components/eco8/Eco8WorldMap';
 import { useCommunities } from '@/hooks/useCommunities';
 import { useAuth } from '@/hooks/useAuth';
 import { useModuleCompletion } from '@/hooks/useModuleCompletion';
@@ -138,6 +139,9 @@ const Eco8Dashboard: React.FC = () => {
                 {/* Collapsible Communities Content */}
                 <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                   <div className="p-4 space-y-4">
+                    {/* World Map */}
+                    <Eco8WorldMap communities={userCommunities} />
+                    
                     {/* Action Buttons */}
                     <div className="flex flex-wrap items-center justify-end gap-2 pb-4 border-b border-border/50">
                       {isSelectionMode ? (
