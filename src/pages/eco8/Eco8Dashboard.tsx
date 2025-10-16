@@ -80,6 +80,14 @@ const Eco8Dashboard: React.FC = () => {
         {/* Navigation Component */}
         <Eco8Navigation hasUserCommunities={hasUserCommunities} />
 
+        {/* Page Title - Minimal Design */}
+        <div className="flex items-center gap-3 mb-6 mt-6">
+          <Users className="h-8 w-8 text-primary" />
+          <div>
+            <p className="text-muted-foreground">Manage and grow your community network</p>
+          </div>
+        </div>
+
         {/* Setup Prompt if no communities */}
         {!loading && !hasUserCommunities && (
           <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md border-2 border-dashed border-primary/50 bg-primary/5">
@@ -99,10 +107,10 @@ const Eco8Dashboard: React.FC = () => {
           </Card>
         )}
 
-        {/* Managed Communities */}
+        {/* Communities Accordion */}
         {hasUserCommunities && (
           <Collapsible open={isPanelOpen} onOpenChange={setIsPanelOpen}>
-            <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mt-8">
+            <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
@@ -116,7 +124,7 @@ const Eco8Dashboard: React.FC = () => {
                       </Button>
                     </CollapsibleTrigger>
                     <div className="flex-1">
-                      <CardTitle>Managed Communities</CardTitle>
+                      <CardTitle>Communities</CardTitle>
                       <CardDescription>
                         {isSelectionMode 
                           ? `${selectedCommunities.length} selected`
@@ -125,7 +133,13 @@ const Eco8Dashboard: React.FC = () => {
                       </CardDescription>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                </div>
+              </CardHeader>
+              
+              <CollapsibleContent className="animate-accordion-down data-[state=closed]:animate-accordion-up">
+                <CardContent>
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-end gap-2 mb-4">
                     {isSelectionMode ? (
                       <>
                         <Button 
@@ -173,11 +187,8 @@ const Eco8Dashboard: React.FC = () => {
                       </>
                     )}
                   </div>
-                </div>
-              </CardHeader>
-              
-              <CollapsibleContent className="animate-accordion-down data-[state=closed]:animate-accordion-up">
-                <CardContent>
+
+                  {/* Community Cards Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {userCommunities.map((community) => (
                       <CompactCommunityCard
