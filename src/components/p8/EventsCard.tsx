@@ -262,7 +262,7 @@ const EventsCard = ({
 
                 {/* Collapsible Content */}
                 <CollapsibleContent 
-                  className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down px-6 lg:px-8"
+                  className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
                 >
                   {/* Events List with Slider */}
                   <div 
