@@ -204,13 +204,13 @@ const P8Asl = () => {
           <div className="relative w-full h-[calc(100vh-240px)] md:h-[calc(100vh-220px)] max-h-[700px] rounded-lg overflow-hidden bg-gradient-to-br from-background/10 via-primary/5 to-primary/10">
             
             {/* Center Radar Chart */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-full max-w-2xl h-full flex flex-col items-center justify-center p-4">
-                <div className="w-full h-[500px] flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center pt-8 pb-4">
+              <div className="w-full max-w-xl h-full flex flex-col items-center justify-start p-4">
+                <div className="w-full h-[350px] lg:h-[400px] flex items-center justify-center">
                   <RadarChart 
                     data={radarData} 
-                    width={500} 
-                    height={500} 
+                    width={350} 
+                    height={350} 
                     activeVector={currentVector}
                     completedVectors={completedVectors}
                   />
@@ -384,69 +384,66 @@ const P8Asl = () => {
               </Accordion>
             </div>
 
-            {/* Bottom Overlay Panel - Mobile Only */}
-            <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 animate-fade-in p-3 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-xl pt-6 max-h-[50vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-              <Accordion 
-                type="single" 
-                value={activeAccordion}
-                onValueChange={setActiveAccordion}
-                className="space-y-2"
-              >
-                {allVectors.map((vector, index) => {
-                  const isCompleted = completedVectors.has(index);
-                  const isCurrent = currentVector === index;
-                  
-                  return (
-                    <AccordionItem
-                      key={vector.id}
-                      value={vector.id}
-                      className={`bg-background/70 backdrop-blur-xl border rounded-lg shadow-lg overflow-hidden ${
-                        isCurrent ? 'border-primary/50 ring-2 ring-primary/30' : 'border-primary/20'
-                      }`}
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <AccordionTrigger 
-                        className="px-3 py-2.5 hover:bg-background/75 hover:no-underline"
-                        onClick={() => setCurrentVector(index)}
-                      >
-                        <div className="flex items-center gap-2 flex-1">
+            {/* Bottom Overlay Panel - Mobile Only - Single Question */}
+            <div className="lg:hidden absolute bottom-0 left-0 right-0 z-20 animate-fade-in p-3 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-xl pt-6">
+              {(() => {
+                const vector = allVectors[currentVector];
+                const isCompleted = completedVectors.has(currentVector);
+                
+                return (
+                  <div className="bg-background/70 backdrop-blur-xl border border-primary/50 ring-2 ring-primary/30 rounded-lg shadow-lg overflow-hidden">
+                    <div className="px-4 py-3 border-b border-primary/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
                           {isCompleted && (
-                            <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                            <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
                               <Check className="h-2.5 w-2.5 text-primary" />
                             </div>
                           )}
                           <div 
-                            className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
+                            className="w-3 h-3 rounded-full" 
                             style={{ backgroundColor: vector.color }}
                           />
-                          <span className="text-xs font-semibold text-foreground/90">
+                          <span className="text-sm font-semibold text-foreground">
                             {vector.label}
                           </span>
                         </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-3 pb-2.5 space-y-2">
-                        {/* Dropdown Selection */}
+                        <Badge variant="secondary" className="text-[10px]">
+                          {vector.category}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="px-4 py-3 space-y-3">
+                      {/* Dropdown Selection */}
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1.5 block">
+                          Select Option
+                        </label>
                         <Select
                           value={selectedOptions[vector.id]}
                           onValueChange={(value) => setSelectedOptions({ ...selectedOptions, [vector.id]: value })}
                         >
-                          <SelectTrigger className="w-full bg-background/50 border-primary/20 h-8 text-xs">
+                          <SelectTrigger className="w-full bg-background/50 border-primary/20">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-background/95 backdrop-blur-xl border-primary/20 z-50">
                             {vector.options.map((option) => (
-                              <SelectItem key={option} value={option} className="text-xs">
+                              <SelectItem key={option} value={option}>
                                 {option}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
+                      </div>
 
-                        {/* Importance Badge & Slider */}
-                        <div className="flex items-center gap-2">
+                      {/* Importance Slider */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-muted-foreground">Importance Level</span>
                           <Badge 
                             variant="secondary" 
-                            className="text-[10px] px-2 py-0.5 flex-shrink-0"
+                            className="text-xs"
                             style={{ 
                               backgroundColor: `${vector.color}20`,
                               color: vector.color,
@@ -454,52 +451,65 @@ const P8Asl = () => {
                           >
                             {getImportanceLabel(importance[vector.id])}
                           </Badge>
-                          <Slider
-                            value={[importance[vector.id]]}
-                            onValueChange={(value) => updateImportance(vector.id, value)}
-                            max={100}
-                            step={25}
-                            className="flex-1"
-                          />
                         </div>
-
-                        {/* Mobile Navigation Buttons */}
-                        <div className="flex gap-2 pt-1">
-                          {index > 0 && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={handlePrevious}
-                              className="flex-1 h-8 text-xs"
+                        <Slider
+                          value={[importance[vector.id]]}
+                          onValueChange={(value) => updateImportance(vector.id, value)}
+                          max={100}
+                          step={25}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between text-[10px] text-muted-foreground/60 px-1 mt-1">
+                          {importanceLevels.map(level => (
+                            <span 
+                              key={level.value}
+                              className={importance[vector.id] === level.value ? 'text-primary font-semibold' : ''}
                             >
-                              Previous
-                            </Button>
-                          )}
-                          {index < 7 ? (
+                              {level.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Navigation Buttons */}
+                      <div className="flex gap-2 pt-2">
+                        {currentVector > 0 && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handlePrevious}
+                            className="flex-1"
+                          >
+                            <ArrowLeft className="mr-1 h-3 w-3" />
+                            Previous
+                          </Button>
+                        )}
+                        {currentVector < 7 ? (
+                          <Button 
+                            size="sm" 
+                            onClick={handleNext}
+                            className="flex-1"
+                          >
+                            Next
+                            <ChevronRight className="ml-1 h-3 w-3" />
+                          </Button>
+                        ) : (
+                          allCompleted && (
                             <Button 
                               size="sm" 
                               onClick={handleNext}
-                              className="flex-1 h-8 text-xs"
+                              className="flex-1"
                             >
-                              Next
+                              Continue
+                              <ArrowRight className="ml-1 h-3 w-3" />
                             </Button>
-                          ) : (
-                            allCompleted && (
-                              <Button 
-                                size="sm" 
-                                onClick={handleNext}
-                                className="flex-1 h-8 text-xs"
-                              >
-                                Continue
-                              </Button>
-                            )
-                          )}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  );
-                })}
-              </Accordion>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Instructions - Bottom Right */}
