@@ -30,6 +30,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavigation';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -37,26 +39,42 @@ const UserKnowledgeResource = () => {
   const { stats, loading: statsLoading } = useUserKnowledgeStats(currentUser?.id);
   const { savedArticles, isLoading: savedLoading } = useSavedArticles();
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity();
+  const [isStatsOpen, setIsStatsOpen] = React.useState(true);
 
-  const StatCard = ({ icon: Icon, label, value, iconColor }: {
-    icon: any;
-    label: string;
-    value: string | number;
-    iconColor: string;
-  }) => (
-    <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md transition-all duration-300 hover:bg-card/60">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-      <CardContent className="relative p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">{label}</p>
-            <p className="text-3xl font-bold">{value}</p>
-          </div>
-          <Icon className={`h-8 w-8 ${iconColor}`} />
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const statItems = [
+    {
+      icon: FileText,
+      label: "Articles",
+      value: stats?.totalArticles || 0,
+      iconColor: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+      borderColor: "border-blue-500/20"
+    },
+    {
+      icon: HelpCircle,
+      label: "Questions",
+      value: stats?.totalQuestions || 0,
+      iconColor: "text-green-500",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500/20"
+    },
+    {
+      icon: Quote,
+      label: "Quotes",
+      value: stats?.totalQuotes || 0,
+      iconColor: "text-purple-500",
+      bgColor: "bg-purple-500/10",
+      borderColor: "border-purple-500/20"
+    },
+    {
+      icon: BarChart,
+      label: "Polls",
+      value: stats?.totalPolls || 0,
+      iconColor: "text-orange-500",
+      bgColor: "bg-orange-500/10",
+      borderColor: "border-orange-500/20"
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
@@ -74,33 +92,79 @@ const UserKnowledgeResource = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            icon={FileText}
-            label="Articles"
-            value={stats?.totalArticles || 0}
-            iconColor="text-blue-500"
-          />
-          <StatCard
-            icon={HelpCircle}
-            label="Questions"
-            value={stats?.totalQuestions || 0}
-            iconColor="text-green-500"
-          />
-          <StatCard
-            icon={Quote}
-            label="Quotes"
-            value={stats?.totalQuotes || 0}
-            iconColor="text-purple-500"
-          />
-          <StatCard
-            icon={BarChart}
-            label="Polls"
-            value={stats?.totalPolls || 0}
-            iconColor="text-orange-500"
-          />
-        </div>
+        {/* Stats Accordion */}
+        <Card className="relative overflow-hidden glass-morphism border-0 backdrop-blur-md transition-all">
+          <Collapsible open={isStatsOpen} onOpenChange={setIsStatsOpen}>
+            <div className="p-0">
+              {/* Header */}
+              <div className="p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-xl border-b border-primary/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    <div>
+                      <h3 className="text-lg font-semibold">Content Statistics</h3>
+                      <p className="text-sm text-muted-foreground">Your contribution breakdown</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Collapsible Stats Content */}
+              <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <div className="p-4 space-y-2">
+                  {statItems.map((stat, index) => {
+                    const Icon = stat.icon;
+                    return (
+                      <div
+                        key={index}
+                        className={`flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md transition-all duration-300 cursor-pointer group border ${stat.borderColor}`}
+                      >
+                        {/* Left side: Icon and Label */}
+                        <div className="flex items-center space-x-3 flex-1">
+                          <div className={`w-10 h-10 rounded-full ${stat.bgColor} flex items-center justify-center shrink-0`}>
+                            <Icon className={`h-5 w-5 ${stat.iconColor}`} />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium group-hover:text-primary transition-colors">
+                              {stat.label}
+                            </h4>
+                            <p className="text-xs text-muted-foreground">
+                              Total {stat.label.toLowerCase()} created
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Right side: Value */}
+                        <div className="flex items-center space-x-2 ml-4 shrink-0">
+                          <span className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
+                            {stat.value}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CollapsibleContent>
+
+              {/* Full Width Collapse Toggle at Bottom */}
+              <CollapsibleTrigger asChild>
+                <button className="w-full py-3 flex items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all border-t border-primary/20">
+                  {isStatsOpen ? (
+                    <>
+                      <span>Show Less</span>
+                      <ChevronUp className="w-4 h-4 ml-2" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Show Statistics</span>
+                      <ChevronDown className="w-4 h-4 ml-2" />
+                    </>
+                  )}
+                </button>
+              </CollapsibleTrigger>
+            </div>
+          </Collapsible>
+        </Card>
 
         {/* Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
