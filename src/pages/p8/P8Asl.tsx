@@ -266,6 +266,13 @@ const P8Asl = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center pb-24 relative">
       {/* Centered Radar Chart */}
       <div className="flex flex-col items-center gap-8">
+        {/* Instructions */}
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            Click nodes to configure • Drag to set importance
+          </p>
+        </div>
+
         <RadarChart
           data={radarData}
           width={420}
