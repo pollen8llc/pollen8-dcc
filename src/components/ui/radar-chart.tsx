@@ -42,6 +42,20 @@ export const RadarChart = ({
   onDragStart
 }: RadarChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  
+  // Use refs to store callbacks to prevent unnecessary re-renders
+  const onNodeClickRef = useRef(onNodeClick);
+  const onNodeDragRef = useRef(onNodeDrag);
+  const onDragUpdateRef = useRef(onDragUpdate);
+  const onDragStartRef = useRef(onDragStart);
+  
+  // Update refs when callbacks change
+  useEffect(() => {
+    onNodeClickRef.current = onNodeClick;
+    onNodeDragRef.current = onNodeDrag;
+    onDragUpdateRef.current = onDragUpdate;
+    onDragStartRef.current = onDragStart;
+  });
 
   useEffect(() => {
     if (!svgRef.current || !data.length) return;
@@ -233,7 +247,7 @@ export const RadarChart = ({
       // Click handler
       circle.on('click', (event) => {
         event.stopPropagation();
-        onNodeClick?.(i);
+        onNodeClickRef.current?.(i);
       });
 
       // Drag behavior - only if Stage 1 is complete
@@ -241,7 +255,7 @@ export const RadarChart = ({
         const drag = d3.drag()
           .on('start', function() {
             d3.select(this).style('cursor', 'grabbing');
-            onDragStart?.();
+            onDragStartRef.current?.();
           })
           .on('drag', function(event) {
             const dx = event.x;
@@ -268,7 +282,7 @@ export const RadarChart = ({
             updateRadarPath(updatedData);
             
             // Notify parent of drag update
-            onDragUpdate?.(snapped);
+            onDragUpdateRef.current?.(snapped);
           })
           .on('end', function(event) {
             d3.select(this).style('cursor', isStage2Complete ? 'pointer' : 'grab');
@@ -277,7 +291,7 @@ export const RadarChart = ({
             const distance = Math.sqrt(dx * dx + dy * dy);
             const importance = Math.min(100, Math.max(0, (distance / radius) * 100));
             const snapped = Math.round(importance / 25) * 25;
-            onNodeDrag(i, snapped);
+            onNodeDragRef.current?.(i, snapped);
           });
 
         circle.call(drag as any);
@@ -287,7 +301,7 @@ export const RadarChart = ({
         .text(`${d.category}: ${d.importance}%`);
     });
 
-  }, [data, width, height, angleOffset, strokeColor, fillColor, stage1Complete, stage2Complete, pulsingNode, onNodeClick, onNodeDrag, onDragUpdate, onDragStart]);
+  }, [data, width, height, angleOffset, strokeColor, fillColor, stage1Complete, stage2Complete, pulsingNode]);
 
   return (
     <svg
