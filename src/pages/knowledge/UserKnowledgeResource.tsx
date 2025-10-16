@@ -29,7 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Eco8OnlyNavigation } from '@/components/knowledge/Eco8OnlyNavigation';
+import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavigation';
 
 const UserKnowledgeResource = () => {
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ const UserKnowledgeResource = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <Eco8OnlyNavigation />
+      <Cultiva8OnlyNavigation />
       
       <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
         {/* Page Title */}

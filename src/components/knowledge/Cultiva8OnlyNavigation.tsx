@@ -9,7 +9,7 @@ import {
 import { useUser } from "@/contexts/UserContext";
 import { UnifiedAvatar } from "@/components/ui/unified-avatar";
 
-export function Eco8OnlyNavigation() {
+export function Cultiva8OnlyNavigation() {
   const location = useLocation();
   const { currentUser } = useUser();
   
@@ -67,7 +67,7 @@ export function Eco8OnlyNavigation() {
               key={item.href}
               to={item.href}
               className={cn(
-                "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
+                "flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
                 "hover:scale-105 hover:shadow-[#00eada]/20",
                 item.isActive
                   ? "bg-white/10 border border-white/20 text-foreground shadow-lg"

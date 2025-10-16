@@ -13,7 +13,7 @@ import {
 // UI Components
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eco8OnlyNavigation } from '@/components/knowledge/Eco8OnlyNavigation';
+import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavigation';
 
 // Content Type Selector
 import { ContentTypeSelector } from '@/components/knowledge/ContentTypeSelector';
@@ -58,7 +58,7 @@ const ContentCreator = () => {
       <div className="container mx-auto px-4 py-6">
         {/* Navigation */}
         <div className="mb-6">
-          <Eco8OnlyNavigation />
+          <Cultiva8OnlyNavigation />
         </div>
         
         <div className="max-w-3xl mx-auto">
