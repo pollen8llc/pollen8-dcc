@@ -224,7 +224,7 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
           wasUserChoice 
             ? "border-primary bg-primary/5 shadow-sm" 
             : "border-border hover:border-primary/30",
-          !stats.hasVoted && "cursor-pointer hover:shadow-md"
+          !stats.hasVoted && "cursor-pointer active:scale-[0.98]"
         )}
       >
         {/* Background progress bar */}
@@ -240,32 +240,33 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
         />
         
         {/* Option content */}
-        <div className="relative p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1">
+        <div className="relative p-3 sm:p-4">
+          <div className="flex flex-col gap-2 sm:gap-3">
+            {/* Top row: Checkbox/Radio + Text */}
+            <div className="flex items-start gap-2 sm:gap-3 flex-1">
               {!stats.hasVoted && (
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 mt-0.5">
                   {pollData.allowMultipleSelections ? (
                     <Checkbox
                       checked={isSelected}
                       onCheckedChange={(checked) => handleOptionSelect(index, checked as boolean)}
-                      className="data-[state=checked]:bg-primary"
+                      className="data-[state=checked]:bg-primary h-4 w-4 sm:h-5 sm:w-5"
                     />
                   ) : (
                     <RadioGroup
                       value={selectedOptions[0]?.toString() || ''}
                       onValueChange={(value) => setSelectedOptions([parseInt(value)])}
                     >
-                      <RadioGroupItem value={index.toString()} />
+                      <RadioGroupItem value={index.toString()} className="h-4 w-4 sm:h-5 sm:w-5" />
                     </RadioGroup>
                   )}
                 </div>
               )}
               
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <Label 
                   className={cn(
-                    "text-sm font-medium cursor-pointer leading-relaxed",
+                    "text-sm font-medium cursor-pointer leading-snug sm:leading-relaxed block",
                     wasUserChoice && "text-primary"
                   )}
                 >
@@ -274,20 +275,20 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
               </div>
             </div>
 
-            {/* Results section - stacked on mobile, inline on desktop */}
-            <div className="flex items-center justify-between sm:justify-end gap-3">
-              <div className="flex items-center gap-2">
+            {/* Bottom row: Stats and indicators */}
+            <div className="flex items-center justify-between pl-6 sm:pl-8">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {wasUserChoice && (
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 )}
                 
                 {isTopChoice && stats.totalVotes > 1 && (
-                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
                 )}
               </div>
               
-              <div className="text-right">
-                <div className="text-sm font-semibold">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="text-xs sm:text-sm font-semibold">
                   {percentage.toFixed(1)}%
                 </div>
                 <div className="text-xs text-muted-foreground">
@@ -313,12 +314,12 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
           style={{ backgroundColor: 'hsl(221 83% 53%)' }}
         />
         
-        <CardContent className="p-6 relative">
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-muted rounded w-1/3"></div>
-            <div className="space-y-3">
+        <CardContent className="p-4 sm:p-6 relative">
+          <div className="animate-pulse space-y-3 sm:space-y-4">
+            <div className="h-5 sm:h-6 bg-muted rounded w-1/3"></div>
+            <div className="space-y-2 sm:space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-16 bg-muted rounded"></div>
+                <div key={i} className="h-14 sm:h-16 bg-muted rounded"></div>
               ))}
             </div>
           </div>
@@ -340,39 +341,41 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
         style={{ backgroundColor: blueColor }}
       />
       
-      <CardHeader className="pb-4 relative">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <CardHeader className="pb-3 sm:pb-4 relative px-4 sm:px-6 pt-4 sm:pt-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div 
-              className="p-2.5 rounded-xl backdrop-blur-sm border"
+              className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl backdrop-blur-sm border"
               style={{ 
                 backgroundColor: `color-mix(in srgb, ${blueColor} 15%, transparent)`,
                 borderColor: `color-mix(in srgb, ${blueColor} 30%, transparent)`
               }}
             >
-              <BarChart3 className="h-5 w-5" style={{ color: blueColor }} />
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: blueColor }} />
             </div>
-            <h3 className="font-semibold text-lg">Poll Results</h3>
+            <h3 className="font-semibold text-base sm:text-lg">Poll Results</h3>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {stats.hasVoted && (
-              <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-                <Check className="h-4 w-4" />
-                <span>Voted</span>
+              <div className="flex items-center gap-1 text-xs sm:text-sm text-green-600 dark:text-green-400">
+                <Check className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Voted</span>
+                <CheckCircle2 className="h-3 w-3 sm:hidden" />
               </div>
             )}
             
-            <div className="flex items-center gap-1 text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-              <Users className="h-4 w-4" />
-              <span>{stats.totalVotes} {stats.totalVotes === 1 ? 'response' : 'responses'}</span>
+            <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground bg-muted px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>{stats.totalVotes}</span>
+              <span className="hidden sm:inline">{stats.totalVotes === 1 ? 'response' : 'responses'}</span>
             </div>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0 relative">
-        <div className="space-y-3">
+      <CardContent className="pt-0 relative px-4 sm:px-6 pb-4 sm:pb-6">
+        <div className="space-y-2 sm:space-y-3">
           <AnimatePresence>
             {pollData.options.map((option, index) => (
               <PollOption
@@ -389,10 +392,10 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-6 pt-4 border-t border-border"
+            className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-border"
           >
-            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col gap-3">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {pollData.allowMultipleSelections 
                   ? "Select one or more options and submit your vote"
                   : "Select one option and submit your vote"
@@ -402,18 +405,18 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
               <Button 
                 onClick={handleVote}
                 disabled={loading || selectedOptions.length === 0}
-                className="w-full sm:w-auto"
-                size="lg"
+                className="w-full"
+                size="default"
               >
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    Submitting...
+                    <span className="text-sm">Submitting...</span>
                   </>
                 ) : (
                   <>
                     <Vote className="h-4 w-4 mr-2" />
-                    Submit Vote
+                    <span className="text-sm">Submit Vote</span>
                   </>
                 )}
               </Button>
@@ -425,10 +428,10 @@ export const ModernPollVoting: React.FC<PollVotingProps> = ({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-6 pt-4 border-t border-border"
+            className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-border"
           >
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
               <span>Thank you for participating in this poll!</span>
             </div>
           </motion.div>
