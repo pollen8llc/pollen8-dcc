@@ -286,7 +286,7 @@ const EventsCard = ({
                       {Array.from({ length: totalPages }).map((_, pageIdx) => {
                         const pageEvents = events.slice(pageIdx * EVENTS_PER_PAGE, (pageIdx + 1) * EVENTS_PER_PAGE);
                         return (
-                          <div key={pageIdx} className="w-full flex-shrink-0 px-1">
+                          <div key={pageIdx} className="w-full flex-shrink-0">
                             <div className="space-y-2">
                               {pageEvents.map(event => (
                                 <div key={event.id} className="flex items-center justify-between p-4 bg-background/60 rounded-lg hover:bg-background/80 hover:shadow-md hover:shadow-teal-500/10 transition-all duration-300 cursor-pointer group">
