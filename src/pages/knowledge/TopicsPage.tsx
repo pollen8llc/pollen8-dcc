@@ -44,10 +44,12 @@ const TopicsPage = () => {
         
         {/* Header */}
         <div className="mb-8 mt-6">
-          <h1 className="text-3xl font-bold tracking-tight">Topics</h1>
-          <p className="text-muted-foreground mt-1">
-            Browse topics to find conversations that interest you
-          </p>
+          <div className="flex items-center gap-3">
+            <TagIcon className="h-8 w-8 text-primary" />
+            <div>
+              <p className="text-muted-foreground">Browse topics to find conversations that interest you</p>
+            </div>
+          </div>
         </div>
 
         {/* Search */}

@@ -64,10 +64,12 @@ const ContentCreator = () => {
         <div className="max-w-3xl mx-auto">
           {/* Page title */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">Create Content</h1>
-            <p className="text-muted-foreground mt-2">
-              Share your knowledge with the community
-            </p>
+            <div className="flex items-center gap-3">
+              <PlusCircle className="h-8 w-8 text-primary" />
+              <div>
+                <p className="text-muted-foreground">Share your knowledge with the community</p>
+              </div>
+            </div>
           </div>
           
           {/* Content type selection */}

@@ -197,7 +197,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                     className="gap-2"
                   >
                     <Settings className="w-4 h-4" />
-                    Manage
+                    Cultiv8
                   </Button>
                 )}
               </div>
