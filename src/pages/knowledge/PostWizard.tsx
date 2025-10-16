@@ -134,7 +134,11 @@ const PostWizard = () => {
       if (postType === 'poll') {
         finalData.title = mergedData.question; // Map question to title
         finalData.content = mergedData.question; // Use question as content
-        finalData.options = mergedData.options;
+        finalData.options = {
+          options: mergedData.options,
+          allowMultipleSelections: mergedData.allowMultipleSelections || false,
+          duration: mergedData.duration || "7"
+        };
         finalData.tags = mergedData.tags;
       } else if (postType === 'question') {
         finalData.title = mergedData.title; // Question form already uses 'title'

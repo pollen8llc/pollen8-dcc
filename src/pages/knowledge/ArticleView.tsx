@@ -208,7 +208,11 @@ const ArticleView = () => {
                     </div>
                     <ModernPollVoting 
                       pollId={article.id} 
-                      pollData={article.options as any}
+                      pollData={
+                        Array.isArray(article.options)
+                          ? { options: article.options, allowMultipleSelections: false, duration: "7" }
+                          : article.options as any
+                      }
                       isOwner={currentUser?.id === article.author_id}
                     />
                   </div>
