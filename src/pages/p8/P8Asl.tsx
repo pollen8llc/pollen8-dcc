@@ -186,6 +186,18 @@ const P8Asl = () => {
   }, [importance, selectedOptions, stage1Complete, stage2Complete]);
 
   const handleNodeClick = (index: number) => {
+    const vectorId = allVectors[index].id;
+    
+    // If clicking a completed node, allow reconfiguration
+    if (stage2Complete.has(vectorId)) {
+      setStage2Complete(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(vectorId);
+        return newSet;
+      });
+      setPulsingNode(null);
+    }
+    
     setSelectedVector(index);
   };
 
@@ -245,16 +257,14 @@ const P8Asl = () => {
           onNodeDrag={handleNodeDrag}
         />
         
-        {/* Center Badge */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
-          <div className="bg-background/95 backdrop-blur-lg border border-primary/20 rounded-2xl px-6 py-4 shadow-2xl text-center">
-            <p className="text-sm text-muted-foreground mb-1">
-              {stage2Complete.size === 0 && "Click any node to begin"}
-              {stage2Complete.size > 0 && stage2Complete.size < allVectors.length && "Click nodes to configure"}
-              {allCompleted && "All Vectors Complete! ✨"}
-            </p>
-            <p className="text-2xl font-bold text-primary">{stage2Complete.size} / {allVectors.length}</p>
-          </div>
+      </div>
+
+      {/* Bottom Completion Counter */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 pointer-events-none z-0">
+        <div className="backdrop-blur-md bg-background/30 border border-primary/20 rounded-full px-4 py-2">
+          <p className="text-sm font-medium text-foreground/80">
+            {stage2Complete.size} / {allVectors.length}
+          </p>
         </div>
       </div>
 
@@ -321,7 +331,7 @@ const P8Asl = () => {
         <Button
           onClick={() => navigate("/p8/intgr8")}
           size="lg"
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 min-w-48 animate-fade-in shadow-2xl"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 min-w-48 animate-fade-in shadow-2xl"
         >
           <Check className="mr-2 h-5 w-5" />
           Continue
