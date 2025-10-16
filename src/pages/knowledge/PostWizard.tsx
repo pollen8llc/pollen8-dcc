@@ -120,11 +120,38 @@ const PostWizard = () => {
       setIsSubmittingForm(true);
 
       // Final submission - merge stored data with current data and add content type
-      const finalData = {
+      const mergedData = {
         ...formData,
         ...data,
+      };
+      
+      // Transform data based on content type
+      const finalData: any = {
         content_type: getContentType()
       };
+      
+      // Map fields based on post type
+      if (postType === 'poll') {
+        finalData.title = mergedData.question; // Map question to title
+        finalData.content = mergedData.question; // Use question as content
+        finalData.options = mergedData.options;
+        finalData.tags = mergedData.tags;
+      } else if (postType === 'question') {
+        finalData.title = mergedData.title; // Question form already uses 'title'
+        finalData.content = mergedData.content; // Question form already uses 'content'
+        finalData.tags = mergedData.tags;
+      } else if (postType === 'quote') {
+        finalData.title = `Quote by ${mergedData.author}`; // Create title from author
+        finalData.content = mergedData.quote + (mergedData.context ? `\n\n${mergedData.context}` : ''); // Combine quote and context
+        finalData.subtitle = mergedData.author;
+        finalData.tags = mergedData.tags;
+      } else {
+        // Article - use as is
+        finalData.title = mergedData.title;
+        finalData.subtitle = mergedData.subtitle;
+        finalData.content = mergedData.content;
+        finalData.tags = mergedData.tags;
+      }
       
       console.log('Final submission data with content type:', finalData);
       
