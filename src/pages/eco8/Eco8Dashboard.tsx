@@ -109,105 +109,121 @@ const Eco8Dashboard: React.FC = () => {
 
         {/* Communities Accordion */}
         {hasUserCommunities && (
-          <Collapsible open={isPanelOpen} onOpenChange={setIsPanelOpen} className="mt-6">
-            <Card className="group relative overflow-hidden glass-morphism border-0 bg-card/40 backdrop-blur-md transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-              
-              <CollapsibleTrigger asChild>
-                <CardHeader className="relative cursor-pointer hover:bg-card/60 transition-all">
+          <Card className="relative overflow-hidden glass-morphism border-0 backdrop-blur-md transition-all">
+            <Collapsible open={isPanelOpen} onOpenChange={setIsPanelOpen}>
+              <div className="p-0">
+                {/* Header */}
+                <div className="p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-xl border-b border-primary/20">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="transition-transform duration-200">
-                        {isPanelOpen ? (
-                          <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                        )}
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex items-center justify-center w-5 h-5">
+                        {/* Pulsing ring */}
+                        <div className="absolute w-5 h-5 rounded-full bg-teal-400/30 animate-ping" style={{ animationDuration: '2s' }} />
+                        {/* Static dot */}
+                        <div className="relative w-2.5 h-2.5 rounded-full bg-teal-400" />
                       </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-bold">Communities</CardTitle>
-                        <CardDescription className="text-sm">
+                      <div>
+                        <h3 className="text-lg font-semibold">Communities</h3>
+                        <p className="text-sm text-muted-foreground">
                           {isSelectionMode 
                             ? `${selectedCommunities.length} selected`
                             : `${userCommunities.length} ${userCommunities.length === 1 ? 'community' : 'communities'}`
                           }
-                        </CardDescription>
+                        </p>
                       </div>
                     </div>
                   </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent className="relative animate-accordion-down data-[state=closed]:animate-accordion-up">
-                <CardContent className="pt-0">
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap items-center justify-end gap-2 mb-6 pb-4 border-b border-border/50">
-                    {isSelectionMode ? (
+                </div>
+
+                {/* Collapsible Communities Content */}
+                <CollapsibleContent className="overflow-hidden transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                  <div className="p-4 space-y-4">
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap items-center justify-end gap-2 pb-4 border-b border-border/50">
+                      {isSelectionMode ? (
+                        <>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={handleSelectAll}
+                            className="backdrop-blur-sm"
+                          >
+                            {selectedCommunities.length === userCommunities.length ? (
+                              <>
+                                <Square className="h-4 w-4 mr-2" />
+                                Deselect All
+                              </>
+                            ) : (
+                              <>
+                                <CheckSquare className="h-4 w-4 mr-2" />
+                                Select All
+                              </>
+                            )}
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={toggleSelectionMode}
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={toggleSelectionMode}
+                            className="backdrop-blur-sm"
+                          >
+                            <CheckSquare className="h-4 w-4 mr-2" />
+                            Select
+                          </Button>
+                          <Link to="/eco8/setup">
+                            <Button size="sm">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Create New
+                            </Button>
+                          </Link>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Community Cards Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {userCommunities.map((community) => (
+                        <CompactCommunityCard
+                          key={community.id}
+                          community={community}
+                          isSelectionMode={isSelectionMode}
+                          isSelected={selectedCommunities.includes(community.id)}
+                          onToggleSelection={toggleCommunitySelection}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </CollapsibleContent>
+
+                {/* Full Width Collapse Toggle at Bottom */}
+                <CollapsibleTrigger asChild>
+                  <button className="w-full py-3 flex items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all border-t border-primary/20">
+                    {isPanelOpen ? (
                       <>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={handleSelectAll}
-                          className="backdrop-blur-sm"
-                        >
-                          {selectedCommunities.length === userCommunities.length ? (
-                            <>
-                              <Square className="h-4 w-4 mr-2" />
-                              Deselect All
-                            </>
-                          ) : (
-                            <>
-                              <CheckSquare className="h-4 w-4 mr-2" />
-                              Select All
-                            </>
-                          )}
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={toggleSelectionMode}
-                        >
-                          <X className="h-4 w-4 mr-2" />
-                          Cancel
-                        </Button>
+                        <span>Show Less</span>
+                        <ChevronUp className="w-4 h-4 ml-2" />
                       </>
                     ) : (
                       <>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={toggleSelectionMode}
-                          className="backdrop-blur-sm"
-                        >
-                          <CheckSquare className="h-4 w-4 mr-2" />
-                          Select
-                        </Button>
-                        <Link to="/eco8/setup">
-                          <Button size="sm">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Create New
-                          </Button>
-                        </Link>
+                        <span>Show Communities</span>
+                        <ChevronDown className="w-4 h-4 ml-2" />
                       </>
                     )}
-                  </div>
-
-                  {/* Community Cards Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {userCommunities.map((community) => (
-                      <CompactCommunityCard
-                        key={community.id}
-                        community={community}
-                        isSelectionMode={isSelectionMode}
-                        isSelected={selectedCommunities.includes(community.id)}
-                        onToggleSelection={toggleCommunitySelection}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                  </button>
+                </CollapsibleTrigger>
+              </div>
+            </Collapsible>
+          </Card>
         )}
 
         {/* Community Metrics */}
