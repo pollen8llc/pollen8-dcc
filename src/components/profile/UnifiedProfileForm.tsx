@@ -241,8 +241,8 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
       
       <CardContent>
         {/* Navigation Bar */}
-        <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-accent/50 border border-border rounded-2xl shadow-lg mb-6">
-          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg mb-6">
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -252,14 +252,14 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
                   onClick={() => setActiveTab(item.value)}
                   className={cn(
                     "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
-                    "hover:scale-105",
+                    "hover:scale-105 hover:shadow-[#00eada]/20",
                     activeTab === item.value
-                      ? "bg-primary/10 border border-primary/20 text-foreground shadow-lg"
-                      : "bg-background/50 border border-border text-muted-foreground hover:bg-background hover:border-border"
+                      ? "bg-white/10 border border-white/20 text-foreground shadow-lg"
+                      : "bg-white/5 border border-white/5 text-muted-foreground hover:bg-white/10 hover:border-white/15"
                   )}
                 >
                   <Icon className={cn("h-4 w-4", item.iconColor)} />
-                  <span className="hidden sm:inline">{item.label}</span>
+                  <span>{item.label}</span>
                 </button>
               );
             })}
