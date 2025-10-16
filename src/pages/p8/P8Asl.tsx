@@ -158,7 +158,7 @@ const P8Asl = () => {
   const [importance, setImportance] = useState<Record<string, number>>(() => {
     const saved = localStorage.getItem("p8_combined_importance");
     if (saved) return JSON.parse(saved);
-    return Object.fromEntries(allVectors.map(v => [v.id, 0]));
+    return Object.fromEntries(allVectors.map(v => [v.id, 40]));
   });
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
     const saved = localStorage.getItem("p8_combined_options");
@@ -188,7 +188,7 @@ const P8Asl = () => {
   }, [importance, selectedOptions, stage1Complete, stage2Complete]);
 
   const handleReset = () => {
-    const resetImportance = Object.fromEntries(allVectors.map(v => [v.id, 0]));
+    const resetImportance = Object.fromEntries(allVectors.map(v => [v.id, 40]));
     const resetOptions = Object.fromEntries(allVectors.map(v => [v.id, v.options[0].value]));
     
     setImportance(resetImportance);
@@ -372,13 +372,36 @@ const P8Asl = () => {
             </div>
 
             {/* Importance Level Indicator */}
-            <div className="backdrop-blur-md bg-primary/20 border border-primary/30 rounded-full px-4 py-2 min-w-[120px] text-center">
-              <p className="text-sm font-medium text-primary">
-                {isDragging 
-                  ? `Level: ${Math.round(dragImportance / 10)}/10`
+            <div 
+              className="backdrop-blur-md border rounded-full px-4 py-2 min-w-[140px] text-center transition-all duration-300"
+              style={{
+                backgroundColor: isDragging 
+                  ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)}, 0.2)`
                   : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
-                    ? `Level: ${Math.round(importance[allVectors[selectedVector].id] / 10)}/10`
-                    : "Level: -"}
+                    ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)}, 0.2)`
+                    : 'rgba(59, 130, 246, 0.2)',
+                borderColor: isDragging 
+                  ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)}, 0.3)`
+                  : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
+                    ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)}, 0.3)`
+                    : 'rgba(59, 130, 246, 0.3)'
+              }}
+            >
+              <p 
+                className="text-sm font-medium transition-colors duration-300"
+                style={{
+                  color: isDragging 
+                    ? `rgb(${59 + (20 - 59) * (dragImportance / 100)}, ${130 + (184 - 130) * (dragImportance / 100)}, ${246 + (166 - 246) * (dragImportance / 100)})`
+                    : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
+                      ? `rgb(${59 + (20 - 59) * (importance[allVectors[selectedVector].id] / 100)}, ${130 + (184 - 130) * (importance[allVectors[selectedVector].id] / 100)}, ${246 + (166 - 246) * (importance[allVectors[selectedVector].id] / 100)})`
+                      : 'rgb(59, 130, 246)'
+                }}
+              >
+                {isDragging 
+                  ? `Importance: ${Math.round(dragImportance / 10)}/10`
+                  : selectedVector !== null && stage1Complete.has(allVectors[selectedVector].id)
+                    ? `Importance: ${Math.round(importance[allVectors[selectedVector].id] / 10)}/10`
+                    : "Importance: -"}
               </p>
             </div>
           </div>
