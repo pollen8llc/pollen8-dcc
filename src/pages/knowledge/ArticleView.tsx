@@ -314,7 +314,7 @@ const ArticleView = () => {
                 )}
                 
                 {/* Tags */}
-                {article.tags && article.tags.length > 0 && (
+                {article.tags && Array.isArray(article.tags) && article.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-gray-700">
                     {article.tags.map(tag => (
                       <Badge 
