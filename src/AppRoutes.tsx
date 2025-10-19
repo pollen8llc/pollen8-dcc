@@ -116,6 +116,9 @@ const P8Class = lazy(() => import("@/pages/p8/P8Class"));
 const P8Intgr8 = lazy(() => import("@/pages/p8/P8Intgr8"));
 const P8Dashboard = lazy(() => import("@/pages/p8/P8Dashboard"));
 
+// Integrations Page (standalone)
+const Intgr8 = lazy(() => import("@/pages/Intgr8"));
+
 // Loading component
 const AppLoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -656,6 +659,22 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <P8Dashboard />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          
+          {/* Standalone Integrations Page */}
+          <Route path="/intgr8" element={
+            <ProtectedRoute>
+              <Intgr8 />
+            </ProtectedRoute>
+          } />
+
+          {/* Documentation and Features pages */}
+          <Route path="/docs" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Documentation />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
