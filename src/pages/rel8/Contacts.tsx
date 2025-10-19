@@ -136,7 +136,7 @@ const Contacts = () => {
       <Rel8Header />
       
       <div className="flex flex-col flex-1 overflow-hidden">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 flex-shrink-0">
+        <div className="container mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-8 flex-shrink-0">
           
           <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-4">
             <div className="w-full sm:w-auto">

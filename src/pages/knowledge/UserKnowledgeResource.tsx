@@ -113,7 +113,9 @@ const UserKnowledgeResource = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <Cultiva8OnlyNavigation />
+      <div className="container mx-auto max-w-6xl px-4 py-4">
+        <Cultiva8OnlyNavigation />
+      </div>
       
       <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
         {/* Page Title */}

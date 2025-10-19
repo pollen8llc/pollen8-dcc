@@ -38,9 +38,11 @@ const TopicsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full">
+      <div className="container mx-auto max-w-6xl px-4 py-4">
         <Cultiva8OnlyNavigation />
+      </div>
+      
+      <div className="container mx-auto max-w-6xl px-4 py-4 sm:py-8">
         
         {/* Header */}
         <div className="mb-8 mt-6">

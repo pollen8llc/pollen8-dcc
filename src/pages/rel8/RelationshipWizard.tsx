@@ -101,7 +101,7 @@ const RelationshipWizard = () => {
     <div className="min-h-screen bg-background">
       <Rel8Header showProfileBanner={false} />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
         <div className="flex items-center mb-4">
           <Button 
             variant="ghost" 
