@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
+import { Integr8Header } from "@/components/integr8/Integr8Header";
 import { Card } from "@/components/ui/card";
 import { MessageSquare, Calendar, Mail, MessageCircle, FileText, Video, CreditCard, Sparkles, CircleDot, Users, Database, ClipboardList, CalendarClock, Twitter, Linkedin, LucideIcon, Search, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -79,7 +79,7 @@ const Intgr8 = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <Navbar />
+      <Integr8Header />
       <div className="max-w-7xl mx-auto space-y-8 animate-fade-in p-6">
         {/* Header */}
         <div className="space-y-1">
