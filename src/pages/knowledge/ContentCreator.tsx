@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shell } from '@/components/layout/Shell';
+import { Base88Layout } from '@/components/layout/Base88Layout';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -55,7 +56,7 @@ const ContentCreator = () => {
 
   return (
     <Shell>
-      <div className="container mx-auto px-4 py-6">
+      <Base88Layout>
         {/* Navigation */}
         <div className="mb-6">
           <Cultiva8OnlyNavigation />
@@ -107,7 +108,7 @@ const ContentCreator = () => {
             </CardFooter>
           </Card>
         </div>
-      </div>
+      </Base88Layout>
     </Shell>
   );
 };

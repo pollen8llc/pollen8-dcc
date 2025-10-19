@@ -43,6 +43,7 @@ import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavig
 // Types
 import { ContentType } from '@/models/knowledgeTypes';
 import { useSavedArticles } from '@/hooks/knowledge/useSavedArticles';
+import { Base88Layout } from '@/components/layout/Base88Layout';
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -96,7 +97,7 @@ const ArticleView = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-6 max-w-full">
+        <Base88Layout>
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
@@ -108,7 +109,7 @@ const ArticleView = () => {
               Back to Knowledge Base
             </Link>
           </Button>
-        </div>
+        </Base88Layout>
       </div>
     );
   }
@@ -117,14 +118,14 @@ const ArticleView = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-6 max-w-full">
+        <Base88Layout>
           <div className="animate-pulse space-y-4">
             <div className="h-8 w-3/4 bg-muted rounded"></div>
             <div className="h-4 w-1/4 bg-muted rounded"></div>
             <div className="h-64 bg-muted rounded"></div>
             <div className="h-4 w-1/2 bg-muted rounded"></div>
           </div>
-        </div>
+        </Base88Layout>
       </div>
     );
   }
@@ -133,7 +134,7 @@ const ArticleView = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-6 max-w-full">
+        <Base88Layout>
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
@@ -147,7 +148,7 @@ const ArticleView = () => {
               Back to Knowledge Base
             </Link>
           </Button>
-        </div>
+        </Base88Layout>
       </div>
     );
   }
@@ -158,7 +159,7 @@ const ArticleView = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full space-y-6">
+      <Base88Layout className="space-y-6">
         {/* Navigation - Full Width */}
         <Cultiva8OnlyNavigation />
         
@@ -357,7 +358,7 @@ const ArticleView = () => {
             )}
           </div>
         </div>
-      </div>
+      </Base88Layout>
     </div>
   );
 };

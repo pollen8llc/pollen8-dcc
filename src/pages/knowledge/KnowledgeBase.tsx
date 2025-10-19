@@ -15,6 +15,7 @@ import { ArticleCard } from '@/components/knowledge/ArticleCard';
 import { Cultiva8OnlyNavigation } from '@/components/knowledge/Cultiva8OnlyNavigation';
 import { ContentType } from '@/models/knowledgeTypes';
 import LoadingSpinner from '@/components/ui/loading-spinner';
+import { Base88Layout } from '@/components/layout/Base88Layout';
 const KnowledgeBase = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,7 +78,7 @@ const KnowledgeBase = () => {
   return <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-full">
+      <Base88Layout>
         <Cultiva8OnlyNavigation />
         
         {/* Header */}
@@ -167,7 +168,7 @@ const KnowledgeBase = () => {
                 </div>)}
             </div>}
         </div>
-      </div>
+      </Base88Layout>
     </div>;
 };
 export default KnowledgeBase;
