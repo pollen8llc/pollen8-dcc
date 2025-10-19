@@ -91,7 +91,7 @@ const Nomin8ContactsPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6 space-y-8">
+      <div className="container mx-auto max-w-6xl px-4 py-6 space-y-8">
         <Nomin8Navigation />
         
         {/* Header */}

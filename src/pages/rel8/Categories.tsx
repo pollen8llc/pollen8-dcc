@@ -7,7 +7,7 @@ const Categories = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Rel8Header />
       
-      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full space-y-6">
+      <div className="container mx-auto max-w-6xl px-4 py-4 sm:py-8 space-y-6">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6 mt-4 sm:mt-6">
           <div className="min-w-0">

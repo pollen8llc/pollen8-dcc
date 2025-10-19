@@ -11,7 +11,7 @@ export function Rel8Header({ showProfileBanner = false }: Rel8HeaderProps) {
     <div className="w-full">
       <Navbar />
       {showProfileBanner && <DotConnectorHeader />}
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto max-w-6xl px-4 py-4">
         <Rel8OnlyNavigation />
       </div>
     </div>

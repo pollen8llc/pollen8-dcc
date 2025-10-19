@@ -1,12 +1,12 @@
 import Navbar from "@/components/Navbar";
-import { Integr8OnlyNavigation } from "@/components/integr8/Integr8OnlyNavigation";
+import { Cultiva8OnlyNavigation } from "@/components/knowledge/Cultiva8OnlyNavigation";
 
-export function Integr8Header() {
+export function KnowledgeHeader() {
   return (
     <div className="w-full">
       <Navbar />
       <div className="container mx-auto max-w-6xl px-4 py-4">
-        <Integr8OnlyNavigation />
+        <Cultiva8OnlyNavigation />
       </div>
     </div>
   );

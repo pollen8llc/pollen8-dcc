@@ -144,7 +144,7 @@ const Nomin8Settings: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 pt-24 pb-8">
+      <div className="container mx-auto max-w-6xl px-4 pt-24 pb-8">
         <Nomin8Navigation />
         
         <div className="max-w-4xl mx-auto mt-8">

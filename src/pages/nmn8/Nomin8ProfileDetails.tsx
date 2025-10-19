@@ -208,7 +208,7 @@ const Nomin8ProfileDetails: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6 space-y-8">
+      <div className="container mx-auto max-w-6xl px-4 py-6 space-y-8">
         {/* Navigation */}
         <Nomin8Navigation />
 

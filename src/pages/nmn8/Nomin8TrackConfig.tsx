@@ -154,7 +154,7 @@ const Nomin8TrackConfig: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <Navbar />
-        <div className="container mx-auto px-4 py-6 space-y-8">
+        <div className="container mx-auto max-w-6xl px-4 py-6 space-y-8">
           <Nomin8Navigation />
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -171,7 +171,7 @@ const Nomin8TrackConfig: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <Navbar />
-        <div className="container mx-auto px-4 py-6 space-y-8">
+        <div className="container mx-auto max-w-6xl px-4 py-6 space-y-8">
           <Nomin8Navigation />
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">Contact Not Found</h2>
@@ -192,7 +192,7 @@ const Nomin8TrackConfig: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-6 space-y-8">
+      <div className="container mx-auto max-w-6xl px-4 py-6 space-y-8">
         <Nomin8Navigation />
         
         {/* Header */}
