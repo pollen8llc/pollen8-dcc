@@ -113,7 +113,6 @@ const P8Landing = lazy(() => import("@/pages/p8/P8Landing"));
 const P8Loc8 = lazy(() => import("@/pages/p8/P8Loc8"));
 const P8Asl = lazy(() => import("@/pages/p8/P8Asl"));
 const P8Class = lazy(() => import("@/pages/p8/P8Class"));
-const P8Intgr8 = lazy(() => import("@/pages/p8/P8Intgr8"));
 const P8Dashboard = lazy(() => import("@/pages/p8/P8Dashboard"));
 
 // Integrations Page (standalone)
@@ -645,13 +644,6 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <P8Class />
-              </ProtectedRoute>
-            </NonServiceProviderRoute>
-          } />
-          <Route path="/p8/intgr8" element={
-            <NonServiceProviderRoute>
-              <ProtectedRoute>
-                <P8Intgr8 />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
