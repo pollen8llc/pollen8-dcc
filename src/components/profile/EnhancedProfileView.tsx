@@ -46,8 +46,18 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
       if (!profile?.id) return;
       setIsLoading(true);
       try {
-        // Fetch communities where user is a member (including owned)
-        const { data, error } = await supabase
+        // Fetch owned communities
+        const { data: ownedData, error: ownedError } = await supabase
+          .from('communities')
+          .select('*')
+          .eq('owner_id', profile.id);
+        
+        if (ownedError) {
+          console.error("Error fetching owned communities:", ownedError);
+        }
+        
+        // Fetch communities where user is a member
+        const { data: memberData, error: memberError } = await supabase
           .from('community_members')
           .select(`
             community_id,
@@ -66,17 +76,22 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           `)
           .eq('user_id', profile.id);
         
-        if (error) {
-          console.error("Error fetching communities:", error);
-          return;
+        if (memberError) {
+          console.error("Error fetching member communities:", memberError);
         }
         
-        // Extract community data from the joined result
-        const communitiesData = data
+        // Extract community data from member result
+        const memberCommunities = memberData
           ?.map(item => item.communities)
           .filter(Boolean) || [];
         
-        setCommunities(communitiesData as any);
+        // Combine and deduplicate by id
+        const allCommunities = [...(ownedData || []), ...memberCommunities];
+        const uniqueCommunities = Array.from(
+          new Map(allCommunities.map(c => [c.id, c])).values()
+        );
+        
+        setCommunities(uniqueCommunities as any);
       } catch (error) {
         console.error("Error in fetchUserCommunities:", error);
       } finally {
