@@ -421,7 +421,7 @@ const P8Asl = () => {
 
           {/* Next Button */}
           <Button
-            onClick={() => navigate("/p8/intgr8")}
+            onClick={() => navigate("/p8/tags")}
             disabled={!allCompleted}
             className="group"
           >
