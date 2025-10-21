@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Tag as TagIcon, Plus, X, ArrowLeft, Check } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Tag as TagIcon, Plus, X, ArrowLeft, Check, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { COMMUNITY_TAG_LIBRARY, getAllTags } from "@/constants/communityTagLibrary";
 
 interface CommunityTag {
   id: string;
@@ -20,6 +22,7 @@ const P8Tags = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [customTag, setCustomTag] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [tags, setTags] = useState<CommunityTag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>(() => {
@@ -80,19 +83,59 @@ const P8Tags = () => {
     localStorage.setItem("p8_selected_tags", JSON.stringify(selectedTags));
   }, [selectedTags]);
 
-  // Filter tags based on search term
+  // Combine library tags with database tags
+  const allTags = useMemo(() => {
+    const libraryTags = getAllTags();
+    const tagMap = new Map<string, CommunityTag>();
+    
+    // Add database tags with counts
+    tags.forEach(tag => {
+      tagMap.set(tag.name, tag);
+    });
+    
+    // Add library tags that aren't in database
+    libraryTags.forEach(tagName => {
+      if (!tagMap.has(tagName)) {
+        tagMap.set(tagName, {
+          id: tagName,
+          name: tagName,
+          count: 0
+        });
+      }
+    });
+    
+    return Array.from(tagMap.values()).sort((a, b) => b.count - a.count);
+  }, [tags]);
+
+  // Filter tags based on search term and category
   const filteredTags = useMemo(() => {
-    if (!searchTerm) return tags;
-    return tags.filter(tag => 
-      tag.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [tags, searchTerm]);
+    let filtered = allTags;
+    
+    // Filter by category
+    if (categoryFilter !== "all") {
+      const category = COMMUNITY_TAG_LIBRARY.find(cat => cat.id === categoryFilter);
+      if (category) {
+        const categoryTagNames = new Set(category.tags);
+        filtered = filtered.filter(tag => categoryTagNames.has(tag.name));
+      }
+    }
+    
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(tag => 
+        tag.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return filtered;
+  }, [allTags, searchTerm, categoryFilter]);
 
   // Determine popular tags (top 25%)
   const popularTags = useMemo(() => {
-    const threshold = Math.ceil(tags.length / 4);
-    return new Set(tags.slice(0, threshold).map(t => t.id));
-  }, [tags]);
+    const tagsWithCount = allTags.filter(t => t.count > 0);
+    const threshold = Math.ceil(tagsWithCount.length / 4);
+    return new Set(tagsWithCount.slice(0, threshold).map(t => t.id));
+  }, [allTags]);
 
   const toggleTag = (tagName: string) => {
     setSelectedTags(prev => 
@@ -170,17 +213,37 @@ const P8Tags = () => {
           </Card>
         )}
 
-        {/* Search and Add Custom */}
+        {/* Search, Filter and Add Custom */}
         <div className="mb-6 space-y-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search tags..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search tags..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="pl-10">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {COMMUNITY_TAG_LIBRARY.map(category => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Add Custom Tag */}
@@ -252,7 +315,10 @@ const P8Tags = () => {
                         <div>
                           <h3 className="font-medium text-lg">{tag.name}</h3>
                           <p className="text-muted-foreground text-sm">
-                            {tag.count} {tag.count === 1 ? 'community' : 'communities'}
+                            {tag.count > 0 
+                              ? `${tag.count} ${tag.count === 1 ? 'community' : 'communities'}`
+                              : 'From library'
+                            }
                           </p>
                         </div>
                       </div>
