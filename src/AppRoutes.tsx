@@ -109,7 +109,8 @@ const Labr8RequestDetails = lazy(() => import("@/pages/labr8/Labr8RequestDetails
 const Labr8ProjectStatusNew = lazy(() => import("@/pages/labr8/Labr8ProjectStatusNew"));
 
 // P8 Ecosystem Builder Pages
-const P8Landing = lazy(() => import("@/pages/p8/P8Landing"));
+const Builder = lazy(() => import("@/pages/p8/Builder"));
+const P8 = lazy(() => import("@/pages/p8/P8"));
 const P8Loc8 = lazy(() => import("@/pages/p8/P8Loc8"));
 const P8Asl = lazy(() => import("@/pages/p8/P8Asl"));
 const P8Tags = lazy(() => import("@/pages/p8/P8Tags"));
@@ -620,10 +621,17 @@ const AppRoutes = () => {
           } />
 
           {/* P8 Ecosystem Builder Routes */}
+          <Route path="/builder" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <Builder />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
           <Route path="/p8" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <P8Landing />
+                <P8 />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

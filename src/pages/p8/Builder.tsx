@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Users, TrendingUp, Network, Zap } from "lucide-react";
 
-const P8Landing = () => {
+const Builder = () => {
   const navigate = useNavigate();
 
   const stats = [
@@ -55,7 +55,7 @@ const P8Landing = () => {
           </p>
           <Button
             size="lg"
-            onClick={() => navigate("/p8/loc8")}
+            onClick={() => navigate("/p8")}
             className="group text-lg px-8 py-6 bg-primary hover:bg-primary/90"
           >
             Get Started
@@ -66,10 +66,10 @@ const P8Landing = () => {
         {/* Process Preview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            { step: 1, title: "Location", path: "/p8/loc8" },
-            { step: 2, title: "Demographics", path: "/p8/asl" },
-            { step: 3, title: "Network Type", path: "/p8/class" },
-            { step: 4, title: "Integrations", path: "/p8/intgr8" },
+            { step: 1, title: "Community Details", path: "/p8" },
+            { step: 2, title: "Location", path: "/p8/loc8" },
+            { step: 3, title: "Demographics", path: "/p8/asl" },
+            { step: 4, title: "Tags & Topics", path: "/p8/tags" },
           ].map((item, index) => (
             <Card
               key={item.step}
@@ -91,4 +91,4 @@ const P8Landing = () => {
   );
 };
 
-export default P8Landing;
+export default Builder;
