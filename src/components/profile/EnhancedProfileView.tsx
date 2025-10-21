@@ -46,15 +46,37 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
       if (!profile?.id) return;
       setIsLoading(true);
       try {
+        // Fetch communities where user is a member (including owned)
         const { data, error } = await supabase
-          .from('communities')
-          .select('*')
-          .eq('owner_id', profile.id);
+          .from('community_members')
+          .select(`
+            community_id,
+            communities (
+              id,
+              name,
+              description,
+              type,
+              location,
+              is_public,
+              website,
+              logo_url,
+              created_at,
+              updated_at
+            )
+          `)
+          .eq('user_id', profile.id);
+        
         if (error) {
           console.error("Error fetching communities:", error);
           return;
         }
-        setCommunities(data || []);
+        
+        // Extract community data from the joined result
+        const communitiesData = data
+          ?.map(item => item.communities)
+          .filter(Boolean) || [];
+        
+        setCommunities(communitiesData as any);
       } catch (error) {
         console.error("Error in fetchUserCommunities:", error);
       } finally {
@@ -190,26 +212,15 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                   Activity & Stats
                 </CardTitle>
                 {isOwnProfile && (
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.location.href = '/knowledge/my-resources'}
-                      className="gap-2"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Cultiv8
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.location.href = '/eco8'}
-                      className="gap-2"
-                    >
-                      <Users className="w-4 h-4" />
-                      Eco8
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.location.href = '/knowledge/my-resources'}
+                    className="gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Cultiv8
+                  </Button>
                 )}
               </div>
             </CardHeader>
@@ -246,10 +257,23 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           {/* Enhanced Communities - Moved to main panel */}
           <Card className="border-border/50 shadow-lg">
             <CardHeader className="pb-3 sm:pb-4">
-              <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
-                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                Communities
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  Communities
+                </CardTitle>
+                {isOwnProfile && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.location.href = '/eco8'}
+                    className="gap-2"
+                  >
+                    <Users className="w-4 h-4" />
+                    Eco8
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {isLoading ? (
