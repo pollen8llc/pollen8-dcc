@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import Navbar from "@/components/Navbar";
 import UnifiedProfileForm from "@/components/profile/UnifiedProfileForm";
-import { User } from "lucide-react";
+
 import { FormProvider, useForm } from "react-hook-form";
 
 const ProfileSetupPage: React.FC = () => {
@@ -42,18 +42,6 @@ const ProfileSetupPage: React.FC = () => {
     <div className="min-h-screen">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 text-center">
-          <div className="flex justify-center mb-3">
-            <div className="p-3 rounded-full bg-primary/10">
-              <User className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Complete Your Profile</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Welcome! Let's set up your profile so others can find you and you can connect with the community.
-          </p>
-        </div>
-        
         <div className="max-w-3xl mx-auto">
           <FormProvider {...methods}>
             <UnifiedProfileForm 
