@@ -190,15 +190,26 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                   Activity & Stats
                 </CardTitle>
                 {isOwnProfile && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => window.location.href = '/knowledge/my-resources'}
-                    className="gap-2"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Cultiv8
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.location.href = '/knowledge/my-resources'}
+                      className="gap-2"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Cultiv8
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.location.href = '/eco8'}
+                      className="gap-2"
+                    >
+                      <Users className="w-4 h-4" />
+                      Eco8
+                    </Button>
+                  </div>
                 )}
               </div>
             </CardHeader>
