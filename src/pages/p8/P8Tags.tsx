@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Tag as TagIcon, Plus, X, ArrowLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { COMMUNITY_TAG_LIBRARY, getAllTags, searchTags as searchLibraryTags } from "@/constants/communityTagLibrary";
 
 interface CommunityTag {
   id: string;
@@ -22,15 +20,12 @@ const P8Tags = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [customTag, setCustomTag] = useState("");
-  const [databaseTags, setDatabaseTags] = useState<CommunityTag[]>([]);
+  const [tags, setTags] = useState<CommunityTag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>(() => {
     const saved = localStorage.getItem("p8_selected_tags");
     return saved ? JSON.parse(saved) : [];
   });
-
-  // Get all library tags
-  const libraryTags = useMemo(() => getAllTags(), []);
 
   // Fetch community tags from database
   useEffect(() => {
@@ -64,9 +59,14 @@ const P8Tags = () => {
           }))
           .sort((a, b) => b.count - a.count);
 
-        setDatabaseTags(tagArray);
+        setTags(tagArray);
       } catch (error) {
         console.error("Error fetching tags:", error);
+        toast({
+          title: "Error loading tags",
+          description: "Could not load community tags. Please try again.",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }
@@ -80,41 +80,19 @@ const P8Tags = () => {
     localStorage.setItem("p8_selected_tags", JSON.stringify(selectedTags));
   }, [selectedTags]);
 
-  // Combine all tags (library + database) and filter
-  const allCombinedTags = useMemo(() => {
-    const combined = new Map<string, CommunityTag>();
-    
-    // Add library tags
-    libraryTags.forEach(tag => {
-      combined.set(tag, { id: tag, name: tag, count: 0 });
-    });
-    
-    // Add/update with database tags (with counts)
-    databaseTags.forEach(tag => {
-      combined.set(tag.name, tag);
-    });
-    
-    return Array.from(combined.values()).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-  }, [libraryTags, databaseTags]);
-
   // Filter tags based on search term
-  const filteredLibraryTags = useMemo(() => {
-    if (!searchTerm) return libraryTags;
-    return searchLibraryTags(searchTerm);
-  }, [libraryTags, searchTerm]);
-
-  const filteredAllTags = useMemo(() => {
-    if (!searchTerm) return allCombinedTags;
-    return allCombinedTags.filter(tag => 
+  const filteredTags = useMemo(() => {
+    if (!searchTerm) return tags;
+    return tags.filter(tag => 
       tag.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [allCombinedTags, searchTerm]);
+  }, [tags, searchTerm]);
 
-  // Determine popular tags from database (top 25%)
+  // Determine popular tags (top 25%)
   const popularTags = useMemo(() => {
-    const threshold = Math.ceil(databaseTags.length / 4);
-    return new Set(databaseTags.slice(0, threshold).map(t => t.id));
-  }, [databaseTags]);
+    const threshold = Math.ceil(tags.length / 4);
+    return new Set(tags.slice(0, threshold).map(t => t.id));
+  }, [tags]);
 
   const toggleTag = (tagName: string) => {
     setSelectedTags(prev => 
@@ -229,7 +207,7 @@ const P8Tags = () => {
           </div>
         </div>
 
-        {/* Tags Tabs */}
+        {/* Tags Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array(12).fill(null).map((_, i) => (
@@ -241,157 +219,60 @@ const P8Tags = () => {
               </Card>
             ))}
           </div>
+        ) : filteredTags.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredTags.map((tag) => {
+              const isSelected = selectedTags.includes(tag.name);
+              const isPopular = popularTags.has(tag.id);
+              
+              return (
+                <Card
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.name)}
+                  className={cn(
+                    "cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm",
+                    isPopular && "border-[#00eada]/50",
+                    isSelected && "ring-2 ring-[#00eada] bg-[#00eada]/5"
+                  )}
+                >
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className={cn(
+                          "bg-primary/10 rounded-full p-2 mr-3",
+                          isPopular && "bg-[#00eada]/20",
+                          isSelected && "bg-[#00eada]/30"
+                        )}>
+                          <TagIcon className={cn(
+                            "h-4 w-4",
+                            isPopular ? "text-[#00eada]" : "text-primary",
+                            isSelected && "text-[#00eada]"
+                          )} />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-lg">{tag.name}</h3>
+                          <p className="text-muted-foreground text-sm">
+                            {tag.count} {tag.count === 1 ? 'community' : 'communities'}
+                          </p>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <Check className="h-5 w-5 text-[#00eada]" />
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         ) : (
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 text-xs mb-6">
-              <TabsTrigger value="all">All</TabsTrigger>
-              {COMMUNITY_TAG_LIBRARY.map(category => (
-                <TabsTrigger key={category.id} value={category.id} className="text-xs">
-                  {category.name.split(' ')[0]}
-                </TabsTrigger>
-              ))}
-              <TabsTrigger value="popular">Popular</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="mt-4">
-              {filteredAllTags.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {filteredAllTags.map((tag) => {
-                    const isSelected = selectedTags.includes(tag.name);
-                    const isPopular = popularTags.has(tag.id);
-                    
-                    return (
-                      <Badge
-                        key={tag.id}
-                        variant={isSelected ? "default" : "outline"}
-                        className={cn(
-                          "cursor-pointer hover:bg-primary/20 px-4 py-2 text-sm transition-all",
-                          isPopular && "border-[#00eada]/50",
-                          isSelected && "bg-[#00eada] hover:bg-[#00eada]/90 border-[#00eada]"
-                        )}
-                        onClick={() => toggleTag(tag.name)}
-                      >
-                        {tag.name}
-                        {tag.count > 0 && (
-                          <span className="ml-2 opacity-70">({tag.count})</span>
-                        )}
-                        {isSelected && <Check className="ml-2 h-3 w-3" />}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center p-12">
-                  <TagIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No tags found</h3>
-                  <p className="text-muted-foreground">
-                    {searchTerm ? `No tags match "${searchTerm}"` : "No tags available yet"}
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-
-            {COMMUNITY_TAG_LIBRARY.map(category => (
-              <TabsContent key={category.id} value={category.id} className="mt-4">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-1">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground">{category.description}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {category.tags
-                      .filter(tag => !searchTerm || tag.toLowerCase().includes(searchTerm.toLowerCase()))
-                      .map(tag => {
-                        const isSelected = selectedTags.includes(tag);
-                        const tagData = allCombinedTags.find(t => t.name === tag);
-                        
-                        return (
-                          <Badge
-                            key={tag}
-                            variant={isSelected ? "default" : "outline"}
-                            className={cn(
-                              "cursor-pointer hover:bg-primary/20 px-4 py-2 text-sm transition-all",
-                              isSelected && "bg-[#00eada] hover:bg-[#00eada]/90 border-[#00eada]"
-                            )}
-                            onClick={() => toggleTag(tag)}
-                          >
-                            {tag}
-                            {tagData && tagData.count > 0 && (
-                              <span className="ml-2 opacity-70">({tagData.count})</span>
-                            )}
-                            {isSelected && <Check className="ml-2 h-3 w-3" />}
-                          </Badge>
-                        );
-                      })}
-                  </div>
-                </div>
-              </TabsContent>
-            ))}
-
-            <TabsContent value="popular" className="mt-4">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">Popular Tags</h3>
-                  <p className="text-sm text-muted-foreground">Tags used by existing communities</p>
-                </div>
-                {databaseTags.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {databaseTags.slice(0, 20).map((tag) => {
-                      const isSelected = selectedTags.includes(tag.name);
-                      const isPopular = popularTags.has(tag.id);
-                      
-                      return (
-                        <Card
-                          key={tag.id}
-                          onClick={() => toggleTag(tag.name)}
-                          className={cn(
-                            "cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm",
-                            isPopular && "border-[#00eada]/50",
-                            isSelected && "ring-2 ring-[#00eada] bg-[#00eada]/5"
-                          )}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className={cn(
-                                  "bg-primary/10 rounded-full p-2",
-                                  isPopular && "bg-[#00eada]/20",
-                                  isSelected && "bg-[#00eada]/30"
-                                )}>
-                                  <TagIcon className={cn(
-                                    "h-4 w-4",
-                                    isPopular ? "text-[#00eada]" : "text-primary",
-                                    isSelected && "text-[#00eada]"
-                                  )} />
-                                </div>
-                                <div>
-                                  <h3 className="font-medium">{tag.name}</h3>
-                                  <p className="text-muted-foreground text-sm">
-                                    {tag.count} {tag.count === 1 ? 'community' : 'communities'}
-                                  </p>
-                                </div>
-                              </div>
-                              {isSelected && (
-                                <Check className="h-5 w-5 text-[#00eada]" />
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center p-12">
-                    <TagIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No popular tags yet</h3>
-                    <p className="text-muted-foreground">
-                      Browse other categories to select tags
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="text-center p-12">
+            <TagIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">No tags found</h3>
+            <p className="text-muted-foreground">
+              {searchTerm ? `No tags match "${searchTerm}"` : "No tags available yet"}
+            </p>
+          </div>
         )}
       </div>
 
