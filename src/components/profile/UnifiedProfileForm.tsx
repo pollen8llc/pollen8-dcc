@@ -6,7 +6,6 @@ import { useProfiles } from "@/hooks/useProfiles";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Steps } from '@/components/ui/steps';
 import { Loader2, User, FileText, Heart, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +23,6 @@ interface UnifiedProfileFormProps {
 }
 
 const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFormProps) => {
-  const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const navigate = useNavigate();
@@ -34,35 +32,6 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
   
   // Instead of creating a new form instance, we use the parent's form context
   const form = useFormContext();
-  
-  const stepNames = ['Basic Info', 'Bio & Location', 'Interests', 'Privacy'];
-  
-  const handleNext = () => {
-    if (currentStep < stepNames.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-  
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return <BasicInfoStep />;
-      case 1:
-        return <BioStep />;
-      case 2:
-        return <InterestsStep />;
-      case 3:
-        return <PrivacyStep />;
-      default:
-        return null;
-    }
-  };
   
   const renderTabContent = () => {
     switch (activeTab) {
@@ -147,62 +116,7 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
     }
   };
   
-  // Different layouts based on mode
-  if (mode === 'setup') {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-          <CardDescription className="mb-4">
-            Step {currentStep + 1} of {stepNames.length}
-          </CardDescription>
-          <Steps 
-            currentStep={currentStep + 1}
-            className="mt-2"
-            steps={stepNames}
-          />
-        </CardHeader>
-        
-        <CardContent>
-          {renderStepContent()}
-        </CardContent>
-        
-        <CardFooter className="flex justify-between">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={handleBack}
-            disabled={currentStep === 0 || isSubmitting}
-          >
-            Back
-          </Button>
-          
-          {currentStep < stepNames.length - 1 ? (
-            <Button type="button" onClick={handleNext}>
-              Next
-            </Button>
-          ) : (
-            <Button 
-              type="submit" 
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Complete Setup'
-              )}
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-    );
-  }
-  
-  // Edit mode with navigation
+  // Navigation items for both modes
   const navItems = [
     {
       value: "basic",
@@ -233,9 +147,12 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Edit Profile</CardTitle>
+        <CardTitle>{mode === 'setup' ? 'Complete Your Profile' : 'Edit Profile'}</CardTitle>
         <CardDescription>
-          Update your profile information and privacy settings
+          {mode === 'setup' 
+            ? 'Set up your profile to get started and connect with others'
+            : 'Update your profile information and privacy settings'
+          }
         </CardDescription>
       </CardHeader>
       
@@ -275,13 +192,16 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
       </CardContent>
       
       <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={() => navigate('/profile')}>
-          Cancel
-        </Button>
+        {mode === 'edit' && (
+          <Button variant="outline" onClick={() => navigate('/profile')}>
+            Cancel
+          </Button>
+        )}
         <Button 
           onClick={form.handleSubmit(onSubmit)}
           disabled={isSubmitting}
           form="profile-form"
+          className={mode === 'setup' ? 'w-full' : ''}
         >
           {isSubmitting ? (
             <>
@@ -289,7 +209,7 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
               Saving...
             </>
           ) : (
-            'Save Changes'
+            mode === 'setup' ? 'Complete Setup' : 'Save Changes'
           )}
         </Button>
       </CardFooter>
