@@ -65,22 +65,12 @@ const P8 = () => {
         {/* Centered Content */}
         <div className="min-h-[calc(100vh-300px)] flex items-center justify-center">
           <div className="w-full max-w-2xl space-y-8 animate-fade-in">
-            {/* Page Title */}
-            <div className="text-center space-y-3 mb-12">
-              <h1 className="text-5xl font-bold bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-                Community Builder
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Define your community's core identity
-              </p>
-            </div>
-
             {/* Community Name Field */}
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium text-foreground/70 pl-2">
                 Community Name <span className="text-destructive">*</span>
               </label>
-              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-full hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
+              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-full shadow-sm hover:shadow-lg hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
                 <input
                   id="name"
                   type="text"
@@ -97,7 +87,7 @@ const P8 = () => {
               <label htmlFor="description" className="text-sm font-medium text-foreground/70 pl-2">
                 Community Description
               </label>
-              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-3xl hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
+              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-3xl shadow-sm hover:shadow-lg hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
                 <textarea
                   id="description"
                   placeholder="Describe your community's mission, values, and what makes it unique..."
@@ -114,7 +104,7 @@ const P8 = () => {
               <label htmlFor="website" className="text-sm font-medium text-foreground/70 pl-2">
                 Community Website
               </label>
-              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-full hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
+              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-full shadow-sm hover:shadow-lg hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
                 <input
                   id="website"
                   type="url"
