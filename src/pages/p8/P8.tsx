@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Users, FileText, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const P8 = () => {
@@ -44,10 +44,10 @@ const P8 = () => {
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFormData({ ...formData, description: e.target.value });
-    // Auto-expand textarea
-    e.target.style.height = 'auto';
-    e.target.style.height = `${Math.max(120, e.target.scrollHeight)}px`;
+    const value = e.target.value;
+    if (value.length <= 240) {
+      setFormData({ ...formData, description: value });
+    }
   };
 
   return (
@@ -70,14 +70,16 @@ const P8 = () => {
               <label htmlFor="name" className="text-sm font-medium text-foreground/70 pl-2">
                 Community Name <span className="text-destructive">*</span>
               </label>
-              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-full shadow-sm hover:shadow-lg hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
+              <div className="relative">
+                <Users className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10 pointer-events-none" />
                 <input
                   id="name"
                   type="text"
                   placeholder="e.g., Tech Innovators Network"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full h-16 bg-transparent border-none outline-none px-6 text-lg placeholder:text-muted-foreground/50 focus:ring-0"
+                  className="w-full pl-14 pr-6 bg-background/90 backdrop-blur-lg border-2 border-primary/30 text-base h-14 font-medium focus:border-primary/60 rounded-xl shadow-2xl transition-all focus:outline-none focus:ring-0"
+                  style={{ fontSize: '16px' }}
                 />
               </div>
             </div>
@@ -85,16 +87,19 @@ const P8 = () => {
             {/* Community Description Field */}
             <div className="space-y-2">
               <label htmlFor="description" className="text-sm font-medium text-foreground/70 pl-2">
-                Community Description
+                Community Description <span className="text-muted-foreground text-xs">({formData.description.length}/240)</span>
               </label>
-              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-3xl shadow-sm hover:shadow-lg hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
+              <div className="relative">
+                <FileText className="absolute left-6 top-6 h-5 w-5 text-primary z-10 pointer-events-none" />
                 <textarea
                   id="description"
                   placeholder="Describe your community's mission, values, and what makes it unique..."
                   value={formData.description}
                   onChange={handleDescriptionChange}
-                  className="w-full min-h-[120px] bg-transparent border-none outline-none px-6 py-4 text-lg placeholder:text-muted-foreground/50 resize-none focus:ring-0"
-                  style={{ height: '120px' }}
+                  maxLength={240}
+                  rows={2}
+                  className="w-full pl-14 pr-6 py-4 bg-background/90 backdrop-blur-lg border-2 border-primary/30 text-base font-medium focus:border-primary/60 rounded-xl shadow-2xl transition-all resize-none focus:outline-none focus:ring-0"
+                  style={{ fontSize: '16px' }}
                 />
               </div>
             </div>
@@ -104,14 +109,16 @@ const P8 = () => {
               <label htmlFor="website" className="text-sm font-medium text-foreground/70 pl-2">
                 Community Website
               </label>
-              <div className="backdrop-blur-lg bg-white/10 dark:bg-white/5 border border-white/20 rounded-full shadow-sm hover:shadow-lg hover:bg-white/15 dark:hover:bg-white/10 transition-all duration-300">
+              <div className="relative">
+                <Globe className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-primary z-10 pointer-events-none" />
                 <input
                   id="website"
                   type="url"
                   placeholder="https://yourcommunity.com"
                   value={formData.website}
                   onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  className="w-full h-16 bg-transparent border-none outline-none px-6 text-lg placeholder:text-muted-foreground/50 focus:ring-0"
+                  className="w-full pl-14 pr-6 bg-background/90 backdrop-blur-lg border-2 border-primary/30 text-base h-14 font-medium focus:border-primary/60 rounded-xl shadow-2xl transition-all focus:outline-none focus:ring-0"
+                  style={{ fontSize: '16px' }}
                 />
               </div>
             </div>
