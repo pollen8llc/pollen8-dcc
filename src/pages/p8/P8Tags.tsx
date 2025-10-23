@@ -175,6 +175,13 @@ const P8Tags = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <div className="container mx-auto max-w-6xl px-4 py-8">
+        {/* Progress Badge */}
+        <div className="mb-4">
+          <Badge variant="outline" className="backdrop-blur-sm bg-primary/10 text-primary border-primary/30">
+            Step 3 of 4
+          </Badge>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -361,7 +368,7 @@ const P8Tags = () => {
           </div>
 
           <Button
-            onClick={() => navigate("/p8/dashboard")}
+            onClick={() => navigate("/p8/links")}
             className="group"
           >
             Continue

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { RadarChart } from "@/components/ui/radar-chart";
 import {
   Select,
@@ -264,6 +265,13 @@ const P8Asl = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex flex-col items-center justify-center pb-24 relative">
+      {/* Progress Badge */}
+      <div className="absolute top-8 left-8">
+        <Badge variant="outline" className="backdrop-blur-sm bg-primary/10 text-primary border-primary/30">
+          Step 3 of 4
+        </Badge>
+      </div>
+
       {/* Centered Radar Chart */}
       <div className="flex flex-col items-center gap-8 w-full max-w-2xl px-4">
         {/* Instructions */}

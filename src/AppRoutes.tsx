@@ -114,6 +114,7 @@ const P8 = lazy(() => import("@/pages/p8/P8"));
 const P8Loc8 = lazy(() => import("@/pages/p8/P8Loc8"));
 const P8Asl = lazy(() => import("@/pages/p8/P8Asl"));
 const P8Tags = lazy(() => import("@/pages/p8/P8Tags"));
+const P8Links = lazy(() => import("@/pages/p8/P8Links"));
 const P8Class = lazy(() => import("@/pages/p8/P8Class"));
 const P8Dashboard = lazy(() => import("@/pages/p8/P8Dashboard"));
 
@@ -653,6 +654,13 @@ const AppRoutes = () => {
             <NonServiceProviderRoute>
               <ProtectedRoute>
                 <P8Tags />
+              </ProtectedRoute>
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/p8/links" element={
+            <NonServiceProviderRoute>
+              <ProtectedRoute>
+                <P8Links />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />

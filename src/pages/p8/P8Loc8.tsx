@@ -18,7 +18,7 @@ const P8Loc8 = () => {
         {/* Progress */}
         <div className="flex items-center space-x-2 px-2">
           <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30">
-            Step 1 of 4
+            Step 2 of 4
           </Badge>
         </div>
 

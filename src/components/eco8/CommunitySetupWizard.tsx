@@ -7,16 +7,11 @@ interface CommunitySetupWizardProps {
   onCancel?: () => void;
 }
 
-export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = ({
-  onComplete,
-  onCancel,
-}) => {
-  return (
-    <div className="max-w-2xl mx-auto p-6">
-      <CommunityCreationForm 
-        onSuccess={onComplete}
-        onCancel={onCancel}
-      />
-    </div>
-  );
+export const CommunitySetupWizard: React.FC<CommunitySetupWizardProps> = () => {
+  // Redirect to /p8 for the new flow
+  React.useEffect(() => {
+    window.location.href = '/p8';
+  }, []);
+
+  return null;
 };
