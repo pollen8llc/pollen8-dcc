@@ -161,339 +161,437 @@ const CommunityProfile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto max-w-6xl px-4 py-8">
-        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+      
+      {/* Spotify-style Banner Header */}
+      <div className="relative">
+        {/* Banner Image */}
+        <div className="h-80 bg-gradient-to-br from-primary/40 via-primary/20 to-accent/30 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50"></div>
+        </div>
         
-        {/* LinkedIn-style Community Header */}
-        <div className="max-w-4xl mx-auto">
-          {/* Hero Section */}
-          <Card className="mb-6 overflow-hidden">
-            {/* Cover Photo */}
-            <div className="h-48 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 relative">
-              {isOwner && (
-                <div className="absolute top-4 right-4 flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="bg-background/80 backdrop-blur-sm"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        size="sm" 
-                        variant="destructive" 
-                        className="bg-destructive/80 backdrop-blur-sm"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Community</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{community.name}"? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
-                          onClick={handleDelete}
-                          disabled={isDeleting}
-                          className="bg-destructive hover:bg-destructive/90"
-                        >
-                          {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              )}
-            </div>
-            
-            {/* Profile Section */}
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Avatar and Basic Info */}
-                <div className="flex-shrink-0">
-                  <div className="w-32 h-32 -mt-16 mb-4 relative">
-                    <Avatar className="w-32 h-32 border-4 border-background">
-                      <AvatarImage src={community.logo_url} alt={community.name} />
-                      <AvatarFallback className="text-3xl bg-primary/10">
-                        {community.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
+        {/* Profile Section - Overlapping Banner */}
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative -mt-20 pb-8">
+            <div className="flex flex-col md:flex-row gap-6 items-end md:items-start">
+              {/* Avatar Circle */}
+              <div className="flex-shrink-0">
+                <Avatar className="w-40 h-40 border-4 border-background shadow-2xl">
+                  <AvatarImage src={community.logo_url} alt={community.name} />
+                  <AvatarFallback className="text-5xl bg-card">
+                    {community.name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              
+              {/* Community Info */}
+              <div className="flex-1 mt-4 md:mt-12">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div>
+                    <h1 className="text-5xl font-bold mb-2">{community.name}</h1>
+                    <p className="text-lg text-muted-foreground max-w-2xl">{community.description}</p>
                   </div>
-                </div>
-                
-                {/* Main Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
-                    <div>
-                      <h1 className="text-3xl font-bold mb-2">{community.name}</h1>
-                      <p className="text-muted-foreground mb-2">{community.description}</p>
-                      
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
-                        {community.location && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            <span>{community.location}</span>
-                          </div>
-                        )}
-                        {(community.type || community.community_type) && (
-                          <Badge variant="secondary">{community.type || community.community_type}</Badge>
-                        )}
-                        {community.is_public && (
-                          <Badge variant="outline">Public</Badge>
-                        )}
-                        {isRecent && (
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                            <span className="text-green-600">Recently Active</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      {!isOwner && (
-                        <Button>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 flex-shrink-0">
+                    {isOwner ? (
+                      <>
+                        <Button 
+                          size="lg" 
+                          variant="outline"
+                          onClick={() => setIsEditing(true)}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                        <Button variant="outline" size="lg">
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="lg" variant="ghost">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Community</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{community.name}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </>
+                    ) : (
+                      <>
+                        <Button size="lg">
                           <Users className="h-4 w-4 mr-2" />
                           Join Community
                         </Button>
-                      )}
-                      <Button variant="outline" size="sm">
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                        <Button variant="outline" size="lg">
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="lg">
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Dashboard Content */}
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+        
+        {/* Badges Row */}
+        <div className="flex flex-wrap gap-2 mb-8 items-center">
+          {community.location && (
+            <Badge variant="secondary" className="text-sm py-1 px-3">
+              <MapPin className="h-3 w-3 mr-1" />
+              {community.location}
+            </Badge>
+          )}
+          {community.tags && community.tags.map((tag, index) => (
+            <Badge key={index} variant="outline" className="text-sm py-1 px-3">
+              {tag}
+            </Badge>
+          ))}
+          {community.is_public && (
+            <Badge variant="outline" className="text-sm py-1 px-3">
+              Public Community
+            </Badge>
+          )}
+          {isRecent && (
+            <Badge className="text-sm py-1 px-3 bg-green-500/20 text-green-400 border-green-500/30">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
+              Recently Active
+            </Badge>
+          )}
+        </div>
+
+        {/* Dashboard Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Content Grid */}
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+          {/* Left Column - Full Width on Mobile, 2 cols on Desktop */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* 3-Column Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Members</p>
+                      <p className="text-3xl font-bold">{community.member_count || '1'}</p>
+                    </div>
+                    <Users className="h-8 w-8 text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Tags</p>
+                      <p className="text-3xl font-bold">{community.tags?.length || 0}</p>
+                    </div>
+                    <Award className="h-8 w-8 text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Location</p>
+                      <p className="text-lg font-bold truncate">{community.location || 'Remote'}</p>
+                    </div>
+                    <MapPin className="h-8 w-8 text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-              {/* About Section */}
-              {community.description && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>About</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">{community.description}</p>
-                  </CardContent>
-                </Card>
-              )}
+            {/* About Section - Full Width */}
+            {community.description && (
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-2xl">About</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed text-lg">
+                    {community.description}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
+            {/* 2-Column Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Vision */}
               {community.vision && (
-                <Card>
+                <Card className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Lightbulb className="h-5 w-5" />
+                      <Lightbulb className="h-5 w-5 text-primary" />
                       Vision
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">{community.vision}</p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {community.vision}
+                    </p>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Community Values */}
+              {/* Values */}
               {community.community_values && (
-                <Card>
+                <Card className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Heart className="h-5 w-5" />
+                      <Heart className="h-5 w-5 text-primary" />
                       Values
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">{community.community_values}</p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {community.community_values}
+                    </p>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Community Structure */}
+              {/* Structure */}
               {community.community_structure && (
-                <Card>
+                <Card className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5" />
-                      Structure & Organization
+                      <Building2 className="h-5 w-5 text-primary" />
+                      Structure
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">{community.community_structure}</p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {community.community_structure}
+                    </p>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Target Audience */}
-              {community.target_audience && community.target_audience.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      Target Audience
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {community.target_audience.map((audience, index) => (
-                        <Badge key={index} variant="outline">{audience}</Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Personal Background */}
+              {/* Founder Background */}
               {community.personal_background && (
-                <Card>
+                <Card className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <BookOpen className="h-5 w-5" />
-                      Founder Background
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      Founder
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">{community.personal_background}</p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {community.personal_background}
+                    </p>
                   </CardContent>
                 </Card>
               )}
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Contact & Links */}
-              <Card>
+            {/* Target Audience - Full Width */}
+            {community.target_audience && community.target_audience.length > 0 && (
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle>Connect</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Target Audience
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  {community.website && (
-                    <a
-                      href={community.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Globe className="h-4 w-4" />
-                      <span>Website</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-                  
-                  {community.newsletter_url && (
-                    <a
-                      href={community.newsletter_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Rss className="h-4 w-4" />
-                      <span>Newsletter</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  )}
-
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>Created {new Date(community.created_at).toLocaleDateString()}</span>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {community.target_audience.map((audience, index) => (
+                      <Badge key={index} variant="secondary" className="text-sm py-1 px-3">
+                        {audience}
+                      </Badge>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
+            )}
+          </div>
 
-              {/* Community Details */}
-              <Card>
+          {/* Right Sidebar - Single Column */}
+          <div className="space-y-6">
+            
+            {/* Quick Links */}
+            <Card className="hover:shadow-lg transition-shadow sticky top-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Quick Links</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {community.website && (
+                  <a
+                    href={community.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                  >
+                    <Globe className="h-5 w-5 text-primary" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">Website</p>
+                      <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                        Visit our site
+                      </p>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </a>
+                )}
+                
+                {community.newsletter_url && (
+                  <a
+                    href={community.newsletter_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                  >
+                    <Rss className="h-5 w-5 text-primary" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">Newsletter</p>
+                      <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                        Subscribe to updates
+                      </p>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </a>
+                )}
+
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Created</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(community.created_at).toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        year: 'numeric' 
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Social Media */}
+            {community.social_media && Object.keys(community.social_media).length > 0 && (
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle>Details</CardTitle>
+                  <CardTitle className="text-lg">Social Media</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {Object.entries(community.social_media).map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      href={url as string}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-xs font-bold text-primary uppercase">
+                          {platform.charAt(0)}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium capitalize">{platform}</p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    </a>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Communication Platforms */}
+            {community.communication_platforms && Object.keys(community.communication_platforms).length > 0 && (
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-lg">Communication</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {Object.entries(community.communication_platforms).map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      href={url as string}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                    >
+                      <MessageCircle className="h-5 w-5 text-primary" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium capitalize">{platform}</p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    </a>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Community Details */}
+            {(community.format || community.community_size || community.event_frequency || community.start_date) && (
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-lg">Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {community.format && (
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center p-2">
                       <span className="text-sm text-muted-foreground">Format</span>
                       <Badge variant="outline">{community.format}</Badge>
                     </div>
                   )}
                   
                   {community.community_size && (
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center p-2">
                       <span className="text-sm text-muted-foreground">Size</span>
-                      <span className="text-sm">{community.community_size}</span>
+                      <span className="text-sm font-medium">{community.community_size}</span>
                     </div>
                   )}
 
                   {community.event_frequency && (
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center p-2">
                       <span className="text-sm text-muted-foreground">Events</span>
-                      <span className="text-sm">{community.event_frequency}</span>
+                      <span className="text-sm font-medium">{community.event_frequency}</span>
                     </div>
                   )}
 
                   {community.start_date && (
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center p-2">
                       <span className="text-sm text-muted-foreground">Started</span>
-                      <span className="text-sm">{community.start_date}</span>
+                      <span className="text-sm font-medium">{community.start_date}</span>
                     </div>
                   )}
                 </CardContent>
               </Card>
-
-              {/* Communication Platforms */}
-              {community.communication_platforms && Object.keys(community.communication_platforms).length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Communication</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm text-muted-foreground">
-                      Platforms: {Object.keys(community.communication_platforms).join(', ')}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Social Media */}
-              {community.social_media && Object.keys(community.social_media).length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Social Media</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {Object.entries(community.social_media).map(([platform, url]) => (
-                      <a
-                        key={platform}
-                        href={url as string}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        <span className="capitalize">{platform}</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
