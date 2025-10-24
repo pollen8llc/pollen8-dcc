@@ -293,50 +293,70 @@ const CommunityProfile: React.FC = () => {
           {/* Left Column - Full Width on Mobile, 2 cols on Desktop */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* 3-Column Stats Cards */}
+            {/* Stats Cards - P8Dashboard Inspired */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="hover:shadow-lg transition-shadow">
+              <Card className="hover:shadow-lg transition-all duration-300 border-primary/20">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Members</p>
-                      <p className="text-3xl font-bold">{community.member_count || '1'}</p>
+                      <p className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+                        {community.member_count || '1'}
+                      </p>
+                      {isRecent && (
+                        <p className="text-xs text-green-500 mt-1">+12% this week</p>
+                      )}
                     </div>
-                    <Users className="h-8 w-8 text-primary" />
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20">
+                      <Users className="h-8 w-8 text-primary" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="hover:shadow-lg transition-shadow">
+              <Card className="hover:shadow-lg transition-all duration-300 border-blue-500/20">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">Tags</p>
-                      <p className="text-3xl font-bold">{community.tags?.length || 0}</p>
+                      <p className="text-sm text-muted-foreground mb-1">Categories</p>
+                      <p className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-blue-400 bg-clip-text text-transparent">
+                        {community.tags?.length || 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Active topics</p>
                     </div>
-                    <Award className="h-8 w-8 text-primary" />
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/20">
+                      <Award className="h-8 w-8 text-blue-500" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="hover:shadow-lg transition-shadow">
+              <Card className="hover:shadow-lg transition-all duration-300 border-green-500/20">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Location</p>
-                      <p className="text-lg font-bold truncate">{community.location || 'Remote'}</p>
+                      <p className="text-lg font-bold bg-gradient-to-br from-green-500 to-green-400 bg-clip-text text-transparent truncate">
+                        {community.location || 'Remote'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Community base</p>
                     </div>
-                    <MapPin className="h-8 w-8 text-primary" />
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/20">
+                      <MapPin className="h-8 w-8 text-green-500" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* About Section - Full Width */}
+            {/* About Section - Enhanced */}
             {community.description && (
-              <Card className="hover:shadow-lg transition-shadow">
+              <Card className="hover:shadow-lg transition-all duration-300 border-border/50">
                 <CardHeader>
-                  <CardTitle className="text-2xl">About</CardTitle>
+                  <CardTitle className="text-2xl flex items-center gap-2">
+                    <Building2 className="h-6 w-6 text-primary" />
+                    About
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground leading-relaxed text-lg">
@@ -346,14 +366,16 @@ const CommunityProfile: React.FC = () => {
               </Card>
             )}
 
-            {/* 2-Column Layout */}
+            {/* 2-Column Layout - Enhanced Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Vision */}
               {community.vision && (
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="hover:shadow-lg transition-all duration-300 border-purple-500/20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Lightbulb className="h-5 w-5 text-primary" />
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/20">
+                        <Lightbulb className="h-5 w-5 text-purple-500" />
+                      </div>
                       Vision
                     </CardTitle>
                   </CardHeader>
@@ -367,10 +389,12 @@ const CommunityProfile: React.FC = () => {
 
               {/* Values */}
               {community.community_values && (
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="hover:shadow-lg transition-all duration-300 border-pink-500/20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Heart className="h-5 w-5 text-primary" />
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500/10 to-pink-500/20">
+                        <Heart className="h-5 w-5 text-pink-500" />
+                      </div>
                       Values
                     </CardTitle>
                   </CardHeader>
@@ -384,10 +408,12 @@ const CommunityProfile: React.FC = () => {
 
               {/* Structure */}
               {community.community_structure && (
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="hover:shadow-lg transition-all duration-300 border-blue-500/20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-primary" />
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/20">
+                        <Building2 className="h-5 w-5 text-blue-500" />
+                      </div>
                       Structure
                     </CardTitle>
                   </CardHeader>
@@ -401,10 +427,12 @@ const CommunityProfile: React.FC = () => {
 
               {/* Founder Background */}
               {community.personal_background && (
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="hover:shadow-lg transition-all duration-300 border-orange-500/20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <BookOpen className="h-5 w-5 text-primary" />
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-orange-500/20">
+                        <BookOpen className="h-5 w-5 text-orange-500" />
+                      </div>
                       Founder
                     </CardTitle>
                   </CardHeader>
@@ -417,8 +445,8 @@ const CommunityProfile: React.FC = () => {
               )}
             </div>
 
-            {/* Target Audience - Full Width */}
-            {community.target_audience && community.target_audience.length > 0 && (
+            {/* Target Audience - Full Width with Demographics and Psychographics */}
+            {community.target_audience && community.target_audience.length > 0 && community.target_audience[0] && typeof community.target_audience[0] === 'object' && (
               <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -427,13 +455,59 @@ const CommunityProfile: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {community.target_audience.map((audience, index) => (
-                      <Badge key={index} variant="secondary" className="text-sm py-1 px-3">
-                        {audience}
-                      </Badge>
-                    ))}
-                  </div>
+                  {(() => {
+                    const audienceData = community.target_audience[0] as Record<string, string>;
+                    
+                    // Demographics categories
+                    const demographics = {
+                      age: { label: 'Age Range', value: audienceData.age },
+                      status: { label: 'Professional Status', value: audienceData.status },
+                      gender: { label: 'Gender', value: audienceData.gender },
+                      race: { label: 'Ethnicity', value: audienceData.race }
+                    };
+                    
+                    // Psychographics categories
+                    const psychographics = {
+                      interest: { label: 'Interest', value: audienceData.interest },
+                      lifestyle: { label: 'Lifestyle', value: audienceData.lifestyle },
+                      values: { label: 'Values', value: audienceData.values },
+                      attitudes: { label: 'Attitudes', value: audienceData.attitudes }
+                    };
+                    
+                    return (
+                      <div className="space-y-6">
+                        {/* Demographics Section */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Demographics</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {Object.entries(demographics).map(([key, { label, value }]) => value && (
+                              <div key={key} className="p-3 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
+                                <p className="text-xs text-muted-foreground mb-1">{label}</p>
+                                <Badge variant="secondary" className="text-xs font-semibold capitalize">
+                                  {value.replace(/-/g, ' ')}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Psychographics Section */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Psychographics</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {Object.entries(psychographics).map(([key, { label, value }]) => value && (
+                              <div key={key} className="p-3 rounded-lg bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/20">
+                                <p className="text-xs text-muted-foreground mb-1">{label}</p>
+                                <Badge variant="secondary" className="text-xs font-semibold capitalize">
+                                  {value.replace(/-/g, ' ')}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             )}
@@ -442,27 +516,32 @@ const CommunityProfile: React.FC = () => {
           {/* Right Sidebar - Single Column */}
           <div className="space-y-6">
             
-            {/* Quick Links */}
-            <Card className="hover:shadow-lg transition-shadow sticky top-4">
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Links</CardTitle>
+            {/* Quick Links - Enhanced */}
+            <Card className="hover:shadow-lg transition-all duration-300 border-border/50 sticky top-4">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-primary/20">
+                    <Globe className="h-4 w-4 text-primary" />
+                  </div>
+                  Quick Links
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2">
                 {community.website && (
                   <a
                     href={community.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 hover:border-primary/40 transition-all group"
                   >
                     <Globe className="h-5 w-5 text-primary" />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">Website</p>
-                      <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                      <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors truncate">
                         Visit our site
                       </p>
                     </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </a>
                 )}
                 
@@ -471,20 +550,20 @@ const CommunityProfile: React.FC = () => {
                     href={community.newsletter_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all group"
                   >
-                    <Rss className="h-5 w-5 text-primary" />
-                    <div className="flex-1">
+                    <Rss className="h-5 w-5 text-blue-500" />
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">Newsletter</p>
-                      <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                      <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors truncate">
                         Subscribe to updates
                       </p>
                     </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                   </a>
                 )}
 
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-muted/30 to-muted/50 border border-border/30">
                   <Calendar className="h-5 w-5 text-primary" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Created</p>
@@ -499,11 +578,16 @@ const CommunityProfile: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Social Media */}
+            {/* Social Media - Enhanced */}
             {community.social_media && Object.keys(community.social_media).length > 0 && (
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-lg">Social Media</CardTitle>
+              <Card className="hover:shadow-lg transition-all duration-300 border-border/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/20">
+                      <Share2 className="h-4 w-4 text-blue-500" />
+                    </div>
+                    Social Media
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {Object.entries(community.social_media).map(([platform, url]) => (
@@ -512,28 +596,33 @@ const CommunityProfile: React.FC = () => {
                       href={url as string}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all group"
                     >
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-xs font-bold text-primary uppercase">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/20 to-blue-500/30 flex items-center justify-center">
+                        <span className="text-xs font-bold text-blue-500 uppercase">
                           {platform.charAt(0)}
                         </span>
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium capitalize">{platform}</p>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                     </a>
                   ))}
                 </CardContent>
               </Card>
             )}
 
-            {/* Communication Platforms */}
+            {/* Communication Platforms - Enhanced */}
             {community.communication_platforms && Object.keys(community.communication_platforms).length > 0 && (
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-lg">Communication</CardTitle>
+              <Card className="hover:shadow-lg transition-all duration-300 border-border/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/20">
+                      <MessageCircle className="h-4 w-4 text-green-500" />
+                    </div>
+                    Communication
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {Object.entries(community.communication_platforms).map(([platform, url]) => (
@@ -542,13 +631,13 @@ const CommunityProfile: React.FC = () => {
                       href={url as string}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors group"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-green-500/5 to-green-500/10 border border-green-500/20 hover:border-green-500/40 transition-all group"
                     >
-                      <MessageCircle className="h-5 w-5 text-primary" />
-                      <div className="flex-1">
+                      <MessageCircle className="h-5 w-5 text-green-500" />
+                      <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium capitalize">{platform}</p>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-green-500 transition-colors" />
                     </a>
                   ))}
                 </CardContent>
