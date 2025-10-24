@@ -446,7 +446,7 @@ const CommunityProfile: React.FC = () => {
             </div>
 
             {/* Target Audience - Full Width with Demographics and Psychographics */}
-            {community.target_audience && community.target_audience.length > 0 && community.target_audience[0] && typeof community.target_audience[0] === 'object' && (
+            {community.target_audience && community.target_audience.length > 0 && (
               <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -456,55 +456,105 @@ const CommunityProfile: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   {(() => {
-                    const audienceData = community.target_audience[0] as Record<string, string>;
+                    // Convert array of objects to map for easy lookup
+                    const audienceMap = new Map();
+                    community.target_audience.forEach((item: any) => {
+                      if (item && typeof item === 'object' && item.id) {
+                        audienceMap.set(item.id, {
+                          option: item.option,
+                          importance: item.importance || 0
+                        });
+                      }
+                    });
+                    
+                    // Helper function to get importance color
+                    const getImportanceColor = (importance: number) => {
+                      if (importance >= 75) return 'from-red-500/10 to-red-500/20 border-red-500/30';
+                      if (importance >= 50) return 'from-orange-500/10 to-orange-500/20 border-orange-500/30';
+                      if (importance >= 25) return 'from-yellow-500/10 to-yellow-500/20 border-yellow-500/30';
+                      return 'from-gray-500/10 to-gray-500/20 border-gray-500/30';
+                    };
                     
                     // Demographics categories
-                    const demographics = {
-                      age: { label: 'Age Range', value: audienceData.age },
-                      status: { label: 'Professional Status', value: audienceData.status },
-                      gender: { label: 'Gender', value: audienceData.gender },
-                      race: { label: 'Ethnicity', value: audienceData.race }
-                    };
+                    const demographics = [
+                      { id: 'age', label: 'Age Range' },
+                      { id: 'status', label: 'Professional Status' },
+                      { id: 'gender', label: 'Gender' },
+                      { id: 'race', label: 'Ethnicity' }
+                    ];
                     
                     // Psychographics categories
-                    const psychographics = {
-                      interest: { label: 'Interest', value: audienceData.interest },
-                      lifestyle: { label: 'Lifestyle', value: audienceData.lifestyle },
-                      values: { label: 'Values', value: audienceData.values },
-                      attitudes: { label: 'Attitudes', value: audienceData.attitudes }
-                    };
+                    const psychographics = [
+                      { id: 'interest', label: 'Interest' },
+                      { id: 'lifestyle', label: 'Lifestyle' },
+                      { id: 'values', label: 'Values' },
+                      { id: 'attitudes', label: 'Attitudes' }
+                    ];
+                    
+                    const demographicsData = demographics.filter(d => audienceMap.has(d.id));
+                    const psychographicsData = psychographics.filter(p => audienceMap.has(p.id));
+                    
+                    if (demographicsData.length === 0 && psychographicsData.length === 0) {
+                      return <p className="text-muted-foreground text-center py-4">No target audience data available</p>;
+                    }
                     
                     return (
                       <div className="space-y-6">
                         {/* Demographics Section */}
-                        <div>
-                          <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Demographics</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {Object.entries(demographics).map(([key, { label, value }]) => value && (
-                              <div key={key} className="p-3 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
-                                <p className="text-xs text-muted-foreground mb-1">{label}</p>
-                                <Badge variant="secondary" className="text-xs font-semibold capitalize">
-                                  {value.replace(/-/g, ' ')}
-                                </Badge>
-                              </div>
-                            ))}
+                        {demographicsData.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Demographics</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              {demographicsData.map(({ id, label }) => {
+                                const data = audienceMap.get(id);
+                                return (
+                                  <div key={id} className={`p-3 rounded-lg bg-gradient-to-br border ${getImportanceColor(data.importance)} relative overflow-hidden`}>
+                                    {/* Importance indicator bar */}
+                                    <div 
+                                      className="absolute bottom-0 left-0 h-1 bg-primary/40 transition-all"
+                                      style={{ width: `${data.importance}%` }}
+                                    />
+                                    <p className="text-xs text-muted-foreground mb-1">{label}</p>
+                                    <Badge variant="secondary" className="text-xs font-semibold capitalize">
+                                      {data.option.replace(/-/g, ' ')}
+                                    </Badge>
+                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                      {Math.round(data.importance / 10)}/10 importance
+                                    </p>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
+                        )}
                         
                         {/* Psychographics Section */}
-                        <div>
-                          <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Psychographics</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {Object.entries(psychographics).map(([key, { label, value }]) => value && (
-                              <div key={key} className="p-3 rounded-lg bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/20">
-                                <p className="text-xs text-muted-foreground mb-1">{label}</p>
-                                <Badge variant="secondary" className="text-xs font-semibold capitalize">
-                                  {value.replace(/-/g, ' ')}
-                                </Badge>
-                              </div>
-                            ))}
+                        {psychographicsData.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Psychographics</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              {psychographicsData.map(({ id, label }) => {
+                                const data = audienceMap.get(id);
+                                return (
+                                  <div key={id} className={`p-3 rounded-lg bg-gradient-to-br border ${getImportanceColor(data.importance)} relative overflow-hidden`}>
+                                    {/* Importance indicator bar */}
+                                    <div 
+                                      className="absolute bottom-0 left-0 h-1 bg-blue-500/40 transition-all"
+                                      style={{ width: `${data.importance}%` }}
+                                    />
+                                    <p className="text-xs text-muted-foreground mb-1">{label}</p>
+                                    <Badge variant="secondary" className="text-xs font-semibold capitalize">
+                                      {data.option.replace(/-/g, ' ')}
+                                    </Badge>
+                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                      {Math.round(data.importance / 10)}/10 importance
+                                    </p>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })()}

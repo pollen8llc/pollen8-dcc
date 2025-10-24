@@ -77,7 +77,20 @@ const P8Links = () => {
       const description = localStorage.getItem("p8_community_description") || "";
       const location = localStorage.getItem("p8_selected_location") || "Remote";
       const tags = JSON.parse(localStorage.getItem("p8_selected_tags") || "[]");
-      const targetAudience = JSON.parse(localStorage.getItem("p8_combined_options") || "{}");
+      const selectedOptions = JSON.parse(localStorage.getItem("p8_combined_options") || "{}");
+      const importance = JSON.parse(localStorage.getItem("p8_combined_importance") || "{}");
+
+      // Build target audience array with both options and importance
+      const targetAudienceArray: any[] = [];
+      if (Object.keys(selectedOptions).length > 0) {
+        Object.keys(selectedOptions).forEach(vectorId => {
+          targetAudienceArray.push({
+            id: vectorId,
+            option: selectedOptions[vectorId],
+            importance: importance[vectorId] || 0
+          });
+        });
+      }
 
       // Build social media object
       const socialMedia: Record<string, string> = {};
@@ -101,7 +114,7 @@ const P8Links = () => {
         p_website: formData.website.trim() || null,
         p_is_public: true,
         p_tags: tags,
-        p_target_audience: Object.keys(targetAudience).length > 0 ? [targetAudience] : [],
+        p_target_audience: targetAudienceArray,
         p_social_media: Object.keys(socialMedia).length > 0 ? socialMedia : {},
         p_communication_platforms: Object.keys(communicationPlatforms).length > 0 ? communicationPlatforms : {},
       });
