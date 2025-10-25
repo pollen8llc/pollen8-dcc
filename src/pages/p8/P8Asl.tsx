@@ -164,7 +164,8 @@ const P8Asl = () => {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
     const saved = localStorage.getItem("p8_combined_options");
     if (saved) return JSON.parse(saved);
-    return Object.fromEntries(allVectors.map(v => [v.id, v.options[0].value]));
+    // Start with empty strings to allow users to select any option including "all"
+    return Object.fromEntries(allVectors.map(v => [v.id, ""]));
   });
   const [stage1Complete, setStage1Complete] = useState<Set<string>>(() => {
     const saved = localStorage.getItem("p8_stage1_complete");

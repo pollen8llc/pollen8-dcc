@@ -119,6 +119,10 @@ export const RadarChart = ({
           event.stopPropagation();
           onNodeClickRef.current?.(i);
         });
+      
+      // Add tooltip to label
+      labelGroup.append('title')
+        .text(`${d.category}\n\nStep 1: Click to select option\nStep 2: Drag node to set importance`);
 
       // Add badge background
       const textElement = labelGroup.append('text')
