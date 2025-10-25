@@ -20,7 +20,7 @@ export interface Community {
   format?: string;
   community_size?: string;
   event_frequency?: string;
-  target_audience?: string[];
+  target_audience?: any; // JSONB array of {id: string, option: string, importance: number}
   tags?: string[];
   logo_url?: string;
   role_title?: string;

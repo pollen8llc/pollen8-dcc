@@ -235,6 +235,9 @@ const P8Asl = () => {
   };
 
   const handleOptionChange = (vectorId: string, optionValue: string) => {
+    // Don't allow selecting empty option
+    if (!optionValue || optionValue === "") return;
+    
     setSelectedOptions((prev) => ({ ...prev, [vectorId]: optionValue }));
     
     // Mark Stage 1 as complete
@@ -338,9 +341,12 @@ const P8Asl = () => {
                 onValueChange={(value) => handleOptionChange(allVectors[selectedVector].id, value)}
               >
                 <SelectTrigger className="w-full h-12 text-base">
-                  <SelectValue placeholder="Choose an option..." />
+                  <SelectValue placeholder="Select an option..." />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="" disabled className="text-muted-foreground">
+                    Select an option...
+                  </SelectItem>
                   {allVectors[selectedVector].options.map((option) => (
                     <SelectItem key={option.value} value={option.value} className="text-base py-3">
                       {option.label}

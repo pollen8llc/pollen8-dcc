@@ -221,6 +221,10 @@ export const RadarChart = ({
         .style('transition', 'all 0.3s ease-out')
         .style('filter', isStage2Complete ? 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))' : 
                          isPulsing ? `drop-shadow(0 0 12px ${d.color})` : 'none');
+      
+      // Add tooltip to node
+      circle.append('title')
+        .text(`${d.category}\nImportance: ${d.importance}/100\n\nClick to select • Drag to adjust importance`);
 
       // Add pulse animation to pulsing node
       if (isPulsing) {

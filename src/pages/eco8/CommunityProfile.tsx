@@ -164,98 +164,124 @@ const CommunityProfile: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Spotify-style Banner Header */}
-      <div className="relative">
-        {/* Banner Image */}
-        <div className="h-80 bg-gradient-to-br from-primary/40 via-primary/20 to-accent/30 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50"></div>
-        </div>
-        
-        {/* Profile Section - Overlapping Banner */}
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative -mt-20 pb-8">
-            <div className="flex flex-col md:flex-row gap-6 items-end md:items-start">
-              {/* Avatar Circle */}
-              <div className="flex-shrink-0">
-                <Avatar className="w-40 h-40 border-4 border-background shadow-2xl">
+      {/* Enhanced Profile Header - Inspired by User Profile */}
+      <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl mb-8">
+        <CardContent className="p-0">
+          <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 lg:gap-8">
+              {/* Community Logo */}
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                <Avatar className="relative w-24 h-24 sm:w-32 sm:h-32 border-4 border-background shadow-2xl">
                   <AvatarImage src={community.logo_url} alt={community.name} />
-                  <AvatarFallback className="text-5xl bg-card">
+                  <AvatarFallback className="text-3xl sm:text-4xl bg-gradient-to-br from-primary to-primary/60">
                     {community.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
               </div>
               
               {/* Community Info */}
-              <div className="flex-1 mt-4 md:mt-12">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div>
-                    <h1 className="text-5xl font-bold mb-2">{community.name}</h1>
-                    <p className="text-lg text-muted-foreground max-w-2xl">{community.description}</p>
-                  </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 flex-shrink-0">
-                    {isOwner ? (
-                      <>
-                        <Button 
-                          size="lg" 
-                          variant="outline"
-                          onClick={() => setIsEditing(true)}
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Profile
-                        </Button>
-                        <Button variant="outline" size="lg">
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="lg" variant="ghost">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Community</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{community.name}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={handleDelete}
-                                disabled={isDeleting}
-                                className="bg-destructive hover:bg-destructive/90"
-                              >
-                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </>
-                    ) : (
-                      <>
-                        <Button size="lg">
-                          <Users className="h-4 w-4 mr-2" />
-                          Join Community
-                        </Button>
-                        <Button variant="outline" size="lg">
-                          <MessageCircle className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="lg">
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
+              <div className="flex-1 min-w-0 text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
+                    {community.name}
+                  </h1>
+                  {isRecent && (
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 self-center sm:self-auto">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
+                      Active
+                    </Badge>
+                  )}
+                </div>
+                
+                <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mb-3 sm:mb-4">
+                  {community.description}
+                </p>
+                
+                {/* Location and Tags */}
+                <div className="flex flex-wrap gap-2 mb-3 sm:mb-4 justify-center sm:justify-start">
+                  {community.location && (
+                    <Badge variant="secondary" className="text-sm">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {community.location}
+                    </Badge>
+                  )}
+                  {community.type && (
+                    <Badge variant="outline" className="text-sm">
+                      {community.type}
+                    </Badge>
+                  )}
+                  {community.tags?.slice(0, 2).map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-sm">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex-shrink-0 w-full sm:w-auto">
+                <div className="flex gap-2 justify-center sm:justify-start flex-wrap">
+                  {isOwner ? (
+                    <>
+                      <Button 
+                        size="default" 
+                        onClick={() => setIsEditing(true)}
+                        className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                      <Button variant="outline" size="default" className="px-3 sm:px-4 py-2 sm:py-3">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="default" variant="ghost" className="px-3 sm:px-4 py-2 sm:py-3">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Community</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{community.name}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={handleDelete}
+                              disabled={isDeleting}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </>
+                  ) : (
+                    <>
+                      <Button size="default" className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold">
+                        <Users className="h-4 w-4 mr-2" />
+                        Join Community
+                      </Button>
+                      <Button variant="outline" size="default" className="px-3 sm:px-4 py-2 sm:py-3">
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="default" className="px-3 sm:px-4 py-2 sm:py-3">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Dashboard Content */}
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">

@@ -93,7 +93,7 @@ export type Database = {
           owner_id: string
           social_media: Json | null
           tags: string[] | null
-          target_audience: string[] | null
+          target_audience: Json | null
           type: string | null
           updated_at: string
           vision: string | null
@@ -114,7 +114,7 @@ export type Database = {
           owner_id: string
           social_media?: Json | null
           tags?: string[] | null
-          target_audience?: string[] | null
+          target_audience?: Json | null
           type?: string | null
           updated_at?: string
           vision?: string | null
@@ -135,7 +135,7 @@ export type Database = {
           owner_id?: string
           social_media?: Json | null
           tags?: string[] | null
-          target_audience?: string[] | null
+          target_audience?: Json | null
           type?: string | null
           updated_at?: string
           vision?: string | null
@@ -2621,10 +2621,7 @@ export type Database = {
         }
         Returns: string
       }
-      generate_unique_invite_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_unique_invite_code: { Args: never; Returns: string }
       get_community_events: {
         Args: { community_id: string }
         Returns: {
@@ -2655,10 +2652,7 @@ export type Database = {
         Args: { user_a: string; user_b: string }
         Returns: number
       }
-      get_highest_role: {
-        Args: { user_id: string }
-        Returns: string
-      }
+      get_highest_role: { Args: { user_id: string }; Returns: string }
       get_knowledge_articles: {
         Args: {
           p_content_type?: string
@@ -2733,6 +2727,12 @@ export type Database = {
           updated_at: string
           user_id: string
         }
+        SetofOptions: {
+          from: "*"
+          to: "iotas"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_poll_counts: {
         Args: { poll_id: string }
@@ -2741,10 +2741,7 @@ export type Database = {
           option_index: number
         }[]
       }
-      get_rel8t_metrics: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      get_rel8t_metrics: { Args: never; Returns: Json }
       get_term_suggestions: {
         Args: { p_limit?: number; p_search_query?: string; p_term_type: string }
         Returns: {
@@ -2754,10 +2751,7 @@ export type Database = {
           usage_count: number
         }[]
       }
-      get_user_community_ids: {
-        Args: { user_uuid: string }
-        Returns: string[]
-      }
+      get_user_community_ids: { Args: { user_uuid: string }; Returns: string[] }
       get_user_memberships: {
         Args: { user_id: string }
         Returns: {
@@ -2821,14 +2815,8 @@ export type Database = {
         Args: { p_increment?: number; p_metric_type: string; p_user_id: string }
         Returns: boolean
       }
-      increment_view_count: {
-        Args: { article_id: string }
-        Returns: undefined
-      }
-      is_admin: {
-        Args: { user_id: string }
-        Returns: boolean
-      }
+      increment_view_count: { Args: { article_id: string }; Returns: undefined }
+      is_admin: { Args: { user_id: string }; Returns: boolean }
       is_community_owner: {
         Args: { community_id: string; user_id: string }
         Returns: boolean
@@ -2837,18 +2825,12 @@ export type Database = {
         Args: { action_details?: Json; action_name: string; user_id?: string }
         Returns: string
       }
-      populate_us_states_from_atlas: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      populate_us_states_from_atlas: { Args: never; Returns: number }
       record_invite_use: {
         Args: { invite_code: string; used_by_id: string }
         Returns: boolean
       }
-      register_for_event: {
-        Args: { event_id: string }
-        Returns: boolean
-      }
+      register_for_event: { Args: { event_id: string }; Returns: boolean }
       search_locations: {
         Args: {
           limit_count?: number
@@ -2865,10 +2847,7 @@ export type Database = {
           type: string
         }[]
       }
-      sync_existing_data_to_lexicon: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      sync_existing_data_to_lexicon: { Args: never; Returns: number }
       track_location_usage: {
         Args: {
           location_name: string
@@ -2901,18 +2880,12 @@ export type Database = {
         Args: { is_complete?: boolean; module_name: string; user_id: string }
         Returns: boolean
       }
-      update_network_value: {
-        Args: { p_user_id: string }
-        Returns: undefined
-      }
+      update_network_value: { Args: { p_user_id: string }; Returns: undefined }
       update_user_role: {
         Args: { p_assigner_id?: string; p_role_name: string; p_user_id: string }
         Returns: boolean
       }
-      update_user_role_self: {
-        Args: { p_role_name: string }
-        Returns: boolean
-      }
+      update_user_role_self: { Args: { p_role_name: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
