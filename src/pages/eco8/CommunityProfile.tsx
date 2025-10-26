@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Navbar from '@/components/Navbar';
 import { Eco8Navigation } from '@/components/eco8/Eco8Navigation';
 import { CommunityEditForm } from '@/components/eco8/CommunityEditForm';
@@ -32,7 +32,9 @@ import {
   BookOpen,
   Rss,
   Trash2,
-  Loader2
+  Loader2,
+  TrendingUp,
+  Activity
 } from 'lucide-react';
 
 const CommunityProfile: React.FC = () => {
@@ -161,444 +163,387 @@ const CommunityProfile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      {/* Enhanced Profile Header - Inspired by User Profile */}
-      <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl mb-8">
-        <CardContent className="p-0">
-          <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 p-4 sm:p-6 lg:p-8">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 lg:gap-8">
-              {/* Community Logo */}
-              <div className="relative flex-shrink-0">
-                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
-                <Avatar className="relative w-24 h-24 sm:w-32 sm:h-32 border-4 border-background shadow-2xl">
-                  <AvatarImage src={community.logo_url} alt={community.name} />
-                  <AvatarFallback className="text-3xl sm:text-4xl bg-gradient-to-br from-primary to-primary/60">
-                    {community.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              
-              {/* Community Info */}
-              <div className="flex-1 min-w-0 text-center sm:text-left">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-                    {community.name}
-                  </h1>
-                  {isRecent && (
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 self-center sm:self-auto">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
-                      Active
-                    </Badge>
-                  )}
-                </div>
-                
-                <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mb-3 sm:mb-4">
-                  {community.description}
-                </p>
-                
-                {/* Location and Tags */}
-                <div className="flex flex-wrap gap-2 mb-3 sm:mb-4 justify-center sm:justify-start">
-                  {community.location && (
-                    <Badge variant="secondary" className="text-sm">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {community.location}
-                    </Badge>
-                  )}
-                  {community.type && (
-                    <Badge variant="outline" className="text-sm">
-                      {community.type}
-                    </Badge>
-                  )}
-                  {community.tags?.slice(0, 2).map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-sm">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="flex-shrink-0 w-full sm:w-auto">
-                <div className="flex gap-2 justify-center sm:justify-start flex-wrap">
-                  {isOwner ? (
-                    <>
-                      <Button 
-                        size="default" 
-                        onClick={() => setIsEditing(true)}
-                        className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Profile
-                      </Button>
-                      <Button variant="outline" size="default" className="px-3 sm:px-4 py-2 sm:py-3">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button size="default" variant="ghost" className="px-3 sm:px-4 py-2 sm:py-3">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Community</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{community.name}"? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction 
-                              onClick={handleDelete}
-                              disabled={isDeleting}
-                              className="bg-destructive hover:bg-destructive/90"
-                            >
-                              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </>
-                  ) : (
-                    <>
-                      <Button size="default" className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold">
-                        <Users className="h-4 w-4 mr-2" />
-                        Join Community
-                      </Button>
-                      <Button variant="outline" size="default" className="px-3 sm:px-4 py-2 sm:py-3">
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="default" className="px-3 sm:px-4 py-2 sm:py-3">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Dashboard Content */}
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
-        
-        {/* Badges Row */}
-        <div className="flex flex-wrap gap-2 mb-8 items-center">
-          {community.location && (
-            <Badge variant="secondary" className="text-sm py-1 px-3">
-              <MapPin className="h-3 w-3 mr-1" />
-              {community.location}
-            </Badge>
-          )}
-          {community.tags && community.tags.map((tag, index) => (
-            <Badge key={index} variant="outline" className="text-sm py-1 px-3">
-              {tag}
-            </Badge>
-          ))}
-          {community.is_public && (
-            <Badge variant="outline" className="text-sm py-1 px-3">
-              Public Community
-            </Badge>
-          )}
-          {isRecent && (
-            <Badge className="text-sm py-1 px-3 bg-green-500/20 text-green-400 border-green-500/30">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
-              Recently Active
-            </Badge>
-          )}
-        </div>
-
-        {/* Dashboard Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Left Column - Full Width on Mobile, 2 cols on Desktop */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Stats Cards - P8Dashboard Inspired */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="hover:shadow-lg transition-all duration-300 border-primary/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Members</p>
-                      <p className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
-                        {community.member_count || '1'}
-                      </p>
-                      {isRecent && (
-                        <p className="text-xs text-green-500 mt-1">+12% this week</p>
+      {/* Sleek Profile Header - Similar to DotConnectorHeader */}
+      <div className="w-full">
+        <div className="container mx-auto px-4 py-6 max-w-6xl">
+          <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
+            <CardContent className="p-0">
+              <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
+                  {/* Community Logo */}
+                  <div className="relative flex-shrink-0">
+                    <Avatar className="w-24 h-24 border-4 border-background shadow-2xl">
+                      <AvatarImage src={community.logo_url} alt={community.name} />
+                      <AvatarFallback className="text-3xl bg-gradient-to-br from-primary to-primary/60">
+                        {community.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  
+                  {/* Community Info */}
+                  <div className="flex-1 min-w-0 text-center sm:text-left">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
+                      <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
+                        {community.name}
+                      </h1>
+                      <Badge variant="secondary" className="text-sm font-medium self-center sm:self-auto">
+                        {community.type || 'Community'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 justify-center sm:justify-start flex-wrap mb-2">
+                      {community.location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-5 h-5 text-muted-foreground" />
+                          <span className="text-lg text-muted-foreground font-medium">{community.location}</span>
+                        </div>
                       )}
                     </div>
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20">
-                      <Users className="h-8 w-8 text-primary" />
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex-shrink-0 w-full sm:w-auto">
+                    <div className="flex gap-2 justify-center sm:justify-start">
+                      {isOwner ? (
+                        <>
+                          <Button 
+                            onClick={() => setIsEditing(true)}
+                            size="default" 
+                            className="px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+                          >
+                            <Edit className="w-5 h-5 mr-3" />
+                            Edit
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="default" variant="ghost" className="px-3 py-3">
+                                <Trash2 className="h-5 w-5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Community</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{community.name}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={handleDelete}
+                                  disabled={isDeleting}
+                                  className="bg-destructive hover:bg-destructive/90"
+                                >
+                                  {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      ) : (
+                        <>
+                          <Button size="default" className="px-6 py-3 text-base font-semibold">
+                            <Users className="h-5 w-5 mr-2" />
+                            Join
+                          </Button>
+                          <Button variant="outline" size="default" className="px-3 py-3">
+                            <MessageCircle className="h-5 w-5" />
+                          </Button>
+                          <Button variant="outline" size="default" className="px-3 py-3">
+                            <Share2 className="h-5 w-5" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="hover:shadow-lg transition-all duration-300 border-blue-500/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Categories</p>
-                      <p className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-blue-400 bg-clip-text text-transparent">
-                        {community.tags?.length || 0}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">Active topics</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/20">
-                      <Award className="h-8 w-8 text-blue-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="hover:shadow-lg transition-all duration-300 border-green-500/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Location</p>
-                      <p className="text-lg font-bold bg-gradient-to-br from-green-500 to-green-400 bg-clip-text text-transparent truncate">
-                        {community.location || 'Remote'}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">Community base</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/20">
-                      <MapPin className="h-8 w-8 text-green-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* About Section - Enhanced */}
-            {community.description && (
-              <Card className="hover:shadow-lg transition-all duration-300 border-border/50">
-                <CardHeader>
-                  <CardTitle className="text-2xl flex items-center gap-2">
-                    <Building2 className="h-6 w-6 text-primary" />
-                    About
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed text-lg">
-                    {community.description}
+        {/* Glowing Sliver */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-[2px] opacity-60" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-[4px] opacity-40" />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6">
+        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+        
+        {/* Stats Cards Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="hover:shadow-lg transition-all duration-300 border-primary/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Members</p>
+                  <p className="text-3xl font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+                    {community.member_count || '1'}
                   </p>
-                </CardContent>
-              </Card>
-            )}
+                  {isRecent && (
+                    <p className="text-xs text-green-500 mt-1">+12% this week</p>
+                  )}
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20">
+                  <Users className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-all duration-300 border-blue-500/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Engagement</p>
+                  <p className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-blue-400 bg-clip-text text-transparent">
+                    {isRecent ? '68%' : '45%'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Activity rate</p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/20">
+                  <Activity className="h-8 w-8 text-blue-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-all duration-300 border-green-500/20">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Growth</p>
+                  <p className="text-3xl font-bold bg-gradient-to-br from-green-500 to-green-400 bg-clip-text text-transparent">
+                    +{isRecent ? '32' : '15'}%
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">This month</p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/20">
+                  <TrendingUp className="h-8 w-8 text-green-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* 2-Column Layout - Enhanced Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Vision */}
-              {community.vision && (
-                <Card className="hover:shadow-lg transition-all duration-300 border-purple-500/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/20">
-                        <Lightbulb className="h-5 w-5 text-purple-500" />
-                      </div>
-                      Vision
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {community.vision}
+        {/* Full-Width Panel with Accordions */}
+        <Card className="border-border/50">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Building2 className="h-6 w-6 text-primary" />
+              Community Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="multiple" className="w-full">
+              {/* About */}
+              {community.description && (
+                <AccordionItem value="about">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    About the Community
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-muted-foreground leading-relaxed text-base pt-2">
+                      {community.description}
                     </p>
-                  </CardContent>
-                </Card>
+                  </AccordionContent>
+                </AccordionItem>
               )}
 
-              {/* Values */}
-              {community.community_values && (
-                <Card className="hover:shadow-lg transition-all duration-300 border-pink-500/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500/10 to-pink-500/20">
-                        <Heart className="h-5 w-5 text-pink-500" />
-                      </div>
-                      Values
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {community.community_values}
-                    </p>
-                  </CardContent>
-                </Card>
+              {/* Vision & Values */}
+              {(community.vision || community.community_values) && (
+                <AccordionItem value="vision">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    Vision & Values
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-4 pt-2">
+                      {community.vision && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Lightbulb className="h-5 w-5 text-purple-500" />
+                            <h4 className="font-semibold">Vision</h4>
+                          </div>
+                          <p className="text-muted-foreground leading-relaxed">{community.vision}</p>
+                        </div>
+                      )}
+                      {community.community_values && (
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Heart className="h-5 w-5 text-pink-500" />
+                            <h4 className="font-semibold">Values</h4>
+                          </div>
+                          <p className="text-muted-foreground leading-relaxed">{community.community_values}</p>
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
               )}
 
-              {/* Structure */}
-              {community.community_structure && (
-                <Card className="hover:shadow-lg transition-all duration-300 border-blue-500/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/20">
-                        <Building2 className="h-5 w-5 text-blue-500" />
-                      </div>
-                      Structure
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {community.community_structure}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Founder Background */}
-              {community.personal_background && (
-                <Card className="hover:shadow-lg transition-all duration-300 border-orange-500/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-orange-500/20">
-                        <BookOpen className="h-5 w-5 text-orange-500" />
-                      </div>
-                      Founder
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {community.personal_background}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Target Audience - Full Width with Demographics and Psychographics */}
-            {community.target_audience && community.target_audience.length > 0 && (
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-primary" />
-                    Target Audience
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {(() => {
-                    // Convert array of objects to map for easy lookup
-                    const audienceMap = new Map();
-                    community.target_audience.forEach((item: any) => {
-                      if (item && typeof item === 'object' && item.id) {
-                        audienceMap.set(item.id, {
-                          option: item.option,
-                          importance: item.importance || 0
+              {/* Target Audience */}
+              {community.target_audience && community.target_audience.length > 0 && (
+                <AccordionItem value="audience">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-primary" />
+                      Target Audience
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-4 pt-2">
+                      {(() => {
+                        const audienceMap = new Map();
+                        community.target_audience.forEach((item: any) => {
+                          if (item && typeof item === 'object' && item.id) {
+                            audienceMap.set(item.id, {
+                              option: item.option,
+                              importance: item.importance || 0
+                            });
+                          }
                         });
-                      }
-                    });
-                    
-                    // Helper function to get importance color
-                    const getImportanceColor = (importance: number) => {
-                      if (importance >= 75) return 'from-red-500/10 to-red-500/20 border-red-500/30';
-                      if (importance >= 50) return 'from-orange-500/10 to-orange-500/20 border-orange-500/30';
-                      if (importance >= 25) return 'from-yellow-500/10 to-yellow-500/20 border-yellow-500/30';
-                      return 'from-gray-500/10 to-gray-500/20 border-gray-500/30';
-                    };
-                    
-                    // Demographics categories
-                    const demographics = [
-                      { id: 'age', label: 'Age Range' },
-                      { id: 'status', label: 'Professional Status' },
-                      { id: 'gender', label: 'Gender' },
-                      { id: 'race', label: 'Ethnicity' }
-                    ];
-                    
-                    // Psychographics categories
-                    const psychographics = [
-                      { id: 'interest', label: 'Interest' },
-                      { id: 'lifestyle', label: 'Lifestyle' },
-                      { id: 'values', label: 'Values' },
-                      { id: 'attitudes', label: 'Attitudes' }
-                    ];
-                    
-                    const demographicsData = demographics.filter(d => audienceMap.has(d.id));
-                    const psychographicsData = psychographics.filter(p => audienceMap.has(p.id));
-                    
-                    if (demographicsData.length === 0 && psychographicsData.length === 0) {
-                      return <p className="text-muted-foreground text-center py-4">No target audience data available</p>;
-                    }
-                    
-                    return (
-                      <div className="space-y-6">
-                        {/* Demographics Section */}
-                        {demographicsData.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Demographics</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                              {demographicsData.map(({ id, label }) => {
-                                const data = audienceMap.get(id);
-                                return (
-                                  <div key={id} className={`p-3 rounded-lg bg-gradient-to-br border ${getImportanceColor(data.importance)} relative overflow-hidden`}>
-                                    {/* Importance indicator bar */}
-                                    <div 
-                                      className="absolute bottom-0 left-0 h-1 bg-primary/40 transition-all"
-                                      style={{ width: `${data.importance}%` }}
-                                    />
-                                    <p className="text-xs text-muted-foreground mb-1">{label}</p>
-                                    <Badge variant="secondary" className="text-xs font-semibold capitalize">
-                                      {data.option.replace(/-/g, ' ')}
-                                    </Badge>
-                                    <p className="text-[10px] text-muted-foreground mt-1">
-                                      {Math.round(data.importance / 10)}/10 importance
-                                    </p>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
                         
-                        {/* Psychographics Section */}
-                        {psychographicsData.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Psychographics</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                              {psychographicsData.map(({ id, label }) => {
-                                const data = audienceMap.get(id);
-                                return (
-                                  <div key={id} className={`p-3 rounded-lg bg-gradient-to-br border ${getImportanceColor(data.importance)} relative overflow-hidden`}>
-                                    {/* Importance indicator bar */}
-                                    <div 
-                                      className="absolute bottom-0 left-0 h-1 bg-blue-500/40 transition-all"
-                                      style={{ width: `${data.importance}%` }}
-                                    />
-                                    <p className="text-xs text-muted-foreground mb-1">{label}</p>
-                                    <Badge variant="secondary" className="text-xs font-semibold capitalize">
-                                      {data.option.replace(/-/g, ' ')}
-                                    </Badge>
-                                    <p className="text-[10px] text-muted-foreground mt-1">
-                                      {Math.round(data.importance / 10)}/10 importance
-                                    </p>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                        const demographics = [
+                          { id: 'age', label: 'Age Range' },
+                          { id: 'status', label: 'Professional Status' },
+                          { id: 'gender', label: 'Gender' },
+                          { id: 'race', label: 'Ethnicity' }
+                        ];
+                        
+                        const psychographics = [
+                          { id: 'interest', label: 'Interest' },
+                          { id: 'lifestyle', label: 'Lifestyle' },
+                          { id: 'values', label: 'Values' },
+                          { id: 'attitudes', label: 'Attitudes' }
+                        ];
+                        
+                        const demographicsData = demographics.filter(d => audienceMap.has(d.id));
+                        const psychographicsData = psychographics.filter(p => audienceMap.has(p.id));
+                        
+                        return (
+                          <div className="space-y-4">
+                            {demographicsData.length > 0 && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase">Demographics</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {demographicsData.map(({ id, label }) => {
+                                    const data = audienceMap.get(id);
+                                    return (
+                                      <Badge key={id} variant="secondary" className="text-sm">
+                                        {label}: {data.option.replace(/-/g, ' ')}
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {psychographicsData.length > 0 && (
+                              <div>
+                                <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase">Psychographics</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {psychographicsData.map(({ id, label }) => {
+                                    const data = audienceMap.get(id);
+                                    return (
+                                      <Badge key={id} variant="outline" className="text-sm">
+                                        {label}: {data.option.replace(/-/g, ' ')}
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                        );
+                      })()}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
 
-          {/* Right Sidebar - Single Column */}
-          <div className="space-y-6">
-            
-            {/* Quick Links - Enhanced */}
-            <Card className="hover:shadow-lg transition-all duration-300 border-border/50 sticky top-4">
-              <CardHeader className="pb-3">
+              {/* Structure & Leadership */}
+              {(community.community_structure || community.personal_background) && (
+                <AccordionItem value="structure">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    Structure & Leadership
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-4 pt-2">
+                      {community.community_structure && (
+                        <div>
+                          <h4 className="font-semibold mb-2">Community Structure</h4>
+                          <p className="text-muted-foreground leading-relaxed">{community.community_structure}</p>
+                        </div>
+                      )}
+                      {community.personal_background && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <BookOpen className="h-4 w-4 text-orange-500" />
+                            Founder Background
+                          </h4>
+                          <p className="text-muted-foreground leading-relaxed">{community.personal_background}</p>
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {/* Community Details */}
+              {(community.format || community.community_size || community.event_frequency || community.start_date) && (
+                <AccordionItem value="details">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    Community Details
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      {community.format && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Format</p>
+                          <Badge variant="outline">{community.format}</Badge>
+                        </div>
+                      )}
+                      {community.community_size && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Size</p>
+                          <p className="font-medium">{community.community_size}</p>
+                        </div>
+                      )}
+                      {community.event_frequency && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Events</p>
+                          <p className="font-medium">{community.event_frequency}</p>
+                        </div>
+                      )}
+                      {community.start_date && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Started</p>
+                          <p className="font-medium">{community.start_date}</p>
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+          </CardContent>
+        </Card>
+
+        {/* Links & Social Media Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Quick Links */}
+          {(community.website || community.newsletter_url) && (
+            <Card className="border-border/50">
+              <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-primary/20">
-                    <Globe className="h-4 w-4 text-primary" />
-                  </div>
+                  <Globe className="h-5 w-5 text-primary" />
                   Quick Links
                 </CardTitle>
               </CardHeader>
@@ -608,157 +553,110 @@ const CommunityProfile: React.FC = () => {
                     href={community.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 hover:border-primary/40 transition-all group"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-all group"
                   >
                     <Globe className="h-5 w-5 text-primary" />
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1">
                       <p className="text-sm font-medium">Website</p>
-                      <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors truncate">
-                        Visit our site
-                      </p>
                     </div>
                     <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </a>
                 )}
-                
                 {community.newsletter_url && (
                   <a
                     href={community.newsletter_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all group"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-all group"
                   >
                     <Rss className="h-5 w-5 text-blue-500" />
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1">
                       <p className="text-sm font-medium">Newsletter</p>
-                      <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors truncate">
-                        Subscribe to updates
-                      </p>
                     </div>
                     <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                   </a>
                 )}
-
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-muted/30 to-muted/50 border border-border/30">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Created</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(community.created_at).toLocaleDateString('en-US', { 
-                        month: 'long', 
-                        year: 'numeric' 
-                      })}
-                    </p>
-                  </div>
-                </div>
               </CardContent>
             </Card>
+          )}
 
-            {/* Social Media - Enhanced */}
-            {community.social_media && Object.keys(community.social_media).length > 0 && (
-              <Card className="hover:shadow-lg transition-all duration-300 border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/20">
-                      <Share2 className="h-4 w-4 text-blue-500" />
+          {/* Social Media */}
+          {community.social_media && Object.keys(community.social_media).length > 0 && (
+            <Card className="border-border/50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Share2 className="h-5 w-5 text-blue-500" />
+                  Social Media
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {Object.entries(community.social_media).map(([platform, url]) => (
+                  <a
+                    key={platform}
+                    href={url as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-all group"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                      <span className="text-xs font-bold text-blue-500 uppercase">{platform.charAt(0)}</span>
                     </div>
-                    Social Media
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {Object.entries(community.social_media).map(([platform, url]) => (
-                    <a
-                      key={platform}
-                      href={url as string}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all group"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/20 to-blue-500/30 flex items-center justify-center">
-                        <span className="text-xs font-bold text-blue-500 uppercase">
-                          {platform.charAt(0)}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium capitalize">{platform}</p>
-                      </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
-                    </a>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+                    <p className="text-sm font-medium capitalize flex-1">{platform}</p>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
+                  </a>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Communication Platforms - Enhanced */}
-            {community.communication_platforms && Object.keys(community.communication_platforms).length > 0 && (
-              <Card className="hover:shadow-lg transition-all duration-300 border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/20">
-                      <MessageCircle className="h-4 w-4 text-green-500" />
-                    </div>
-                    Communication
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {Object.entries(community.communication_platforms).map(([platform, url]) => (
-                    <a
-                      key={platform}
-                      href={url as string}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-green-500/5 to-green-500/10 border border-green-500/20 hover:border-green-500/40 transition-all group"
-                    >
-                      <MessageCircle className="h-5 w-5 text-green-500" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium capitalize">{platform}</p>
-                      </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-green-500 transition-colors" />
-                    </a>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Community Details */}
-            {(community.format || community.community_size || community.event_frequency || community.start_date) && (
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-lg">Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {community.format && (
-                    <div className="flex justify-between items-center p-2">
-                      <span className="text-sm text-muted-foreground">Format</span>
-                      <Badge variant="outline">{community.format}</Badge>
-                    </div>
-                  )}
-                  
-                  {community.community_size && (
-                    <div className="flex justify-between items-center p-2">
-                      <span className="text-sm text-muted-foreground">Size</span>
-                      <span className="text-sm font-medium">{community.community_size}</span>
-                    </div>
-                  )}
-
-                  {community.event_frequency && (
-                    <div className="flex justify-between items-center p-2">
-                      <span className="text-sm text-muted-foreground">Events</span>
-                      <span className="text-sm font-medium">{community.event_frequency}</span>
-                    </div>
-                  )}
-
-                  {community.start_date && (
-                    <div className="flex justify-between items-center p-2">
-                      <span className="text-sm text-muted-foreground">Started</span>
-                      <span className="text-sm font-medium">{community.start_date}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          {/* Communication Platforms */}
+          {community.communication_platforms && Object.keys(community.communication_platforms).length > 0 && (
+            <Card className="border-border/50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-green-500" />
+                  Communication
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {Object.entries(community.communication_platforms).map(([platform, url]) => (
+                  <a
+                    key={platform}
+                    href={url as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-all group"
+                  >
+                    <MessageCircle className="h-5 w-5 text-green-500" />
+                    <p className="text-sm font-medium capitalize flex-1">{platform}</p>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-green-500 transition-colors" />
+                  </a>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </div>
+
+        {/* Tags */}
+        {community.tags && community.tags.length > 0 && (
+          <Card className="border-border/50">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                Tags & Categories
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {community.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-sm">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
