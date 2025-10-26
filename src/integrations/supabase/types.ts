@@ -2605,39 +2605,22 @@ export type Database = {
         Args: { profile_user_id: string; viewer_id: string }
         Returns: boolean
       }
-      create_community:
-        | {
-            Args: {
-              p_communication_platforms?: Json
-              p_description: string
-              p_format?: string
-              p_is_public?: boolean
-              p_location?: string
-              p_name: string
-              p_social_media?: Json
-              p_tags?: string[]
-              p_target_audience?: Json
-              p_type?: string
-              p_website?: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              p_communication_platforms?: Json
-              p_description: string
-              p_format?: string
-              p_is_public?: boolean
-              p_location?: string
-              p_name: string
-              p_social_media?: Json
-              p_tags?: string[]
-              p_target_audience?: string[]
-              p_type?: string
-              p_website?: string
-            }
-            Returns: string
-          }
+      create_community: {
+        Args: {
+          p_communication_platforms?: Json
+          p_description: string
+          p_format?: string
+          p_is_public?: boolean
+          p_location?: string
+          p_name: string
+          p_social_media?: Json
+          p_tags?: string[]
+          p_target_audience?: Json
+          p_type?: string
+          p_website?: string
+        }
+        Returns: string
+      }
       generate_unique_invite_code: { Args: never; Returns: string }
       get_community_events: {
         Args: { community_id: string }
