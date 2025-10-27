@@ -183,60 +183,6 @@ const cityCoordinates: Record<string, { lat: number; lng: number }> = {
   "Noumea": { lat: -22.2758, lng: 166.4572 },
 };
 
-// State name to city mapping for easier search
-const stateToCity: Record<string, string> = {
-  "Alabama": "Montgomery",
-  "Alaska": "Juneau",
-  "Arizona": "Phoenix",
-  "Arkansas": "Little Rock",
-  "California": "Los Angeles",
-  "Colorado": "Denver",
-  "Connecticut": "Hartford",
-  "Delaware": "Dover",
-  "Florida": "Miami",
-  "Georgia": "Atlanta",
-  "Hawaii": "Honolulu",
-  "Idaho": "Boise",
-  "Illinois": "Chicago",
-  "Indiana": "Indianapolis",
-  "Iowa": "Des Moines",
-  "Kansas": "Wichita",
-  "Kentucky": "Louisville",
-  "Louisiana": "New Orleans",
-  "Maine": "Augusta",
-  "Maryland": "Annapolis",
-  "Massachusetts": "Boston",
-  "Michigan": "Detroit",
-  "Minnesota": "Minneapolis",
-  "Mississippi": "Jackson",
-  "Missouri": "Kansas City",
-  "Montana": "Billings",
-  "Nebraska": "Omaha",
-  "Nevada": "Las Vegas",
-  "New Hampshire": "Concord",
-  "New Jersey": "Newark",
-  "New Mexico": "Albuquerque",
-  "New York": "New York",
-  "North Carolina": "Charlotte",
-  "North Dakota": "Fargo",
-  "Ohio": "Columbus",
-  "Oklahoma": "Oklahoma City",
-  "Oregon": "Portland",
-  "Pennsylvania": "Philadelphia",
-  "Rhode Island": "Providence",
-  "South Carolina": "Charleston",
-  "South Dakota": "Sioux Falls",
-  "Tennessee": "Nashville",
-  "Texas": "Houston",
-  "Utah": "Salt Lake City",
-  "Vermont": "Burlington",
-  "Virginia": "Richmond",
-  "Washington": "Seattle",
-  "West Virginia": "Charleston WV",
-  "Wisconsin": "Milwaukee",
-  "Wyoming": "Cheyenne",
-};
-
 interface Loc8DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -335,21 +281,8 @@ export const Loc8Dialog = ({
   const allCities = Object.keys(cityCoordinates);
   const filteredCities = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
-    
-    // First check if query matches a state name
-    const matchedState = Object.keys(stateToCity).find(state => 
-      state.toLowerCase().includes(query)
-    );
-    
-    if (matchedState) {
-      const cityName = stateToCity[matchedState];
-      return [cityName];
-    }
-    
-    // Otherwise search cities
     return allCities
-      .filter(city => city.toLowerCase().includes(query))
+      .filter(city => city.toLowerCase().includes(searchQuery.toLowerCase()))
       .slice(0, 8); // Limit to 8 for clean mid-canvas display
   }, [searchQuery]);
 

@@ -74,7 +74,7 @@ const P8Loc8 = () => {
                 }
               }}
               disabled={!selectedLocation}
-              className={`group ${!selectedLocation ? 'opacity-40 cursor-not-allowed' : ''}`}
+              className="group"
             >
               {selectedLocation 
                 ? `Continue (${selectedLocation})` 
