@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,16 @@ import { Loc8Dialog } from "@/components/ui/loc8-dialog";
 
 const P8Loc8 = () => {
   const navigate = useNavigate();
-  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(true);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedLocation = localStorage.getItem("p8_selected_location");
+    if (savedLocation) {
+      setSelectedLocation(savedLocation);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
@@ -26,15 +34,25 @@ const P8Loc8 = () => {
         <Loc8Dialog
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
-          value={selectedCities}
-          onValueChange={setSelectedCities}
-          mode="multiple"
-          title="Select Your Cities"
-          description="Choose the cities where you're active or interested in connecting"
+          value={selectedLocation ? [selectedLocation] : []}
+          onValueChange={(cities) => {
+            const location = cities[0] || "";
+            setSelectedLocation(location);
+            if (location) {
+              localStorage.setItem("p8_selected_location", location);
+            } else {
+              localStorage.removeItem("p8_selected_location");
+            }
+          }}
+          mode="single"
+          title="Select Your City"
+          description="Choose the city where your community is based"
           onConfirm={(cities) => {
-            setSelectedCities(cities);
-            setIsDialogOpen(false);
-            if (cities.length > 0) {
+            const location = cities[0];
+            if (location) {
+              setSelectedLocation(location);
+              localStorage.setItem("p8_selected_location", location);
+              setIsDialogOpen(false);
               navigate("/p8/asl");
             }
           }}
@@ -49,17 +67,18 @@ const P8Loc8 = () => {
             </Button>
             <Button 
               onClick={() => {
-                if (selectedCities.length > 0) {
+                if (selectedLocation) {
                   navigate("/p8/asl");
                 } else {
                   setIsDialogOpen(true);
                 }
               }}
+              disabled={!selectedLocation}
               className="group"
             >
-              {selectedCities.length > 0 
-                ? `Continue (${selectedCities.length} selected)` 
-                : "Select Cities"}
+              {selectedLocation 
+                ? `Continue (${selectedLocation})` 
+                : "Select City"}
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
