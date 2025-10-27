@@ -402,7 +402,11 @@ export const Loc8Dialog = ({
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm}>
+          <Button 
+            onClick={handleConfirm}
+            disabled={selectedCities.length === 0}
+            className={selectedCities.length === 0 ? "opacity-40 cursor-not-allowed" : ""}
+          >
             Confirm Selection
           </Button>
         </div>
