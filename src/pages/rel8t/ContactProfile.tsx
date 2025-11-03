@@ -5,7 +5,8 @@ import { ContactHeader } from '@/components/rel8t/ContactHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ProfileCard from '@/components/connections/ProfileCard';
-import { Mail, Phone, MapPin, Building, Calendar, MessageSquare, Users } from 'lucide-react';
+import { Mail, Phone, MapPin, Building, Calendar, MessageSquare, Users, TrendingUp, Activity, ChevronDown } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 // Mock data - replace with actual data fetching
 const mockContact = {
@@ -165,60 +166,222 @@ export default function ContactProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Contact Status
+              <Activity className="h-5 w-5" />
+              Contact Status & Activity
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
-              {/* Column 1 */}
-              <div className="space-y-3 md:space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className={`h-3 w-3 rounded-full flex-shrink-0 ${mockContact.status === 'active' ? 'bg-green-500' : 'bg-gray-500'}`} />
-                  <div>
-                    <p className="text-xs md:text-sm text-muted-foreground">Status</p>
-                    <p className="font-medium text-sm md:text-base capitalize">{mockContact.status}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <p className="text-xs md:text-sm text-muted-foreground">Last Event Attended</p>
-                    <p className="font-medium text-sm md:text-base">{new Date(mockContact.lastEventAttended).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              </div>
+          <CardContent className="space-y-4">
+            {/* Status Card - Accordion */}
+            <Card className="border-2 hover:border-primary/30 transition-colors">
+              <Accordion type="single" collapsible>
+                <AccordionItem value="status" className="border-none">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                    <div className="flex items-center gap-3 w-full">
+                      <div className={`h-3 w-3 rounded-full flex-shrink-0 ${mockContact.status === 'active' ? 'bg-green-500' : 'bg-gray-500'}`} />
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium">Contact Status</p>
+                        <p className="text-xs text-muted-foreground capitalize">{mockContact.status}</p>
+                      </div>
+                      <Badge variant={mockContact.status === 'active' ? 'teal' : 'secondary'} className="text-xs">
+                        {mockContact.status === 'active' ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4">
+                    <div className="pt-3 border-t space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Status History</span>
+                        <Badge variant="outline" className="text-xs">Last 6 months</Badge>
+                      </div>
+                      <div className="h-24 bg-muted/30 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="h-8 w-8 text-muted-foreground/30" />
+                        <span className="ml-2 text-sm text-muted-foreground">Activity timeline chart</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2 bg-muted/50 rounded">
+                          <p className="text-muted-foreground">Active Days</p>
+                          <p className="font-semibold text-green-500">142/180</p>
+                        </div>
+                        <div className="p-2 bg-muted/50 rounded">
+                          <p className="text-muted-foreground">Response Rate</p>
+                          <p className="font-semibold">87%</p>
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </Card>
 
-              {/* Column 2 */}
-              <div className="space-y-3 md:space-y-4">
-                <div className="flex items-center gap-3">
-                  <MessageSquare className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <p className="text-xs md:text-sm text-muted-foreground">Last Communication</p>
-                    <p className="font-medium text-sm md:text-base">{new Date(mockContact.lastCommunication).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Users className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
-                  <div>
-                    <p className="text-xs md:text-sm text-muted-foreground">Last Introduction</p>
-                    <p className="font-medium text-sm md:text-base">{new Date(mockContact.lastIntroduction).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Last Event Attended Card - Accordion */}
+            <Card className="border-2 hover:border-primary/30 transition-colors">
+              <Accordion type="single" collapsible>
+                <AccordionItem value="event" className="border-none">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                    <div className="flex items-center gap-3 w-full">
+                      <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium">Last Event Attended</p>
+                        <p className="text-xs text-muted-foreground">{new Date(mockContact.lastEventAttended).toLocaleDateString()}</p>
+                      </div>
+                      <Badge variant="tag" className="text-xs">Tech Summit 2024</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4">
+                    <div className="pt-3 border-t space-y-3">
+                      <p className="text-sm font-medium">Recent Event History</p>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary" />
+                            <span className="text-sm">Tech Summit 2024</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">Jan 15, 2024</span>
+                        </div>
+                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary/50" />
+                            <span className="text-sm">Networking Mixer</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">Dec 10, 2023</span>
+                        </div>
+                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary/30" />
+                            <span className="text-sm">Annual Gala</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">Nov 5, 2023</span>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="text-xs">Total Events: 8</Badge>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </Card>
 
-            {/* Full Width Status Footer Bar */}
-            <div className="pt-3 md:pt-4 border-t">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 p-3 rounded-lg bg-primary/5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="teal" className="text-xs">Engagement Score: 85%</Badge>
-                  <Badge variant="tag" className="text-xs">3 Events This Year</Badge>
-                  <Badge variant="tag" className="text-xs">12 Interactions</Badge>
+            {/* Last Communication Card - Accordion */}
+            <Card className="border-2 hover:border-primary/30 transition-colors">
+              <Accordion type="single" collapsible>
+                <AccordionItem value="communication" className="border-none">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                    <div className="flex items-center gap-3 w-full">
+                      <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium">Last Communication</p>
+                        <p className="text-xs text-muted-foreground">{new Date(mockContact.lastCommunication).toLocaleDateString()}</p>
+                      </div>
+                      <Badge variant="tag" className="text-xs">Email</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4">
+                    <div className="pt-3 border-t space-y-3">
+                      <p className="text-sm font-medium">Communication Timeline</p>
+                      <div className="space-y-2">
+                        <div className="flex gap-2 p-2 bg-muted/30 rounded">
+                          <Mail className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm">Partnership discussion follow-up</p>
+                            <p className="text-xs text-muted-foreground">Jan 20, 2024</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 p-2 bg-muted/30 rounded">
+                          <Phone className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm">Phone call - 15 minutes</p>
+                            <p className="text-xs text-muted-foreground">Jan 18, 2024</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 p-2 bg-muted/30 rounded">
+                          <MessageSquare className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm">Meeting invitation sent</p>
+                            <p className="text-xs text-muted-foreground">Jan 12, 2024</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="p-2 bg-muted/50 rounded text-center">
+                          <p className="text-muted-foreground">Emails</p>
+                          <p className="font-semibold">24</p>
+                        </div>
+                        <div className="p-2 bg-muted/50 rounded text-center">
+                          <p className="text-muted-foreground">Calls</p>
+                          <p className="font-semibold">8</p>
+                        </div>
+                        <div className="p-2 bg-muted/50 rounded text-center">
+                          <p className="text-muted-foreground">Meetings</p>
+                          <p className="font-semibold">5</p>
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </Card>
+
+            {/* Last Introduction Card - Accordion */}
+            <Card className="border-2 hover:border-primary/30 transition-colors">
+              <Accordion type="single" collapsible>
+                <AccordionItem value="introduction" className="border-none">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                    <div className="flex items-center gap-3 w-full">
+                      <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium">Last Introduction</p>
+                        <p className="text-xs text-muted-foreground">{new Date(mockContact.lastIntroduction).toLocaleDateString()}</p>
+                      </div>
+                      <Badge variant="tag" className="text-xs">2 Connections</Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4">
+                    <div className="pt-3 border-t space-y-3">
+                      <p className="text-sm font-medium">Introduction History</p>
+                      <div className="space-y-2">
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium">Sarah Williams ↔ Mike Johnson</span>
+                            <span className="text-xs text-muted-foreground">Jan 10, 2024</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Product collaboration opportunity</p>
+                        </div>
+                        <div className="p-2 bg-muted/30 rounded">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium">Jane Doe ↔ Tech Corp</span>
+                            <span className="text-xs text-muted-foreground">Dec 15, 2023</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Marketing partnership discussion</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2 bg-muted/50 rounded">
+                          <p className="text-muted-foreground">Total Intros</p>
+                          <p className="font-semibold text-primary">12</p>
+                        </div>
+                        <div className="p-2 bg-muted/50 rounded">
+                          <p className="text-muted-foreground">Success Rate</p>
+                          <p className="font-semibold text-green-500">75%</p>
+                        </div>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </Card>
+
+            {/* Engagement Summary Card */}
+            <Card className="border-2 border-primary/20 bg-primary/5">
+              <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="teal" className="text-xs">Engagement Score: 85%</Badge>
+                    <Badge variant="tag" className="text-xs">3 Events This Year</Badge>
+                    <Badge variant="tag" className="text-xs">12 Interactions</Badge>
+                  </div>
+                  <Badge variant="popularTag" className="text-xs">High Priority</Badge>
                 </div>
-                <Badge variant="popularTag" className="text-xs">High Priority</Badge>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
 
