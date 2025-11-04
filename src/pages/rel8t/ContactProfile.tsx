@@ -172,13 +172,12 @@ export default function ContactProfile() {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Status Card - Accordion */}
-            <Card className="relative overflow-hidden border-2 border-primary/20 bg-card/40 backdrop-blur-xl hover:border-primary/50 hover:bg-card/60 transition-all duration-300 animate-fade-in">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+            <Card className="border-2 hover:border-primary/30 transition-colors">
               <Accordion type="single" collapsible>
-                <AccordionItem value="status" className="border-none relative">
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline group">
+                <AccordionItem value="status" className="border-none">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
                     <div className="flex items-center gap-3 w-full">
-                      <div className={`h-3 w-3 rounded-full flex-shrink-0 transition-transform duration-300 group-hover:scale-125 ${mockContact.status === 'active' ? 'bg-green-500 shadow-lg shadow-green-500/50' : 'bg-gray-500'}`} />
+                      <div className={`h-3 w-3 rounded-full flex-shrink-0 ${mockContact.status === 'active' ? 'bg-green-500' : 'bg-gray-500'}`} />
                       <div className="flex-1 text-left">
                         <p className="text-sm font-medium">Contact Status</p>
                         <p className="text-xs text-muted-foreground capitalize">{mockContact.status}</p>
@@ -189,21 +188,21 @@ export default function ContactProfile() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-4 pb-4">
-                    <div className="pt-3 border-t border-primary/10 space-y-3 animate-fade-in">
+                    <div className="pt-3 border-t space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">Status History</span>
                         <Badge variant="outline" className="text-xs">Last 6 months</Badge>
                       </div>
-                      <div className="h-24 bg-background/50 backdrop-blur-sm rounded-lg flex items-center justify-center border border-primary/10">
+                      <div className="h-24 bg-muted/30 rounded-lg flex items-center justify-center">
                         <TrendingUp className="h-8 w-8 text-muted-foreground/30" />
                         <span className="ml-2 text-sm text-muted-foreground">Activity timeline chart</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="p-2 bg-background/60 backdrop-blur-sm rounded border border-primary/10">
+                        <div className="p-2 bg-muted/50 rounded">
                           <p className="text-muted-foreground">Active Days</p>
                           <p className="font-semibold text-green-500">142/180</p>
                         </div>
-                        <div className="p-2 bg-background/60 backdrop-blur-sm rounded border border-primary/10">
+                        <div className="p-2 bg-muted/50 rounded">
                           <p className="text-muted-foreground">Response Rate</p>
                           <p className="font-semibold">87%</p>
                         </div>
@@ -215,13 +214,12 @@ export default function ContactProfile() {
             </Card>
 
             {/* Last Event Attended Card - Accordion */}
-            <Card className="relative overflow-hidden border-2 border-primary/20 bg-card/40 backdrop-blur-xl hover:border-primary/50 hover:bg-card/60 transition-all duration-300 animate-fade-in">
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 pointer-events-none" />
+            <Card className="border-2 hover:border-primary/30 transition-colors">
               <Accordion type="single" collapsible>
-                <AccordionItem value="event" className="border-none relative">
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline group">
+                <AccordionItem value="event" className="border-none">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
                     <div className="flex items-center gap-3 w-full">
-                      <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                      <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <div className="flex-1 text-left">
                         <p className="text-sm font-medium">Last Event Attended</p>
                         <p className="text-xs text-muted-foreground">{new Date(mockContact.lastEventAttended).toLocaleDateString()}</p>
@@ -230,24 +228,24 @@ export default function ContactProfile() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-4 pb-4">
-                    <div className="pt-3 border-t border-primary/10 space-y-3 animate-fade-in">
+                    <div className="pt-3 border-t space-y-3">
                       <p className="text-sm font-medium">Recent Event History</p>
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
+                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
                           <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-primary shadow-lg shadow-primary/50" />
+                            <div className="h-2 w-2 rounded-full bg-primary" />
                             <span className="text-sm">Tech Summit 2024</span>
                           </div>
                           <span className="text-xs text-muted-foreground">Jan 15, 2024</span>
                         </div>
-                        <div className="flex items-center justify-between p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
+                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-primary/50" />
                             <span className="text-sm">Networking Mixer</span>
                           </div>
                           <span className="text-xs text-muted-foreground">Dec 10, 2023</span>
                         </div>
-                        <div className="flex items-center justify-between p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
+                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-primary/30" />
                             <span className="text-sm">Annual Gala</span>
@@ -263,13 +261,12 @@ export default function ContactProfile() {
             </Card>
 
             {/* Last Communication Card - Accordion */}
-            <Card className="relative overflow-hidden border-2 border-primary/20 bg-card/40 backdrop-blur-xl hover:border-primary/50 hover:bg-card/60 transition-all duration-300 animate-fade-in">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+            <Card className="border-2 hover:border-primary/30 transition-colors">
               <Accordion type="single" collapsible>
-                <AccordionItem value="communication" className="border-none relative">
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline group">
+                <AccordionItem value="communication" className="border-none">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
                     <div className="flex items-center gap-3 w-full">
-                      <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                      <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <div className="flex-1 text-left">
                         <p className="text-sm font-medium">Last Communication</p>
                         <p className="text-xs text-muted-foreground">{new Date(mockContact.lastCommunication).toLocaleDateString()}</p>
@@ -278,24 +275,24 @@ export default function ContactProfile() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-4 pb-4">
-                    <div className="pt-3 border-t border-primary/10 space-y-3 animate-fade-in">
+                    <div className="pt-3 border-t space-y-3">
                       <p className="text-sm font-medium">Communication Timeline</p>
                       <div className="space-y-2">
-                        <div className="flex gap-2 p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
+                        <div className="flex gap-2 p-2 bg-muted/30 rounded">
                           <Mail className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
                             <p className="text-sm">Partnership discussion follow-up</p>
                             <p className="text-xs text-muted-foreground">Jan 20, 2024</p>
                           </div>
                         </div>
-                        <div className="flex gap-2 p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
+                        <div className="flex gap-2 p-2 bg-muted/30 rounded">
                           <Phone className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
                             <p className="text-sm">Phone call - 15 minutes</p>
                             <p className="text-xs text-muted-foreground">Jan 18, 2024</p>
                           </div>
                         </div>
-                        <div className="flex gap-2 p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
+                        <div className="flex gap-2 p-2 bg-muted/30 rounded">
                           <MessageSquare className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
                             <p className="text-sm">Meeting invitation sent</p>
@@ -304,15 +301,15 @@ export default function ContactProfile() {
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div className="p-2 bg-background/60 backdrop-blur-sm rounded text-center border border-primary/10">
+                        <div className="p-2 bg-muted/50 rounded text-center">
                           <p className="text-muted-foreground">Emails</p>
                           <p className="font-semibold">24</p>
                         </div>
-                        <div className="p-2 bg-background/60 backdrop-blur-sm rounded text-center border border-primary/10">
+                        <div className="p-2 bg-muted/50 rounded text-center">
                           <p className="text-muted-foreground">Calls</p>
                           <p className="font-semibold">8</p>
                         </div>
-                        <div className="p-2 bg-background/60 backdrop-blur-sm rounded text-center border border-primary/10">
+                        <div className="p-2 bg-muted/50 rounded text-center">
                           <p className="text-muted-foreground">Meetings</p>
                           <p className="font-semibold">5</p>
                         </div>
@@ -324,13 +321,12 @@ export default function ContactProfile() {
             </Card>
 
             {/* Last Introduction Card - Accordion */}
-            <Card className="relative overflow-hidden border-2 border-primary/20 bg-card/40 backdrop-blur-xl hover:border-primary/50 hover:bg-card/60 transition-all duration-300 animate-fade-in">
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 pointer-events-none" />
+            <Card className="border-2 hover:border-primary/30 transition-colors">
               <Accordion type="single" collapsible>
-                <AccordionItem value="introduction" className="border-none relative">
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline group">
+                <AccordionItem value="introduction" className="border-none">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline">
                     <div className="flex items-center gap-3 w-full">
-                      <Users className="h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                      <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <div className="flex-1 text-left">
                         <p className="text-sm font-medium">Last Introduction</p>
                         <p className="text-xs text-muted-foreground">{new Date(mockContact.lastIntroduction).toLocaleDateString()}</p>
@@ -339,17 +335,17 @@ export default function ContactProfile() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-4 pb-4">
-                    <div className="pt-3 border-t border-primary/10 space-y-3 animate-fade-in">
+                    <div className="pt-3 border-t space-y-3">
                       <p className="text-sm font-medium">Introduction History</p>
                       <div className="space-y-2">
-                        <div className="p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
+                        <div className="p-2 bg-muted/30 rounded">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-medium">Sarah Williams ↔ Mike Johnson</span>
                             <span className="text-xs text-muted-foreground">Jan 10, 2024</span>
                           </div>
                           <p className="text-xs text-muted-foreground">Product collaboration opportunity</p>
                         </div>
-                        <div className="p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
+                        <div className="p-2 bg-muted/30 rounded">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-medium">Jane Doe ↔ Tech Corp</span>
                             <span className="text-xs text-muted-foreground">Dec 15, 2023</span>
@@ -358,13 +354,13 @@ export default function ContactProfile() {
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="p-2 bg-background/60 backdrop-blur-sm rounded border border-primary/10">
+                        <div className="p-2 bg-muted/50 rounded">
                           <p className="text-muted-foreground">Total Intros</p>
-                          <p className="font-semibold">12</p>
+                          <p className="font-semibold text-primary">12</p>
                         </div>
-                        <div className="p-2 bg-background/60 backdrop-blur-sm rounded border border-primary/10">
+                        <div className="p-2 bg-muted/50 rounded">
                           <p className="text-muted-foreground">Success Rate</p>
-                          <p className="font-semibold">92%</p>
+                          <p className="font-semibold text-green-500">75%</p>
                         </div>
                       </div>
                     </div>
