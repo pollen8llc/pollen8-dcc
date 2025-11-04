@@ -231,40 +231,14 @@ export default function ContactProfile() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {mockAssociatedContacts.map((contact) => {
-                const fullName = `${contact.first_name} ${contact.last_name}`;
-                return (
-                  <Card 
-                    key={contact.id}
-                    onClick={() => navigate(`/profile/${contact.id}`)}
-                    className="cursor-pointer hover:shadow-md transition-all bg-card/80 backdrop-blur-sm border-2 bg-gradient-to-br from-card/80 to-card/40 hover:border-primary/30 hover:shadow-primary/10 hover:shadow-2xl group relative overflow-hidden"
-                  >
-                    {/* Gradient border effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-                    
-                    <CardContent className="p-5 relative z-10">
-                      <div className="flex items-center">
-                        <div className="bg-primary/10 rounded-full p-2 mr-3 group-hover:bg-primary/20 transition-colors">
-                          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold">
-                            {contact.first_name?.[0]}{contact.last_name?.[0]}
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">{fullName}</h3>
-                          <p className="text-muted-foreground text-sm">Community Member</p>
-                          {contact.location && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                              <p className="text-xs text-muted-foreground truncate">{contact.location}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mockAssociatedContacts.map((contact) => (
+                <ProfileCard
+                  key={contact.id}
+                  profile={contact as any}
+                  connectionDepth={1}
+                />
+              ))}
             </div>
           </CardContent>
         </Card>
