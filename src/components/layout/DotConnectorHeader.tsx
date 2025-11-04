@@ -6,21 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Settings, MapPin } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-
 interface DotConnectorHeaderProps {
   className?: string;
 }
-
-export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({ 
-  className = "" 
+export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
+  className = ""
 }) => {
-  const { currentUser } = useUser();
+  const {
+    currentUser
+  } = useUser();
   const navigate = useNavigate();
-
   const getFullName = () => {
     return currentUser?.name || "Organizer";
   };
-
   const getInitials = () => {
     const name = currentUser?.name || '';
     const nameParts = name.split(' ');
@@ -31,67 +29,49 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
     }
     return 'O';
   };
-
   const handleSettingsClick = () => {
     navigate("/settings");
   };
-
-  return (
-    <div className={`w-full ${className}`}>
+  return <div className={`w-full ${className}`}>
       {/* Header Content */}
-      <div className="container mx-auto px-4 py-6 max-w-6xl lg:px-6">
-        <Card className="overflow-hidden bg-gradient-to-br from-background via-muted/5 to-background border-border/50 shadow-2xl">
-          <CardContent className="p-0">
-            <div className="relative bg-gradient-to-r from-background via-background/50 to-background p-6 lg:p-8">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 lg:gap-8">
-               {/* Avatar */}
-               <div className="relative flex-shrink-0">
-                 <Avatar userId={currentUser?.id} size={96} />
-               </div>
-                
-                {/* Profile Info */}
-                <div className="flex-1 min-w-0 text-center sm:text-left">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
-                    <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
-                      {getFullName()}
-                    </h1>
-                    <Badge variant="secondary" className="text-sm font-medium self-center sm:self-auto">
-                      {currentUser?.role}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 justify-center sm:justify-start flex-wrap">
-                    {currentUser?.location && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-5 h-5 text-muted-foreground" />
-                        <span className="text-lg text-muted-foreground font-medium">{currentUser.location}</span>
-                      </div>
-                    )}
-                  </div>
+      <Card className="border-0 bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl shadow-lg mb-6">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-xl">
+                <div className="w-full h-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-semibold text-xl">
+                  {getInitials()}
                 </div>
-                
-                {/* Settings Button */}
-                <div className="flex-shrink-0 w-full sm:w-auto">
-                  <Button 
-                    onClick={handleSettingsClick} 
-                    size="default" 
-                    className="w-full sm:w-auto px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
-                  >
-                    <Settings className="w-5 h-5 mr-3" />
-                    Settings
-                  </Button>
+              </Avatar>
+              <div className="space-y-2">
+                <h1 className="text-2xl font-bold text-foreground">{getFullName()}</h1>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                    Dot Connector
+                  </Badge>
+                  <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                    <MapPin className="h-4 w-4" />
+                    <span>Active Network</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleSettingsClick}
+              className="h-10 w-10 rounded-full border-primary/20 hover:border-primary/40 hover:bg-primary/10"
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Glowing Sliver */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent relative">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-[2px] opacity-60" />
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-[4px] opacity-40" />
       </div>
-    </div>
-  );
+    </div>;
 };
