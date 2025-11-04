@@ -100,14 +100,14 @@ const P8Dashboard = () => {
       <DotConnectorHeader />
       <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
 
-        {/* Network World Map */}
-        <NetworkWorldMap />
-
         {/* Location World Map */}
         <LocationWorldMap />
 
         {/* Events Card */}
         <EventsCard />
+
+        {/* Network World Map */}
+        <NetworkWorldMap />
       </div>
     </div>;
 };
