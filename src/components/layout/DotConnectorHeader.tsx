@@ -38,7 +38,7 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
 
   const handleAvatarClick = () => {
     if (currentUser?.id) {
-      navigate(`/rel8/contactprofile/${currentUser.id}`);
+      navigate(`/profile/${currentUser.id}`);
     }
   };
 
