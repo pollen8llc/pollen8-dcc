@@ -84,7 +84,7 @@ export default function ContactProfile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Rel8Header showProfileBanner />
+      <Rel8Header />
       
       <div className="container mx-auto max-w-6xl px-4 py-6 space-y-6">
         {/* Contact Header */}
