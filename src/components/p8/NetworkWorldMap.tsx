@@ -78,7 +78,7 @@ const RingChart = () => {
 };
 
 const NetworkWorldMap = () => {
-  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
@@ -184,139 +184,6 @@ const NetworkWorldMap = () => {
                   <p className="text-sm text-muted-foreground">
                     Social Connection Analysis
                   </p>
-                </div>
-              </div>
-
-              {/* Contact Reminders Card */}
-              <div className="relative z-10 mt-4">
-                <div className="glass-morphism bg-card/20 backdrop-blur-sm rounded-lg border-0 overflow-hidden">
-                  {/* Top Section */}
-                  <div className="flex items-center justify-between p-4 border-b border-border/50">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      <h4 className="text-sm font-semibold text-foreground">Relationships</h4>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate("/rel8/contacts")}
-                    >
-                      Manage
-                    </Button>
-                  </div>
-
-                  {/* Bottom Section - Slider or Empty State */}
-                  <div className="p-4">
-                    {upcomingOutreach.length === 0 ? (
-                      <div className="text-center py-8">
-                        <p className="text-sm text-muted-foreground">
-                          No upcoming outreach tasks scheduled
-                        </p>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Navigation Buttons */}
-                        <div className="flex items-center justify-end gap-2 mb-3">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={goToPreviousPage}
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={goToNextPage}
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        
-                        {/* Slider Container */}
-                        <div 
-                          className="overflow-hidden relative"
-                          onMouseDown={(e) => handleDragStart(e.clientX)}
-                          onMouseMove={(e) => handleDragMove(e.clientX)}
-                          onMouseUp={handleDragEnd}
-                          onMouseLeave={handleDragEnd}
-                          onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
-                          onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
-                          onTouchEnd={handleDragEnd}
-                        >
-                          <div 
-                            className="flex"
-                            style={{
-                              transform: `translateX(calc(-${currentPage * 100}% + ${dragOffset}px))`,
-                              transition: isDragging ? 'none' : isTransitioning ? 'transform 0.3s ease-out' : 'none',
-                              cursor: isDragging ? 'grabbing' : 'grab'
-                            }}
-                          >
-                            {Array.from({ length: totalPages }).map((_, pageIndex) => (
-                              <div
-                                key={pageIndex}
-                                className="w-full flex-shrink-0 grid grid-cols-1 gap-2"
-                              >
-                                {upcomingOutreach
-                                  .slice(pageIndex * TASKS_PER_PAGE, (pageIndex + 1) * TASKS_PER_PAGE)
-                                  .map((task) => (
-                                    <div
-                                      key={task.id}
-                                      className="p-3 rounded-lg bg-card/40 hover:bg-card/60 transition-colors border border-border/50"
-                                    >
-                                      <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                          <p className="text-sm font-medium text-foreground truncate">
-                                            {task.title}
-                                          </p>
-                                          <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                            Due: {format(new Date(task.due_date), "MMM d, yyyy")}
-                                          </p>
-                                          {task.contacts && task.contacts.length > 0 && (
-                                            <p className="text-xs text-muted-foreground truncate mt-0.5">
-                                              Contact: {task.contacts[0].name}
-                                            </p>
-                                          )}
-                                        </div>
-                                        <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                          task.priority === 'high' 
-                                            ? 'bg-red-500/20 text-red-400'
-                                            : task.priority === 'medium'
-                                            ? 'bg-yellow-500/20 text-yellow-400'
-                                            : 'bg-green-500/20 text-green-400'
-                                        }`}>
-                                          {task.priority}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Page Indicators */}
-                        {totalPages > 1 && (
-                          <div className="flex justify-center gap-1.5 mt-3">
-                            {Array.from({ length: totalPages }).map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => goToPage(index)}
-                                className={`h-1.5 rounded-full transition-all ${
-                                  index === currentPage
-                                    ? 'w-6 bg-primary'
-                                    : 'w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                                }`}
-                                aria-label={`Go to page ${index + 1}`}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
                 </div>
               </div>
 
@@ -457,6 +324,139 @@ const NetworkWorldMap = () => {
                     </Button>
                   </div>
                 )}
+              </div>
+
+              {/* Contact Reminders Card */}
+              <div className="relative z-10 mt-4">
+                <div className="glass-morphism bg-card/20 backdrop-blur-sm rounded-lg border-0 overflow-hidden">
+                  {/* Top Section */}
+                  <div className="flex items-center justify-between p-4 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <h4 className="text-sm font-semibold text-foreground">Relationships</h4>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate("/rel8/contacts")}
+                    >
+                      Manage
+                    </Button>
+                  </div>
+
+                  {/* Bottom Section - Slider or Empty State */}
+                  <div className="p-4">
+                    {upcomingOutreach.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-muted-foreground">
+                          No upcoming outreach tasks scheduled
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Navigation Buttons */}
+                        <div className="flex items-center justify-end gap-2 mb-3">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={goToPreviousPage}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={goToNextPage}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        {/* Slider Container */}
+                        <div 
+                          className="overflow-hidden relative"
+                          onMouseDown={(e) => handleDragStart(e.clientX)}
+                          onMouseMove={(e) => handleDragMove(e.clientX)}
+                          onMouseUp={handleDragEnd}
+                          onMouseLeave={handleDragEnd}
+                          onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+                          onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
+                          onTouchEnd={handleDragEnd}
+                        >
+                          <div 
+                            className="flex"
+                            style={{
+                              transform: `translateX(calc(-${currentPage * 100}% + ${dragOffset}px))`,
+                              transition: isDragging ? 'none' : isTransitioning ? 'transform 0.3s ease-out' : 'none',
+                              cursor: isDragging ? 'grabbing' : 'grab'
+                            }}
+                          >
+                            {Array.from({ length: totalPages }).map((_, pageIndex) => (
+                              <div
+                                key={pageIndex}
+                                className="w-full flex-shrink-0 grid grid-cols-1 gap-2"
+                              >
+                                {upcomingOutreach
+                                  .slice(pageIndex * TASKS_PER_PAGE, (pageIndex + 1) * TASKS_PER_PAGE)
+                                  .map((task) => (
+                                    <div
+                                      key={task.id}
+                                      className="p-3 rounded-lg bg-card/40 hover:bg-card/60 transition-colors border border-border/50"
+                                    >
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-medium text-foreground truncate">
+                                            {task.title}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                            Due: {format(new Date(task.due_date), "MMM d, yyyy")}
+                                          </p>
+                                          {task.contacts && task.contacts.length > 0 && (
+                                            <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                              Contact: {task.contacts[0].name}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                          task.priority === 'high' 
+                                            ? 'bg-red-500/20 text-red-400'
+                                            : task.priority === 'medium'
+                                            ? 'bg-yellow-500/20 text-yellow-400'
+                                            : 'bg-green-500/20 text-green-400'
+                                        }`}>
+                                          {task.priority}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Page Indicators */}
+                        {totalPages > 1 && (
+                          <div className="flex justify-center gap-1.5 mt-3">
+                            {Array.from({ length: totalPages }).map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => goToPage(index)}
+                                className={`h-1.5 rounded-full transition-all ${
+                                  index === currentPage
+                                    ? 'w-6 bg-primary'
+                                    : 'w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                                }`}
+                                aria-label={`Go to page ${index + 1}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
