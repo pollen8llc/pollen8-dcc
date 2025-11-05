@@ -260,8 +260,8 @@ const NetworkWorldMap = () => {
                       <Calendar className="h-4 w-4 text-primary" />
                       <h4 className="text-sm font-semibold text-foreground">Relationships</h4>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => navigate("/rel8/contacts")}>
-                      Manage
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => navigate("/rel8/contacts")}>
+                      <Calendar className="h-4 w-4" />
                     </Button>
                   </div>
 
