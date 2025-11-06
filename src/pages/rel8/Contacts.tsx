@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import ContactList from "@/components/rel8t/ContactList";
-import { PlusCircle, Trash2, Edit, CheckSquare, Square, Search, Filter } from "lucide-react";
+import { Heart, Trash2, Edit, CheckSquare, Square, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -213,12 +213,12 @@ const Contacts = () => {
                   </Button>
                   
                   <Button 
-                    onClick={() => navigate("/rel8/contacts/create")}
+                    onClick={() => navigate("/rel8/build-rapport")}
                     className="flex items-center gap-2 w-full sm:w-auto hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
                     size="sm"
                   >
-                    <PlusCircle className="h-4 w-4" />
-                    <span className="sm:inline">New Contact</span>
+                    <Heart className="h-4 w-4" />
+                    <span className="sm:inline">Build Rapport</span>
                   </Button>
                 </>
               )}

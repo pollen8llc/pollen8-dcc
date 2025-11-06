@@ -152,12 +152,7 @@ export function DataTablesSection() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <Button variant="outline" onClick={() => navigate("/rel8/contacts/create")} className="h-16 flex-col gap-2">
-              <Users className="h-5 w-5" />
-              <span className="text-sm">Add Contact</span>
-            </Button>
-            
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <Button variant="outline" onClick={() => navigate("/rel8/triggers/wizard")} className="h-16 flex-col gap-2">
               <Zap className="h-5 w-5" />
               <span className="text-sm">Create Trigger</span>
