@@ -1,16 +1,20 @@
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Badge } from "@/components/ui/badge";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
-import { Calendar, Users, Heart, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle } from "lucide-react";
+import { Calendar, Users, Heart, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle, Globe, ChevronDown } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useModuleCompletion } from "@/hooks/useModuleCompletion";
-import { useEffect } from "react";
+import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [isNetworkMapOpen, setIsNetworkMapOpen] = useState(false);
   const {
     rel8_complete,
     loading: completionLoading
@@ -120,6 +124,33 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Network Map Section */}
+        <Collapsible 
+          open={isNetworkMapOpen} 
+          onOpenChange={setIsNetworkMapOpen}
+          className="mb-8"
+        >
+          <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md">
+            <CollapsibleTrigger className="w-full">
+              <div className="p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-xl border-b border-primary/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-semibold">Network Map</h3>
+                    <Badge variant="secondary">{contactCount} contacts</Badge>
+                  </div>
+                  <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isNetworkMapOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-6">
+                <NetworkMapGlobe />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Outreach Tasks Section */}
         <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mb-8">
