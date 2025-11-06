@@ -218,23 +218,23 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
             </Card>
           )}
 
-          {/* Enhanced Activity & Stats Card */}
+          {/* Network Stats Card */}
           <Card className="border-border/50 shadow-lg">
             <CardHeader className="pb-4 sm:pb-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
-                  <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                  Activity & Stats
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  Network Stats
                 </CardTitle>
                 {isOwnProfile && (
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => window.location.href = '/knowledge/my-resources'}
+                    onClick={() => window.location.href = '/rel8t'}
                     className="gap-2"
                   >
-                    <Settings className="w-4 h-4" />
-                    Cultiv8
+                    <Users className="w-4 h-4" />
+                    Rel8t
                   </Button>
                 )}
               </div>
@@ -242,28 +242,28 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                 <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">{stats?.totalArticles ?? 0}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Articles</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">0</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Connections</div>
                 </div>
                 <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-500">{stats?.totalViews ?? 0}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Views</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-500">0</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Introductions</div>
                 </div>
                 <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-green-500/5 to-green-500/10 border border-green-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-500">{stats?.totalComments ?? 0}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Comments</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-500">0</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Referrals</div>
                 </div>
                 <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-orange-500/5 to-orange-500/10 border border-orange-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-orange-500">{stats?.totalVotes ?? 0}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Votes</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-orange-500">0</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Mutual</div>
                 </div>
                 <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-500">{stats?.savedArticlesCount ?? 0}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Saved</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-500">0</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Events</div>
                 </div>
                 <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-teal-500/5 to-teal-500/10 border border-teal-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-teal-500">{stats?.recentArticlesCount ?? 0}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Recent</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-teal-500">0</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Groups</div>
                 </div>
               </div>
             </CardContent>
@@ -315,6 +315,57 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                   No communities found
                 </p>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Enhanced Activity & Stats Card - Moved to bottom */}
+          <Card className="border-border/50 shadow-lg">
+            <CardHeader className="pb-4 sm:pb-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
+                  <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  Activity & Stats
+                </CardTitle>
+                {isOwnProfile && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.location.href = '/knowledge/my-resources'}
+                    className="gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Cultiv8
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">{stats?.totalArticles ?? 0}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Articles</div>
+                </div>
+                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/20 rounded-xl">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-500">{stats?.totalViews ?? 0}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Views</div>
+                </div>
+                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-green-500/5 to-green-500/10 border border-green-500/20 rounded-xl">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-500">{stats?.totalComments ?? 0}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Comments</div>
+                </div>
+                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-orange-500/5 to-orange-500/10 border border-orange-500/20 rounded-xl">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-orange-500">{stats?.totalVotes ?? 0}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Votes</div>
+                </div>
+                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/20 rounded-xl">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-500">{stats?.savedArticlesCount ?? 0}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Saved</div>
+                </div>
+                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-teal-500/5 to-teal-500/10 border border-teal-500/20 rounded-xl">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-teal-500">{stats?.recentArticlesCount ?? 0}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Recent</div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
