@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, Users, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Upload } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { format } from 'date-fns';
 
@@ -68,12 +68,6 @@ const EVENTS_PER_PAGE = 3;
 interface EventsCardProps {
   className?: string;
 }
-// Event platform badges
-const eventPlatforms = [
-  { name: 'Luma', color: '#9333ea' },
-  { name: 'Eventbrite', color: '#f97316' },
-  { name: 'Meetup', color: '#ef4444' },
-];
 
 const EventsCard = ({
   className = ''
@@ -324,44 +318,15 @@ const EventsCard = ({
                     </div>
                   </div>
 
-                  {/* Event Platforms Badge Grid */}
+                  {/* Import Events Button */}
                   <div className="mt-6 pt-6 border-t border-teal-500/20">
-                    <h4 className="text-sm font-semibold text-muted-foreground mb-3">Event Data Sources</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {eventPlatforms.map((platform) => (
-                        <Badge
-                          key={platform.name}
-                          variant="tag"
-                          className="px-3 py-1.5 justify-center truncate cursor-pointer hover:scale-105 transition-transform"
-                          style={{ 
-                            backgroundColor: `${platform.color}20`,
-                            borderColor: platform.color,
-                            color: platform.color
-                          }}
-                        >
-                          {platform.name}
-                        </Badge>
-                      ))}
-                      {/* Always show 3 blank + slots */}
-                      <Badge
-                        variant="outline"
-                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-teal-500/20 transition-colors"
-                      >
-                        +
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-teal-500/20 transition-colors"
-                      >
-                        +
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className="px-3 py-1.5 justify-center cursor-pointer hover:bg-teal-500/20 transition-colors"
-                      >
-                        +
-                      </Badge>
-                    </div>
+                    <Button 
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Import Events
+                    </Button>
                   </div>
                 </CollapsibleContent>
               </div>
