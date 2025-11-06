@@ -1,11 +1,11 @@
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Users, Activity, Zap, Globe, Target, CheckCircle2, Upload } from "lucide-react";
+import { TrendingUp, Users, Activity, Zap, Globe, Target, CheckCircle2 } from "lucide-react";
 import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 import NetworkWorldMap from "@/components/p8/NetworkWorldMap";
 import LocationWorldMap from "@/components/p8/LocationWorldMap";
-import { Button } from "@/components/ui/button";
+import EventsCard from "@/components/p8/EventsCard";
 const P8Dashboard = () => {
   const metrics = [{
     label: "Total Members",
@@ -106,20 +106,8 @@ const P8Dashboard = () => {
         {/* Location World Map */}
         <LocationWorldMap />
 
-        {/* Import Button */}
-        <Card className="p-8 backdrop-blur-xl bg-card/40 border-primary/20 shadow-lg">
-          <div className="flex flex-col items-center justify-center gap-4">
-            <Upload className="h-12 w-12 text-primary" />
-            <h3 className="text-xl font-semibold text-foreground">Import Events</h3>
-            <p className="text-sm text-muted-foreground text-center max-w-md">
-              Import your events from external sources to keep track of all your activities in one place.
-            </p>
-            <Button size="lg" className="w-full max-w-md">
-              <Upload className="mr-2 h-4 w-4" />
-              Import Events
-            </Button>
-          </div>
-        </Card>
+        {/* Events Card */}
+        <EventsCard />
       </div>
     </div>;
 };
