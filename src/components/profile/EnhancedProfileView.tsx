@@ -218,6 +218,31 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
             </Card>
           )}
 
+          {/* Enhanced Interests */}
+          {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 && (
+            <Card className="border-border/50 shadow-lg">
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
+                  <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  Interests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2 sm:gap-3">
+                  {profile.interests.map((interest: string, idx: number) => (
+                    <Badge 
+                      key={idx} 
+                      variant="secondary"
+                      className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border border-primary/30 hover:from-primary/20 hover:via-secondary/20 hover:to-accent/20 transition-all duration-300 cursor-pointer shadow-sm"
+                    >
+                      #{interest}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Network Stats Card */}
           <Card className="border-border/50 shadow-lg">
             <CardHeader className="pb-4 sm:pb-6">
@@ -425,33 +450,8 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
           </Card>
         </div>
 
-        {/* Right Column - Interests & Social Links Only */}
+        {/* Right Column - Social Links Only */}
         <div className="lg:col-span-4 space-y-4 sm:space-y-6 lg:space-y-8">
-          {/* Enhanced Interests */}
-          {profile?.interests && Array.isArray(profile.interests) && profile.interests.length > 0 && (
-            <Card className="border-border/50 shadow-lg">
-              <CardHeader className="pb-3 sm:pb-4">
-                <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
-                  <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                  Interests
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2 sm:gap-3">
-                  {profile.interests.map((interest: string, idx: number) => (
-                    <Badge 
-                      key={idx} 
-                      variant="secondary"
-                      className="px-2 sm:px-3 lg:px-4 py-1 sm:py-2 text-xs sm:text-sm font-semibold bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border border-primary/30 hover:from-primary/20 hover:via-secondary/20 hover:to-accent/20 transition-all duration-300 cursor-pointer shadow-sm"
-                    >
-                      #{interest}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Enhanced Social Links - Show All Profile Links */}
           {profile?.social_links && typeof profile.social_links === 'object' && (
             <Card className="border-border/50 shadow-lg">
