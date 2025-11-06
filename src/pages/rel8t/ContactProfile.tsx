@@ -21,7 +21,6 @@ const mockContact = {
   status: 'active' as const,
   tags: ['VIP', 'Tech'],
   bio: 'Experienced technology executive with over 15 years in the industry. Passionate about innovation and building strong business relationships. Always looking to connect with like-minded professionals.',
-  lastEventAttended: '2024-01-15',
   lastCommunication: '2024-01-20',
   lastIntroduction: '2024-01-10',
   notes: 'Met at Tech Summit 2023. Very interested in our new product line. Follow up on potential partnership opportunities.',
@@ -208,54 +207,6 @@ export default function ContactProfile() {
                           <p className="font-semibold">87%</p>
                         </div>
                       </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </Card>
-
-            {/* Last Event Attended Card - Accordion */}
-            <Card className="relative overflow-hidden border-2 border-primary/20 bg-card/40 backdrop-blur-xl hover:border-primary/50 hover:bg-card/60 transition-all duration-300 animate-fade-in">
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 pointer-events-none" />
-              <Accordion type="single" collapsible>
-                <AccordionItem value="event" className="border-none relative">
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline group">
-                    <div className="flex items-center gap-3 w-full">
-                      <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
-                      <div className="flex-1 text-left">
-                        <p className="text-sm font-medium">Last Event Attended</p>
-                        <p className="text-xs text-muted-foreground">{new Date(mockContact.lastEventAttended).toLocaleDateString()}</p>
-                      </div>
-                      <Badge variant="tag" className="text-xs">Tech Summit 2024</Badge>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4 pb-4">
-                    <div className="pt-3 border-t border-primary/10 space-y-3 animate-fade-in">
-                      <p className="text-sm font-medium">Recent Event History</p>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-primary shadow-lg shadow-primary/50" />
-                            <span className="text-sm">Tech Summit 2024</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">Jan 15, 2024</span>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-primary/50" />
-                            <span className="text-sm">Networking Mixer</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">Dec 10, 2023</span>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-background/50 backdrop-blur-sm rounded border border-primary/10 hover:bg-background/70 transition-colors">
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-primary/30" />
-                            <span className="text-sm">Annual Gala</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground">Nov 5, 2023</span>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="text-xs">Total Events: 8</Badge>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
