@@ -1,19 +1,16 @@
-import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOutreachStatusCounts } from "@/services/rel8t/outreachService";
 import { getContactCount, getCategories } from "@/services/rel8t/contactService";
-import { Calendar, Users, Heart, Settings, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle } from "lucide-react";
+import { Calendar, Users, Heart, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useModuleCompletion } from "@/hooks/useModuleCompletion";
 import { useEffect } from "react";
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("outreach");
   const {
     rel8_complete,
     loading: completionLoading
@@ -126,36 +123,22 @@ const Dashboard = () => {
 
         {/* Outreach Tasks Section */}
         <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Outreach Tasks</span>
+          <div className="p-4 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-xl border-b border-primary/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-primary" />
+                <div>
+                  <h3 className="text-lg font-semibold">Outreach Tasks</h3>
+                </div>
+              </div>
               <Button onClick={handleBuildRapport} size="sm">
                 <Heart className="h-4 w-4 mr-2" />
                 Build Rapport
               </Button>
-            </CardTitle>
-            <CardDescription>
-              Manage your relationship building activities and follow-ups
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-6">
-                <TabsTrigger value="outreach">Active Tasks</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="outreach">
-                <OutreachList />
-              </TabsContent>
-              
-              <TabsContent value="completed">
-                <OutreachList defaultTab="completed" showTabs={false} />
-              </TabsContent>
-            </Tabs>
-
-            {/* Empty state */}
-            {outreachCounts.upcoming + outreachCounts.overdue === 0 && activeTab === "outreach"}
+            </div>
+          </div>
+          <CardContent className="pt-6">
+            <OutreachList />
           </CardContent>
         </Card>
 
