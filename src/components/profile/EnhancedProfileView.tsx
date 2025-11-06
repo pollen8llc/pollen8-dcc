@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-import { Edit, MapPin, Globe, User, Users, Mail, Phone, ExternalLink, Settings, BarChart2 } from "lucide-react";
+import { Edit, MapPin, Globe, User, Users, Mail, Phone, ExternalLink, Settings, BarChart2, TrendingUp, Network } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { UnifiedProfile } from "@/types/unifiedProfile";
 import { UserRole } from "@/models/types";
@@ -223,7 +223,7 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
             <CardHeader className="pb-4 sm:pb-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl lg:text-2xl">
-                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  <Network className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   Network Stats
                 </CardTitle>
                 {isOwnProfile && (
@@ -239,31 +239,44 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 )}
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">0</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Connections</div>
+            <CardContent className="space-y-6 sm:space-y-8">
+              {/* Active vs Total Connections - Percentage Bar */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm sm:text-base font-semibold text-foreground">Connection Activity</h4>
+                  <span className="text-sm sm:text-base font-bold text-primary">0 of 0 active</span>
                 </div>
-                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-500">0</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Introductions</div>
+                <div className="relative h-4 sm:h-5 bg-muted/20 rounded-full overflow-hidden border border-border/30">
+                  <div 
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary-glow to-primary rounded-full transition-all duration-500"
+                    style={{ width: '0%' }}
+                  />
                 </div>
-                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-green-500/5 to-green-500/10 border border-green-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-500">0</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Referrals</div>
+                <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
+                  <span>0% active connections</span>
+                  <span>Total: 0</span>
                 </div>
-                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-orange-500/5 to-orange-500/10 border border-orange-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-orange-500">0</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Mutual</div>
+              </div>
+
+              {/* Rapport Growth Line Graph */}
+              <div className="space-y-3">
+                <h4 className="text-sm sm:text-base font-semibold text-foreground">Rapport Growth</h4>
+                <div className="h-40 sm:h-48 bg-gradient-to-br from-muted/10 to-muted/5 rounded-xl border border-border/30 flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <TrendingUp className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground/40 mx-auto" />
+                    <p className="text-xs sm:text-sm text-muted-foreground">Communication data pending</p>
+                  </div>
                 </div>
-                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-500">0</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Events</div>
-                </div>
-                <div className="text-center p-3 sm:p-4 lg:p-6 bg-gradient-to-br from-teal-500/5 to-teal-500/10 border border-teal-500/20 rounded-xl">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-teal-500">0</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground font-medium mt-1">Groups</div>
+              </div>
+
+              {/* Cross Connections Line Graph */}
+              <div className="space-y-3">
+                <h4 className="text-sm sm:text-base font-semibold text-foreground">Cross Connections</h4>
+                <div className="h-40 sm:h-48 bg-gradient-to-br from-muted/10 to-muted/5 rounded-xl border border-border/30 flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <Network className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground/40 mx-auto" />
+                    <p className="text-xs sm:text-sm text-muted-foreground">No cross-connection data</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
