@@ -48,26 +48,9 @@ export function ContactHeader({
               <Avatar userId={contactId} size={100} className="ring-2 ring-primary/20" />
             </div>
 
-            {/* Name & Badges Row */}
-            <div className="text-center space-y-3">
+            {/* Name Row */}
+            <div className="text-center">
               <h1 className="text-2xl font-bold">{name}</h1>
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                {category && (
-                  <Badge variant="teal" className="text-xs">{category}</Badge>
-                )}
-                {groups.map((group, idx) => (
-                  <Badge key={idx} variant="default" className="text-xs gap-1">
-                    <Users className="h-3 w-3" />
-                    {group}
-                  </Badge>
-                ))}
-                <Badge variant={status === 'active' ? 'default' : 'outline'} className="text-xs">
-                  {status === 'active' ? 'Active' : 'Inactive'}
-                </Badge>
-                {tags.map((tag, idx) => (
-                  <Badge key={idx} variant="tag" className="text-xs">{tag}</Badge>
-                ))}
-              </div>
             </div>
 
             {/* Glowing Separator */}
@@ -113,28 +96,7 @@ export function ContactHeader({
               <Avatar userId={contactId} size={80} className="ring-2 ring-primary/20" />
               
               <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h1 className="text-3xl font-bold mb-2">{name}</h1>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {category && (
-                        <Badge variant="teal">{category}</Badge>
-                      )}
-                      {groups.map((group, idx) => (
-                        <Badge key={idx} variant="default" className="gap-1">
-                          <Users className="h-3 w-3" />
-                          {group}
-                        </Badge>
-                      ))}
-                      <Badge variant={status === 'active' ? 'default' : 'outline'}>
-                        {status === 'active' ? 'Active' : 'Inactive'}
-                      </Badge>
-                      {tags.map((tag, idx) => (
-                        <Badge key={idx} variant="tag">{tag}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <h1 className="text-3xl font-bold">{name}</h1>
               </div>
             </div>
 
