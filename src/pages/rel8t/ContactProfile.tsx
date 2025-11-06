@@ -5,7 +5,7 @@ import { ContactHeader } from '@/components/rel8t/ContactHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ProfileCard from '@/components/connections/ProfileCard';
-import { Mail, Phone, MapPin, Building, Calendar, MessageSquare, Users, TrendingUp, Activity, ChevronDown } from 'lucide-react';
+import { Mail, Phone, MapPin, Building, Calendar, MessageSquare, Users, TrendingUp, Activity, ChevronDown, Tag } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 // Mock data - replace with actual data fetching
@@ -157,6 +157,50 @@ export default function ContactProfile() {
                   <p className="text-xs md:text-sm">{mockContact.notes}</p>
                 </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tags & Categories Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="h-5 w-5" />
+              Tags & Categories
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Tags Section */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-3">Tags</p>
+              <div className="flex flex-wrap gap-2">
+                {mockContact.tags.map((tag, index) => (
+                  <Badge key={index} variant="tag">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-border/50" />
+
+            {/* Categories Section */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-3">Categories</p>
+              <div className="flex flex-wrap gap-2">
+                {mockContact.category && (
+                  <Badge variant="teal">
+                    {mockContact.category}
+                  </Badge>
+                )}
+                {mockContact.groups.map((group, index) => (
+                  <Badge key={index} variant="default" className="gap-1">
+                    <Users className="h-3 w-3" />
+                    {group}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
