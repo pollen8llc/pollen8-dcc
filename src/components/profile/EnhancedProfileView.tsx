@@ -241,42 +241,84 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
             </CardHeader>
             <CardContent className="space-y-6 sm:space-y-8">
               {/* Active vs Total Connections - Percentage Bar */}
-              <div className="space-y-3">
+              <div className="p-4 sm:p-6 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm sm:text-base font-semibold text-foreground">Connection Activity</h4>
-                  <span className="text-sm sm:text-base font-bold text-primary">0 of 0 active</span>
+                  <span className="text-sm sm:text-base font-bold text-primary">35 of 48 active</span>
                 </div>
-                <div className="relative h-4 sm:h-5 bg-muted/20 rounded-full overflow-hidden border border-border/30">
+                <div className="relative h-6 sm:h-8 bg-background/40 backdrop-blur-sm rounded-full overflow-hidden border border-primary/30">
                   <div 
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary-glow to-primary rounded-full transition-all duration-500"
-                    style={{ width: '0%' }}
-                  />
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary-glow to-primary rounded-full transition-all duration-500 flex items-center justify-center"
+                    style={{ width: '73%' }}
+                  >
+                    <span className="text-xs sm:text-sm font-bold text-primary-foreground px-2">73%</span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
-                  <span>0% active connections</span>
-                  <span>Total: 0</span>
+                  <span>73% actively communicating</span>
+                  <span>13 inactive</span>
                 </div>
               </div>
 
               {/* Rapport Growth Line Graph */}
-              <div className="space-y-3">
-                <h4 className="text-sm sm:text-base font-semibold text-foreground">Rapport Growth</h4>
-                <div className="h-40 sm:h-48 bg-gradient-to-br from-muted/10 to-muted/5 rounded-xl border border-border/30 flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <TrendingUp className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground/40 mx-auto" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">Communication data pending</p>
+              <div className="p-4 sm:p-6 bg-gradient-to-br from-green-500/5 to-green-500/10 border border-green-500/20 rounded-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm sm:text-base font-semibold text-foreground">Rapport Growth</h4>
+                  <span className="text-sm sm:text-base font-bold text-green-500">+24% this month</span>
+                </div>
+                <div className="h-40 sm:h-48 bg-background/20 backdrop-blur-sm rounded-lg border border-green-500/30 p-4 flex items-end gap-2">
+                  {/* Mock line graph bars */}
+                  <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                    <div className="w-full bg-gradient-to-t from-green-500/60 to-green-500/30 rounded-t" style={{ height: '45%' }}></div>
+                    <span className="text-xs text-muted-foreground">W1</span>
                   </div>
+                  <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                    <div className="w-full bg-gradient-to-t from-green-500/60 to-green-500/30 rounded-t" style={{ height: '62%' }}></div>
+                    <span className="text-xs text-muted-foreground">W2</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                    <div className="w-full bg-gradient-to-t from-green-500/60 to-green-500/30 rounded-t" style={{ height: '58%' }}></div>
+                    <span className="text-xs text-muted-foreground">W3</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                    <div className="w-full bg-gradient-to-t from-green-500/70 to-green-500/40 rounded-t" style={{ height: '85%' }}></div>
+                    <span className="text-xs text-muted-foreground">W4</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
+                  <span>Based on messages, calls & meetings</span>
+                  <TrendingUp className="h-4 w-4 text-green-500" />
                 </div>
               </div>
 
               {/* Cross Connections Line Graph */}
-              <div className="space-y-3">
-                <h4 className="text-sm sm:text-base font-semibold text-foreground">Cross Connections</h4>
-                <div className="h-40 sm:h-48 bg-gradient-to-br from-muted/10 to-muted/5 rounded-xl border border-border/30 flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <Network className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground/40 mx-auto" />
-                    <p className="text-xs sm:text-sm text-muted-foreground">No cross-connection data</p>
+              <div className="p-4 sm:p-6 bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/20 rounded-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm sm:text-base font-semibold text-foreground">Cross Connections</h4>
+                  <span className="text-sm sm:text-base font-bold text-blue-500">12 new links</span>
+                </div>
+                <div className="h-40 sm:h-48 bg-background/20 backdrop-blur-sm rounded-lg border border-blue-500/30 p-4 flex items-end gap-2">
+                  {/* Mock cross-connection graph */}
+                  <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                    <div className="w-full bg-gradient-to-t from-blue-500/60 to-blue-500/30 rounded-t" style={{ height: '35%' }}></div>
+                    <span className="text-xs text-muted-foreground">W1</span>
                   </div>
+                  <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                    <div className="w-full bg-gradient-to-t from-blue-500/60 to-blue-500/30 rounded-t" style={{ height: '48%' }}></div>
+                    <span className="text-xs text-muted-foreground">W2</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                    <div className="w-full bg-gradient-to-t from-blue-500/70 to-blue-500/40 rounded-t" style={{ height: '72%' }}></div>
+                    <span className="text-xs text-muted-foreground">W3</span>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-end items-center gap-1">
+                    <div className="w-full bg-gradient-to-t from-blue-500/70 to-blue-500/40 rounded-t" style={{ height: '90%' }}></div>
+                    <span className="text-xs text-muted-foreground">W4</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
+                  <span>Connections introducing you to their network</span>
+                  <Network className="h-4 w-4 text-blue-500" />
                 </div>
               </div>
             </CardContent>
