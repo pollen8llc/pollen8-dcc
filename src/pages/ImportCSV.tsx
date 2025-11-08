@@ -9,7 +9,7 @@ import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileSpreadsheet, Upload } from "lucide-react";
+import { ArrowLeft, FileSpreadsheet, Upload, UserPlus, Send, Search } from "lucide-react";
 
 const ImportCSV = () => {
   const navigate = useNavigate();
@@ -90,6 +90,46 @@ const ImportCSV = () => {
               Import contacts from CSV, vCard, or Excel files
             </p>
           </div>
+        </div>
+
+        {/* Contact Connection Options Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary/30"
+            onClick={() => navigate(isRel8Import ? '/rel8/contacts/new' : '/contacts/new')}
+          >
+            <CardContent className="p-6 text-center">
+              <UserPlus className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold text-sm">Create Contact</h3>
+            </CardContent>
+          </Card>
+
+          <Card className="border-primary/50 bg-primary/5">
+            <CardContent className="p-6 text-center">
+              <Upload className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold text-sm">Import Contacts</h3>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary/30"
+            onClick={() => navigate(isRel8Import ? '/rel8/invites' : '/invites')}
+          >
+            <CardContent className="p-6 text-center">
+              <Send className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold text-sm">Invite Contacts</h3>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary/30"
+            onClick={() => navigate(isRel8Import ? '/rel8/contacts' : '/contacts')}
+          >
+            <CardContent className="p-6 text-center">
+              <Search className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold text-sm">Find Contact</h3>
+            </CardContent>
+          </Card>
         </div>
         
         <Card className="glass-morphism border-0 backdrop-blur-md">
