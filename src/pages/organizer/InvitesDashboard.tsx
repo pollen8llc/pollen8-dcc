@@ -8,7 +8,7 @@ import { useInvites } from "@/hooks/useInvites";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import { InviteMetricsCard } from "@/components/invites/InviteMetricsCard";
-import InviteGenerator from "@/components/invites/InviteGenerator";
+import { InviteMethodTabs } from "@/components/invites/InviteMethodTabs";
 import { 
   RefreshCw,
   Link as LinkIcon
@@ -108,14 +108,7 @@ const InvitesDashboard = () => {
         </div>
 
         {/* Create Invite Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Generate New Link</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <InviteGenerator onInviteCreated={loadInvites} />
-          </CardContent>
-        </Card>
+        <InviteMethodTabs onInviteCreated={loadInvites} />
 
         {/* Active Invites List Section */}
         <Card>
