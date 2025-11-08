@@ -24,6 +24,7 @@ const InvitesManagementPage = lazy(() => import("@/pages/InvitesManagementPage")
 const InvitePage = lazy(() => import("@/pages/InvitePage"));
 const InvitesDashboard = lazy(() => import("@/pages/organizer/InvitesDashboard"));
 const InviteMicrosite = lazy(() => import("@/pages/InviteMicrosite"));
+const InviteRedirect = lazy(() => import("@/components/invites/InviteRedirect"));
 const Settings = lazy(() => import("@/pages/Settings"));
 
 // Admin pages
@@ -208,11 +209,7 @@ const AppRoutes = () => {
               <InvitesDashboard />
             </NonServiceProviderRoute>
           } />
-          <Route path="/invite/:code" element={
-            <NonServiceProviderRoute>
-              <InvitePage />
-            </NonServiceProviderRoute>
-          } />
+          <Route path="/invite/:code" element={<InviteRedirect />} />
           
           {/* Admin routes - Protected from service providers */}
           <Route path="/admin" element={
