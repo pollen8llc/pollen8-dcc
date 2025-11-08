@@ -18,6 +18,16 @@ const BuildRapport = () => {
     queryFn: getTriggers,
   });
 
+  const formatCondition = (condition: string) => {
+    try {
+      // Remove escaped quotes and parse if it's a JSON string
+      const cleaned = condition.replace(/\\"/g, '"').replace(/^"|"$/g, '');
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    } catch {
+      return condition;
+    }
+  };
+
   const handleCreateNewTrigger = () => {
     navigate("/rel8/triggers/wizard?returnTo=relationship");
   };
@@ -71,11 +81,11 @@ const BuildRapport = () => {
                     <div className="flex-1">
                       <h4 className="font-medium text-foreground">{trigger.name}</h4>
                       <div className="flex items-center gap-2 mt-2">
-                        <Badge className="text-xs bg-background/50 backdrop-blur-sm border-primary/20">
-                          {trigger.condition}
+                        <Badge variant="outline" className="text-xs">
+                          {formatCondition(trigger.condition)}
                         </Badge>
                         {trigger.is_active && (
-                          <Badge className="text-xs bg-primary/20 backdrop-blur-sm border-primary/30">
+                          <Badge variant="secondary" className="text-xs">
                             Active
                           </Badge>
                         )}

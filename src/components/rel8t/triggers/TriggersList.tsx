@@ -51,6 +51,16 @@ export function TriggersList({
     }
   };
 
+  const formatCondition = (condition: string) => {
+    try {
+      // Remove escaped quotes and parse if it's a JSON string
+      const cleaned = condition.replace(/\\"/g, '"').replace(/^"|"$/g, '');
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    } catch {
+      return condition;
+    }
+  };
+
   const getRecurrenceText = (trigger: Trigger) => {
     if (!trigger.recurrence_pattern) return null;
     
@@ -79,10 +89,10 @@ export function TriggersList({
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">{trigger.description}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge className="text-xs bg-background/50 backdrop-blur-sm border-primary/20">
-                    {trigger.condition}
+                  <Badge variant="outline" className="text-xs">
+                    {formatCondition(trigger.condition)}
                   </Badge>
-                  <Badge className="text-xs bg-background/50 backdrop-blur-sm border-primary/20">
+                  <Badge variant="secondary" className="text-xs">
                     {trigger.action}
                   </Badge>
                 </div>
