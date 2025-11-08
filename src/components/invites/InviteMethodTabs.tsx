@@ -41,21 +41,21 @@ export const InviteMethodTabs: React.FC<InviteMethodTabsProps> = ({ onInviteCrea
   const handleCreateLinkInvite = async () => {
     try {
       const invite = await createInvite(
-        undefined,
         linkForm.maxUses || undefined,
         linkForm.expirationDate?.toISOString()
       );
       
       if (invite) {
-        const inviteUrl = `${window.location.origin}/invite/${invite.link_id}`;
+        const inviteUrl = `${window.location.origin}/i/${invite.link_id}`;
         copyToClipboard(inviteUrl, "Invite link");
         onInviteCreated();
         setLinkForm({ maxUses: '', expirationDate: undefined, description: '' });
       }
     } catch (error) {
+      console.error("Error creating invite:", error);
       toast({
         title: "Error",
-        description: "Failed to create invite link",
+        description: error instanceof Error ? error.message : "Failed to create invite link",
         variant: "destructive"
       });
     }

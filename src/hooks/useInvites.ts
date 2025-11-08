@@ -22,8 +22,7 @@ export const useInvites = () => {
    * Create a new invite
    */
   const handleCreateInvite = async (
-    communityId?: string,
-    maxUses?: string | number,  // Accept either string or number
+    maxUses?: string | number,
     expiresAt?: string
   ): Promise<InviteData | null> => {
     if (!currentUser) {
@@ -51,7 +50,7 @@ export const useInvites = () => {
         }
       }
       
-      const invite = await createInvite(currentUser.id, communityId, maxUsesNum, expiresAt);
+      const invite = await createInvite(currentUser.id, undefined, maxUsesNum, expiresAt);
 
       if (invite) {
         toast({
