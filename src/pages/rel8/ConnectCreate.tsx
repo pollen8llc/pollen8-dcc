@@ -1,12 +1,59 @@
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserPlus } from "lucide-react";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
-import ContactCreate from "./ContactCreate";
+import ContactForm from "@/components/rel8t/ContactForm";
+import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
+import { toast } from "@/hooks/use-toast";
 
 const ConnectCreate = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Create contact mutation
+  const createMutation = useMutation({
+    mutationFn: async (values: any) => {
+      // Extract selectedGroups from values before creating contact
+      const { selectedGroups, ...contactData } = values;
+      const newContact = await createContact(contactData);
+      
+      // If groups are selected, add the contact to groups
+      if (selectedGroups && selectedGroups.length > 0) {
+        await Promise.all(
+          selectedGroups.map((groupId: string) => 
+            addContactToGroup(newContact.id, groupId)
+          )
+        );
+      }
+      
+      return newContact;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      toast({
+        title: "Contact created",
+        description: "New contact has been successfully created.",
+      });
+      navigate("/rel8/contacts");
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create contact.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = (values: any) => {
+    createMutation.mutate(values);
+  };
+
+  const handleCancel = () => {
+    navigate("/rel8/connect");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
@@ -15,20 +62,34 @@ const ConnectCreate = () => {
       <div className="container mx-auto max-w-6xl px-4 py-8">
         <Rel8OnlyNavigation />
         
-        <div className="flex items-center justify-between mb-6 mt-6">
+        <div className="flex items-center gap-3 mb-6 mt-6">
+          <UserPlus className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold">Create Contact</h1>
             <p className="text-sm text-muted-foreground">
               Add a new contact to your network
             </p>
           </div>
-          <Button variant="outline" onClick={() => navigate('/rel8/connect')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+        </div>
+
+        <div className="flex justify-end mb-4">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/rel8/connect')}
+            className="flex items-center gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
+          >
+            <ArrowLeft className="h-4 w-4" />
             Back to Connect
           </Button>
         </div>
 
-        <ContactCreate />
+        <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-6">
+          <ContactForm
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            isSubmitting={createMutation.isPending}
+          />
+        </div>
       </div>
     </div>
   );
