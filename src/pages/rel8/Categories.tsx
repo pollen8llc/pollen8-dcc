@@ -9,10 +9,9 @@ const Categories = () => {
       
       <div className="container mx-auto max-w-6xl px-4 py-4 sm:py-8 space-y-6">
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6 mt-4 sm:mt-6">
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate tracking-tight">Categories</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Manage contact categories for better organization</p>
+        <div className="flex items-center gap-3 mb-4 sm:mb-6 mt-4 sm:mt-6">
+          <div>
+            <p className="text-sm text-muted-foreground">Manage contact categories for better organization</p>
           </div>
         </div>
 

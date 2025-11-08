@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Mail } from "lucide-react";
 
 interface EmailFormData {
   to: string;
@@ -75,11 +75,13 @@ const EmailTest = () => {
       <Rel8Header showProfileBanner={false} />
       <div className="container mx-auto px-4 py-8">
         
-        <div className="mt-6 mb-8">
-          <h1 className="text-3xl font-bold">Email Testing</h1>
-          <p className="text-muted-foreground mt-1">
-            Test the email sending functionality
-          </p>
+        <div className="mt-6 mb-8 flex items-center gap-3">
+          <Mail className="h-6 w-6 text-primary" />
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Test the email sending functionality
+            </p>
+          </div>
         </div>
 
         <Card className="max-w-2xl mx-auto">

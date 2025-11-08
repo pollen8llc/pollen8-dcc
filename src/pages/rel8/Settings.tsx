@@ -8,10 +8,9 @@ const Settings = () => {
       
       <div className="container mx-auto max-w-6xl px-4 py-8 space-y-6">
         
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
+        <div className="flex items-center gap-3 mb-6 mt-6">
           <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Triggers</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Configure your automation triggers</p>
+            <p className="text-sm text-muted-foreground">Configure your automation triggers</p>
           </div>
         </div>
 

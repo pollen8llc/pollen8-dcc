@@ -15,102 +15,81 @@ const ConnectHub = () => {
         <Rel8OnlyNavigation />
         
         <div className="flex items-center gap-3 mb-6 mt-6">
-          <Users className="h-7 w-7 text-primary" />
+          <Users className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold">Connect Contacts</h1>
             <p className="text-sm text-muted-foreground">
               Choose how you want to add contacts to your network
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card 
-            className="cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-lg"
+            className="relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer group bg-card/40 backdrop-blur-md border-border/50 hover:shadow-lg hover:shadow-primary/10"
             onClick={() => navigate('/rel8/connect/create')}
           >
-            <CardHeader>
+            <CardHeader className="space-y-2 p-5">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-500/10 rounded-lg">
-                  <UserPlus className="h-6 w-6 text-blue-500" />
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <UserPlus className="h-5 w-5" />
                 </div>
-                <div>
-                  <CardTitle>Create Contact</CardTitle>
-                  <CardDescription>Add a new contact manually</CardDescription>
-                </div>
+                <CardTitle className="text-lg">Create Contact</CardTitle>
               </div>
+              <CardDescription className="text-sm">
+                Add a new contact manually by entering their details
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Fill in contact details and add them to your network one by one
-              </p>
-            </CardContent>
           </Card>
 
           <Card 
-            className="cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-lg"
+            className="relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer group bg-card/40 backdrop-blur-md border-border/50 hover:shadow-lg hover:shadow-primary/10"
             onClick={() => navigate('/rel8/connect/import')}
           >
-            <CardHeader>
+            <CardHeader className="space-y-2 p-5">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-green-500/10 rounded-lg">
-                  <Upload className="h-6 w-6 text-green-500" />
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Upload className="h-5 w-5" />
                 </div>
-                <div>
-                  <CardTitle>Import Contacts</CardTitle>
-                  <CardDescription>Upload from CSV, vCard, or Excel</CardDescription>
-                </div>
+                <CardTitle className="text-lg">Import Contacts</CardTitle>
               </div>
+              <CardDescription className="text-sm">
+                Upload contacts from CSV or import from external platforms
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Bulk import contacts from files like CSV, vCard, or Excel spreadsheets
-              </p>
-            </CardContent>
           </Card>
 
           <Card 
-            className="cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-lg"
+            className="relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer group bg-card/40 backdrop-blur-md border-border/50 hover:shadow-lg hover:shadow-primary/10"
             onClick={() => navigate('/rel8/invites')}
           >
-            <CardHeader>
+            <CardHeader className="space-y-2 p-5">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-purple-500/10 rounded-lg">
-                  <Link2 className="h-6 w-6 text-purple-500" />
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Link2 className="h-5 w-5" />
                 </div>
-                <div>
-                  <CardTitle>Invite Links</CardTitle>
-                  <CardDescription>Generate shareable invite links</CardDescription>
-                </div>
+                <CardTitle className="text-lg">Invite Links</CardTitle>
               </div>
+              <CardDescription className="text-sm">
+                Generate and manage personalized invite links for contacts
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Create links that anyone can use to share their contact info with you
-              </p>
-            </CardContent>
           </Card>
 
           <Card 
-            className="cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-lg"
+            className="relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer group bg-card/40 backdrop-blur-md border-border/50 hover:shadow-lg hover:shadow-primary/10"
             onClick={() => navigate('/rel8/connect/find')}
           >
-            <CardHeader>
+            <CardHeader className="space-y-2 p-5">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-orange-500/10 rounded-lg">
-                  <Search className="h-6 w-6 text-orange-500" />
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Search className="h-5 w-5" />
                 </div>
-                <div>
-                  <CardTitle>Find Contacts</CardTitle>
-                  <CardDescription>Search and browse your network</CardDescription>
-                </div>
+                <CardTitle className="text-lg">Find Contacts</CardTitle>
               </div>
+              <CardDescription className="text-sm">
+                Search and discover contacts in the network
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Search through your existing contacts and view their profiles
-              </p>
-            </CardContent>
           </Card>
         </div>
       </div>

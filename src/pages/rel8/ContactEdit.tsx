@@ -283,9 +283,9 @@ const ContactEdit = () => {
               
               <div className="flex-1 space-y-3 w-full text-center sm:text-left">
                 <div>
-                  <h1 className="text-3xl font-bold">{contact.name}</h1>
+                  <h1 className="text-2xl font-bold">{contact.name}</h1>
                   {contact.email && (
-                    <p className="text-muted-foreground text-lg">{contact.email}</p>
+                    <p className="text-muted-foreground">{contact.email}</p>
                   )}
                 </div>
                 
