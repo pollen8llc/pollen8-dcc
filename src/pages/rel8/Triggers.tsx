@@ -1,24 +1,18 @@
 import { TriggerManagement } from "@/components/rel8t/TriggerManagement";
-import { Rel8Header } from "@/components/rel8t/Rel8Header";
+import Navbar from "@/components/Navbar";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 
 const Triggers = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <Rel8Header />
+      <Navbar />
       
-      <div className="container mx-auto max-w-6xl px-4 py-8 space-y-6">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        {/* Navigation Component */}
+        <Rel8OnlyNavigation />
         
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-6">
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Triggers</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Configure your automation triggers</p>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div>
-            <TriggerManagement />
-          </div>
+        <div className="mt-8">
+          <TriggerManagement />
         </div>
       </div>
     </div>
