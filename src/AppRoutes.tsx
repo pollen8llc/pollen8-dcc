@@ -57,6 +57,13 @@ const Triggers = lazy(() => import("@/pages/rel8/Triggers"));
 const BuildRapport = lazy(() => import("@/pages/rel8/BuildRapport"));
 const Setup = lazy(() => import("@/pages/rel8/Setup"));
 
+// REL8 Connect pages
+const ConnectHub = lazy(() => import("@/pages/rel8/ConnectHub"));
+const ConnectCreate = lazy(() => import("@/pages/rel8/ConnectCreate"));
+const ConnectImport = lazy(() => import("@/pages/rel8/ConnectImport"));
+const ConnectFind = lazy(() => import("@/pages/rel8/ConnectFind"));
+const InvitesPage = lazy(() => import("@/pages/rel8/InvitesPage"));
+
 // Nomin8 pages
 const Nomin8Dashboard = lazy(() => import("@/pages/nmn8/Nomin8Dashboard"));
 const Nomin8ContactsPage = lazy(() => import("@/pages/nmn8/Nomin8ContactsPage"));
@@ -89,7 +96,7 @@ const CommunityDirectory = lazy(() => import("@/pages/eco8/CommunityDirectory"))
 const CommunityProfile = lazy(() => import("@/pages/eco8/CommunityProfile"));
 const CommunityDashboard = lazy(() => import("@/pages/eco8/CommunityDashboard"));
 const Eco8Dashboard = lazy(() => import("@/pages/eco8/Eco8Dashboard"));
-const InvitesPage = lazy(() => import("@/pages/eco8/InvitesPage"));
+const Eco8InvitesPage = lazy(() => import("@/pages/eco8/InvitesPage"));
 
 // Modul8 pages - Updated for new flow
 const Modul8Dashboard = lazy(() => import("@/pages/modul8/Modul8Dashboard"));
@@ -361,15 +368,30 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
 
-          {/* REL8 Connect - now uses unified CSV import */}
+          {/* REL8 Connect Hub and Sub-pages */}
           <Route path="/rel8/connect" element={
             <NonServiceProviderRoute>
-              <ImportCSV />
+              <ConnectHub />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/rel8/connect/create" element={
+            <NonServiceProviderRoute>
+              <ConnectCreate />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/rel8/connect/import" element={
+            <NonServiceProviderRoute>
+              <ConnectImport />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/rel8/connect/find" element={
+            <NonServiceProviderRoute>
+              <ConnectFind />
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/invites" element={
             <NonServiceProviderRoute>
-              <ImportCSV />
+              <InvitesPage />
             </NonServiceProviderRoute>
           } />
 
@@ -623,7 +645,7 @@ const AppRoutes = () => {
           <Route path="/eco8/invites" element={
             <NonServiceProviderRoute>
               <ProtectedRoute>
-                <InvitesPage />
+                <Eco8InvitesPage />
               </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
