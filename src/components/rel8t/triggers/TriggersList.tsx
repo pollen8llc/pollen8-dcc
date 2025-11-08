@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Calendar, Plus, Trash2, Clock } from "lucide-react";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { format } from "date-fns";
@@ -50,6 +51,16 @@ export function TriggersList({
     }
   };
 
+  const formatCondition = (condition: string) => {
+    try {
+      // Remove escaped quotes and parse if it's a JSON string
+      const cleaned = condition.replace(/\\"/g, '"').replace(/^"|"$/g, '');
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    } catch {
+      return condition;
+    }
+  };
+
   const getRecurrenceText = (trigger: Trigger) => {
     if (!trigger.recurrence_pattern) return null;
     
@@ -77,11 +88,13 @@ export function TriggersList({
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">{trigger.description}</p>
-                <div className="text-xs text-muted-foreground mt-2">
-                  <span className="font-medium">Condition:</span> {trigger.condition}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  <span className="font-medium">Action:</span> {trigger.action}
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="outline" className="text-xs">
+                    {formatCondition(trigger.condition)}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    {trigger.action}
+                  </Badge>
                 </div>
                 
                 {/* Display scheduled time if applicable */}
