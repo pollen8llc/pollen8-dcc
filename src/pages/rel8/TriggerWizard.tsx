@@ -66,29 +66,17 @@ const TriggerWizard = () => {
 
         {/* Minimal Header */}
         <div className="flex items-center gap-3 mb-8">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex items-center gap-3">
-            <Zap className="h-7 w-7 text-primary" />
-            <div>
-              <h1 className="text-2xl font-bold">Create Trigger</h1>
-              <p className="text-sm text-muted-foreground">
-                Set up an automation for your relationships
-              </p>
-            </div>
+          <Zap className="h-7 w-7 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold">Create Trigger</h1>
+            <p className="text-sm text-muted-foreground">
+              Set up an automation for your relationships
+            </p>
           </div>
         </div>
 
         {/* Form Card */}
-        <div className="max-w-4xl mx-auto">
-          <Card className="glass-morphism border-0 backdrop-blur-md">
+        <Card className="glass-morphism border-0 backdrop-blur-md">
           <CardHeader className="border-b border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
             <CardTitle className="text-lg">Trigger Details</CardTitle>
           </CardHeader>
@@ -219,7 +207,6 @@ const TriggerWizard = () => {
             </form>
           </CardContent>
         </Card>
-        </div>
       </div>
     </div>
   );
