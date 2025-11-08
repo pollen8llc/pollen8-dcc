@@ -81,7 +81,7 @@ const BuildRapport = () => {
                     <div className="flex-1">
                       <h4 className="font-medium text-foreground">{trigger.name}</h4>
                       <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="secondary" className="text-xs">
                           {formatCondition(trigger.condition)}
                         </Badge>
                         {trigger.is_active && (

@@ -89,7 +89,7 @@ export function TriggersList({
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">{trigger.description}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="secondary" className="text-xs">
                     {formatCondition(trigger.condition)}
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
