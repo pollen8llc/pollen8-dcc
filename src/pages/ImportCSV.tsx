@@ -37,8 +37,16 @@ const ImportCSV = () => {
   useEffect(() => {
     if (isRel8Import) {
       getInvitesByCreator();
+      
+      // Auto-scroll to invite section if on /rel8/invites route
+      if (location.pathname === '/rel8/invites') {
+        setTimeout(() => {
+          const inviteSection = document.getElementById('invite-section');
+          inviteSection?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
     }
-  }, [isRel8Import]);
+  }, [isRel8Import, location.pathname]);
 
   const handleInviteCreated = async () => {
     await getInvitesByCreator();

@@ -367,6 +367,11 @@ const AppRoutes = () => {
               <ImportCSV />
             </NonServiceProviderRoute>
           } />
+          <Route path="/rel8/invites" element={
+            <NonServiceProviderRoute>
+              <ImportCSV />
+            </NonServiceProviderRoute>
+          } />
 
           {/* Import routes */}
           <Route path="/import" element={
