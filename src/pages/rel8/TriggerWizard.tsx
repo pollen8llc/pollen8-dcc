@@ -60,7 +60,7 @@ const TriggerWizard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       
-      <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
         {/* Navigation Component */}
         <Rel8OnlyNavigation />
 
@@ -87,7 +87,8 @@ const TriggerWizard = () => {
         </div>
 
         {/* Form Card */}
-        <Card className="glass-morphism border-0 backdrop-blur-md">
+        <div className="max-w-4xl mx-auto">
+          <Card className="glass-morphism border-0 backdrop-blur-md">
           <CardHeader className="border-b border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
             <CardTitle className="text-lg">Trigger Details</CardTitle>
           </CardHeader>
@@ -218,6 +219,7 @@ const TriggerWizard = () => {
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
