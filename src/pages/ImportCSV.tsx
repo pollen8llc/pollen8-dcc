@@ -85,9 +85,9 @@ const ImportCSV = () => {
         <div className="flex items-center gap-3 mb-6 mt-6">
           <Upload className="h-7 w-7 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold">Import Contacts</h1>
+            <h1 className="text-2xl font-bold">Connect Contacts</h1>
             <p className="text-sm text-muted-foreground">
-              Import contacts from CSV, vCard, or Excel files
+              Connect contacts from CSV, vCard, Excel files, or other options
             </p>
           </div>
         </div>
@@ -107,7 +107,7 @@ const ImportCSV = () => {
           <Card className="border-primary/50 bg-primary/5">
             <CardContent className="p-3 text-center">
               <Upload className="h-5 w-5 text-primary mx-auto mb-1" />
-              <h3 className="font-medium text-xs">Import Contacts</h3>
+              <h3 className="font-medium text-xs">Import Files</h3>
             </CardContent>
           </Card>
 

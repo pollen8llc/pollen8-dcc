@@ -358,8 +358,8 @@ const AppRoutes = () => {
             </NonServiceProviderRoute>
           } />
 
-          {/* REL8 Import - now uses unified CSV import */}
-          <Route path="/rel8/import" element={
+          {/* REL8 Connect - now uses unified CSV import */}
+          <Route path="/rel8/connect" element={
             <NonServiceProviderRoute>
               <ImportCSV />
             </NonServiceProviderRoute>

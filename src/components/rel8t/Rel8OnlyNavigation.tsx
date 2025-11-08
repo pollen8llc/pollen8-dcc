@@ -31,11 +31,11 @@ export function Rel8OnlyNavigation() {
       isActive: location.pathname.startsWith("/rel8/contacts")
     },
     {
-      href: "/rel8/import",
-      label: "Import",
+      href: "/rel8/connect",
+      label: "Connect",
       icon: Upload,
       iconColor: "text-green-500",
-      isActive: location.pathname === "/rel8/import"
+      isActive: location.pathname === "/rel8/connect"
     },
     {
       href: "/rel8/triggers",

@@ -76,10 +76,10 @@ const ImportsAndInvites: React.FC = () => {
                   <Button
                     variant="outline"
                     className="h-24 flex-col gap-2"
-                    onClick={() => navigate('/rel8/import')}
+                    onClick={() => navigate('/rel8/connect')}
                   >
                     <FileSpreadsheet className="h-8 w-8" />
-                    <span>CSV Import</span>
+                    <span>Connect Contacts</span>
                   </Button>
                   
                   <Button

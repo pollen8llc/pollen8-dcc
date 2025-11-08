@@ -53,7 +53,7 @@ const FeaturesPage = () => {
         'View analytics and relationship insights'
       ],
       icon: <Users className="h-5 w-5" />,
-      routes: ['/rel8/dashboard', '/rel8/contacts', '/rel8/triggers', '/rel8/import'],
+      routes: ['/rel8/dashboard', '/rel8/contacts', '/rel8/triggers', '/rel8/connect'],
       roles: ['All Users']
     },
     {
@@ -171,7 +171,7 @@ const FeaturesPage = () => {
         'Integration status monitoring'
       ],
       icon: <Settings className="h-5 w-5" />,
-      routes: ['/rel8/import', '/modul8/contracts'],
+      routes: ['/rel8/connect', '/modul8/contracts'],
       roles: ['All Users']
     }
   ];
