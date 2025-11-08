@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
@@ -8,36 +8,74 @@ import { createContact } from "@/services/rel8t/contactService";
 import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileSpreadsheet, Upload, UserPlus, Send, Search } from "lucide-react";
+import { Upload, UserPlus, Send, Search, Link2 } from "lucide-react";
+import { InviteMethodTabs } from "@/components/invites/InviteMethodTabs";
+import { InviteMetricsCard } from "@/components/invites/InviteMetricsCard";
+import { useInvites } from "@/hooks/useInvites";
+import { Separator } from "@/components/ui/separator";
 
 const ImportCSV = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isInvalidating, setIsInvalidating] = useState(false);
 
-  // Determine if this is being used for REL8 or general import
   const isRel8Import = location.pathname.includes('/rel8');
   const backPath = isRel8Import ? '/rel8/contacts' : '/imports';
   const successPath = isRel8Import ? '/rel8/contacts' : '/a10d';
+
+  const {
+    invites,
+    isLoading: invitesLoading,
+    getInvitesByCreator,
+    invalidateInvite
+  } = useInvites();
+
+  const activeInvites = invites.filter(invite => invite.is_active);
+
+  useEffect(() => {
+    if (isRel8Import) {
+      getInvitesByCreator();
+    }
+  }, [isRel8Import]);
+
+  const handleInviteCreated = async () => {
+    await getInvitesByCreator();
+  };
+
+  const handleInvalidateInvite = async (inviteId: string) => {
+    setIsInvalidating(true);
+    try {
+      await invalidateInvite(inviteId);
+      toast({
+        title: "Success",
+        description: "Invite link has been deactivated",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to deactivate invite link",
+        variant: "destructive",
+      });
+    } finally {
+      setIsInvalidating(false);
+    }
+  };
 
   const handleImportComplete = async (importedContacts: NormalizedContact[]) => {
     setIsProcessing(true);
     let successCount = 0;
     let errorCount = 0;
-    const errors: string[] = [];
 
     try {
       for (const contact of importedContacts) {
         try {
-          // Transform normalized contact to service contact format
           const serviceContact = DataNormalizer.transformToServiceContact(contact);
           await createContact(serviceContact);
           successCount++;
         } catch (error: any) {
           errorCount++;
-          errors.push(`Failed to import ${contact.name}: ${error.message}`);
           console.error('Error importing contact:', contact.name, error);
         }
       }
@@ -48,19 +86,15 @@ const ImportCSV = () => {
           description: `Successfully imported ${successCount} contacts.${errorCount ? ` ${errorCount} failed.` : ""}`
         });
         
-        // Invalidate contacts query to refresh the contacts list
         queryClient.invalidateQueries({ queryKey: ["contacts"] });
-        
-        // Navigate back to appropriate page after successful import
         navigate(successPath);
       } else {
         toast({
           title: "Import failed",
-          description: "No contacts were successfully imported. Please check your data and try again.",
+          description: "No contacts were successfully imported.",
           variant: "destructive"
         });
       }
-      
     } catch (error: any) {
       console.error('Import process error:', error);
       toast({
@@ -78,10 +112,8 @@ const ImportCSV = () => {
       <Navbar />
       
       <div className="container mx-auto max-w-6xl px-4 py-8">
-        {/* Navigation Component for REL8 */}
         {isRel8Import && <Rel8OnlyNavigation />}
         
-        {/* Minimal Header */}
         <div className="flex items-center gap-3 mb-6 mt-6">
           <Upload className="h-7 w-7 text-primary" />
           <div>
@@ -92,7 +124,6 @@ const ImportCSV = () => {
           </div>
         </div>
 
-        {/* Contact Connection Options Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary/30"
@@ -113,7 +144,10 @@ const ImportCSV = () => {
 
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary/30"
-            onClick={() => navigate(isRel8Import ? '/rel8/invites' : '/invites')}
+            onClick={() => {
+              const inviteSection = document.getElementById('invite-section');
+              inviteSection?.scrollIntoView({ behavior: 'smooth' });
+            }}
           >
             <CardContent className="p-3 text-center">
               <Send className="h-5 w-5 text-primary mx-auto mb-1" />
@@ -131,6 +165,55 @@ const ImportCSV = () => {
             </CardContent>
           </Card>
         </div>
+
+        {isRel8Import && (
+          <>
+            <div id="invite-section" className="space-y-6 mb-8">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">Generate Invite Links</h2>
+                <p className="text-muted-foreground">
+                  Create shareable links to collect contact information
+                </p>
+              </div>
+
+              <InviteMethodTabs onInviteCreated={handleInviteCreated} />
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Link2 className="h-5 w-5" />
+                    Active Invite Links
+                  </CardTitle>
+                  <CardDescription>
+                    Manage and track your active invitation links
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {invitesLoading ? (
+                    <p className="text-muted-foreground text-center py-8">Loading...</p>
+                  ) : activeInvites.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No active invite links. Create one above!
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {activeInvites.map((invite) => (
+                        <InviteMetricsCard
+                          key={invite.id}
+                          invite={invite}
+                          onInvalidate={handleInvalidateInvite}
+                          isInvalidating={isInvalidating}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Separator className="my-8" />
+          </>
+        )}
         
         <Card className="glass-morphism border-0 backdrop-blur-md">
           <CardHeader className="border-b border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">

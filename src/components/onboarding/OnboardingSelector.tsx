@@ -50,43 +50,14 @@ const OnboardingSelector = () => {
     if (role === UserRole.ORGANIZER) {
       navigate("/create-community");
     } else if (role === UserRole.MEMBER) {
-      // If there's an invite code, process it first
+      // If there's an invite code, redirect to public microsite
       if (inviteCode) {
-        setIsSubmitting(true);
-        try {
-          const inviteId = await recordInviteUse(inviteCode, currentUser.id);
-          
-          if (inviteId) {
-            toast({
-              title: "Success",
-              description: "Invite accepted successfully!",
-            });
-            
-            // Refresh user data after connection is created
-            await refreshUser();
-            
-            navigate("/communities/join");
-          } else {
-            toast({
-              title: "Error",
-              description: "Invalid or expired invite code",
-              variant: "destructive",
-            });
-          }
-        } catch (error) {
-          console.error("Error accepting invite:", error);
-          toast({
-            title: "Error",
-            description: "There was a problem accepting the invite",
-            variant: "destructive",
-          });
-        } finally {
-          setIsSubmitting(false);
-        }
-      } else {
-        // No invite code, just continue to joining communities
-        navigate("/communities/join");
+        toast({
+          title: "Notice",
+          description: "Please use the invite link directly to connect",
+        });
       }
+      navigate("/discover");
     } else {
       // For service provider or other roles, go to main page
       navigate("/");

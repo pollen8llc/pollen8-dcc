@@ -23,6 +23,7 @@ const OrganizerDashboard = lazy(() => import("@/pages/OrganizerDashboard"));
 const InvitesManagementPage = lazy(() => import("@/pages/InvitesManagementPage"));
 const InvitePage = lazy(() => import("@/pages/InvitePage"));
 const InvitesDashboard = lazy(() => import("@/pages/organizer/InvitesDashboard"));
+const InviteMicrosite = lazy(() => import("@/pages/InviteMicrosite"));
 const Settings = lazy(() => import("@/pages/Settings"));
 
 // Admin pages
@@ -134,7 +135,9 @@ const AppRoutes = () => {
     <ErrorBoundary>
       <Suspense fallback={<AppLoadingSpinner />}>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Index />} />
+          <Route path="/i/:linkId" element={<InviteMicrosite />} />
           <Route path="/auth" element={
             <NonServiceProviderRoute>
               <Auth />

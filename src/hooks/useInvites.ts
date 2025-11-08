@@ -167,47 +167,12 @@ export const useInvites = () => {
   };
 
   /**
-   * Use an invite - meant for onboarding process
+   * Use an invite - for backward compatibility (deprecated)
+   * Use the public microsite flow instead
    */
   const useInvite = async (code: string): Promise<string | null> => {
-    if (!currentUser) {
-      toast({
-        title: "Authentication Error",
-        description: "You must be logged in to use invites",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    if (!code) {
-      throw new Error("No code provided");
-    }
-
-    setIsLoading(true);
-    try {
-      const inviteId = await recordInviteUse(code, currentUser.id);
-      
-      if (inviteId) {
-        toast({
-          title: "Success",
-          description: "Invite used successfully",
-        });
-      } else {
-        throw new Error("Invalid or expired invite");
-      }
-      
-      return inviteId;
-    } catch (error) {
-      console.error("Error in useInvite:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
+    console.warn("useInvite is deprecated. Use the public microsite flow at /i/:linkId instead");
+    return null;
   };
 
   return {

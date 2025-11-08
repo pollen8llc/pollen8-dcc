@@ -462,6 +462,45 @@ export type Database = {
         }
         Relationships: []
       }
+      invites: {
+        Row: {
+          code: string
+          created_at: string
+          creator_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          link_id: string
+          max_uses: number | null
+          updated_at: string
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          creator_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_id: string
+          max_uses?: number | null
+          updated_at?: string
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          creator_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_id?: string
+          max_uses?: number | null
+          updated_at?: string
+          used_count?: number
+        }
+        Relationships: []
+      }
       iotas: {
         Row: {
           created_at: string
@@ -2886,6 +2925,16 @@ export type Database = {
         Returns: boolean
       }
       update_user_role_self: { Args: { p_role_name: string }; Returns: boolean }
+      use_invite_link: {
+        Args: {
+          p_invite_code: string
+          p_visitor_email: string
+          p_visitor_name: string
+          p_visitor_phone?: string
+          p_visitor_tags?: string[]
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

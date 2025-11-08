@@ -45,8 +45,8 @@ export const generateUniqueCode = async (): Promise<string> => {
  * Generate a unique link ID for an invite
  */
 export const generateUniqueLinkId = (code: string): string => {
-  // Convert the code to base64 and remove any characters that would be problematic in a URL
-  return Buffer.from(code).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  // Use the code as-is since it's already unique and URL-safe
+  return code;
 };
 
 /**
@@ -68,17 +68,19 @@ export const createInvite = async (
     // Generate a link ID based on the code
     const linkId = generateUniqueLinkId(code);
     
+    const inviteData: any = {
+      creator_id: creatorId,
+      code: code,
+      link_id: linkId,
+      max_uses: maxUses || null,
+      expires_at: expiresAt || null,
+      is_active: true,
+      used_count: 0
+    };
+    
     const { data, error } = await (supabase as any)
       .from('invites')
-      .insert({
-        creator_id: creatorId,
-        community_id: communityId,
-        code: code,
-        link_id: linkId,
-        max_uses: maxUses || null,
-        expires_at: expiresAt || null,
-        is_active: true
-      } as any)
+      .insert(inviteData)
       .select('*')
       .single();
       
@@ -96,7 +98,6 @@ export const createInvite = async (
       action: 'create_invite',
       details: { 
         invite_id: data.id,
-        community_id: communityId,
         code: code,
         max_uses: maxUses
       }
@@ -249,38 +250,33 @@ export const validateInvite = async (inviteId: string): Promise<boolean> => {
 };
 
 /**
- * Record the use of an invite
+ * Record the use of an invite via the public microsite
  */
-export const recordInviteUse = async (inviteCode: string, userId: string): Promise<string | null> => {
+export const recordInviteUse = async (
+  code: string, 
+  visitorName: string,
+  visitorEmail: string,
+  visitorPhone?: string,
+  visitorMessage?: string
+): Promise<string | null> => {
   try {
-    const { data, error } = await (supabase as any)
-      .rpc('record_invite_use', {
-        invite_code: inviteCode,
-        used_by_id: userId
-      } as any);
-      
+    // Call the database function to record usage and create contact
+    const { data, error } = await supabase.rpc('use_invite_link', {
+      p_invite_code: code,
+      p_visitor_name: visitorName,
+      p_visitor_email: visitorEmail,
+      p_visitor_phone: visitorPhone || null,
+      p_visitor_tags: visitorMessage ? [visitorMessage] : null
+    });
+
     if (error) {
       console.error("Error recording invite use:", error);
-      toast({
-        title: "Error",
-        description: "Could not record invite use",
-        variant: "destructive",
-      });
-      return null;
+      throw new Error(error.message);
     }
-    
-    await logAuditAction({
-      action: 'invite_used',
-      details: { 
-        invite_code: inviteCode,
-        user_id: userId,
-        invite_id: data
-      }
-    });
-    
-    return (data as any) || null;
+
+    return data as string;
   } catch (error) {
     console.error("Exception in recordInviteUse:", error);
-    return null;
+    throw error;
   }
 };

@@ -98,36 +98,21 @@ const InvitePage: React.FC = () => {
     setError(null);
     
     try {
-      console.log("Accepting invite with code:", invite.code);
-      const inviteId = await recordInviteUse(invite.code, currentUser.id);
-      
-      if (inviteId) {
-        // Refresh user data to get updated connections
-        await refreshUser();
-        
-        toast({
-          title: "Success",
-          description: "You've successfully accepted the invite!",
-        });
-        
-        // Navigate to REL8T dashboard
-        navigate("/rel8/dashboard");
-      } else {
-        toast({
-          title: "Error",
-          description: "There was a problem accepting the invite",
-          variant: "destructive",
-        });
-        setError("Failed to accept the invite. It may be invalid or expired.");
-      }
-    } catch (error) {
-      console.error("Error accepting invite:", error);
+      console.log("This invite system is deprecated. Redirecting to new flow...");
       toast({
-        title: "Error",
-        description: "There was a problem accepting the invite",
+        title: "Notice",
+        description: "This invite link format is no longer supported. Please request a new invite link.",
         variant: "destructive",
       });
-      setError("An error occurred while accepting the invite");
+      navigate("/");
+    } catch (error) {
+      console.error("Error:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem processing the invite",
+        variant: "destructive",
+      });
+      setError("An error occurred");
     } finally {
       setIsAccepting(false);
     }
