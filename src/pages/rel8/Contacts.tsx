@@ -2,12 +2,13 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import ContactList from "@/components/rel8t/ContactList";
-import { Heart, Trash2, Edit, CheckSquare, Square, Search, Filter } from "lucide-react";
+import { Heart, Trash2, Edit, CheckSquare, Square, Search, Filter, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Rel8Header } from "@/components/rel8t/Rel8Header";
+import Navbar from "@/components/Navbar";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { getContacts, deleteMultipleContacts, getCategories } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 
@@ -132,102 +133,105 @@ const Contacts = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gradient-to-br from-background via-background/95 to-primary/5">
-      <Rel8Header />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <Navbar />
       
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <div className="container mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-8 flex-shrink-0">
-          
-          <div className="flex flex-col gap-4 mb-4 sm:mb-6 mt-4">
-            <div className="w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Contacts</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                Manage your network and relationships
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              {isSelectionMode ? (
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        {/* Navigation Component */}
+        <Rel8OnlyNavigation />
+        
+        {/* Minimal Header */}
+        <div className="flex items-center gap-3 mb-6 mt-6">
+          <Users className="h-7 w-7 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Contacts</h1>
+            <p className="text-sm text-muted-foreground">
+              Manage your network and relationships
+            </p>
+          </div>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 mb-6">
+          {isSelectionMode ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={handleSelectAll}
+                className="flex items-center gap-2"
+                size="sm"
+              >
+                {selectedContacts.length === filteredContacts.length ? (
+                  <CheckSquare className="h-4 w-4" />
+                ) : (
+                  <Square className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {selectedContacts.length === filteredContacts.length ? "Deselect All" : "Select All"}
+                </span>
+              </Button>
+              
+              {selectedContacts.length > 0 && (
                 <>
                   <Button
                     variant="outline"
-                    onClick={handleSelectAll}
+                    onClick={() => {
+                      const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
+                      if (firstContact) handleEditContact(firstContact);
+                    }}
                     className="flex items-center gap-2"
                     size="sm"
                   >
-                    {selectedContacts.length === filteredContacts.length ? (
-                      <CheckSquare className="h-4 w-4" />
-                    ) : (
-                      <Square className="h-4 w-4" />
-                    )}
-                    <span className="hidden sm:inline">
-                      {selectedContacts.length === filteredContacts.length ? "Deselect All" : "Select All"}
-                    </span>
+                    <Edit className="h-4 w-4" />
+                    <span className="hidden sm:inline">Edit</span>
                   </Button>
                   
-                  {selectedContacts.length > 0 && (
-                    <>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
-                          if (firstContact) handleEditContact(firstContact);
-                        }}
-                        className="flex items-center gap-2"
-                        size="sm"
-                      >
-                        <Edit className="h-4 w-4" />
-                        <span className="hidden sm:inline">Edit</span>
-                      </Button>
-                      
-                      <Button
-                        variant="destructive"
-                        onClick={handleBulkDelete}
-                        className="flex items-center gap-2"
-                        size="sm"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="hidden sm:inline">Delete ({selectedContacts.length})</span>
-                      </Button>
-                    </>
-                  )}
-                  
                   <Button
-                    variant="outline"
-                    onClick={toggleSelectionMode}
-                    size="sm"
-                  >
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={toggleSelectionMode}
+                    variant="destructive"
+                    onClick={handleBulkDelete}
                     className="flex items-center gap-2"
                     size="sm"
                   >
-                    <CheckSquare className="h-4 w-4" />
-                    <span className="hidden sm:inline">Select</span>
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => navigate("/rel8/build-rapport")}
-                    className="flex items-center gap-2 w-full sm:w-auto hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
-                    size="sm"
-                  >
-                    <Heart className="h-4 w-4" />
-                    <span className="sm:inline">Build Rapport</span>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Delete ({selectedContacts.length})</span>
                   </Button>
                 </>
               )}
-            </div>
-          </div>
+              
+              <Button
+                variant="outline"
+                onClick={toggleSelectionMode}
+                size="sm"
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={toggleSelectionMode}
+                className="flex items-center gap-2"
+                size="sm"
+              >
+                <CheckSquare className="h-4 w-4" />
+                <span className="hidden sm:inline">Select</span>
+              </Button>
+              
+              <Button 
+                onClick={() => navigate("/rel8/build-rapport")}
+                className="flex items-center gap-2"
+                size="sm"
+              >
+                <Heart className="h-4 w-4" />
+                <span className="sm:inline">Build Rapport</span>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="space-y-4 mb-6 flex-shrink-0">
+        <div className="space-y-4 mb-6">
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -286,17 +290,15 @@ const Contacts = () => {
           </div>
         </div>
         
-        <ScrollArea className="flex-1">
-          <ContactList
-            contacts={filteredContacts}
-            isLoading={isLoading}
-            onEdit={handleEditContact}
-            onRefresh={handleRefresh}
-            onContactMultiSelect={isSelectionMode ? handleContactSelect : undefined}
-            selectedContacts={selectedContacts}
-            isSelectionMode={isSelectionMode}
-          />
-        </ScrollArea>
+        <ContactList
+          contacts={filteredContacts}
+          isLoading={isLoading}
+          onEdit={handleEditContact}
+          onRefresh={handleRefresh}
+          onContactMultiSelect={isSelectionMode ? handleContactSelect : undefined}
+          selectedContacts={selectedContacts}
+          isSelectionMode={isSelectionMode}
+        />
       </div>
     </div>
   );

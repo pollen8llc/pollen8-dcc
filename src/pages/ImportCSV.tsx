@@ -2,14 +2,14 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
-import { Rel8Header } from "@/components/rel8t/Rel8Header";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { toast } from "@/hooks/use-toast";
 import { createContact } from "@/services/rel8t/contactService";
 import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, FileSpreadsheet, Upload } from "lucide-react";
 
 const ImportCSV = () => {
   const navigate = useNavigate();
@@ -74,50 +74,30 @@ const ImportCSV = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {isRel8Import ? <Rel8Header /> : <Navbar />}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <Navbar />
       
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600">
-              <FileSpreadsheet className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Import CSV</h1>
-              <p className="text-muted-foreground">Import contacts from CSV, vCard, or Excel files</p>
-            </div>
-          </div>
-          <div className="ml-auto flex gap-2">
-            {isRel8Import && (
-              <Button
-                onClick={() => navigate('/imports')}
-                variant="outline"
-                size="sm"
-                className="gap-2"
-              >
-                More Options
-              </Button>
-            )}
-            <Button
-              onClick={() => navigate(backPath)}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Back</span>
-            </Button>
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        {/* Navigation Component for REL8 */}
+        {isRel8Import && <Rel8OnlyNavigation />}
+        
+        {/* Minimal Header */}
+        <div className="flex items-center gap-3 mb-6 mt-6">
+          <Upload className="h-7 w-7 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold">Import Contacts</h1>
+            <p className="text-sm text-muted-foreground">
+              Import contacts from CSV, vCard, or Excel files
+            </p>
           </div>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>File Import</CardTitle>
-            <CardDescription>Import contacts from CSV, vCard, or Excel files</CardDescription>
+        <Card className="glass-morphism border-0 backdrop-blur-md">
+          <CardHeader className="border-b border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+            <CardTitle className="text-lg">File Import</CardTitle>
+            <CardDescription>Choose a file to import your contacts</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             {isProcessing ? (
               <div className="flex items-center justify-center p-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
