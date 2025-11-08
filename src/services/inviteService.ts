@@ -28,7 +28,7 @@ export const generateUniqueCode = async (): Promise<string> => {
       console.error("Error generating unique code:", error);
       toast({
         title: "Error",
-        description: "Could not generate invite code",
+        description: `Could not generate invite code: ${error.message}`,
         variant: "destructive",
       });
       return "";
@@ -37,6 +37,11 @@ export const generateUniqueCode = async (): Promise<string> => {
     return data;
   } catch (error) {
     console.error("Exception in generateUniqueCode:", error);
+    toast({
+      title: "Error",
+      description: error instanceof Error ? error.message : "Unexpected error generating invite code",
+      variant: "destructive",
+    });
     return "";
   }
 };
@@ -142,7 +147,7 @@ export const getInviteByCode = async (code: string): Promise<InviteData | null> 
       .from('invites')
       .select('*')
       .eq('code', code)
-      .single();
+      .maybeSingle();
       
     if (error) {
       console.error("Error fetching invite by code:", error);
@@ -165,7 +170,7 @@ export const getInviteByLinkId = async (linkId: string): Promise<InviteData | nu
       .from('invites')
       .select('*')
       .eq('link_id', linkId)
-      .single();
+      .maybeSingle();
       
     if (error) {
       console.error("Error fetching invite by link ID:", error);
