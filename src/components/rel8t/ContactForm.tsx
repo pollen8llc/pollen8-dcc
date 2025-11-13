@@ -13,9 +13,7 @@ import {
 } from "@/components/ui/select";
 import { 
   getCategories, 
-  ContactCategory, 
-  ContactGroup, 
-  getContactGroups 
+  ContactCategory
 } from "@/services/rel8t/contactService";
 import { 
   MapPin,
@@ -37,7 +35,6 @@ interface ContactFormProps {
     tags?: string[];
     category_id?: string;
     location?: string;
-    groups?: ContactGroup[];
   };
   onSubmit: (values: any) => void;
   onCancel: () => void;
@@ -53,8 +50,7 @@ const DEFAULT_VALUES = {
   notes: "",
   tags: [],
   category_id: "",
-  location: "",
-  groups: []
+  location: ""
 };
 
 const ContactForm = ({
@@ -66,10 +62,6 @@ const ContactForm = ({
   const [values, setValues] = useState(initialValues);
   const [tagsInput, setTagsInput] = useState("");
   const [categories, setCategories] = useState<ContactCategory[]>([]);
-  const [groups, setGroups] = useState<ContactGroup[]>([]);
-  const [selectedGroups, setSelectedGroups] = useState<string[]>(
-    initialValues.groups?.map(g => g.id) || []
-  );
   
   useEffect(() => {
     const loadCategories = async () => {
@@ -81,17 +73,7 @@ const ContactForm = ({
       }
     };
     
-    const loadGroups = async () => {
-      try {
-        const fetchedGroups = await getContactGroups();
-        setGroups(fetchedGroups);
-      } catch (error) {
-        console.error("Error loading groups:", error);
-      }
-    };
-    
     loadCategories();
-    loadGroups();
   }, []);
 
   const handleChange = (
@@ -130,14 +112,7 @@ const ContactForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Prepare form data with selected groups
-    const formData = {
-      ...values,
-      selectedGroups // Pass selected groups for processing in the parent component
-    };
-    
-    onSubmit(formData);
+    onSubmit(values);
   };
 
   const handleSelectCategory = (category_id: string) => {
@@ -148,13 +123,7 @@ const ContactForm = ({
   };
 
   const toggleGroupSelection = (groupId: string) => {
-    setSelectedGroups(prev => {
-      if (prev.includes(groupId)) {
-        return prev.filter(id => id !== groupId);
-      } else {
-        return [...prev, groupId];
-      }
-    });
+    // Groups removed - no-op
   };
 
   return (
@@ -276,41 +245,6 @@ const ContactForm = ({
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-foreground border-b pb-2">Organization & Tags</h3>
 
-          {/* Groups field */}
-          {groups.length > 0 && (
-            <div>
-              <Label htmlFor="groups" className="text-sm font-medium flex items-center gap-1.5 mb-2">
-                <Users className="h-4 w-4 text-muted-foreground" /> Groups
-              </Label>
-              <div className="border border-border/40 rounded-md p-3 max-h-40">
-                <ScrollArea className="h-32">
-                  <div className="space-y-2">
-                    {groups.map((group) => (
-                      <div key={group.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`group-${group.id}`}
-                          checked={selectedGroups.includes(group.id)}
-                          onCheckedChange={() => toggleGroupSelection(group.id)}
-                        />
-                        <label
-                          htmlFor={`group-${group.id}`}
-                          className="flex items-center gap-2 text-sm cursor-pointer"
-                        >
-                          {group.color && (
-                            <div 
-                              className="w-2 h-2 rounded-full" 
-                              style={{ backgroundColor: group.color }}
-                            />
-                          )}
-                          {group.name}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            </div>
-          )}
 
           {/* Tags field */}
           <div>

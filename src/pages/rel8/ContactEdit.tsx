@@ -60,36 +60,8 @@ const ContactEdit = () => {
       
       console.log("ContactEdit mutation - received values:", values);
       
-      // Extract selectedGroups from values before updating contact
-      const { selectedGroups, ...contactData } = values;
-      
-      console.log("ContactEdit mutation - contact data:", contactData);
-      console.log("ContactEdit mutation - selected groups:", selectedGroups);
-      console.log("ContactEdit mutation - current contact groups:", contact?.groups);
-      
       // Update basic contact data
-      const updatedContact = await updateContact(id, contactData);
-      
-      // Handle group membership changes if selectedGroups is provided
-      if (selectedGroups && contact?.groups) {
-        // Find groups to add and remove
-        const currentGroupIds = contact.groups.map(g => g.id);
-        const groupsToAdd = selectedGroups.filter((g: string) => !currentGroupIds.includes(g));
-        const groupsToRemove = currentGroupIds.filter(g => !selectedGroups.includes(g));
-        
-        console.log("Groups to add:", groupsToAdd);
-        console.log("Groups to remove:", groupsToRemove);
-        
-        // Add contact to new groups
-        for (const groupId of groupsToAdd) {
-          await addContactToGroup(id, groupId);
-        }
-        
-        // Remove contact from old groups
-        for (const groupId of groupsToRemove) {
-          await removeContactFromGroup(id, groupId);
-        }
-      }
+      const updatedContact = await updateContact(id, values);
       
       return updatedContact;
     },
@@ -455,8 +427,7 @@ const ContactEdit = () => {
                       notes: contact.notes || '',
                       tags: contact.tags || [],
                       category_id: contact.category_id || '',
-                      location: contact.location || '',
-                      groups: contact.groups || []
+                      location: contact.location || ''
                     }}
                     onSubmit={handleSubmit}
                     onCancel={() => handleModeChange('view')}

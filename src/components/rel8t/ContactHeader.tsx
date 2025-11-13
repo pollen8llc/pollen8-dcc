@@ -10,7 +10,6 @@ interface ContactHeaderProps {
   contactId: string;
   name: string;
   category?: string;
-  groups?: string[];
   avatar?: string;
   status?: 'active' | 'inactive';
   tags?: string[];
@@ -25,7 +24,6 @@ export function ContactHeader({
   contactId,
   name,
   category,
-  groups = [],
   avatar,
   status = 'active',
   tags = [],

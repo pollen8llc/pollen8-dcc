@@ -91,7 +91,6 @@ export default function ContactProfile() {
           contactId={mockContact.id}
           name={mockContact.name}
           category={mockContact.category}
-          groups={mockContact.groups}
           status={mockContact.status}
           tags={mockContact.tags}
           onActv8={handleActv8}
