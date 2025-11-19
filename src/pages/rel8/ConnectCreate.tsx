@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
-import ContactForm from "@/components/rel8t/ContactForm";
+import ContactCreateWizard from "@/components/rel8t/ContactCreateWizard";
 import { createContact } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 
@@ -70,8 +70,8 @@ const ConnectCreate = () => {
           </Button>
         </div>
 
-        <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-6">
-          <ContactForm
+        <div className="max-w-3xl mx-auto bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl p-8">
+          <ContactCreateWizard
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             isSubmitting={createMutation.isPending}
