@@ -11,6 +11,10 @@ export interface Contact {
   notes?: string;
   tags?: string[];
   location?: string;
+  status?: string;
+  interests?: string[];
+  bio?: string;
+  last_introduction_date?: string;
   created_at: string;
   updated_at: string;
   user_id: string;
@@ -65,9 +69,37 @@ export const getContactCount = async (): Promise<number> => {
 };
 
 export const getContactById = async (id: string): Promise<Contact | null> => {
-  const { data, error } = await supabase.from("rms_contacts").select(`*,category:category_id(id,name,color)`).eq("id", id).single();
-  if (error) throw new Error(error.message);
-  return data || null;
+  // First get the contact with category
+  const { data: contact, error: contactError } = await supabase
+    .from("rms_contacts")
+    .select(`
+      *,
+      category:category_id(id,name,color)
+    `)
+    .eq("id", id)
+    .single();
+  
+  if (contactError) throw new Error(contactError.message);
+  if (!contact) return null;
+  
+  // Then get affiliations separately
+  const { data: affiliations, error: affiliationsError } = await supabase
+    .from("rms_contact_affiliations")
+    .select(`
+      *,
+      affiliated_contact:affiliated_contact_id(id,name,email,organization,role,location)
+    `)
+    .eq("contact_id", id);
+  
+  if (affiliationsError) throw new Error(affiliationsError.message);
+  
+  return {
+    ...contact,
+    affiliations: affiliations?.map((aff: any) => ({
+      ...aff,
+      affiliation_type: aff.affiliation_type as 'user' | 'contact' | 'community'
+    })) || []
+  };
 };
 
 export const createContact = async (contact: Omit<Contact, "id" | "created_at" | "updated_at" | "user_id">): Promise<Contact> => {
