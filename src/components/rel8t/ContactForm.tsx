@@ -18,11 +18,11 @@ import {
 import { 
   MapPin,
   Building,
-  Users
+  Heart
 } from "lucide-react";
 import { LocationSelector } from "@/components/ui/location-selector";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Badge } from "@/components/ui/badge";
 
 interface ContactFormProps {
   initialValues?: {
@@ -35,6 +35,10 @@ interface ContactFormProps {
     tags?: string[];
     category_id?: string;
     location?: string;
+    status?: 'active' | 'inactive';
+    interests?: string[];
+    bio?: string;
+    last_introduction_date?: string;
   };
   onSubmit: (values: any) => void;
   onCancel: () => void;
@@ -50,7 +54,11 @@ const DEFAULT_VALUES = {
   notes: "",
   tags: [],
   category_id: "",
-  location: ""
+  location: "",
+  status: "active" as 'active' | 'inactive',
+  interests: [],
+  bio: "",
+  last_introduction_date: ""
 };
 
 const ContactForm = ({
@@ -61,6 +69,7 @@ const ContactForm = ({
 }: ContactFormProps) => {
   const [values, setValues] = useState(initialValues);
   const [tagsInput, setTagsInput] = useState("");
+  const [interestsInput, setInterestsInput] = useState("");
   const [categories, setCategories] = useState<ContactCategory[]>([]);
   
   useEffect(() => {
@@ -107,6 +116,31 @@ const ContactForm = ({
     setValues({
       ...values,
       tags: values.tags?.filter(tag => tag !== tagToRemove) || []
+    });
+  };
+
+  const handleInterestsKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      
+      if (!interestsInput.trim()) return;
+      
+      const newInterest = interestsInput.trim();
+      if (!values.interests?.includes(newInterest)) {
+        setValues({
+          ...values,
+          interests: [...(values.interests || []), newInterest]
+        });
+      }
+      
+      setInterestsInput("");
+    }
+  };
+
+  const removeInterest = (interestToRemove: string) => {
+    setValues({
+      ...values,
+      interests: values.interests?.filter(interest => interest !== interestToRemove) || []
     });
   };
 
@@ -184,6 +218,44 @@ const ContactForm = ({
           </div>
         </div>
 
+        {/* Profile Details Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-foreground border-b pb-2">Profile Details</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="status" className="text-sm font-medium">Status</Label>
+              <Select
+                value={values.status || "active"}
+                onValueChange={(value) => setValues({ ...values, status: value as 'active' | 'inactive' })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Current contact status</p>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="bio" className="text-sm font-medium">Bio / Description</Label>
+            <Textarea
+              id="bio"
+              name="bio"
+              value={values.bio || ""}
+              onChange={handleChange}
+              rows={6}
+              className="mt-1 resize-none"
+              placeholder="Add a bio or description for this contact..."
+            />
+            <p className="text-xs text-muted-foreground mt-1">A short description or summary about this contact</p>
+          </div>
+        </div>
+
         {/* Professional Information Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-foreground border-b pb-2">Professional Information</h3>
@@ -241,10 +313,46 @@ const ContactForm = ({
           </div>
         </div>
 
-        {/* Organization & Tags Section */}
+        {/* Interests & Tags Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-foreground border-b pb-2">Organization & Tags</h3>
+          <h3 className="text-lg font-medium text-foreground border-b pb-2">Interests & Tags</h3>
 
+          {/* Interests field */}
+          <div>
+            <Label htmlFor="interests" className="text-sm font-medium">Interests</Label>
+            <Input
+              id="interests"
+              value={interestsInput}
+              onChange={(e) => setInterestsInput(e.target.value)}
+              onKeyDown={handleInterestsKeyDown}
+              placeholder="Type and press Enter to add interests"
+              className="mt-1"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              What topics or areas is this contact interested in? Press Enter or comma to add.
+            </p>
+            {values.interests && values.interests.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {values.interests.map((interest, index) => (
+                  <Badge 
+                    key={index} 
+                    variant="secondary"
+                    className="px-2 py-1 flex items-center gap-1"
+                  >
+                    <Heart className="h-3 w-3" />
+                    {interest}
+                    <button
+                      type="button"
+                      onClick={() => removeInterest(interest)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Tags field */}
           <div>
@@ -274,6 +382,28 @@ const ContactForm = ({
                 placeholder={values.tags?.length ? "" : "Add tags (press Enter)"}
               />
             </div>
+          </div>
+        </div>
+
+        {/* Introduction Tracking Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-foreground border-b pb-2">Introduction Tracking</h3>
+          
+          <div>
+            <Label htmlFor="last_introduction_date" className="text-sm font-medium">Last Introduction Date</Label>
+            <div className="mt-1">
+              <DatePicker
+                value={values.last_introduction_date ? new Date(values.last_introduction_date) : undefined}
+                onChange={(date) => setValues({ 
+                  ...values, 
+                  last_introduction_date: date ? date.toISOString() : '' 
+                })}
+                className="w-full"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Track when you last introduced this contact to someone
+            </p>
           </div>
         </div>
 
