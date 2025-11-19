@@ -26,7 +26,7 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
     location: "",
     organization: "",
     role: "",
-    category_id: "",
+    category_id: undefined,
     bio: "",
     status: "active" as 'active' | 'inactive',
     interests: [] as string[],
@@ -112,7 +112,29 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(values);
+    
+    // Sanitize data before submission
+    const sanitizedValues = {
+      ...values,
+      // Convert empty category_id to null (important for UUID foreign key)
+      category_id: values.category_id || null,
+      // Convert empty optional text fields to null
+      email: values.email.trim() || null,
+      phone: values.phone.trim() || null,
+      organization: values.organization.trim() || null,
+      role: values.role.trim() || null,
+      location: values.location.trim() || null,
+      bio: values.bio.trim() || null,
+      notes: values.notes.trim() || null,
+      // Add source tracking
+      source: "wizard",
+      // Keep arrays and status as-is (they're already proper format)
+      tags: values.tags,
+      interests: values.interests,
+      status: values.status
+    };
+    
+    onSubmit(sanitizedValues);
   };
 
   return (
@@ -209,7 +231,7 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
             <div>
               <Label htmlFor="category_id" className="text-sm font-medium">Category</Label>
               <Select
-                value={values.category_id}
+                value={values.category_id || ""}
                 onValueChange={(value) => setValues({ ...values, category_id: value })}
               >
                 <SelectTrigger className="mt-1.5">
