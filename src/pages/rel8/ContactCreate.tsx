@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import ContactForm from "@/components/rel8t/ContactForm";
-import { createContact, addContactToGroup } from "@/services/rel8t/contactService";
+import { createContact } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import {
   Breadcrumb,
@@ -21,20 +21,7 @@ const ContactCreate = () => {
   // Create contact mutation
   const createMutation = useMutation({
     mutationFn: async (values: any) => {
-      // Extract selectedGroups from values before creating contact
-      const { selectedGroups, ...contactData } = values;
-      const newContact = await createContact(contactData);
-      
-      // If groups are selected, add the contact to groups
-      if (selectedGroups && selectedGroups.length > 0) {
-        await Promise.all(
-          selectedGroups.map((groupId: string) => 
-            addContactToGroup(newContact.id, groupId)
-          )
-        );
-      }
-      
-      return newContact;
+      return await createContact(values);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });

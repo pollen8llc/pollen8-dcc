@@ -14,9 +14,7 @@ import { useUser } from "@/contexts/UserContext";
 import { 
   getContactById, 
   updateContact, 
-  deleteContact, 
-  addContactToGroup,
-  removeContactFromGroup
+  deleteContact 
 } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -486,24 +484,6 @@ const ContactEdit = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {contact.groups && contact.groups.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium mb-2">Groups</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {contact.groups.map((group) => (
-                            <Badge key={group.id} variant="outline" className="bg-muted/20 border-muted">
-                              {group.color && (
-                                <div 
-                                  className="w-2 h-2 rounded-full mr-1" 
-                                  style={{ backgroundColor: group.color }}
-                                />
-                              )}
-                              {group.name}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                     {contact.tags && contact.tags.length > 0 && (
                       <div>
                         <h4 className="text-sm font-medium mb-2">Tags</h4>

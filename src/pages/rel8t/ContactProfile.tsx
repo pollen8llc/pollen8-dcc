@@ -5,7 +5,7 @@ import { ContactHeader } from '@/components/rel8t/ContactHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ProfileCard from '@/components/connections/ProfileCard';
-import { Mail, Phone, MapPin, Building, Calendar, MessageSquare, Users, TrendingUp, Activity, ChevronDown, Tag } from 'lucide-react';
+import { Mail, Phone, MapPin, Building, Calendar, MessageSquare, Users, TrendingUp, Activity, ChevronDown, Tag, Heart } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 // Mock data - replace with actual data fetching
@@ -20,6 +20,7 @@ const mockContact = {
   groups: ['Board Members', 'Tech Leaders'],
   status: 'active' as const,
   tags: ['VIP', 'Tech'],
+  interests: ['Innovation', 'Technology', 'Business Strategy', 'Networking'],
   bio: 'Experienced technology executive with over 15 years in the industry. Passionate about innovation and building strong business relationships. Always looking to connect with like-minded professionals.',
   lastCommunication: '2024-01-20',
   lastIntroduction: '2024-01-10',
@@ -197,6 +198,22 @@ export default function ContactProfile() {
                   <Badge key={index} variant="default" className="gap-1">
                     <Users className="h-3 w-3" />
                     {group}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-border/50" />
+
+            {/* Interests Section */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-3">Interests</p>
+              <div className="flex flex-wrap gap-2">
+                {mockContact.interests?.map((interest, index) => (
+                  <Badge key={index} variant="secondary" className="gap-1">
+                    <Heart className="h-3 w-3" />
+                    {interest}
                   </Badge>
                 ))}
               </div>
