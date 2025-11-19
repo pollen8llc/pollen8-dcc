@@ -166,7 +166,7 @@ export default function ContactProfile() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Tag className="h-5 w-5" />
-              Tags & Categories
+              Details
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
