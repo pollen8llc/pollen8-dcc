@@ -2244,11 +2244,14 @@ export type Database = {
       }
       rms_contacts: {
         Row: {
+          bio: string | null
           category_id: string | null
           created_at: string
           email: string | null
           id: string
+          interests: string[] | null
           last_contact_date: string | null
+          last_introduction_date: string | null
           location: string | null
           name: string
           notes: string | null
@@ -2256,16 +2259,20 @@ export type Database = {
           phone: string | null
           role: string | null
           source: string | null
+          status: string | null
           tags: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          bio?: string | null
           category_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          interests?: string[] | null
           last_contact_date?: string | null
+          last_introduction_date?: string | null
           location?: string | null
           name: string
           notes?: string | null
@@ -2273,16 +2280,20 @@ export type Database = {
           phone?: string | null
           role?: string | null
           source?: string | null
+          status?: string | null
           tags?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          bio?: string | null
           category_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          interests?: string[] | null
           last_contact_date?: string | null
+          last_introduction_date?: string | null
           location?: string | null
           name?: string
           notes?: string | null
@@ -2290,6 +2301,7 @@ export type Database = {
           phone?: string | null
           role?: string | null
           source?: string | null
+          status?: string | null
           tags?: string[] | null
           updated_at?: string
           user_id?: string
