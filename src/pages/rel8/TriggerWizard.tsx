@@ -103,7 +103,10 @@ const TriggerWizard = () => {
           )}
           <CardContent className={cn("p-6", showTemplateSelection && "pt-8")}>
             {showTemplateSelection ? (
-              <TriggerTemplateSelection onSelectTemplate={handleTemplateSelect} />
+              <TriggerTemplateSelection 
+                onSelectTemplate={handleTemplateSelect}
+                showDatePickers={false}
+              />
             ) : (
             <form onSubmit={onSubmit} className="space-y-6">
               {/* Change Template Button */}
