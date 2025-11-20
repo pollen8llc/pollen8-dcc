@@ -63,6 +63,11 @@ export default function ContactProfile() {
     );
   }
 
+  // Extract affiliated user ID if exists
+  const affiliatedUserId = contact.affiliations
+    ?.find(aff => aff.affiliation_type === 'user' && aff.affiliated_user_id)
+    ?.affiliated_user_id;
+
   const associatedContacts = contact.affiliations
     ?.filter(aff => aff.affiliation_type === 'contact' && aff.affiliated_contact)
     .map(aff => ({
@@ -87,6 +92,7 @@ export default function ContactProfile() {
           category={contact.category?.name || "Uncategorized"}
           status={(contact.status || "active") as "active" | "inactive"}
           tags={contact.tags || []}
+          affiliatedUserId={affiliatedUserId}
           onActv8={handleActv8}
           onNomin8={handleNomin8}
           onEvalu8={handleEvalu8}

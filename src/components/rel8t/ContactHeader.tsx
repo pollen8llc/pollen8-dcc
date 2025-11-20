@@ -13,6 +13,7 @@ interface ContactHeaderProps {
   avatar?: string;
   status?: 'active' | 'inactive';
   tags?: string[];
+  affiliatedUserId?: string;
   onActv8?: () => void;
   onNomin8?: () => void;
   onEvalu8?: () => void;
@@ -27,6 +28,7 @@ export function ContactHeader({
   avatar,
   status = 'active',
   tags = [],
+  affiliatedUserId,
   onActv8,
   onNomin8,
   onEvalu8,
@@ -43,7 +45,7 @@ export function ContactHeader({
           <div className="space-y-4">
             {/* Avatar Row */}
             <div className="flex items-center justify-center">
-              <Avatar userId={contactId} size={100} className="ring-2 ring-primary/20" />
+              <Avatar userId={affiliatedUserId || contactId} size={100} className="ring-2 ring-primary/20" />
             </div>
 
             {/* Name Row */}
@@ -91,7 +93,7 @@ export function ContactHeader({
           <>
             {/* Contact Info Section */}
             <div className="flex items-start gap-6 mb-6">
-              <Avatar userId={contactId} size={80} className="ring-2 ring-primary/20" />
+              <Avatar userId={affiliatedUserId || contactId} size={80} className="ring-2 ring-primary/20" />
               
               <div className="flex-1">
                 <h1 className="text-3xl font-bold">{name}</h1>
