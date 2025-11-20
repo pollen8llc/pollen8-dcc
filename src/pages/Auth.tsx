@@ -105,8 +105,8 @@ const Auth = () => {
           console.log("🚀 Auth: Redirecting SERVICE_PROVIDER to:", destination);
           navigate(destination, { replace: true });
         } else {
-          console.log("🚀 Auth: Redirecting authenticated user to /initi8");
-          navigate("/initi8", { replace: true });
+          console.log("🚀 Auth: Redirecting authenticated user to /rel8/connect");
+          navigate("/rel8/connect", { replace: true });
         }
         return;
       }
@@ -132,18 +132,18 @@ const Auth = () => {
             console.log("🚀 Auth: Quick redirect - SERVICE_PROVIDER to /labr8/dashboard");
             navigate("/labr8/dashboard", { replace: true });
           } else {
-            console.log("🚀 Auth: Quick redirect - User to /initi8");  
-            navigate("/initi8", { replace: true });
+            console.log("🚀 Auth: Quick redirect - User to /rel8/connect");  
+            navigate("/rel8/connect", { replace: true });
           }
         } catch (error) {
           console.error("❌ Auth: Error in quick role check:", error);
           // Fallback to default redirect
-          navigate("/initi8", { replace: true });
+          navigate("/rel8/connect", { replace: true });
         }
       }
     } catch (error) {
       console.error("❌ Auth: Error in handleAuthenticatedRedirect:", error);
-      navigate("/initi8", { replace: true });
+      navigate("/rel8/connect", { replace: true });
     }
   }, [currentUser, navigate]);
 
