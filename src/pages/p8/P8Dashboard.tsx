@@ -6,6 +6,7 @@ import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 import NetworkWorldMap from "@/components/p8/NetworkWorldMap";
 import LocationWorldMap from "@/components/p8/LocationWorldMap";
 import EventsCard from "@/components/p8/EventsCard";
+import { P8Navigation } from "@/components/p8/P8Navigation";
 const P8Dashboard = () => {
   const metrics = [{
     label: "Total Members",
@@ -99,6 +100,8 @@ const P8Dashboard = () => {
       <Navbar />
       <DotConnectorHeader />
       <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
+        {/* P8 Network Navigation Bar */}
+        <P8Navigation />
 
         {/* Network World Map */}
         <NetworkWorldMap />
