@@ -134,37 +134,48 @@ const TriggerWizard = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* Trigger Date */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Start Date *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full h-11 justify-start text-left font-normal bg-background border-2 border-border hover:border-primary",
-                          !formData.triggerDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.triggerDate ? (
-                          format(formData.triggerDate, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formData.triggerDate || undefined}
-                        onSelect={(date) => updateFormData({ triggerDate: date || null })}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                {/* Trigger Date - Hidden for template-based (already set) */}
+                {formData.selectedTemplate === 'custom' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Start Date *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full h-11 justify-start text-left font-normal bg-background border-2 border-border hover:border-primary",
+                            !formData.triggerDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.triggerDate ? (
+                            format(formData.triggerDate, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.triggerDate || undefined}
+                          onSelect={(date) => updateFormData({ triggerDate: date || null })}
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+
+                {/* Show selected date as read-only for template-based triggers */}
+                {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Start Date</Label>
+                    <div className="h-11 px-3 py-2 text-sm rounded-lg bg-muted border-2 border-border flex items-center">
+                      {formData.triggerDate && format(formData.triggerDate, "PPP")}
+                    </div>
+                  </div>
+                )}
 
                 {/* Trigger Time */}
                 <div className="space-y-2">
