@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,11 +13,13 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { TriggerTemplateSelection, TriggerTemplate } from "@/components/rel8t/triggers/TriggerTemplateSelection";
 
 const TriggerWizard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get('returnTo');
+  const [showTemplateSelection, setShowTemplateSelection] = useState(true);
   
   const { 
     formData, 
@@ -25,6 +28,22 @@ const TriggerWizard = () => {
     frequencyOptions,
     priorityOptions
   } = useTriggerWizard();
+
+  const handleTemplateSelect = (template: TriggerTemplate) => {
+    // Calculate the date based on template
+    const newDate = new Date();
+    newDate.setDate(newDate.getDate() + template.defaultDaysAhead);
+    
+    // Pre-fill form data based on template
+    updateFormData({
+      frequency: template.frequency,
+      triggerDate: template.id === 'custom' ? formData.triggerDate : newDate,
+      selectedTemplate: template.id
+    });
+    
+    // Move to form view
+    setShowTemplateSelection(false);
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,12 +94,17 @@ const TriggerWizard = () => {
           </div>
         </div>
 
-        {/* Form Card */}
+        {/* Template Selection or Form Card */}
         <Card className="glass-morphism border-0 backdrop-blur-md">
           <CardHeader className="border-b border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
-            <CardTitle className="text-lg">Trigger Details</CardTitle>
+            <CardTitle className="text-lg">
+              {showTemplateSelection ? "Select Template" : "Trigger Details"}
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
+            {showTemplateSelection ? (
+              <TriggerTemplateSelection onSelectTemplate={handleTemplateSelect} />
+            ) : (
             <form onSubmit={onSubmit} className="space-y-6">
               {/* Trigger Name */}
               <div className="space-y-2">
@@ -95,6 +119,21 @@ const TriggerWizard = () => {
                   className="backdrop-blur-sm bg-background/50"
                 />
               </div>
+
+              {/* Change Template Button */}
+              {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTemplateSelection(true)}
+                    className="text-xs text-muted-foreground hover:text-primary"
+                  >
+                    ← Change Template
+                  </Button>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Trigger Date */}
@@ -145,25 +184,37 @@ const TriggerWizard = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Frequency */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Frequency</Label>
-                  <Select
-                    value={formData.frequency}
-                    onValueChange={(value) => updateFormData({ frequency: value })}
-                  >
-                    <SelectTrigger className="backdrop-blur-sm bg-background/50">
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {frequencyOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Frequency - Only show for custom template */}
+                {formData.selectedTemplate === 'custom' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Frequency</Label>
+                    <Select
+                      value={formData.frequency}
+                      onValueChange={(value) => updateFormData({ frequency: value })}
+                    >
+                      <SelectTrigger className="backdrop-blur-sm bg-background/50">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {frequencyOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Show selected frequency as read-only for template-based triggers */}
+                {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Frequency</Label>
+                    <div className="px-3 py-2 text-sm rounded-lg backdrop-blur-sm bg-background/50 border border-white/10">
+                      {frequencyOptions.find(opt => opt.value === formData.frequency)?.label}
+                    </div>
+                  </div>
+                )}
 
                 {/* Priority */}
                 <div className="space-y-2">
@@ -205,6 +256,7 @@ const TriggerWizard = () => {
                 </Button>
               </div>
             </form>
+            )}
           </CardContent>
         </Card>
       </div>
