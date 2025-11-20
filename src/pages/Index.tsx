@@ -41,7 +41,12 @@ const Index = () => {
         const destination = currentUser.labr8_setup_complete ? "/labr8/dashboard" : "/labr8/setup";
         navigate(destination, { replace: true });
       } else {
-        console.log('🚀 Index.tsx - Redirecting authenticated user to REL8 connect page');
+        console.log('🚀 Index.tsx - Redirecting MEMBER/ORGANIZER/ADMIN user to /rel8/connect');
+        console.log('🔍 Index.tsx - User details:', {
+          role: currentUser.role,
+          userId: currentUser.id,
+          email: currentUser.email
+        });
         navigate("/rel8/connect", { replace: true });
       }
     }
