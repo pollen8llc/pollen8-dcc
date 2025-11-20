@@ -1,13 +1,16 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, AlertCircle } from "lucide-react";
+import { Check, Calendar, AlertCircle, Download } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Outreach, updateOutreachStatus } from "@/services/rel8t/outreachService";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { CalendarOptionsDialog } from "./CalendarOptionsDialog";
+import { generateOutreachICS } from "@/utils/outreachIcsGenerator";
+import { supabase } from "@/integrations/supabase/client";
 
 interface OutreachCardProps {
   outreach: Outreach;
@@ -15,12 +18,24 @@ interface OutreachCardProps {
 
 export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   const queryClient = useQueryClient();
+  const [showCalendarDialog, setShowCalendarDialog] = useState(false);
+  const [icsContent, setIcsContent] = useState<string>("");
   
   const handleMarkComplete = async () => {
     const success = await updateOutreachStatus(outreach.id, "completed");
     if (success) {
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
     }
+  };
+
+  const handleAddToCalendar = async () => {
+    // Get user email for ICS organizer field
+    const { data: { user } } = await supabase.auth.getUser();
+    const userEmail = user?.email;
+
+    const ics = generateOutreachICS(outreach, userEmail);
+    setIcsContent(ics);
+    setShowCalendarDialog(true);
   };
 
   // Updated color classes for the dark theme
@@ -77,19 +92,39 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
             </span>
           </div>
           
-          {outreach.status === "pending" && (
+          <div className="flex gap-2">
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="sm" 
-              className="gap-1"
-              onClick={handleMarkComplete}
+              className="gap-1 h-8 px-2"
+              onClick={handleAddToCalendar}
             >
-              <Check className="h-4 w-4" />
-              Mark Complete
+              <Download className="h-4 w-4" />
             </Button>
-          )}
+            
+            {outreach.status === "pending" && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1"
+                onClick={handleMarkComplete}
+              >
+                <Check className="h-4 w-4" />
+                Mark Complete
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
+
+      <CalendarOptionsDialog
+        open={showCalendarDialog}
+        onOpenChange={setShowCalendarDialog}
+        title={outreach.title}
+        description={outreach.description || undefined}
+        icsContent={icsContent}
+        startDate={outreach.due_date}
+      />
     </Card>
   );
 };
