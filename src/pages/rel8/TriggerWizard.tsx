@@ -79,29 +79,24 @@ const TriggerWizard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80">
       <Navbar />
       
-      <div className="container mx-auto max-w-6xl px-4 py-8">
+      <div className="container mx-auto max-w-5xl px-4 py-8">
         {/* Navigation Component */}
         <Rel8OnlyNavigation />
 
         {/* Minimal Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <Zap className="h-7 w-7 text-primary" />
-          <div>
-            <h1 className="text-2xl font-bold">Create Trigger</h1>
-            <p className="text-sm text-muted-foreground">
-              Set up an automation for your relationships
-            </p>
-          </div>
+        <div className="flex items-center gap-3 mb-6 mt-6">
+          <Zap className="h-6 w-6 text-primary" />
+          <h1 className="text-xl font-semibold">Create Trigger</h1>
         </div>
 
-        {/* Template Selection or Form Card */}
-        <Card className="glass-morphism border-0 backdrop-blur-md">
-          <CardHeader className="border-b border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
-            <CardTitle className="text-lg">
-              {showTemplateSelection ? "Select Template" : "Trigger Details"}
+        {/* Form Card */}
+        <Card className="backdrop-blur-md bg-card/95 border-2 border-border">
+          <CardHeader className="border-b border-border/50 pb-4">
+            <CardTitle className="text-base font-medium">
+              {showTemplateSelection ? "Select Template" : "Trigger Configuration"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -109,9 +104,24 @@ const TriggerWizard = () => {
               <TriggerTemplateSelection onSelectTemplate={handleTemplateSelect} />
             ) : (
             <form onSubmit={onSubmit} className="space-y-6">
+              {/* Change Template Button */}
+              {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
+                <div className="flex justify-start -mt-2 mb-4">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTemplateSelection(true)}
+                    className="text-xs hover:text-primary"
+                  >
+                    ← Change Template
+                  </Button>
+                </div>
+              )}
+
               {/* Trigger Name */}
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">Trigger Name</Label>
+              <div className="space-y-2 mb-6">
+                <Label htmlFor="name" className="text-sm font-medium">Trigger Name *</Label>
                 <Input
                   id="name"
                   type="text"
@@ -119,35 +129,20 @@ const TriggerWizard = () => {
                   value={formData.name}
                   onChange={(e) => updateFormData({ name: e.target.value })}
                   required
-                  className="backdrop-blur-sm bg-background/50"
+                  className="h-11 bg-background border-2 border-border focus:border-primary"
                 />
               </div>
 
-              {/* Change Template Button */}
-              {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowTemplateSelection(true)}
-                    className="text-xs text-muted-foreground hover:text-primary"
-                  >
-                    ← Change Template
-                  </Button>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 {/* Trigger Date */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Trigger Date</Label>
+                  <Label className="text-sm font-medium">Start Date *</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal backdrop-blur-sm bg-background/50",
+                          "w-full h-11 justify-start text-left font-normal bg-background border-2 border-border hover:border-primary",
                           !formData.triggerDate && "text-muted-foreground"
                         )}
                       >
@@ -159,12 +154,13 @@ const TriggerWizard = () => {
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
                         selected={formData.triggerDate || undefined}
                         onSelect={(date) => updateFormData({ triggerDate: date || null })}
                         initialFocus
+                        className="pointer-events-auto"
                       />
                     </PopoverContent>
                   </Popover>
@@ -172,30 +168,30 @@ const TriggerWizard = () => {
 
                 {/* Trigger Time */}
                 <div className="space-y-2">
-                  <Label htmlFor="triggerTime" className="text-sm font-medium">Trigger Time</Label>
+                  <Label htmlFor="triggerTime" className="text-sm font-medium">Time *</Label>
                   <div className="relative">
-                    <Clock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <Clock className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                     <Input
                       id="triggerTime"
                       type="time"
                       value={formData.triggerTime || "09:00"}
                       onChange={(e) => updateFormData({ triggerTime: e.target.value })}
-                      className="pl-10 backdrop-blur-sm bg-background/50"
+                      className="h-11 pl-10 bg-background border-2 border-border focus:border-primary"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 {/* Frequency - Only show for custom template */}
                 {formData.selectedTemplate === 'custom' && (
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Frequency</Label>
+                    <Label htmlFor="frequency" className="text-sm font-medium">Frequency *</Label>
                     <Select
                       value={formData.frequency}
                       onValueChange={(value) => updateFormData({ frequency: value })}
                     >
-                      <SelectTrigger className="backdrop-blur-sm bg-background/50">
+                      <SelectTrigger className="h-11 bg-background border-2 border-border hover:border-primary">
                         <SelectValue placeholder="Select frequency" />
                       </SelectTrigger>
                       <SelectContent>
@@ -213,7 +209,7 @@ const TriggerWizard = () => {
                 {formData.selectedTemplate && formData.selectedTemplate !== 'custom' && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Frequency</Label>
-                    <div className="px-3 py-2 text-sm rounded-lg backdrop-blur-sm bg-background/50 border border-white/10">
+                    <div className="h-11 px-3 py-2 text-sm rounded-lg bg-muted border-2 border-border flex items-center">
                       {frequencyOptions.find(opt => opt.value === formData.frequency)?.label}
                     </div>
                   </div>
@@ -221,12 +217,12 @@ const TriggerWizard = () => {
 
                 {/* Priority */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Priority</Label>
+                  <Label className="text-sm font-medium">Priority *</Label>
                   <Select
                     value={formData.priority}
                     onValueChange={(value) => updateFormData({ priority: value })}
                   >
-                    <SelectTrigger className="backdrop-blur-sm bg-background/50">
+                    <SelectTrigger className="h-11 bg-background border-2 border-border hover:border-primary">
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
                     <SelectContent>
@@ -240,22 +236,22 @@ const TriggerWizard = () => {
                 </div>
               </div>
 
-              {/* Submit Buttons */}
-              <div className="flex gap-3 pt-6 border-t border-border/50">
+              {/* Action Buttons */}
+              <div className="flex justify-between pt-4 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleCancel}
-                  className="flex-1"
+                  className="h-11 px-6 border-2"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1"
-                  disabled={!formData.name || !formData.triggerDate}
+                  disabled={!formData.name.trim()}
+                  className="h-11 px-8"
                 >
-                  {returnTo === 'relationship' ? 'Create & Continue' : 'Create Trigger'}
+                  {returnTo === 'relationship' ? 'Add Trigger' : 'Create Trigger'}
                 </Button>
               </div>
             </form>
