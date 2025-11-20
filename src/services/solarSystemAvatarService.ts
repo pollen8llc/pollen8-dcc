@@ -29,6 +29,10 @@ export class SolarSystemAvatarService {
         .single();
 
       if (profileError || !profile) {
+        // Gracefully handle "no rows" case without console spam
+        if (profileError?.code === 'PGRST116' || profileError?.message?.includes('0 rows')) {
+          return null;
+        }
         console.error("Error fetching user profile:", profileError);
         return null;
       }

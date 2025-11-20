@@ -42,7 +42,7 @@ export interface ContactAffiliation {
   relationship?: string;
   created_at: string;
   updated_at: string;
-  affiliated_user?: { id: string; email: string } | null | Record<string, any>;
+  affiliated_user?: { user_id: string; id?: string; email?: string } | null | Record<string, any>;
   affiliated_contact?: Contact | null | Record<string, any>;
   affiliated_community?: { id: string; name: string } | null | Record<string, any>;
 }

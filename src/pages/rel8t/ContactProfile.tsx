@@ -63,10 +63,10 @@ export default function ContactProfile() {
     );
   }
 
-  // Extract affiliated user ID if exists
+  // Extract affiliated user ID if exists (from joined profile data)
   const affiliatedUserId = contact.affiliations
-    ?.find(aff => aff.affiliation_type === 'user' && aff.affiliated_user_id)
-    ?.affiliated_user_id;
+    ?.find(aff => aff.affiliation_type === 'user' && aff.affiliated_user?.user_id)
+    ?.affiliated_user?.user_id;
 
   const associatedContacts = contact.affiliations
     ?.filter(aff => aff.affiliation_type === 'contact' && aff.affiliated_contact)
