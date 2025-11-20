@@ -148,13 +148,6 @@ export default function ContactProfile() {
                 )}
               </div>
             </div>
-
-            {contact.bio && (
-              <div className="pt-3 md:pt-4 border-t">
-                <h4 className="font-semibold mb-2 text-sm md:text-base">Bio</h4>
-                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.bio}</p>
-              </div>
-            )}
             
             {contact.notes && (
               <div className="pt-3 md:pt-4 border-t">
@@ -164,6 +157,24 @@ export default function ContactProfile() {
             )}
           </CardContent>
         </Card>
+
+        {/* Teal separator */}
+        {contact.bio && (
+          <div className="h-px bg-gradient-to-r from-transparent via-[#00eada] to-transparent opacity-50" />
+        )}
+
+        {/* Bio - Glassmorphic Card */}
+        {contact.bio && (
+          <Card 
+            className="relative overflow-hidden glass-morphism border-0 backdrop-blur-md" 
+            style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)' }}
+          >
+            <CardContent className="p-6">
+              <h4 className="font-semibold mb-3 text-sm md:text-base">Bio</h4>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.bio}</p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Details */}
         <Card>
