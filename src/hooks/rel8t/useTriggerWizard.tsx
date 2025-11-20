@@ -32,7 +32,7 @@ export function useTriggerWizard() {
     setFormData(prev => ({ ...prev, ...data }));
   }, []);
 
-  // Submit the form data and return the created trigger
+  // Submit the form data and return the created trigger with ICS content
   const handleSubmit = useCallback(async (returnTo?: string) => {
     try {
       console.log("Submitting trigger with data:", formData);
@@ -63,6 +63,8 @@ export function useTriggerWizard() {
       const result = await createTrigger(triggerData);
       
       if (result) {
+        const { trigger, icsContent } = result;
+        
         toast({
           title: "Trigger created successfully",
           description: "Your automation trigger has been created."
@@ -70,10 +72,10 @@ export function useTriggerWizard() {
         
         // If returning to relationship wizard, store trigger in context
         if (returnTo === 'relationship') {
-          setSelectedTrigger(result);
+          setSelectedTrigger(trigger);
         }
         
-        return result; // Return the created trigger
+        return { trigger, icsContent }; // Return trigger and ICS content
       }
       
       return null;

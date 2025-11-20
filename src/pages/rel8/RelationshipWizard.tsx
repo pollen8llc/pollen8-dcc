@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
+import { TriggerCreatedDialog } from "@/components/rel8t/TriggerCreatedDialog";
 
 type WizardStep = 
   | "select-contacts" 
@@ -37,6 +38,9 @@ const RelationshipWizard = () => {
   
   const [step, setStep] = useState<WizardStep>("select-contacts");
   const [data, setData] = useState<WizardData>(initialData);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [createdTrigger, setCreatedTrigger] = useState<Trigger | null>(null);
+  const [icsContent, setIcsContent] = useState<string | null>(null);
 
   // Initialize wizard data with selected trigger from context
   useEffect(() => {
@@ -78,10 +82,17 @@ const RelationshipWizard = () => {
     setStep("review");
   };
 
-  const handleReviewSubmit = () => {
-    // Clear wizard data and redirect to the main rel8 dashboard
-    clearWizardData();
-    navigate("/rel8");
+  const handleReviewSubmit = (trigger?: Trigger, ics?: string) => {
+    // If trigger was just created, show success dialog
+    if (trigger && ics) {
+      setCreatedTrigger(trigger);
+      setIcsContent(ics);
+      setShowSuccessDialog(true);
+    } else {
+      // Clear wizard data and redirect to the main rel8 dashboard
+      clearWizardData();
+      navigate("/rel8");
+    }
   };
 
   const getStepTitle = () => {
@@ -194,6 +205,18 @@ const RelationshipWizard = () => {
             )}
           </CardContent>
         </Card>
+        <TriggerCreatedDialog 
+          open={showSuccessDialog}
+          onOpenChange={(open) => {
+            setShowSuccessDialog(open);
+            if (!open) {
+              clearWizardData();
+              navigate("/rel8");
+            }
+          }}
+          trigger={createdTrigger}
+          icsContent={icsContent}
+        />
       </div>
     </div>
   );

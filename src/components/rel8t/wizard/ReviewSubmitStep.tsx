@@ -24,7 +24,7 @@ interface ReviewSubmitStepProps {
     triggers: Trigger[];
     priority: OutreachPriority;
   };
-  onSubmit: () => void;
+  onSubmit: (trigger?: Trigger, icsContent?: string) => void;
   onPrevious?: () => void;
 }
 
