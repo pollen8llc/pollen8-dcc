@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Steps } from "@/components/ui/steps";
 import { Loc8Dialog } from "@/components/ui/loc8-dialog";
 import { Loc8DialogTrigger } from "@/components/ui/loc8-dialog-trigger";
 import { ArrowLeft, ArrowRight, Check, Tag as TagIcon, Heart } from "lucide-react";
@@ -141,11 +140,6 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <Steps 
-        currentStep={currentStep} 
-        steps={["Contact Details", "Professional Info", "Additional Details"]}
-      />
-
       <div className="min-h-[400px]">
         {currentStep === 1 && (
           <div className="space-y-6 animate-fade-in">
