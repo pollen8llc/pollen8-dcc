@@ -75,7 +75,7 @@ const Contacts = () => {
   }, [contacts, searchQuery, selectedCategory, selectedTag]);
 
   const handleEditContact = (contact: any) => {
-    navigate(`/rel8/contacts/${contact.id}/edit`);
+    navigate(`/rel8/contactprofile/${contact.id}`);
   };
 
   const handleRefresh = () => {
