@@ -6,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Steps } from "@/components/ui/steps";
-import { LocationSelector } from "@/components/ui/location-selector";
+import { Loc8Dialog } from "@/components/ui/loc8-dialog";
+import { Loc8DialogTrigger } from "@/components/ui/loc8-dialog-trigger";
 import { ArrowLeft, ArrowRight, Check, Tag as TagIcon, Heart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +37,7 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
 
   const [tagInput, setTagInput] = useState("");
   const [interestInput, setInterestInput] = useState("");
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
 
   // Fetch categories
   const { data: categories = [] } = useQuery({
@@ -199,11 +201,20 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
 
             <div className="space-y-2">
               <Label htmlFor="location" className="text-sm font-medium text-foreground/70 pl-2">Location</Label>
-              <div className="[&_.location-selector-trigger]:bg-background/90 [&_.location-selector-trigger]:backdrop-blur-lg [&_.location-selector-trigger]:border-2 [&_.location-selector-trigger]:border-primary/30 [&_.location-selector-trigger]:focus:border-primary/60 [&_.location-selector-trigger]:rounded-xl [&_.location-selector-trigger]:shadow-lg [&_.location-selector-trigger]:h-12 [&_.location-selector-trigger]:transition-all">
-                <LocationSelector
-                  value={values.location}
-                  onValueChange={(value) => setValues({ ...values, location: value })}
-                  placeholder="Select or type a location"
+              <div className="[&_button]:bg-background/90 [&_button]:backdrop-blur-lg [&_button]:border-2 [&_button]:border-primary/30 [&_button]:hover:border-primary/60 [&_button]:rounded-xl [&_button]:shadow-lg [&_button]:h-12 [&_button]:transition-all">
+                <Loc8DialogTrigger
+                  value={values.location ? [values.location] : []}
+                  placeholder="Select your city"
+                  onClick={() => setIsLocationDialogOpen(true)}
+                />
+                <Loc8Dialog
+                  open={isLocationDialogOpen}
+                  onOpenChange={setIsLocationDialogOpen}
+                  mode="single"
+                  value={values.location ? [values.location] : []}
+                  onValueChange={(cities) => setValues({ ...values, location: cities[0] || '' })}
+                  title="Contact Location"
+                  description="Select the contact's city"
                 />
               </div>
             </div>
