@@ -141,12 +141,6 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="mb-8">
-        <Badge variant="outline" className="backdrop-blur-sm bg-primary/10 text-primary border-primary/30">
-          Step {currentStep} of 3
-        </Badge>
-      </div>
-      
       <Steps 
         currentStep={currentStep} 
         steps={["Contact Details", "Professional Info", "Additional Details"]}
