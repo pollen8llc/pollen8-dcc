@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { PostgrestResponse } from "@supabase/supabase-js";
+import { generateSystemEmail } from "./systemEmailService";
+import { generateICSFile, triggerToICSEventData } from "./icsGenerationService";
 
 // Time trigger types (for time-based automations)
 export const TIME_TRIGGER_TYPES = {
@@ -120,6 +122,16 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
     
     if (!user) throw new Error("User not authenticated");
 
+    // Get user profile for email
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!profile?.email) throw new Error("User email not found");
+
+    // Step 1: Create the initial trigger
     const { data, error } = await supabase
       .from("rms_triggers")
       .insert([{
@@ -139,15 +151,110 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
 
     if (error) throw error;
 
+    // Step 2: Generate system email and calendar UID
+    const systemEmail = generateSystemEmail(user.id, data.id);
+    const calendarEventUID = `trigger-${data.id}@ecosystembuilder.app`;
+
+    // Step 3: Update trigger with calendar integration fields
+    const { data: updatedTrigger, error: updateError } = await supabase
+      .from("rms_triggers")
+      .update({
+        system_email: systemEmail,
+        calendar_event_uid: calendarEventUID
+      })
+      .eq("id", data.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    // Step 4: Generate ICS file
+    const icsEventData = triggerToICSEventData(
+      { ...updatedTrigger, time_trigger_type: trigger.action },
+      profile.email,
+      profile.full_name
+    );
+    const icsContent = generateICSFile(icsEventData);
+
+    // Step 5: Send creation notification with ICS attachment
+    try {
+      const emailSubject = `📅 New Trigger Created: ${trigger.name}`;
+      const emailBody = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; }
+              .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }
+              .button { background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1 style="margin: 0;">✅ Trigger Created Successfully</h1>
+              </div>
+              <div class="content">
+                <h2 style="color: #1f2937; margin-top: 0;">${trigger.name}</h2>
+                <p style="color: #4b5563; line-height: 1.6;">
+                  ${trigger.description || 'Your automated trigger has been created and added to your calendar.'}
+                </p>
+                <p style="color: #6b7280; font-size: 14px;">
+                  📧 <strong>System Email:</strong> ${systemEmail}<br>
+                  📆 <strong>Calendar Event:</strong> Added to your calendar (see attachment)
+                </p>
+                <a href="https://pollen8.app/rel8/triggers" class="button">View All Triggers</a>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      await supabase.functions.invoke('send-email', {
+        body: {
+          to: profile.email,
+          subject: emailSubject,
+          html: emailBody,
+          toName: profile.full_name,
+          icsAttachment: {
+            filename: `${trigger.name.replace(/[^a-z0-9]/gi, '_')}.ics`,
+            content: icsContent
+          }
+        }
+      });
+
+      // Step 6: Create email notification record
+      await supabase
+        .from("rms_email_notifications")
+        .insert({
+          trigger_id: data.id,
+          user_id: user.id,
+          recipient_email: profile.email,
+          subject: emailSubject,
+          body: emailBody,
+          status: 'sent',
+          sent_at: new Date().toISOString(),
+          scheduled_at: new Date().toISOString(),
+          notification_type: 'creation',
+          has_ics_attachment: true,
+          ics_data: icsContent
+        });
+    } catch (emailError) {
+      console.error("Error sending creation email:", emailError);
+      // Don't fail trigger creation if email fails
+    }
+
     toast({
       title: "Trigger created",
-      description: "Automation trigger has been successfully created.",
+      description: "Automation trigger has been successfully created and added to your calendar.",
     });
     
     return {
-      ...data,
-      condition: JSON.stringify(data.condition || {}),
-      recurrence_pattern: data.recurrence_pattern as RecurrencePattern
+      ...updatedTrigger,
+      condition: JSON.stringify(updatedTrigger.condition || {}),
+      recurrence_pattern: updatedTrigger.recurrence_pattern as RecurrencePattern
     } as Trigger;
   } catch (error: any) {
     console.error("Error creating trigger:", error);
@@ -162,6 +269,10 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
 
 export const updateTrigger = async (id: string, trigger: Partial<Trigger>): Promise<Trigger | null> => {
   try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
     // Prepare the update object with any type conversions needed
     const updateData = {
       ...trigger,
@@ -177,6 +288,103 @@ export const updateTrigger = async (id: string, trigger: Partial<Trigger>): Prom
       .single();
 
     if (error) throw error;
+
+    // If trigger has calendar integration, send update notification
+    if (data.system_email && data.calendar_event_uid) {
+      try {
+        // Get user profile
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profile?.email) {
+          // Generate updated ICS with incremented sequence
+          const icsEventData = triggerToICSEventData(
+            { ...data, time_trigger_type: data.trigger_type },
+            profile.email,
+            profile.full_name
+          );
+          icsEventData.sequence = (icsEventData.sequence || 0) + 1;
+          const icsContent = generateICSFile(icsEventData);
+
+          // Send update notification to both user and system email
+          const emailSubject = `📝 Trigger Updated: ${data.name}`;
+          const emailBody = `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <style>
+                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                  .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; }
+                  .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <h1 style="margin: 0;">📝 Trigger Updated</h1>
+                  </div>
+                  <div class="content">
+                    <h2 style="color: #1f2937; margin-top: 0;">${data.name}</h2>
+                    <p style="color: #4b5563;">Your trigger has been updated. The calendar event has been updated accordingly.</p>
+                  </div>
+                </div>
+              </body>
+            </html>
+          `;
+
+          // Send to user
+          await supabase.functions.invoke('send-email', {
+            body: {
+              to: profile.email,
+              subject: emailSubject,
+              html: emailBody,
+              toName: profile.full_name,
+              icsAttachment: {
+                filename: `${data.name.replace(/[^a-z0-9]/gi, '_')}_updated.ics`,
+                content: icsContent
+              }
+            }
+          });
+
+          // Send to system email for tracking
+          await supabase.functions.invoke('send-email', {
+            body: {
+              to: data.system_email,
+              subject: emailSubject,
+              html: emailBody,
+              icsAttachment: {
+                filename: `${data.name.replace(/[^a-z0-9]/gi, '_')}_updated.ics`,
+                content: icsContent
+              }
+            }
+          });
+
+          // Create notification record
+          await supabase
+            .from("rms_email_notifications")
+            .insert({
+              trigger_id: id,
+              user_id: user.id,
+              recipient_email: profile.email,
+              subject: emailSubject,
+              body: emailBody,
+              status: 'sent',
+              sent_at: new Date().toISOString(),
+              scheduled_at: new Date().toISOString(),
+              notification_type: 'update',
+              has_ics_attachment: true,
+              ics_data: icsContent
+            });
+        }
+      } catch (emailError) {
+        console.error("Error sending update notification:", emailError);
+        // Don't fail the update if email fails
+      }
+    }
     
     toast({
       title: "Trigger updated",

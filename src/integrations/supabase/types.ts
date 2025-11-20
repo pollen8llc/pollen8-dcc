@@ -2322,8 +2322,11 @@ export type Database = {
           contact_id: string | null
           created_at: string
           error_message: string | null
+          has_ics_attachment: boolean | null
+          ics_data: string | null
           id: string
           metadata: Json | null
+          notification_type: string | null
           scheduled_at: string | null
           sent_at: string | null
           status: string
@@ -2337,8 +2340,11 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           error_message?: string | null
+          has_ics_attachment?: boolean | null
+          ics_data?: string | null
           id?: string
           metadata?: Json | null
+          notification_type?: string | null
           scheduled_at?: string | null
           sent_at?: string | null
           status?: string
@@ -2352,8 +2358,11 @@ export type Database = {
           contact_id?: string | null
           created_at?: string
           error_message?: string | null
+          has_ics_attachment?: boolean | null
+          ics_data?: string | null
           id?: string
           metadata?: Json | null
+          notification_type?: string | null
           scheduled_at?: string | null
           sent_at?: string | null
           status?: string
@@ -2479,45 +2488,54 @@ export type Database = {
       rms_triggers: {
         Row: {
           action: string
+          calendar_event_uid: string | null
           condition: Json
           created_at: string
           description: string | null
+          ics_file_url: string | null
           id: string
           is_active: boolean
           last_executed_at: string | null
           name: string
           next_execution_at: string | null
           recurrence_pattern: Json
+          system_email: string | null
           trigger_type: string
           updated_at: string
           user_id: string
         }
         Insert: {
           action: string
+          calendar_event_uid?: string | null
           condition?: Json
           created_at?: string
           description?: string | null
+          ics_file_url?: string | null
           id?: string
           is_active?: boolean
           last_executed_at?: string | null
           name: string
           next_execution_at?: string | null
           recurrence_pattern?: Json
+          system_email?: string | null
           trigger_type: string
           updated_at?: string
           user_id: string
         }
         Update: {
           action?: string
+          calendar_event_uid?: string | null
           condition?: Json
           created_at?: string
           description?: string | null
+          ics_file_url?: string | null
           id?: string
           is_active?: boolean
           last_executed_at?: string | null
           name?: string
           next_execution_at?: string | null
           recurrence_pattern?: Json
+          system_email?: string | null
           trigger_type?: string
           updated_at?: string
           user_id?: string
