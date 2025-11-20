@@ -207,7 +207,7 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
                   📧 <strong>System Email:</strong> ${systemEmail}<br>
                   📆 <strong>Calendar Event:</strong> Added to your calendar (see attachment)
                 </p>
-                <a href="https://pollen8.app/rel8/triggers" class="button">View All Triggers</a>
+                <a href="https://ecosystembuilder.app/rel8/triggers" class="button">View All Triggers</a>
               </div>
             </div>
           </body>

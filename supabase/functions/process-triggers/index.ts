@@ -4,12 +4,12 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
 // SMTP configuration
-const smtpHost = Deno.env.get('SMTP_HOST') || 'mail.pollen8.app'
+const smtpHost = Deno.env.get('SMTP_HOST') || 'mail.ecosystembuilder.app'
 const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587')
-const smtpUser = Deno.env.get('SMTP_USER') || 'notifications@pollen8.app'
+const smtpUser = Deno.env.get('SMTP_USER') || 'notifications@ecosystembuilder.app'
 const smtpPassword = Deno.env.get('SMTP_PASS') || ''
-const smtpFromEmail = Deno.env.get('FROM_EMAIL') || 'notifications@pollen8.app'
-const smtpFromName = Deno.env.get('SMTP_FROM_NAME') || 'Rel8t Automation'
+const smtpFromEmail = Deno.env.get('FROM_EMAIL') || 'notifications@ecosystembuilder.app'
+const smtpFromName = Deno.env.get('SMTP_FROM_NAME') || 'Ecosystem Builder Automation'
 
 // Initialize the Supabase client
 const supabase = createClient(supabaseUrl, supabaseServiceKey)

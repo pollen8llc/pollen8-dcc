@@ -42,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Prepare email payload
     const emailPayload: any = {
-      from: 'Pollen8 Notifications <notifications@pollen8.app>',
+      from: 'Ecosystem Builder Notifications <notifications@ecosystembuilder.app>',
       to: [to],
       subject: subject,
       html: html,
