@@ -31,19 +31,9 @@ const Index = () => {
         return;
       }
       
-      // Service providers go to LAB-R8 by default, but can access other platforms if they have roles
-      if (currentUser.role === 'SERVICE_PROVIDER') {
-        console.log('🚀 Index.tsx - Redirecting SERVICE_PROVIDER to LAB-R8');
-        console.log('🔍 Index.tsx - LAB-R8 setup status:', {
-          labr8_setup_complete: currentUser.labr8_setup_complete,
-          profile_complete: currentUser.profile_complete
-        });
-        const destination = currentUser.labr8_setup_complete ? "/labr8/dashboard" : "/labr8/setup";
-        navigate(destination, { replace: true });
-      } else {
-        console.log('🚀 Index.tsx - Redirecting authenticated user to REL8 connect page');
-        navigate("/rel8/connect", { replace: true });
-      }
+      // Redirect all authenticated users to REL8 connect page
+      console.log('🚀 Index.tsx - Redirecting authenticated user to REL8 connect page');
+      navigate("/rel8/connect", { replace: true });
     }
   }, [currentUser, isLoading, navigate]);
 
