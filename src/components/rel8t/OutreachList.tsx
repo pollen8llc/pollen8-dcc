@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { formatDistanceToNow, format, isPast, isToday } from "date-fns";
 import { 
   Loader2, 
@@ -49,6 +50,7 @@ const OutreachList = ({
 }: OutreachListProps) => {
   const [activeTab, setActiveTab] = useState<OutreachFilterTab>(defaultTab);
   const [outreachToDelete, setOutreachToDelete] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const queryClient = useQueryClient();
   
   // Query to fetch outreach data based on active tab
@@ -121,10 +123,40 @@ const OutreachList = ({
     );
   }
 
+  // Get dates with scheduled outreach
+  const rapportDates = outreachItems
+    .filter(item => item.due_date)
+    .map(item => new Date(item.due_date!));
+
+  // Custom modifier to highlight rapport days
+  const modifiers = {
+    rapport: rapportDates,
+  };
+
+  const modifiersClassNames = {
+    rapport: "bg-[#00eada]/20 text-[#00eada] font-bold hover:bg-[#00eada]/30",
+  };
+
   return (
     <div className={className}>
       {showTabs && (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterTab)}>
+          {/* Calendar Section */}
+          <div className="mb-6">
+            <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20">
+              <CardContent className="p-4">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  modifiers={modifiers}
+                  modifiersClassNames={modifiersClassNames}
+                  className="rounded-md pointer-events-auto"
+                />
+              </CardContent>
+            </Card>
+          </div>
+
           <TabsList className="grid grid-cols-3 mb-6">
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
             <TabsTrigger value="overdue">Overdue</TabsTrigger>
