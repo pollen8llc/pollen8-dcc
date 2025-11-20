@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Clock, Calendar as CalendarIcon, CalendarRange, CalendarDays, CalendarCheck, Settings } from "lucide-react";
+import { Clock, Calendar as CalendarIcon, CalendarRange, CalendarDays, CalendarCheck, Settings, CalendarClock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -37,7 +37,7 @@ export const TRIGGER_TEMPLATES: TriggerTemplate[] = [
     id: "weekly",
     name: "Weekly",
     description: "Ideal for regular check-ins and weekly updates",
-    icon: Calendar,
+    icon: CalendarClock,
     iconColor: "text-blue-500",
     accentColor: "border-blue-500/20 hover:border-blue-500/40",
     frequency: "weekly",
