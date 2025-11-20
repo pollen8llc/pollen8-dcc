@@ -40,7 +40,7 @@ export const generateICSFile = (event: ICSEventData): string => {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Pollen8//REL8 Trigger System//EN',
+    'PRODID:-//Ecosystem Builder//REL8 Trigger System//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:REQUEST',
     'BEGIN:VEVENT',
@@ -192,13 +192,13 @@ export const triggerToICSEventData = (
   return {
     uid: trigger.calendar_event_uid || `trigger-${trigger.id}@ecosystembuilder.app`,
     summary: trigger.name,
-    description: trigger.description || 'Automated reminder from Pollen8 REL8',
+    description: trigger.description || 'Automated reminder from Ecosystem Builder REL8',
     startDate,
     endDate,
-    location: 'Pollen8 Platform',
+    location: 'Ecosystem Builder Platform',
     organizer: {
       email: trigger.system_email || 'notifications@ecosystembuilder.app',
-      name: 'Pollen8 REL8 System',
+      name: 'Ecosystem Builder REL8 System',
     },
     attendees: [
       {
