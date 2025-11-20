@@ -141,20 +141,16 @@ const OutreachList = ({
     <div className={className}>
       {showTabs && (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterTab)}>
-          {/* Calendar Section */}
-          <div className="mb-6">
-            <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20">
-              <CardContent className="p-4">
-                <CalendarComponent
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  modifiers={modifiers}
-                  modifiersClassNames={modifiersClassNames}
-                  className="rounded-md pointer-events-auto"
-                />
-              </CardContent>
-            </Card>
+          {/* Calendar - Full Width Responsive */}
+          <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-4 md:p-6 mb-6 shadow-xl">
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              modifiers={modifiers}
+              modifiersClassNames={modifiersClassNames}
+              className="w-full mx-auto border-0 pointer-events-auto"
+            />
           </div>
 
           <TabsList className="grid grid-cols-3 mb-6">
