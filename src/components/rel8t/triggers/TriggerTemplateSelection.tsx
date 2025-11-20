@@ -134,11 +134,11 @@ export function TriggerTemplateSelection({
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center space-y-2">
-        <h2 className="text-xl font-semibold">Choose a Template</h2>
+        <h2 className="text-lg font-semibold">Choose a Template</h2>
         <p className="text-sm text-muted-foreground">
           {showDatePickers 
             ? "Select a preset template and choose your start date" 
-            : "Select a preset template to quickly create your trigger, or choose custom for full control"
+            : "Select a preset template to quickly create your trigger"
           }
         </p>
       </div>
@@ -150,27 +150,24 @@ export function TriggerTemplateSelection({
             <Card
               key={template.id}
               className={cn(
-                "backdrop-blur-md bg-white/5 border-2 transition-all duration-300",
-                "hover:bg-white/10 hover:shadow-lg hover:shadow-primary/20",
+                "bg-card border-2 transition-all duration-200",
+                "hover:border-primary hover:shadow-lg",
                 template.accentColor,
-                "p-6 space-y-4"
+                "p-5 space-y-4"
               )}
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
                 <div className={cn(
-                  "p-3 rounded-xl backdrop-blur-sm bg-white/10 border border-white/20",
-                  "transition-transform duration-300"
+                  "p-2.5 rounded-lg bg-background border-2 border-border"
                 )}>
-                  <Icon className={cn("h-6 w-6", template.iconColor)} />
+                  <Icon className={cn("h-5 w-5", template.iconColor)} />
                 </div>
+                <h3 className="font-semibold">{template.name}</h3>
               </div>
 
-              <div className="space-y-2">
-                <h3 className="font-semibold text-lg">{template.name}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {template.description}
-                </p>
-              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed min-h-[40px]">
+                {template.description}
+              </p>
 
               {showDatePickers && template.id !== 'custom' && (
                 <Popover>
@@ -179,12 +176,12 @@ export function TriggerTemplateSelection({
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        "backdrop-blur-sm bg-background/50 hover:bg-background/70"
+                        "bg-background border-2 border-border hover:border-primary h-10"
                       )}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(templateDates[template.id], "PPP")}
+                      {format(templateDates[template.id], "PP")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -202,22 +199,13 @@ export function TriggerTemplateSelection({
               <Button
                 onClick={() => handleTemplateSelect(template)}
                 className={cn(
-                  "w-full",
+                  "w-full h-10",
                   template.id === 'custom' && "mt-auto"
                 )}
                 variant={template.id === 'custom' ? 'outline' : 'default'}
               >
-                {showDatePickers ? 'Select & Continue' : 'Select Template'}
+                {showDatePickers ? 'Select & Continue' : 'Select'}
               </Button>
-
-              {!showDatePickers && (
-                <div className="pt-2 flex items-center text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
-                    <div className={cn("w-2 h-2 rounded-full", template.iconColor.replace('text-', 'bg-'))} />
-                    {template.id === 'custom' ? 'Fully customizable' : `${template.name} schedule`}
-                  </span>
-                </div>
-              )}
             </Card>
           );
         })}
