@@ -58,18 +58,6 @@ const ConnectCreate = () => {
           </div>
         </div>
 
-        <div className="flex justify-end mb-4">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => navigate('/rel8/connect')}
-            className="flex items-center gap-2 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/20"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Connect
-          </Button>
-        </div>
-
         <div className="max-w-3xl mx-auto bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl shadow-xl p-8">
           <ContactCreateWizard
             onSubmit={handleSubmit}
