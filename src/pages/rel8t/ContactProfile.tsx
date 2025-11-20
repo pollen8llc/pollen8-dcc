@@ -77,10 +77,10 @@ export default function ContactProfile() {
     })) || [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Rel8Header />
       
-      <div className="container mx-auto max-w-6xl px-4 py-6 space-y-6">
+      <div className="container mx-auto max-w-6xl px-4 py-6 space-y-6 animate-fade-in">
         <ContactHeader
           contactId={contact.id}
           name={contact.name}
@@ -95,10 +95,10 @@ export default function ContactProfile() {
         />
 
         {/* Basic Information */}
-        <Card>
+        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+              <User className="h-5 w-5 text-primary" />
               Contact Information
             </CardTitle>
           </CardHeader>
@@ -108,7 +108,7 @@ export default function ContactProfile() {
               <div className="space-y-3 md:space-y-4">
                 {contact.email && (
                   <div className="flex items-start gap-3">
-                    <Mail className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground mt-1" />
+                    <Mail className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
                     <div>
                       <div className="text-xs md:text-sm text-muted-foreground">Email</div>
                       <div className="text-sm md:text-base">{contact.email}</div>
@@ -117,7 +117,7 @@ export default function ContactProfile() {
                 )}
                 {contact.phone && (
                   <div className="flex items-start gap-3">
-                    <Phone className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground mt-1" />
+                    <Phone className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
                     <div>
                       <div className="text-xs md:text-sm text-muted-foreground">Phone</div>
                       <div className="text-sm md:text-base">{contact.phone}</div>
@@ -130,7 +130,7 @@ export default function ContactProfile() {
               <div className="space-y-3 md:space-y-4">
                 {contact.location && (
                   <div className="flex items-start gap-3">
-                    <MapPin className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground mt-1" />
+                    <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
                     <div>
                       <div className="text-xs md:text-sm text-muted-foreground">Location</div>
                       <div className="text-sm md:text-base">{contact.location}</div>
@@ -139,7 +139,7 @@ export default function ContactProfile() {
                 )}
                 {contact.organization && (
                   <div className="flex items-start gap-3">
-                    <Building2 className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground mt-1" />
+                    <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
                     <div>
                       <div className="text-xs md:text-sm text-muted-foreground">Organization</div>
                       <div className="text-sm md:text-base">{contact.organization}</div>
@@ -150,7 +150,7 @@ export default function ContactProfile() {
             </div>
             
             {contact.notes && (
-              <div className="pt-3 md:pt-4 border-t">
+              <div className="pt-3 md:pt-4 border-t border-border/50">
                 <h4 className="font-semibold mb-2 text-sm md:text-base">Notes</h4>
                 <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.notes}</p>
               </div>
@@ -177,10 +177,10 @@ export default function ContactProfile() {
         )}
 
         {/* Details */}
-        <Card>
+        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5" />
+              <Tag className="h-5 w-5 text-primary" />
               Details
             </CardTitle>
           </CardHeader>
@@ -190,7 +190,7 @@ export default function ContactProfile() {
                 <h4 className="text-sm font-semibold mb-2">Tags</h4>
                 <div className="flex flex-wrap gap-2">
                   {contact.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
+                    <Badge key={tag} variant="secondary" className="hover:scale-105 transition-transform">
                       {tag}
                     </Badge>
                   ))}
@@ -201,7 +201,7 @@ export default function ContactProfile() {
             {contact.category && (
               <div>
                 <h4 className="text-sm font-semibold mb-2">Category</h4>
-                <Badge variant="outline" style={{ borderColor: contact.category.color }}>
+                <Badge variant="outline" style={{ borderColor: contact.category.color }} className="hover:scale-105 transition-transform">
                   {contact.category.name}
                 </Badge>
               </div>
@@ -212,7 +212,7 @@ export default function ContactProfile() {
                 <h4 className="text-sm font-semibold mb-2">Interests</h4>
                 <div className="flex flex-wrap gap-2">
                   {contact.interests.map((interest) => (
-                    <Badge key={interest} variant="outline">
+                    <Badge key={interest} variant="outline" className="hover:scale-105 transition-transform">
                       {interest}
                     </Badge>
                   ))}
@@ -223,17 +223,17 @@ export default function ContactProfile() {
         </Card>
 
         {/* Contact Status & Activity */}
-        <Card>
+        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5" />
+              <Heart className="h-5 w-5 text-primary" />
               Contact Status & Activity
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="status">
-                <AccordionTrigger>Contact Status</AccordionTrigger>
+              <AccordionItem value="status" className="border-border/50">
+                <AccordionTrigger className="hover:text-primary">Contact Status</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-2">
                     <p className="text-sm">
@@ -259,10 +259,10 @@ export default function ContactProfile() {
         </Card>
 
         {/* Associated Contacts */}
-        <Card>
+        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5" />
+              <UserPlus className="h-5 w-5 text-primary" />
               Associated Contacts ({associatedContacts.length})
             </CardTitle>
           </CardHeader>
@@ -270,7 +270,11 @@ export default function ContactProfile() {
             {associatedContacts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {associatedContacts.map((assocContact) => (
-                  <div key={assocContact.profile.id} className="cursor-pointer" onClick={() => navigate(`/rel8/contactprofile/${assocContact.profile.id}`)}>
+                  <div 
+                    key={assocContact.profile.id} 
+                    className="cursor-pointer hover:scale-105 transition-transform" 
+                    onClick={() => navigate(`/rel8/contactprofile/${assocContact.profile.id}`)}
+                  >
                     <ProfileCard {...assocContact} />
                   </div>
                 ))}
