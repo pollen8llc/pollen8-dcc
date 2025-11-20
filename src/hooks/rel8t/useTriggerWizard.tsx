@@ -11,6 +11,7 @@ export interface SimpleTriggerFormData {
   triggerTime: string;
   frequency: string;
   priority: string;
+  selectedTemplate?: string;
 }
 
 export function useTriggerWizard() {
@@ -21,7 +22,8 @@ export function useTriggerWizard() {
     triggerDate: new Date(),
     triggerTime: "09:00",
     frequency: "daily",
-    priority: "medium"
+    priority: "medium",
+    selectedTemplate: undefined
   });
 
   // Update form data with partial updates
@@ -93,8 +95,10 @@ export function useTriggerWizard() {
     frequencyOptions: [
       { value: "onetime", label: "One Time" },
       { value: "daily", label: "Daily" },
+      { value: "weekly", label: "Weekly" },
+      { value: "biweekly", label: "Biweekly" },
       { value: "monthly", label: "Monthly" },
-      { value: "weekly", label: "Weekly" }
+      { value: "quarterly", label: "Quarterly" }
     ],
     priorityOptions: [
       { value: "low", label: "Low" },

@@ -7,6 +7,7 @@ export const TIME_TRIGGER_TYPES = {
   HOURLY: 'hourly',
   DAILY: 'daily',
   WEEKLY: 'weekly',
+  BIWEEKLY: 'biweekly',
   MONTHLY: 'monthly',
   QUARTERLY: 'quarterly',
   YEARLY: 'yearly'
