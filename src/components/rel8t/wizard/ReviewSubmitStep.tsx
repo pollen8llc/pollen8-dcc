@@ -16,7 +16,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { addDays, format } from "date-fns";
-import { Trigger } from "@/services/rel8t/triggerService";
+import { Trigger, createTrigger } from "@/services/rel8t/triggerService";
 
 interface ReviewSubmitStepProps {
   wizardData: {
@@ -117,15 +117,52 @@ export const ReviewSubmitStep = ({
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
       queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
       
-      setSubmissionStatus("success");
-      toast({
-        title: "Relationship plan created",
-        description: `Created ${triggers.length} outreach reminders for ${contacts.length} contacts.`
-      });
-      
-      setTimeout(() => {
-        onSubmit();
-      }, 1500);
+      // Create a trigger for the relationship plan (using first trigger as base)
+      const baseTrigger = triggers[0];
+      const dueDate = getDueDateFromTrigger(baseTrigger);
+      const executionTime = dueDate.toISOString();
+
+      const triggerPayload = {
+        name: baseTrigger.name || "Relationship Outreach Reminder",
+        description: baseTrigger.description || `Reminder to follow up with ${contacts.length} contact${contacts.length !== 1 ? "s" : ""}.`,
+        is_active: true,
+        condition: "onetime",
+        action: "send_email",
+        execution_time: executionTime,
+        next_execution_at: executionTime,
+        recurrence_pattern: {
+          type: "onetime",
+          startDate: executionTime
+        }
+      };
+
+      const triggerResult = await createTrigger(triggerPayload);
+
+      if (triggerResult) {
+        const { trigger, icsContent } = triggerResult;
+
+        setSubmissionStatus("success");
+        toast({
+          title: "Relationship plan created",
+          description: `Created ${triggers.length} outreach reminder${triggers.length !== 1 ? 's' : ''} for ${contacts.length} contact${contacts.length !== 1 ? 's' : ''}.`
+        });
+
+        // Pass trigger and ICS to parent to show dialog and download
+        setTimeout(() => {
+          onSubmit(trigger, icsContent);
+        }, 1500);
+      } else {
+        // Fallback: outreach created but no trigger/ICS
+        setSubmissionStatus("success");
+        toast({
+          title: "Relationship plan created",
+          description: "Your outreach items were created successfully."
+        });
+
+        setTimeout(() => {
+          onSubmit();
+        }, 1500);
+      }
     } catch (error) {
       console.error("Submission error:", error);
       setSubmissionStatus("error");
