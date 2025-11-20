@@ -1,12 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Calendar, Download, Copy, CheckCircle2, Bell } from "lucide-react";
-import { downloadICS } from "@/utils/icsDownload";
+import { Calendar, Copy, CheckCircle2, Bell } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { format } from "date-fns";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
+import { CalendarOptionsDialog } from "./CalendarOptionsDialog";
 
 interface TriggerCreatedDialogProps {
   open: boolean;
@@ -17,37 +17,13 @@ interface TriggerCreatedDialogProps {
 
 export function TriggerCreatedDialog({ open, onOpenChange, trigger, icsContent }: TriggerCreatedDialogProps) {
   const navigate = useNavigate();
-  const hasAutoDownloaded = useRef(false);
-
-  // Auto-download ICS file when dialog opens
-  useEffect(() => {
-    if (open && trigger && icsContent && !hasAutoDownloaded.current) {
-      const filename = `${trigger.name.replace(/\s+/g, '-').toLowerCase()}.ics`;
-      downloadICS(icsContent, filename);
-      hasAutoDownloaded.current = true;
-      
-      toast({
-        title: "Calendar file downloaded",
-        description: "Import this file into your calendar app to set up automatic reminders."
-      });
-    }
-    
-    // Reset flag when dialog closes
-    if (!open) {
-      hasAutoDownloaded.current = false;
-    }
-  }, [open, trigger, icsContent]);
+  const [showCalendarOptions, setShowCalendarOptions] = useState(false);
 
   if (!trigger) return null;
 
-  const handleDownloadICS = () => {
-    if (icsContent) {
-      const filename = `${trigger.name.replace(/\s+/g, '-').toLowerCase()}.ics`;
-      downloadICS(icsContent, filename);
-      toast({
-        title: "Calendar file downloaded",
-        description: "Import this file into your calendar app."
-      });
+  const handleAddToCalendar = () => {
+    if (icsContent && trigger.execution_time) {
+      setShowCalendarOptions(true);
     }
   };
 
@@ -112,13 +88,14 @@ export function TriggerCreatedDialog({ open, onOpenChange, trigger, icsContent }
         </DialogHeader>
 
         <div className="flex flex-col gap-2 mt-4">
-          {icsContent && (
-            <Button
-              onClick={handleDownloadICS}
-              className="w-full"
+          {icsContent && trigger.execution_time && (
+            <Button 
+              variant="default" 
+              className="w-full gap-2"
+              onClick={handleAddToCalendar}
             >
-              <Download className="h-4 w-4 mr-2" />
-              Download Calendar File (.ics)
+              <Calendar className="h-4 w-4" />
+              Add to Calendar
             </Button>
           )}
           
@@ -130,20 +107,33 @@ export function TriggerCreatedDialog({ open, onOpenChange, trigger, icsContent }
                 navigate("/rel8/notifications");
               }}
             >
+              <Bell className="h-4 w-4 mr-2" />
               View Notifications
             </Button>
             <Button
               variant="outline"
               onClick={() => {
                 onOpenChange(false);
-                navigate("/rel8/build-rapport");
+                navigate("/rel8/triggers");
               }}
             >
+              <Calendar className="h-4 w-4 mr-2" />
               View Triggers
             </Button>
           </div>
         </div>
       </DialogContent>
+
+      {icsContent && trigger.execution_time && (
+        <CalendarOptionsDialog
+          open={showCalendarOptions}
+          onOpenChange={setShowCalendarOptions}
+          title={trigger.name}
+          description={trigger.description || undefined}
+          icsContent={icsContent}
+          startDate={trigger.execution_time}
+        />
+      )}
     </Dialog>
   );
 }
