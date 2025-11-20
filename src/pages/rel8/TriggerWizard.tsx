@@ -94,12 +94,14 @@ const TriggerWizard = () => {
 
         {/* Form Card */}
         <Card className="backdrop-blur-md bg-card/95 border-2 border-border">
-          <CardHeader className="border-b border-border/50 pb-4">
-            <CardTitle className="text-base font-medium">
-              {showTemplateSelection ? "Select Template" : "Trigger Configuration"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
+          {!showTemplateSelection && (
+            <CardHeader className="border-b border-border/50 pb-4">
+              <CardTitle className="text-base font-medium">
+                Trigger Configuration
+              </CardTitle>
+            </CardHeader>
+          )}
+          <CardContent className={cn("p-6", showTemplateSelection && "pt-8")}>
             {showTemplateSelection ? (
               <TriggerTemplateSelection onSelectTemplate={handleTemplateSelect} />
             ) : (
