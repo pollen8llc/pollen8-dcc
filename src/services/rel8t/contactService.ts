@@ -82,12 +82,13 @@ export const getContactById = async (id: string): Promise<Contact | null> => {
   if (contactError) throw new Error(contactError.message);
   if (!contact) return null;
   
-  // Then get affiliations separately
+  // Then get affiliations separately with user profile data
   const { data: affiliations, error: affiliationsError } = await supabase
     .from("rms_contact_affiliations")
     .select(`
       *,
-      affiliated_contact:affiliated_contact_id(id,name,email,organization,role,location)
+      affiliated_contact:affiliated_contact_id(id,name,email,organization,role,location),
+      affiliated_user:affiliated_user_id(user_id)
     `)
     .eq("contact_id", id);
   
