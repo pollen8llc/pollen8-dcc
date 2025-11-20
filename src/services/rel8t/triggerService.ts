@@ -49,6 +49,8 @@ export interface Trigger {
   next_execution_at?: string;
   last_executed_at?: string;
   recurrence_pattern?: RecurrencePattern | null;
+  system_email?: string;
+  calendar_event_uid?: string;
 }
 
 export interface TriggerStats {
@@ -115,7 +117,7 @@ export const getTrigger = async (id: string): Promise<Trigger | null> => {
   }
 };
 
-export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at">): Promise<Trigger | null> => {
+export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "created_at" | "updated_at" | "system_email" | "calendar_event_uid">): Promise<{ trigger: Trigger; icsContent: string } | null> => {
   try {
     // Get the current user's ID
     const { data: { user } } = await supabase.auth.getUser();
@@ -252,10 +254,13 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
     });
     
     return {
-      ...updatedTrigger,
-      condition: JSON.stringify(updatedTrigger.condition || {}),
-      recurrence_pattern: updatedTrigger.recurrence_pattern as RecurrencePattern
-    } as Trigger;
+      trigger: {
+        ...updatedTrigger,
+        condition: JSON.stringify(updatedTrigger.condition || {}),
+        recurrence_pattern: updatedTrigger.recurrence_pattern as RecurrencePattern
+      } as Trigger,
+      icsContent
+    };
   } catch (error: any) {
     console.error("Error creating trigger:", error);
     toast({
