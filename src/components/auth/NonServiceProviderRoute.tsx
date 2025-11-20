@@ -20,15 +20,8 @@ const NonServiceProviderRoute = ({ children }: NonServiceProviderRouteProps) => 
     );
   }
 
-  // Require authentication - redirect to auth if not logged in
-  if (!currentUser) {
-    const currentPath = window.location.pathname + window.location.search;
-    const returnUrl = currentPath !== '/' ? `?returnTo=${encodeURIComponent(currentPath)}` : '';
-    return <Navigate to={`/auth${returnUrl}`} replace />;
-  }
-
   // If user is a service provider, redirect to LAB-R8 dashboard
-  if (currentUser.role === 'SERVICE_PROVIDER') {
+  if (currentUser?.role === 'SERVICE_PROVIDER') {
     console.log('🔍 NonServiceProviderRoute - Service provider setup status:', {
       labr8_setup_complete: currentUser.labr8_setup_complete,
       profile_complete: currentUser.profile_complete
@@ -40,7 +33,7 @@ const NonServiceProviderRoute = ({ children }: NonServiceProviderRouteProps) => 
     }
   }
 
-  // Allow access for all other authenticated users
+  // Allow access for all other users (including non-authenticated)
   return <>{children}</>;
 };
 
