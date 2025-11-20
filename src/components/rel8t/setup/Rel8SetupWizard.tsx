@@ -8,15 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, CalendarIcon, Clock, Users, Building2, Zap } from "lucide-react";
-import { format } from "date-fns";
+import { CheckCircle, Users, Building2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createCategory } from "@/services/rel8t/contactService";
 import { createContact } from "@/services/rel8t/contactService";
 import { createTrigger } from "@/services/rel8t/triggerService";
+import { TriggerTemplateSelection, TriggerTemplateWithDate } from "@/components/rel8t/triggers/TriggerTemplateSelection";
 
 interface SetupState {
   step: number;
@@ -31,8 +29,7 @@ interface SetupState {
   };
   trigger: {
     name: string;
-    triggerDate: Date | null;
-    triggerTime: string;
+    selectedTemplate?: TriggerTemplateWithDate;
   };
 }
 
@@ -43,7 +40,7 @@ export function Rel8SetupWizard() {
     step: 1,
     category: { name: "", description: "" },
     contact: { name: "", email: "", category_id: "" },
-    trigger: { name: "", triggerDate: new Date(), triggerTime: "09:00" }
+    trigger: { name: "", selectedTemplate: undefined }
   });
 
   const handleSubmit = async () => {
@@ -127,24 +124,25 @@ export function Rel8SetupWizard() {
         throw new Error("Failed to create contact");
       }
 
-      // Create trigger
+      // Create trigger based on template
       let executionTime: string | undefined;
-      if (state.trigger.triggerDate && state.trigger.triggerTime) {
-        const [hours, minutes] = state.trigger.triggerTime.split(':');
-        const combinedDateTime = new Date(state.trigger.triggerDate);
-        combinedDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const template = state.trigger.selectedTemplate;
+      
+      if (template?.selectedDate) {
+        const combinedDateTime = new Date(template.selectedDate);
+        combinedDateTime.setHours(9, 0, 0, 0); // Default to 9 AM
         executionTime = combinedDateTime.toISOString();
       }
 
       const triggerResult = await createTrigger({
         name: state.trigger.name,
-        description: `One-time trigger at ${state.trigger.triggerTime}`,
+        description: `${template?.name || 'One-time'} trigger`,
         is_active: true,
-        condition: "onetime",
+        condition: template?.frequency || "onetime",
         action: "send_email",
         execution_time: executionTime,
         recurrence_pattern: {
-          type: "onetime",
+          type: template?.frequency || "onetime",
           startDate: executionTime || new Date().toISOString()
         }
       });
@@ -293,66 +291,55 @@ export function Rel8SetupWizard() {
                 <Zap className="h-5 w-5" />
                 Step 3: Set Up Your First Trigger
               </CardTitle>
+              <CardDescription>
+                Choose a trigger template to automate your relationship management
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="triggerName">Trigger Name</Label>
-                <Input
-                  id="triggerName"
-                  placeholder="e.g., Follow up with John"
-                  value={state.trigger.name}
-                  onChange={(e) => updateTrigger({ name: e.target.value })}
+            <CardContent className="space-y-6">
+              {!state.trigger.selectedTemplate ? (
+                <TriggerTemplateSelection 
+                  onSelectTemplate={(template) => updateTrigger({ selectedTemplate: template })}
+                  showDatePickers={true}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Trigger Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-primary/10 border border-primary/20">
+                    <div>
+                      <p className="font-medium">{state.trigger.selectedTemplate.name} Template Selected</p>
+                      <p className="text-sm text-muted-foreground">
+                        {state.trigger.selectedTemplate.selectedDate && 
+                          `Start date: ${new Date(state.trigger.selectedTemplate.selectedDate).toLocaleDateString()}`
+                        }
+                      </p>
+                    </div>
                     <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !state.trigger.triggerDate && "text-muted-foreground"
-                      )}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => updateTrigger({ selectedTemplate: undefined })}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {state.trigger.triggerDate ? (
-                        format(state.trigger.triggerDate, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
+                      Change
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={state.trigger.triggerDate || undefined}
-                      onSelect={(date) => updateTrigger({ triggerDate: date || null })}
-                      initialFocus
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="triggerName">Trigger Name</Label>
+                    <Input
+                      id="triggerName"
+                      placeholder="e.g., Follow up with John"
+                      value={state.trigger.name}
+                      onChange={(e) => updateTrigger({ name: e.target.value })}
                     />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="triggerTime">Trigger Time</Label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="triggerTime"
-                    type="time"
-                    value={state.trigger.triggerTime}
-                    onChange={(e) => updateTrigger({ triggerTime: e.target.value })}
-                    className="pl-10"
-                  />
+                  </div>
                 </div>
-              </div>
+              )}
+              
               <div className="flex justify-between">
                 <Button variant="outline" onClick={prevStep}>
                   Back
                 </Button>
                 <Button 
                   onClick={nextStep}
-                  disabled={!state.trigger.name.trim() || !state.trigger.triggerDate}
+                  disabled={!state.trigger.name.trim() || !state.trigger.selectedTemplate}
                 >
                   Next
                 </Button>
@@ -388,7 +375,10 @@ export function Rel8SetupWizard() {
                 <div>
                   <h4 className="font-medium mb-2">Trigger</h4>
                   <p className="text-sm text-muted-foreground">
-                    {state.trigger.name} - {state.trigger.triggerDate && format(state.trigger.triggerDate, "PPP")} at {state.trigger.triggerTime}
+                    {state.trigger.name} - {state.trigger.selectedTemplate?.name} template
+                    {state.trigger.selectedTemplate?.selectedDate && 
+                      ` starting ${new Date(state.trigger.selectedTemplate.selectedDate).toLocaleDateString()}`
+                    }
                   </p>
                 </div>
               </div>

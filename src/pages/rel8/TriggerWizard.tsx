@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useTriggerWizard } from "@/hooks/rel8t/useTriggerWizard";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { TriggerTemplateSelection, TriggerTemplate } from "@/components/rel8t/triggers/TriggerTemplateSelection";
+import { TriggerTemplateSelection, TriggerTemplateWithDate } from "@/components/rel8t/triggers/TriggerTemplateSelection";
 
 const TriggerWizard = () => {
   const navigate = useNavigate();
@@ -29,15 +29,18 @@ const TriggerWizard = () => {
     priorityOptions
   } = useTriggerWizard();
 
-  const handleTemplateSelect = (template: TriggerTemplate) => {
-    // Calculate the date based on template
-    const newDate = new Date();
-    newDate.setDate(newDate.getDate() + template.defaultDaysAhead);
+  const handleTemplateSelect = (template: TriggerTemplateWithDate) => {
+    // Use the date from the template if provided
+    const templateDate = template.selectedDate || (() => {
+      const newDate = new Date();
+      newDate.setDate(newDate.getDate() + template.defaultDaysAhead);
+      return newDate;
+    })();
     
     // Pre-fill form data based on template
     updateFormData({
       frequency: template.frequency,
-      triggerDate: template.id === 'custom' ? formData.triggerDate : newDate,
+      triggerDate: template.id === 'custom' ? formData.triggerDate : templateDate,
       selectedTemplate: template.id
     });
     
