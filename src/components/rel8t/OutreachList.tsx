@@ -57,6 +57,7 @@ const OutreachList = ({
   const { data: outreachItems = [], isLoading } = useQuery({
     queryKey: ["outreach", activeTab],
     queryFn: () => getOutreach(activeTab),
+    placeholderData: (previousData) => previousData, // Keep previous data while loading new tab
   });
 
   // Display specific number of items if maxItems is provided
@@ -153,14 +154,20 @@ const OutreachList = ({
             />
           </div>
 
-          <TabsList className="grid grid-cols-3 mb-6">
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="overdue">Overdue</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsList className="grid grid-cols-3 mb-6 backdrop-blur-sm bg-muted/50">
+            <TabsTrigger value="upcoming" className="data-[state=active]:bg-background">
+              Upcoming
+            </TabsTrigger>
+            <TabsTrigger value="overdue" className="data-[state=active]:bg-background">
+              Overdue
+            </TabsTrigger>
+            <TabsTrigger value="completed" className="data-[state=active]:bg-background">
+              Completed
+            </TabsTrigger>
           </TabsList>
           
           {(["upcoming", "overdue", "completed"] as OutreachFilterTab[]).map(tab => (
-            <TabsContent key={tab} value={tab} className="mt-0">
+            <TabsContent key={tab} value={tab} className="mt-0 animate-fade-in">
               {renderOutreachContent()}
             </TabsContent>
           ))}
