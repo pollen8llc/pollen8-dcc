@@ -15,6 +15,7 @@ import { createCategory } from "@/services/rel8t/contactService";
 import { createContact } from "@/services/rel8t/contactService";
 import { createTrigger } from "@/services/rel8t/triggerService";
 import { TriggerTemplateSelection, TriggerTemplateWithDate } from "@/components/rel8t/triggers/TriggerTemplateSelection";
+import { downloadICS } from "@/utils/icsDownload";
 
 interface SetupState {
   step: number;
@@ -151,9 +152,15 @@ export function Rel8SetupWizard() {
         throw new Error("Failed to create trigger");
       }
 
+      // Auto-download ICS file if available
+      if (triggerResult.icsContent && triggerResult.trigger) {
+        const filename = `${triggerResult.trigger.name.replace(/\s+/g, '-').toLowerCase()}.ics`;
+        downloadICS(triggerResult.icsContent, filename);
+      }
+
       toast({
         title: "Setup Complete!",
-        description: "Your Rel8 setup is complete. Welcome aboard!"
+        description: "Your Rel8 setup is complete. Calendar file downloaded for automatic reminders."
       });
       
       // Mark REL8 setup as complete

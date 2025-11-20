@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { format } from "date-fns";
+import { useEffect, useRef } from "react";
 
 interface TriggerCreatedDialogProps {
   open: boolean;
@@ -16,6 +17,26 @@ interface TriggerCreatedDialogProps {
 
 export function TriggerCreatedDialog({ open, onOpenChange, trigger, icsContent }: TriggerCreatedDialogProps) {
   const navigate = useNavigate();
+  const hasAutoDownloaded = useRef(false);
+
+  // Auto-download ICS file when dialog opens
+  useEffect(() => {
+    if (open && trigger && icsContent && !hasAutoDownloaded.current) {
+      const filename = `${trigger.name.replace(/\s+/g, '-').toLowerCase()}.ics`;
+      downloadICS(icsContent, filename);
+      hasAutoDownloaded.current = true;
+      
+      toast({
+        title: "Calendar file downloaded",
+        description: "Import this file into your calendar app to set up automatic reminders."
+      });
+    }
+    
+    // Reset flag when dialog closes
+    if (!open) {
+      hasAutoDownloaded.current = false;
+    }
+  }, [open, trigger, icsContent]);
 
   if (!trigger) return null;
 
