@@ -196,21 +196,22 @@ const ContactEdit = () => {
           <Card>
             <CardContent className="pt-6">
               <ContactForm
-                initialValues={{
-                  name: contact.name,
-                  email: contact.email || '',
-                  phone: contact.phone || '',
-                  organization: contact.organization || '',
-                  role: contact.role || '',
-                  notes: contact.notes || '',
-                  tags: contact.tags || [],
-                  category_id: contact.category_id || '',
-                  location: contact.location || '',
-                  status: (contact.status as 'active' | 'inactive') || 'active',
-                  interests: contact.interests || [],
-                  bio: contact.bio || '',
-                  last_introduction_date: contact.last_introduction_date || ''
-                }}
+        initialValues={{
+          name: contact.name,
+          email: contact.email || '',
+          phone: contact.phone || '',
+          organization: contact.organization || '',
+          role: contact.role || '',
+          industry: contact.industry || '',
+          notes: contact.notes || '',
+          tags: contact.tags || [],
+          category_id: contact.category_id || '',
+          location: contact.location || '',
+          status: (contact.status as 'active' | 'inactive') || 'active',
+          interests: contact.interests || [],
+          bio: contact.bio || '',
+          last_introduction_date: contact.last_introduction_date || ''
+        }}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
                 isSubmitting={updateMutation.isPending}
