@@ -185,63 +185,61 @@ const ContactEdit = () => {
           </Breadcrumb>
         </div>
 
+        {/* Header Section - NOT in a card */}
         {contact && (
-          <Card className="backdrop-blur-md bg-card/80 border-primary/20 shadow-lg hover:shadow-primary/10 transition-shadow">
-            <CardContent className="p-8">
-              {/* Header Section */}
-              <div className="flex justify-between items-start mb-8 pb-6 border-b border-border/50">
-                <div>
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    Edit Contact
-                  </h2>
-                  <p className="text-muted-foreground mt-2">Update contact information and details</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleCancel} 
-                    variant="outline" 
-                    size="sm"
-                    className="hover:bg-primary/10 hover:border-primary/50 transition-all"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={handleDelete} 
-                    variant="destructive" 
-                    size="sm"
-                    className="hover:shadow-lg hover:shadow-destructive/20 transition-all"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
-                </div>
+          <>
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  Edit Contact
+                </h2>
+                <p className="text-muted-foreground mt-2">Update contact information and details</p>
               </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleCancel} 
+                  variant="outline" 
+                  size="sm"
+                  className="hover:bg-primary/10 hover:border-primary/50 transition-all"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleDelete} 
+                  variant="destructive" 
+                  size="sm"
+                  className="hover:shadow-lg hover:shadow-destructive/20 transition-all"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </div>
 
-              {/* Form Section */}
-              <ContactForm
-                initialValues={{
-                  name: contact.name,
-                  email: contact.email || '',
-                  phone: contact.phone || '',
-                  organization: contact.organization || '',
-                  role: contact.role || '',
-                  industry: contact.industry || '',
-                  notes: contact.notes || '',
-                  tags: contact.tags || [],
-                  category_id: contact.category_id || '',
-                  location: contact.location || '',
-                  status: (contact.status as 'active' | 'inactive') || 'active',
-                  interests: contact.interests || [],
-                  bio: contact.bio || '',
-                  last_introduction_date: contact.last_introduction_date || ''
-                }}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                isSubmitting={updateMutation.isPending}
-              />
-            </CardContent>
-          </Card>
+            {/* Form with separate cards */}
+            <ContactForm
+              initialValues={{
+                name: contact.name,
+                email: contact.email || '',
+                phone: contact.phone || '',
+                organization: contact.organization || '',
+                role: contact.role || '',
+                industry: contact.industry || '',
+                notes: contact.notes || '',
+                tags: contact.tags || [],
+                category_id: contact.category_id || '',
+                location: contact.location || '',
+                status: (contact.status as 'active' | 'inactive') || 'active',
+                interests: contact.interests || [],
+                bio: contact.bio || '',
+                last_introduction_date: contact.last_introduction_date || ''
+              }}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              isSubmitting={updateMutation.isPending}
+            />
+          </>
         )}
       </div>
 
