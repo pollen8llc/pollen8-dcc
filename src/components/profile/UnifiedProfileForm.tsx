@@ -216,63 +216,102 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
     }
   ];
 
+  // Get card title and description based on active tab
+  const getCardInfo = () => {
+    switch (activeTab) {
+      case "basic":
+        return { 
+          title: "Basic Information", 
+          description: "Your name, contact details, and social links" 
+        };
+      case "bio":
+        return { 
+          title: "Bio & Location", 
+          description: "Tell us about yourself and where you're based" 
+        };
+      case "interests":
+        return { 
+          title: "Your Interests", 
+          description: "Add topics that interest you to connect with like-minded people" 
+        };
+      case "privacy":
+        return { 
+          title: "Privacy Settings", 
+          description: "Control who can view your profile" 
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  };
+
+  const cardInfo = getCardInfo();
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{mode === 'setup' ? 'Complete Your Profile' : 'Edit Profile'}</CardTitle>
-        <CardDescription>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          {mode === 'setup' ? 'Complete Your Profile' : 'Edit Profile'}
+        </h1>
+        <p className="text-muted-foreground mt-2">
           {mode === 'setup' 
             ? 'Set up your profile to get started and connect with others'
             : 'Update your profile information and privacy settings'
           }
-        </CardDescription>
-      </CardHeader>
+        </p>
+      </div>
+
+      {/* Navigation Bar */}
+      <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-card/80 border border-primary/20 rounded-2xl shadow-lg">
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isAccessible = isTabAccessible(item.value);
+            const isCompleted = completedTabs.includes(item.value);
+            
+            return (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => handleTabChange(item.value)}
+                disabled={!isAccessible && mode === 'setup'}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
+                  "hover:scale-105 hover:shadow-primary/20",
+                  activeTab === item.value
+                    ? "bg-primary/20 border border-primary/30 text-foreground shadow-lg"
+                    : isAccessible
+                    ? "bg-card/40 border border-border/50 text-muted-foreground hover:bg-card/60 hover:border-primary/30"
+                    : "bg-card/20 border border-border/30 text-muted-foreground/30 cursor-not-allowed opacity-50"
+                )}
+              >
+                <Icon className={cn("h-4 w-4", isAccessible ? item.iconColor : "text-muted-foreground/30")} />
+                <span className="flex-1">{item.label}</span>
+                {isCompleted && mode === 'setup' && (
+                  <span className="text-green-500">✓</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
       
-      <CardContent>
-        {/* Navigation Bar */}
-        <nav className="flex items-center gap-2 p-2 backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-lg mb-6">
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isAccessible = isTabAccessible(item.value);
-              const isCompleted = completedTabs.includes(item.value);
-              
-              return (
-                <button
-                  key={item.value}
-                  type="button"
-                  onClick={() => handleTabChange(item.value)}
-                  disabled={!isAccessible && mode === 'setup'}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
-                    "hover:scale-105 hover:shadow-[#00eada]/20",
-                    activeTab === item.value
-                      ? "bg-white/10 border border-white/20 text-foreground shadow-lg"
-                      : isAccessible
-                      ? "bg-white/5 border border-white/5 text-muted-foreground hover:bg-white/10 hover:border-white/15"
-                      : "bg-white/5 border border-white/5 text-muted-foreground/30 cursor-not-allowed opacity-50"
-                  )}
-                >
-                  <Icon className={cn("h-4 w-4", isAccessible ? item.iconColor : "text-muted-foreground/30")} />
-                  <span className="flex-1">{item.label}</span>
-                  {isCompleted && mode === 'setup' && (
-                    <span className="text-green-500">✓</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
+      {/* Content Card */}
+      <Card className="backdrop-blur-md bg-card/80 border-primary/20 shadow-lg hover:shadow-primary/10 transition-shadow">
+        <CardHeader>
+          <CardTitle>{cardInfo.title}</CardTitle>
+          <CardDescription>{cardInfo.description}</CardDescription>
+        </CardHeader>
         
-        {/* Content Area */}
-        <div className="mt-6">
+        <CardContent>
           <form id="profile-form" onSubmit={form.handleSubmit(onSubmit)}>
             {renderTabContent()}
           </form>
-        </div>
-      </CardContent>
-      
-      <CardFooter className="flex justify-between">
+        </CardContent>
+      </Card>
+
+      {/* Action Buttons */}
+      <div className="flex justify-between items-center pt-4">
         {mode === 'edit' && (
           <Button variant="outline" onClick={() => navigate('/profile')}>
             Cancel
@@ -303,8 +342,8 @@ const UnifiedProfileForm = ({ mode, existingData, onComplete }: UnifiedProfileFo
             )}
           </Button>
         )}
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };
 
