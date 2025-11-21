@@ -113,17 +113,17 @@ const ContactCard = ({
       
       {/* Selection checkbox */}
       {isSelectionMode && (
-        <div className="absolute top-3 left-3 z-20">
+        <div className="absolute top-3 right-3 z-20">
           <Checkbox
             checked={isSelected}
             onCheckedChange={(checked) => onSelect?.(contact.id, checked as boolean)}
-            className="bg-background/90 border-2"
+            className="bg-background/90 border-2 rounded-full h-5 w-5"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
       )}
 
-      <CardContent className={`p-5 relative z-10 ${isSelectionMode ? 'pt-12' : ''}`}>
+      <CardContent className="p-5 relative z-10">{/* Removed pt-12 padding */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="bg-primary/10 rounded-full p-2 group-hover:bg-primary/20 transition-colors flex-shrink-0">

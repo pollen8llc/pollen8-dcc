@@ -177,73 +177,79 @@ const Contacts = () => {
         </div>
         
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
+        <div className="mb-6">
           {isSelectionMode ? (
-            <>
-              <Button
-                variant="outline"
-                onClick={handleSelectAll}
-                className="flex items-center justify-center gap-2 w-full sm:w-auto"
-                size="sm"
-              >
-                {selectedContacts.length === filteredContacts.length ? (
-                  <CheckSquare className="h-4 w-4" />
-                ) : (
-                  <Square className="h-4 w-4" />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              {/* Left side buttons */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:flex-1">
+                <Button
+                  variant="outline"
+                  onClick={handleSelectAll}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                  size="sm"
+                >
+                  {selectedContacts.length === filteredContacts.length ? (
+                    <CheckSquare className="h-4 w-4" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                  <span>
+                    {selectedContacts.length === filteredContacts.length ? "Deselect All" : "Select All"}
+                  </span>
+                </Button>
+                
+                {selectedContacts.length > 0 && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
+                        if (firstContact) handleEditContact(firstContact);
+                      }}
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                      size="sm"
+                    >
+                      <Edit className="h-4 w-4" />
+                      <span>Edit</span>
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCategorizeDialogOpen(true)}
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                      size="sm"
+                    >
+                      <Filter className="h-4 w-4" />
+                      <span>Categorize</span>
+                    </Button>
+                  </>
                 )}
-                <span>
-                  {selectedContacts.length === filteredContacts.length ? "Deselect All" : "Select All"}
-                </span>
-              </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={toggleSelectionMode}
+                  className="w-full sm:w-auto"
+                  size="sm"
+                >
+                  Cancel
+                </Button>
+              </div>
               
+              {/* Delete button - right side on desktop, bottom on mobile */}
               {selectedContacts.length > 0 && (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
-                      if (firstContact) handleEditContact(firstContact);
-                    }}
-                    className="flex items-center justify-center gap-2 w-full sm:w-auto"
-                    size="sm"
-                  >
-                    <Edit className="h-4 w-4" />
-                    <span>Edit</span>
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsCategorizeDialogOpen(true)}
-                    className="flex items-center justify-center gap-2 w-full sm:w-auto"
-                    size="sm"
-                  >
-                    <Filter className="h-4 w-4" />
-                    <span>Categorize</span>
-                  </Button>
-                  
-                  <Button
-                    variant="destructive"
-                    onClick={handleBulkDelete}
-                    className="flex items-center justify-center gap-2 w-full sm:w-auto"
-                    size="sm"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span>Delete ({selectedContacts.length})</span>
-                  </Button>
-                </>
+                <Button
+                  variant="destructive"
+                  onClick={handleBulkDelete}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto order-last sm:order-none"
+                  size="sm"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete ({selectedContacts.length})</span>
+                </Button>
               )}
-              
-              <Button
-                variant="outline"
-                onClick={toggleSelectionMode}
-                className="w-full sm:w-auto"
-                size="sm"
-              >
-                Cancel
-              </Button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <Button
                 variant="outline"
                 onClick={toggleSelectionMode}
@@ -262,7 +268,7 @@ const Contacts = () => {
                 <Heart className="h-4 w-4" />
                 <span>Build Rapport</span>
               </Button>
-            </>
+            </div>
           )}
         </div>
 
