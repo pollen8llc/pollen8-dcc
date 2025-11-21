@@ -180,7 +180,24 @@ const ContactForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(values);
+    
+    // Sanitize values before submission
+    const sanitizedValues = {
+      ...values,
+      // Convert empty string to null for date field
+      last_introduction_date: values.last_introduction_date?.trim() || null,
+      // Ensure other optional fields are null instead of empty strings
+      email: values.email?.trim() || null,
+      phone: values.phone?.trim() || null,
+      organization: values.organization?.trim() || null,
+      role: values.role?.trim() || null,
+      industry: values.industry?.trim() || null,
+      notes: values.notes?.trim() || null,
+      bio: values.bio?.trim() || null,
+      location: values.location?.trim() || null,
+    };
+    
+    onSubmit(sanitizedValues);
   };
 
   const handleSelectCategory = (category_id: string) => {
