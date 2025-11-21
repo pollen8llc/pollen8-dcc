@@ -120,7 +120,7 @@ const ProfileEditPage: React.FC = () => {
   // Show loading state only while we're actually loading
   if (isLoading || (profileLoading && !isFormInitialized) || !isFormInitialized) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center min-h-[50vh]">
@@ -132,7 +132,7 @@ const ProfileEditPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <h1 className="sr-only">Edit Profile</h1>
@@ -142,7 +142,7 @@ const ProfileEditPage: React.FC = () => {
             <AlertDescription>{profileError}</AlertDescription>
           </Alert>
         )}
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <FormProvider {...form}>
             <UnifiedProfileForm 
               mode="edit" 
