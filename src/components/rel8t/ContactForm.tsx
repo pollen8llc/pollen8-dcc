@@ -12,6 +12,13 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { 
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { 
   getCategories, 
   ContactCategory
 } from "@/services/rel8t/contactService";
@@ -21,9 +28,10 @@ import {
   Building,
   Heart
 } from "lucide-react";
-import { LocationSelector } from "@/components/ui/location-selector";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Badge } from "@/components/ui/badge";
+import { Loc8Dialog } from "@/components/ui/loc8-dialog";
+import { Loc8DialogTrigger } from "@/components/ui/loc8-dialog-trigger";
 
 interface ContactFormProps {
   initialValues?: {
@@ -75,6 +83,7 @@ const ContactForm = ({
   const [interestsInput, setInterestsInput] = useState("");
   const [categories, setCategories] = useState<ContactCategory[]>([]);
   const [industries, setIndustries] = useState<string[]>([]);
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
   
   useEffect(() => {
     const loadCategories = async () => {
@@ -186,12 +195,16 @@ const ContactForm = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-foreground border-b pb-2">Basic Information</h3>
-          
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Card 1: Basic Information */}
+      <Card className="backdrop-blur-md bg-card/80 border-primary/20 shadow-lg hover:shadow-primary/10 transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Basic Information
+          </CardTitle>
+          <CardDescription>Essential contact details</CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="name" className="text-sm font-medium">Name*</Label>
@@ -217,7 +230,7 @@ const ContactForm = ({
               />
             </div>
 
-            <div>
+            <div className="md:col-span-2">
               <Label htmlFor="phone" className="text-sm font-medium">Phone</Label>
               <Input
                 id="phone"
@@ -227,26 +240,46 @@ const ContactForm = ({
                 className="mt-1"
               />
             </div>
-
-            <div>
-              <Label htmlFor="location" className="text-sm font-medium flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-muted-foreground" /> Location
-              </Label>
-              <LocationSelector
-                value={values.location || ""}
-                onValueChange={(value) => setValues({ ...values, location: value })}
-                placeholder="Select location"
-                allowCustomInput={true}
-                showHierarchy={true}
-              />
-            </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Profile Details Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-foreground border-b pb-2">Profile Details</h3>
-          
+      {/* Card 2: Location */}
+      <Card className="backdrop-blur-md bg-card/80 border-primary/20 shadow-lg hover:shadow-primary/10 transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Location
+          </CardTitle>
+          <CardDescription>Where is this contact based?</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Loc8DialogTrigger
+            value={values.location ? [values.location] : []}
+            placeholder="Select location on globe"
+            onClick={() => setIsLocationDialogOpen(true)}
+          />
+          <Loc8Dialog
+            open={isLocationDialogOpen}
+            onOpenChange={setIsLocationDialogOpen}
+            mode="single"
+            value={values.location ? [values.location] : []}
+            onValueChange={(cities) => setValues({ ...values, location: cities[0] || '' })}
+            title="Select Contact Location"
+            description="Choose the city where this contact is based"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Card 3: Profile Details */}
+      <Card className="backdrop-blur-md bg-card/80 border-primary/20 shadow-lg hover:shadow-primary/10 transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Profile Details
+          </CardTitle>
+          <CardDescription>Contact status and introduction tracking</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="status" className="text-sm font-medium">Status</Label>
@@ -296,12 +329,18 @@ const ContactForm = ({
             />
             <p className="text-xs text-muted-foreground mt-1">A short description or summary about this contact</p>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Professional Information Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-foreground border-b pb-2">Professional Information</h3>
-          
+      {/* Card 4: Professional Information */}
+      <Card className="backdrop-blur-md bg-card/80 border-primary/20 shadow-lg hover:shadow-primary/10 transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Professional Information
+          </CardTitle>
+          <CardDescription>Work details and categorization</CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="organization" className="text-sm font-medium flex items-center gap-1.5">
@@ -374,12 +413,18 @@ const ContactForm = ({
               </Select>
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Interests & Tags Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-foreground border-b pb-2">Interests & Tags</h3>
-
+      {/* Card 5: Interests & Tags */}
+      <Card className="backdrop-blur-md bg-card/80 border-primary/20 shadow-lg hover:shadow-primary/10 transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Interests & Tags
+          </CardTitle>
+          <CardDescription>Track interests and organize with tags</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
           {/* Interests field */}
           <div>
             <Label htmlFor="interests" className="text-sm font-medium">Interests</Label>
@@ -446,12 +491,18 @@ const ContactForm = ({
               />
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Notes Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-foreground border-b pb-2">Additional Notes</h3>
-          
+      {/* Card 6: Additional Notes */}
+      <Card className="backdrop-blur-md bg-card/80 border-primary/20 shadow-lg hover:shadow-primary/10 transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Additional Notes
+          </CardTitle>
+          <CardDescription>Any other information about this contact</CardDescription>
+        </CardHeader>
+        <CardContent>
           <div>
             <Label htmlFor="notes" className="text-sm font-medium">Notes</Label>
             <Textarea
@@ -464,29 +515,29 @@ const ContactForm = ({
               placeholder="Add any additional notes about this contact..."
             />
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Form actions */}
-        <div className="flex justify-end gap-3 pt-6 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSubmitting}
-            className="px-6"
-          >
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="px-6"
-          >
-            {isSubmitting ? "Saving..." : "Save Contact"}
-          </Button>
-        </div>
-      </form>
-    </div>
+      {/* Form actions */}
+      <div className="flex justify-end gap-3 pt-6">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          className="px-6"
+        >
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="px-6"
+        >
+          {isSubmitting ? "Saving..." : "Save Contact"}
+        </Button>
+      </div>
+    </form>
   );
 };
 
