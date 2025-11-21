@@ -127,6 +127,18 @@ export const deleteMultipleContacts = async (ids: string[]): Promise<void> => {
   if (error) throw new Error(error.message);
 };
 
+export const updateMultipleContacts = async (
+  ids: string[], 
+  updates: { category_id?: string; industry?: string }
+): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contacts")
+    .update(updates)
+    .in("id", ids);
+  
+  if (error) throw new Error(error.message);
+};
+
 export const addAffiliation = async (contactId: string, affiliation: { affiliation_type: 'user' | 'contact' | 'community'; affiliated_user_id?: string; affiliated_contact_id?: string; affiliated_community_id?: string; relationship?: string; }): Promise<ContactAffiliation> => {
   const { data: user } = await supabase.auth.getUser();
   const { data, error } = await supabase.from("rms_contact_affiliations").insert([{ contact_id: contactId, user_id: user.user?.id, ...affiliation }]).select();

@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
-import { getContacts, deleteMultipleContacts, getCategories } from "@/services/rel8t/contactService";
+import { getContacts, deleteMultipleContacts, updateMultipleContacts, getCategories } from "@/services/rel8t/contactService";
 import { toast } from "@/hooks/use-toast";
+import { BulkCategorizeDialog } from "@/components/rel8t/BulkCategorizeDialog";
 
 const Contacts = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const Contacts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTag, setSelectedTag] = useState<string>("all");
+  const [isCategorizeDialogOpen, setIsCategorizeDialogOpen] = useState(false);
 
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
@@ -126,6 +128,29 @@ const Contacts = () => {
     setSelectedContacts([]);
   };
 
+  const handleBulkCategorize = async (updates: { 
+    category_id?: string; 
+    industry?: string 
+  }) => {
+    if (selectedContacts.length === 0) return;
+    
+    try {
+      await updateMultipleContacts(selectedContacts, updates);
+      toast({
+        title: "Contacts updated",
+        description: `Successfully updated ${selectedContacts.length} contact(s)`,
+      });
+      setIsCategorizeDialogOpen(false);
+      handleRefresh();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update contacts",
+        variant: "destructive",
+      });
+    }
+  };
+
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("all");
@@ -184,6 +209,16 @@ const Contacts = () => {
                   >
                     <Edit className="h-4 w-4" />
                     <span className="hidden sm:inline">Edit</span>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCategorizeDialogOpen(true)}
+                    className="flex items-center gap-2"
+                    size="sm"
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span className="hidden sm:inline">Categorize</span>
                   </Button>
                   
                   <Button
@@ -298,6 +333,13 @@ const Contacts = () => {
           onContactMultiSelect={isSelectionMode ? handleContactSelect : undefined}
           selectedContacts={selectedContacts}
           isSelectionMode={isSelectionMode}
+        />
+
+        <BulkCategorizeDialog
+          open={isCategorizeDialogOpen}
+          onOpenChange={setIsCategorizeDialogOpen}
+          selectedCount={selectedContacts.length}
+          onSubmit={handleBulkCategorize}
         />
       </div>
     </div>
