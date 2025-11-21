@@ -2249,6 +2249,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          industry: string | null
           interests: string[] | null
           last_contact_date: string | null
           last_introduction_date: string | null
@@ -2270,6 +2271,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          industry?: string | null
           interests?: string[] | null
           last_contact_date?: string | null
           last_introduction_date?: string | null
@@ -2291,6 +2293,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          industry?: string | null
           interests?: string[] | null
           last_contact_date?: string | null
           last_introduction_date?: string | null

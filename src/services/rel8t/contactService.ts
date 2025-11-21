@@ -14,6 +14,7 @@ export interface Contact {
   status?: string;
   interests?: string[];
   bio?: string;
+  industry?: string;
   last_introduction_date?: string;
   created_at: string;
   updated_at: string;
