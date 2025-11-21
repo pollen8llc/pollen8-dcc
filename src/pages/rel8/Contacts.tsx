@@ -177,13 +177,13 @@ const Contacts = () => {
         </div>
         
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
           {isSelectionMode ? (
             <>
               <Button
                 variant="outline"
                 onClick={handleSelectAll}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto"
                 size="sm"
               >
                 {selectedContacts.length === filteredContacts.length ? (
@@ -191,7 +191,7 @@ const Contacts = () => {
                 ) : (
                   <Square className="h-4 w-4" />
                 )}
-                <span className="hidden sm:inline">
+                <span>
                   {selectedContacts.length === filteredContacts.length ? "Deselect All" : "Select All"}
                 </span>
               </Button>
@@ -204,31 +204,31 @@ const Contacts = () => {
                       const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
                       if (firstContact) handleEditContact(firstContact);
                     }}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto"
                     size="sm"
                   >
                     <Edit className="h-4 w-4" />
-                    <span className="hidden sm:inline">Edit</span>
+                    <span>Edit</span>
                   </Button>
                   
                   <Button
                     variant="outline"
                     onClick={() => setIsCategorizeDialogOpen(true)}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto"
                     size="sm"
                   >
                     <Filter className="h-4 w-4" />
-                    <span className="hidden sm:inline">Categorize</span>
+                    <span>Categorize</span>
                   </Button>
                   
                   <Button
                     variant="destructive"
                     onClick={handleBulkDelete}
-                    className="flex items-center gap-2"
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto"
                     size="sm"
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Delete ({selectedContacts.length})</span>
+                    <span>Delete ({selectedContacts.length})</span>
                   </Button>
                 </>
               )}
@@ -236,6 +236,7 @@ const Contacts = () => {
               <Button
                 variant="outline"
                 onClick={toggleSelectionMode}
+                className="w-full sm:w-auto"
                 size="sm"
               >
                 Cancel
@@ -246,20 +247,20 @@ const Contacts = () => {
               <Button
                 variant="outline"
                 onClick={toggleSelectionMode}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto"
                 size="sm"
               >
                 <CheckSquare className="h-4 w-4" />
-                <span className="hidden sm:inline">Select</span>
+                <span>Select</span>
               </Button>
               
               <Button 
                 onClick={() => navigate("/rel8/build-rapport")}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto"
                 size="sm"
               >
                 <Heart className="h-4 w-4" />
-                <span className="sm:inline">Build Rapport</span>
+                <span>Build Rapport</span>
               </Button>
             </>
           )}
