@@ -264,6 +264,23 @@ const ContactForm = ({
               </Select>
               <p className="text-xs text-muted-foreground mt-1">Current contact status</p>
             </div>
+
+            <div>
+              <Label htmlFor="last_introduction_date" className="text-sm font-medium">Last Introduction Date</Label>
+              <div className="mt-1">
+                <DatePicker
+                  value={values.last_introduction_date ? new Date(values.last_introduction_date) : undefined}
+                  onChange={(date) => setValues({ 
+                    ...values, 
+                    last_introduction_date: date ? date.toISOString() : '' 
+                  })}
+                  className="w-full"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Track when you last introduced this contact
+              </p>
+            </div>
           </div>
 
           <div>
@@ -428,28 +445,6 @@ const ContactForm = ({
                 placeholder={values.tags?.length ? "" : "Add tags (press Enter)"}
               />
             </div>
-          </div>
-        </div>
-
-        {/* Introduction Tracking Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-foreground border-b pb-2">Introduction Tracking</h3>
-          
-          <div>
-            <Label htmlFor="last_introduction_date" className="text-sm font-medium">Last Introduction Date</Label>
-            <div className="mt-1">
-              <DatePicker
-                value={values.last_introduction_date ? new Date(values.last_introduction_date) : undefined}
-                onChange={(date) => setValues({ 
-                  ...values, 
-                  last_introduction_date: date ? date.toISOString() : '' 
-                })}
-                className="w-full"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Track when you last introduced this contact to someone
-            </p>
           </div>
         </div>
 
