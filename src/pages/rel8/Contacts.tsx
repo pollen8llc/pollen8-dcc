@@ -225,14 +225,14 @@ const Contacts = () => {
                   </>
                 )}
                 
-                <Button
-                  variant="outline"
-                  onClick={toggleSelectionMode}
-                  className="w-full sm:w-auto"
-                  size="sm"
-                >
-                  Cancel
-                </Button>
+              <Button
+                variant="outline"
+                onClick={toggleSelectionMode}
+                className="w-full sm:w-auto"
+                size="sm"
+              >
+                Close
+              </Button>
               </div>
               
               {/* Delete button - right side on desktop, bottom on mobile */}

@@ -123,7 +123,7 @@ const ContactCard = ({
         </div>
       )}
 
-      <CardContent className="p-5 relative z-10">{/* Removed pt-12 padding */}
+      <CardContent className="p-5 relative z-10 flex flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="bg-primary/10 rounded-full p-2 group-hover:bg-primary/20 transition-colors flex-shrink-0">
@@ -131,19 +131,7 @@ const ContactCard = ({
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-lg truncate group-hover:text-primary transition-colors">{contact.name}</h3>
-              {contact.category ? (
-                <Badge 
-                  variant="outline" 
-                  className="text-xs mt-1"
-                  style={{
-                    backgroundColor: `${getCategoryColor()}20`,
-                    borderColor: `${getCategoryColor()}40`,
-                    color: getCategoryColor()
-                  }}
-                >
-                  {contact.category.name}
-                </Badge>
-              ) : contact.organization && (
+              {contact.organization && (
                 <p className="text-muted-foreground text-sm truncate">{contact.organization}</p>
               )}
               {contact.location && (
@@ -178,6 +166,36 @@ const ContactCard = ({
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
+          )}
+        </div>
+
+        {/* Badge Footer - Fixed height for consistent card heights */}
+        <div className="mt-3 pt-3 border-t border-border/50 min-h-[60px] flex flex-col gap-2">
+          {contact.category && (
+            <Badge 
+              variant="outline" 
+              className="text-xs w-full justify-center"
+              style={{
+                backgroundColor: `${getCategoryColor()}20`,
+                borderColor: `${getCategoryColor()}40`,
+                color: getCategoryColor()
+              }}
+            >
+              {contact.category.name}
+            </Badge>
+          )}
+          
+          {contact.industry && (
+            <Badge 
+              variant="outline" 
+              className="text-xs w-full justify-center bg-secondary/20 border-secondary/40"
+            >
+              {contact.industry}
+            </Badge>
+          )}
+          
+          {!contact.category && !contact.industry && (
+            <p className="text-xs text-muted-foreground/50 text-center">No category or industry</p>
           )}
         </div>
       </CardContent>
