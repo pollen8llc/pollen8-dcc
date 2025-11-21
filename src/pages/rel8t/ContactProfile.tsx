@@ -152,6 +152,24 @@ export default function ContactProfile() {
                     </div>
                   </div>
                 )}
+                {contact.role && (
+                  <div className="flex items-start gap-3">
+                    <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                    <div>
+                      <div className="text-xs md:text-sm text-muted-foreground">Role</div>
+                      <div className="text-sm md:text-base">{contact.role}</div>
+                    </div>
+                  </div>
+                )}
+                {contact.industry && (
+                  <div className="flex items-start gap-3">
+                    <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                    <div>
+                      <div className="text-xs md:text-sm text-muted-foreground">Industry</div>
+                      <div className="text-sm md:text-base">{contact.industry}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             

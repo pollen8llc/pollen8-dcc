@@ -15,6 +15,7 @@ import {
   getCategories, 
   ContactCategory
 } from "@/services/rel8t/contactService";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   MapPin,
   Building,
@@ -31,6 +32,7 @@ interface ContactFormProps {
     phone?: string;
     organization?: string;
     role?: string;
+    industry?: string;
     notes?: string;
     tags?: string[];
     category_id?: string;
@@ -51,6 +53,7 @@ const DEFAULT_VALUES = {
   phone: "",
   organization: "",
   role: "",
+  industry: "",
   notes: "",
   tags: [],
   category_id: "",
@@ -71,6 +74,7 @@ const ContactForm = ({
   const [tagsInput, setTagsInput] = useState("");
   const [interestsInput, setInterestsInput] = useState("");
   const [categories, setCategories] = useState<ContactCategory[]>([]);
+  const [industries, setIndustries] = useState<string[]>([]);
   
   useEffect(() => {
     const loadCategories = async () => {
@@ -83,6 +87,27 @@ const ContactForm = ({
     };
     
     loadCategories();
+  }, []);
+
+  useEffect(() => {
+    const loadIndustries = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('lexicon')
+          .select('term')
+          .eq('term_type', 'industry')
+          .eq('is_active', true)
+          .eq('is_suggested', true)
+          .order('term');
+        
+        if (error) throw error;
+        setIndustries(data?.map(item => item.term) || []);
+      } catch (error) {
+        console.error("Error loading industries:", error);
+      }
+    };
+    
+    loadIndustries();
   }, []);
 
   const handleChange = (
@@ -283,6 +308,27 @@ const ContactForm = ({
                 onChange={handleChange}
                 className="mt-1"
               />
+            </div>
+
+            <div>
+              <Label htmlFor="industry" className="text-sm font-medium">Industry</Label>
+              <Select
+                value={values.industry || ""}
+                onValueChange={(value) => setValues({ ...values, industry: value === "none" ? undefined : value })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {industries.map((industry) => (
+                    <SelectItem key={industry} value={industry}>
+                      {industry}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Primary industry or market vertical</p>
             </div>
 
             <div>
