@@ -187,6 +187,7 @@ const ContactForm = ({
       // Convert empty string to null for date field
       last_introduction_date: values.last_introduction_date?.trim() || null,
       // Ensure other optional fields are null instead of empty strings
+      category_id: values.category_id?.trim() || null,
       email: values.email?.trim() || null,
       phone: values.phone?.trim() || null,
       organization: values.organization?.trim() || null,
