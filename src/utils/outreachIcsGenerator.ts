@@ -51,7 +51,8 @@ STATUS:CONFIRMED
 SEQUENCE:0
 PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}
 ORGANIZER;CN=REL8 Notifications:mailto:${systemEmail}
-${userEmail ? `ATTENDEE;CN=${escapeICSText(userEmail)};RSVP=TRUE:mailto:${userEmail}` : ''}
+ATTENDEE;CN=REL8 System;RSVP=TRUE;ROLE=REQ-PARTICIPANT:mailto:${systemEmail}
+${userEmail ? `ATTENDEE;CN=${escapeICSText(userEmail)};RSVP=TRUE;ROLE=REQ-PARTICIPANT:mailto:${userEmail}` : ''}
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY
