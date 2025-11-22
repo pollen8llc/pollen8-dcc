@@ -102,15 +102,6 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
           </div>
           
           <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="gap-1 h-8 px-2"
-              onClick={handleAddToCalendar}
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-            
             {outreach.status === "pending" && (
               <Button 
                 variant="outline" 

@@ -249,6 +249,15 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       throw new Error('User not authenticated');
     }
     
+    // Get user's profile email
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("user_id", user.id)
+      .single();
+    
+    const userEmail = profile?.email || user.email;
+    
     // Create outreach
     const { data, error } = await supabase
       .from("rms_outreach")
@@ -269,19 +278,117 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     
     const outreachId = data.id;
     
-    // Generate ICS UID and enable calendar sync
-    const icsUid = `outreach-${outreachId}@rel8.app`;
+    // Generate system email and ICS UID
+    const { generateOutreachSystemEmail } = await import("./systemEmailService");
+    const systemEmail = generateOutreachSystemEmail(user.id, outreachId);
+    const icsUid = `outreach-${outreachId}@ecosystembuilder.app`;
+    
+    // Generate ICS content with system email
+    const { generateOutreachICS } = await import("@/utils/outreachIcsGenerator");
+    const icsContent = generateOutreachICS(
+      { ...data, contacts: [] } as Outreach, 
+      systemEmail,
+      userEmail
+    );
+    
+    // Create email notification with ICS attachment
+    const { data: notificationData, error: notificationError } = await supabase
+      .from("rms_email_notifications")
+      .insert({
+        user_id: user.id,
+        subject: `New Outreach Task: ${outreach.title}`,
+        body: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #00eada;">New Outreach Task Created</h2>
+            <p>You have a new outreach task scheduled.</p>
+            <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+              <h3 style="margin-top: 0;">${outreach.title}</h3>
+              ${outreach.description ? `<p>${outreach.description}</p>` : ''}
+              <p><strong>Priority:</strong> ${outreach.priority}</p>
+              <p><strong>Due Date:</strong> ${new Date(outreach.due_date).toLocaleDateString()}</p>
+            </div>
+            <p>The calendar invitation is attached to this email. Add it to your calendar to stay on track!</p>
+            <p style="color: #666; font-size: 12px; margin-top: 24px;">
+              System Email: ${systemEmail}
+            </p>
+          </div>
+        `,
+        status: "pending",
+        notification_type: "outreach_created",
+        has_ics_attachment: true,
+        ics_data: icsContent,
+        metadata: {
+          outreachId,
+          systemEmail,
+          userEmail
+        }
+      })
+      .select()
+      .single();
+    
+    if (notificationError) {
+      console.error("Error creating email notification:", notificationError);
+    }
+    
+    // Send email via edge function
+    if (notificationData && userEmail) {
+      try {
+        const { error: sendError } = await supabase.functions.invoke("send-email", {
+          body: {
+            to: userEmail,
+            subject: notificationData.subject,
+            html: notificationData.body,
+            icsAttachment: {
+              content: icsContent,
+              filename: `outreach-${outreachId}.ics`
+            }
+          }
+        });
+        
+        // Update notification status
+        if (sendError) {
+          await supabase
+            .from("rms_email_notifications")
+            .update({ 
+              status: "failed",
+              error_message: sendError.message
+            })
+            .eq("id", notificationData.id);
+        } else {
+          await supabase
+            .from("rms_email_notifications")
+            .update({ 
+              status: "sent",
+              sent_at: new Date().toISOString()
+            })
+            .eq("id", notificationData.id);
+        }
+      } catch (emailError: any) {
+        console.error("Error sending email:", emailError);
+        await supabase
+          .from("rms_email_notifications")
+          .update({ 
+            status: "failed",
+            error_message: emailError.message
+          })
+          .eq("id", notificationData.id);
+      }
+    }
+    
+    // Update outreach with ICS UID, system email, and enable calendar sync
     const { error: updateError } = await supabase
       .from("rms_outreach")
       .update({
         ics_uid: icsUid,
+        system_email: systemEmail,
         calendar_sync_enabled: true,
-        sequence: 0
+        sequence: 0,
+        raw_ics: icsContent
       })
       .eq("id", outreachId);
     
     if (updateError) {
-      console.error("Error setting ICS UID:", updateError);
+      console.error("Error setting ICS UID and system email:", updateError);
     }
     
     // Associate contacts if provided
@@ -304,7 +411,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     
     toast({
       title: "Outreach created",
-      description: "New outreach item has been created successfully.",
+      description: "Calendar invitation sent to your email.",
     });
     
     return outreachId;

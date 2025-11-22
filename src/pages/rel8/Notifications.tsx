@@ -227,12 +227,18 @@ export default function Notifications() {
                         {getStatusIcon(notification.status)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
+                       <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-foreground truncate">{notification.subject}</h3>
                           {getStatusBadge(notification.status)}
-                          {notification.notification_type && (
-                            <Badge variant="outline" className="capitalize">
-                              {notification.notification_type.replace('_', ' ')}
+                          {notification.notification_type === "outreach_created" && (
+                            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+                              Outreach Task
+                            </Badge>
+                          )}
+                          {notification.has_ics_attachment && (
+                            <Badge variant="outline" className="bg-green-900/30 text-green-400 border-green-400/30">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              ICS
                             </Badge>
                           )}
                         </div>
@@ -244,6 +250,9 @@ export default function Notifications() {
                           )}
                           {notification.scheduled_at && (
                             <p>Scheduled: {format(new Date(notification.scheduled_at), "PPP 'at' p")}</p>
+                          )}
+                          {notification.notification_type === "outreach_created" && (notification.metadata as any)?.systemEmail && (
+                            <p className="font-mono text-xs">System: {(notification.metadata as any).systemEmail}</p>
                           )}
                         </div>
 

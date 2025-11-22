@@ -38,3 +38,38 @@ export const parseSystemEmail = (email: string): { userId: string; triggerId: st
 export const isSystemEmail = (email: string): boolean => {
   return /^notifications-[a-f0-9]{12}@ecosystembuilder\.app$/.test(email);
 };
+
+/**
+ * Generate a unique system email for an outreach task
+ * Format: notifications-{shortUserId}{shortOutreachId}@ecosystembuilder.app
+ */
+export const generateOutreachSystemEmail = (userId: string, outreachId: string): string => {
+  const shortUserId = userId.replace(/-/g, '').substring(0, 6);
+  const shortOutreachId = outreachId.replace(/-/g, '').substring(0, 6);
+  
+  return `notifications-${shortUserId}${shortOutreachId}@ecosystembuilder.app`;
+};
+
+/**
+ * Parse an outreach system email to extract user and outreach information
+ * Returns null if the email doesn't match the expected format
+ */
+export const parseOutreachSystemEmail = (email: string): { userId: string; outreachId: string } | null => {
+  const match = email.match(/^notifications-([a-f0-9]{6})([a-f0-9]{6})@ecosystembuilder\.app$/);
+  
+  if (!match) {
+    return null;
+  }
+  
+  return {
+    userId: match[1],
+    outreachId: match[2],
+  };
+};
+
+/**
+ * Validate that an email is a valid outreach system email
+ */
+export const isOutreachSystemEmail = (email: string): boolean => {
+  return /^notifications-[a-f0-9]{12}@ecosystembuilder\.app$/.test(email);
+};
