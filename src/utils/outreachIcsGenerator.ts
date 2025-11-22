@@ -10,7 +10,7 @@ const formatICSDate = (date: Date): string => {
   return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
 };
 
-export const generateOutreachICS = (outreach: Outreach, userEmail?: string): string => {
+export const generateOutreachICS = (outreach: Outreach, systemEmail: string, userEmail?: string): string => {
   const now = new Date();
   const startDate = new Date(outreach.due_date);
   const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
@@ -50,7 +50,7 @@ LOCATION:REL8 Platform
 STATUS:CONFIRMED
 SEQUENCE:0
 PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}
-ORGANIZER;CN=REL8 Notifications:mailto:notifications@rel8.app
+ORGANIZER;CN=REL8 Notifications:mailto:${systemEmail}
 ${userEmail ? `ATTENDEE;CN=${escapeICSText(userEmail)};RSVP=TRUE:mailto:${userEmail}` : ''}
 BEGIN:VALARM
 TRIGGER:-PT15M
