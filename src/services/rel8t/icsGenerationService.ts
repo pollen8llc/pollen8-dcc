@@ -184,7 +184,7 @@ export const triggerToICSEventData = (
   userEmail: string,
   userName?: string
 ): ICSEventData => {
-  const startDate = new Date(trigger.next_execution || trigger.created_at);
+  const startDate = new Date(trigger.next_execution_at || trigger.execution_time || trigger.created_at);
   
   // End date is 30 minutes after start for calendar blocking
   const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);

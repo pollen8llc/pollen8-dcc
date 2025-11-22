@@ -29,11 +29,13 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   };
 
   const handleAddToCalendar = async () => {
-    // Get user email for ICS organizer field
+    // Get user email for ICS attendee field
     const { data: { user } } = await supabase.auth.getUser();
     const userEmail = user?.email;
 
-    const ics = generateOutreachICS(outreach, userEmail);
+    // Use system email from outreach as organizer, fallback to user email
+    const systemEmail = outreach.system_email || userEmail || 'notifications@ecosystembuilder.app';
+    const ics = generateOutreachICS(outreach, systemEmail, userEmail);
     setIcsContent(ics);
     setShowCalendarDialog(true);
   };
@@ -103,15 +105,26 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
           
           <div className="flex gap-2">
             {outreach.status === "pending" && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-1"
-                onClick={handleMarkComplete}
-              >
-                <Check className="h-4 w-4" />
-                Mark Complete
-              </Button>
+              <>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1"
+                  onClick={handleAddToCalendar}
+                >
+                  <Calendar className="h-4 w-4" />
+                  Add to Calendar
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1"
+                  onClick={handleMarkComplete}
+                >
+                  <Check className="h-4 w-4" />
+                  Mark Complete
+                </Button>
+              </>
             )}
           </div>
         </div>
