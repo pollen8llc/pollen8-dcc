@@ -54,9 +54,18 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     )}>
       <CardHeader className="px-4 py-3 border-b border-border/20 bg-card">
         <div className="flex justify-between items-center">
-          <Badge variant="outline" className={cn(priorityColor[outreach.priority])}>
-            {outreach.priority} priority
-          </Badge>
+          <div className="flex gap-2">
+            <Badge variant="outline" className={cn(priorityColor[outreach.priority])}>
+              {outreach.priority} priority
+            </Badge>
+            
+            {outreach.calendar_sync_enabled && (
+              <Badge variant="outline" className="bg-green-900/30 text-green-400 border-green-400/30">
+                <Calendar className="h-3 w-3 mr-1" />
+                Synced
+              </Badge>
+            )}
+          </div>
           
           {isOverdue && (
             <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-500/30">

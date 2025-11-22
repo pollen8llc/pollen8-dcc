@@ -2400,39 +2400,54 @@ export type Database = {
       }
       rms_outreach: {
         Row: {
+          calendar_sync_enabled: boolean | null
           created_at: string
           description: string | null
           due_date: string | null
+          ics_uid: string | null
           id: string
+          last_calendar_update: string | null
           message: string
           priority: string | null
+          raw_ics: string | null
           scheduled_at: string | null
+          sequence: number | null
           status: string
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          calendar_sync_enabled?: boolean | null
           created_at?: string
           description?: string | null
           due_date?: string | null
+          ics_uid?: string | null
           id?: string
+          last_calendar_update?: string | null
           message: string
           priority?: string | null
+          raw_ics?: string | null
           scheduled_at?: string | null
+          sequence?: number | null
           status?: string
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          calendar_sync_enabled?: boolean | null
           created_at?: string
           description?: string | null
           due_date?: string | null
+          ics_uid?: string | null
           id?: string
+          last_calendar_update?: string | null
           message?: string
           priority?: string | null
+          raw_ics?: string | null
           scheduled_at?: string | null
+          sequence?: number | null
           status?: string
           title?: string
           updated_at?: string
@@ -2481,6 +2496,53 @@ export type Database = {
           },
           {
             foreignKeyName: "fk_outreach_contacts_outreach_id"
+            columns: ["outreach_id"]
+            isOneToOne: false
+            referencedRelation: "rms_outreach"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rms_outreach_sync_log: {
+        Row: {
+          changes: Json | null
+          created_at: string | null
+          email_from: string | null
+          email_subject: string | null
+          id: string
+          outreach_id: string
+          raw_ics: string | null
+          sequence: number | null
+          sync_type: string
+          user_id: string
+        }
+        Insert: {
+          changes?: Json | null
+          created_at?: string | null
+          email_from?: string | null
+          email_subject?: string | null
+          id?: string
+          outreach_id: string
+          raw_ics?: string | null
+          sequence?: number | null
+          sync_type: string
+          user_id: string
+        }
+        Update: {
+          changes?: Json | null
+          created_at?: string | null
+          email_from?: string | null
+          email_subject?: string | null
+          id?: string
+          outreach_id?: string
+          raw_ics?: string | null
+          sequence?: number | null
+          sync_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rms_outreach_sync_log_outreach_id_fkey"
             columns: ["outreach_id"]
             isOneToOne: false
             referencedRelation: "rms_outreach"

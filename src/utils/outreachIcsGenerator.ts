@@ -15,7 +15,7 @@ export const generateOutreachICS = (outreach: Outreach, userEmail?: string): str
   const startDate = new Date(outreach.due_date);
   const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
   
-  const uid = `outreach-${outreach.id}@ecosystembuilder.app`;
+  const uid = `outreach-${outreach.id}@rel8.app`;
   const timestamp = formatICSDate(now);
   const startDateFormatted = formatICSDate(startDate);
   const endDateFormatted = formatICSDate(endDate);
@@ -34,10 +34,10 @@ export const generateOutreachICS = (outreach: Outreach, userEmail?: string): str
 
   return `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Ecosystem Builder//Outreach Reminder//EN
+PRODID:-//REL8//Outreach Task//EN
 CALSCALE:GREGORIAN
-METHOD:PUBLISH
-X-WR-CALNAME:Ecosystem Builder - Outreach
+METHOD:REQUEST
+X-WR-CALNAME:REL8 - Outreach Tasks
 X-WR-TIMEZONE:UTC
 BEGIN:VEVENT
 UID:${uid}
@@ -46,11 +46,12 @@ DTSTART:${startDateFormatted}
 DTEND:${endDateFormatted}
 SUMMARY:${escapeICSText(outreach.title)}
 DESCRIPTION:${escapeICSText(description)}
-LOCATION:Ecosystem Builder - REL8
+LOCATION:REL8 Platform
 STATUS:CONFIRMED
 SEQUENCE:0
 PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}
-${userEmail ? `ORGANIZER;CN=Ecosystem Builder:mailto:${userEmail}` : ''}
+ORGANIZER;CN=REL8 Notifications:mailto:notifications@rel8.app
+${userEmail ? `ATTENDEE;CN=${escapeICSText(userEmail)};RSVP=TRUE:mailto:${userEmail}` : ''}
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY

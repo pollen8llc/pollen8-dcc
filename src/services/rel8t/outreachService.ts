@@ -31,6 +31,11 @@ export interface Outreach {
   created_at?: string;
   updated_at?: string;
   contacts?: Contact[];
+  ics_uid?: string;
+  sequence?: number;
+  calendar_sync_enabled?: boolean;
+  last_calendar_update?: string;
+  raw_ics?: string;
 }
 
 export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> => {
@@ -263,6 +268,21 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     if (error) throw error;
     
     const outreachId = data.id;
+    
+    // Generate ICS UID and enable calendar sync
+    const icsUid = `outreach-${outreachId}@rel8.app`;
+    const { error: updateError } = await supabase
+      .from("rms_outreach")
+      .update({
+        ics_uid: icsUid,
+        calendar_sync_enabled: true,
+        sequence: 0
+      })
+      .eq("id", outreachId);
+    
+    if (updateError) {
+      console.error("Error setting ICS UID:", updateError);
+    }
     
     // Associate contacts if provided
     if (contactIds.length > 0) {
