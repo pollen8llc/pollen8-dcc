@@ -34,6 +34,7 @@ export interface Outreach {
   ics_uid?: string;
   sequence?: number;
   calendar_sync_enabled?: boolean;
+  system_email?: string;
   last_calendar_update?: string;
   raw_ics?: string;
 }

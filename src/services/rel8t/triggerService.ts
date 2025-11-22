@@ -256,6 +256,7 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
     return {
       trigger: {
         ...updatedTrigger,
+        execution_time: updatedTrigger.next_execution_at,
         condition: JSON.stringify(updatedTrigger.condition || {}),
         recurrence_pattern: updatedTrigger.recurrence_pattern as RecurrencePattern
       } as Trigger,
