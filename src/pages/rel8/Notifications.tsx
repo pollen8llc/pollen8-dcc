@@ -6,20 +6,65 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Download, RefreshCw, ExternalLink, Mail, AlertCircle, CheckCircle2, Clock, Calendar, GitBranch } from "lucide-react";
+import { Download, RefreshCw, ExternalLink, Mail, AlertCircle, CheckCircle2, Clock, Calendar, GitBranch, Bell } from "lucide-react";
 import { downloadICS } from "@/utils/icsDownload";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { CrossPlatformNotificationCard } from "@/components/rel8t/CrossPlatformNotificationCard";
 
 type NotificationStatus = "all" | "sent" | "pending" | "failed";
-type NotificationTab = "emails" | "calendar";
+type NotificationTab = "platform" | "emails" | "calendar";
 
 export default function Notifications() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<NotificationStatus>("all");
-  const [activeTab, setActiveTab] = useState<NotificationTab>("emails");
+  const [activeTab, setActiveTab] = useState<NotificationTab>("platform");
+
+  // Fetch cross-platform notifications
+  const { data: platformNotifications, isLoading: platformNotificationsLoading } = useQuery({
+    queryKey: ["cross-platform-notifications"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("cross_platform_notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Delete notification mutation
+  const deleteNotificationMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await supabase
+        .from("cross_platform_notifications")
+        .delete()
+        .eq("id", notificationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Notification deleted",
+        description: "The notification has been removed."
+      });
+      queryClient.invalidateQueries({ queryKey: ["cross-platform-notifications"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete notification",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
 
   // Fetch email notifications
   const { data: notifications, isLoading } = useQuery({
@@ -191,16 +236,51 @@ export default function Notifications() {
         </div>
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as NotificationTab)} className="mb-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-[300px]">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[450px]">
+            <TabsTrigger value="platform">
+              <Bell className="h-4 w-4 mr-2" />
+              Platform
+            </TabsTrigger>
             <TabsTrigger value="emails">
               <Mail className="h-4 w-4 mr-2" />
               Emails
             </TabsTrigger>
             <TabsTrigger value="calendar">
               <Calendar className="h-4 w-4 mr-2" />
-              Calendar Updates
+              Calendar
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="platform" className="mt-6">
+            {platformNotificationsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : platformNotifications && platformNotifications.length > 0 ? (
+              <div className="space-y-4">
+                {platformNotifications.map((notification) => (
+                  <CrossPlatformNotificationCard
+                    key={notification.id}
+                    notification={notification}
+                    onDelete={(id) => deleteNotificationMutation.mutate(id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-card/80 backdrop-blur-sm border-border/50">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Bell className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No notifications yet</h3>
+                  <p className="text-muted-foreground text-center mb-4">
+                    Platform notifications will appear here when you receive updates
+                  </p>
+                  <Button onClick={() => navigate("/rel8/connect")}>
+                    Go to REL8 Connect
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
           <TabsContent value="emails" className="mt-6">
             <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as NotificationStatus)} className="mb-6">
