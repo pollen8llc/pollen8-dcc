@@ -3,7 +3,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Settings, MapPin } from "lucide-react";
+import { Settings, MapPin, Bell } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
@@ -34,6 +34,10 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
 
   const handleSettingsClick = () => {
     navigate("/settings");
+  };
+
+  const handleUpdatesClick = () => {
+    navigate("/rel8/notifications");
   };
 
   const handleAvatarClick = () => {
@@ -79,17 +83,28 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                   </div>
                 </div>
                 
-                {/* Settings Button */}
-                <div className="flex-shrink-0 w-full sm:w-auto">
-                  <Button 
-                    onClick={handleSettingsClick} 
-                    size="default" 
-                    className="w-full sm:w-auto px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
-                  >
-                    <Settings className="w-5 h-5 mr-3" />
-                    Settings
-                  </Button>
-                </div>
+                 {/* Action Buttons */}
+                 <div className="flex-shrink-0 w-full sm:w-auto">
+                   <div className="flex flex-col sm:flex-row gap-2">
+                     <Button 
+                       onClick={handleUpdatesClick} 
+                       variant="outline"
+                       size="default" 
+                       className="w-full sm:w-auto px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+                     >
+                       <Bell className="w-5 h-5 mr-3" />
+                       Updates
+                     </Button>
+                     <Button 
+                       onClick={handleSettingsClick} 
+                       size="default" 
+                       className="w-full sm:w-auto px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
+                     >
+                       <Settings className="w-5 h-5 mr-3" />
+                       Settings
+                     </Button>
+                   </div>
+                 </div>
               </div>
             </div>
           </CardContent>
