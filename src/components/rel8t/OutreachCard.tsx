@@ -3,14 +3,24 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, AlertCircle, Download } from "lucide-react";
+import { Check, Calendar, AlertCircle, Download, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Outreach, updateOutreachStatus } from "@/services/rel8t/outreachService";
+import { Outreach, updateOutreachStatus, deleteOutreach } from "@/services/rel8t/outreachService";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarOptionsDialog } from "./CalendarOptionsDialog";
 import { generateOutreachICS } from "@/utils/outreachIcsGenerator";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface OutreachCardProps {
   outreach: Outreach;
@@ -20,12 +30,22 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   const queryClient = useQueryClient();
   const [showCalendarDialog, setShowCalendarDialog] = useState(false);
   const [icsContent, setIcsContent] = useState<string>("");
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const handleMarkComplete = async () => {
     const success = await updateOutreachStatus(outreach.id, "completed");
     if (success) {
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
     }
+  };
+
+  const handleDelete = async () => {
+    const success = await deleteOutreach(outreach.id);
+    if (success) {
+      queryClient.invalidateQueries({ queryKey: ["outreach"] });
+      queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
+    }
+    setShowDeleteDialog(false);
   };
 
   const handleAddToCalendar = async () => {
@@ -69,12 +89,23 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
             )}
           </div>
           
-          {isOverdue && (
-            <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-500/30">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              Overdue
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {isOverdue && (
+              <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-500/30">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                Overdue
+              </Badge>
+            )}
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowDeleteDialog(true)}
+              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       
@@ -138,6 +169,26 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
         icsContent={icsContent}
         startDate={outreach.due_date}
       />
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Outreach Task?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this outreach task.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
