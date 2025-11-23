@@ -51,8 +51,8 @@ STATUS:CONFIRMED
 SEQUENCE:0
 PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}
 ORGANIZER;CN=REL8 Notifications:mailto:${systemEmail}
-ATTENDEE;CN=REL8 System;RSVP=TRUE;ROLE=REQ-PARTICIPANT:mailto:${systemEmail}
-${userEmail ? `ATTENDEE;CN=${escapeICSText(userEmail)};RSVP=TRUE;ROLE=REQ-PARTICIPANT:mailto:${userEmail}` : ''}
+ATTENDEE;CN=REL8 Notification System;ROLE=NON-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${systemEmail}
+${userEmail ? `ATTENDEE;CN=User;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${userEmail}` : ''}
 BEGIN:VALARM
 TRIGGER:-PT15M
 ACTION:DISPLAY

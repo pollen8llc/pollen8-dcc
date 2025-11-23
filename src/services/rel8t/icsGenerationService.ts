@@ -17,6 +17,7 @@ export interface ICSEventData {
   attendees: Array<{
     email: string;
     name?: string;
+    role?: 'REQ-PARTICIPANT' | 'NON-PARTICIPANT';
   }>;
   recurrenceRule?: string;
   sequence?: number;
@@ -80,7 +81,8 @@ export const generateICSFile = (event: ICSEventData): string => {
   // Add attendees
   event.attendees.forEach(attendee => {
     const attendeeName = attendee.name ? `;CN=${attendee.name}` : '';
-    lines.push(`ATTENDEE;RSVP=TRUE;ROLE=REQ-PARTICIPANT${attendeeName}:mailto:${attendee.email}`);
+    const role = attendee.role || 'REQ-PARTICIPANT';
+    lines.push(`ATTENDEE;ROLE=${role};PARTSTAT=NEEDS-ACTION;RSVP=TRUE${attendeeName}:mailto:${attendee.email}`);
   });
 
   // Add recurrence rule if provided
@@ -203,11 +205,13 @@ export const triggerToICSEventData = (
     attendees: [
       {
         email: trigger.system_email || 'notifications@ecosystembuilder.app',
-        name: 'REL8 System',
+        name: 'REL8 Notification System',
+        role: 'NON-PARTICIPANT',
       },
       {
         email: userEmail,
-        name: userName,
+        name: userName || 'User',
+        role: 'REQ-PARTICIPANT',
       },
     ],
     recurrenceRule: generateRRULE(trigger.time_trigger_type, trigger.recurrence_pattern),
