@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Mail, User, Building2, Calendar } from "lucide-react";
+import { Trash2, Bell, User, Building2, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import {
   AlertDialog,
@@ -64,7 +64,7 @@ export const CrossPlatformNotificationCard = ({
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4 flex-1">
               <div className="mt-1">
-                <Mail className={`h-4 w-4 ${notification.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+                <Bell className={`h-4 w-4 ${notification.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
