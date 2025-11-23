@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Rel8Header } from "@/components/rel8t/Rel8Header";
+import Navbar from "@/components/Navbar";
+import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -323,7 +324,7 @@ export default function Notifications() {
       return (
         <Card key={item.id} className="glass-morphism border-0 backdrop-blur-md hover:bg-card/60 transition-all">
           <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex flex-col gap-4">
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <div className="mt-1 shrink-0">
                   {getStatusIcon(item.status)}
@@ -361,16 +362,16 @@ export default function Notifications() {
                 </div>
               </div>
 
-              <div className="flex flex-row sm:flex-col gap-2 self-end sm:self-start">
+              <div className="flex flex-wrap gap-2">
                 {item.has_ics_attachment && item.ics_data && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleDownloadICS(item)}
-                    className="text-xs"
+                    className="flex-1 sm:flex-none min-w-[120px]"
                   >
-                    <Download className="h-3 w-3 sm:mr-2" />
-                    <span className="hidden sm:inline">ICS</span>
+                    <Download className="h-3 w-3 mr-2" />
+                    Download
                   </Button>
                 )}
                 
@@ -380,10 +381,10 @@ export default function Notifications() {
                     size="sm"
                     onClick={() => retryEmailMutation.mutate(item.id)}
                     disabled={retryEmailMutation.isPending}
-                    className="text-xs"
+                    className="flex-1 sm:flex-none min-w-[120px]"
                   >
-                    <RefreshCw className={`h-3 w-3 sm:mr-2 ${retryEmailMutation.isPending ? 'animate-spin' : ''}`} />
-                    <span className="hidden sm:inline">Retry</span>
+                    <RefreshCw className={`h-3 w-3 mr-2 ${retryEmailMutation.isPending ? 'animate-spin' : ''}`} />
+                    Retry
                   </Button>
                 )}
 
@@ -391,10 +392,10 @@ export default function Notifications() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setDeleteTarget({ id: item.id, type: "email" })}
-                  className="text-xs hover:bg-destructive/10 hover:text-destructive"
+                  className="flex-1 sm:flex-none min-w-[120px] hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <Trash2 className="h-3 w-3 sm:mr-2" />
-                  <span className="hidden sm:inline">Delete</span>
+                  <Trash2 className="h-3 w-3 mr-2" />
+                  Delete
                 </Button>
               </div>
             </div>
@@ -414,7 +415,7 @@ export default function Notifications() {
       return (
         <Card key={item.id} className="glass-morphism border-0 backdrop-blur-md hover:bg-card/60 transition-all">
           <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex flex-col gap-4">
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <div className="mt-1 shrink-0">
                   {getSyncTypeIcon(item.sync_type)}
@@ -451,16 +452,16 @@ export default function Notifications() {
                 </div>
               </div>
 
-              <div className="flex flex-row sm:flex-col gap-2 self-end sm:self-start">
+              <div className="flex flex-wrap gap-2">
                 {item.outreach?.id && (
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => navigate("/rel8/outreach")}
-                    className="text-xs"
+                    className="flex-1 sm:flex-none min-w-[120px]"
                   >
-                    <ExternalLink className="h-3 w-3 sm:mr-2" />
-                    <span className="hidden sm:inline">View</span>
+                    <ExternalLink className="h-3 w-3 mr-2" />
+                    View
                   </Button>
                 )}
 
@@ -468,10 +469,10 @@ export default function Notifications() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setDeleteTarget({ id: item.id, type: "sync" })}
-                  className="text-xs hover:bg-destructive/10 hover:text-destructive"
+                  className="flex-1 sm:flex-none min-w-[120px] hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <Trash2 className="h-3 w-3 sm:mr-2" />
-                  <span className="hidden sm:inline">Delete</span>
+                  <Trash2 className="h-3 w-3 mr-2" />
+                  Delete
                 </Button>
               </div>
             </div>
@@ -491,12 +492,14 @@ export default function Notifications() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-primary/5">
-      <Rel8Header showProfileBanner={false} />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+      <Navbar />
       
-      <div className="container mx-auto max-w-4xl px-4 py-6 space-y-6">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        <Rel8OnlyNavigation />
+        
         {/* Header */}
-        <div>
+        <div className="mt-8 mb-6">
           <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Notifications
           </h1>
@@ -504,7 +507,7 @@ export default function Notifications() {
         </div>
 
         {/* Filters - Stack on mobile */}
-        <Card className="glass-morphism border-0 backdrop-blur-md">
+        <Card className="glass-morphism border-0 backdrop-blur-md mb-6">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={activeView} onValueChange={(v) => setActiveView(v as NotificationView)}>
