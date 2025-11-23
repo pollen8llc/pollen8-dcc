@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -35,7 +35,7 @@ export default function Notifications() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; type: "email" | "sync" } | null>(null);
 
   // Fetch cross-platform notifications
-  const { data: platformNotifications, isLoading: platformNotificationsLoading } = useQuery({
+  const { data: platformNotifications, isLoading: platformNotificationsLoading, refetch: refetchPlatform } = useQuery({
     queryKey: ["cross-platform-notifications"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -49,8 +49,30 @@ export default function Notifications() {
 
       if (error) throw error;
       return data;
-    }
+    },
+    refetchOnMount: true,
+    staleTime: 0
   });
+
+  // Real-time subscription for platform notifications
+  useEffect(() => {
+    const channel = supabase
+      .channel('platform-notifications-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'cross_platform_notifications'
+        },
+        () => refetchPlatform()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchPlatform]);
 
   // Delete notification mutation
   const deleteNotificationMutation = useMutation({
@@ -131,7 +153,7 @@ export default function Notifications() {
   });
 
   // Fetch email notifications
-  const { data: notifications, isLoading } = useQuery({
+  const { data: notifications, isLoading, refetch: refetchEmails } = useQuery({
     queryKey: ["email-notifications"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -145,11 +167,33 @@ export default function Notifications() {
 
       if (error) throw error;
       return data;
-    }
+    },
+    refetchOnMount: true,
+    staleTime: 0
   });
 
+  // Real-time subscription for email notifications
+  useEffect(() => {
+    const channel = supabase
+      .channel('email-notifications-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_email_notifications'
+        },
+        () => refetchEmails()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchEmails]);
+
   // Fetch calendar sync logs
-  const { data: syncLogs, isLoading: syncLogsLoading } = useQuery({
+  const { data: syncLogs, isLoading: syncLogsLoading, refetch: refetchSyncLogs } = useQuery({
     queryKey: ["calendar-sync-logs"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -166,8 +210,30 @@ export default function Notifications() {
 
       if (error) throw error;
       return data;
-    }
+    },
+    refetchOnMount: true,
+    staleTime: 0
   });
+
+  // Real-time subscription for sync logs
+  useEffect(() => {
+    const channel = supabase
+      .channel('sync-logs-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_outreach_sync_log'
+        },
+        () => refetchSyncLogs()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchSyncLogs]);
 
   // Retry email mutation
   const retryEmailMutation = useMutation({
