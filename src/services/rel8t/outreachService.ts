@@ -110,8 +110,9 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
       .from("rms_outreach")
       .select(`
         *,
-        contacts:rms_outreach_contacts(
-          contact:contact_id(
+        rms_outreach_contacts(
+          contact_id,
+          rms_contacts(
             id,
             name,
             email,
@@ -149,8 +150,12 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
     
     // Process data to format contacts  
     const formattedData = (data as any)?.map((item: any) => {
-      // Extract contacts from nested structure - handle query errors gracefully
-      const contacts = Array.isArray(item.contacts) ? item.contacts.map((contactItem: any) => contactItem.contact || contactItem) : [];
+      // Extract contacts from the junction table and nested rms_contacts
+      const contacts = Array.isArray(item.rms_outreach_contacts) 
+        ? item.rms_outreach_contacts
+            .map((oc: any) => oc.rms_contacts) // Extract the nested contact object
+            .filter((c: any) => c) // Remove any null entries
+        : [];
       
       // Ensure priority is correctly typed
       const priority = (item.priority || 'medium') as OutreachPriority;
@@ -165,6 +170,12 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
         due_date: item.due_date || item.created_at,
         created_at: item.created_at,
         updated_at: item.updated_at,
+        system_email: item.system_email,
+        calendar_sync_enabled: item.calendar_sync_enabled || false,
+        ics_uid: item.ics_uid,
+        sequence: item.sequence,
+        last_calendar_update: item.last_calendar_update,
+        raw_ics: item.raw_ics,
         contacts
       } as Outreach;
     });
@@ -407,6 +418,36 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
         // If contact association fails, delete the outreach
         await supabase.from("rms_outreach").delete().eq("id", outreachId);
         throw contactsError;
+      }
+      
+      // Fetch contact details to include in notification
+      const { data: contactDetails } = await supabase
+        .from("rms_contacts")
+        .select("id, name, email")
+        .in("id", contactIds);
+      
+      // Create cross-platform notification with contact metadata
+      const contactNames = contactDetails?.map(c => c.name).join(", ") || "contacts";
+      const { error: notifError } = await supabase
+        .from("cross_platform_notifications")
+        .insert({
+          user_id: user.id,
+          title: "New Outreach Task Created",
+          message: `${outreach.title} - Due ${new Date(outreach.due_date).toLocaleDateString()}`,
+          notification_type: "outreach_created",
+          is_read: false,
+          metadata: {
+            outreachId: outreachId,
+            contactIds: contactIds,
+            contactName: contactNames,
+            contactNames: contactNames,
+            priority: outreach.priority,
+            dueDate: outreach.due_date
+          }
+        });
+      
+      if (notifError) {
+        console.error("Error creating cross-platform notification:", notifError);
       }
     }
     
