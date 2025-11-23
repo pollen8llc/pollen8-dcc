@@ -15,11 +15,7 @@ const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
   
 
   const handleAvatarClick = () => {
-    if (currentUser.role === UserRole.ORGANIZER || currentUser.role === UserRole.ADMIN) {
-      navigate("/organizer");
-    } else {
-      navigate("/profile");
-    }
+    navigate("/rel8/notifications");
   };
 
   return (
