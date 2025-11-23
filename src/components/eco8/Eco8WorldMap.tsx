@@ -169,7 +169,7 @@ const Eco8WorldMap = ({ communities = [], className = "" }: Eco8WorldMapProps) =
           </Geographies>
 
           {/* Community Markers - White nodes */}
-          {viewState.level === "world" && communitiesWithCoords.map((community) => (
+          {(viewState.level === "world" || viewState.level === "usa") && communitiesWithCoords.map((community) => (
             <Marker 
               key={community.id} 
               coordinates={[community.longitude, community.latitude]}
