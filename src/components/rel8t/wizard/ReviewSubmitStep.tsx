@@ -75,6 +75,9 @@ export const ReviewSubmitStep = ({
   const { contacts, triggers, priority } = wizardData;
 
   const handleSubmit = async () => {
+    // Prevent double submission
+    if (isSubmitting) return;
+    
     if (contacts.length === 0) {
       toast({
         variant: "destructive",
