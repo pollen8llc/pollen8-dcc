@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Loc8Dialog } from "@/components/ui/loc8-dialog";
+import { Loc8DialogTrigger } from "@/components/ui/loc8-dialog-trigger";
 import { getCategories } from "@/services/rel8t/contactService";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,7 +23,8 @@ export function BulkCategorizeDialog({
 }: BulkCategorizeDialogProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedIndustry, setSelectedIndustry] = useState<string>("");
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
   const [industries, setIndustries] = useState<string[]>([]);
 
   // Fetch categories
@@ -63,8 +64,8 @@ export function BulkCategorizeDialog({
       updates.industry = selectedIndustry;
     }
 
-    if (selectedLocation && selectedLocation.trim() !== "") {
-      updates.location = selectedLocation.trim();
+    if (selectedLocation.length > 0) {
+      updates.location = selectedLocation[0];
     }
 
     // Only submit if at least one field is selected
@@ -73,14 +74,14 @@ export function BulkCategorizeDialog({
       // Reset selections
       setSelectedCategory("");
       setSelectedIndustry("");
-      setSelectedLocation("");
+      setSelectedLocation([]);
     }
   };
 
   const handleCancel = () => {
     setSelectedCategory("");
     setSelectedIndustry("");
-    setSelectedLocation("");
+    setSelectedLocation([]);
     onOpenChange(false);
   };
 
@@ -96,51 +97,41 @@ export function BulkCategorizeDialog({
 
         <div className="space-y-4 py-4">
           {/* Category Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Select category (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No change</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select category (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No change</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Industry Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="industry">Industry</Label>
-            <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-              <SelectTrigger id="industry">
-                <SelectValue placeholder="Select industry (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No change</SelectItem>
-                {industries.map((industry) => (
-                  <SelectItem key={industry} value={industry}>
-                    {industry}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select industry (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">No change</SelectItem>
+              {industries.map((industry) => (
+                <SelectItem key={industry} value={industry}>
+                  {industry}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          {/* Location Input */}
-          <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              placeholder="Enter location (optional)"
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-            />
-          </div>
+          {/* Location Selection */}
+          <Loc8DialogTrigger
+            value={selectedLocation}
+            placeholder="Select location (optional)"
+            onClick={() => setIsLocationDialogOpen(true)}
+          />
 
           {/* Info Message */}
           <p className="text-sm text-muted-foreground">
@@ -148,14 +139,24 @@ export function BulkCategorizeDialog({
           </p>
         </div>
 
+        <Loc8Dialog
+          open={isLocationDialogOpen}
+          onOpenChange={setIsLocationDialogOpen}
+          value={selectedLocation}
+          onValueChange={setSelectedLocation}
+          mode="single"
+          title="Select Location"
+          description="Choose a city for the selected contacts"
+        />
+
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={!selectedCategory && !selectedIndustry && !selectedLocation || 
-                     (selectedCategory === "none" && selectedIndustry === "none" && !selectedLocation)}
+            disabled={!selectedCategory && !selectedIndustry && selectedLocation.length === 0 || 
+                     (selectedCategory === "none" && selectedIndustry === "none" && selectedLocation.length === 0)}
           >
             Update Contacts
           </Button>
