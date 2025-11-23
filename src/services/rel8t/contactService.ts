@@ -129,7 +129,7 @@ export const deleteMultipleContacts = async (ids: string[]): Promise<void> => {
 
 export const updateMultipleContacts = async (
   ids: string[], 
-  updates: { category_id?: string; industry?: string }
+  updates: { category_id?: string; industry?: string; location?: string }
 ): Promise<void> => {
   const { error } = await supabase
     .from("rms_contacts")
