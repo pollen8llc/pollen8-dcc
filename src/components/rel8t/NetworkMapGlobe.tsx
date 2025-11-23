@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Globe from 'react-globe.gl';
 import { getContacts } from '@/services/rel8t/contactService';
+import { supabase } from '@/integrations/supabase/client';
 import { MapPin, Users, Globe as GlobeIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -128,37 +129,100 @@ const NetworkMapGlobe = () => {
     queryFn: () => getContacts(),
   });
 
+  // Fetch locations from database
+  const { data: dbLocations = [] } = useQuery({
+    queryKey: ['locations-for-map'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('locations')
+        .select('name, latitude, longitude, type, state_code, country_code')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   // Parse and aggregate contact locations
   const locationData = useMemo(() => {
-    const locationMap = new Map<string, number>();
+    const locationMap = new Map<string, { lat: number; lng: number; name: string }>();
 
     contacts.forEach((contact) => {
       if (contact.location) {
         const location = contact.location.trim();
-        // Try to match location string to known cities
-        const cityKey = Object.keys(cityCoordinates).find(
-          (city) => location.toLowerCase().includes(city.toLowerCase())
+        const locationLower = location.toLowerCase();
+        
+        // First try to match against database locations (prioritize exact matches)
+        let dbMatch = dbLocations.find(
+          (loc) => loc.name.toLowerCase() === locationLower
         );
         
-        if (cityKey) {
-          locationMap.set(cityKey, (locationMap.get(cityKey) || 0) + 1);
+        // If no exact match, try partial match (e.g., "Austin, Texas" matches "Texas")
+        if (!dbMatch) {
+          dbMatch = dbLocations.find(
+            (loc) => locationLower.includes(loc.name.toLowerCase()) ||
+                     (loc.state_code && locationLower.includes(loc.state_code.toLowerCase()))
+          );
+        }
+        
+        if (dbMatch && dbMatch.latitude && dbMatch.longitude) {
+          const key = dbMatch.name;
+          if (!locationMap.has(key)) {
+            locationMap.set(key, {
+              lat: dbMatch.latitude,
+              lng: dbMatch.longitude,
+              name: dbMatch.name,
+            });
+          }
+        } else {
+          // Fall back to hardcoded cityCoordinates
+          const cityKey = Object.keys(cityCoordinates).find(
+            (city) => locationLower.includes(city.toLowerCase())
+          );
+          
+          if (cityKey && !locationMap.has(cityKey)) {
+            locationMap.set(cityKey, {
+              lat: cityCoordinates[cityKey].lat,
+              lng: cityCoordinates[cityKey].lng,
+              name: cityKey,
+            });
+          }
+        }
+      }
+    });
+
+    // Count contacts per location
+    const locationCounts = new Map<string, number>();
+    contacts.forEach((contact) => {
+      if (contact.location) {
+        const location = contact.location.trim();
+        const locationLower = location.toLowerCase();
+        
+        for (const [key, coords] of locationMap.entries()) {
+          if (locationLower.includes(key.toLowerCase()) ||
+              (key === coords.name && locationLower === key.toLowerCase())) {
+            locationCounts.set(key, (locationCounts.get(key) || 0) + 1);
+            break;
+          }
         }
       }
     });
 
     // Convert to array of points
-    const points: LocationPoint[] = Array.from(locationMap.entries()).map(
-      ([city, count]) => ({
-        lat: cityCoordinates[city].lat,
-        lng: cityCoordinates[city].lng,
-        city,
-        count,
+    const points: LocationPoint[] = Array.from(locationMap.entries())
+      .map(([key, coords]) => ({
+        lat: coords.lat,
+        lng: coords.lng,
+        city: coords.name,
+        count: locationCounts.get(key) || 1,
         color: 'hsl(var(--primary))',
-      })
-    );
+      }))
+      .filter((point) => point.count > 0);
 
     return points;
-  }, [contacts]);
+  }, [contacts, dbLocations]);
 
   // Calculate stats
   const stats = useMemo(() => {
