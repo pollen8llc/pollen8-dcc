@@ -1,10 +1,9 @@
 import React from 'react';
 import { Avatar } from '@/components/ui/avatar';
-import { Avatar as AvatarBase, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Zap, Target, Star, Edit, Trash2, Users, User } from 'lucide-react';
+import { Zap, Target, Star, Edit, Trash2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ContactHeaderProps {
@@ -46,15 +45,7 @@ export function ContactHeader({
           <div className="space-y-4">
             {/* Avatar Row */}
             <div className="flex items-center justify-center">
-              {affiliatedUserId ? (
-                <Avatar userId={affiliatedUserId} size={100} className="ring-2 ring-primary/20" />
-              ) : (
-                <AvatarBase className="h-[100px] w-[100px] ring-2 ring-primary/20">
-                  <AvatarFallback className="bg-primary/10">
-                    <User className="h-12 w-12 text-primary" />
-                  </AvatarFallback>
-                </AvatarBase>
-              )}
+              <Avatar userId={affiliatedUserId || "UXI8000"} size={100} className="ring-2 ring-primary/20" />
             </div>
 
             {/* Name Row */}
@@ -102,15 +93,7 @@ export function ContactHeader({
           <>
             {/* Contact Info Section */}
             <div className="flex items-start gap-6 mb-6">
-              {affiliatedUserId ? (
-                <Avatar userId={affiliatedUserId} size={80} className="ring-2 ring-primary/20" />
-              ) : (
-                <AvatarBase className="h-[80px] w-[80px] ring-2 ring-primary/20">
-                  <AvatarFallback className="bg-primary/10">
-                    <User className="h-10 w-10 text-primary" />
-                  </AvatarFallback>
-                </AvatarBase>
-              )}
+              <Avatar userId={affiliatedUserId || "UXI8000"} size={80} className="ring-2 ring-primary/20" />
               
               <div className="flex-1">
                 <h1 className="text-3xl font-bold">{name}</h1>
