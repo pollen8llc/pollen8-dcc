@@ -95,7 +95,9 @@ export const ReviewSubmitStep = ({
         const dueDate = getDueDateFromTrigger(trigger);
         
         const outreach = {
-          title: trigger.name,
+          title: contacts.length === 1 
+            ? `Follow up with ${contacts[0].name}`
+            : `Follow up with ${contacts.map(c => c.name).join(', ')}`,
           description: trigger.description || `Reminder for ${contacts.map(c => c.name).join(', ')}`,
           priority: priority,
           status: 'pending' as OutreachStatus,

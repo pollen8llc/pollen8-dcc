@@ -71,93 +71,99 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
 
   return (
     <Card className={cn(
-      "mb-4 h-[180px] flex flex-col", 
+      "mb-4 flex flex-col", 
       isOverdue ? "border-red-500/30" : "border-border/20"
     )}>
       <CardHeader className="px-4 py-3 border-b border-border/20 bg-card">
         <div className="flex justify-between items-center">
-          <div className="flex gap-2">
-            <Badge variant="outline" className={cn(priorityColor[outreach.priority])}>
-              {outreach.priority} priority
-            </Badge>
-            
+          <div className="flex gap-2 flex-wrap">
             {outreach.calendar_sync_enabled && (
               <Badge variant="outline" className="bg-green-900/30 text-green-400 border-green-400/30">
                 <Calendar className="h-3 w-3 mr-1" />
                 Synced
               </Badge>
             )}
-          </div>
-          
-          <div className="flex items-center gap-2">
+            
             {isOverdue && (
               <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-500/30">
                 <AlertCircle className="h-3 w-3 mr-1" />
                 Overdue
               </Badge>
             )}
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowDeleteDialog(true)}
-              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
           </div>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowDeleteDialog(true)}
+            className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </CardHeader>
       
       <CardContent className="p-4 flex flex-col flex-grow">
-        <h3 className="text-lg font-medium mb-1">{outreach.title}</h3>
-        {outreach.description && (
-          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{outreach.description}</p>
-        )}
+        <h3 className="text-lg font-semibold mb-4">{outreach.title}</h3>
         
-        <div className="mb-3">
-          <h4 className="text-sm font-medium mb-1">Contacts</h4>
-          <div className="flex flex-wrap gap-1">
-            {outreach.contacts?.map((contact) => (
-              <Badge key={contact.id} variant="outline" className="font-normal border-[#00eada]/30 bg-[#00eada]/10 text-[#00eada]">
-                {contact.name}
-              </Badge>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">Priority</span>
+            <Badge variant="outline" className={cn(priorityColor[outreach.priority], "w-fit")}>
+              {outreach.priority}
+            </Badge>
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">Due Date</span>
+            <div className="flex items-center text-sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              <span>{formatDistanceToNow(new Date(outreach.due_date), { addSuffix: true })}</span>
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">Contacts</span>
+            <div className="flex flex-wrap gap-1">
+              {outreach.contacts?.map((contact) => (
+                <Badge key={contact.id} variant="outline" className="font-normal border-[#00eada]/30 bg-[#00eada]/10 text-[#00eada]">
+                  {contact.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">Type</span>
+            <p className="text-sm line-clamp-2">
+              {outreach.description || "Relationship outreach"}
+            </p>
           </div>
         </div>
         
-        <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4 mr-1" />
-            <span>
-              {formatDistanceToNow(new Date(outreach.due_date), { addSuffix: true })}
-            </span>
-          </div>
-          
-          <div className="flex gap-2">
-            {outreach.status === "pending" && (
-              <>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-1"
-                  onClick={handleAddToCalendar}
-                >
-                  <Calendar className="h-4 w-4" />
-                  Add to Calendar
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-1"
-                  onClick={handleMarkComplete}
-                >
-                  <Check className="h-4 w-4" />
-                  Mark Complete
-                </Button>
-              </>
-            )}
-          </div>
+        <div className="flex items-center justify-end gap-2 mt-auto pt-3 border-t border-border/20">
+          {outreach.status === "pending" && (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1"
+                onClick={handleAddToCalendar}
+              >
+                <Calendar className="h-4 w-4" />
+                Add to Calendar
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1"
+                onClick={handleMarkComplete}
+              >
+                <Check className="h-4 w-4" />
+                Mark Complete
+              </Button>
+            </>
+          )}
         </div>
       </CardContent>
 
