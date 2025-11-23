@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Search, X } from "lucide-react";
 import Globe from "react-globe.gl";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 // City coordinates mapping - Major US cities + international cities
 const cityCoordinates: Record<string, { lat: number; lng: number }> = {
@@ -208,7 +209,47 @@ export const Loc8Dialog = ({
   const [selectedCities, setSelectedCities] = useState<string[]>(value);
   const [isReady, setIsReady] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [locationCoordinates, setLocationCoordinates] = useState<Record<string, { lat: number; lng: number }>>(cityCoordinates);
+  const [isLoadingLocations, setIsLoadingLocations] = useState(false);
   const MAX_LOCATIONS = 2;
+
+  // Fetch locations from database
+  useEffect(() => {
+    const fetchLocations = async () => {
+      setIsLoadingLocations(true);
+      try {
+        const { data, error } = await supabase
+          .from("locations")
+          .select("name, latitude, longitude, type")
+          .eq("is_active", true)
+          .not("latitude", "is", null)
+          .not("longitude", "is", null);
+
+        if (error) throw error;
+
+        if (data) {
+          const coords: Record<string, { lat: number; lng: number }> = {};
+          data.forEach((loc) => {
+            coords[loc.name] = {
+              lat: Number(loc.latitude),
+              lng: Number(loc.longitude)
+            };
+          });
+          // Merge with hardcoded cities to ensure we have both
+          setLocationCoordinates({ ...cityCoordinates, ...coords });
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        toast.error("Failed to load locations from database");
+      } finally {
+        setIsLoadingLocations(false);
+      }
+    };
+
+    if (open) {
+      fetchLocations();
+    }
+  }, [open]);
 
   // Sync with external value
   useEffect(() => {
@@ -218,13 +259,13 @@ export const Loc8Dialog = ({
   // Memoized points data for selected cities
   const pointsData = useMemo(() => {
     return selectedCities.map(city => ({
-      lat: cityCoordinates[city]?.lat || 0,
-      lng: cityCoordinates[city]?.lng || 0,
+      lat: locationCoordinates[city]?.lat || 0,
+      lng: locationCoordinates[city]?.lng || 0,
       size: 0.8,
       color: 'hsl(var(--primary))',
       city: city
     }));
-  }, [selectedCities]);
+  }, [selectedCities, locationCoordinates]);
 
   useEffect(() => {
     if (!globeEl.current || !open) return;
@@ -277,14 +318,14 @@ export const Loc8Dialog = ({
     onOpenChange(false);
   };
 
-  // Filter cities based on search query for mid-canvas display
-  const allCities = Object.keys(cityCoordinates);
+  // Filter locations based on search query for mid-canvas display
+  const allLocations = Object.keys(locationCoordinates);
   const filteredCities = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    return allCities
-      .filter(city => city.toLowerCase().includes(searchQuery.toLowerCase()))
+    return allLocations
+      .filter(location => location.toLowerCase().includes(searchQuery.toLowerCase()))
       .slice(0, 8); // Limit to 8 for clean mid-canvas display
-  }, [searchQuery]);
+  }, [searchQuery, locationCoordinates]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -370,12 +411,12 @@ export const Loc8Dialog = ({
                 </div>
               )}
 
-              {/* Search Input */}
+               {/* Search Input */}
               <div className="relative px-2">
                 <Search className="absolute left-6 md:left-8 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-primary z-10 pointer-events-none" />
                 <Input
                   type="text"
-                  placeholder="Search for cities..."
+                  placeholder="Search for cities or states..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => {
@@ -385,6 +426,7 @@ export const Loc8Dialog = ({
                   }}
                   className="w-full pl-12 md:pl-16 pr-4 md:pr-6 bg-background/90 backdrop-blur-lg border-2 border-primary/30 text-base md:text-xl h-14 md:h-16 font-medium focus:border-primary/60 rounded-xl shadow-2xl transition-all"
                   style={{ fontSize: '16px' }} // Prevent iOS zoom
+                  disabled={isLoadingLocations}
                 />
               </div>
             </div>
