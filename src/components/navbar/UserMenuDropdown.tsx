@@ -26,7 +26,9 @@ const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
       
       if (error) throw error;
       return count || 0;
-    }
+    },
+    refetchOnMount: true,
+    staleTime: 0
   });
 
   useEffect(() => {
