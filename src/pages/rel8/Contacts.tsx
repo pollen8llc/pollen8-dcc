@@ -130,7 +130,8 @@ const Contacts = () => {
 
   const handleBulkCategorize = async (updates: { 
     category_id?: string; 
-    industry?: string 
+    industry?: string;
+    location?: string;
   }) => {
     if (selectedContacts.length === 0) return;
     

@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { getCategories } from "@/services/rel8t/contactService";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,7 +12,7 @@ interface BulkCategorizeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedCount: number;
-  onSubmit: (updates: { category_id?: string; industry?: string }) => void;
+  onSubmit: (updates: { category_id?: string; industry?: string; location?: string }) => void;
 }
 
 export function BulkCategorizeDialog({
@@ -22,6 +23,7 @@ export function BulkCategorizeDialog({
 }: BulkCategorizeDialogProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedIndustry, setSelectedIndustry] = useState<string>("");
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [industries, setIndustries] = useState<string[]>([]);
 
   // Fetch categories
@@ -51,7 +53,7 @@ export function BulkCategorizeDialog({
   }, [open]);
 
   const handleSubmit = () => {
-    const updates: { category_id?: string; industry?: string } = {};
+    const updates: { category_id?: string; industry?: string; location?: string } = {};
     
     if (selectedCategory && selectedCategory !== "none") {
       updates.category_id = selectedCategory;
@@ -61,18 +63,24 @@ export function BulkCategorizeDialog({
       updates.industry = selectedIndustry;
     }
 
+    if (selectedLocation && selectedLocation.trim() !== "") {
+      updates.location = selectedLocation.trim();
+    }
+
     // Only submit if at least one field is selected
     if (Object.keys(updates).length > 0) {
       onSubmit(updates);
       // Reset selections
       setSelectedCategory("");
       setSelectedIndustry("");
+      setSelectedLocation("");
     }
   };
 
   const handleCancel = () => {
     setSelectedCategory("");
     setSelectedIndustry("");
+    setSelectedLocation("");
     onOpenChange(false);
   };
 
@@ -82,7 +90,7 @@ export function BulkCategorizeDialog({
         <DialogHeader>
           <DialogTitle>Categorize {selectedCount} Contact(s)</DialogTitle>
           <DialogDescription>
-            Update category and industry for selected contacts
+            Update category, industry, and location for selected contacts
           </DialogDescription>
         </DialogHeader>
 
@@ -123,6 +131,17 @@ export function BulkCategorizeDialog({
             </Select>
           </div>
 
+          {/* Location Input */}
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              placeholder="Enter location (optional)"
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+            />
+          </div>
+
           {/* Info Message */}
           <p className="text-sm text-muted-foreground">
             Only selected fields will be updated. "No change" selections won't modify existing values.
@@ -135,8 +154,8 @@ export function BulkCategorizeDialog({
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={!selectedCategory && !selectedIndustry || 
-                     (selectedCategory === "none" && selectedIndustry === "none")}
+            disabled={!selectedCategory && !selectedIndustry && !selectedLocation || 
+                     (selectedCategory === "none" && selectedIndustry === "none" && !selectedLocation)}
           >
             Update Contacts
           </Button>
