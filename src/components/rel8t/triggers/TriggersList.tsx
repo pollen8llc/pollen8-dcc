@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Plus, Trash2, Clock } from "lucide-react";
+import { Calendar, Plus, Trash2, Clock, Phone, Mail, MessageCircle, Video, MapPin, PhoneCall } from "lucide-react";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { format } from "date-fns";
 
@@ -67,6 +67,54 @@ export function TriggersList({
     const { type } = trigger.recurrence_pattern;
     return `Repeats ${type}`;
   };
+
+  const getChannelIcon = (channel?: string) => {
+    switch (channel) {
+      case "text": return <Phone className="h-4 w-4" />;
+      case "call": return <PhoneCall className="h-4 w-4" />;
+      case "email": return <Mail className="h-4 w-4" />;
+      case "dm": return <MessageCircle className="h-4 w-4" />;
+      case "meeting": return <Video className="h-4 w-4" />;
+      case "irl": return <MapPin className="h-4 w-4" />;
+      default: return null;
+    }
+  };
+
+  const getChannelLabel = (channel?: string) => {
+    switch (channel) {
+      case "text": return "Text/SMS";
+      case "call": return "Phone Call";
+      case "email": return "Email";
+      case "dm": return "Direct Message";
+      case "meeting": return "Virtual Meeting";
+      case "irl": return "In-Person Meeting";
+      default: return null;
+    }
+  };
+
+  const formatChannelDetails = (channel?: string, details?: any) => {
+    if (!channel || !details) return null;
+
+    switch (channel) {
+      case "text":
+      case "call":
+        return details.phone ? `Phone: ${details.phone}` : null;
+      case "email":
+        return details.email ? `Email: ${details.email}` : null;
+      case "dm":
+        return details.platform && details.handle 
+          ? `${details.platform.charAt(0).toUpperCase() + details.platform.slice(1)}: ${details.handle}`
+          : null;
+      case "meeting":
+        return details.meetingPlatform 
+          ? `${details.meetingPlatform.charAt(0).toUpperCase() + details.meetingPlatform.slice(1)}${details.link ? `: ${details.link}` : ''}`
+          : null;
+      case "irl":
+        return details.address ? `Location: ${details.address}` : null;
+      default:
+        return null;
+    }
+  };
   
   return (
     <div className="space-y-4">
@@ -109,6 +157,25 @@ export function TriggersList({
                 {trigger.recurrence_pattern && (
                   <div className="text-xs text-blue-500 mt-1">
                     {getRecurrenceText(trigger)}
+                  </div>
+                )}
+
+                {/* Display follow-up channel if applicable */}
+                {trigger.outreach_channel && (
+                  <div className="flex items-start gap-2 mt-3 p-2 rounded-md bg-muted/50">
+                    <div className="text-primary mt-0.5">
+                      {getChannelIcon(trigger.outreach_channel)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-medium text-foreground">
+                        {getChannelLabel(trigger.outreach_channel)}
+                      </div>
+                      {formatChannelDetails(trigger.outreach_channel, trigger.channel_details) && (
+                        <div className="text-xs text-muted-foreground mt-0.5 break-words">
+                          {formatChannelDetails(trigger.outreach_channel, trigger.channel_details)}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

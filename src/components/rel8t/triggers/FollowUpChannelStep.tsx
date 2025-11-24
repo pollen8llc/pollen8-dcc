@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,11 @@ export function FollowUpChannelStep({
 }: FollowUpChannelStepProps) {
   const [localDetails, setLocalDetails] = useState<ChannelDetails>(channelDetails);
   const [isChannelSectionCollapsed, setIsChannelSectionCollapsed] = useState(false);
+
+  // Sync localDetails with channelDetails prop changes
+  useEffect(() => {
+    setLocalDetails(channelDetails);
+  }, [channelDetails]);
   const handleChannelSelect = (channel: string) => {
     onChannelChange(channel);
     setIsChannelSectionCollapsed(true);

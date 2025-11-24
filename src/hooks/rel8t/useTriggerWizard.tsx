@@ -91,7 +91,7 @@ export function useTriggerWizard() {
         is_active: true,
         condition: formData.frequency,
         action: "send_email",
-        execution_time: executionTime,
+        next_execution_at: executionTime,
         recurrence_pattern: {
           type: formData.frequency,
           startDate: executionTime || new Date().toISOString()
