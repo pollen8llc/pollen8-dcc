@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, MessageCircle, Video, MapPin, PhoneCall } from "lucide-react";
+import { Phone, Mail, MessageCircle, Video, MapPin, PhoneCall, ChevronDown, ChevronUp } from "lucide-react";
 
 interface ChannelDetails {
   phone?: string;
@@ -38,6 +38,12 @@ export function FollowUpChannelStep({
   onDetailsChange,
 }: FollowUpChannelStepProps) {
   const [localDetails, setLocalDetails] = useState<ChannelDetails>(channelDetails);
+  const [isChannelSectionCollapsed, setIsChannelSectionCollapsed] = useState(false);
+
+  const handleChannelSelect = (channel: string) => {
+    onChannelChange(channel);
+    setIsChannelSectionCollapsed(true);
+  };
 
   const handleDetailChange = (field: keyof ChannelDetails, value: string) => {
     const updated = { ...localDetails, [field]: value };
@@ -167,10 +173,22 @@ export function FollowUpChannelStep({
   return (
     <div className="space-y-6 animate-fade-in">
       <Card className="p-6 backdrop-blur-sm bg-card/80 border-primary/20">
-        <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          Choose Follow-Up Method
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Choose Follow-Up Method
+          </h3>
+          {selectedChannel && (
+            <button
+              type="button"
+              onClick={() => setIsChannelSectionCollapsed(!isChannelSectionCollapsed)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isChannelSectionCollapsed ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
+            </button>
+          )}
+        </div>
+        {!isChannelSectionCollapsed && (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {channelOptions.map((option) => {
             const Icon = option.icon;
             const isSelected = selectedChannel === option.value;
@@ -178,7 +196,7 @@ export function FollowUpChannelStep({
               <button
                 key={option.value}
                 type="button"
-                onClick={() => onChannelChange(option.value)}
+                onClick={() => handleChannelSelect(option.value)}
                 className={`
                   p-4 rounded-lg border-2 transition-all duration-200
                   flex flex-col items-center gap-2 text-center
@@ -196,7 +214,8 @@ export function FollowUpChannelStep({
               </button>
             );
           })}
-        </div>
+          </div>
+        )}
       </Card>
 
       {selectedChannel && (

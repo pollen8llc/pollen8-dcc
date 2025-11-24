@@ -1,9 +1,11 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { createTrigger } from "@/services/rel8t/triggerService";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
+
+const WIZARD_STATE_KEY = "trigger_wizard_state";
 
 export interface SimpleTriggerFormData {
   name: string;
@@ -27,16 +29,40 @@ export interface SimpleTriggerFormData {
 export function useTriggerWizard() {
   const navigate = useNavigate();
   const { setSelectedTrigger } = useRelationshipWizard();
-  const [formData, setFormData] = useState<SimpleTriggerFormData>({
-    name: "",
-    triggerDate: new Date(),
-    triggerTime: "09:00",
-    frequency: "daily",
-    priority: "medium",
-    selectedTemplate: undefined,
-    outreachChannel: undefined,
-    channelDetails: undefined
-  });
+  
+  // Load initial state from localStorage if available
+  const getInitialFormData = (): SimpleTriggerFormData => {
+    const savedState = localStorage.getItem(WIZARD_STATE_KEY);
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        // Convert date string back to Date object
+        if (parsed.triggerDate) {
+          parsed.triggerDate = new Date(parsed.triggerDate);
+        }
+        return parsed;
+      } catch (e) {
+        console.error("Failed to parse saved wizard state:", e);
+      }
+    }
+    return {
+      name: "",
+      triggerDate: new Date(),
+      triggerTime: "09:00",
+      frequency: "daily",
+      priority: "medium",
+      selectedTemplate: undefined,
+      outreachChannel: undefined,
+      channelDetails: undefined
+    };
+  };
+
+  const [formData, setFormData] = useState<SimpleTriggerFormData>(getInitialFormData);
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(WIZARD_STATE_KEY, JSON.stringify(formData));
+  }, [formData]);
 
   // Update form data with partial updates
   const updateFormData = useCallback((data: Partial<SimpleTriggerFormData>) => {
@@ -83,6 +109,9 @@ export function useTriggerWizard() {
           title: "Trigger created successfully",
           description: "Your automation trigger has been created."
         });
+        
+        // Clear saved state after successful creation
+        localStorage.removeItem(WIZARD_STATE_KEY);
         
         // If returning to relationship wizard, store trigger in context
         if (returnTo === 'relationship') {
