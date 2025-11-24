@@ -51,6 +51,8 @@ export interface Trigger {
   recurrence_pattern?: RecurrencePattern | null;
   system_email?: string;
   calendar_event_uid?: string;
+  outreach_channel?: string;
+  channel_details?: Record<string, any>;
 }
 
 export interface TriggerStats {
@@ -146,7 +148,9 @@ export const createTrigger = async (trigger: Omit<Trigger, "id" | "user_id" | "c
         is_active: trigger.is_active,
         next_execution_at: trigger.next_execution_at,
         last_executed_at: trigger.last_executed_at,
-        recurrence_pattern: trigger.recurrence_pattern
+        recurrence_pattern: trigger.recurrence_pattern,
+        outreach_channel: trigger.outreach_channel,
+        channel_details: trigger.channel_details
       }])
       .select()
       .single();

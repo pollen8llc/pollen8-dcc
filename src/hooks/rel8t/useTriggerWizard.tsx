@@ -12,6 +12,16 @@ export interface SimpleTriggerFormData {
   frequency: string;
   priority: string;
   selectedTemplate?: string;
+  outreachChannel?: string;
+  channelDetails?: {
+    phone?: string;
+    email?: string;
+    platform?: string;
+    handle?: string;
+    link?: string;
+    meetingPlatform?: string;
+    address?: string;
+  };
 }
 
 export function useTriggerWizard() {
@@ -23,7 +33,9 @@ export function useTriggerWizard() {
     triggerTime: "09:00",
     frequency: "daily",
     priority: "medium",
-    selectedTemplate: undefined
+    selectedTemplate: undefined,
+    outreachChannel: undefined,
+    channelDetails: undefined
   });
 
   // Update form data with partial updates
@@ -57,7 +69,9 @@ export function useTriggerWizard() {
         recurrence_pattern: {
           type: formData.frequency,
           startDate: executionTime || new Date().toISOString()
-        }
+        },
+        outreach_channel: formData.outreachChannel,
+        channel_details: formData.channelDetails
       };
       
       const result = await createTrigger(triggerData);

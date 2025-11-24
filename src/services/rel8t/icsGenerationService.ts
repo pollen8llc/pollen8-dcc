@@ -191,10 +191,36 @@ export const triggerToICSEventData = (
   // End date is 30 minutes after start for calendar blocking
   const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
 
+  // Format channel details for description
+  let channelInfo = "";
+  if (trigger.outreach_channel && trigger.channel_details) {
+    const channelLabels: Record<string, string> = {
+      text: "📱 Text/SMS",
+      call: "📞 Phone Call",
+      email: "✉️ Email",
+      dm: "💬 Direct Message",
+      meeting: "🎥 Virtual Meeting",
+      irl: "🤝 In-Person Meeting"
+    };
+
+    channelInfo = `\n\n${channelLabels[trigger.outreach_channel] || "Follow-up Method"}\n`;
+
+    const details = trigger.channel_details;
+    if (details.phone) channelInfo += `📱 Phone: ${details.phone}\n`;
+    if (details.email) channelInfo += `✉️ Email: ${details.email}\n`;
+    if (details.platform && details.handle) channelInfo += `💬 ${details.platform}: ${details.handle}\n`;
+    if (details.meetingPlatform && details.link) {
+      channelInfo += `🔗 ${details.meetingPlatform} Meeting: ${details.link}\n`;
+    }
+    if (details.address) channelInfo += `📍 Location: ${details.address}\n`;
+  }
+
+  const description = `${trigger.description || "Automated reminder from Ecosystem Builder REL8"}${channelInfo}`;
+
   return {
     uid: trigger.calendar_event_uid || `trigger-${trigger.id}@ecosystembuilder.app`,
     summary: trigger.name,
-    description: trigger.description || 'Automated reminder from Ecosystem Builder REL8',
+    description,
     startDate,
     endDate,
     location: 'Ecosystem Builder Platform',

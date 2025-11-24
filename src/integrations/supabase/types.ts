@@ -2554,6 +2554,7 @@ export type Database = {
         Row: {
           action: string
           calendar_event_uid: string | null
+          channel_details: Json | null
           condition: Json
           created_at: string
           description: string | null
@@ -2563,6 +2564,7 @@ export type Database = {
           last_executed_at: string | null
           name: string
           next_execution_at: string | null
+          outreach_channel: string | null
           recurrence_pattern: Json
           system_email: string | null
           trigger_type: string
@@ -2572,6 +2574,7 @@ export type Database = {
         Insert: {
           action: string
           calendar_event_uid?: string | null
+          channel_details?: Json | null
           condition?: Json
           created_at?: string
           description?: string | null
@@ -2581,6 +2584,7 @@ export type Database = {
           last_executed_at?: string | null
           name: string
           next_execution_at?: string | null
+          outreach_channel?: string | null
           recurrence_pattern?: Json
           system_email?: string | null
           trigger_type: string
@@ -2590,6 +2594,7 @@ export type Database = {
         Update: {
           action?: string
           calendar_event_uid?: string | null
+          channel_details?: Json | null
           condition?: Json
           created_at?: string
           description?: string | null
@@ -2599,6 +2604,7 @@ export type Database = {
           last_executed_at?: string | null
           name?: string
           next_execution_at?: string | null
+          outreach_channel?: string | null
           recurrence_pattern?: Json
           system_email?: string | null
           trigger_type?: string
