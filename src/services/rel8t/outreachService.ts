@@ -304,7 +304,8 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       systemEmail,
       userEmail,
       outreach.outreach_channel,
-      outreach.channel_details
+      outreach.channel_details,
+      outreachId
     );
     
     // Create email notification with ICS attachment
@@ -312,7 +313,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       .from("rms_email_notifications")
       .insert({
         user_id: user.id,
-        subject: `Outreach #${outreachId.slice(0, 8)}: ${outreach.title}`,
+        subject: `Reminder set: ${outreach.title} #${outreachId.slice(0, 8)}`,
         body: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #00eada;">New Outreach Task Created</h2>

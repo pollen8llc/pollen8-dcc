@@ -16,7 +16,7 @@ const EmailTester = () => {
   // Form state
   const [emailId, setEmailId] = useState("test-email-123");
   const [from, setFrom] = useState("user@gmail.com");
-  const [subject, setSubject] = useState("Outreach #904a90dd: Follow up with Aaron");
+  const [subject, setSubject] = useState("Reminder set: Follow up with Aaron #904a90dd");
   const [icsContent, setIcsContent] = useState(`BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//REL8//EN

@@ -145,8 +145,9 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Try to parse short outreach ID from subject line first
-    // Format: "Outreach #12345678: ..." or "RE: Outreach #12345678: ..."
-    const subjectMatch = subject.match(/Outreach\s+#([a-f0-9]{8}):/i);
+    // Format: "Reminder set: Follow up with Aaron #904a90dd"
+    // Also handles "RE: Reminder set: ..." or "Fwd: ..."
+    const subjectMatch = subject.match(/#([a-f0-9]{8})(?:\s*$|\s)/i);
     let outreach = null;
     let lookupError = null;
 
