@@ -26,6 +26,8 @@ interface ReviewSubmitStepProps {
   };
   onSubmit: (trigger?: Trigger, icsContent?: string) => void;
   onPrevious?: () => void;
+  hasSelectedTrigger?: boolean;
+  onRemoveTrigger?: () => void;
 }
 
 // Helper function to get due date from trigger
@@ -63,6 +65,8 @@ export const ReviewSubmitStep = ({
   wizardData,
   onSubmit,
   onPrevious,
+  hasSelectedTrigger,
+  onRemoveTrigger,
 }: ReviewSubmitStepProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -284,7 +288,19 @@ export const ReviewSubmitStep = ({
 
       {/* Reminders - Sleek Cards */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-muted-foreground">Reminders</h4>
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-medium text-muted-foreground">Reminders</h4>
+          {hasSelectedTrigger && onRemoveTrigger && triggers.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRemoveTrigger}
+              className="h-7 text-xs text-muted-foreground hover:text-foreground"
+            >
+              Remove & select different trigger
+            </Button>
+          )}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {triggers.length === 0 ? (
             <div className="col-span-2 text-center py-6 text-sm text-muted-foreground">
