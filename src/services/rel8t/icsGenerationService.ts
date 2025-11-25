@@ -230,8 +230,8 @@ export const triggerToICSEventData = (
     endDate,
     location,
     organizer: {
-      email: trigger.system_email || 'notifications@ecosystembuilder.app',
-      name: 'Ecosystem Builder REL8 System',
+      email: userEmail,
+      name: userName || 'User',
     },
     attendees: [
       {
