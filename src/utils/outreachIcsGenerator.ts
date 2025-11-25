@@ -11,6 +11,23 @@ const formatICSDate = (date: Date): string => {
   return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
 };
 
+// Fold long lines at 75 characters per RFC 5545
+const foldLine = (line: string): string => {
+  if (line.length <= 75) return line;
+  
+  const result: string[] = [];
+  let remaining = line;
+  result.push(remaining.substring(0, 75));
+  remaining = remaining.substring(75);
+  
+  while (remaining.length > 0) {
+    result.push(' ' + remaining.substring(0, 74)); // Leading space + 74 chars
+    remaining = remaining.substring(74);
+  }
+  
+  return result.join('\r\n');
+};
+
 export const generateOutreachICS = (
   outreach: Outreach, 
   systemEmail: string, 
@@ -42,32 +59,44 @@ export const generateOutreachICS = (
       .replace(/\n/g, '\\n');
   };
 
-  return `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//REL8//Outreach Task//EN
-CALSCALE:GREGORIAN
-METHOD:REQUEST
-X-WR-CALNAME:REL8 - Outreach Tasks
-X-WR-TIMEZONE:UTC
-BEGIN:VEVENT
-UID:${uid}
-DTSTAMP:${timestamp}
-DTSTART:${startDateFormatted}
-DTEND:${endDateFormatted}
-SUMMARY:${escapeICSText(outreach.title)}
-DESCRIPTION:${escapeICSText(description)}
-LOCATION:${escapeICSText(location)}
-STATUS:CONFIRMED
-SEQUENCE:0
-PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}
-ORGANIZER;CN=REL8 Notifications:mailto:${userEmail || systemEmail}
-ATTENDEE;CN=REL8 Notification System;ROLE=NON-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${systemEmail}
-${userEmail ? `ATTENDEE;CN=User;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${userEmail}` : ''}
-BEGIN:VALARM
-TRIGGER:-PT15M
-ACTION:DISPLAY
-DESCRIPTION:Reminder: ${escapeICSText(outreach.title)}
-END:VALARM
-END:VEVENT
-END:VCALENDAR`;
+  // Build ICS using array for proper line endings
+  const lines: string[] = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//REL8//Outreach Task//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:REQUEST',
+    'X-WR-CALNAME:REL8 - Outreach Tasks',
+    'X-WR-TIMEZONE:UTC',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${timestamp}`,
+    `DTSTART:${startDateFormatted}`,
+    `DTEND:${endDateFormatted}`,
+    foldLine(`SUMMARY:${escapeICSText(outreach.title)}`),
+    foldLine(`DESCRIPTION:${escapeICSText(description)}`),
+    foldLine(`LOCATION:${escapeICSText(location)}`),
+    'STATUS:CONFIRMED',
+    'SEQUENCE:0',
+    `PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}`,
+    foldLine(`ORGANIZER;CN=REL8 Notifications:mailto:${userEmail || systemEmail}`),
+    foldLine(`ATTENDEE;CN=REL8 Notification System;ROLE=NON-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${systemEmail}`)
+  ];
+
+  // Only add user attendee if email exists
+  if (userEmail) {
+    lines.push(foldLine(`ATTENDEE;CN=User;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${userEmail}`));
+  }
+
+  lines.push(
+    'BEGIN:VALARM',
+    'TRIGGER:-PT15M',
+    'ACTION:DISPLAY',
+    foldLine(`DESCRIPTION:Reminder: ${escapeICSText(outreach.title)}`),
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  );
+
+  return lines.join('\r\n') + '\r\n';
 };
