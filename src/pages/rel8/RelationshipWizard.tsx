@@ -138,7 +138,7 @@ const RelationshipWizard = () => {
           {/* Display trigger info if we have a selected trigger */}
           {selectedTrigger && (
             <div className="ml-auto">
-              <Badge variant="outline" className="px-3 py-1 bg-primary/5">
+              <Badge variant="outline" className="px-3 py-1 bg-primary/5 border-[#00eada] border-2">
                 Using selected trigger: {selectedTrigger.name}
               </Badge>
             </div>
@@ -192,6 +192,11 @@ const RelationshipWizard = () => {
                 wizardData={data}
                 onSubmit={handleReviewSubmit}
                 onPrevious={() => setStep(selectedTrigger ? "select-contacts" : "select-triggers")}
+                hasSelectedTrigger={!!selectedTrigger}
+                onRemoveTrigger={selectedTrigger ? () => {
+                  setData(prev => ({ ...prev, triggers: [] }));
+                  setStep("select-triggers");
+                } : undefined}
               />
             )}
           </CardContent>
