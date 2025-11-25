@@ -274,7 +274,7 @@ const Contacts = () => {
               </Button>
               
               <Button 
-                onClick={() => navigate("/rel8/build-rapport")}
+                onClick={() => navigate("/rel8/wizard")}
                 className="flex items-center justify-center gap-2 w-full sm:w-auto"
                 size="sm"
               >
