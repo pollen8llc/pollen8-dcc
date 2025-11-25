@@ -6,8 +6,6 @@ import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep
 import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
 import { Contact } from "@/services/rel8t/contactService";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
@@ -41,14 +39,12 @@ const RelationshipWizard = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdTrigger, setCreatedTrigger] = useState<Trigger | null>(null);
   const [icsContent, setIcsContent] = useState<string | null>(null);
-  const [cameFromPreSelection, setCameFromPreSelection] = useState(false);
 
   // Initialize wizard with pre-selected contacts from Contacts page
   useEffect(() => {
     if (preSelectedContacts.length > 0) {
       setData(prev => ({ ...prev, contacts: preSelectedContacts }));
-      setStep("select-triggers");
-      setCameFromPreSelection(true);
+      // Stay on step 1 - contacts are pre-populated for confirmation
     }
   }, [preSelectedContacts]);
 
@@ -123,21 +119,6 @@ const RelationshipWizard = () => {
       <Rel8Header showProfileBanner={false} />
       
       <div className="container mx-auto max-w-6xl px-4 py-8">
-        <div className="flex items-center mb-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mr-2" 
-            onClick={() => {
-              clearWizardData();
-              navigate(cameFromPreSelection ? "/rel8/contacts" : selectedTrigger ? "/rel8/build-rapport" : "/rel8");
-            }}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to {cameFromPreSelection ? "Contacts" : selectedTrigger ? "Build Rapport" : "Dashboard"}
-          </Button>
-        </div>
-        
         <div className="flex flex-col md:flex-row gap-4 md:items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">{getStepTitle()}</h1>
@@ -192,7 +173,7 @@ const RelationshipWizard = () => {
             {step === "select-triggers" && !selectedTrigger && (
               <SelectTriggersStep
                 onNext={handleSelectTriggersNext}
-                onPrevious={() => cameFromPreSelection ? navigate("/rel8/contacts") : setStep("select-contacts")}
+                onPrevious={() => setStep("select-contacts")}
                 selectedContacts={data.contacts}
               />
             )}
@@ -210,7 +191,7 @@ const RelationshipWizard = () => {
               <ReviewSubmitStep
                 wizardData={data}
                 onSubmit={handleReviewSubmit}
-                onPrevious={() => cameFromPreSelection ? setStep("select-triggers") : setStep(selectedTrigger ? "select-contacts" : "select-triggers")}
+                onPrevious={() => setStep(selectedTrigger ? "select-contacts" : "select-triggers")}
               />
             )}
           </CardContent>
