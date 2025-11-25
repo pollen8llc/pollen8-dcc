@@ -312,7 +312,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       .from("rms_email_notifications")
       .insert({
         user_id: user.id,
-        subject: `New Outreach Task: ${outreach.title}`,
+        subject: `Outreach #${outreachId.slice(0, 8)}: ${outreach.title}`,
         body: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #00eada;">New Outreach Task Created</h2>

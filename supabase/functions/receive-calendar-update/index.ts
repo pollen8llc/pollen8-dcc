@@ -144,15 +144,46 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Find matching outreach task
-    const { data: outreach, error: lookupError } = await supabase
-      .from("rms_outreach")
-      .select("*")
-      .eq("ics_uid", uid)
-      .single();
+    // Try to parse short outreach ID from subject line first
+    // Format: "Outreach #12345678: ..." or "RE: Outreach #12345678: ..."
+    const subjectMatch = subject.match(/Outreach\s+#([a-f0-9]{8}):/i);
+    let outreach = null;
+    let lookupError = null;
+
+    if (subjectMatch) {
+      const shortId = subjectMatch[1];
+      console.log("📧 Parsed short outreach ID from subject:", shortId);
+      
+      // Find outreach where ID starts with this short ID
+      const result = await supabase
+        .from("rms_outreach")
+        .select("*")
+        .ilike("id", `${shortId}%`)
+        .single();
+      
+      outreach = result.data;
+      lookupError = result.error;
+      
+      if (outreach) {
+        console.log("✅ Found outreach by short ID:", outreach.id);
+      }
+    }
+
+    // Fallback to ICS UID matching if subject parsing failed
+    if (!outreach && uid) {
+      console.log("Trying ICS UID fallback:", uid);
+      const result = await supabase
+        .from("rms_outreach")
+        .select("*")
+        .eq("ics_uid", uid)
+        .single();
+      
+      outreach = result.data;
+      lookupError = result.error;
+    }
 
     if (lookupError || !outreach) {
-      console.log("No matching outreach task found for UID:", uid);
+      console.log("No matching outreach task found");
       return new Response(JSON.stringify({ message: "No matching task" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
