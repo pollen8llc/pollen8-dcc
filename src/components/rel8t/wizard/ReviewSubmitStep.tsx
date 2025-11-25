@@ -26,7 +26,6 @@ interface ReviewSubmitStepProps {
   };
   onSubmit: (trigger?: Trigger, icsContent?: string) => void;
   onPrevious?: () => void;
-  hasSelectedTrigger?: boolean;
   onRemoveTrigger?: () => void;
 }
 
@@ -65,7 +64,6 @@ export const ReviewSubmitStep = ({
   wizardData,
   onSubmit,
   onPrevious,
-  hasSelectedTrigger,
   onRemoveTrigger,
 }: ReviewSubmitStepProps) => {
   const { toast } = useToast();
@@ -292,15 +290,14 @@ export const ReviewSubmitStep = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-medium text-muted-foreground">Reminders</h4>
-          {hasSelectedTrigger && onRemoveTrigger && triggers.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
+          {onRemoveTrigger && triggers.length > 0 && (
+            <Badge
+              variant="outline"
               onClick={onRemoveTrigger}
-              className="h-7 text-xs text-muted-foreground hover:text-foreground"
+              className="h-8 px-3 cursor-pointer backdrop-blur-sm bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-all"
             >
-              Remove & select different trigger
-            </Button>
+              Remove Selected Triggers
+            </Badge>
           )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

@@ -192,11 +192,10 @@ const RelationshipWizard = () => {
                 wizardData={data}
                 onSubmit={handleReviewSubmit}
                 onPrevious={() => setStep(selectedTrigger ? "select-contacts" : "select-triggers")}
-                hasSelectedTrigger={!!selectedTrigger}
-                onRemoveTrigger={selectedTrigger ? () => {
+                onRemoveTrigger={() => {
                   setData(prev => ({ ...prev, triggers: [] }));
                   setStep("select-triggers");
-                } : undefined}
+                }}
               />
             )}
           </CardContent>
