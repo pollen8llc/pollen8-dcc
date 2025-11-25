@@ -52,7 +52,7 @@ const Dashboard = () => {
 
   // Handler for building rapport (renamed from handleCreateRelationship)
   const handleBuildRapport = () => {
-    navigate("/rel8/build-rapport");
+    navigate("/rel8/wizard");
   };
 
   // Check REL8 setup status - only use database state

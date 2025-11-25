@@ -158,7 +158,7 @@ export function DataTablesSection() {
               <span className="text-sm">Create Trigger</span>
             </Button>
             
-            <Button variant="outline" onClick={() => navigate("/rel8/build-rapport")} className="h-16 flex-col gap-2">
+            <Button variant="outline" onClick={() => navigate("/rel8/wizard")} className="h-16 flex-col gap-2">
               <Calendar className="h-5 w-5" />
               <span className="text-sm">Build Rapport</span>
             </Button>

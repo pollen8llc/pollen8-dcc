@@ -34,6 +34,13 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  // Sync pre-selected contacts when prop changes
+  useEffect(() => {
+    if (initialSelectedContacts && initialSelectedContacts.length > 0) {
+      setSelectedContacts(initialSelectedContacts);
+    }
+  }, [initialSelectedContacts]);
+
   // Fetch contacts
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["contacts"],
