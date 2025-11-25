@@ -170,7 +170,7 @@ const Contacts = () => {
     setPreSelectedContacts(selectedContactObjects);
     
     // Navigate to the wizard
-    navigate("/rel8/build-rapport");
+    navigate("/rel8/wizard");
   };
 
   return (
