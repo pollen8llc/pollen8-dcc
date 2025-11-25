@@ -60,7 +60,7 @@ LOCATION:${escapeICSText(location)}
 STATUS:CONFIRMED
 SEQUENCE:0
 PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}
-ORGANIZER;CN=REL8 Notifications:mailto:${systemEmail}
+ORGANIZER;CN=REL8 Notifications:mailto:${userEmail || systemEmail}
 ATTENDEE;CN=REL8 Notification System;ROLE=NON-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${systemEmail}
 ${userEmail ? `ATTENDEE;CN=User;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${userEmail}` : ''}
 BEGIN:VALARM
