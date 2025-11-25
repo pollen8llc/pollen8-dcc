@@ -82,7 +82,7 @@ const TriggerWizard = () => {
 
   const handleBack = () => {
     if (returnTo === 'relationship') {
-      navigate("/rel8/build-rapport");
+      navigate("/rel8/wizard");
     } else {
       navigate("/rel8/triggers");
     }
@@ -90,7 +90,7 @@ const TriggerWizard = () => {
 
   const handleCancel = () => {
     if (returnTo === 'relationship') {
-      navigate("/rel8/build-rapport");
+      navigate("/rel8/wizard");
     } else {
       navigate("/rel8/triggers");
     }
