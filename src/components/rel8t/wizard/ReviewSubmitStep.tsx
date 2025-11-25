@@ -77,8 +77,11 @@ export const ReviewSubmitStep = ({
   const { contacts, triggers, priority } = wizardData;
 
   const handleSubmit = async () => {
-    // Prevent double submission
-    if (isSubmitting) return;
+    // Synchronous guard to prevent double submission (before any state updates)
+    if (isSubmitting) {
+      console.log("⚠️ Double submission prevented");
+      return;
+    }
     
     if (contacts.length === 0) {
       toast({
@@ -89,6 +92,7 @@ export const ReviewSubmitStep = ({
       return;
     }
 
+    // Set submitting state immediately (synchronously update the flag)
     setIsSubmitting(true);
     setSubmissionStatus("submitting");
 
@@ -126,52 +130,17 @@ export const ReviewSubmitStep = ({
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
       queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
       
-      // Create a trigger for the relationship plan (using first trigger as base)
-      const baseTrigger = triggers[0];
-      const dueDate = getDueDateFromTrigger(baseTrigger);
-      const executionTime = dueDate.toISOString();
+      // Success! Outreach items created from existing triggers
+      setSubmissionStatus("success");
+      toast({
+        title: "Relationship plan created",
+        description: `Created ${triggers.length} outreach reminder${triggers.length !== 1 ? 's' : ''} for ${contacts.length} contact${contacts.length !== 1 ? 's' : ''}.`
+      });
 
-      const triggerPayload = {
-        name: baseTrigger.name || "Relationship Outreach Reminder",
-        description: baseTrigger.description || `Reminder to follow up with ${contacts.length} contact${contacts.length !== 1 ? "s" : ""}.`,
-        is_active: true,
-        condition: "onetime",
-        action: "send_email",
-        execution_time: executionTime,
-        next_execution_at: executionTime,
-        recurrence_pattern: {
-          type: "onetime",
-          startDate: executionTime
-        }
-      };
-
-      const triggerResult = await createTrigger(triggerPayload);
-
-      if (triggerResult) {
-        const { trigger, icsContent } = triggerResult;
-
-        setSubmissionStatus("success");
-        toast({
-          title: "Relationship plan created",
-          description: `Created ${triggers.length} outreach reminder${triggers.length !== 1 ? 's' : ''} for ${contacts.length} contact${contacts.length !== 1 ? 's' : ''}.`
-        });
-
-        // Pass trigger and ICS to parent to show dialog and download
-        setTimeout(() => {
-          onSubmit(trigger, icsContent);
-        }, 1500);
-      } else {
-        // Fallback: outreach created but no trigger/ICS
-        setSubmissionStatus("success");
-        toast({
-          title: "Relationship plan created",
-          description: "Your outreach items were created successfully."
-        });
-
-        setTimeout(() => {
-          onSubmit();
-        }, 1500);
-      }
+      // Complete without creating duplicate triggers
+      setTimeout(() => {
+        onSubmit();
+      }, 1500);
     } catch (error) {
       console.error("Submission error:", error);
       setSubmissionStatus("error");
