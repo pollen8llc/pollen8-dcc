@@ -32,6 +32,7 @@ const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const DebuggerDashboard = lazy(() => import("@/pages/admin/DebuggerDashboard"));
 const AvatarGallery = lazy(() => import("@/pages/admin/AvatarGallery"));
 const LexiconManagement = lazy(() => import("@/pages/admin/LexiconManagement"));
+const EmailTester = lazy(() => import("@/pages/admin/EmailTester"));
 
 // Knowledge base pages
 const KnowledgeBase = lazy(() => import("@/pages/knowledge/KnowledgeBase"));
@@ -231,6 +232,11 @@ const AppRoutes = () => {
           <Route path="/admin/lexicon" element={
             <NonServiceProviderRoute>
               <LexiconManagement />
+            </NonServiceProviderRoute>
+          } />
+          <Route path="/admin/email-tester" element={
+            <NonServiceProviderRoute>
+              <EmailTester />
             </NonServiceProviderRoute>
           } />
           
