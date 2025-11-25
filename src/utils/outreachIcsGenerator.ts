@@ -79,7 +79,7 @@ export const generateOutreachICS = (
     'STATUS:CONFIRMED',
     'SEQUENCE:0',
     `PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}`,
-    foldLine(`ORGANIZER;CN=REL8 Notifications:mailto:${userEmail || systemEmail}`),
+    foldLine(`ORGANIZER;CN=REL8 Notifications:mailto:${systemEmail}`),
     foldLine(`ATTENDEE;CN=REL8 Notification System;ROLE=NON-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${systemEmail}`)
   ];
 
