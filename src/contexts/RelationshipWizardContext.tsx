@@ -1,10 +1,13 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Trigger } from '@/services/rel8t/triggerService';
+import { Contact } from '@/services/rel8t/contactService';
 
 interface RelationshipWizardContextType {
   selectedTrigger: Trigger | null;
   setSelectedTrigger: (trigger: Trigger | null) => void;
+  preSelectedContacts: Contact[];
+  setPreSelectedContacts: (contacts: Contact[]) => void;
   clearWizardData: () => void;
 }
 
@@ -24,9 +27,11 @@ interface RelationshipWizardProviderProps {
 
 export const RelationshipWizardProvider: React.FC<RelationshipWizardProviderProps> = ({ children }) => {
   const [selectedTrigger, setSelectedTrigger] = useState<Trigger | null>(null);
+  const [preSelectedContacts, setPreSelectedContacts] = useState<Contact[]>([]);
 
   const clearWizardData = () => {
     setSelectedTrigger(null);
+    setPreSelectedContacts([]);
   };
 
   return (
@@ -34,6 +39,8 @@ export const RelationshipWizardProvider: React.FC<RelationshipWizardProviderProp
       value={{
         selectedTrigger,
         setSelectedTrigger,
+        preSelectedContacts,
+        setPreSelectedContacts,
         clearWizardData,
       }}
     >

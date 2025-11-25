@@ -34,13 +34,23 @@ const initialData: WizardData = {
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
-  const { selectedTrigger, clearWizardData } = useRelationshipWizard();
+  const { selectedTrigger, preSelectedContacts, clearWizardData } = useRelationshipWizard();
   
   const [step, setStep] = useState<WizardStep>("select-contacts");
   const [data, setData] = useState<WizardData>(initialData);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdTrigger, setCreatedTrigger] = useState<Trigger | null>(null);
   const [icsContent, setIcsContent] = useState<string | null>(null);
+  const [cameFromPreSelection, setCameFromPreSelection] = useState(false);
+
+  // Initialize wizard with pre-selected contacts from Contacts page
+  useEffect(() => {
+    if (preSelectedContacts.length > 0) {
+      setData(prev => ({ ...prev, contacts: preSelectedContacts }));
+      setStep("select-triggers");
+      setCameFromPreSelection(true);
+    }
+  }, [preSelectedContacts]);
 
   // Initialize wizard data with selected trigger from context
   useEffect(() => {
@@ -120,11 +130,11 @@ const RelationshipWizard = () => {
             className="mr-2" 
             onClick={() => {
               clearWizardData();
-              navigate(selectedTrigger ? "/rel8/build-rapport" : "/rel8");
+              navigate(cameFromPreSelection ? "/rel8/contacts" : selectedTrigger ? "/rel8/build-rapport" : "/rel8");
             }}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to {selectedTrigger ? "Build Rapport" : "Dashboard"}
+            Back to {cameFromPreSelection ? "Contacts" : selectedTrigger ? "Build Rapport" : "Dashboard"}
           </Button>
         </div>
         
@@ -182,7 +192,7 @@ const RelationshipWizard = () => {
             {step === "select-triggers" && !selectedTrigger && (
               <SelectTriggersStep
                 onNext={handleSelectTriggersNext}
-                onPrevious={() => setStep("select-contacts")}
+                onPrevious={() => cameFromPreSelection ? navigate("/rel8/contacts") : setStep("select-contacts")}
                 selectedContacts={data.contacts}
               />
             )}
@@ -200,7 +210,7 @@ const RelationshipWizard = () => {
               <ReviewSubmitStep
                 wizardData={data}
                 onSubmit={handleReviewSubmit}
-                onPrevious={() => setStep(selectedTrigger ? "select-contacts" : "select-triggers")}
+                onPrevious={() => cameFromPreSelection ? setStep("select-triggers") : setStep(selectedTrigger ? "select-contacts" : "select-triggers")}
               />
             )}
           </CardContent>

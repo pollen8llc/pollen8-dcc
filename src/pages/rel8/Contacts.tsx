@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import ContactList from "@/components/rel8t/ContactList";
-import { Heart, Trash2, Edit, CheckSquare, Square, Search, Filter, Users } from "lucide-react";
+import { Heart, Trash2, CheckSquare, Square, Search, Filter, Users } from "lucide-react";
+import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +17,7 @@ import { BulkCategorizeDialog } from "@/components/rel8t/BulkCategorizeDialog";
 const Contacts = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { setPreSelectedContacts } = useRelationshipWizard();
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -158,6 +160,19 @@ const Contacts = () => {
     setSelectedTag("all");
   };
 
+  const handleBuildRapportWithSelected = () => {
+    // Get the full contact objects for all selected IDs
+    const selectedContactObjects = contacts.filter(contact => 
+      selectedContacts.includes(contact.id)
+    );
+    
+    // Set them in the context
+    setPreSelectedContacts(selectedContactObjects);
+    
+    // Navigate to the wizard
+    navigate("/rel8/build-rapport");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
@@ -202,16 +217,13 @@ const Contacts = () => {
                 {selectedContacts.length > 0 && (
                   <>
                     <Button
-                      variant="outline"
-                      onClick={() => {
-                        const firstContact = filteredContacts.find(c => c.id === selectedContacts[0]);
-                        if (firstContact) handleEditContact(firstContact);
-                      }}
+                      variant="default"
+                      onClick={handleBuildRapportWithSelected}
                       className="flex items-center justify-center gap-2 w-full sm:w-auto"
                       size="sm"
                     >
-                      <Edit className="h-4 w-4" />
-                      <span>Edit</span>
+                      <Heart className="h-4 w-4" />
+                      <span>Build Rapport</span>
                     </Button>
                     
                     <Button
