@@ -33,7 +33,8 @@ export const generateOutreachICS = (
   systemEmail: string, 
   userEmail?: string,
   outreachChannel?: string | null,
-  channelDetails?: Record<string, any> | null
+  channelDetails?: Record<string, any> | null,
+  outreachId?: string
 ): string => {
   const now = new Date();
   const startDate = new Date(outreach.due_date);
@@ -59,6 +60,12 @@ export const generateOutreachICS = (
       .replace(/\n/g, '\\n');
   };
 
+  // Format summary with task ID at the end
+  const shortId = outreachId ? outreachId.slice(0, 8) : '';
+  const summaryText = shortId 
+    ? `Reminder set: ${outreach.title} #${shortId}`
+    : outreach.title;
+
   // Build ICS using array for proper line endings
   const lines: string[] = [
     'BEGIN:VCALENDAR',
@@ -73,7 +80,7 @@ export const generateOutreachICS = (
     `DTSTAMP:${timestamp}`,
     `DTSTART:${startDateFormatted}`,
     `DTEND:${endDateFormatted}`,
-    foldLine(`SUMMARY:${escapeICSText(outreach.title)}`),
+    foldLine(`SUMMARY:${escapeICSText(summaryText)}`),
     foldLine(`DESCRIPTION:${escapeICSText(description)}`),
     foldLine(`LOCATION:${escapeICSText(location)}`),
     'STATUS:CONFIRMED',
@@ -92,7 +99,7 @@ export const generateOutreachICS = (
     'BEGIN:VALARM',
     'TRIGGER:-PT15M',
     'ACTION:DISPLAY',
-    foldLine(`DESCRIPTION:Reminder: ${escapeICSText(outreach.title)}`),
+    foldLine(`DESCRIPTION:Reminder: ${escapeICSText(summaryText)}`),
     'END:VALARM',
     'END:VEVENT',
     'END:VCALENDAR'
