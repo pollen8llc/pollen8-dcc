@@ -94,6 +94,19 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
     (!selectedCategory || contact.category_id === selectedCategory)
   );
 
+  // Sort contacts: pre-selected contacts appear at the TOP of the list
+  const sortedContacts = [...filteredContacts].sort((a, b) => {
+    const aSelected = selectedContacts.some(c => c.id === a.id);
+    const bSelected = selectedContacts.some(c => c.id === b.id);
+    
+    // Pre-selected contacts come first
+    if (aSelected && !bSelected) return -1;
+    if (!aSelected && bSelected) return 1;
+    
+    // Within each group, sort alphabetically by name
+    return a.name.localeCompare(b.name);
+  });
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row mb-4 gap-2">
@@ -156,7 +169,7 @@ export const SelectContactsStep: React.FC<SelectContactsStepProps> = ({
       ) : (
         <ScrollArea className="h-[400px] pr-4">
           <div className="space-y-2">
-            {filteredContacts.map((contact) => (
+            {sortedContacts.map((contact) => (
               <div
                 key={contact.id}
                 className="flex items-center space-x-3 border rounded-md p-3 hover:bg-secondary/20 transition-colors"
