@@ -3,6 +3,7 @@
  */
 
 import { Outreach } from "@/services/rel8t/outreachService";
+import { getLocationFromChannel } from "./channelLocationHelper";
 
 const formatICSDate = (date: Date): string => {
   const pad = (num: number) => String(num).padStart(2, '0');
@@ -10,7 +11,13 @@ const formatICSDate = (date: Date): string => {
   return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
 };
 
-export const generateOutreachICS = (outreach: Outreach, systemEmail: string, userEmail?: string): string => {
+export const generateOutreachICS = (
+  outreach: Outreach, 
+  systemEmail: string, 
+  userEmail?: string,
+  outreachChannel?: string | null,
+  channelDetails?: Record<string, any> | null
+): string => {
   const now = new Date();
   const startDate = new Date(outreach.due_date);
   const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
@@ -22,6 +29,9 @@ export const generateOutreachICS = (outreach: Outreach, systemEmail: string, use
   
   const contactNames = outreach.contacts?.map(c => c.name).join(', ') || 'contacts';
   const description = outreach.description || `Follow up with ${contactNames}`;
+  
+  // Get location from channel information
+  const location = getLocationFromChannel(outreachChannel, channelDetails);
   
   // Escape special characters for ICS format
   const escapeICSText = (text: string) => {
@@ -46,7 +56,7 @@ DTSTART:${startDateFormatted}
 DTEND:${endDateFormatted}
 SUMMARY:${escapeICSText(outreach.title)}
 DESCRIPTION:${escapeICSText(description)}
-LOCATION:REL8 Platform
+LOCATION:${escapeICSText(location)}
 STATUS:CONFIRMED
 SEQUENCE:0
 PRIORITY:${outreach.priority === 'high' ? '1' : outreach.priority === 'medium' ? '5' : '9'}
