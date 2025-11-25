@@ -19,7 +19,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Contact } from "@/services/rel8t/contactService";
 import { Label } from "@/components/ui/label";
-import { Check, AlertCircle, Flag, CalendarIcon } from "lucide-react";
+import { Check, AlertCircle, Flag, CalendarIcon, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getTriggers, Trigger } from "@/services/rel8t/triggerService";
 import { format } from "date-fns";
@@ -28,15 +29,32 @@ interface SelectTriggersStepProps {
   selectedContacts: Contact[];
   onNext: (data: { triggers: Trigger[], priority: 'low' | 'medium' | 'high' }) => void;
   onPrevious?: () => void;
+  initialSelectedTrigger?: Trigger | null;
 }
 
 export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
   selectedContacts,
   onNext,
   onPrevious,
+  initialSelectedTrigger,
 }) => {
   const [selectedTriggers, setSelectedTriggers] = useState<Trigger[]>([]);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+
+  // Auto-select the trigger returned from creation
+  useEffect(() => {
+    if (initialSelectedTrigger) {
+      setSelectedTriggers(prev => {
+        const alreadySelected = prev.some(t => t.id === initialSelectedTrigger.id);
+        if (!alreadySelected) {
+          return [...prev, initialSelectedTrigger];
+        }
+        return prev;
+      });
+    }
+  }, [initialSelectedTrigger]);
+
+  const navigate = useNavigate();
 
   // Fetch actual triggers from database
   const { data: triggers = [], isLoading } = useQuery({
@@ -136,14 +154,25 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
         </RadioGroup>
       </div>
 
-      <div>
-        <h3 className="text-lg font-medium mb-2">Add Reminders</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Select reminders to help you stay in touch with 
-          {selectedContacts.length === 1 
-            ? " this contact" 
-            : ` these ${selectedContacts.length} contacts`}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Add Reminders</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Select reminders to help you stay in touch with 
+            {selectedContacts.length === 1 
+              ? " this contact" 
+              : ` these ${selectedContacts.length} contacts`}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/rel8/triggers/new?returnTo=relationship")}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Create New Trigger
+        </Button>
       </div>
 
       {isLoading ? (

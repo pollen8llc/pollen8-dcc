@@ -61,14 +61,6 @@ const RelationshipWizard = () => {
     }
   }, [selectedTrigger]);
 
-  // Auto-advance to review step when we have a selected trigger
-  useEffect(() => {
-    if (step === "select-triggers" && selectedTrigger) {
-      const timer = setTimeout(() => setStep("review"), 100);
-      return () => clearTimeout(timer);
-    }
-  }, [step, selectedTrigger]);
-
   const handleSelectContactsNext = (stepData: { contacts: Contact[] }) => {
     setData(prev => ({ ...prev, contacts: stepData.contacts }));
     // If we have a selected trigger, skip triggers step and go to review
@@ -170,21 +162,13 @@ const RelationshipWizard = () => {
               />
             )}
 
-            {step === "select-triggers" && !selectedTrigger && (
+            {step === "select-triggers" && (
               <SelectTriggersStep
                 onNext={handleSelectTriggersNext}
                 onPrevious={() => setStep("select-contacts")}
                 selectedContacts={data.contacts}
+                initialSelectedTrigger={selectedTrigger}
               />
-            )}
-            
-            {/* Skip trigger selection if we already have a selected trigger */}
-            {step === "select-triggers" && selectedTrigger && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-4">
-                  Trigger already selected. Proceeding to review...
-                </p>
-              </div>
             )}
             
             {step === "review" && (
