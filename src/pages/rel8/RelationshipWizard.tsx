@@ -32,7 +32,15 @@ const initialData: WizardData = {
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
-  const { selectedTrigger, preSelectedContacts, clearWizardData } = useRelationshipWizard();
+  const { 
+    selectedTrigger, 
+    preSelectedContacts, 
+    wizardStep,
+    workingContacts,
+    setWizardStep,
+    setWorkingContacts,
+    clearWizardData 
+  } = useRelationshipWizard();
   
   const [step, setStep] = useState<WizardStep>("select-contacts");
   const [data, setData] = useState<WizardData>(initialData);
@@ -40,13 +48,21 @@ const RelationshipWizard = () => {
   const [createdTrigger, setCreatedTrigger] = useState<Trigger | null>(null);
   const [icsContent, setIcsContent] = useState<string | null>(null);
 
-  // Initialize wizard with pre-selected contacts from Contacts page
+  // Initialize wizard with persisted state when returning from trigger creation
+  // or with pre-selected contacts from Contacts page
   useEffect(() => {
-    if (preSelectedContacts.length > 0) {
+    if (wizardStep && workingContacts.length > 0) {
+      // Restore persisted state from context
+      setData(prev => ({ ...prev, contacts: workingContacts }));
+      setStep(wizardStep);
+      // Clear persisted state after restoring
+      setWizardStep(null);
+      setWorkingContacts([]);
+    } else if (preSelectedContacts.length > 0) {
+      // Initial load from Contacts page
       setData(prev => ({ ...prev, contacts: preSelectedContacts }));
-      // Stay on step 1 - contacts are pre-populated for confirmation
     }
-  }, [preSelectedContacts]);
+  }, [wizardStep, workingContacts, preSelectedContacts, setWizardStep, setWorkingContacts]);
 
   // Initialize wizard data with selected trigger from context
   useEffect(() => {

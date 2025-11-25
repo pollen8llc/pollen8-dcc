@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,6 +41,7 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
 }) => {
   const [selectedTriggers, setSelectedTriggers] = useState<Trigger[]>([]);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const { setWizardStep, setWorkingContacts } = useRelationshipWizard();
 
   // Auto-select the trigger returned from creation
   useEffect(() => {
@@ -55,6 +57,13 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
   }, [initialSelectedTrigger]);
 
   const navigate = useNavigate();
+
+  const handleCreateTrigger = () => {
+    // Persist wizard state before navigating away
+    setWizardStep("select-triggers");
+    setWorkingContacts(selectedContacts);
+    navigate("/rel8/triggers/wizard?returnTo=relationship");
+  };
 
   // Fetch actual triggers from database
   const { data: triggers = [], isLoading } = useQuery({
@@ -167,7 +176,7 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate("/rel8/triggers/wizard?returnTo=relationship")}
+          onClick={handleCreateTrigger}
           className="flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
