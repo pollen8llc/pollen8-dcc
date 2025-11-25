@@ -108,7 +108,9 @@ export const ReviewSubmitStep = ({
           description: trigger.description || `Reminder for ${contacts.map(c => c.name).join(', ')}`,
           priority: priority,
           status: 'pending' as OutreachStatus,
-          due_date: dueDate.toISOString()
+          due_date: dueDate.toISOString(),
+          outreach_channel: trigger.outreach_channel,
+          channel_details: trigger.channel_details
         };
         
         return await createOutreach(outreach, contactIds);

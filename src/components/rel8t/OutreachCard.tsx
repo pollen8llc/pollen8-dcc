@@ -55,7 +55,13 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
 
     // Use system email from outreach as organizer, fallback to user email
     const systemEmail = outreach.system_email || userEmail || 'notifications@ecosystembuilder.app';
-    const ics = generateOutreachICS(outreach, systemEmail, userEmail);
+    const ics = generateOutreachICS(
+      outreach, 
+      systemEmail, 
+      userEmail,
+      outreach.outreach_channel,
+      outreach.channel_details
+    );
     setIcsContent(ics);
     setShowCalendarDialog(true);
   };

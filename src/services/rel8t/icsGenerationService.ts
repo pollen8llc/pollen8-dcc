@@ -3,6 +3,8 @@
  * Creates iCalendar (.ics) files for trigger events
  */
 
+import { getLocationFromChannel } from "@/utils/channelLocationHelper";
+
 export interface ICSEventData {
   uid: string;
   summary: string;
@@ -217,13 +219,16 @@ export const triggerToICSEventData = (
 
   const description = `${trigger.description || "Automated reminder from Ecosystem Builder REL8"}${channelInfo}`;
 
+  // Get location from channel information
+  const location = getLocationFromChannel(trigger.outreach_channel, trigger.channel_details);
+
   return {
     uid: trigger.calendar_event_uid || `trigger-${trigger.id}@ecosystembuilder.app`,
     summary: trigger.name,
     description,
     startDate,
     endDate,
-    location: 'Ecosystem Builder Platform',
+    location,
     organizer: {
       email: trigger.system_email || 'notifications@ecosystembuilder.app',
       name: 'Ecosystem Builder REL8 System',

@@ -37,6 +37,8 @@ export interface Outreach {
   system_email?: string;
   last_calendar_update?: string;
   raw_ics?: string;
+  outreach_channel?: string | null;
+  channel_details?: Record<string, any> | null;
 }
 
 export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> => {
@@ -300,7 +302,9 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     const icsContent = generateOutreachICS(
       { ...data, contacts: [] } as Outreach, 
       systemEmail,
-      userEmail
+      userEmail,
+      outreach.outreach_channel,
+      outreach.channel_details
     );
     
     // Create email notification with ICS attachment
