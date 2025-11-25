@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { OutreachTimelineDialog } from "@/components/rel8t/OutreachTimelineDialog";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export default function Notifications() {
   const [statusFilter, setStatusFilter] = useState<NotificationStatus>("all");
   const [activeView, setActiveView] = useState<NotificationView>("all");
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; type: "email" | "sync" } | null>(null);
+  const [selectedOutreachId, setSelectedOutreachId] = useState<string | null>(null);
 
   // Fetch cross-platform notifications
   const { data: platformNotifications, isLoading: platformNotificationsLoading, refetch: refetchPlatform } = useQuery({
@@ -479,7 +481,11 @@ export default function Notifications() {
 
     if (item._type === 'calendar') {
       return (
-        <Card key={item.id} className="glass-morphism border-0 backdrop-blur-md hover:bg-card/60 transition-all">
+        <Card 
+          key={item.id} 
+          className="glass-morphism border-0 backdrop-blur-md hover:bg-card/60 transition-all cursor-pointer"
+          onClick={() => setSelectedOutreachId(item.outreach_id)}
+        >
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col gap-4">
               <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -534,7 +540,10 @@ export default function Notifications() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setDeleteTarget({ id: item.id, type: "sync" })}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteTarget({ id: item.id, type: "sync" });
+                  }}
                   className="flex-1 sm:flex-none min-w-[120px] hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 className="h-3 w-3 mr-2" />
@@ -760,6 +769,12 @@ export default function Notifications() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <OutreachTimelineDialog
+        outreachId={selectedOutreachId}
+        isOpen={!!selectedOutreachId}
+        onClose={() => setSelectedOutreachId(null)}
+      />
     </div>
   );
 }
