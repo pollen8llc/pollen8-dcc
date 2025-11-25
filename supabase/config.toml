@@ -72,3 +72,6 @@ enabled = false
 client_id = ""
 secret = ""
 redirect_uri = ""
+
+[functions.receive-calendar-update]
+verify_jwt = false
