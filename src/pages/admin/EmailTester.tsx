@@ -178,7 +178,7 @@ END:VCALENDAR`);
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="icsContent">ICS File Content</Label>
+                <Label htmlFor="icsContent">ICS File Content (Reference Only)</Label>
                 <Textarea
                   id="icsContent"
                   value={icsContent}
@@ -187,8 +187,12 @@ END:VCALENDAR`);
                   className="font-mono text-sm"
                   placeholder="BEGIN:VCALENDAR..."
                 />
+                <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                  ⚠️ Note: The edge function fetches ICS content from Resend API, not from this field. 
+                  This webhook test will fail unless the email_id exists in Resend with a real ICS attachment.
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  The ICS content that would be in the email attachment
+                  For real testing, send an actual email with ICS attachment to your Resend inbound address.
                 </p>
               </div>
 
@@ -272,21 +276,44 @@ END:VCALENDAR`);
               <CardTitle>Testing Instructions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <div>
-                <p className="font-semibold text-foreground mb-1">1. Email Subject Format</p>
-                <p>Must include either the short outreach ID (first 8 chars) or the full ics_uid from the database.</p>
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-4">
+                <p className="font-semibold text-yellow-600 dark:text-yellow-400 mb-2">⚠️ Important: Webhook Testing Limitations</p>
+                <p className="text-xs">
+                  This tester sends a webhook payload, but the edge function fetches ICS attachments from Resend's API. 
+                  The test will fail with a 500 error unless the email_id actually exists in Resend with a real ICS attachment.
+                </p>
               </div>
+              
               <div>
-                <p className="font-semibold text-foreground mb-1">2. ICS UID Matching</p>
-                <p>The UID in the ICS content should match the calendar_event_uid in rms_outreach table.</p>
+                <p className="font-semibold text-foreground mb-1">Real-World Testing (Recommended)</p>
+                <ol className="list-decimal ml-4 space-y-1">
+                  <li>Create an outreach task in REL8 (it will send you an ICS calendar invite)</li>
+                  <li>Accept the calendar invite in your calendar app (Google, Outlook, etc.)</li>
+                  <li>Modify the event in your calendar (change time, title, etc.)</li>
+                  <li>Your calendar provider will send update email to the system address</li>
+                  <li>Check rms_outreach_sync_log to see the sync event</li>
+                </ol>
               </div>
+              
               <div>
-                <p className="font-semibold text-foreground mb-1">3. Check Database</p>
-                <p>After a successful test, check the rms_outreach_sync_log table to see the logged event.</p>
+                <p className="font-semibold text-foreground mb-1">Webhook Payload Structure</p>
+                <p>This tester helps you understand the webhook payload structure that Resend sends:</p>
+                <ul className="list-disc ml-4 space-y-1 mt-1">
+                  <li>Email subject must contain outreach short ID (e.g., "Outreach #904a90dd: ...")</li>
+                  <li>Attachments array indicates ICS file presence</li>
+                  <li>Edge function fetches actual ICS content from Resend API</li>
+                  <li>ICS UID must match calendar_event_uid in rms_outreach table</li>
+                </ul>
               </div>
+              
               <div>
-                <p className="font-semibold text-foreground mb-1">4. SEQUENCE Number</p>
-                <p>Change the SEQUENCE number in the ICS to test update detection (higher = newer version).</p>
+                <p className="font-semibold text-foreground mb-1">Check Sync Results</p>
+                <p>After updates, check these tables:</p>
+                <ul className="list-disc ml-4 space-y-1 mt-1">
+                  <li><code className="bg-muted px-1 rounded">rms_outreach_sync_log</code> - All sync events with changes</li>
+                  <li><code className="bg-muted px-1 rounded">rms_outreach</code> - Updated event details</li>
+                  <li><code className="bg-muted px-1 rounded">cross_platform_notifications</code> - User notifications</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
