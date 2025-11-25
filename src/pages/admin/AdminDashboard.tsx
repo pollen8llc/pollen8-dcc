@@ -125,6 +125,9 @@ const AdminDashboard = () => {
                 <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
                   System Settings
                 </TabsTrigger>
+                <TabsTrigger value="email-tester" className="data-[state=active]:bg-primary data-[state=active]:text-black font-medium rounded-xl transition-all duration-300">
+                  Email Tester
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="animate-fade-in">
@@ -220,6 +223,31 @@ const AdminDashboard = () => {
                   
                   {/* Technical Documentation Generator */}
                   <TechnicalDocumentationGenerator />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="email-tester" className="animate-fade-in">
+                <div className="glass-morphism glass-morphism-hover rounded-3xl p-8 border border-primary/20">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                      <span className="text-black font-bold text-xl">📧</span>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground">Email Tester</h2>
+                      <p className="text-muted-foreground">Test the inbound email webhook system</p>
+                    </div>
+                  </div>
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground mb-4">
+                      Navigate to the dedicated email tester page for full functionality
+                    </p>
+                    <a 
+                      href="/admin/email-tester" 
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black rounded-xl hover:bg-primary/90 transition-colors font-medium"
+                    >
+                      Open Email Tester
+                    </a>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
