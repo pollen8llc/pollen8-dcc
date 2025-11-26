@@ -97,20 +97,70 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("📊 Final detected status:", detectedStatus);
 
-    // Try to extract new date from email body for reschedules
-    let newDateString = null;
-    if (detectedStatus === 'rescheduled') {
-      const datePatterns = [
+    // Extract responder information from 'from' field
+    const responderMatch = from.match(/^(.+?)\s*<(.+?)>$/);
+    const responderName = responderMatch ? responderMatch[1].replace(/['"]/g, '').trim() : null;
+    const responderEmail = responderMatch ? responderMatch[2] : from;
+    console.log("👤 Responder:", responderName || responderEmail);
+
+    // Extract attendee note/comment from body if present
+    let attendeeNote = null;
+    if (emailBody) {
+      const notePatterns = [
+        /note[:\s]+["']?(.+?)["']?(?:\n\n|\n[A-Z]|$)/is,
+        /comment[:\s]+["']?(.+?)["']?(?:\n\n|\n[A-Z]|$)/is,
+        /message[:\s]+["']?(.+?)["']?(?:\n\n|\n[A-Z]|$)/is,
+        /"([^"]{10,200})"/,  // Quoted message between 10-200 chars
+      ];
+
+      for (const pattern of notePatterns) {
+        const match = emailBody.match(pattern);
+        if (match) {
+          attendeeNote = match[1].trim();
+          if (attendeeNote.length > 200) {
+            attendeeNote = attendeeNote.substring(0, 200) + '...';
+          }
+          console.log("💬 Attendee note found:", attendeeNote.substring(0, 50));
+          break;
+        }
+      }
+    }
+
+    // Extract time changes from body
+    let newTimeInfo = null;
+    if (emailBody) {
+      const timePatterns = [
+        /when[:\s]+(.+?)(?:\n|$)/i,
+        /time[:\s]+(.+?)(?:\n|$)/i,
         /new time[:\s]+(.+?)(?:\n|$)/i,
         /rescheduled to[:\s]+(.+?)(?:\n|$)/i,
         /changed to[:\s]+(.+?)(?:\n|$)/i,
       ];
 
-      for (const pattern of datePatterns) {
+      for (const pattern of timePatterns) {
         const match = emailBody.match(pattern);
         if (match) {
-          newDateString = match[1].trim();
-          console.log("📅 Extracted new date:", newDateString);
+          newTimeInfo = match[1].trim();
+          console.log("🕐 Time info found:", newTimeInfo);
+          break;
+        }
+      }
+    }
+
+    // Extract location changes from body
+    let newLocation = null;
+    if (emailBody) {
+      const locationPatterns = [
+        /where[:\s]+(.+?)(?:\n|$)/i,
+        /location[:\s]+(.+?)(?:\n|$)/i,
+        /new location[:\s]+(.+?)(?:\n|$)/i,
+      ];
+
+      for (const pattern of locationPatterns) {
+        const match = emailBody.match(pattern);
+        if (match) {
+          newLocation = match[1].trim();
+          console.log("📍 Location found:", newLocation);
           break;
         }
       }
@@ -154,21 +204,33 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("✅ Found matching outreach task:", outreach.id);
 
-    // Calculate what changed based on detected status
+    // Build comprehensive changes object with all extracted data
     const changes: Record<string, any> = {
-      status: { old: outreach.status, new: detectedStatus }
+      status: { old: outreach.status, new: detectedStatus },
+      responder: {
+        name: responderName,
+        email: responderEmail
+      }
     };
 
-    // Try to parse new date if provided
-    if (newDateString) {
+    // Add optional fields if found
+    if (attendeeNote) {
+      changes.note = attendeeNote;
+    }
+    if (newTimeInfo) {
+      changes.newTime = newTimeInfo;
+      // Try to parse as date for due_date update
       try {
-        const parsedDate = new Date(newDateString);
+        const parsedDate = new Date(newTimeInfo);
         if (!isNaN(parsedDate.getTime())) {
           changes.due_date = { old: outreach.due_date, new: parsedDate.toISOString() };
         }
       } catch (e) {
-        console.log("Failed to parse new date:", newDateString);
+        console.log("Could not parse time as date:", newTimeInfo);
       }
+    }
+    if (newLocation) {
+      changes.location = newLocation;
     }
 
     // Update the outreach task status
@@ -237,17 +299,28 @@ const handler = async (req: Request): Promise<Response> => {
       ? '🔄 Calendar Event Rescheduled'
       : '📝 Calendar Event Updated';
 
-    const notificationMessage = detectedStatus === 'cancelled'
-      ? `${outreach.title} was cancelled`
-      : detectedStatus === 'accepted'
-      ? `${outreach.title} was accepted`
-      : detectedStatus === 'declined'
-      ? `${outreach.title} was declined`
-      : detectedStatus === 'tentative'
-      ? `${outreach.title} marked as tentative`
-      : detectedStatus === 'rescheduled' && newDateString
-      ? `${outreach.title} was rescheduled to ${newDateString}`
-      : `${outreach.title} was updated`;
+    // Build enhanced notification message with responder info and notes
+    let notificationMessage = '';
+    const responderDisplay = responderName || responderEmail;
+    
+    if (detectedStatus === 'cancelled') {
+      notificationMessage = `${responderDisplay} cancelled: ${outreach.title}`;
+    } else if (detectedStatus === 'accepted') {
+      notificationMessage = `${responderDisplay} accepted: ${outreach.title}`;
+    } else if (detectedStatus === 'declined') {
+      notificationMessage = `${responderDisplay} declined: ${outreach.title}`;
+    } else if (detectedStatus === 'tentative') {
+      notificationMessage = `${responderDisplay} marked as tentative: ${outreach.title}`;
+    } else if (detectedStatus === 'rescheduled' && newTimeInfo) {
+      notificationMessage = `${responderDisplay} rescheduled: ${outreach.title} to ${newTimeInfo}`;
+    } else {
+      notificationMessage = `${responderDisplay} updated: ${outreach.title}`;
+    }
+
+    // Append attendee note if present
+    if (attendeeNote) {
+      notificationMessage += ` - "${attendeeNote}"`;
+    }
 
     const { error: notifError } = await supabase
       .from("cross_platform_notifications")
