@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, Bell, User, Building2 } from "lucide-react";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,7 @@ export const CrossPlatformNotificationCard = ({
   onDelete 
 }: CrossPlatformNotificationCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const isMobile = useIsMobile();
   
   // Extract reference from metadata
   const getReference = () => {
@@ -59,7 +61,7 @@ export const CrossPlatformNotificationCard = ({
   return (
     <>
       <Card className="group bg-card border-border/50 hover:border-border hover:shadow-md transition-all duration-200">
-        <CardContent className="p-4">
+        <CardContent className={`${isMobile ? 'p-3' : 'p-4'}`}>
           <div className="flex items-start gap-3">
             <div className="mt-0.5 shrink-0">
               <div className={`relative ${notification.is_read ? 'opacity-50' : ''}`}>
@@ -70,9 +72,9 @@ export const CrossPlatformNotificationCard = ({
               </div>
             </div>
             
-            <div className="flex-1 min-w-0 space-y-1.5">
+            <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <h3 className={`font-medium text-sm leading-tight ${
+                <h3 className={`font-medium text-sm leading-tight pr-2 ${
                   notification.is_read ? 'text-foreground' : 'text-primary'
                 }`}>
                   {notification.title}
@@ -81,9 +83,9 @@ export const CrossPlatformNotificationCard = ({
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowDeleteDialog(true)}
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0"
+                  className={`${isMobile ? 'h-9 w-9 opacity-100' : 'h-7 w-7 opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0`}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className={isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} />
                 </Button>
               </div>
               
@@ -91,16 +93,31 @@ export const CrossPlatformNotificationCard = ({
                 {notification.message}
               </p>
               
-              <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                <span className="text-muted-foreground">{format(new Date(notification.created_at), "MMM d, h:mm a")}</span>
-                <span className="text-muted-foreground/50">•</span>
-                <span className="text-muted-foreground/70 capitalize">{notification.notification_type.replace(/_/g, ' ')}</span>
-                <span className="text-muted-foreground/50">•</span>
-                <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
-                  <ReferenceIcon className="h-3 w-3" />
-                  {ref.name}
-                </span>
-              </div>
+              {isMobile ? (
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-muted-foreground">{format(new Date(notification.created_at), "MMM d, h:mm a")}</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-muted-foreground/70 capitalize">{notification.notification_type.replace(/_/g, ' ')}</span>
+                    <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
+                      <ReferenceIcon className="h-3 w-3" />
+                      <span>{ref.name}</span>
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                  <span className="text-muted-foreground">{format(new Date(notification.created_at), "MMM d, h:mm a")}</span>
+                  <span className="text-muted-foreground/50">•</span>
+                  <span className="text-muted-foreground/70 capitalize">{notification.notification_type.replace(/_/g, ' ')}</span>
+                  <span className="text-muted-foreground/50">•</span>
+                  <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
+                    <ReferenceIcon className="h-3 w-3" />
+                    {ref.name}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
