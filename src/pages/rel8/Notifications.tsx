@@ -437,10 +437,10 @@ export default function Notifications() {
                 
                 {/* Content */}
                 <div className="flex-1 min-w-0 space-y-2">
-                  {/* Header Row */}
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-sm leading-tight text-foreground truncate flex-1">{item.subject}</h3>
-                    <div className="flex items-center gap-1 shrink-0">
+                  {/* Header - Stack on mobile */}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                    <h3 className="font-medium text-sm leading-tight text-foreground sm:truncate sm:flex-1">{item.subject}</h3>
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
                         {format(new Date(item.created_at), "h:mm a")}
                       </span>
@@ -451,34 +451,38 @@ export default function Notifications() {
                           e.stopPropagation();
                           setDeleteTarget({ id: item.id, type: "email" });
                         }}
-                        className={`h-6 w-6 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity`}
+                        className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity`}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
                   
-                  {/* Metadata Line */}
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                    <span className="text-primary/80 capitalize">{item.status}</span>
-                    {item.has_ics_attachment && (
-                      <>
-                        <span className="text-muted-foreground/50">|</span>
-                        <Calendar className="h-3 w-3 text-green-500" />
-                        <span className="text-green-500">Calendar</span>
-                      </>
-                    )}
-                    {isOutreachEmail && (
-                      <>
-                        <span className="text-muted-foreground/50">|</span>
-                        <span className="text-primary/80">Outreach</span>
-                      </>
-                    )}
-                    <span className="text-muted-foreground/50">|</span>
-                    <ReferenceIcon className="h-3 w-3 text-muted-foreground/70" />
-                    <span className="text-muted-foreground/70 capitalize truncate">
-                      {ref.type}: {ref.name}
-                    </span>
+                  {/* Metadata - Stack on mobile */}
+                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row flex-wrap items-center'} gap-1.5 text-xs`}>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-primary/80 capitalize">{item.status}</span>
+                      {item.has_ics_attachment && (
+                        <>
+                          <span className="text-muted-foreground/50">|</span>
+                          <Calendar className="h-3 w-3 text-green-500" />
+                          <span className="text-green-500">Calendar</span>
+                        </>
+                      )}
+                      {isOutreachEmail && (
+                        <>
+                          <span className="text-muted-foreground/50">|</span>
+                          <span className="text-primary/80">Outreach</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {!isMobile && <span className="text-muted-foreground/50">|</span>}
+                      <ReferenceIcon className="h-3 w-3 text-muted-foreground/70" />
+                      <span className="text-muted-foreground/70 capitalize">
+                        {ref.type}: {ref.name}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Action Buttons */}
@@ -563,12 +567,12 @@ export default function Notifications() {
                 
                 {/* Content */}
                 <div className="flex-1 min-w-0 space-y-2">
-                  {/* Header Row */}
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-sm leading-tight text-foreground truncate flex-1">
+                  {/* Header - Stack on mobile */}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                    <h3 className="font-medium text-sm leading-tight text-foreground sm:truncate sm:flex-1">
                       {item.outreach?.title || "Calendar Update"}
                     </h3>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
                         {format(new Date(item.created_at), "h:mm a")}
                       </span>
@@ -579,15 +583,15 @@ export default function Notifications() {
                           e.stopPropagation();
                           setDeleteTarget({ id: item.id, type: "sync" });
                         }}
-                        className={`h-6 w-6 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity`}
+                        className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity`}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
                   
-                  {/* Metadata Line */}
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                  {/* Metadata - Stack on mobile */}
+                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row flex-wrap items-center'} gap-1.5 text-xs`}>
                     <span className={
                       item.sync_type === 'update' ? 'text-blue-500' :
                       item.sync_type === 'reschedule' ? 'text-yellow-500' :
@@ -597,18 +601,18 @@ export default function Notifications() {
                       {item.sync_type.charAt(0).toUpperCase() + item.sync_type.slice(1)}
                     </span>
                     {item.email_from && (
-                      <>
-                        <span className="text-muted-foreground/50">|</span>
-                        <span className="text-muted-foreground/70 truncate">
+                      <div className="flex items-center gap-1.5">
+                        {!isMobile && <span className="text-muted-foreground/50">|</span>}
+                        <span className="text-muted-foreground/70">
                           {item.email_from.split('@')[0]}
                         </span>
-                      </>
+                      </div>
                     )}
                     {updateCount > 1 && (
-                      <>
-                        <span className="text-muted-foreground/50">|</span>
+                      <div className="flex items-center gap-1.5">
+                        {!isMobile && <span className="text-muted-foreground/50">|</span>}
                         <span className="text-primary/80">{updateCount} updates</span>
-                      </>
+                      </div>
                     )}
                   </div>
 

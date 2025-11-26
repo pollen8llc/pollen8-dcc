@@ -78,12 +78,12 @@ export const CrossPlatformNotificationCard = ({
             
             {/* Content */}
             <div className="flex-1 min-w-0 space-y-2">
-              {/* Header Row */}
-              <div className="flex items-start justify-between gap-2">
-                <h3 className={`font-medium text-sm leading-tight ${notification.is_read ? 'text-foreground' : 'text-primary'} truncate flex-1`}>
+              {/* Header - Stack on mobile */}
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                <h3 className={`font-medium text-sm leading-tight ${notification.is_read ? 'text-foreground' : 'text-primary'} sm:truncate sm:flex-1`}>
                   {notification.title}
                 </h3>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {format(new Date(notification.created_at), "h:mm a")}
                   </span>
@@ -91,7 +91,7 @@ export const CrossPlatformNotificationCard = ({
                     variant="ghost"
                     size="icon"
                     onClick={() => setShowDeleteDialog(true)}
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                    className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity`}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -103,20 +103,24 @@ export const CrossPlatformNotificationCard = ({
                 {notification.message}
               </p>
               
-              {/* Metadata Line */}
-              <div className="flex items-center gap-1.5 text-xs">
-                <span className="text-primary/80 capitalize">
-                  {notification.notification_type.replace(/_/g, ' ')}
-                </span>
-                <span className="text-muted-foreground/50">|</span>
-                <ReferenceIcon className="h-3 w-3 text-muted-foreground/70" />
-                <span className="text-muted-foreground/70 capitalize truncate">
-                  {ref.type}: {ref.name}
-                </span>
-                <span className="text-muted-foreground/50">|</span>
-                <span className="text-muted-foreground/70 font-mono text-[10px]">
-                  #{notification.id.slice(0, 6)}
-                </span>
+              {/* Metadata - Stack on mobile */}
+              <div className={`flex ${isMobile ? 'flex-col' : 'flex-row items-center'} gap-1.5 text-xs`}>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-primary/80 capitalize">
+                    {notification.notification_type.replace(/_/g, ' ')}
+                  </span>
+                  <span className="text-muted-foreground/50">|</span>
+                  <ReferenceIcon className="h-3 w-3 text-muted-foreground/70" />
+                  <span className="text-muted-foreground/70 capitalize">
+                    {ref.type}: {ref.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {!isMobile && <span className="text-muted-foreground/50">|</span>}
+                  <span className="text-muted-foreground/70 font-mono text-[10px]">
+                    #{notification.id.slice(0, 6)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
