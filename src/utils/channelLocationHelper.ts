@@ -14,14 +14,14 @@ export const getLocationFromChannel = (
   switch (outreachChannel) {
     case "text":
     case "call":
-      return channelDetails.phone ? `📱 ${channelDetails.phone}` : "Phone";
+      return channelDetails.phone ? `Phone: ${channelDetails.phone}` : "Phone";
     
     case "email":
-      return channelDetails.email ? `✉️ ${channelDetails.email}` : "Email";
+      return channelDetails.email ? `Email: ${channelDetails.email}` : "Email";
     
     case "dm":
       return channelDetails.platform && channelDetails.handle 
-        ? `💬 ${channelDetails.platform}: @${channelDetails.handle}` 
+        ? `${channelDetails.platform}: @${channelDetails.handle}` 
         : "Direct Message";
     
     case "meeting":

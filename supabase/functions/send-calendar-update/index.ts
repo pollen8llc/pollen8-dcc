@@ -50,19 +50,19 @@ const getLocationFromChannel = (channel: string | null, details: any): string =>
   switch (channel) {
     case 'text':
     case 'call':
-      return details.phone ? `📱 ${details.phone}` : 'Phone';
+      return details.phone ? `Phone: ${details.phone}` : 'Phone';
     case 'email':
-      return details.email ? `✉️ ${details.email}` : 'Email';
+      return details.email ? `Email: ${details.email}` : 'Email';
     case 'dm':
       return details.platform && details.handle 
-        ? `💬 ${details.platform}: @${details.handle}` 
+        ? `${details.platform}: @${details.handle}` 
         : 'Direct Message';
     case 'meeting':
       return details.link 
-        ? `🔗 ${details.link}` 
+        ? `Link: ${details.link}` 
         : details.meetingPlatform || 'Virtual Meeting';
     case 'irl':
-      return details.address ? `📍 ${details.address}` : 'In Person';
+      return details.address ? `Address: ${details.address}` : 'In Person';
     default:
       return 'REL8 Platform';
   }
