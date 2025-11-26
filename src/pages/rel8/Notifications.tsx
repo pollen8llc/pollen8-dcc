@@ -409,134 +409,116 @@ export default function Notifications() {
       const isOutreachEmail = item.notification_type === "outreach_created";
       const outreachId = item.metadata?.outreachId;
       const isExpanded = outreachId && expandedOutreachIds.has(outreachId);
+      
+      const getStatusColor = () => {
+        if (item.status === 'sent') return 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]';
+        if (item.status === 'failed') return 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]';
+        if (item.status === 'pending') return 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.4)] animate-pulse';
+        return 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]';
+      };
 
       return (
         <div key={item.id} className="group">
           <Card 
-            className={`bg-card border-border/50 hover:border-border hover:shadow-md transition-all duration-200 ${
+            className={`glass-morphism border-0 bg-card/30 backdrop-blur-md hover:bg-card/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 ${
               isOutreachEmail ? 'cursor-pointer' : ''
             }`}
             onClick={isOutreachEmail && outreachId ? () => toggleOutreachExpanded(outreachId) : undefined}
           >
-            <CardContent className={`${isMobile ? 'p-3' : 'p-4'}`}>
+            <CardContent className="p-4">
               <div className="flex items-start gap-3">
+                {/* Status Indicator */}
+                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${getStatusColor()}`} />
+                
+                {/* Status Icon */}
                 <div className="mt-0.5 shrink-0">
                   {getStatusIcon(item.status)}
                 </div>
                 
+                {/* Content */}
                 <div className="flex-1 min-w-0 space-y-2">
+                  {/* Header Row */}
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-sm leading-tight text-foreground pr-2">{item.subject}</h3>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget({ id: item.id, type: "email" });
-                      }}
-                      className={`${isMobile ? 'h-9 w-9 opacity-100' : 'h-7 w-7 opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0`}
-                    >
-                      <Trash2 className={isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} />
-                    </Button>
-                  </div>
-                  
-                  {isMobile ? (
-                    <div className="space-y-1 text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {item.has_ics_attachment && (
-                          <span className="text-green-500 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>Calendar</span>
-                          </span>
-                        )}
-                        {isOutreachEmail && (
-                          <span className="text-primary/80">Outreach</span>
-                        )}
-                        <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
-                          <ReferenceIcon className="h-3 w-3" />
-                          <span>{ref.name}</span>
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                      <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
-                      {item.has_ics_attachment && (
-                        <>
-                          <span className="text-muted-foreground/50">•</span>
-                          <span className="text-green-500 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            Calendar
-                          </span>
-                        </>
-                      )}
-                      {isOutreachEmail && (
-                        <>
-                          <span className="text-muted-foreground/50">•</span>
-                          <span className="text-primary/80">Outreach</span>
-                        </>
-                      )}
-                      <span className="text-muted-foreground/50">•</span>
-                      <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
-                        <ReferenceIcon className="h-3 w-3" />
-                        {ref.name}
+                    <h3 className="font-medium text-sm leading-tight text-foreground truncate flex-1">{item.subject}</h3>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {format(new Date(item.created_at), "h:mm a")}
                       </span>
-                    </div>
-                  )}
-
-                  {item.sent_at && (
-                    <p className="text-xs text-muted-foreground">Sent {format(new Date(item.sent_at), "MMM d, h:mm a")}</p>
-                  )}
-
-                  {item.error_message && (
-                    <div className="mt-2 p-2 bg-destructive/10 rounded-md">
-                      <p className="text-xs text-destructive">{item.error_message}</p>
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap gap-1.5 pt-0.5">
-                    {item.has_ics_attachment && item.ics_data && (
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDownloadICS(item);
+                          setDeleteTarget({ id: item.id, type: "email" });
                         }}
-                        className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-primary/10 hover:text-primary`}
+                        className={`h-6 w-6 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity`}
                       >
-                        <Download className="h-3 w-3 mr-1.5" />
-                        Download
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Metadata Line */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="text-primary/80 capitalize">{item.status}</span>
+                    {item.has_ics_attachment && (
+                      <>
+                        <span className="text-muted-foreground/50">|</span>
+                        <Calendar className="h-3 w-3 text-green-500" />
+                        <span className="text-green-500">Calendar</span>
+                      </>
                     )}
-                    
+                    {isOutreachEmail && (
+                      <>
+                        <span className="text-muted-foreground/50">|</span>
+                        <span className="text-primary/80">Outreach</span>
+                      </>
+                    )}
+                    <span className="text-muted-foreground/50">|</span>
+                    <ReferenceIcon className="h-3 w-3 text-muted-foreground/70" />
+                    <span className="text-muted-foreground/70 capitalize truncate">
+                      {ref.type}: {ref.name}
+                    </span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap gap-2">
                     {item.status === "failed" && (
                       <Button
-                        variant="ghost"
-                        size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           retryEmailMutation.mutate(item.id);
                         }}
-                        disabled={retryEmailMutation.isPending}
-                        className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-primary/10`}
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
                       >
-                        <RefreshCw className={`h-3 w-3 mr-1.5 ${retryEmailMutation.isPending ? 'animate-spin' : ''}`} />
+                        <RefreshCw className="h-3 w-3" />
                         Retry
                       </Button>
                     )}
-
+                    {item.has_ics_attachment && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownloadICS(item);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
+                      >
+                        <Download className="h-3 w-3" />
+                        Download
+                      </Button>
+                    )}
                     {isOutreachEmail && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => e.stopPropagation()}
-                        className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-muted`}
+                        className="h-7 text-xs gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
                       >
-                        {isExpanded ? '▼' : '▶'} Timeline
+                        <List className="h-3 w-3" />
+                        {isExpanded ? 'Hide' : 'View'} Timeline
                       </Button>
                     )}
                   </div>
@@ -546,9 +528,7 @@ export default function Notifications() {
           </Card>
           
           {isExpanded && outreachId && (
-            <div className="mt-1 bg-card border border-border/50 rounded-lg overflow-hidden">
-              <OutreachTimelineAccordion outreachId={outreachId} />
-            </div>
+            <OutreachTimelineAccordion outreachId={outreachId} />
           )}
         </div>
       );
@@ -556,135 +536,98 @@ export default function Notifications() {
 
     if (item._type === 'calendar') {
       const isExpanded = expandedOutreachIds.has(item.outreach_id);
+      const updateCount = item._updateCount || 1;
       
+      const getStatusColor = () => {
+        if (item.sync_type === 'create') return 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]';
+        if (item.sync_type === 'reschedule') return 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.4)]';
+        if (item.sync_type === 'cancel') return 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]';
+        return 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]';
+      };
+
       return (
         <div key={item.id} className="group">
           <Card 
-            className="bg-card border-border/50 hover:border-border hover:shadow-md transition-all duration-200 cursor-pointer"
+            className="glass-morphism border-0 bg-card/30 backdrop-blur-md hover:bg-card/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 cursor-pointer"
             onClick={() => toggleOutreachExpanded(item.outreach_id)}
           >
-            <CardContent className={`${isMobile ? 'p-3' : 'p-4'}`}>
+            <CardContent className="p-4">
               <div className="flex items-start gap-3">
+                {/* Status Indicator */}
+                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${getStatusColor()}`} />
+                
+                {/* Sync Type Icon */}
                 <div className="mt-0.5 shrink-0">
                   {getSyncTypeIcon(item.sync_type)}
                 </div>
                 
+                {/* Content */}
                 <div className="flex-1 min-w-0 space-y-2">
+                  {/* Header Row */}
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-sm leading-tight text-foreground pr-2">
-                      {item.outreach?.title || "Unknown Outreach"}
+                    <h3 className="font-medium text-sm leading-tight text-foreground truncate flex-1">
+                      {item.outreach?.title || "Calendar Update"}
                     </h3>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget({ id: item.id, type: "sync" });
-                      }}
-                      className={`${isMobile ? 'h-9 w-9 opacity-100' : 'h-7 w-7 opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0`}
-                    >
-                      <Trash2 className={isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} />
-                    </Button>
-                  </div>
-                  
-                  {isMobile ? (
-                    <div className="space-y-1 text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`capitalize ${
-                          item.sync_type === 'create' ? 'text-green-500' :
-                          item.sync_type === 'update' ? 'text-blue-500' :
-                          item.sync_type === 'reschedule' ? 'text-yellow-500' :
-                          item.sync_type === 'cancel' ? 'text-red-500' :
-                          'text-muted-foreground'
-                        }`}>
-                          {item.sync_type}
-                        </span>
-                        {item._updateCount > 1 && (
-                          <span className="text-primary/80">{item._updateCount} updates</span>
-                        )}
-                        {item.email_from && (
-                          <span className="text-muted-foreground/70 truncate max-w-[120px]">{item.email_from}</span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                      <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
-                      <span className="text-muted-foreground/50">•</span>
-                      <span className={`capitalize ${
-                        item.sync_type === 'create' ? 'text-green-500' :
-                        item.sync_type === 'update' ? 'text-blue-500' :
-                        item.sync_type === 'reschedule' ? 'text-yellow-500' :
-                        item.sync_type === 'cancel' ? 'text-red-500' :
-                        'text-muted-foreground'
-                      }`}>
-                        {item.sync_type}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {format(new Date(item.created_at), "h:mm a")}
                       </span>
-                      {item._updateCount > 1 && (
-                        <>
-                          <span className="text-muted-foreground/50">•</span>
-                          <span className="text-primary/80">{item._updateCount} updates</span>
-                        </>
-                      )}
-                      {item.email_from && (
-                        <>
-                          <span className="text-muted-foreground/50">•</span>
-                          <span className="text-muted-foreground/70 truncate max-w-[150px]">{item.email_from}</span>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {item.changes && Object.keys(item.changes).length > 0 && (
-                    <div className="mt-2 p-2 bg-muted/30 rounded-md space-y-1">
-                      {Object.entries(item.changes).map(([key, value]: [string, any]) => (
-                        <div key={key} className="text-xs flex items-center gap-1.5 flex-wrap">
-                          <span className="font-medium capitalize text-foreground">{key}:</span>
-                          <span className="line-through text-muted-foreground">{JSON.stringify(value.old)}</span>
-                          <span className="text-muted-foreground/50">→</span>
-                          <span className="text-foreground">{JSON.stringify(value.new)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap gap-1.5 pt-0.5">
-                    {item.outreach?.id && (
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate("/rel8/outreach");
+                          setDeleteTarget({ id: item.id, type: "sync" });
                         }}
-                        className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-primary/10 hover:text-primary`}
+                        className={`h-6 w-6 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity`}
                       >
-                        <ExternalLink className="h-3 w-3 mr-1.5" />
-                        View
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
-                    )}
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => e.stopPropagation()}
-                      className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-muted`}
-                    >
-                      {isExpanded ? '▼' : '▶'} Timeline
-                    </Button>
+                    </div>
                   </div>
+                  
+                  {/* Metadata Line */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className={
+                      item.sync_type === 'update' ? 'text-blue-500' :
+                      item.sync_type === 'reschedule' ? 'text-yellow-500' :
+                      item.sync_type === 'cancel' ? 'text-red-500' :
+                      'text-green-500'
+                    }>
+                      {item.sync_type.charAt(0).toUpperCase() + item.sync_type.slice(1)}
+                    </span>
+                    {item.email_from && (
+                      <>
+                        <span className="text-muted-foreground/50">|</span>
+                        <span className="text-muted-foreground/70 truncate">
+                          {item.email_from.split('@')[0]}
+                        </span>
+                      </>
+                    )}
+                    {updateCount > 1 && (
+                      <>
+                        <span className="text-muted-foreground/50">|</span>
+                        <span className="text-primary/80">{updateCount} updates</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Action */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
+                  >
+                    <List className="h-3 w-3" />
+                    {isExpanded ? 'Hide' : 'View'} Timeline
+                  </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           {isExpanded && (
-            <div className="mt-1 bg-card border border-border/50 rounded-lg overflow-hidden">
-              <OutreachTimelineAccordion outreachId={item.outreach_id} />
-            </div>
+            <OutreachTimelineAccordion outreachId={item.outreach_id} />
           )}
         </div>
       );

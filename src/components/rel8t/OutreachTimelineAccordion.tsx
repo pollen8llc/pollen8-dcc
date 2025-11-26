@@ -173,7 +173,7 @@ export function OutreachTimelineAccordion({ outreachId }: OutreachTimelineAccord
 
   if (isLoading) {
     return (
-      <div className="px-4 sm:px-6 py-4 border-t border-border/20 bg-muted/10">
+      <div className="px-4 sm:px-6 py-4 border-t border-border/20 bg-card/20 backdrop-blur-sm">
         <div className="flex items-center justify-center py-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
         </div>
@@ -183,7 +183,7 @@ export function OutreachTimelineAccordion({ outreachId }: OutreachTimelineAccord
 
   if (!timelineItems || timelineItems.length === 0) {
     return (
-      <div className="px-4 sm:px-6 py-4 border-t border-border/20 bg-muted/10">
+      <div className="px-4 sm:px-6 py-4 border-t border-border/20 bg-card/20 backdrop-blur-sm">
         <div className="text-center py-4 space-y-2">
           <Calendar className="w-8 h-8 mx-auto text-muted-foreground/50" />
           <p className="text-xs text-muted-foreground">
@@ -195,7 +195,7 @@ export function OutreachTimelineAccordion({ outreachId }: OutreachTimelineAccord
   }
 
   return (
-    <div className="px-4 sm:px-6 py-4 border-t border-border/20 bg-muted/10 animate-in slide-in-from-top-2 duration-300">
+    <div className="px-4 sm:px-6 py-4 border-t border-border/20 bg-card/20 backdrop-blur-sm animate-in slide-in-from-top-2 duration-300">
       <h4 className="text-sm font-semibold mb-3 text-foreground">Timeline</h4>
       <div className="relative">
         {/* Timeline line */}
