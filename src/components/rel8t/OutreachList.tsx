@@ -176,8 +176,8 @@ const OutreachList = ({
                       {selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : 'Pick a date'}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] backdrop-blur-xl bg-card/90 border-primary/30">
-                    <DialogHeader>
+                  <DialogContent className="h-[100dvh] w-full max-w-full sm:max-w-[425px] sm:h-auto backdrop-blur-xl bg-card/90 border-primary/30 p-6">
+                    <DialogHeader className="text-center">
                       <DialogTitle className="text-lg font-semibold">Select a date</DialogTitle>
                     </DialogHeader>
                     <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
