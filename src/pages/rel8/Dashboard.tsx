@@ -11,7 +11,6 @@ import { Calendar, Users, Heart, Upload, Zap, Building2, MessageSquare, Clock, C
 import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { useModuleCompletion } from "@/hooks/useModuleCompletion";
-import { Rel8BottomNav } from "@/components/rel8t/Rel8BottomNav";
 import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -74,7 +73,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Rel8Header />
 
-      <div className="container mx-auto max-w-6xl px-4 py-8 pb-24 md:pb-8">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="glass-morphism border-0 bg-card/40 backdrop-blur-md hover:bg-card/60 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
@@ -175,8 +174,6 @@ const Dashboard = () => {
         </Card>
 
       </div>
-
-      <Rel8BottomNav />
     </div>
   );
 };
