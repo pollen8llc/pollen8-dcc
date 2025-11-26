@@ -41,9 +41,7 @@ const InvitesPage: React.FC = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <Eco8Navigation hasUserCommunities={hasUserCommunities} />
-
+        <div className="container mx-auto px-4 py-8 max-w-6xl pb-32">
           <div className="space-y-6">
             {/* Invite Generation Section */}
             <Card>
@@ -78,6 +76,13 @@ const InvitesPage: React.FC = () => {
                 <InviteList />
               </CardContent>
             </Card>
+          </div>
+        </div>
+
+        {/* Sticky Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+          <div className="container mx-auto max-w-6xl pointer-events-auto">
+            <Eco8Navigation hasUserCommunities={hasUserCommunities} />
           </div>
         </div>
       </div>
