@@ -49,7 +49,11 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const { email_id, from, subject, text, html } = payload.data;
+    const { email_id, from, to, subject, text, html } = payload.data;
+    
+    // Extract system email from "To" addresses
+    const systemEmailMatch = to?.find((addr: string) => addr.includes('@ecosystembuilder.app'));
+    console.log("📬 System email recipient:", systemEmailMatch || "not found");
 
     // Parse email body content
     const emailBody = text || (html ? html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : '');
@@ -171,31 +175,60 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Try to parse short outreach ID from subject line
-    // Format: "Reminder set: Follow up with Aaron #904a90dd"
-    // Also handles "RE: Reminder set: ..." or "Fwd: ..."
-    const subjectMatch = subject.match(/#([a-f0-9]{8})(?:\s*$|\s)/i);
-    
-    if (!subjectMatch) {
-      console.log("No outreach ID found in subject");
-      return new Response(JSON.stringify({ message: "No task ID in subject" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Try to extract outreach info from "To" address first
+    // Format: notifications-{6charUserId}{6charOutreachId}@ecosystembuilder.app
+    let outreach = null;
+    let lookupError = null;
+
+    // Method 1: Match by system_email directly (most reliable)
+    if (systemEmailMatch) {
+      console.log("🔍 Attempting lookup by system_email:", systemEmailMatch);
+      const result = await supabase
+        .from("rms_outreach")
+        .select("*")
+        .eq("system_email", systemEmailMatch)
+        .single();
+      
+      outreach = result.data;
+      lookupError = result.error;
     }
 
-    const shortId = subjectMatch[1];
-    console.log("📧 Parsed short outreach ID from subject:", shortId);
-    
-    // Find outreach where ID starts with this short ID
-    const { data: outreach, error: lookupError } = await supabase
-      .from("rms_outreach")
-      .select("*")
-      .filter('id::text', 'ilike', `${shortId}%`)
-      .single();
+    // Method 2: Fallback - Parse short ID from system email
+    if (!outreach && systemEmailMatch) {
+      const emailMatch = systemEmailMatch.match(/notifications-[a-f0-9]{6}([a-f0-9]{6})@/i);
+      if (emailMatch) {
+        const shortOutreachId = emailMatch[1];
+        console.log("🔍 Attempting lookup by short ID from email:", shortOutreachId);
+        const result = await supabase
+          .from("rms_outreach")
+          .select("*")
+          .filter('id::text', 'ilike', `${shortOutreachId}%`)
+          .single();
+        
+        outreach = result.data;
+        lookupError = result.error;
+      }
+    }
 
-    if (lookupError || !outreach) {
-      console.log("No matching outreach task found");
+    // Method 3: Fallback - Parse short ID from subject (original method)
+    if (!outreach) {
+      const subjectMatch = subject.match(/#([a-f0-9]{8})(?:\s*$|\s)/i);
+      if (subjectMatch) {
+        const shortId = subjectMatch[1];
+        console.log("🔍 Attempting lookup by short ID from subject:", shortId);
+        const result = await supabase
+          .from("rms_outreach")
+          .select("*")
+          .filter('id::text', 'ilike', `${shortId}%`)
+          .single();
+        
+        outreach = result.data;
+        lookupError = result.error;
+      }
+    }
+
+    if (!outreach) {
+      console.log("❌ No matching outreach task found");
       return new Response(JSON.stringify({ message: "No matching task" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
