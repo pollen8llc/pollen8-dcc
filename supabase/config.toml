@@ -75,3 +75,6 @@ redirect_uri = ""
 
 [functions.receive-calendar-update]
 verify_jwt = false
+
+[functions.send-calendar-update]
+verify_jwt = false
