@@ -101,10 +101,10 @@ const OutreachList = ({
     if (!count) return <>{date.getDate()}</>;
     
     return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        <span className="relative z-10">{date.getDate()}</span>
-        <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-white flex items-center justify-center shadow-sm">
-          <span className="text-[10px] font-bold text-black px-1">{count}</span>
+      <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
+        <span className="relative z-10 pointer-events-none">{date.getDate()}</span>
+        <div className="absolute top-0 right-0 min-w-[16px] md:min-w-[18px] h-[16px] md:h-[18px] rounded-full bg-white flex items-center justify-center shadow-sm pointer-events-none">
+          <span className="text-[9px] md:text-[10px] font-bold text-black px-0.5 md:px-1 pointer-events-none">{count}</span>
         </div>
       </div>
     );
@@ -115,15 +115,15 @@ const OutreachList = ({
       {showTabs && (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterTab)}>
           {/* Calendar - Full Width Responsive */}
-          <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-4 md:p-6 mb-6 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-muted-foreground">
+          <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-3 md:p-6 mb-6 shadow-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 md:mb-4">
+              <h3 className="text-xs md:text-sm font-medium text-muted-foreground">
                 {selectedDate ? `Showing tasks for ${selectedDate.toLocaleDateString()}` : 'Select a date to filter tasks'}
               </h3>
               {selectedDate && (
                 <button
                   onClick={() => setSelectedDate(undefined)}
-                  className="text-xs text-primary hover:underline"
+                  className="text-xs text-primary hover:underline min-h-[44px] md:min-h-0 flex items-center touch-manipulation"
                 >
                   Clear filter
                 </button>
@@ -136,7 +136,7 @@ const OutreachList = ({
               components={{
                 DayContent: ({ date }) => renderDayContent(date)
               }}
-              className="w-full mx-auto border-0 pointer-events-auto"
+              className="w-full mx-auto border-0"
             />
           </div>
 
