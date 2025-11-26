@@ -168,59 +168,50 @@ const OutreachList = ({
             {/* Mobile: List View */}
             {isMobile && (
               <div className="space-y-2">
-                {/* Calendar picker button */}
+                {/* Date picker button */}
                 <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full min-h-[44px] justify-start touch-manipulation">
+                    <Button variant="outline" className="w-full min-h-[44px] justify-start touch-manipulation glassmorphic">
                       <CalendarDays className="mr-2 h-4 w-4" />
                       {selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : 'Pick a date'}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
+                  <DialogContent className="sm:max-w-[425px] backdrop-blur-xl bg-card/90 border-primary/30">
                     <DialogHeader>
-                      <DialogTitle>Select a date</DialogTitle>
+                      <DialogTitle className="text-lg font-semibold">Select a date</DialogTitle>
                     </DialogHeader>
-                    <CalendarComponent
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(date) => {
-                        setSelectedDate(date);
-                        setIsCalendarOpen(false);
-                      }}
-                      components={{
-                        DayContent: ({ date }) => renderDayContent(date)
-                      }}
-                      className="w-full mx-auto border-0"
-                    />
+                    <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
+                      {datesWithTasks.length === 0 ? (
+                        <p className="text-center text-muted-foreground text-sm py-8">No scheduled tasks</p>
+                      ) : (
+                        datesWithTasks.map(({ date, count }) => {
+                          const isSelected = selectedDate && isSameDay(date, selectedDate);
+                          return (
+                            <button
+                              key={date.toISOString()}
+                              onClick={() => {
+                                setSelectedDate(isSelected ? undefined : date);
+                                setIsCalendarOpen(false);
+                              }}
+                              className={`w-full flex items-center justify-between p-4 rounded-lg transition-all touch-manipulation min-h-[56px] backdrop-blur-md ${
+                                isSelected 
+                                  ? 'bg-primary/90 text-primary-foreground shadow-lg border border-primary' 
+                                  : 'bg-card/50 hover:bg-card/70 border border-primary/20'
+                              }`}
+                            >
+                              <span className="font-medium text-left">{format(date, 'EEEE, MMMM d, yyyy')}</span>
+                              <span className={`min-w-[28px] h-[28px] rounded-full flex items-center justify-center text-xs font-bold shadow-sm ${
+                                isSelected ? 'bg-primary-foreground text-primary' : 'bg-primary text-primary-foreground'
+                              }`}>
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
                   </DialogContent>
                 </Dialog>
-                
-                {/* Tasks grouped by date */}
-                {datesWithTasks.length === 0 ? (
-                  <p className="text-center text-muted-foreground text-sm py-4">No scheduled tasks</p>
-                ) : (
-                  datesWithTasks.map(({ date, count }) => {
-                    const isSelected = selectedDate && isSameDay(date, selectedDate);
-                    return (
-                      <button
-                        key={date.toISOString()}
-                        onClick={() => setSelectedDate(isSelected ? undefined : date)}
-                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-all touch-manipulation min-h-[44px] ${
-                          isSelected 
-                            ? 'bg-primary text-primary-foreground shadow-lg' 
-                            : 'bg-background/50 hover:bg-background/70'
-                        }`}
-                      >
-                        <span className="font-medium">{format(date, 'EEEE, MMMM d, yyyy')}</span>
-                        <span className={`min-w-[24px] h-[24px] rounded-full flex items-center justify-center text-xs font-bold ${
-                          isSelected ? 'bg-primary-foreground text-primary' : 'bg-primary text-primary-foreground'
-                        }`}>
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })
-                )}
               </div>
             )}
           </div>
