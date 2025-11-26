@@ -103,8 +103,8 @@ const OutreachList = ({
     return (
       <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
         <span className="relative z-10 pointer-events-none">{date.getDate()}</span>
-        <div className="absolute top-0 right-0 min-w-[16px] md:min-w-[18px] h-[16px] md:h-[18px] rounded-full bg-white flex items-center justify-center shadow-sm pointer-events-none">
-          <span className="text-[9px] md:text-[10px] font-bold text-black px-0.5 md:px-1 pointer-events-none">{count}</span>
+        <div className="absolute top-0 right-0 min-w-[14px] md:min-w-[18px] h-[14px] md:h-[18px] rounded-full bg-white flex items-center justify-center shadow-sm pointer-events-none">
+          <span className="text-[8px] md:text-[10px] font-bold text-black px-0.5 md:px-1 pointer-events-none">{count}</span>
         </div>
       </div>
     );
@@ -115,7 +115,7 @@ const OutreachList = ({
       {showTabs && (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as OutreachFilterTab)}>
           {/* Calendar - Full Width Responsive */}
-          <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-2 md:p-4 mb-6 shadow-xl">
+          <div className="glass-morphism bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl border border-primary/30 rounded-xl p-1 md:p-4 mb-6 shadow-xl overflow-hidden max-w-full">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2 px-2 md:px-0 md:mb-3">
               <h3 className="text-xs md:text-sm font-medium text-muted-foreground">
                 {selectedDate ? `Showing tasks for ${selectedDate.toLocaleDateString()}` : 'Select a date to filter tasks'}
