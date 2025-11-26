@@ -113,8 +113,7 @@ const UserKnowledgeResource = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <div className="container mx-auto max-w-6xl px-4 py-4">
-        <Cultiva8OnlyNavigation />
+      <div className="container mx-auto max-w-6xl px-4 py-4 pb-32">
       </div>
       
       <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
@@ -534,6 +533,13 @@ const UserKnowledgeResource = () => {
             )}
           </TabsContent>
         </Tabs>
+      </div>
+
+      {/* Sticky Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div className="container mx-auto max-w-6xl pointer-events-auto">
+          <Cultiva8OnlyNavigation />
+        </div>
       </div>
     </div>
   );

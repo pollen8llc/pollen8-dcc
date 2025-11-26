@@ -56,12 +56,7 @@ const ContentCreator = () => {
 
   return (
     <Shell>
-      <Base88Layout>
-        {/* Navigation */}
-        <div className="mb-6">
-          <Cultiva8OnlyNavigation />
-        </div>
-        
+      <Base88Layout className="pb-32">
         <div className="max-w-3xl mx-auto">
           {/* Page title */}
           <div className="mb-8">
@@ -109,6 +104,13 @@ const ContentCreator = () => {
           </Card>
         </div>
       </Base88Layout>
+
+      {/* Sticky Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div className="container mx-auto max-w-6xl pointer-events-auto">
+          <Cultiva8OnlyNavigation />
+        </div>
+      </div>
     </Shell>
   );
 };

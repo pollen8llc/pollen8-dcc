@@ -38,8 +38,7 @@ const TopicsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto max-w-6xl px-4 py-4">
-        <Cultiva8OnlyNavigation />
+      <div className="container mx-auto max-w-6xl px-4 py-4 pb-32">
       </div>
       
       <div className="container mx-auto max-w-6xl px-4 py-4 sm:py-8">
@@ -118,6 +117,13 @@ const TopicsPage = () => {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Sticky Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div className="container mx-auto max-w-6xl pointer-events-auto">
+          <Cultiva8OnlyNavigation />
+        </div>
       </div>
     </div>
   );
