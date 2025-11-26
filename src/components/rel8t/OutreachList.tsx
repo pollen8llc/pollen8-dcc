@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Loader2, Calendar } from "lucide-react";
 import { OutreachCard } from "./OutreachCard";
-import { isSameDay, startOfDay } from "date-fns";
+import { isSameDay, startOfDay, format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface OutreachListProps {
   maxItems?: number;
@@ -26,6 +27,7 @@ const OutreachList = ({
 }: OutreachListProps) => {
   const [activeTab, setActiveTab] = useState<OutreachFilterTab>(defaultTab);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const isMobile = useIsMobile();
   
   // Query to fetch outreach data based on active tab
   const { data: outreachItems = [], isLoading, refetch } = useQuery({
@@ -110,6 +112,23 @@ const OutreachList = ({
     );
   };
 
+  // Get sorted dates with tasks for mobile list view
+  const datesWithTasks = useMemo(() => {
+    const dateMap = new Map<string, { date: Date; count: number }>();
+    outreachItems.forEach(item => {
+      if (item.due_date) {
+        const date = startOfDay(new Date(item.due_date));
+        const dateKey = date.toISOString();
+        if (dateMap.has(dateKey)) {
+          dateMap.get(dateKey)!.count++;
+        } else {
+          dateMap.set(dateKey, { date, count: 1 });
+        }
+      }
+    });
+    return Array.from(dateMap.values()).sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [outreachItems]);
+
   return (
     <div className={className}>
       {showTabs && (
@@ -129,15 +148,50 @@ const OutreachList = ({
                 </button>
               )}
             </div>
-            <CalendarComponent
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              components={{
-                DayContent: ({ date }) => renderDayContent(date)
-              }}
-              className="w-full mx-auto border-0"
-            />
+            
+            {/* Desktop/Tablet: Calendar Grid */}
+            {!isMobile && (
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                components={{
+                  DayContent: ({ date }) => renderDayContent(date)
+                }}
+                className="w-full mx-auto border-0"
+              />
+            )}
+            
+            {/* Mobile: List View */}
+            {isMobile && (
+              <div className="space-y-2">
+                {datesWithTasks.length === 0 ? (
+                  <p className="text-center text-muted-foreground text-sm py-4">No scheduled tasks</p>
+                ) : (
+                  datesWithTasks.map(({ date, count }) => {
+                    const isSelected = selectedDate && isSameDay(date, selectedDate);
+                    return (
+                      <button
+                        key={date.toISOString()}
+                        onClick={() => setSelectedDate(isSelected ? undefined : date)}
+                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-all touch-manipulation min-h-[44px] ${
+                          isSelected 
+                            ? 'bg-primary text-primary-foreground shadow-lg' 
+                            : 'bg-background/50 hover:bg-background/70'
+                        }`}
+                      >
+                        <span className="font-medium">{format(date, 'EEEE, MMMM d, yyyy')}</span>
+                        <span className={`min-w-[24px] h-[24px] rounded-full flex items-center justify-center text-xs font-bold ${
+                          isSelected ? 'bg-primary-foreground text-primary' : 'bg-primary text-primary-foreground'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
 
           <TabsList className="grid grid-cols-3 mb-6 backdrop-blur-sm bg-muted/50">
