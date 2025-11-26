@@ -83,6 +83,23 @@ const OutreachList = ({
     );
   }, [outreachItems, selectedDate]);
 
+  // Get sorted dates with tasks for mobile list view
+  const datesWithTasks = useMemo(() => {
+    const dateMap = new Map<string, { date: Date; count: number }>();
+    outreachItems.forEach(item => {
+      if (item.due_date) {
+        const date = startOfDay(new Date(item.due_date));
+        const dateKey = date.toISOString();
+        if (dateMap.has(dateKey)) {
+          dateMap.get(dateKey)!.count++;
+        } else {
+          dateMap.set(dateKey, { date, count: 1 });
+        }
+      }
+    });
+    return Array.from(dateMap.values()).sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [outreachItems]);
+
   // Display specific number of items if maxItems is provided
   const displayedItems = maxItems ? filteredItems.slice(0, maxItems) : filteredItems;
 
@@ -111,23 +128,6 @@ const OutreachList = ({
       </div>
     );
   };
-
-  // Get sorted dates with tasks for mobile list view
-  const datesWithTasks = useMemo(() => {
-    const dateMap = new Map<string, { date: Date; count: number }>();
-    outreachItems.forEach(item => {
-      if (item.due_date) {
-        const date = startOfDay(new Date(item.due_date));
-        const dateKey = date.toISOString();
-        if (dateMap.has(dateKey)) {
-          dateMap.get(dateKey)!.count++;
-        } else {
-          dateMap.set(dateKey, { date, count: 1 });
-        }
-      }
-    });
-    return Array.from(dateMap.values()).sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [outreachItems]);
 
   return (
     <div className={className}>
