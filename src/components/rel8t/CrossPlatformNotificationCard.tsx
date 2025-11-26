@@ -1,8 +1,8 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Bell, User, Building2, Calendar } from "lucide-react";
+import { Trash2, Bell, User, Building2 } from "lucide-react";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +33,7 @@ export const CrossPlatformNotificationCard = ({
   onDelete 
 }: CrossPlatformNotificationCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const isMobile = useIsMobile();
   
   // Extract reference from metadata
   const getReference = () => {
@@ -57,58 +58,69 @@ export const CrossPlatformNotificationCard = ({
     setShowDeleteDialog(false);
   };
 
+  const getStatusColor = () => {
+    if (!notification.is_read) return 'bg-primary shadow-[0_0_8px_rgba(0,234,218,0.4)]';
+    return 'bg-muted-foreground/50';
+  };
+
   return (
     <>
-      <Card className="glass-morphism border-0 backdrop-blur-md hover:bg-card/60 transition-all">
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4 flex-1">
-              <div className="mt-1">
-                <Bell className={`h-4 w-4 ${notification.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+      <Card className="glass-morphism border-0 bg-card/30 backdrop-blur-md hover:bg-card/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            {/* Status Indicator */}
+            <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${getStatusColor()} ${!notification.is_read ? 'animate-pulse' : ''}`} />
+            
+            {/* Icon */}
+            <div className="shrink-0 mt-0.5">
+              <Bell className={`h-4 w-4 ${notification.is_read ? 'text-muted-foreground' : 'text-primary'}`} />
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 min-w-0 space-y-2">
+              {/* Header Row */}
+              <div className="flex items-start justify-between gap-2">
+                <h3 className={`font-medium text-sm leading-tight ${notification.is_read ? 'text-foreground' : 'text-primary'} truncate flex-1`}>
+                  {notification.title}
+                </h3>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {format(new Date(notification.created_at), "h:mm a")}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className={`font-semibold truncate ${notification.is_read ? 'text-foreground' : 'text-primary'}`}>
-                    {notification.title}
-                  </h3>
-                  {!notification.is_read && (
-                    <Badge variant="default" className="bg-primary/20 text-primary border-primary/30 text-xs">
-                      New
-                    </Badge>
-                  )}
-                  <Badge variant="outline" className="capitalize text-xs">
-                    {notification.notification_type.replace(/_/g, ' ')}
-                  </Badge>
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-2">
-                  {notification.message}
-                </p>
-                
-                <div className="text-xs text-muted-foreground">
-                  {format(new Date(notification.created_at), "PPP 'at' p")}
-                </div>
+              
+              {/* Message */}
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {notification.message}
+              </p>
+              
+              {/* Metadata Line */}
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="text-primary/80 capitalize">
+                  {notification.notification_type.replace(/_/g, ' ')}
+                </span>
+                <span className="text-muted-foreground/50">|</span>
+                <ReferenceIcon className="h-3 w-3 text-muted-foreground/70" />
+                <span className="text-muted-foreground/70 capitalize truncate">
+                  {ref.type}: {ref.name}
+                </span>
+                <span className="text-muted-foreground/50">|</span>
+                <span className="text-muted-foreground/70 font-mono text-[10px]">
+                  #{notification.id.slice(0, 6)}
+                </span>
               </div>
             </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowDeleteDialog(true)}
-              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive shrink-0"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
           </div>
         </CardContent>
-        
-        <CardFooter className="px-6 py-3 bg-muted/20 border-t border-border/20 flex flex-wrap items-center justify-between text-xs text-muted-foreground gap-2">
-          <span className="font-mono">#{notification.id.slice(0, 8)}</span>
-          <div className="flex items-center gap-1">
-            <ReferenceIcon className="h-3 w-3" />
-            <span className="capitalize">{ref.type}: {ref.name}</span>
-          </div>
-        </CardFooter>
       </Card>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
