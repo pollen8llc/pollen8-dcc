@@ -77,10 +77,7 @@ const Eco8Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
 
-      <div className="container mx-auto max-w-6xl px-4 py-8">
-        {/* Navigation Component */}
-        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
-
+      <div className="container mx-auto max-w-6xl px-4 py-8 pb-32">
         {/* Page Title - Minimal Design */}
         <div className="flex items-center gap-3 mb-6 mt-6">
           <Users className="h-8 w-8 text-primary" />
@@ -314,6 +311,13 @@ const Eco8Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         )}
+      </div>
+
+      {/* Sticky Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div className="container mx-auto max-w-6xl pointer-events-auto">
+          <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+        </div>
       </div>
     </div>
   );

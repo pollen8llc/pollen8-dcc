@@ -130,9 +130,7 @@ const CommunityDirectory: React.FC = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto max-w-6xl px-4 py-8">
-        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
-
+      <main className="container mx-auto max-w-6xl px-4 py-8 pb-32">
         {/* Search & Filter Bar */}
         <Card className="bg-card border rounded-2xl p-6 mb-6">
           <div className="flex flex-col gap-4">
@@ -258,6 +256,13 @@ const CommunityDirectory: React.FC = () => {
           </Button>
         </div>
       </main>
+
+      {/* Sticky Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div className="container mx-auto max-w-6xl pointer-events-auto">
+          <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+        </div>
+      </div>
     </div>
   );
 };

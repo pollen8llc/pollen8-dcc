@@ -84,9 +84,7 @@ const CommunityDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Navbar />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <Eco8Navigation hasUserCommunities={hasUserCommunities} />
-
+      <div className="container mx-auto px-4 py-8 max-w-6xl pb-32">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="backdrop-blur-md bg-white/5 border border-white/10">
@@ -268,6 +266,13 @@ const CommunityDashboard: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Sticky Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div className="container mx-auto max-w-6xl pointer-events-auto">
+          <Eco8Navigation hasUserCommunities={hasUserCommunities} />
+        </div>
       </div>
     </div>
   );
