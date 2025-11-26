@@ -53,33 +53,49 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Parse email body content
     const emailBody = text || (html ? html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : '');
-    console.log("📧 Email body preview:", emailBody.substring(0, 500));
+    console.log("📧 Email body preview:", emailBody ? emailBody.substring(0, 200) : "(empty)");
 
-    if (!emailBody) {
-      console.log("No email body content found");
-      return new Response(JSON.stringify({ message: "No email body" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Detect event status from email body
+    // Parse status from subject line FIRST (calendar apps prefix subject with status)
+    const subjectLower = subject.toLowerCase();
     let detectedStatus = 'update';
-    const bodyLower = emailBody.toLowerCase();
 
-    if (bodyLower.includes('accepted') || bodyLower.includes('has accepted') || bodyLower.includes('going')) {
+    if (subjectLower.startsWith('accepted:') || subjectLower.includes('accepted:')) {
       detectedStatus = 'accepted';
-    } else if (bodyLower.includes('declined') || bodyLower.includes('has declined') || bodyLower.includes('not going')) {
+      console.log("📊 Status detected from subject: accepted");
+    } else if (subjectLower.startsWith('declined:') || subjectLower.includes('declined:')) {
       detectedStatus = 'declined';
-    } else if (bodyLower.includes('tentative') || bodyLower.includes('maybe')) {
+      console.log("📊 Status detected from subject: declined");
+    } else if (subjectLower.startsWith('tentative:') || subjectLower.includes('tentative:')) {
       detectedStatus = 'tentative';
-    } else if (bodyLower.includes('cancelled') || bodyLower.includes('canceled')) {
+      console.log("📊 Status detected from subject: tentative");
+    } else if (subjectLower.startsWith('cancelled:') || subjectLower.startsWith('canceled:')) {
       detectedStatus = 'cancelled';
-    } else if (bodyLower.includes('rescheduled') || bodyLower.includes('new time') || bodyLower.includes('changed to')) {
-      detectedStatus = 'rescheduled';
+      console.log("📊 Status detected from subject: cancelled");
     }
 
-    console.log("📊 Detected status:", detectedStatus);
+    // If no status in subject and we have a body, try parsing the body as fallback
+    if (detectedStatus === 'update' && emailBody) {
+      const bodyLower = emailBody.toLowerCase();
+
+      if (bodyLower.includes('accepted') || bodyLower.includes('has accepted') || bodyLower.includes('going')) {
+        detectedStatus = 'accepted';
+        console.log("📊 Status detected from body: accepted");
+      } else if (bodyLower.includes('declined') || bodyLower.includes('has declined') || bodyLower.includes('not going')) {
+        detectedStatus = 'declined';
+        console.log("📊 Status detected from body: declined");
+      } else if (bodyLower.includes('tentative') || bodyLower.includes('maybe')) {
+        detectedStatus = 'tentative';
+        console.log("📊 Status detected from body: tentative");
+      } else if (bodyLower.includes('cancelled') || bodyLower.includes('canceled')) {
+        detectedStatus = 'cancelled';
+        console.log("📊 Status detected from body: cancelled");
+      } else if (bodyLower.includes('rescheduled') || bodyLower.includes('new time') || bodyLower.includes('changed to')) {
+        detectedStatus = 'rescheduled';
+        console.log("📊 Status detected from body: rescheduled");
+      }
+    }
+
+    console.log("📊 Final detected status:", detectedStatus);
 
     // Try to extract new date from email body for reschedules
     let newDateString = null;
