@@ -275,9 +275,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Update status based on detected action
     if (detectedStatus === 'cancelled') {
       updateData.status = 'cancelled';
-    } else if (detectedStatus === 'accepted') {
-      updateData.status = 'active';
     }
+    // Accepted events remain as 'pending' - accepting doesn't mean completion
 
     // Update date if rescheduled and we have a new date
     if (changes.due_date) {
