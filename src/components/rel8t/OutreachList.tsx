@@ -7,10 +7,12 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Loader2, Calendar } from "lucide-react";
+import { Loader2, Calendar, CalendarDays } from "lucide-react";
 import { OutreachCard } from "./OutreachCard";
 import { isSameDay, startOfDay, format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface OutreachListProps {
   maxItems?: number;
@@ -27,6 +29,7 @@ const OutreachList = ({
 }: OutreachListProps) => {
   const [activeTab, setActiveTab] = useState<OutreachFilterTab>(defaultTab);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const isMobile = useIsMobile();
   
   // Query to fetch outreach data based on active tab
@@ -165,6 +168,34 @@ const OutreachList = ({
             {/* Mobile: List View */}
             {isMobile && (
               <div className="space-y-2">
+                {/* Calendar picker button */}
+                <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full min-h-[44px] justify-start touch-manipulation">
+                      <CalendarDays className="mr-2 h-4 w-4" />
+                      {selectedDate ? format(selectedDate, 'EEEE, MMMM d, yyyy') : 'Pick a date'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Select a date</DialogTitle>
+                    </DialogHeader>
+                    <CalendarComponent
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        setIsCalendarOpen(false);
+                      }}
+                      components={{
+                        DayContent: ({ date }) => renderDayContent(date)
+                      }}
+                      className="w-full mx-auto border-0"
+                    />
+                  </DialogContent>
+                </Dialog>
+                
+                {/* Tasks grouped by date */}
                 {datesWithTasks.length === 0 ? (
                   <p className="text-center text-muted-foreground text-sm py-4">No scheduled tasks</p>
                 ) : (
