@@ -181,7 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
       attachments: [
         {
           filename: 'outreach-update.ics',
-          content: Buffer.from(icsContent).toString('base64'),
+          content: btoa(icsContent),
         }
       ]
     });
