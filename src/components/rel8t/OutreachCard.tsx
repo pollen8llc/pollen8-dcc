@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Calendar, AlertCircle, Download, Trash2, Pencil } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Outreach, updateOutreachStatus, deleteOutreach } from "@/services/rel8t/outreachService";
+import { Outreach, updateOutreachStatus, deleteOutreach, sendCalendarUpdate } from "@/services/rel8t/outreachService";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarOptionsDialog } from "./CalendarOptionsDialog";
@@ -35,14 +35,34 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const handleMarkComplete = async () => {
+    // Get user email for calendar update
+    const { data: { user } } = await supabase.auth.getUser();
+    const userEmail = user?.email;
+    
+    // Update database status
     const success = await updateOutreachStatus(outreach.id, "completed");
+    
     if (success) {
+      // Send calendar cancellation to remove from external calendar
+      if (outreach.calendar_sync_enabled && userEmail) {
+        await sendCalendarUpdate(outreach.id, 'cancel', userEmail);
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
     }
   };
 
 
   const handleDelete = async () => {
+    // Get user email for calendar update
+    const { data: { user } } = await supabase.auth.getUser();
+    const userEmail = user?.email;
+    
+    // Send calendar cancellation before deleting
+    if (outreach.calendar_sync_enabled && userEmail) {
+      await sendCalendarUpdate(outreach.id, 'cancel', userEmail);
+    }
+    
     const success = await deleteOutreach(outreach.id);
     if (success) {
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
