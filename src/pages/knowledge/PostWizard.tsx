@@ -203,12 +203,7 @@ const PostWizard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 sm:py-6">
-        {/* Navigation */}
-        <div className="mb-4 sm:mb-6">
-          <Cultiva8OnlyNavigation />
-        </div>
-        
+      <div className="container mx-auto px-4 py-4 sm:py-6 pb-32">
         <div className="max-w-3xl mx-auto animate-fade-in">
           {/* Header */}
           <div className="mb-6 sm:mb-8 flex items-center gap-3 animate-fade-in">
@@ -300,6 +295,13 @@ const PostWizard = () => {
               )}
             </CardFooter>
           </Card>
+        </div>
+      </div>
+
+      {/* Sticky Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div className="container mx-auto max-w-6xl pointer-events-auto">
+          <Cultiva8OnlyNavigation />
         </div>
       </div>
     </div>
