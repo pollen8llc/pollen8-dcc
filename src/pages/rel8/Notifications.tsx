@@ -315,11 +315,23 @@ export default function Notifications() {
     }
   };
 
+  // Group sync logs by outreach_id, keeping only the latest per outreach
+  const groupedSyncLogs = Object.values(
+    (syncLogs || []).reduce((acc, log) => {
+      if (!acc[log.outreach_id] || new Date(log.created_at) > new Date(acc[log.outreach_id].created_at)) {
+        // Count how many logs exist for this outreach_id
+        const count = (syncLogs || []).filter(l => l.outreach_id === log.outreach_id).length;
+        acc[log.outreach_id] = { ...log, _updateCount: count };
+      }
+      return acc;
+    }, {} as Record<string, any>)
+  );
+
   // Combined notifications for "all" view
   const allNotifications = [
     ...(platformNotifications || []).map(n => ({ ...n, _type: 'platform' as const, _date: new Date(n.created_at) })),
     ...(notifications || []).map(n => ({ ...n, _type: 'email' as const, _date: new Date(n.created_at) })),
-    ...(syncLogs || []).map(n => ({ ...n, _type: 'calendar' as const, _date: new Date(n.created_at) }))
+    ...groupedSyncLogs.map(n => ({ ...n, _type: 'calendar' as const, _date: new Date(n.created_at) }))
   ].sort((a, b) => b._date.getTime() - a._date.getTime());
 
   const filteredNotifications = notifications?.filter(n => {
@@ -562,6 +574,14 @@ export default function Notifications() {
                       {item.outreach?.title || "Unknown Outreach"}
                     </h3>
                     {getSyncTypeBadge(item.sync_type)}
+                    {item._updateCount > 1 && (
+                      <Badge variant="outline" className="text-xs">
+                        {item._updateCount} updates
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="text-xs">
+                      {isExpanded ? '▼' : '▶'} Timeline
+                    </Badge>
                   </div>
                   
                   <div className="text-sm text-muted-foreground space-y-1">
@@ -800,8 +820,8 @@ export default function Notifications() {
                 <div className="flex items-center justify-center py-16">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                 </div>
-              ) : syncLogs && syncLogs.length > 0 ? (
-                syncLogs.map((item) => renderUnifiedNotification({ ...item, _type: 'calendar' as const, _date: new Date(item.created_at) }))
+              ) : groupedSyncLogs && groupedSyncLogs.length > 0 ? (
+                groupedSyncLogs.map((item) => renderUnifiedNotification({ ...item, _type: 'calendar' as const, _date: new Date(item.created_at) }))
               ) : (
                 <Card className="glass-morphism border-0 backdrop-blur-md">
                   <CardContent className="flex flex-col items-center justify-center py-16">
