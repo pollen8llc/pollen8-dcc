@@ -96,6 +96,30 @@ const TriggerWizard = () => {
     }
   };
 
+  // Validate channel details based on selected channel
+  const isChannelDetailsValid = () => {
+    if (!formData.outreachChannel) return true; // No channel selected, no validation needed
+    
+    const details = formData.channelDetails;
+    if (!details) return false; // Channel selected but no details provided
+    
+    switch (formData.outreachChannel) {
+      case 'text':
+      case 'call':
+        return !!details.phone?.trim();
+      case 'email':
+        return !!details.email?.trim();
+      case 'dm':
+        return !!details.platform?.trim() && !!details.handle?.trim();
+      case 'meeting':
+        return !!details.meetingPlatform?.trim() && !!details.link?.trim();
+      case 'irl':
+        return !!details.address?.trim();
+      default:
+        return false;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80">
       <Navbar />
@@ -327,7 +351,7 @@ const TriggerWizard = () => {
                       </Button>
                       <Button
                         type="submit"
-                        disabled={!formData.name.trim()}
+                        disabled={!formData.name.trim() || (formData.outreachChannel && !isChannelDetailsValid())}
                         className="h-11 px-8"
                       >
                         {returnTo === 'relationship' ? 'Add Trigger' : 'Create Trigger'}
