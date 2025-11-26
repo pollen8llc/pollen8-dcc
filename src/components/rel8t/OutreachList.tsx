@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   getOutreach,
   OutreachFilterTab
 } from "@/services/rel8t/outreachService";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Loader2, Calendar } from "lucide-react";
@@ -27,11 +28,36 @@ const OutreachList = ({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   
   // Query to fetch outreach data based on active tab
-  const { data: outreachItems = [], isLoading } = useQuery({
+  const { data: outreachItems = [], isLoading, refetch } = useQuery({
     queryKey: ["outreach", activeTab],
     queryFn: () => getOutreach(activeTab),
     placeholderData: (previousData) => previousData,
+    refetchOnMount: true,
+    staleTime: 0,
   });
+
+  // Real-time subscription for outreach changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('outreach-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_outreach'
+        },
+        (payload) => {
+          console.log('📬 Real-time outreach update:', payload);
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch]);
 
   // Count tasks per date
   const taskCountsByDate = useMemo(() => {
