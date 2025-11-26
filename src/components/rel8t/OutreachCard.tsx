@@ -3,12 +3,13 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, AlertCircle, Download, Trash2 } from "lucide-react";
+import { Check, Calendar, AlertCircle, Download, Trash2, Pencil } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Outreach, updateOutreachStatus, deleteOutreach } from "@/services/rel8t/outreachService";
+import { Outreach, updateOutreachStatus, deleteOutreach, updateOutreach } from "@/services/rel8t/outreachService";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarOptionsDialog } from "./CalendarOptionsDialog";
+import { OutreachEditDialog } from "./OutreachEditDialog";
 import { generateOutreachICS } from "@/utils/outreachIcsGenerator";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -31,11 +32,20 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   const [showCalendarDialog, setShowCalendarDialog] = useState(false);
   const [icsContent, setIcsContent] = useState<string>("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   
   const handleMarkComplete = async () => {
     const success = await updateOutreachStatus(outreach.id, "completed");
     if (success) {
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
+    }
+  };
+
+  const handleSaveEdit = async (updates: Partial<Outreach>) => {
+    const success = await updateOutreach(outreach.id, updates);
+    if (success) {
+      queryClient.invalidateQueries({ queryKey: ["outreach"] });
+      queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
     }
   };
 
@@ -98,14 +108,24 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
             )}
           </div>
           
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowDeleteDialog(true)}
-            className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowEditDialog(true)}
+              className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowDeleteDialog(true)}
+              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       
@@ -172,6 +192,13 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
           )}
         </div>
       </CardContent>
+
+      <OutreachEditDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        outreach={outreach}
+        onSave={handleSaveEdit}
+      />
 
       <CalendarOptionsDialog
         open={showCalendarDialog}

@@ -222,6 +222,43 @@ export const updateOutreachStatus = async (id: string, status: OutreachStatus): 
   }
 };
 
+export const updateOutreach = async (
+  id: string,
+  updates: Partial<Outreach>
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("rms_outreach")
+      .update({
+        title: updates.title,
+        description: updates.description,
+        due_date: updates.due_date,
+        priority: updates.priority,
+        outreach_channel: updates.outreach_channel,
+        channel_details: updates.channel_details,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+
+    if (error) throw error;
+    
+    toast({
+      title: "Outreach updated",
+      description: "Outreach item has been successfully updated.",
+    });
+    
+    return true;
+  } catch (error: any) {
+    console.error(`Error updating outreach:`, error);
+    toast({
+      title: "Error updating outreach",
+      description: error.message,
+      variant: "destructive",
+    });
+    return false;
+  }
+};
+
 export const deleteOutreach = async (id: string): Promise<boolean> => {
   try {
     // First delete associated contacts
