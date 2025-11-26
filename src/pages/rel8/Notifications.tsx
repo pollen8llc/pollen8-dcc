@@ -79,12 +79,17 @@ export default function Notifications() {
   // Delete notification mutation
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId: string) => {
+      console.log("Attempting to delete notification:", notificationId);
       const { error } = await supabase
         .from("cross_platform_notifications")
         .delete()
         .eq("id", notificationId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting notification:", error);
+        throw error;
+      }
+      console.log("Successfully deleted notification:", notificationId);
     },
     onSuccess: () => {
       toast({
@@ -94,6 +99,7 @@ export default function Notifications() {
       queryClient.invalidateQueries({ queryKey: ["cross-platform-notifications"] });
     },
     onError: (error) => {
+      console.error("Delete notification mutation error:", error);
       toast({
         title: "Failed to delete notification",
         description: error.message,
@@ -105,12 +111,17 @@ export default function Notifications() {
   // Delete email notification mutation
   const deleteEmailMutation = useMutation({
     mutationFn: async (notificationId: string) => {
+      console.log("Attempting to delete email notification:", notificationId);
       const { error } = await supabase
         .from("rms_email_notifications")
         .delete()
         .eq("id", notificationId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting email notification:", error);
+        throw error;
+      }
+      console.log("Successfully deleted email notification:", notificationId);
     },
     onSuccess: () => {
       toast({
@@ -120,6 +131,7 @@ export default function Notifications() {
       setDeleteTarget(null);
     },
     onError: (error) => {
+      console.error("Delete email mutation error:", error);
       toast({
         title: "Failed to delete",
         description: error.message,
@@ -131,12 +143,17 @@ export default function Notifications() {
   // Delete sync log mutation
   const deleteSyncLogMutation = useMutation({
     mutationFn: async (logId: string) => {
+      console.log("Attempting to delete sync log:", logId);
       const { error} = await supabase
         .from("rms_outreach_sync_log")
         .delete()
         .eq("id", logId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting sync log:", error);
+        throw error;
+      }
+      console.log("Successfully deleted sync log:", logId);
     },
     onSuccess: () => {
       toast({
@@ -146,6 +163,7 @@ export default function Notifications() {
       setDeleteTarget(null);
     },
     onError: (error) => {
+      console.error("Delete sync log mutation error:", error);
       toast({
         title: "Failed to delete",
         description: error.message,
