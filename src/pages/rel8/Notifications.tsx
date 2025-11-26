@@ -13,6 +13,7 @@ import { downloadICS } from "@/utils/icsDownload";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { CrossPlatformNotificationCard } from "@/components/rel8t/CrossPlatformNotificationCard";
 import {
   AlertDialog,
@@ -31,6 +32,7 @@ type NotificationView = "all" | "platform" | "emails" | "calendar";
 export default function Notifications() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [statusFilter, setStatusFilter] = useState<NotificationStatus>("all");
   const [activeView, setActiveView] = useState<NotificationView>("all");
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; type: "email" | "sync" } | null>(null);
@@ -416,15 +418,15 @@ export default function Notifications() {
             }`}
             onClick={isOutreachEmail && outreachId ? () => toggleOutreachExpanded(outreachId) : undefined}
           >
-            <CardContent className="p-4">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-4'}`}>
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 shrink-0">
                   {getStatusIcon(item.status)}
                 </div>
                 
-                <div className="flex-1 min-w-0 space-y-1.5">
+                <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-sm leading-tight text-foreground">{item.subject}</h3>
+                    <h3 className="font-medium text-sm leading-tight text-foreground pr-2">{item.subject}</h3>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -432,35 +434,58 @@ export default function Notifications() {
                         e.stopPropagation();
                         setDeleteTarget({ id: item.id, type: "email" });
                       }}
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0"
+                      className={`${isMobile ? 'h-9 w-9 opacity-100' : 'h-7 w-7 opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0`}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className={isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} />
                     </Button>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                    <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
-                    {item.has_ics_attachment && (
-                      <>
-                        <span className="text-muted-foreground/50">•</span>
-                        <span className="text-green-500 flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          Calendar
+                  {isMobile ? (
+                    <div className="space-y-1 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {item.has_ics_attachment && (
+                          <span className="text-green-500 flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>Calendar</span>
+                          </span>
+                        )}
+                        {isOutreachEmail && (
+                          <span className="text-primary/80">Outreach</span>
+                        )}
+                        <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
+                          <ReferenceIcon className="h-3 w-3" />
+                          <span>{ref.name}</span>
                         </span>
-                      </>
-                    )}
-                    {isOutreachEmail && (
-                      <>
-                        <span className="text-muted-foreground/50">•</span>
-                        <span className="text-primary/80">Outreach</span>
-                      </>
-                    )}
-                    <span className="text-muted-foreground/50">•</span>
-                    <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
-                      <ReferenceIcon className="h-3 w-3" />
-                      {ref.name}
-                    </span>
-                  </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
+                      {item.has_ics_attachment && (
+                        <>
+                          <span className="text-muted-foreground/50">•</span>
+                          <span className="text-green-500 flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Calendar
+                          </span>
+                        </>
+                      )}
+                      {isOutreachEmail && (
+                        <>
+                          <span className="text-muted-foreground/50">•</span>
+                          <span className="text-primary/80">Outreach</span>
+                        </>
+                      )}
+                      <span className="text-muted-foreground/50">•</span>
+                      <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
+                        <ReferenceIcon className="h-3 w-3" />
+                        {ref.name}
+                      </span>
+                    </div>
+                  )}
 
                   {item.sent_at && (
                     <p className="text-xs text-muted-foreground">Sent {format(new Date(item.sent_at), "MMM d, h:mm a")}</p>
@@ -472,7 +497,7 @@ export default function Notifications() {
                     </div>
                   )}
 
-                  <div className="flex flex-wrap gap-1.5 pt-1">
+                  <div className="flex flex-wrap gap-1.5 pt-0.5">
                     {item.has_ics_attachment && item.ics_data && (
                       <Button
                         variant="ghost"
@@ -481,7 +506,7 @@ export default function Notifications() {
                           e.stopPropagation();
                           handleDownloadICS(item);
                         }}
-                        className="h-7 text-xs hover:bg-primary/10 hover:text-primary"
+                        className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-primary/10 hover:text-primary`}
                       >
                         <Download className="h-3 w-3 mr-1.5" />
                         Download
@@ -497,7 +522,7 @@ export default function Notifications() {
                           retryEmailMutation.mutate(item.id);
                         }}
                         disabled={retryEmailMutation.isPending}
-                        className="h-7 text-xs hover:bg-primary/10"
+                        className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-primary/10`}
                       >
                         <RefreshCw className={`h-3 w-3 mr-1.5 ${retryEmailMutation.isPending ? 'animate-spin' : ''}`} />
                         Retry
@@ -509,7 +534,7 @@ export default function Notifications() {
                         variant="ghost"
                         size="sm"
                         onClick={(e) => e.stopPropagation()}
-                        className="h-7 text-xs hover:bg-muted"
+                        className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-muted`}
                       >
                         {isExpanded ? '▼' : '▶'} Timeline
                       </Button>
@@ -538,15 +563,15 @@ export default function Notifications() {
             className="bg-card border-border/50 hover:border-border hover:shadow-md transition-all duration-200 cursor-pointer"
             onClick={() => toggleOutreachExpanded(item.outreach_id)}
           >
-            <CardContent className="p-4">
+            <CardContent className={`${isMobile ? 'p-3' : 'p-4'}`}>
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 shrink-0">
                   {getSyncTypeIcon(item.sync_type)}
                 </div>
                 
-                <div className="flex-1 min-w-0 space-y-1.5">
+                <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-medium text-sm leading-tight text-foreground">
+                    <h3 className="font-medium text-sm leading-tight text-foreground pr-2">
                       {item.outreach?.title || "Unknown Outreach"}
                     </h3>
                     <Button
@@ -556,37 +581,62 @@ export default function Notifications() {
                         e.stopPropagation();
                         setDeleteTarget({ id: item.id, type: "sync" });
                       }}
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0"
+                      className={`${isMobile ? 'h-9 w-9 opacity-100' : 'h-7 w-7 opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0`}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className={isMobile ? "h-4 w-4" : "h-3.5 w-3.5"} />
                     </Button>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                    <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
-                    <span className="text-muted-foreground/50">•</span>
-                    <span className={`capitalize ${
-                      item.sync_type === 'create' ? 'text-green-500' :
-                      item.sync_type === 'update' ? 'text-blue-500' :
-                      item.sync_type === 'reschedule' ? 'text-yellow-500' :
-                      item.sync_type === 'cancel' ? 'text-red-500' :
-                      'text-muted-foreground'
-                    }`}>
-                      {item.sync_type}
-                    </span>
-                    {item._updateCount > 1 && (
-                      <>
-                        <span className="text-muted-foreground/50">•</span>
-                        <span className="text-primary/80">{item._updateCount} updates</span>
-                      </>
-                    )}
-                    {item.email_from && (
-                      <>
-                        <span className="text-muted-foreground/50">•</span>
-                        <span className="text-muted-foreground/70 truncate max-w-[150px]">{item.email_from}</span>
-                      </>
-                    )}
-                  </div>
+                  {isMobile ? (
+                    <div className="space-y-1 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`capitalize ${
+                          item.sync_type === 'create' ? 'text-green-500' :
+                          item.sync_type === 'update' ? 'text-blue-500' :
+                          item.sync_type === 'reschedule' ? 'text-yellow-500' :
+                          item.sync_type === 'cancel' ? 'text-red-500' :
+                          'text-muted-foreground'
+                        }`}>
+                          {item.sync_type}
+                        </span>
+                        {item._updateCount > 1 && (
+                          <span className="text-primary/80">{item._updateCount} updates</span>
+                        )}
+                        {item.email_from && (
+                          <span className="text-muted-foreground/70 truncate max-w-[120px]">{item.email_from}</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
+                      <span className="text-muted-foreground/50">•</span>
+                      <span className={`capitalize ${
+                        item.sync_type === 'create' ? 'text-green-500' :
+                        item.sync_type === 'update' ? 'text-blue-500' :
+                        item.sync_type === 'reschedule' ? 'text-yellow-500' :
+                        item.sync_type === 'cancel' ? 'text-red-500' :
+                        'text-muted-foreground'
+                      }`}>
+                        {item.sync_type}
+                      </span>
+                      {item._updateCount > 1 && (
+                        <>
+                          <span className="text-muted-foreground/50">•</span>
+                          <span className="text-primary/80">{item._updateCount} updates</span>
+                        </>
+                      )}
+                      {item.email_from && (
+                        <>
+                          <span className="text-muted-foreground/50">•</span>
+                          <span className="text-muted-foreground/70 truncate max-w-[150px]">{item.email_from}</span>
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   {item.changes && Object.keys(item.changes).length > 0 && (
                     <div className="mt-2 p-2 bg-muted/30 rounded-md space-y-1">
@@ -601,7 +651,7 @@ export default function Notifications() {
                     </div>
                   )}
 
-                  <div className="flex flex-wrap gap-1.5 pt-1">
+                  <div className="flex flex-wrap gap-1.5 pt-0.5">
                     {item.outreach?.id && (
                       <Button
                         variant="ghost"
@@ -610,7 +660,7 @@ export default function Notifications() {
                           e.stopPropagation();
                           navigate("/rel8/outreach");
                         }}
-                        className="h-7 text-xs hover:bg-primary/10 hover:text-primary"
+                        className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-primary/10 hover:text-primary`}
                       >
                         <ExternalLink className="h-3 w-3 mr-1.5" />
                         View
@@ -621,7 +671,7 @@ export default function Notifications() {
                       variant="ghost"
                       size="sm"
                       onClick={(e) => e.stopPropagation()}
-                      className="h-7 text-xs hover:bg-muted"
+                      className={`${isMobile ? 'h-9' : 'h-7'} text-xs hover:bg-muted`}
                     >
                       {isExpanded ? '▼' : '▶'} Timeline
                     </Button>
