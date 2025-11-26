@@ -259,6 +259,35 @@ export const updateOutreach = async (
   }
 };
 
+export const sendCalendarUpdate = async (
+  outreachId: string,
+  updateType: 'update' | 'reschedule' | 'cancel',
+  userEmail: string
+): Promise<boolean> => {
+  try {
+    console.log('Sending calendar update:', { outreachId, updateType, userEmail });
+    
+    const { data, error } = await supabase.functions.invoke('send-calendar-update', {
+      body: {
+        outreachId,
+        updateType,
+        userEmail
+      }
+    });
+
+    if (error) {
+      console.error('Error sending calendar update:', error);
+      return false;
+    }
+
+    console.log('Calendar update sent successfully:', data);
+    return true;
+  } catch (error) {
+    console.error('Failed to send calendar update:', error);
+    return false;
+  }
+};
+
 export const deleteOutreach = async (id: string): Promise<boolean> => {
   try {
     // First delete associated contacts

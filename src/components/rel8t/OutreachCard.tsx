@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Calendar, AlertCircle, Download, Trash2, Pencil } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { Outreach, updateOutreachStatus, deleteOutreach, updateOutreach } from "@/services/rel8t/outreachService";
+import { Outreach, updateOutreachStatus, deleteOutreach, updateOutreach, sendCalendarUpdate } from "@/services/rel8t/outreachService";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarOptionsDialog } from "./CalendarOptionsDialog";
 import { OutreachEditDialog } from "./OutreachEditDialog";
 import { generateOutreachICS } from "@/utils/outreachIcsGenerator";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,10 +31,28 @@ interface OutreachCardProps {
 
 export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [showCalendarDialog, setShowCalendarDialog] = useState(false);
   const [icsContent, setIcsContent] = useState<string>("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+
+  // Get user profile for email
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('user_id', user.id)
+        .single();
+      
+      return data;
+    },
+  });
   
   const handleMarkComplete = async () => {
     const success = await updateOutreachStatus(outreach.id, "completed");
@@ -41,11 +61,52 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     }
   };
 
-  const handleSaveEdit = async (updates: Partial<Outreach>) => {
+  const handleSaveEdit = async (updates: Partial<Outreach>, withCalendarUpdate: boolean = false) => {
     const success = await updateOutreach(outreach.id, updates);
+    
     if (success) {
+      // If user requested calendar update, send it
+      if (withCalendarUpdate && profile?.email) {
+        // Determine update type based on what changed
+        let updateType: 'update' | 'reschedule' = 'update';
+        if (updates.due_date && updates.due_date !== outreach.due_date) {
+          updateType = 'reschedule';
+        }
+        
+        const calendarSuccess = await sendCalendarUpdate(
+          outreach.id,
+          updateType,
+          profile.email
+        );
+        
+        if (calendarSuccess) {
+          toast({
+            title: "Success",
+            description: "Outreach task updated and calendar notification sent",
+          });
+        } else {
+          toast({
+            title: "Partial Success",
+            description: "Task updated but calendar notification failed",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Success",
+          description: "Outreach task updated successfully",
+        });
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["outreach"] });
       queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to update outreach task",
+        variant: "destructive",
+      });
     }
   };
 

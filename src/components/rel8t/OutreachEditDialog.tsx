@@ -24,7 +24,7 @@ interface OutreachEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   outreach: Outreach;
-  onSave: (updates: Partial<Outreach>) => Promise<void>;
+  onSave: (updates: Partial<Outreach>, withCalendarUpdate?: boolean) => Promise<void>;
 }
 
 export const OutreachEditDialog: React.FC<OutreachEditDialogProps> = ({
@@ -48,6 +48,7 @@ export const OutreachEditDialog: React.FC<OutreachEditDialogProps> = ({
     outreach.channel_details || {}
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [sendingCalendarUpdate, setSendingCalendarUpdate] = useState(false);
 
   useEffect(() => {
     setTitle(outreach.title);
@@ -68,10 +69,15 @@ export const OutreachEditDialog: React.FC<OutreachEditDialogProps> = ({
     setChannelDetails((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSave = async () => {
-    if (isSaving) return;
+  const handleSave = async (withCalendarUpdate: boolean = false) => {
+    if (isSaving || sendingCalendarUpdate) return;
     
-    setIsSaving(true);
+    if (withCalendarUpdate) {
+      setSendingCalendarUpdate(true);
+    } else {
+      setIsSaving(true);
+    }
+    
     try {
       const updates: Partial<Outreach> = {
         title,
@@ -82,10 +88,11 @@ export const OutreachEditDialog: React.FC<OutreachEditDialogProps> = ({
         channel_details: Object.keys(channelDetails).length > 0 ? channelDetails : null,
       };
 
-      await onSave(updates);
+      await onSave(updates, withCalendarUpdate);
       onOpenChange(false);
     } finally {
       setIsSaving(false);
+      setSendingCalendarUpdate(false);
     }
   };
 
@@ -270,16 +277,26 @@ export const OutreachEditDialog: React.FC<OutreachEditDialogProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 flex-col sm:flex-row">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={isSaving}
+            disabled={isSaving || sendingCalendarUpdate}
           >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Saving..." : "Save Changes"}
+          <Button 
+            onClick={() => handleSave(false)} 
+            disabled={isSaving || sendingCalendarUpdate}
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
+          <Button 
+            onClick={() => handleSave(true)}
+            disabled={isSaving || sendingCalendarUpdate}
+            className="bg-primary"
+          >
+            {sendingCalendarUpdate ? "Updating Calendar..." : "Save & Update Calendar"}
           </Button>
         </DialogFooter>
       </DialogContent>
