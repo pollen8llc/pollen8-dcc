@@ -352,19 +352,6 @@ export default function Notifications() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
-      sent: "default",
-      failed: "destructive",
-      pending: "secondary"
-    };
-    return (
-      <Badge variant={variants[status] || "outline"} className="capitalize text-xs">
-        {status}
-      </Badge>
-    );
-  };
-
   const getSyncTypeIcon = (syncType: string) => {
     switch (syncType) {
       case "update":
@@ -378,20 +365,6 @@ export default function Notifications() {
       default:
         return <GitBranch className="h-4 w-4 text-muted-foreground" />;
     }
-  };
-
-  const getSyncTypeBadge = (syncType: string) => {
-    const colors: Record<string, string> = {
-      update: "bg-blue-900/30 text-blue-400 border-blue-400/30",
-      reschedule: "bg-yellow-900/30 text-yellow-400 border-yellow-400/30",
-      cancel: "bg-red-900/30 text-red-400 border-red-400/30",
-      create: "bg-green-900/30 text-green-400 border-green-400/30"
-    };
-    return (
-      <Badge variant="outline" className={`${colors[syncType] || "border-border/30"} text-xs`}>
-        {syncType}
-      </Badge>
-    );
   };
 
   const getReference = (notification: any) => {
@@ -436,116 +409,119 @@ export default function Notifications() {
       const isExpanded = outreachId && expandedOutreachIds.has(outreachId);
 
       return (
-        <div key={item.id}>
+        <div key={item.id} className="group">
           <Card 
-            className={`glass-morphism border-0 backdrop-blur-md hover:bg-card/60 transition-all ${
+            className={`bg-card border-border/50 hover:border-border hover:shadow-md transition-all duration-200 ${
               isOutreachEmail ? 'cursor-pointer' : ''
             }`}
             onClick={isOutreachEmail && outreachId ? () => toggleOutreachExpanded(outreachId) : undefined}
           >
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="mt-1 shrink-0">
-                    {getStatusIcon(item.status)}
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 shrink-0">
+                  {getStatusIcon(item.status)}
+                </div>
+                
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-medium text-sm leading-tight text-foreground">{item.subject}</h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget({ id: item.id, type: "email" });
+                      }}
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-foreground truncate">{item.subject}</h3>
-                      {getStatusBadge(item.status)}
-                      {item.notification_type === "outreach_created" && (
-                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
-                          Outreach
-                        </Badge>
-                      )}
-                      {item.has_ics_attachment && (
-                        <Badge variant="outline" className="bg-green-900/30 text-green-400 border-green-400/30 text-xs">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          ICS
-                        </Badge>
-                      )}
-                      {isOutreachEmail && (
-                        <Badge variant="outline" className="text-xs">
-                          {isExpanded ? '▼' : '▶'} Timeline
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p className="text-xs">{format(new Date(item.created_at), "PPP 'at' p")}</p>
-                      {item.sent_at && (
-                        <p className="text-xs">Sent: {format(new Date(item.sent_at), "PPP 'at' p")}</p>
-                      )}
-                    </div>
+                  
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
+                    {item.has_ics_attachment && (
+                      <>
+                        <span className="text-muted-foreground/50">•</span>
+                        <span className="text-green-500 flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          Calendar
+                        </span>
+                      </>
+                    )}
+                    {isOutreachEmail && (
+                      <>
+                        <span className="text-muted-foreground/50">•</span>
+                        <span className="text-primary/80">Outreach</span>
+                      </>
+                    )}
+                    <span className="text-muted-foreground/50">•</span>
+                    <span className="text-muted-foreground/70 capitalize flex items-center gap-1">
+                      <ReferenceIcon className="h-3 w-3" />
+                      {ref.name}
+                    </span>
+                  </div>
 
-                    {item.error_message && (
-                      <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                        <p className="text-xs text-destructive font-medium">Error:</p>
-                        <p className="text-xs text-destructive/80 mt-1">{item.error_message}</p>
-                      </div>
+                  {item.sent_at && (
+                    <p className="text-xs text-muted-foreground">Sent {format(new Date(item.sent_at), "MMM d, h:mm a")}</p>
+                  )}
+
+                  {item.error_message && (
+                    <div className="mt-2 p-2 bg-destructive/10 rounded-md">
+                      <p className="text-xs text-destructive">{item.error_message}</p>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {item.has_ics_attachment && item.ics_data && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownloadICS(item);
+                        }}
+                        className="h-7 text-xs hover:bg-primary/10 hover:text-primary"
+                      >
+                        <Download className="h-3 w-3 mr-1.5" />
+                        Download
+                      </Button>
+                    )}
+                    
+                    {item.status === "failed" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          retryEmailMutation.mutate(item.id);
+                        }}
+                        disabled={retryEmailMutation.isPending}
+                        className="h-7 text-xs hover:bg-primary/10"
+                      >
+                        <RefreshCw className={`h-3 w-3 mr-1.5 ${retryEmailMutation.isPending ? 'animate-spin' : ''}`} />
+                        Retry
+                      </Button>
+                    )}
+
+                    {isOutreachEmail && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-7 text-xs hover:bg-muted"
+                      >
+                        {isExpanded ? '▼' : '▶'} Timeline
+                      </Button>
                     )}
                   </div>
                 </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {item.has_ics_attachment && item.ics_data && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownloadICS(item);
-                      }}
-                      className="flex-1 sm:flex-none min-w-[120px]"
-                    >
-                      <Download className="h-3 w-3 mr-2" />
-                      Download
-                    </Button>
-                  )}
-                  
-                  {item.status === "failed" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        retryEmailMutation.mutate(item.id);
-                      }}
-                      disabled={retryEmailMutation.isPending}
-                      className="flex-1 sm:flex-none min-w-[120px]"
-                    >
-                      <RefreshCw className={`h-3 w-3 mr-2 ${retryEmailMutation.isPending ? 'animate-spin' : ''}`} />
-                      Retry
-                    </Button>
-                  )}
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteTarget({ id: item.id, type: "email" });
-                    }}
-                    className="flex-1 sm:flex-none min-w-[120px] hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <Trash2 className="h-3 w-3 mr-2" />
-                    Delete
-                  </Button>
-                </div>
               </div>
             </CardContent>
-            <CardFooter className="px-6 py-3 bg-muted/20 border-t border-border/20 flex flex-wrap items-center justify-between text-xs text-muted-foreground gap-2">
-              <span className="font-mono">#{item.id.slice(0, 8)}</span>
-              <div className="flex items-center gap-1">
-                <ReferenceIcon className="h-3 w-3" />
-                <span className="capitalize">{ref.type}: {ref.name}</span>
-              </div>
-            </CardFooter>
           </Card>
           
-          {/* Inline timeline accordion */}
           {isExpanded && outreachId && (
-            <div className="glass-morphism border-0 backdrop-blur-md border-t-0 rounded-t-none">
+            <div className="mt-1 bg-card border border-border/50 rounded-lg overflow-hidden">
               <OutreachTimelineAccordion outreachId={outreachId} />
             </div>
           )}
@@ -557,104 +533,110 @@ export default function Notifications() {
       const isExpanded = expandedOutreachIds.has(item.outreach_id);
       
       return (
-        <div key={item.id}>
+        <div key={item.id} className="group">
           <Card 
-            className="glass-morphism border-0 backdrop-blur-md hover:bg-card/60 transition-all cursor-pointer"
+            className="bg-card border-border/50 hover:border-border hover:shadow-md transition-all duration-200 cursor-pointer"
             onClick={() => toggleOutreachExpanded(item.outreach_id)}
           >
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-start gap-3 flex-1 min-w-0">
-                <div className="mt-1 shrink-0">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 shrink-0">
                   {getSyncTypeIcon(item.sync_type)}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <h3 className="font-semibold text-foreground truncate">
+                
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-medium text-sm leading-tight text-foreground">
                       {item.outreach?.title || "Unknown Outreach"}
                     </h3>
-                    {getSyncTypeBadge(item.sync_type)}
-                    {item._updateCount > 1 && (
-                      <Badge variant="outline" className="text-xs">
-                        {item._updateCount} updates
-                      </Badge>
-                    )}
-                    <Badge variant="outline" className="text-xs">
-                      {isExpanded ? '▼' : '▶'} Timeline
-                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget({ id: item.id, type: "sync" });
+                      }}
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity shrink-0"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                   
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <p className="text-xs">{format(new Date(item.created_at), "PPP 'at' p")}</p>
-                    {item.email_from && <p className="text-xs truncate">From: {item.email_from}</p>}
-                    {item.sequence !== null && <p className="text-xs">Sequence: {item.sequence}</p>}
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="text-muted-foreground">{format(new Date(item.created_at), "MMM d, h:mm a")}</span>
+                    <span className="text-muted-foreground/50">•</span>
+                    <span className={`capitalize ${
+                      item.sync_type === 'create' ? 'text-green-500' :
+                      item.sync_type === 'update' ? 'text-blue-500' :
+                      item.sync_type === 'reschedule' ? 'text-yellow-500' :
+                      item.sync_type === 'cancel' ? 'text-red-500' :
+                      'text-muted-foreground'
+                    }`}>
+                      {item.sync_type}
+                    </span>
+                    {item._updateCount > 1 && (
+                      <>
+                        <span className="text-muted-foreground/50">•</span>
+                        <span className="text-primary/80">{item._updateCount} updates</span>
+                      </>
+                    )}
+                    {item.email_from && (
+                      <>
+                        <span className="text-muted-foreground/50">•</span>
+                        <span className="text-muted-foreground/70 truncate max-w-[150px]">{item.email_from}</span>
+                      </>
+                    )}
                   </div>
 
                   {item.changes && Object.keys(item.changes).length > 0 && (
-                    <div className="mt-3 p-3 bg-muted/30 border border-border/30 rounded-lg">
-                      <p className="text-xs font-medium mb-2">Changes:</p>
-                      <div className="space-y-1 text-xs text-muted-foreground">
-                        {Object.entries(item.changes).map(([key, value]: [string, any]) => (
-                          <div key={key} className="flex gap-2 flex-wrap">
-                            <span className="font-medium capitalize">{key}:</span>
-                            <span className="line-through">{JSON.stringify(value.old)}</span>
-                            <span>→</span>
-                            <span className="text-foreground">{JSON.stringify(value.new)}</span>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="mt-2 p-2 bg-muted/30 rounded-md space-y-1">
+                      {Object.entries(item.changes).map(([key, value]: [string, any]) => (
+                        <div key={key} className="text-xs flex items-center gap-1.5 flex-wrap">
+                          <span className="font-medium capitalize text-foreground">{key}:</span>
+                          <span className="line-through text-muted-foreground">{JSON.stringify(value.old)}</span>
+                          <span className="text-muted-foreground/50">→</span>
+                          <span className="text-foreground">{JSON.stringify(value.new)}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {item.outreach?.id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/rel8/outreach");
+                        }}
+                        className="h-7 text-xs hover:bg-primary/10 hover:text-primary"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1.5" />
+                        View
+                      </Button>
+                    )}
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-7 text-xs hover:bg-muted"
+                    >
+                      {isExpanded ? '▼' : '▶'} Timeline
+                    </Button>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                {item.outreach?.id && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate("/rel8/outreach");
-                    }}
-                    className="flex-1 sm:flex-none min-w-[120px]"
-                  >
-                    <ExternalLink className="h-3 w-3 mr-2" />
-                    View
-                  </Button>
-                )}
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteTarget({ id: item.id, type: "sync" });
-                  }}
-                  className="flex-1 sm:flex-none min-w-[120px] hover:bg-destructive/10 hover:text-destructive"
-                >
-                  <Trash2 className="h-3 w-3 mr-2" />
-                  Delete
-                </Button>
-              </div>
+            </CardContent>
+          </Card>
+          
+          {isExpanded && (
+            <div className="mt-1 bg-card border border-border/50 rounded-lg overflow-hidden">
+              <OutreachTimelineAccordion outreachId={item.outreach_id} />
             </div>
-          </CardContent>
-          <CardFooter className="px-6 py-3 bg-muted/20 border-t border-border/20 flex flex-wrap items-center justify-between text-xs text-muted-foreground gap-2">
-            <span className="font-mono">#{item.id.slice(0, 8)}</span>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>Outreach: {item.outreach?.title || 'N/A'}</span>
-            </div>
-          </CardFooter>
-        </Card>
-        
-        {/* Inline timeline accordion */}
-        {isExpanded && item.outreach_id && (
-          <div className="glass-morphism border-0 backdrop-blur-md border-t-0 rounded-t-none">
-            <OutreachTimelineAccordion outreachId={item.outreach_id} />
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       );
     }
 
