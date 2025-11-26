@@ -89,12 +89,33 @@ const formatChanges = (changes: any) => {
           );
         }
 
+        // Handle responder object specifically
+        if (key === 'responder' && typeof value === 'object' && value !== null) {
+          const responderDisplay = value.name 
+            ? `${value.name} <${value.email}>` 
+            : value.email || 'Unknown';
+          return (
+            <div key={key} className="flex items-start gap-2">
+              <span className="text-muted-foreground">•</span>
+              <span>
+                <span className="font-medium">{displayKey}:</span>{' '}
+                <span className="text-primary">{responderDisplay}</span>
+              </span>
+            </div>
+          );
+        }
+
+        // Generic fallback - handle any other objects
+        const displayValue = typeof value === 'object' && value !== null 
+          ? JSON.stringify(value) 
+          : String(value);
+
         return (
           <div key={key} className="flex items-start gap-2">
             <span className="text-muted-foreground">•</span>
             <span>
               <span className="font-medium">{displayKey}:</span>{' '}
-              <span className="text-primary">{String(value)}</span>
+              <span className="text-primary">{displayValue}</span>
             </span>
           </div>
         );
