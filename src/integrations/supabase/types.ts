@@ -2413,6 +2413,7 @@ export type Database = {
           scheduled_at: string | null
           sequence: number | null
           status: string
+          system_email: string | null
           title: string
           updated_at: string
           user_id: string
@@ -2431,6 +2432,7 @@ export type Database = {
           scheduled_at?: string | null
           sequence?: number | null
           status?: string
+          system_email?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -2449,6 +2451,7 @@ export type Database = {
           scheduled_at?: string | null
           sequence?: number | null
           status?: string
+          system_email?: string | null
           title?: string
           updated_at?: string
           user_id?: string

@@ -178,6 +178,8 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
         sequence: item.sequence,
         last_calendar_update: item.last_calendar_update,
         raw_ics: item.raw_ics,
+        outreach_channel: item.outreach_channel,
+        channel_details: item.channel_details,
         contacts
       } as Outreach;
     });
@@ -283,7 +285,9 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
         priority: outreach.priority,
         status: outreach.status,
         due_date: outreach.due_date,
-        scheduled_at: outreach.due_date
+        scheduled_at: outreach.due_date,
+        outreach_channel: outreach.outreach_channel || null,
+        channel_details: outreach.channel_details || null
       }])
       .select()
       .single();
