@@ -319,65 +319,6 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("✅ Sync logged");
     }
 
-    // Create cross-platform notification for the user
-    const notificationTitle = detectedStatus === 'cancelled' 
-      ? '📅 Calendar Event Cancelled'
-      : detectedStatus === 'accepted'
-      ? '✅ Calendar Event Accepted'
-      : detectedStatus === 'declined'
-      ? '❌ Calendar Event Declined'
-      : detectedStatus === 'tentative'
-      ? '🤔 Calendar Event Tentative'
-      : detectedStatus === 'rescheduled'
-      ? '🔄 Calendar Event Rescheduled'
-      : '📝 Calendar Event Updated';
-
-    // Build enhanced notification message with responder info and notes
-    let notificationMessage = '';
-    const responderDisplay = responderName || responderEmail;
-    
-    if (detectedStatus === 'cancelled') {
-      notificationMessage = `${responderDisplay} cancelled: ${outreach.title}`;
-    } else if (detectedStatus === 'accepted') {
-      notificationMessage = `${responderDisplay} accepted: ${outreach.title}`;
-    } else if (detectedStatus === 'declined') {
-      notificationMessage = `${responderDisplay} declined: ${outreach.title}`;
-    } else if (detectedStatus === 'tentative') {
-      notificationMessage = `${responderDisplay} marked as tentative: ${outreach.title}`;
-    } else if (detectedStatus === 'rescheduled' && newTimeInfo) {
-      notificationMessage = `${responderDisplay} rescheduled: ${outreach.title} to ${newTimeInfo}`;
-    } else {
-      notificationMessage = `${responderDisplay} updated: ${outreach.title}`;
-    }
-
-    // Append attendee note if present
-    if (attendeeNote) {
-      notificationMessage += ` - "${attendeeNote}"`;
-    }
-
-    const { error: notifError } = await supabase
-      .from("cross_platform_notifications")
-      .insert({
-        user_id: outreach.user_id,
-        title: notificationTitle,
-        message: notificationMessage,
-        notification_type: "calendar_sync",
-        is_read: false,
-        metadata: {
-          outreachId: outreach.id,
-          syncType: detectedStatus,
-          changes: changes,
-          emailFrom: from,
-          emailSubject: subject
-        }
-      });
-
-    if (notifError) {
-      console.error("Failed to create notification:", notifError);
-    } else {
-      console.log("✅ User notification created");
-    }
-
     return new Response(
       JSON.stringify({
         message: "Calendar update processed",
