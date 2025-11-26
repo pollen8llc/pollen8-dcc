@@ -17,11 +17,11 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-0 md:p-6 w-full max-w-full overflow-hidden", className)}
+      className={cn("p-4 md:p-6 w-full", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
         month: "space-y-4 w-full",
-        caption: "flex justify-center pt-1 relative items-center mb-2 md:mb-4",
+        caption: "flex justify-center pt-1 relative items-center mb-4",
         caption_label: "text-base md:text-lg font-semibold text-foreground",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
@@ -34,11 +34,11 @@ function Calendar({
         head_row: "flex w-full justify-between mb-2",
         head_cell:
           "text-muted-foreground/80 rounded-md flex-1 font-semibold text-xs md:text-sm uppercase tracking-wide",
-        row: "flex w-full justify-between mt-0.5 md:mt-1",
-        cell: "flex-1 text-center text-xs md:text-sm p-0.5 md:p-1 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        row: "flex w-full justify-between mt-1",
+        cell: "flex-1 text-center text-sm md:text-base p-0.5 md:p-1 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-8 md:h-14 w-full p-0 font-medium aria-selected:opacity-100 hover:bg-primary/10 active:scale-95 md:hover:scale-105 transition-all touch-manipulation"
+          "min-h-[44px] h-11 w-full md:h-14 p-0 font-medium aria-selected:opacity-100 hover:bg-primary/10 active:scale-95 md:hover:scale-105 transition-all touch-manipulation"
         ),
         day_range_end: "day-range-end",
         day_selected:
