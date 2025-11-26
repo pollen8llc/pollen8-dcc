@@ -94,6 +94,70 @@ export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> =
   }
 };
 
+export const getOutreachById = async (id: string): Promise<Outreach | null> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    
+    const { data, error } = await supabase
+      .from("rms_outreach")
+      .select(`
+        *,
+        rms_outreach_contacts(
+          contact_id,
+          rms_contacts(
+            id,
+            name,
+            email,
+            organization
+          )
+        )
+      `)
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+    
+    if (error) throw error;
+    if (!data) return null;
+    
+    // Extract contacts from the junction table
+    const contacts = Array.isArray((data as any).rms_outreach_contacts) 
+      ? (data as any).rms_outreach_contacts
+          .map((oc: any) => oc.rms_contacts)
+          .filter((c: any) => c)
+      : [];
+    
+    const priority = ((data as any).priority || 'medium') as OutreachPriority;
+    
+    return {
+      id: (data as any).id,
+      user_id: (data as any).user_id,
+      title: (data as any).title,
+      description: (data as any).message || (data as any).description,
+      priority: priority,
+      status: (data as any).status as OutreachStatus,
+      due_date: (data as any).due_date || (data as any).created_at,
+      created_at: (data as any).created_at,
+      updated_at: (data as any).updated_at,
+      system_email: (data as any).system_email,
+      calendar_sync_enabled: (data as any).calendar_sync_enabled || false,
+      ics_uid: (data as any).ics_uid,
+      sequence: (data as any).sequence,
+      last_calendar_update: (data as any).last_calendar_update,
+      raw_ics: (data as any).raw_ics,
+      outreach_channel: (data as any).outreach_channel,
+      channel_details: (data as any).channel_details,
+      contacts
+    } as Outreach;
+  } catch (error: any) {
+    console.error("Error fetching outreach by ID:", error);
+    return null;
+  }
+};
+
 export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outreach[]> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
