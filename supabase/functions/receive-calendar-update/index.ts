@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import ICAL from "https://esm.sh/ical.js@1.5.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,93 +49,55 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const { email_id, from, subject, attachments } = payload.data;
+    const { email_id, from, subject, text, html } = payload.data;
 
-    // Check if there are attachments
-    if (!attachments || attachments.length === 0) {
-      console.log("No attachments found, skipping");
-      return new Response(JSON.stringify({ message: "No attachments" }), {
+    // Parse email body content
+    const emailBody = text || (html ? html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : '');
+    console.log("📧 Email body preview:", emailBody.substring(0, 500));
+
+    if (!emailBody) {
+      console.log("No email body content found");
+      return new Response(JSON.stringify({ message: "No email body" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Find ICS attachment
-    const icsAttachment = attachments.find(
-      (att) => att.filename.endsWith(".ics") || att.content_type === "text/calendar"
-    );
+    // Detect event status from email body
+    let detectedStatus = 'update';
+    const bodyLower = emailBody.toLowerCase();
 
-    if (!icsAttachment) {
-      console.log("No ICS attachment found");
-      return new Response(JSON.stringify({ message: "No ICS attachment" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (bodyLower.includes('accepted') || bodyLower.includes('has accepted') || bodyLower.includes('going')) {
+      detectedStatus = 'accepted';
+    } else if (bodyLower.includes('declined') || bodyLower.includes('has declined') || bodyLower.includes('not going')) {
+      detectedStatus = 'declined';
+    } else if (bodyLower.includes('tentative') || bodyLower.includes('maybe')) {
+      detectedStatus = 'tentative';
+    } else if (bodyLower.includes('cancelled') || bodyLower.includes('canceled')) {
+      detectedStatus = 'cancelled';
+    } else if (bodyLower.includes('rescheduled') || bodyLower.includes('new time') || bodyLower.includes('changed to')) {
+      detectedStatus = 'rescheduled';
     }
 
-    console.log("📎 Found ICS attachment:", icsAttachment.filename);
+    console.log("📊 Detected status:", detectedStatus);
 
-    // Fetch the ICS attachment from Resend API
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendApiKey) {
-      console.error("RESEND_API_KEY not configured");
-      return new Response(JSON.stringify({ error: "Configuration error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Try to extract new date from email body for reschedules
+    let newDateString = null;
+    if (detectedStatus === 'rescheduled') {
+      const datePatterns = [
+        /new time[:\s]+(.+?)(?:\n|$)/i,
+        /rescheduled to[:\s]+(.+?)(?:\n|$)/i,
+        /changed to[:\s]+(.+?)(?:\n|$)/i,
+      ];
 
-    // Fetch attachment content from Resend
-    const attachmentResponse = await fetch(
-      `https://api.resend.com/emails/${email_id}/attachments/${icsAttachment.filename}`,
-      {
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-        },
+      for (const pattern of datePatterns) {
+        const match = emailBody.match(pattern);
+        if (match) {
+          newDateString = match[1].trim();
+          console.log("📅 Extracted new date:", newDateString);
+          break;
+        }
       }
-    );
-
-    if (!attachmentResponse.ok) {
-      console.error("Failed to fetch attachment:", attachmentResponse.statusText);
-      return new Response(JSON.stringify({ error: "Failed to fetch attachment" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const icsContent = await attachmentResponse.text();
-    console.log("📄 ICS content fetched, length:", icsContent.length);
-
-    // Parse ICS using ical.js
-    const jcalData = ICAL.parse(icsContent);
-    const comp = new ICAL.Component(jcalData);
-    const vevent = comp.getFirstSubcomponent("vevent");
-
-    if (!vevent) {
-      console.log("No VEVENT found in ICS");
-      return new Response(JSON.stringify({ message: "No VEVENT" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Extract event properties
-    const uid = vevent.getFirstPropertyValue("uid");
-    const summary = vevent.getFirstPropertyValue("summary");
-    const description = vevent.getFirstPropertyValue("description");
-    const dtstart = vevent.getFirstPropertyValue("dtstart");
-    const dtend = vevent.getFirstPropertyValue("dtend");
-    const sequence = vevent.getFirstPropertyValue("sequence") || 0;
-    const status = vevent.getFirstPropertyValue("status") || "CONFIRMED";
-
-    console.log("📅 Parsed ICS:", { uid, summary, sequence, status });
-
-    if (!uid) {
-      console.log("No UID in ICS, cannot match to outreach task");
-      return new Response(JSON.stringify({ message: "No UID" }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
 
     // Initialize Supabase client
@@ -144,44 +105,28 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Try to parse short outreach ID from subject line first
+    // Try to parse short outreach ID from subject line
     // Format: "Reminder set: Follow up with Aaron #904a90dd"
     // Also handles "RE: Reminder set: ..." or "Fwd: ..."
     const subjectMatch = subject.match(/#([a-f0-9]{8})(?:\s*$|\s)/i);
-    let outreach = null;
-    let lookupError = null;
-
-    if (subjectMatch) {
-      const shortId = subjectMatch[1];
-      console.log("📧 Parsed short outreach ID from subject:", shortId);
-      
-      // Find outreach where ID starts with this short ID
-      const result = await supabase
-        .from("rms_outreach")
-        .select("*")
-        .ilike("id", `${shortId}%`)
-        .single();
-      
-      outreach = result.data;
-      lookupError = result.error;
-      
-      if (outreach) {
-        console.log("✅ Found outreach by short ID:", outreach.id);
-      }
+    
+    if (!subjectMatch) {
+      console.log("No outreach ID found in subject");
+      return new Response(JSON.stringify({ message: "No task ID in subject" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Fallback to ICS UID matching if subject parsing failed
-    if (!outreach && uid) {
-      console.log("Trying ICS UID fallback:", uid);
-      const result = await supabase
-        .from("rms_outreach")
-        .select("*")
-        .eq("ics_uid", uid)
-        .single();
-      
-      outreach = result.data;
-      lookupError = result.error;
-    }
+    const shortId = subjectMatch[1];
+    console.log("📧 Parsed short outreach ID from subject:", shortId);
+    
+    // Find outreach where ID starts with this short ID
+    const { data: outreach, error: lookupError } = await supabase
+      .from("rms_outreach")
+      .select("*")
+      .ilike("id", `${shortId}%`)
+      .single();
 
     if (lookupError || !outreach) {
       console.log("No matching outreach task found");
@@ -193,45 +138,44 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("✅ Found matching outreach task:", outreach.id);
 
-    // Calculate what changed
-    const changes: Record<string, any> = {};
-    const newStartDate = dtstart ? dtstart.toJSDate().toISOString() : null;
-    const newEndDate = dtend ? dtend.toJSDate().toISOString() : null;
+    // Calculate what changed based on detected status
+    const changes: Record<string, any> = {
+      status: { old: outreach.status, new: detectedStatus }
+    };
 
-    if (newStartDate && outreach.due_date !== newStartDate) {
-      changes.due_date = { old: outreach.due_date, new: newStartDate };
-    }
-    if (summary && outreach.title !== summary) {
-      changes.title = { old: outreach.title, new: summary };
-    }
-    if (description && outreach.description !== description) {
-      changes.description = { old: outreach.description, new: description };
-    }
-    if (sequence !== outreach.sequence) {
-      changes.sequence = { old: outreach.sequence, new: sequence };
-    }
-
-    // Determine sync type
-    let syncType = "update";
-    if (status === "CANCELLED") {
-      syncType = "cancel";
-    } else if (changes.due_date) {
-      syncType = "reschedule";
+    // Try to parse new date if provided
+    if (newDateString) {
+      try {
+        const parsedDate = new Date(newDateString);
+        if (!isNaN(parsedDate.getTime())) {
+          changes.due_date = { old: outreach.due_date, new: parsedDate.toISOString() };
+        }
+      } catch (e) {
+        console.log("Failed to parse new date:", newDateString);
+      }
     }
 
-    // Update the outreach task
+    // Update the outreach task status
+    const updateData: any = {
+      last_calendar_update: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Update status based on detected action
+    if (detectedStatus === 'cancelled') {
+      updateData.status = 'cancelled';
+    } else if (detectedStatus === 'accepted') {
+      updateData.status = 'active';
+    }
+
+    // Update date if rescheduled and we have a new date
+    if (changes.due_date) {
+      updateData.due_date = changes.due_date.new;
+    }
+
     const { error: updateError } = await supabase
       .from("rms_outreach")
-      .update({
-        due_date: newStartDate || outreach.due_date,
-        title: summary || outreach.title,
-        description: description || outreach.description,
-        sequence: sequence,
-        status: status === "CANCELLED" ? "cancelled" : outreach.status,
-        last_calendar_update: new Date().toISOString(),
-        raw_ics: icsContent,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", outreach.id);
 
     if (updateError) {
@@ -244,18 +188,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("✅ Outreach task updated");
 
-    // Log to sync log
+    // Log to sync log with email body
     const { error: logError } = await supabase
       .from("rms_outreach_sync_log")
       .insert({
         outreach_id: outreach.id,
         user_id: outreach.user_id,
-        sync_type: syncType,
+        sync_type: detectedStatus,
         changes: changes,
-        raw_ics: icsContent,
+        raw_ics: emailBody, // Store email body in raw_ics field
         email_from: from,
         email_subject: subject,
-        sequence: sequence,
+        sequence: null, // No sequence from email body
       });
 
     if (logError) {
@@ -264,11 +208,59 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("✅ Sync logged");
     }
 
+    // Create cross-platform notification for the user
+    const notificationTitle = detectedStatus === 'cancelled' 
+      ? '📅 Calendar Event Cancelled'
+      : detectedStatus === 'accepted'
+      ? '✅ Calendar Event Accepted'
+      : detectedStatus === 'declined'
+      ? '❌ Calendar Event Declined'
+      : detectedStatus === 'tentative'
+      ? '🤔 Calendar Event Tentative'
+      : detectedStatus === 'rescheduled'
+      ? '🔄 Calendar Event Rescheduled'
+      : '📝 Calendar Event Updated';
+
+    const notificationMessage = detectedStatus === 'cancelled'
+      ? `${outreach.title} was cancelled`
+      : detectedStatus === 'accepted'
+      ? `${outreach.title} was accepted`
+      : detectedStatus === 'declined'
+      ? `${outreach.title} was declined`
+      : detectedStatus === 'tentative'
+      ? `${outreach.title} marked as tentative`
+      : detectedStatus === 'rescheduled' && newDateString
+      ? `${outreach.title} was rescheduled to ${newDateString}`
+      : `${outreach.title} was updated`;
+
+    const { error: notifError } = await supabase
+      .from("cross_platform_notifications")
+      .insert({
+        user_id: outreach.user_id,
+        title: notificationTitle,
+        message: notificationMessage,
+        notification_type: "calendar_sync",
+        is_read: false,
+        metadata: {
+          outreachId: outreach.id,
+          syncType: detectedStatus,
+          changes: changes,
+          emailFrom: from,
+          emailSubject: subject
+        }
+      });
+
+    if (notifError) {
+      console.error("Failed to create notification:", notifError);
+    } else {
+      console.log("✅ User notification created");
+    }
+
     return new Response(
       JSON.stringify({
         message: "Calendar update processed",
         outreach_id: outreach.id,
-        sync_type: syncType,
+        sync_type: detectedStatus,
         changes: Object.keys(changes),
       }),
       {
