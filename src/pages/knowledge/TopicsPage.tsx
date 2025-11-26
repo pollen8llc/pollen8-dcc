@@ -38,10 +38,8 @@ const TopicsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container mx-auto max-w-6xl px-4 py-4 pb-32">
-      </div>
       
-      <div className="container mx-auto max-w-6xl px-4 py-4 sm:py-8">
+      <div className="container mx-auto max-w-6xl px-4 py-4 sm:py-8 pb-32">
         
         {/* Header */}
         <div className="mb-8 mt-6">
