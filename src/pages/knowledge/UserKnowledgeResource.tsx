@@ -113,10 +113,8 @@ const UserKnowledgeResource = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
-      <div className="container mx-auto max-w-6xl px-4 py-4 pb-32">
-      </div>
       
-      <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in">
+      <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6 animate-fade-in pb-32">
         {/* Page Title */}
         <div className="mb-8 mt-6">
           <div className="flex items-center gap-3">
