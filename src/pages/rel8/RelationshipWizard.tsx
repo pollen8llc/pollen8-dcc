@@ -1,26 +1,45 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SelectContactsStep } from "@/components/rel8t/wizard/SelectContactsStep";
 import { SelectTriggersStep } from "@/components/rel8t/wizard/SelectTriggersStep";
 import { ReviewSubmitStep } from "@/components/rel8t/wizard/ReviewSubmitStep";
+import { EditDetailsStep } from "@/components/rel8t/wizard/EditDetailsStep";
+import { EditChannelStep } from "@/components/rel8t/wizard/EditChannelStep";
+import { ReviewEditStep } from "@/components/rel8t/wizard/ReviewEditStep";
 import { Contact } from "@/services/rel8t/contactService";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 import { TriggerCreatedDialog } from "@/components/rel8t/TriggerCreatedDialog";
+import { getOutreachById, Outreach } from "@/services/rel8t/outreachService";
+import { useQuery } from "@tanstack/react-query";
 
 type WizardStep = 
   | "select-contacts" 
   | "select-triggers" 
   | "review";
 
+type EditWizardStep = 
+  | "edit-details" 
+  | "edit-channel" 
+  | "review-edit";
+
 type WizardData = {
   contacts: Contact[];
   triggers: Trigger[];
   importedContacts: any[];
   priority: 'low' | 'medium' | 'high';
+};
+
+type EditWizardData = {
+  title: string;
+  description: string;
+  dueDate: string;
+  priority: 'low' | 'medium' | 'high';
+  outreachChannel: string | null;
+  channelDetails: Record<string, any> | null;
 };
 
 const initialData: WizardData = {
@@ -32,6 +51,11 @@ const initialData: WizardData = {
 
 const RelationshipWizard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode');
+  const outreachId = searchParams.get('id');
+  const isEditMode = mode === 'edit' && outreachId;
+
   const { 
     selectedTrigger, 
     preSelectedContacts, 
@@ -42,11 +66,21 @@ const RelationshipWizard = () => {
     clearWizardData 
   } = useRelationshipWizard();
   
-  const [step, setStep] = useState<WizardStep>("select-contacts");
+  const [step, setStep] = useState<WizardStep | EditWizardStep>(
+    isEditMode ? "edit-details" : "select-contacts"
+  );
   const [data, setData] = useState<WizardData>(initialData);
+  const [editData, setEditData] = useState<EditWizardData | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdTrigger, setCreatedTrigger] = useState<Trigger | null>(null);
   const [icsContent, setIcsContent] = useState<string | null>(null);
+
+  // Fetch existing outreach data when in edit mode
+  const { data: existingOutreach, isLoading: isLoadingOutreach } = useQuery({
+    queryKey: ['outreach', outreachId],
+    queryFn: () => getOutreachById(outreachId!),
+    enabled: !!isEditMode,
+  });
 
   // Initialize wizard with persisted state when returning from trigger creation
   // or with pre-selected contacts from Contacts page
@@ -109,6 +143,16 @@ const RelationshipWizard = () => {
     }
   };
 
+  const handleEditDetailsNext = (stepData: EditWizardData) => {
+    setEditData(prev => ({ ...prev, ...stepData } as EditWizardData));
+    setStep("edit-channel");
+  };
+
+  const handleEditChannelNext = (stepData: { outreachChannel: string | null; channelDetails: Record<string, any> | null }) => {
+    setEditData(prev => ({ ...prev, ...stepData } as EditWizardData));
+    setStep("review-edit");
+  };
+
   const getStepTitle = () => {
     switch (step) {
       case "select-contacts":
@@ -117,10 +161,41 @@ const RelationshipWizard = () => {
         return "Set Reminders";
       case "review":
         return "Review & Submit";
+      case "edit-details":
+        return "Edit Details";
+      case "edit-channel":
+        return "Edit Follow-up Channel";
+      case "review-edit":
+        return "Review Changes";
       default:
-        return "Build Relationship";
+        return isEditMode ? "Edit Outreach" : "Build Relationship";
     }
   };
+
+  if (isEditMode && isLoadingOutreach) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Rel8Header showProfileBanner={false} />
+        <div className="container mx-auto max-w-6xl px-4 py-8 flex justify-center items-center">
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isEditMode && !existingOutreach) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Rel8Header showProfileBanner={false} />
+        <div className="container mx-auto max-w-6xl px-4 py-8">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold">Outreach task not found</h2>
+            <p className="text-muted-foreground mt-2">The outreach task you're trying to edit doesn't exist.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,7 +206,11 @@ const RelationshipWizard = () => {
           <div>
             <h1 className="text-2xl font-bold">{getStepTitle()}</h1>
             <p className="text-muted-foreground">
-              {selectedTrigger ? "Complete your relationship plan" : "Create a plan to build relationships with contacts"}
+              {isEditMode 
+                ? "Update your outreach task details" 
+                : selectedTrigger 
+                  ? "Complete your relationship plan" 
+                  : "Create a plan to build relationships with contacts"}
             </p>
           </div>
           
@@ -171,14 +250,14 @@ const RelationshipWizard = () => {
 
         <Card className="border-border/20">
           <CardContent className="p-6">
-            {step === "select-contacts" && (
+            {!isEditMode && step === "select-contacts" && (
               <SelectContactsStep
                 selectedContacts={data.contacts}
                 onNext={handleSelectContactsNext}
               />
             )}
 
-            {step === "select-triggers" && (
+            {!isEditMode && step === "select-triggers" && (
               <SelectTriggersStep
                 onNext={handleSelectTriggersNext}
                 onPrevious={() => setStep("select-contacts")}
@@ -187,7 +266,7 @@ const RelationshipWizard = () => {
               />
             )}
             
-            {step === "review" && (
+            {!isEditMode && step === "review" && (
               <ReviewSubmitStep
                 wizardData={data}
                 onSubmit={handleReviewSubmit}
@@ -196,6 +275,29 @@ const RelationshipWizard = () => {
                   setData(prev => ({ ...prev, triggers: [] }));
                   setStep("select-triggers");
                 }}
+              />
+            )}
+
+            {isEditMode && existingOutreach && step === "edit-details" && (
+              <EditDetailsStep
+                outreach={existingOutreach}
+                onNext={handleEditDetailsNext}
+              />
+            )}
+
+            {isEditMode && existingOutreach && step === "edit-channel" && (
+              <EditChannelStep
+                outreach={existingOutreach}
+                onNext={handleEditChannelNext}
+                onPrevious={() => setStep("edit-details")}
+              />
+            )}
+
+            {isEditMode && existingOutreach && editData && step === "review-edit" && (
+              <ReviewEditStep
+                outreach={existingOutreach}
+                updatedData={editData}
+                onPrevious={() => setStep("edit-channel")}
               />
             )}
           </CardContent>
