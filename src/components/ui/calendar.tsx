@@ -35,10 +35,10 @@ function Calendar({
         head_cell:
           "text-muted-foreground/80 rounded-md flex-1 font-semibold text-xs md:text-sm uppercase tracking-wide",
         row: "flex w-full justify-between mt-1",
-        cell: "flex-1 text-center text-sm md:text-base p-0.5 md:p-1 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        cell: "flex-1 text-center text-xs md:text-sm p-0.5 md:p-1 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "min-h-[44px] h-11 w-full md:h-14 p-0 font-medium aria-selected:opacity-100 hover:bg-primary/10 active:scale-95 md:hover:scale-105 transition-all touch-manipulation"
+          "min-h-[38px] h-10 w-full md:h-14 p-0 font-medium aria-selected:opacity-100 hover:bg-primary/10 active:scale-95 md:hover:scale-105 transition-all touch-manipulation"
         ),
         day_range_end: "day-range-end",
         day_selected:
