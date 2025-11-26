@@ -191,7 +191,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: outreach, error: lookupError } = await supabase
       .from("rms_outreach")
       .select("*")
-      .ilike("id", `${shortId}%`)
+      .filter('id::text', 'ilike', `${shortId}%`)
       .single();
 
     if (lookupError || !outreach) {
