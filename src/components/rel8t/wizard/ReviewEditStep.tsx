@@ -108,7 +108,7 @@ export const ReviewEditStep: React.FC<ReviewEditStepProps> = ({
         queryClient.invalidateQueries({ queryKey: ["outreach-counts"] });
         queryClient.invalidateQueries({ queryKey: ["notifications"] });
         
-        navigate("/organizer");
+        navigate("/rel8");
       } else {
         toast({
           title: "Error",
