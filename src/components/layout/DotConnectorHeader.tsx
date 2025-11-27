@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Settings, MapPin, Bell } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import { NetworkScoreBadge } from "@/components/ui/network-score-badge";
+import { NetworkPlexus, NetworkScoreNumber } from "@/components/ui/network-score-badge";
 
 interface DotConnectorHeaderProps {
   className?: string;
@@ -62,14 +62,17 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                  <Avatar userId={currentUser?.id} size={96} />
                </div>
                 
-                 {/* Profile Info */}
-                 <div className="flex-1 min-w-0 text-center sm:text-left">
-                   <div className="flex flex-col gap-2 mb-3">
-                     <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
-                       {getFullName()}
-                     </h1>
-                     <NetworkScoreBadge score={currentUser?.network_value || 0} />
-                   </div>
+                  {/* Profile Info */}
+                  <div className="flex-1 min-w-0 text-center sm:text-left">
+                    <div className="flex flex-col gap-2 mb-3">
+                      <div className="flex items-center gap-3 justify-center sm:justify-start">
+                        <NetworkPlexus />
+                        <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
+                          {getFullName()}
+                        </h1>
+                      </div>
+                      <NetworkScoreNumber score={currentUser?.network_value || 0} />
+                    </div>
                   
                   <div className="flex items-center gap-3 justify-center sm:justify-start flex-wrap">
                     {currentUser?.location && (
