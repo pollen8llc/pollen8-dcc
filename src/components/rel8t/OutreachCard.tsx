@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarOptionsDialog } from "./CalendarOptionsDialog";
 import { generateOutreachICS } from "@/utils/outreachIcsGenerator";
+import { downloadICS } from "@/utils/icsDownload";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import {
@@ -89,6 +90,26 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     setShowCalendarDialog(true);
   };
 
+  const handleDownloadICS = async () => {
+    // Get user email for ICS attendee field
+    const { data: { user } } = await supabase.auth.getUser();
+    const userEmail = user?.email;
+
+    // Use system email from outreach as organizer, fallback to user email
+    const systemEmail = outreach.system_email || userEmail || 'notifications@ecosystembuilder.app';
+    const ics = generateOutreachICS(
+      outreach, 
+      systemEmail, 
+      userEmail,
+      outreach.outreach_channel,
+      outreach.channel_details
+    );
+    
+    // Generate filename from outreach title
+    const filename = `${outreach.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+    downloadICS(ics, filename);
+  };
+
   // Updated color classes for the dark theme
   const priorityColor = {
     low: "bg-blue-900/30 text-blue-400 border-blue-400/30",
@@ -105,12 +126,23 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     )}>
       <CardHeader className="px-4 py-3 border-b border-border/20 bg-card">
         <div className="flex justify-between items-center">
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap items-center">
             {outreach.calendar_sync_enabled && (
-              <Badge variant="outline" className="bg-green-900/30 text-green-400 border-green-400/30">
-                <Calendar className="h-3 w-3 mr-1" />
-                Synced
-              </Badge>
+              <>
+                <Badge variant="outline" className="bg-green-900/30 text-green-400 border-green-400/30">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Synced
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDownloadICS}
+                  className="h-6 w-6 hover:bg-primary/10 hover:text-primary"
+                  title="Download ICS file"
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+              </>
             )}
             
             {isOverdue && (
