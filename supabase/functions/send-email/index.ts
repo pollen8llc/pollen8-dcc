@@ -52,10 +52,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (icsAttachment) {
       console.log(`Adding ICS attachment: ${icsAttachment.filename}`);
       
-      // Convert ICS content to base64
-      const encoder = new TextEncoder();
-      const icsBytes = encoder.encode(icsAttachment.content);
-      const base64Content = btoa(String.fromCharCode(...icsBytes));
+      // Convert ICS content to base64 with proper UTF-8 handling
+      const base64Content = btoa(unescape(encodeURIComponent(icsAttachment.content)));
 
       emailPayload.attachments = [
         {
