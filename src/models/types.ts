@@ -15,6 +15,7 @@ export interface User {
   bio: string;
   location?: string;
   phone?: string;
+  website?: string;
   interests?: string[];
   communities: string[];
   managedCommunities?: string[]; // Communities where user is organizer
