@@ -440,15 +440,25 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
     
     const outreachId = data.id;
     
+    // Fetch contact details BEFORE generating ICS to include names
+    let contactDetails: { id: string; name: string; email?: string }[] = [];
+    if (contactIds.length > 0) {
+      const { data: fetchedContacts } = await supabase
+        .from("rms_contacts")
+        .select("id, name, email")
+        .in("id", contactIds);
+      contactDetails = fetchedContacts || [];
+    }
+    
     // Generate system email and ICS UID
     const { generateOutreachSystemEmail } = await import("./systemEmailService");
     const systemEmail = generateOutreachSystemEmail(user.id, outreachId);
     const icsUid = `outreach-${outreachId}@ecosystembuilder.app`;
     
-    // Generate ICS content with system email
+    // Generate ICS content with system email and actual contact names
     const { generateOutreachICS } = await import("@/utils/outreachIcsGenerator");
     const icsContent = generateOutreachICS(
-      { ...data, contacts: [] } as Outreach, 
+      { ...data, contacts: contactDetails } as Outreach, 
       systemEmail,
       userEmail,
       outreach.outreach_channel,
@@ -574,12 +584,7 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
         throw contactsError;
       }
       
-      // Fetch contact details to include in notification
-      const { data: contactDetails } = await supabase
-        .from("rms_contacts")
-        .select("id, name, email")
-        .in("id", contactIds);
-      
+      // Use already-fetched contact details for notification (fetched earlier for ICS)
       // Create cross-platform notification with contact metadata
       const contactNames = contactDetails?.map(c => c.name).join(", ") || "contacts";
       const { error: notifError } = await supabase
