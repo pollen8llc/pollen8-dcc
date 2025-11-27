@@ -206,6 +206,64 @@ Deno.serve(async (req) => {
             })
             .eq('id', trigger.id)
           
+          console.log(`Updated trigger ${trigger.id} with next execution: ${nextExecution}`)
+          
+          // Find and reschedule linked outreach tasks for recurring triggers
+          if (trigger.recurrence_pattern) {
+            const { data: linkedOutreach, error: outreachError } = await supabase
+              .from('rms_outreach')
+              .select('*')
+              .eq('trigger_id', trigger.id)
+              .eq('status', 'pending')
+            
+            if (outreachError) {
+              console.error('Error fetching linked outreach:', outreachError)
+            } else if (linkedOutreach && linkedOutreach.length > 0) {
+              console.log(`Found ${linkedOutreach.length} linked outreach tasks for trigger ${trigger.id}`)
+              
+              for (const outreach of linkedOutreach) {
+                if (outreach.calendar_sync_enabled) {
+                  // Update the outreach task's due_date to the next execution
+                  const { error: updateError } = await supabase
+                    .from('rms_outreach')
+                    .update({ due_date: nextExecution })
+                    .eq('id', outreach.id)
+                  
+                  if (updateError) {
+                    console.error(`Error updating outreach ${outreach.id}:`, updateError)
+                  } else {
+                    console.log(`Updated outreach ${outreach.id} due_date to ${nextExecution}`)
+                    
+                    // Get user email for calendar update
+                    const { data: profile } = await supabase
+                      .from('profiles')
+                      .select('email')
+                      .eq('user_id', outreach.user_id)
+                      .single()
+                    
+                    if (profile?.email) {
+                      // Send ICS reschedule update
+                      const { error: calendarError } = await supabase.functions.invoke('send-calendar-update', {
+                        body: {
+                          outreachId: outreach.id,
+                          updateType: 'reschedule',
+                          userEmail: profile.email,
+                          includeContactsAsAttendees: false
+                        }
+                      })
+                      
+                      if (calendarError) {
+                        console.error(`Error sending calendar update for outreach ${outreach.id}:`, calendarError)
+                      } else {
+                        console.log(`Sent calendar reschedule update for outreach ${outreach.id}`)
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
           processedTimedTriggers.push({
             trigger_id: trigger.id,
             email_sent: emailSent,

@@ -40,6 +40,7 @@ export interface Outreach {
   outreach_channel?: string | null;
   channel_details?: Record<string, any> | null;
   contacts_notified_at?: string | null;
+  trigger_id?: string | null;
 }
 
 export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> => {
@@ -107,6 +108,7 @@ export const getOutreachById = async (id: string): Promise<Outreach | null> => {
       .from("rms_outreach")
       .select(`
         *,
+        trigger_id,
         rms_outreach_contacts(
           contact_id,
           rms_contacts(
@@ -152,6 +154,7 @@ export const getOutreachById = async (id: string): Promise<Outreach | null> => {
       outreach_channel: (data as any).outreach_channel,
       channel_details: (data as any).channel_details,
       contacts_notified_at: (data as any).contacts_notified_at,
+      trigger_id: (data as any).trigger_id,
       contacts
     } as Outreach;
   } catch (error: any) {
@@ -178,6 +181,7 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
       .from("rms_outreach")
       .select(`
         *,
+        trigger_id,
         rms_outreach_contacts(
           contact_id,
           rms_contacts(
@@ -247,6 +251,7 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
         outreach_channel: item.outreach_channel,
         channel_details: item.channel_details,
         contacts_notified_at: item.contacts_notified_at,
+        trigger_id: item.trigger_id,
         contacts
       } as Outreach;
     });
@@ -422,7 +427,8 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
         due_date: outreach.due_date,
         scheduled_at: outreach.due_date,
         outreach_channel: outreach.outreach_channel || null,
-        channel_details: outreach.channel_details || null
+        channel_details: outreach.channel_details || null,
+        trigger_id: outreach.trigger_id || null
       }])
       .select()
       .single();

@@ -2419,6 +2419,7 @@ export type Database = {
           status: string
           system_email: string | null
           title: string
+          trigger_id: string | null
           updated_at: string
           user_id: string
         }
@@ -2442,6 +2443,7 @@ export type Database = {
           status?: string
           system_email?: string | null
           title: string
+          trigger_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -2465,10 +2467,19 @@ export type Database = {
           status?: string
           system_email?: string | null
           title?: string
+          trigger_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rms_outreach_trigger_id_fkey"
+            columns: ["trigger_id"]
+            isOneToOne: false
+            referencedRelation: "rms_triggers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rms_outreach_contacts: {
         Row: {
