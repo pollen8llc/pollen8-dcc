@@ -211,14 +211,21 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Email sent:', emailResponse);
 
-    // Update database with new sequence and raw ICS
+    // Update database with new sequence, raw ICS, and contacts_notified_at if contacts were notified
+    const updateData: any = {
+      calendar_event_sequence: newSequence,
+      raw_ics: icsContent,
+      last_calendar_update: new Date().toISOString()
+    };
+    
+    // Set contacts_notified_at when contacts are being notified
+    if (includeContactsAsAttendees && contactEmails.length > 0) {
+      updateData.contacts_notified_at = new Date().toISOString();
+    }
+
     const { error: updateError } = await supabase
       .from('rms_outreach')
-      .update({
-        calendar_event_sequence: newSequence,
-        raw_ics: icsContent,
-        last_calendar_update: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', outreachId);
 
     if (updateError) {

@@ -2403,6 +2403,7 @@ export type Database = {
           calendar_event_sequence: number | null
           calendar_sync_enabled: boolean | null
           channel_details: Json | null
+          contacts_notified_at: string | null
           created_at: string
           description: string | null
           due_date: string | null
@@ -2425,6 +2426,7 @@ export type Database = {
           calendar_event_sequence?: number | null
           calendar_sync_enabled?: boolean | null
           channel_details?: Json | null
+          contacts_notified_at?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -2447,6 +2449,7 @@ export type Database = {
           calendar_event_sequence?: number | null
           calendar_sync_enabled?: boolean | null
           channel_details?: Json | null
+          contacts_notified_at?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
