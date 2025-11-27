@@ -7,6 +7,7 @@ import { Check, Calendar, AlertCircle, Download, Trash2, Pencil, Users } from "l
 import { formatDistanceToNow } from "date-fns";
 import { Outreach, updateOutreachStatus, deleteOutreach, sendCalendarUpdate } from "@/services/rel8t/outreachService";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarOptionsDialog } from "./CalendarOptionsDialog";
 import { generateOutreachICS } from "@/utils/outreachIcsGenerator";
@@ -111,11 +112,14 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   };
 
   const handleNotifyContacts = async () => {
+    console.log('handleNotifyContacts called', { outreach });
+    
     // Check if any contacts have emails
     const contactsWithEmails = outreach.contacts?.filter(c => c.email) || [];
     
+    console.log('Contacts with emails:', contactsWithEmails);
+    
     if (contactsWithEmails.length === 0) {
-      const { toast } = await import("@/hooks/use-toast");
       toast({
         title: "No contact emails",
         description: "None of the associated contacts have email addresses.",
@@ -129,7 +133,6 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     const userEmail = user?.email;
     
     if (!userEmail) {
-      const { toast } = await import("@/hooks/use-toast");
       toast({
         title: "Error",
         description: "Unable to retrieve your email address.",
@@ -137,6 +140,8 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
       });
       return;
     }
+    
+    console.log('Calling sendCalendarUpdate with includeContactsAsAttendees=true');
     
     try {
       const success = await sendCalendarUpdate(
@@ -147,16 +152,22 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
       );
       
       if (success) {
-        const { toast } = await import("@/hooks/use-toast");
         toast({
           title: "Contacts notified",
           description: `Calendar invitation sent to ${contactsWithEmails.length} contact(s).`
         });
+      } else {
+        toast({
+          title: "Failed to notify contacts",
+          description: "The calendar update could not be sent.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
-      const { toast } = await import("@/hooks/use-toast");
+      console.error('Error notifying contacts:', error);
       toast({ 
         title: "Failed to notify contacts", 
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive" 
       });
     }
