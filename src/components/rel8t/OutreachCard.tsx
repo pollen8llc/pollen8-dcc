@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, AlertCircle, Download, Trash2, Pencil } from "lucide-react";
+import { Check, Calendar, AlertCircle, Download, Trash2, Pencil, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Outreach, updateOutreachStatus, deleteOutreach, sendCalendarUpdate } from "@/services/rel8t/outreachService";
 import { cn } from "@/lib/utils";
@@ -108,6 +108,58 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
     // Generate filename from outreach title
     const filename = `${outreach.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
     downloadICS(ics, filename);
+  };
+
+  const handleNotifyContacts = async () => {
+    // Check if any contacts have emails
+    const contactsWithEmails = outreach.contacts?.filter(c => c.email) || [];
+    
+    if (contactsWithEmails.length === 0) {
+      const { toast } = await import("@/hooks/use-toast");
+      toast({
+        title: "No contact emails",
+        description: "None of the associated contacts have email addresses.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Get user email
+    const { data: { user } } = await supabase.auth.getUser();
+    const userEmail = user?.email;
+    
+    if (!userEmail) {
+      const { toast } = await import("@/hooks/use-toast");
+      toast({
+        title: "Error",
+        description: "Unable to retrieve your email address.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      const success = await sendCalendarUpdate(
+        outreach.id, 
+        'update',
+        userEmail,
+        true // includeContactsAsAttendees
+      );
+      
+      if (success) {
+        const { toast } = await import("@/hooks/use-toast");
+        toast({
+          title: "Contacts notified",
+          description: `Calendar invitation sent to ${contactsWithEmails.length} contact(s).`
+        });
+      }
+    } catch (error) {
+      const { toast } = await import("@/hooks/use-toast");
+      toast({ 
+        title: "Failed to notify contacts", 
+        variant: "destructive" 
+      });
+    }
   };
 
   // Updated color classes for the dark theme
@@ -219,10 +271,10 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
                 variant="outline" 
                 size="sm" 
                 className="gap-1"
-                onClick={handleAddToCalendar}
+                onClick={handleNotifyContacts}
               >
-                <Calendar className="h-4 w-4" />
-                Add to Calendar
+                <Users className="h-4 w-4" />
+                Notify Contact{outreach.contacts && outreach.contacts.length !== 1 ? 's' : ''}
               </Button>
               <Button 
                 variant="outline" 

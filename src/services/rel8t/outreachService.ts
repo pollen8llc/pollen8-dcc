@@ -326,16 +326,18 @@ export const updateOutreach = async (
 export const sendCalendarUpdate = async (
   outreachId: string,
   updateType: 'update' | 'reschedule' | 'cancel',
-  userEmail: string
+  userEmail: string,
+  includeContactsAsAttendees?: boolean
 ): Promise<boolean> => {
   try {
-    console.log('Sending calendar update:', { outreachId, updateType, userEmail });
+    console.log('Sending calendar update:', { outreachId, updateType, userEmail, includeContactsAsAttendees });
     
     const { data, error } = await supabase.functions.invoke('send-calendar-update', {
       body: {
         outreachId,
         updateType,
-        userEmail
+        userEmail,
+        includeContactsAsAttendees
       }
     });
 
