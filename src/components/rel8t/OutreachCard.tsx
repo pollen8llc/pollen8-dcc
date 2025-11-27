@@ -292,10 +292,10 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
                 size="sm" 
                 className={cn(
                   "gap-1",
-                  outreach.contacts_notified_at && "bg-green-600 hover:bg-green-700 text-white"
+                  outreach.contacts_notified_at && "bg-green-600 hover:bg-green-600 text-white cursor-default"
                 )}
                 onClick={handleNotifyContacts}
-                disabled={isNotifying}
+                disabled={!!outreach.contacts_notified_at || isNotifying}
               >
                 {outreach.contacts_notified_at ? (
                   <CheckCircle2 className="h-4 w-4" />
