@@ -87,9 +87,12 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                           <span className="text-xs text-muted-foreground">{currentUser.location}</span>
                         </div>
                       )}
+                      <div className="hidden sm:flex scale-75 origin-left">
+                        <NetworkScoreNumber score={currentUser?.network_value || 0} />
+                      </div>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center sm:justify-start scale-75 origin-center sm:origin-left">
+                    <div className="flex sm:hidden justify-center scale-75">
                       <NetworkScoreNumber score={currentUser?.network_value || 0} />
                     </div>
                   </div>
