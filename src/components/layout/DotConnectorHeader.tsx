@@ -67,11 +67,7 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                       )}
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center sm:justify-start mb-3">
-                      <NetworkScoreNumber score={currentUser?.network_value || 0} />
-                    </div>
-                  
-                    <div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start flex-wrap">
+                    <div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start flex-wrap mb-3">
                       {currentUser?.location && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
@@ -91,6 +87,10 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                           </a>
                         </Badge>
                       )}
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center sm:justify-start">
+                      <NetworkScoreNumber score={currentUser?.network_value || 0} />
                     </div>
                   </div>
               </div>
