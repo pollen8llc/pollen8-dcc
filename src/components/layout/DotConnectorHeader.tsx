@@ -2,10 +2,10 @@ import React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Settings, MapPin, Bell, Network } from "lucide-react";
+import { Settings, MapPin, Bell } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
+import { NetworkScoreBadge } from "@/components/ui/network-score-badge";
 
 interface DotConnectorHeaderProps {
   className?: string;
@@ -68,12 +68,7 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                      <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
                        {getFullName()}
                      </h1>
-                     <div className="flex items-center gap-2 self-center sm:self-start">
-                       <Network className="w-5 h-5 text-primary animate-pulse" />
-                       <span className="text-2xl font-bold text-foreground">
-                         {currentUser?.network_value || 0}
-                       </span>
-                     </div>
+                     <NetworkScoreBadge score={currentUser?.network_value || 0} />
                    </div>
                   
                   <div className="flex items-center gap-3 justify-center sm:justify-start flex-wrap">
