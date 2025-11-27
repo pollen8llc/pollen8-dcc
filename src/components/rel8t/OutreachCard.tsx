@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, AlertCircle, Download, Trash2, Pencil, Users } from "lucide-react";
+import { Check, Calendar, AlertCircle, Download, Trash2, Pencil, Users, CheckCircle2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Outreach, updateOutreachStatus, deleteOutreach, sendCalendarUpdate } from "@/services/rel8t/outreachService";
 import { cn } from "@/lib/utils";
@@ -292,13 +292,17 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
                 size="sm" 
                 className={cn(
                   "gap-1",
-                  outreach.contacts_notified_at && "bg-green-600 hover:bg-green-600 text-white cursor-default"
+                  outreach.contacts_notified_at && "bg-green-600 hover:bg-green-700 text-white"
                 )}
                 onClick={handleNotifyContacts}
-                disabled={!!outreach.contacts_notified_at || isNotifying}
+                disabled={isNotifying}
               >
-                <Users className="h-4 w-4" />
-                {outreach.contacts_notified_at ? 'Contacts Notified' : `Notify Contact${outreach.contacts && outreach.contacts.length !== 1 ? 's' : ''}`}
+                {outreach.contacts_notified_at ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <Users className="h-4 w-4" />
+                )}
+                {outreach.contacts_notified_at ? 'Notified' : `Notify Contact${outreach.contacts && outreach.contacts.length !== 1 ? 's' : ''}`}
               </Button>
               <Button 
                 variant="outline" 
