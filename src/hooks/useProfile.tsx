@@ -125,20 +125,26 @@ export const useProfile = (session: Session | null) => {
       const communities = managedCommunities;
 
       // Create user object
-      const userData: User = {
-        id: userId,
-        name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'User',
-        role: role,
-        imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-        email: profile?.email || "",
-        bio: profile?.bio || "", 
-        communities,
-        managedCommunities,
-        createdAt: profile?.created_at || new Date().toISOString(),
-        profile_complete: profile?.profile_complete || profile?.is_profile_complete || false,
-        labr8_setup_complete: profile?.labr8_setup_complete || false,
-        modul8_setup_complete: profile?.modul8_setup_complete || false
-      };
+        const userData: User = {
+          id: userId,
+          name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'User',
+          role: role,
+          imageUrl: profile?.avatar_url || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+          email: profile?.email || "",
+          bio: profile?.bio || "",
+          location: profile?.location || undefined,
+          phone: profile?.phone || undefined,
+          website: profile?.website || undefined,
+          interests: profile?.interests || [],
+          network_value: profile?.network_value || 0,
+          network_score: profile?.network_score || 0,
+          communities,
+          managedCommunities,
+          createdAt: profile?.created_at || new Date().toISOString(),
+          profile_complete: profile?.profile_complete || profile?.is_profile_complete || false,
+          labr8_setup_complete: profile?.labr8_setup_complete || false,
+          modul8_setup_complete: profile?.modul8_setup_complete || false
+        };
 
       console.log("User data constructed successfully:", userData);
       setCurrentUser(userData);
