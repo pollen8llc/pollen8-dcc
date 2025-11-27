@@ -136,9 +136,9 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleDownloadICS}
+                  onClick={handleAddToCalendar}
                   className="h-6 w-6 hover:bg-primary/10 hover:text-primary"
-                  title="Download ICS file"
+                  title="Add to calendar"
                 >
                   <Download className="h-3 w-3" />
                 </Button>
