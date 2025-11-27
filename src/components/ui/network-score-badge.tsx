@@ -1,5 +1,4 @@
 import React from "react";
-import { Badge } from "@/components/ui/badge";
 
 interface NetworkScoreBadgeProps {
   score: number;
@@ -10,10 +9,7 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
   const formattedScore = score.toString().padStart(8, "0");
   
   return (
-    <Badge 
-      variant="secondary" 
-      className="inline-flex items-center gap-2 px-3 py-2 bg-card/50 backdrop-blur-sm border-primary/20 h-10 w-fit self-center sm:self-start"
-    >
+    <div className="inline-flex items-center gap-2 h-10 w-fit self-center sm:self-start">
       {/* Tiny 6-Point Plexus Animation */}
       <div className="relative w-5 h-5 flex-shrink-0">
         <svg viewBox="0 0 24 24" className="w-full h-full">
@@ -53,6 +49,6 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
           );
         })}
       </div>
-    </Badge>
+    </div>
   );
 };
