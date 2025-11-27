@@ -2774,6 +2774,7 @@ export type Database = {
         Args: { profile_user_id: string; viewer_id: string }
         Returns: boolean
       }
+      check_rel8_completion: { Args: { p_user_id: string }; Returns: boolean }
       create_community: {
         Args: {
           p_communication_platforms?: Json
