@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 interface NetworkScoreBadgeProps {
   score: number;
@@ -8,26 +8,101 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
   // Format score to 8 digits with leading zeros
   const formattedScore = score.toString().padStart(8, "0");
   
+  // Node positions
+  const nodes = [
+    { id: 0, cx: 12, cy: 4 },
+    { id: 1, cx: 20, cy: 8 },
+    { id: 2, cx: 20, cy: 16 },
+    { id: 3, cx: 12, cy: 20 },
+    { id: 4, cx: 4, cy: 16 },
+    { id: 5, cx: 4, cy: 8 },
+  ];
+
+  // State for active node (flashing)
+  const [activeNode, setActiveNode] = useState(0);
+  
+  // State for active edges
+  const [activeEdges, setActiveEdges] = useState<Set<string>>(new Set());
+
+  // Sequential node flashing animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveNode((prev) => (prev + 1) % nodes.length);
+    }, 800);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Random edge animations
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const from = Math.floor(Math.random() * nodes.length);
+      const to = Math.floor(Math.random() * nodes.length);
+      if (from !== to) {
+        const edgeKey = `${from}-${to}`;
+        setActiveEdges((prev) => {
+          const newSet = new Set(prev);
+          newSet.add(edgeKey);
+          return newSet;
+        });
+        
+        // Remove edge after animation
+        setTimeout(() => {
+          setActiveEdges((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(edgeKey);
+            return newSet;
+          });
+        }, 600);
+      }
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+  
   return (
-    <div className="inline-flex items-center gap-2 h-10 w-fit self-center sm:self-start">
-      {/* Tiny 6-Point Plexus Animation */}
-      <div className="relative w-5 h-5 flex-shrink-0">
+    <div className="inline-flex items-center gap-3 h-10 w-fit self-center sm:self-start">
+      {/* Network Traffic Plexus Animation */}
+      <div className="relative w-8 h-8 flex-shrink-0">
         <svg viewBox="0 0 24 24" className="w-full h-full">
-          {/* 6 connection points in a network */}
-          <circle cx="12" cy="4" r="1" fill="white" opacity="0.8" className="animate-pulse" />
-          <circle cx="20" cy="8" r="1" fill="white" opacity="0.6" className="animate-pulse" style={{ animationDelay: "0.2s" }} />
-          <circle cx="20" cy="16" r="1" fill="white" opacity="0.6" className="animate-pulse" style={{ animationDelay: "0.4s" }} />
-          <circle cx="12" cy="20" r="1" fill="white" opacity="0.8" className="animate-pulse" style={{ animationDelay: "0.6s" }} />
-          <circle cx="4" cy="16" r="1" fill="white" opacity="0.6" className="animate-pulse" style={{ animationDelay: "0.8s" }} />
-          <circle cx="4" cy="8" r="1" fill="white" opacity="0.6" className="animate-pulse" style={{ animationDelay: "1s" }} />
+          {/* Static connection lines (base network) */}
+          <line x1="12" y1="4" x2="20" y2="8" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="20" y1="8" x2="20" y2="16" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="20" y1="16" x2="12" y2="20" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="12" y1="20" x2="4" y2="16" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="4" y1="16" x2="4" y2="8" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="4" y1="8" x2="12" y2="4" stroke="white" strokeWidth="0.5" opacity="0.2" />
           
-          {/* Connection lines */}
-          <line x1="12" y1="4" x2="20" y2="8" stroke="white" strokeWidth="0.5" opacity="0.3" />
-          <line x1="20" y1="8" x2="20" y2="16" stroke="white" strokeWidth="0.5" opacity="0.3" />
-          <line x1="20" y1="16" x2="12" y2="20" stroke="white" strokeWidth="0.5" opacity="0.3" />
-          <line x1="12" y1="20" x2="4" y2="16" stroke="white" strokeWidth="0.5" opacity="0.3" />
-          <line x1="4" y1="16" x2="4" y2="8" stroke="white" strokeWidth="0.5" opacity="0.3" />
-          <line x1="4" y1="8" x2="12" y2="4" stroke="white" strokeWidth="0.5" opacity="0.3" />
+          {/* Animated traffic edges */}
+          {Array.from(activeEdges).map((edgeKey) => {
+            const [from, to] = edgeKey.split('-').map(Number);
+            const fromNode = nodes[from];
+            const toNode = nodes[to];
+            return (
+              <line
+                key={edgeKey}
+                x1={fromNode.cx}
+                y1={fromNode.cy}
+                x2={toNode.cx}
+                y2={toNode.cy}
+                stroke="white"
+                strokeWidth="1"
+                opacity="0.9"
+                className="animate-pulse"
+              />
+            );
+          })}
+          
+          {/* Network nodes with sequential flashing */}
+          {nodes.map((node, index) => (
+            <circle
+              key={node.id}
+              cx={node.cx}
+              cy={node.cy}
+              r={activeNode === index ? "1.5" : "1.2"}
+              fill="white"
+              opacity={activeNode === index ? "1" : "0.7"}
+              className="transition-all duration-300"
+            />
+          ))}
         </svg>
       </div>
 
