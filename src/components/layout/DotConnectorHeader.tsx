@@ -97,8 +97,8 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                      </Button>
                      <Button 
                        onClick={handleSettingsClick} 
-                       size="icon" 
-                       className="w-12 h-12 sm:w-14 sm:h-14"
+                       size="default" 
+                       className="w-auto px-4 py-3 lg:py-4"
                      >
                        <Settings className="w-5 h-5" />
                      </Button>
