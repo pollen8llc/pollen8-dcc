@@ -35,6 +35,7 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   const [showCalendarDialog, setShowCalendarDialog] = useState(false);
   const [icsContent, setIcsContent] = useState<string>("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isNotifying, setIsNotifying] = useState(false);
   
   const handleMarkComplete = async () => {
     // Get user email for calendar update
@@ -112,6 +113,8 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   };
 
   const handleNotifyContacts = async () => {
+    if (isNotifying) return; // Prevent double-click
+    
     console.log('handleNotifyContacts called', { outreach });
     
     // Check if any contacts have emails
@@ -141,6 +144,7 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
       return;
     }
     
+    setIsNotifying(true);
     console.log('Calling sendCalendarUpdate with includeContactsAsAttendees=true');
     
     try {
@@ -152,6 +156,9 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
       );
       
       if (success) {
+        // Refresh outreach data to get updated contacts_notified_at
+        queryClient.invalidateQueries({ queryKey: ["outreach"] });
+        
         toast({
           title: "Contacts notified",
           description: `Calendar invitation sent to ${contactsWithEmails.length} contact(s).`
@@ -162,6 +169,7 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
           description: "The calendar update could not be sent.",
           variant: "destructive"
         });
+        setIsNotifying(false);
       }
     } catch (error) {
       console.error('Error notifying contacts:', error);
@@ -170,6 +178,7 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
         description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive" 
       });
+      setIsNotifying(false);
     }
   };
 
@@ -279,13 +288,17 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
           {outreach.status === "pending" && (
             <>
               <Button 
-                variant="outline" 
+                variant={outreach.contacts_notified_at ? "default" : "outline"}
                 size="sm" 
-                className="gap-1"
+                className={cn(
+                  "gap-1",
+                  outreach.contacts_notified_at && "bg-green-600 hover:bg-green-600 text-white cursor-default"
+                )}
                 onClick={handleNotifyContacts}
+                disabled={!!outreach.contacts_notified_at || isNotifying}
               >
                 <Users className="h-4 w-4" />
-                Notify Contact{outreach.contacts && outreach.contacts.length !== 1 ? 's' : ''}
+                {outreach.contacts_notified_at ? 'Contacts Notified' : `Notify Contact${outreach.contacts && outreach.contacts.length !== 1 ? 's' : ''}`}
               </Button>
               <Button 
                 variant="outline" 

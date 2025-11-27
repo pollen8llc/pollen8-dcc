@@ -39,6 +39,7 @@ export interface Outreach {
   raw_ics?: string;
   outreach_channel?: string | null;
   channel_details?: Record<string, any> | null;
+  contacts_notified_at?: string | null;
 }
 
 export const getOutreachStatusCounts = async (): Promise<OutreachStatusCounts> => {
