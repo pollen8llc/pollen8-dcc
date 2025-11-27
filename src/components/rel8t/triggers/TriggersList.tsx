@@ -1,10 +1,17 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Plus, Trash2, Clock, Phone, Mail, MessageCircle, Video, MapPin, PhoneCall } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Calendar, Plus, Trash2, Clock, Phone, Mail, MessageCircle, Video, MapPin, PhoneCall, Bell, MoreVertical } from "lucide-react";
 import { Trigger } from "@/services/rel8t/triggerService";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TriggersListProps {
   triggers: Trigger[];
@@ -116,89 +123,132 @@ export function TriggersList({
     }
   };
   
+  const isMobile = useIsMobile();
+
   return (
     <div className="space-y-4">
-      {triggers.map((trigger) => (
-        <div
-          key={trigger.id}
-          className="border rounded-lg p-4"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-start">
-              {renderIcon(trigger.action)}
-              <div className="ml-3">
-                <div className="flex items-center">
-                  <h4 className="font-medium">{trigger.name}</h4>
-                  <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
-                    trigger.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                  }`}>
-                    {trigger.is_active ? "Active" : "Inactive"}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">{trigger.description}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {formatCondition(trigger.condition)}
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    {trigger.action}
-                  </Badge>
+      {triggers.map((trigger) => {
+        const nextExecTime = trigger.next_execution_at ? format(new Date(trigger.next_execution_at), "h:mm a") : null;
+        const channelDetails = formatChannelDetails(trigger.outreach_channel, trigger.channel_details);
+        
+        return (
+          <Card 
+            key={trigger.id}
+            className="glass-morphism border-0 bg-card/30 backdrop-blur-md hover:bg-card/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 group"
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                {/* Status Indicator */}
+                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                  trigger.is_active 
+                    ? 'bg-primary shadow-[0_0_8px_rgba(0,234,218,0.4)] animate-pulse' 
+                    : 'bg-muted-foreground/50'
+                }`} />
+                
+                {/* Icon */}
+                <div className="shrink-0 mt-0.5">
+                  <Bell className={`h-4 w-4 ${trigger.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
                 </div>
                 
-                {/* Display scheduled time if applicable */}
-                {trigger.next_execution_at && (
-                  <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    <Clock className="h-3 w-3 mr-1" />
-                    <span>Next execution: {formatDateTime(trigger.next_execution_at)}</span>
-                  </div>
-                )}
-                
-                {/* Display recurrence info if applicable */}
-                {trigger.recurrence_pattern && (
-                  <div className="text-xs text-blue-500 mt-1">
-                    {getRecurrenceText(trigger)}
-                  </div>
-                )}
-
-                {/* Display follow-up channel if applicable */}
-                {trigger.outreach_channel && (
-                  <div className="flex items-start gap-2 mt-3 p-2 rounded-md bg-muted/50">
-                    <div className="text-primary mt-0.5">
-                      {getChannelIcon(trigger.outreach_channel)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium text-foreground">
-                        {getChannelLabel(trigger.outreach_channel)}
-                      </div>
-                      {formatChannelDetails(trigger.outreach_channel, trigger.channel_details) && (
-                        <div className="text-xs text-muted-foreground mt-0.5 break-words">
-                          {formatChannelDetails(trigger.outreach_channel, trigger.channel_details)}
-                        </div>
+                {/* Content */}
+                <div className="flex-1 min-w-0 space-y-2">
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                    <h3 className={`font-medium text-sm leading-tight ${
+                      trigger.is_active ? 'text-primary' : 'text-foreground'
+                    } sm:truncate sm:flex-1`}>
+                      {trigger.name}
+                    </h3>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {nextExecTime && (
+                        <span className="text-xs text-muted-foreground whitespace-nowrap flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {nextExecTime}
+                        </span>
                       )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-primary/10 transition-opacity`}
+                          >
+                            <MoreVertical className="h-3.5 w-3.5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="glass-morphism">
+                          <DropdownMenuItem onClick={() => onToggleActive(trigger.id, trigger.is_active || false)}>
+                            {trigger.is_active ? "Disable" : "Enable"}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => onDelete(trigger.id)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
-                )}
+                  
+                  {/* Description */}
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {trigger.description}
+                  </p>
+                  
+                  {/* Metadata Row 1 - Condition & Action */}
+                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row items-center'} gap-1.5 text-xs`}>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-primary/80 capitalize">
+                        {formatCondition(trigger.condition)}
+                      </span>
+                      <span className="text-muted-foreground/50">|</span>
+                      <span className="text-muted-foreground/70 capitalize">
+                        {trigger.action.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Metadata Row 2 - Recurrence & ID */}
+                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row items-center'} gap-1.5 text-xs`}>
+                    {trigger.recurrence_pattern && (
+                      <>
+                        <span className="text-primary/60">
+                          {getRecurrenceText(trigger)}
+                        </span>
+                        {!isMobile && <span className="text-muted-foreground/50">|</span>}
+                      </>
+                    )}
+                    <span className="text-muted-foreground/70 font-mono text-[10px]">
+                      #{trigger.id.slice(0, 8)}
+                    </span>
+                  </div>
+
+                  {/* Follow-up Channel */}
+                  {trigger.outreach_channel && (
+                    <div className="flex items-start gap-2 mt-2 p-2 rounded-md bg-primary/5 border border-primary/10">
+                      <div className="text-primary mt-0.5">
+                        {getChannelIcon(trigger.outreach_channel)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium text-foreground">
+                          {getChannelLabel(trigger.outreach_channel)}
+                        </div>
+                        {channelDetails && (
+                          <div className="text-xs text-muted-foreground mt-0.5 break-words">
+                            {channelDetails}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => onToggleActive(trigger.id, trigger.is_active || false)}
-              >
-                {trigger.is_active ? "Disable" : "Enable"}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => onDelete(trigger.id)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
