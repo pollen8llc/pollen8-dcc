@@ -9,14 +9,14 @@ export const NetworkPlexus: React.FC = () => {
   // Node positions - 8 nodes in a square (corners + midpoints),
   // stretched to fill the full 24x24 viewBox (no internal padding)
   const nodes = [
-    { id: 0, cx: 2, cy: 2 },      // Top-left corner
-    { id: 1, cx: 12, cy: 2 },     // Top-middle
-    { id: 2, cx: 22, cy: 2 },     // Top-right corner
-    { id: 3, cx: 22, cy: 12 },    // Right-middle
-    { id: 4, cx: 22, cy: 22 },    // Bottom-right corner
-    { id: 5, cx: 12, cy: 22 },    // Bottom-middle
-    { id: 6, cx: 2, cy: 22 },     // Bottom-left corner
-    { id: 7, cx: 2, cy: 12 },     // Left-middle
+    { id: 0, cx: 2.5, cy: 2.5 },      // Top-left corner
+    { id: 1, cx: 12, cy: 2.5 },       // Top-middle
+    { id: 2, cx: 21.5, cy: 2.5 },     // Top-right corner
+    { id: 3, cx: 21.5, cy: 12 },      // Right-middle
+    { id: 4, cx: 21.5, cy: 21.5 },    // Bottom-right corner
+    { id: 5, cx: 12, cy: 21.5 },      // Bottom-middle
+    { id: 6, cx: 2.5, cy: 21.5 },     // Bottom-left corner
+    { id: 7, cx: 2.5, cy: 12 },       // Left-middle
   ];
 
   // State for active node (flashing)
@@ -62,15 +62,15 @@ export const NetworkPlexus: React.FC = () => {
   return (
     <div className="relative w-10 h-10 flex-shrink-0">
       <svg viewBox="0 0 24 24" className="w-full h-full">
-        {/* Static connection lines (square perimeter) with 2px inset */}
-        <line x1="2" y1="2" x2="12" y2="2" stroke="white" strokeWidth="0.5" opacity="0.2" />
-        <line x1="12" y1="2" x2="22" y2="2" stroke="white" strokeWidth="0.5" opacity="0.2" />
-        <line x1="22" y1="2" x2="22" y2="12" stroke="white" strokeWidth="0.5" opacity="0.2" />
-        <line x1="22" y1="12" x2="22" y2="22" stroke="white" strokeWidth="0.5" opacity="0.2" />
-        <line x1="22" y1="22" x2="12" y2="22" stroke="white" strokeWidth="0.5" opacity="0.2" />
-        <line x1="12" y1="22" x2="2" y2="22" stroke="white" strokeWidth="0.5" opacity="0.2" />
-        <line x1="2" y1="22" x2="2" y2="12" stroke="white" strokeWidth="0.5" opacity="0.2" />
-        <line x1="2" y1="12" x2="2" y2="2" stroke="white" strokeWidth="0.5" opacity="0.2" />
+        {/* Static connection lines (square perimeter) with 2.5px inset */}
+        <line x1="2.5" y1="2.5" x2="12" y2="2.5" stroke="white" strokeWidth="0.5" opacity="0.2" />
+        <line x1="12" y1="2.5" x2="21.5" y2="2.5" stroke="white" strokeWidth="0.5" opacity="0.2" />
+        <line x1="21.5" y1="2.5" x2="21.5" y2="12" stroke="white" strokeWidth="0.5" opacity="0.2" />
+        <line x1="21.5" y1="12" x2="21.5" y2="21.5" stroke="white" strokeWidth="0.5" opacity="0.2" />
+        <line x1="21.5" y1="21.5" x2="12" y2="21.5" stroke="white" strokeWidth="0.5" opacity="0.2" />
+        <line x1="12" y1="21.5" x2="2.5" y2="21.5" stroke="white" strokeWidth="0.5" opacity="0.2" />
+        <line x1="2.5" y1="21.5" x2="2.5" y2="12" stroke="white" strokeWidth="0.5" opacity="0.2" />
+        <line x1="2.5" y1="12" x2="2.5" y2="2.5" stroke="white" strokeWidth="0.5" opacity="0.2" />
         
         {/* Animated traffic edges */}
         {Array.from(activeEdges).map((edgeKey) => {
