@@ -29,6 +29,14 @@ const foldLine = (line: string): string => {
   return result.join('\r\n');
 };
 
+// Sanitize names to ASCII-only characters for ICS compatibility
+const sanitizeName = (name: string): string => {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+    .replace(/[^\x00-\x7F]/g, ''); // Remove non-ASCII characters
+};
+
 type UpdateType = 'update' | 'reschedule' | 'cancel';
 
 export const generateOutreachICSUpdate = (
@@ -68,7 +76,7 @@ export const generateOutreachICSUpdate = (
 
   // Format summary with user name and task ID at the end
   const shortId = outreachId ? outreachId.slice(0, 8) : '';
-  const userName = userFullName || 'User';
+  const userName = sanitizeName(userFullName || 'User');
   const summaryText = shortId 
     ? `${userName}: Follow up with - ${contactNames} #${shortId}`
     : `${userName}: Follow up with - ${contactNames}`;
