@@ -282,7 +282,6 @@ const handler = async (req: Request): Promise<Response> => {
         sync_type: 'outbound_update',
         sync_direction: 'outbound',
         email_source: 'rel8_system',
-        sequence_number: newSequence,
         status: status.toLowerCase(),
         changes: {
           update_type: updateType,
@@ -299,7 +298,7 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ 
         success: true, 
         sequence: newSequence,
-        emailId: emailResponse.data?.id 
+        emailId: userEmailResponse.data?.id 
       }),
       { 
         status: 200, 
