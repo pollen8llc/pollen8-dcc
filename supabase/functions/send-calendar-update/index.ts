@@ -221,7 +221,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to user with detailed subject
     const userEmailResponse = await resend.emails.send({
-      from: 'REL8 Calendar <notifications@ecosystembuilder.app>',
+      from: 'Ecosystem Builder <notifications@ecosystembuilder.app>',
       to: [userEmail],
       subject: userEmailSubject,
       html: userHtmlBody,
@@ -238,7 +238,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send separate email to contacts with friendly subject
     if (includeContactsAsAttendees && contactEmails.length > 0) {
       const contactEmailResponse = await resend.emails.send({
-        from: 'REL8 Calendar <notifications@ecosystembuilder.app>',
+        from: 'Ecosystem Builder <notifications@ecosystembuilder.app>',
         to: contactEmails,
         subject: contactEmailSubject,  // "Meeting invitation from Marcus Johnson"
         html: contactHtmlBody,
