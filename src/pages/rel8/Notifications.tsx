@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { OutreachTimelineAccordion } from "@/components/rel8t/OutreachTimelineAccordion";
+import { ConsolidatedOutreachCard } from "@/components/rel8t/ConsolidatedOutreachCard";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -237,6 +238,48 @@ export default function Notifications() {
     staleTime: 0
   });
 
+  // Fetch consolidated outreach tasks with contacts and sync logs
+  const { data: outreachTasks, isLoading: outreachTasksLoading, refetch: refetchOutreach } = useQuery({
+    queryKey: ["outreach-notifications"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("rms_outreach")
+        .select(`
+          *,
+          contacts:rms_outreach_contacts(
+            contact:rms_contacts(id, name, email)
+          )
+        `)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch sync logs for each outreach
+      const tasksWithLogs = await Promise.all(
+        (data || []).map(async (task) => {
+          const { data: logs } = await supabase
+            .from("rms_outreach_sync_log")
+            .select("*")
+            .eq("outreach_id", task.id)
+            .order("created_at", { ascending: false });
+
+          return {
+            ...task,
+            syncLogs: logs || []
+          };
+        })
+      );
+
+      return tasksWithLogs;
+    },
+    refetchOnMount: true,
+    staleTime: 0
+  });
+
   // Real-time subscription for sync logs
   useEffect(() => {
     const channel = supabase
@@ -248,14 +291,37 @@ export default function Notifications() {
           schema: 'public',
           table: 'rms_outreach_sync_log'
         },
-        () => refetchSyncLogs()
+        () => {
+          refetchSyncLogs();
+          refetchOutreach();
+        }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refetchSyncLogs]);
+  }, [refetchSyncLogs, refetchOutreach]);
+
+  // Real-time subscription for outreach tasks
+  useEffect(() => {
+    const channel = supabase
+      .channel('outreach-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'rms_outreach'
+        },
+        () => refetchOutreach()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchOutreach]);
 
   // Retry email mutation
   const retryEmailMutation = useMutation({
@@ -317,26 +383,17 @@ export default function Notifications() {
     }
   };
 
-  // Group sync logs by outreach_id, keeping only the latest per outreach
-  const groupedSyncLogs = Object.values(
-    (syncLogs || []).reduce((acc, log) => {
-      if (!acc[log.outreach_id] || new Date(log.created_at) > new Date(acc[log.outreach_id].created_at)) {
-        // Count how many logs exist for this outreach_id
-        const count = (syncLogs || []).filter(l => l.outreach_id === log.outreach_id).length;
-        acc[log.outreach_id] = { ...log, _updateCount: count };
-      }
-      return acc;
-    }, {} as Record<string, any>)
-  );
-
-  // Combined notifications for "all" view
+  // Filter non-outreach emails and platform notifications
+  const nonOutreachEmails = (notifications || []).filter(n => n.notification_type !== "outreach_created");
+  
+  // Combined notifications for "all" view (platform + non-outreach emails + consolidated outreach)
   const allNotifications = [
     ...(platformNotifications || []).map(n => ({ ...n, _type: 'platform' as const, _date: new Date(n.created_at) })),
-    ...(notifications || []).map(n => ({ ...n, _type: 'email' as const, _date: new Date(n.created_at) })),
-    ...groupedSyncLogs.map(n => ({ ...n, _type: 'calendar' as const, _date: new Date(n.created_at) }))
+    ...nonOutreachEmails.map(n => ({ ...n, _type: 'email' as const, _date: new Date(n.created_at) })),
+    ...(outreachTasks || []).map(n => ({ ...n, _type: 'outreach' as const, _date: new Date(n.created_at) }))
   ].sort((a, b) => b._date.getTime() - a._date.getTime());
 
-  const filteredNotifications = notifications?.filter(n => {
+  const filteredNotifications = nonOutreachEmails.filter(n => {
     if (statusFilter === "all") return true;
     return n.status === statusFilter;
   });
@@ -401,6 +458,33 @@ export default function Notifications() {
           key={item.id}
           notification={item}
           onDelete={(id) => deleteNotificationMutation.mutate(id)}
+        />
+      );
+    }
+
+    if (item._type === 'outreach') {
+      const contacts = (item.contacts || []).map((c: any) => ({
+        id: c.contact.id,
+        name: c.contact.name,
+        email: c.contact.email
+      }));
+
+      return (
+        <ConsolidatedOutreachCard
+          key={item.id}
+          outreachId={item.id}
+          outreachTitle={item.title}
+          contacts={contacts}
+          dueDate={item.due_date}
+          status={item.status}
+          syncLogs={item.syncLogs || []}
+          onDelete={() => {
+            // Optionally implement delete functionality
+            toast({
+              title: "Delete not implemented",
+              description: "Use the outreach page to delete tasks."
+            });
+          }}
         />
       );
     }
@@ -538,104 +622,6 @@ export default function Notifications() {
       );
     }
 
-    if (item._type === 'calendar') {
-      const isExpanded = expandedOutreachIds.has(item.outreach_id);
-      const updateCount = item._updateCount || 1;
-      
-      const getStatusColor = () => {
-        if (item.sync_type === 'create') return 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]';
-        if (item.sync_type === 'reschedule') return 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.4)]';
-        if (item.sync_type === 'cancel') return 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]';
-        return 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]';
-      };
-
-      return (
-        <div key={item.id} className="group">
-          <Card 
-            className="glass-morphism border-0 bg-card/30 backdrop-blur-md hover:bg-card/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 cursor-pointer"
-            onClick={() => toggleOutreachExpanded(item.outreach_id)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                {/* Status Indicator */}
-                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${getStatusColor()}`} />
-                
-                {/* Sync Type Icon */}
-                <div className="mt-0.5 shrink-0">
-                  {getSyncTypeIcon(item.sync_type)}
-                </div>
-                
-                {/* Content */}
-                <div className="flex-1 min-w-0 space-y-2">
-                  {/* Header - Stack on mobile */}
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
-                    <h3 className="font-medium text-sm leading-tight text-foreground sm:truncate sm:flex-1">
-                      {item.outreach?.title || "Calendar Update"}
-                    </h3>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {format(new Date(item.created_at), "h:mm a")}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTarget({ id: item.id, type: "sync" });
-                        }}
-                        className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:bg-destructive/10 hover:text-destructive transition-opacity`}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {/* Metadata - Stack on mobile */}
-                  <div className={`flex ${isMobile ? 'flex-col' : 'flex-row flex-wrap items-center'} gap-1.5 text-xs`}>
-                    <span className={
-                      item.sync_type === 'update' ? 'text-blue-500' :
-                      item.sync_type === 'reschedule' ? 'text-yellow-500' :
-                      item.sync_type === 'cancel' ? 'text-red-500' :
-                      'text-green-500'
-                    }>
-                      {item.sync_type.charAt(0).toUpperCase() + item.sync_type.slice(1)}
-                    </span>
-                    {item.email_from && (
-                      <div className="flex items-center gap-1.5">
-                        {!isMobile && <span className="text-muted-foreground/50">|</span>}
-                        <span className="text-muted-foreground/70">
-                          {item.email_from.split('@')[0]}
-                        </span>
-                      </div>
-                    )}
-                    {updateCount > 1 && (
-                      <div className="flex items-center gap-1.5">
-                        {!isMobile && <span className="text-muted-foreground/50">|</span>}
-                        <span className="text-primary/80">{updateCount} updates</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Action */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
-                  >
-                    <List className="h-3 w-3" />
-                    {isExpanded ? 'Hide' : 'View'} Timeline
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {isExpanded && (
-            <OutreachTimelineAccordion outreachId={item.outreach_id} />
-          )}
-        </div>
-      );
-    }
 
     return null;
   };
@@ -683,7 +669,7 @@ export default function Notifications() {
                   <SelectItem value="calendar">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>Calendar</span>
+                      <span>Outreach Tasks</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -711,7 +697,7 @@ export default function Notifications() {
           {/* ALL VIEW */}
           {activeView === "all" && (
             <>
-              {(platformNotificationsLoading || isLoading || syncLogsLoading) ? (
+              {(platformNotificationsLoading || isLoading || outreachTasksLoading) ? (
                 <div className="flex items-center justify-center py-16">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                 </div>
@@ -790,22 +776,46 @@ export default function Notifications() {
             </>
           )}
 
-          {/* CALENDAR VIEW */}
+          {/* OUTREACH VIEW - replaces calendar view */}
           {activeView === "calendar" && (
             <>
-              {syncLogsLoading ? (
+              {outreachTasksLoading ? (
                 <div className="flex items-center justify-center py-16">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                 </div>
-              ) : groupedSyncLogs && groupedSyncLogs.length > 0 ? (
-                groupedSyncLogs.map((item) => renderUnifiedNotification({ ...item, _type: 'calendar' as const, _date: new Date(item.created_at) }))
+              ) : outreachTasks && outreachTasks.length > 0 ? (
+                outreachTasks.map((task) => {
+                  const contacts = (task.contacts || []).map((c: any) => ({
+                    id: c.contact.id,
+                    name: c.contact.name,
+                    email: c.contact.email
+                  }));
+
+                  return (
+                    <ConsolidatedOutreachCard
+                      key={task.id}
+                      outreachId={task.id}
+                      outreachTitle={task.title}
+                      contacts={contacts}
+                      dueDate={task.due_date}
+                      status={task.status}
+                      syncLogs={task.syncLogs || []}
+                      onDelete={() => {
+                        toast({
+                          title: "Delete not implemented",
+                          description: "Use the outreach page to delete tasks."
+                        });
+                      }}
+                    />
+                  );
+                })
               ) : (
                 <Card className="glass-morphism border-0 backdrop-blur-md">
                   <CardContent className="flex flex-col items-center justify-center py-16">
                     <Calendar className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No calendar updates</h3>
+                    <h3 className="text-lg font-semibold mb-2">No outreach tasks</h3>
                     <p className="text-muted-foreground text-center text-sm mb-6">
-                      Calendar sync updates will appear here
+                      Outreach tasks with calendar sync will appear here
                     </p>
                   </CardContent>
                 </Card>
