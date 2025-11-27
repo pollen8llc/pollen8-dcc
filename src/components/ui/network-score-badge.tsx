@@ -12,7 +12,7 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
   return (
     <Badge 
       variant="secondary" 
-      className="inline-flex items-center gap-2 px-3 py-2 bg-card/50 backdrop-blur-sm border-primary/20 h-10 w-auto"
+      className="inline-flex items-center gap-2 px-3 py-2 bg-card/50 backdrop-blur-sm border-primary/20 h-10 w-fit self-center sm:self-start"
     >
       {/* Tiny 6-Point Plexus Animation */}
       <div className="relative w-5 h-5 flex-shrink-0">
