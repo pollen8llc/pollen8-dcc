@@ -23,6 +23,8 @@ export interface User {
   profile_complete?: boolean;
   labr8_setup_complete?: boolean;
   modul8_setup_complete?: boolean;
+  network_value?: number;
+  network_score?: number;
 }
 
 export interface Community {
