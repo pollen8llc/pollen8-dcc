@@ -182,45 +182,75 @@ const handler = async (req: Request): Promise<Response> => {
     const icsContent = icsLines.join('\r\n') + '\r\n';
 
     // Determine email subject based on update type
-    let emailSubject = `Updated: ${summaryText}`;
+    // User email subject - detailed with prefix and ID
+    let userEmailSubject = `Updated: ${summaryText}`;
     if (updateType === 'cancel') {
-      emailSubject = `Cancelled: ${summaryText}`;
+      userEmailSubject = `Cancelled: ${summaryText}`;
     } else if (updateType === 'reschedule') {
-      emailSubject = `Rescheduled: ${summaryText}`;
+      userEmailSubject = `Rescheduled: ${summaryText}`;
     }
 
-    // Determine recipients - include contacts if requested
-    const recipients = [userEmail];
-    if (includeContactsAsAttendees && contactEmails.length > 0) {
-      recipients.push(...contactEmails);
-      console.log(`Sending email to ${recipients.length} recipients:`, recipients);
-    }
+    // Contact email subject - clean and friendly
+    const contactEmailSubject = `Meeting invitation from ${userFullName}`;
 
-    // Send email with ICS attachment
-    const emailResponse = await resend.emails.send({
+    // User HTML body - detailed format
+    const userHtmlBody = `
+      <h2>Your REL8 outreach task has been ${updateType === 'cancel' ? 'cancelled' : 'updated'}</h2>
+      <p><strong>${outreach.title}</strong></p>
+      <p>${description}</p>
+      ${updateType !== 'cancel' ? `
+        <p><strong>When:</strong> ${new Date(outreach.due_date).toLocaleString()}</p>
+        <p><strong>Where:</strong> ${location}</p>
+        <p><strong>Priority:</strong> ${outreach.priority}</p>
+      ` : '<p>This event has been cancelled.</p>'}
+      <p>Your calendar will be updated automatically when you accept the attached invitation.</p>
+    `;
+
+    // Contact HTML body - friendly invitation format
+    const contactHtmlBody = `
+      <h2>${userFullName} has invited you to connect</h2>
+      <p><strong>Follow up with: ${contactNames}</strong></p>
+      ${updateType !== 'cancel' ? `
+        <p><strong>When:</strong> ${new Date(outreach.due_date).toLocaleString()}</p>
+        <p><strong>Where:</strong> ${location}</p>
+      ` : '<p>This meeting has been cancelled.</p>'}
+      <p>Please accept or decline the attached calendar invitation.</p>
+    `;
+
+    const icsBase64 = base64Encode(new TextEncoder().encode(icsContent));
+
+    // Send email to user with detailed subject
+    const userEmailResponse = await resend.emails.send({
       from: 'REL8 Calendar <notifications@ecosystembuilder.app>',
-      to: recipients,
-      subject: emailSubject,
-      html: `
-        <h2>Your REL8 outreach task has been ${updateType === 'cancel' ? 'cancelled' : 'updated'}</h2>
-        <p><strong>${outreach.title}</strong></p>
-        <p>${description}</p>
-        ${updateType !== 'cancel' ? `
-          <p><strong>When:</strong> ${new Date(outreach.due_date).toLocaleString()}</p>
-          <p><strong>Where:</strong> ${location}</p>
-          <p><strong>Priority:</strong> ${outreach.priority}</p>
-        ` : '<p>This event has been cancelled.</p>'}
-        <p>Your calendar will be updated automatically when you accept the attached invitation.</p>
-      `,
+      to: [userEmail],
+      subject: userEmailSubject,
+      html: userHtmlBody,
       attachments: [
         {
           filename: 'outreach-update.ics',
-          content: base64Encode(new TextEncoder().encode(icsContent)),
+          content: icsBase64,
         }
       ]
     });
 
-    console.log('Email sent:', emailResponse);
+    console.log('Email sent to user:', userEmailResponse);
+
+    // Send separate email to contacts with friendly subject
+    if (includeContactsAsAttendees && contactEmails.length > 0) {
+      const contactEmailResponse = await resend.emails.send({
+        from: 'REL8 Calendar <notifications@ecosystembuilder.app>',
+        to: contactEmails,
+        subject: contactEmailSubject,  // "Meeting invitation from Marcus Johnson"
+        html: contactHtmlBody,
+        attachments: [
+          {
+            filename: 'meeting-invitation.ics',
+            content: icsBase64,
+          }
+        ]
+      });
+      console.log(`Sent invitation to ${contactEmails.length} contacts:`, contactEmailResponse);
+    }
 
     // Update database with new sequence, raw ICS, and contacts_notified_at if contacts were notified
     const updateData: any = {
