@@ -405,14 +405,17 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       throw new Error('User not authenticated');
     }
     
-    // Get user's profile email
+    // Get user's profile email and name
     const { data: profile } = await supabase
       .from("profiles")
-      .select("email")
+      .select("email, first_name, last_name")
       .eq("user_id", user.id)
       .single();
     
     const userEmail = profile?.email || user.email;
+    const userFullName = profile 
+      ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
+      : 'User';
     
     // Create outreach
     const { data, error } = await supabase
@@ -450,7 +453,8 @@ export const createOutreach = async (outreach: Omit<Outreach, "id" | "user_id" |
       userEmail,
       outreach.outreach_channel,
       outreach.channel_details,
-      outreachId
+      outreachId,
+      userFullName
     );
     
     // Create email notification with ICS attachment
