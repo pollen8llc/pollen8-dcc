@@ -67,21 +67,21 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                       )}
                     </div>
                     
-                    <div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start flex-wrap mb-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-start flex-wrap mb-2">
                       {currentUser?.location && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                          <span className="text-base sm:text-lg text-muted-foreground font-medium">{currentUser.location}</span>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">{currentUser.location}</span>
                         </div>
                       )}
                       {currentUser?.website && (
-                        <Badge variant="outline" className="flex items-center gap-1">
+                        <Badge variant="outline" className="flex items-center gap-1 h-5 px-1.5 text-xs">
                           <Globe className="w-3 h-3" />
                           <a 
                             href={currentUser.website.startsWith('http') ? currentUser.website : `https://${currentUser.website}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs hover:underline"
+                            className="hover:underline"
                           >
                             Website
                           </a>
@@ -89,7 +89,7 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                       )}
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center sm:justify-start">
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center sm:justify-start scale-75 origin-center sm:origin-left">
                       <NetworkScoreNumber score={currentUser?.network_value || 0} />
                     </div>
                   </div>
