@@ -12,10 +12,10 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
   return (
     <Badge 
       variant="secondary" 
-      className="flex items-center gap-2 px-2 py-1 bg-card/50 backdrop-blur-sm border-primary/20"
+      className="flex items-center gap-1.5 px-2 py-0.5 bg-card/50 backdrop-blur-sm border-primary/20 h-6"
     >
       {/* Tiny 6-Point Plexus Animation */}
-      <div className="relative w-4 h-4">
+      <div className="relative w-3 h-3">
         <svg viewBox="0 0 24 24" className="w-full h-full">
           {/* 6 connection points in a network */}
           <circle cx="12" cy="4" r="1" fill="white" opacity="0.8" className="animate-pulse" />
@@ -36,7 +36,7 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
       </div>
 
       {/* 8-Digit Counter Display */}
-      <div className="flex items-center font-mono text-sm leading-none">
+      <div className="flex items-center font-mono text-xs leading-none tracking-tighter">
         {formattedScore.split("").map((digit, index) => {
           const isActive = index >= 8 - score.toString().length;
           return (
