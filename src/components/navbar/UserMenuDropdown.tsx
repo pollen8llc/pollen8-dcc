@@ -50,7 +50,7 @@ const UserMenuDropdown = ({
   };
   
   return (
-    <div className="relative h-10 w-10 cursor-pointer" onClick={handleAvatarClick}>
+    <div className="relative h-10 w-10 cursor-pointer p-[5px]" onClick={handleAvatarClick}>
       <NetworkPlexus />
       {unreadCount > 0 && (
         <span className="absolute -top-0.5 -right-0.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center">
