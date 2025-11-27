@@ -8,14 +8,16 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
   // Format score to 8 digits with leading zeros
   const formattedScore = score.toString().padStart(8, "0");
   
-  // Node positions
+  // Node positions - 8 nodes in a square (corners + midpoints)
   const nodes = [
-    { id: 0, cx: 12, cy: 4 },
-    { id: 1, cx: 20, cy: 8 },
-    { id: 2, cx: 20, cy: 16 },
-    { id: 3, cx: 12, cy: 20 },
-    { id: 4, cx: 4, cy: 16 },
-    { id: 5, cx: 4, cy: 8 },
+    { id: 0, cx: 4, cy: 4 },      // Top-left corner
+    { id: 1, cx: 12, cy: 4 },     // Top-middle
+    { id: 2, cx: 20, cy: 4 },     // Top-right corner
+    { id: 3, cx: 20, cy: 12 },    // Right-middle
+    { id: 4, cx: 20, cy: 20 },    // Bottom-right corner
+    { id: 5, cx: 12, cy: 20 },    // Bottom-middle
+    { id: 6, cx: 4, cy: 20 },     // Bottom-left corner
+    { id: 7, cx: 4, cy: 12 },     // Left-middle
   ];
 
   // State for active node (flashing)
@@ -63,13 +65,15 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
       {/* Network Traffic Plexus Animation */}
       <div className="relative w-8 h-8 flex-shrink-0">
         <svg viewBox="0 0 24 24" className="w-full h-full">
-          {/* Static connection lines (base network) */}
-          <line x1="12" y1="4" x2="20" y2="8" stroke="white" strokeWidth="0.5" opacity="0.2" />
-          <line x1="20" y1="8" x2="20" y2="16" stroke="white" strokeWidth="0.5" opacity="0.2" />
-          <line x1="20" y1="16" x2="12" y2="20" stroke="white" strokeWidth="0.5" opacity="0.2" />
-          <line x1="12" y1="20" x2="4" y2="16" stroke="white" strokeWidth="0.5" opacity="0.2" />
-          <line x1="4" y1="16" x2="4" y2="8" stroke="white" strokeWidth="0.5" opacity="0.2" />
-          <line x1="4" y1="8" x2="12" y2="4" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          {/* Static connection lines (square perimeter) */}
+          <line x1="4" y1="4" x2="12" y2="4" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="12" y1="4" x2="20" y2="4" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="20" y1="4" x2="20" y2="12" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="20" y1="12" x2="20" y2="20" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="20" y1="20" x2="12" y2="20" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="12" y1="20" x2="4" y2="20" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="4" y1="20" x2="4" y2="12" stroke="white" strokeWidth="0.5" opacity="0.2" />
+          <line x1="4" y1="12" x2="4" y2="4" stroke="white" strokeWidth="0.5" opacity="0.2" />
           
           {/* Animated traffic edges */}
           {Array.from(activeEdges).map((edgeKey) => {
