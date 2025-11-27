@@ -101,6 +101,17 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Fetch user profile for name
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('user_id', outreach.user_id)
+      .single();
+    
+    const userFullName = profile 
+      ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
+      : 'User';
+
     // Increment sequence number
     const newSequence = (outreach.calendar_event_sequence || 0) + 1;
     const shortId = outreachId.slice(0, 8);
@@ -114,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
     const contactNames = outreach.contacts?.map((c: any) => c.contact.name).join(', ') || 'contacts';
     const description = outreach.description || `Follow up with ${contactNames}`;
     const location = getLocationFromChannel(outreach.outreach_channel, outreach.channel_details);
-    const summaryText = `Reminder set: ${outreach.title} #${shortId}`;
+    const summaryText = `${userFullName}: Follow up with - ${contactNames} #${shortId}`;
     
     const method = updateType === 'cancel' ? 'CANCEL' : 'REQUEST';
     const status = updateType === 'cancel' ? 'CANCELLED' : 'CONFIRMED';

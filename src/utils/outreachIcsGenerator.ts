@@ -34,7 +34,8 @@ export const generateOutreachICS = (
   userEmail?: string,
   outreachChannel?: string | null,
   channelDetails?: Record<string, any> | null,
-  outreachId?: string
+  outreachId?: string,
+  userFullName?: string
 ): string => {
   const now = new Date();
   const startDate = new Date(outreach.due_date);
@@ -60,11 +61,12 @@ export const generateOutreachICS = (
       .replace(/\n/g, '\\n');
   };
 
-  // Format summary with task ID at the end
+  // Format summary with user name and task ID at the end
   const shortId = outreachId ? outreachId.slice(0, 8) : '';
+  const userName = userFullName || 'User';
   const summaryText = shortId 
-    ? `Reminder set: ${outreach.title} #${shortId}`
-    : outreach.title;
+    ? `${userName}: Follow up with - ${contactNames} #${shortId}`
+    : `${userName}: Follow up with - ${contactNames}`;
 
   // Build ICS using array for proper line endings
   const lines: string[] = [

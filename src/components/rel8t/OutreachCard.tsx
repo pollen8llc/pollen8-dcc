@@ -93,9 +93,20 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
   };
 
   const handleDownloadICS = async () => {
-    // Get user email for ICS attendee field
+    // Get user email and profile for ICS attendee field
     const { data: { user } } = await supabase.auth.getUser();
     const userEmail = user?.email;
+
+    // Fetch user profile for full name
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('user_id', outreach.user_id)
+      .single();
+    
+    const userFullName = profile 
+      ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() 
+      : 'User';
 
     // Use system email from outreach as organizer, fallback to user email
     const systemEmail = outreach.system_email || userEmail || 'notifications@ecosystembuilder.app';
@@ -104,7 +115,9 @@ export const OutreachCard: React.FC<OutreachCardProps> = ({ outreach }) => {
       systemEmail, 
       userEmail,
       outreach.outreach_channel,
-      outreach.channel_details
+      outreach.channel_details,
+      outreach.id,
+      userFullName
     );
     
     // Generate filename from outreach title

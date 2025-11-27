@@ -39,7 +39,8 @@ export const generateOutreachICSUpdate = (
   newSequence: number,
   outreachChannel?: string | null,
   channelDetails?: Record<string, any> | null,
-  outreachId?: string
+  outreachId?: string,
+  userFullName?: string
 ): string => {
   const now = new Date();
   const startDate = new Date(outreach.due_date);
@@ -65,11 +66,12 @@ export const generateOutreachICSUpdate = (
       .replace(/\n/g, '\\n');
   };
 
-  // Format summary with task ID at the end
+  // Format summary with user name and task ID at the end
   const shortId = outreachId ? outreachId.slice(0, 8) : '';
+  const userName = userFullName || 'User';
   const summaryText = shortId 
-    ? `Reminder set: ${outreach.title} #${shortId}`
-    : outreach.title;
+    ? `${userName}: Follow up with - ${contactNames} #${shortId}`
+    : `${userName}: Follow up with - ${contactNames}`;
 
   // Determine METHOD and STATUS based on update type
   const method = updateType === 'cancel' ? 'CANCEL' : 'REQUEST';
