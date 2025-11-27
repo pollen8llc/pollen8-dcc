@@ -141,18 +141,14 @@ const EnhancedProfileView: React.FC<EnhancedProfileViewProps> = ({
                 <Avatar userId={profile.user_id} size={96} />
               </div>
               
-              {/* Profile Info - Name and Role Badge */}
+              {/* Profile Info - Name and Location Only */}
               <div className="flex-1 min-w-0 text-center sm:text-left">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
                     {getFullName()}
                   </h1>
                   {profile.role && (
-                    <Badge 
-                      variant="default" 
-                      className="text-xs sm:text-sm font-semibold self-center sm:self-auto px-3 py-1.5 bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90 border border-primary-foreground/20 shadow-lg"
-                    >
-                      <User className="w-3 h-3 mr-1.5" />
+                    <Badge variant="secondary" className="text-xs sm:text-sm font-medium self-center sm:self-auto">
                       {profile.role}
                     </Badge>
                   )}
