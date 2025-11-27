@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
+import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -42,6 +43,7 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
   const [selectedTriggers, setSelectedTriggers] = useState<Trigger[]>([]);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const { setWizardStep, setWorkingContacts } = useRelationshipWizard();
+  const { currentUser } = useUser();
 
   // Auto-select the trigger returned from creation
   useEffect(() => {
@@ -67,8 +69,9 @@ export const SelectTriggersStep: React.FC<SelectTriggersStepProps> = ({
 
   // Fetch actual triggers from database
   const { data: triggers = [], isLoading } = useQuery({
-    queryKey: ["triggers"],
+    queryKey: ["triggers", currentUser?.id],
     queryFn: getTriggers,
+    enabled: !!currentUser?.id,
   });
 
   const toggleTrigger = (trigger: Trigger) => {

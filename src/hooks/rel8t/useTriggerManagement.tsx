@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import { useUser } from "@/contexts/UserContext";
 import { 
   getTriggers, 
   deleteTrigger, 
@@ -19,6 +20,7 @@ export function useTriggerManagement() {
   const [activeTab, setActiveTab] = useState("active");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingTrigger, setEditingTrigger] = useState<Trigger | null>(null);
+  const { currentUser } = useUser();
 
   // Fetch triggers
   const { 
@@ -26,8 +28,9 @@ export function useTriggerManagement() {
     isLoading, 
     refetch 
   } = useQuery({
-    queryKey: ["triggers"],
+    queryKey: ["triggers", currentUser?.id],
     queryFn: getTriggers,
+    enabled: !!currentUser?.id,
   });
 
   // Fetch email statistics

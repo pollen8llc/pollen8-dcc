@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from "@/contexts/UserContext";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -12,10 +13,12 @@ import { useRelationshipWizard } from "@/contexts/RelationshipWizardContext";
 const BuildRapport = () => {
   const navigate = useNavigate();
   const { setSelectedTrigger } = useRelationshipWizard();
+  const { currentUser } = useUser();
   
   const { data: triggers = [] } = useQuery({
-    queryKey: ["triggers"],
+    queryKey: ["triggers", currentUser?.id],
     queryFn: getTriggers,
+    enabled: !!currentUser?.id,
   });
 
   const formatCondition = (condition: string) => {
