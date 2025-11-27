@@ -16,6 +16,7 @@ interface CalendarUpdateRequest {
   outreachId: string;
   updateType: 'update' | 'reschedule' | 'cancel';
   userEmail: string;
+  includeContactsAsAttendees?: boolean;
 }
 
 // ICS generation utilities (inline to avoid imports)
@@ -76,17 +77,17 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const { outreachId, updateType, userEmail }: CalendarUpdateRequest = await req.json();
+    const { outreachId, updateType, userEmail, includeContactsAsAttendees }: CalendarUpdateRequest = await req.json();
 
-    console.log('Processing calendar update:', { outreachId, updateType, userEmail });
+    console.log('Processing calendar update:', { outreachId, updateType, userEmail, includeContactsAsAttendees });
 
-    // Fetch outreach task with contacts
+    // Fetch outreach task with contacts (including emails)
     const { data: outreach, error: fetchError } = await supabase
       .from('rms_outreach')
       .select(`
         *,
         contacts:rms_outreach_contacts(
-          contact:rms_contacts(id, name)
+          contact:rms_contacts(id, name, email)
         )
       `)
       .eq('id', outreachId)
@@ -141,6 +142,20 @@ const handler = async (req: Request): Promise<Response> => {
       foldLine(`ATTENDEE;CN=REL8 Notification System;ROLE=NON-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${outreach.system_email}`),
       foldLine(`ATTENDEE;CN=User;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${userEmail}`)
     ];
+
+    // Add contacts as attendees if requested
+    const contactEmails: string[] = [];
+    if (includeContactsAsAttendees && outreach.contacts?.length > 0) {
+      for (const contactEntry of outreach.contacts) {
+        const contact = contactEntry.contact;
+        if (contact.email) {
+          icsLines.push(
+            foldLine(`ATTENDEE;CN=${escapeICSText(contact.name)};ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${contact.email}`)
+          );
+          contactEmails.push(contact.email);
+        }
+      }
+    }
 
     if (updateType !== 'cancel') {
       icsLines.push(
@@ -216,7 +231,8 @@ const handler = async (req: Request): Promise<Response> => {
         status: status.toLowerCase(),
         changes: {
           update_type: updateType,
-          new_sequence: newSequence
+          new_sequence: newSequence,
+          contacts_notified: includeContactsAsAttendees ? contactEmails : []
         }
       });
 
