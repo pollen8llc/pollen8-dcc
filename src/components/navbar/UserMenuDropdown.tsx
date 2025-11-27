@@ -58,10 +58,10 @@ const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
   return (
     <Button 
       variant="ghost" 
-      className="relative h-8 w-8 rounded-full"
+      className="relative h-9 w-9 rounded-md p-0"
       onClick={handleAvatarClick}
     >
-      <div className="ring-1 ring-primary/20 rounded-full p-0.5">
+      <div className="h-full w-full flex items-center justify-center ring-1 ring-primary/20 rounded-md bg-background/50">
         <NetworkPlexus />
       </div>
       {unreadCount > 0 && (
