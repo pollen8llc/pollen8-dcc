@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Upload, UserPlus, Search, Link2 } from "lucide-react";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
+import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 
 const ConnectHub = () => {
   const navigate = useNavigate();
@@ -10,9 +11,10 @@ const ConnectHub = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Navbar />
+      <DotConnectorHeader />
       
       <div className="container mx-auto max-w-6xl px-4 py-8 pb-32">
-        <div className="flex items-center gap-3 mb-6 mt-6">
+        <div className="flex items-center gap-3 mb-6 mt-0">
           <Users className="h-6 w-6 text-primary" />
           <div>
             <p className="text-sm text-muted-foreground">
