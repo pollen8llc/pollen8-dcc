@@ -178,10 +178,17 @@ const handler = async (req: Request): Promise<Response> => {
       emailSubject = `Rescheduled: ${summaryText}`;
     }
 
+    // Determine recipients - include contacts if requested
+    const recipients = [userEmail];
+    if (includeContactsAsAttendees && contactEmails.length > 0) {
+      recipients.push(...contactEmails);
+      console.log(`Sending email to ${recipients.length} recipients:`, recipients);
+    }
+
     // Send email with ICS attachment
     const emailResponse = await resend.emails.send({
       from: 'REL8 Calendar <notifications@ecosystembuilder.app>',
-      to: [userEmail],
+      to: recipients,
       subject: emailSubject,
       html: `
         <h2>Your REL8 outreach task has been ${updateType === 'cancel' ? 'cancelled' : 'updated'}</h2>

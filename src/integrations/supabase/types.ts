@@ -2400,6 +2400,7 @@ export type Database = {
       }
       rms_outreach: {
         Row: {
+          calendar_event_sequence: number | null
           calendar_sync_enabled: boolean | null
           channel_details: Json | null
           created_at: string
@@ -2421,6 +2422,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          calendar_event_sequence?: number | null
           calendar_sync_enabled?: boolean | null
           channel_details?: Json | null
           created_at?: string
@@ -2442,6 +2444,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          calendar_event_sequence?: number | null
           calendar_sync_enabled?: boolean | null
           channel_details?: Json | null
           created_at?: string
@@ -2517,6 +2520,7 @@ export type Database = {
           changes: Json | null
           created_at: string | null
           email_from: string | null
+          email_source: string | null
           email_subject: string | null
           id: string
           outreach_id: string
@@ -2529,6 +2533,7 @@ export type Database = {
           changes?: Json | null
           created_at?: string | null
           email_from?: string | null
+          email_source?: string | null
           email_subject?: string | null
           id?: string
           outreach_id: string
@@ -2541,6 +2546,7 @@ export type Database = {
           changes?: Json | null
           created_at?: string | null
           email_from?: string | null
+          email_source?: string | null
           email_subject?: string | null
           id?: string
           outreach_id?: string
