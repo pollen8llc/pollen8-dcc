@@ -1,11 +1,11 @@
 import React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Settings, MapPin, Bell } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Globe } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import { NetworkPlexus, NetworkScoreNumber } from "@/components/ui/network-score-badge";
+import { NetworkScoreNumber } from "@/components/ui/network-score-badge";
 
 interface DotConnectorHeaderProps {
   className?: string;
@@ -32,14 +32,6 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
     return 'O';
   };
 
-  const handleSettingsClick = () => {
-    navigate("/settings");
-  };
-
-  const handleUpdatesClick = () => {
-    navigate("/rel8/notifications");
-  };
-
   const handleAvatarClick = () => {
     if (currentUser?.id) {
       navigate(`/profile/${currentUser.id}`);
@@ -64,44 +56,43 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                 
                    {/* Profile Info */}
                   <div className="flex-1 min-w-0 text-center sm:text-left">
-                    <div className="flex flex-col gap-2 mb-3">
-                      <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-3">
+                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
                         {getFullName()}
                       </h1>
+                      {currentUser?.role && (
+                        <Badge variant="secondary" className="text-xs sm:text-sm font-medium self-center sm:self-auto">
+                          {currentUser.role}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center sm:justify-start mb-3">
                       <NetworkScoreNumber score={currentUser?.network_value || 0} />
                     </div>
                   
-                  <div className="flex items-center gap-3 justify-center sm:justify-start flex-wrap">
-                    {currentUser?.location && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-5 h-5 text-muted-foreground" />
-                        <span className="text-lg text-muted-foreground font-medium">{currentUser.location}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2 sm:gap-3 justify-center sm:justify-start flex-wrap">
+                      {currentUser?.location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                          <span className="text-base sm:text-lg text-muted-foreground font-medium">{currentUser.location}</span>
+                        </div>
+                      )}
+                      {currentUser?.website && (
+                        <Badge variant="outline" className="flex items-center gap-1">
+                          <Globe className="w-3 h-3" />
+                          <a 
+                            href={currentUser.website.startsWith('http') ? currentUser.website : `https://${currentUser.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs hover:underline"
+                          >
+                            Website
+                          </a>
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                </div>
-                
-                 {/* Action Buttons */}
-                 <div className="flex-shrink-0 w-full sm:w-auto">
-                   <div className="flex flex-col sm:flex-row gap-2">
-                     <Button 
-                       onClick={handleUpdatesClick} 
-                       variant="outline"
-                       size="default" 
-                       className="w-full sm:w-auto px-6 lg:px-8 py-3 lg:py-4 text-base lg:text-lg font-semibold"
-                     >
-                       <Bell className="w-5 h-5 mr-3" />
-                       Notifications
-                     </Button>
-                     <Button 
-                       onClick={handleSettingsClick} 
-                       size="default" 
-                       className="w-auto px-4 py-3 lg:py-4"
-                     >
-                       <Settings className="w-5 h-5" />
-                     </Button>
-                   </div>
-                 </div>
               </div>
             </div>
           </CardContent>
