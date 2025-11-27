@@ -12,73 +12,31 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
   return (
     <Badge 
       variant="secondary" 
-      className="flex items-center gap-3 px-4 py-2 bg-card/50 backdrop-blur-sm border-primary/20"
+      className="flex items-center gap-2 px-2 py-1 bg-card/50 backdrop-blur-sm border-primary/20"
     >
-      {/* Hexagon Plexus Animation */}
-      <div className="relative w-8 h-8">
-        <svg
-          viewBox="0 0 100 100"
-          className="w-full h-full"
-          style={{ filter: "drop-shadow(0 0 4px hsl(var(--primary)/0.5))" }}
-        >
-          {/* Animated hexagons */}
-          <g className="animate-pulse">
-            {/* Center hexagon */}
-            <polygon
-              points="50,15 65,25 65,45 50,55 35,45 35,25"
-              fill="none"
-              stroke="hsl(var(--primary))"
-              strokeWidth="2"
-              className="animate-[scale-in_2s_ease-in-out_infinite]"
-            />
-            {/* Top hexagon */}
-            <polygon
-              points="50,5 60,10 60,20 50,25 40,20 40,10"
-              fill="none"
-              stroke="hsl(var(--primary))"
-              strokeWidth="1.5"
-              opacity="0.6"
-              className="animate-[fade-in_2s_ease-in-out_infinite_0.3s]"
-            />
-            {/* Bottom hexagon */}
-            <polygon
-              points="50,55 60,60 60,70 50,75 40,70 40,60"
-              fill="none"
-              stroke="hsl(var(--primary))"
-              strokeWidth="1.5"
-              opacity="0.6"
-              className="animate-[fade-in_2s_ease-in-out_infinite_0.6s]"
-            />
-            {/* Left hexagon */}
-            <polygon
-              points="30,30 35,27 40,30 40,36 35,39 30,36"
-              fill="none"
-              stroke="hsl(var(--primary))"
-              strokeWidth="1.5"
-              opacity="0.4"
-              className="animate-[fade-in_2s_ease-in-out_infinite_0.9s]"
-            />
-            {/* Right hexagon */}
-            <polygon
-              points="60,30 65,27 70,30 70,36 65,39 60,36"
-              fill="none"
-              stroke="hsl(var(--primary))"
-              strokeWidth="1.5"
-              opacity="0.4"
-              className="animate-[fade-in_2s_ease-in-out_infinite_1.2s]"
-            />
-          </g>
-          {/* Connection lines (plexus effect) */}
-          <g opacity="0.3">
-            <line x1="50" y1="25" x2="50" y2="55" stroke="hsl(var(--primary))" strokeWidth="1" />
-            <line x1="35" y1="25" x2="30" y2="30" stroke="hsl(var(--primary))" strokeWidth="1" />
-            <line x1="65" y1="25" x2="70" y2="30" stroke="hsl(var(--primary))" strokeWidth="1" />
-          </g>
+      {/* Tiny 6-Point Plexus Animation */}
+      <div className="relative w-4 h-4">
+        <svg viewBox="0 0 24 24" className="w-full h-full">
+          {/* 6 connection points in a network */}
+          <circle cx="12" cy="4" r="1" fill="white" opacity="0.8" className="animate-pulse" />
+          <circle cx="20" cy="8" r="1" fill="white" opacity="0.6" className="animate-pulse" style={{ animationDelay: "0.2s" }} />
+          <circle cx="20" cy="16" r="1" fill="white" opacity="0.6" className="animate-pulse" style={{ animationDelay: "0.4s" }} />
+          <circle cx="12" cy="20" r="1" fill="white" opacity="0.8" className="animate-pulse" style={{ animationDelay: "0.6s" }} />
+          <circle cx="4" cy="16" r="1" fill="white" opacity="0.6" className="animate-pulse" style={{ animationDelay: "0.8s" }} />
+          <circle cx="4" cy="8" r="1" fill="white" opacity="0.6" className="animate-pulse" style={{ animationDelay: "1s" }} />
+          
+          {/* Connection lines */}
+          <line x1="12" y1="4" x2="20" y2="8" stroke="white" strokeWidth="0.5" opacity="0.3" />
+          <line x1="20" y1="8" x2="20" y2="16" stroke="white" strokeWidth="0.5" opacity="0.3" />
+          <line x1="20" y1="16" x2="12" y2="20" stroke="white" strokeWidth="0.5" opacity="0.3" />
+          <line x1="12" y1="20" x2="4" y2="16" stroke="white" strokeWidth="0.5" opacity="0.3" />
+          <line x1="4" y1="16" x2="4" y2="8" stroke="white" strokeWidth="0.5" opacity="0.3" />
+          <line x1="4" y1="8" x2="12" y2="4" stroke="white" strokeWidth="0.5" opacity="0.3" />
         </svg>
       </div>
 
       {/* 8-Digit Counter Display */}
-      <div className="flex items-center gap-0.5 font-mono text-lg leading-none">
+      <div className="flex items-center font-mono text-sm leading-none">
         {formattedScore.split("").map((digit, index) => {
           const isActive = index >= 8 - score.toString().length;
           return (
