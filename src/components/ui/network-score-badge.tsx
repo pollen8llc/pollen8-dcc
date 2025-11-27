@@ -5,8 +5,9 @@ interface NetworkScoreBadgeProps {
 }
 
 export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) => {
-  // Format score to 8 digits with leading zeros
-  const formattedScore = score.toString().padStart(8, "0");
+  // Format score to 8 digits - actual score digits on left, trailing zeros dimmed
+  const scoreStr = score.toString();
+  const formattedScore = scoreStr.padEnd(8, "0");
   
   // Node positions - 8 nodes in a square (corners + midpoints)
   const nodes = [
@@ -113,7 +114,7 @@ export const NetworkScoreBadge: React.FC<NetworkScoreBadgeProps> = ({ score }) =
       {/* 8-Digit Counter Display */}
       <div className="flex items-center gap-0.5 font-mono text-base leading-none">
         {formattedScore.split("").map((digit, index) => {
-          const isActive = index >= 8 - score.toString().length;
+          const isActive = index < scoreStr.length;
           return (
             <span
               key={index}
