@@ -151,6 +151,7 @@ export const getOutreachById = async (id: string): Promise<Outreach | null> => {
       raw_ics: (data as any).raw_ics,
       outreach_channel: (data as any).outreach_channel,
       channel_details: (data as any).channel_details,
+      contacts_notified_at: (data as any).contacts_notified_at,
       contacts
     } as Outreach;
   } catch (error: any) {
@@ -245,6 +246,7 @@ export const getOutreach = async (tab: OutreachFilterTab = "all"): Promise<Outre
         raw_ics: item.raw_ics,
         outreach_channel: item.outreach_channel,
         channel_details: item.channel_details,
+        contacts_notified_at: item.contacts_notified_at,
         contacts
       } as Outreach;
     });
