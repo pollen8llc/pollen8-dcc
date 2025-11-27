@@ -68,12 +68,6 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                     </div>
                     
                     <div className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-start flex-wrap mb-2">
-                      {currentUser?.location && (
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{currentUser.location}</span>
-                        </div>
-                      )}
                       {currentUser?.website && (
                         <Badge variant="outline" className="flex items-center gap-1 h-5 px-1.5 text-xs">
                           <Globe className="w-3 h-3" />
@@ -86,6 +80,12 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                             Website
                           </a>
                         </Badge>
+                      )}
+                      {currentUser?.location && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">{currentUser.location}</span>
+                        </div>
                       )}
                     </div>
                     
