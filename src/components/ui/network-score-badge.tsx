@@ -115,9 +115,9 @@ export const NetworkScoreNumber: React.FC<NetworkScoreBadgeProps> = ({ score }) 
   const formattedScore = scoreStr.padEnd(8, "0");
   
   return (
-    <div className="flex items-center gap-2 font-mono text-base leading-none">
-      <span className="text-xs text-muted-foreground uppercase tracking-wide">network value</span>
-      <div className="flex items-center gap-0.5">
+    <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full backdrop-blur-md bg-[hsl(180,100%,50%)]/10 border border-[hsl(180,100%,50%)]/20 shadow-lg">
+      <span className="text-xs text-[hsl(180,100%,50%)] uppercase tracking-wide font-semibold">network value</span>
+      <div className="flex items-center gap-0.5 font-mono text-base leading-none">
         {formattedScore.split("").map((digit, index) => {
           const isActive = index < scoreStr.length;
           return (
@@ -125,8 +125,8 @@ export const NetworkScoreNumber: React.FC<NetworkScoreBadgeProps> = ({ score }) 
               key={index}
               className={`transition-opacity duration-300 ${
                 isActive 
-                  ? "text-foreground opacity-100" 
-                  : "text-muted-foreground/30 opacity-40"
+                  ? "text-[hsl(180,100%,50%)] opacity-100" 
+                  : "text-[hsl(180,100%,50%)]/30 opacity-40"
               }`}
             >
               {digit}
