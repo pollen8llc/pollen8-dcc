@@ -59,7 +59,7 @@ export const NetworkPlexus: React.FC = () => {
   }, []);
   
   return (
-    <div className="relative w-8 h-8 flex-shrink-0">
+    <div className="relative w-4 h-4 flex-shrink-0">
       <svg viewBox="0 0 24 24" className="w-full h-full">
         {/* Static connection lines (square perimeter) */}
         <line x1="4" y1="4" x2="12" y2="4" stroke="white" strokeWidth="0.5" opacity="0.2" />
@@ -114,22 +114,25 @@ export const NetworkScoreNumber: React.FC<NetworkScoreBadgeProps> = ({ score }) 
   const formattedScore = scoreStr.padEnd(8, "0");
   
   return (
-    <div className="flex items-center gap-0.5 font-mono text-base leading-none">
-      {formattedScore.split("").map((digit, index) => {
-        const isActive = index < scoreStr.length;
-        return (
-          <span
-            key={index}
-            className={`transition-opacity duration-300 ${
-              isActive 
-                ? "text-foreground opacity-100" 
-                : "text-muted-foreground/30 opacity-40"
-            }`}
-          >
-            {digit}
-          </span>
-        );
-      })}
+    <div className="flex items-center gap-2 font-mono text-base leading-none">
+      <span className="text-xs text-muted-foreground uppercase tracking-wide">network value</span>
+      <div className="flex items-center gap-0.5">
+        {formattedScore.split("").map((digit, index) => {
+          const isActive = index < scoreStr.length;
+          return (
+            <span
+              key={index}
+              className={`transition-opacity duration-300 ${
+                isActive 
+                  ? "text-foreground opacity-100" 
+                  : "text-muted-foreground/30 opacity-40"
+              }`}
+            >
+              {digit}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 };
