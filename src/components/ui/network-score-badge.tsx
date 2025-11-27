@@ -59,7 +59,7 @@ export const NetworkPlexus: React.FC = () => {
   }, []);
   
   return (
-    <div className="relative w-4 h-4 flex-shrink-0">
+    <div className="relative w-7 h-7 flex-shrink-0">
       <svg viewBox="0 0 24 24" className="w-full h-full">
         {/* Static connection lines (square perimeter) */}
         <line x1="4" y1="4" x2="12" y2="4" stroke="white" strokeWidth="0.5" opacity="0.2" />
