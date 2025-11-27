@@ -338,7 +338,9 @@ const AppRoutes = () => {
           } />
           <Route path="/rel8/triggers" element={
             <NonServiceProviderRoute>
-              <Triggers />
+              <ProtectedRoute>
+                <Triggers />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/settings" element={
@@ -353,7 +355,9 @@ const AppRoutes = () => {
           } />
           <Route path="/rel8/triggers/wizard" element={
             <NonServiceProviderRoute>
-              <TriggerWizard />
+              <ProtectedRoute>
+                <TriggerWizard />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/test-email" element={

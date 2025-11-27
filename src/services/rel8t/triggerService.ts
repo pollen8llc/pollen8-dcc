@@ -65,9 +65,18 @@ export interface TriggerStats {
 
 export const getTriggers = async (): Promise<Trigger[]> => {
   try {
+    // Get current user for explicit filtering (defense in depth)
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.warn("getTriggers called without authenticated user");
+      return [];
+    }
+
     const { data, error } = await supabase
       .from("rms_triggers")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
