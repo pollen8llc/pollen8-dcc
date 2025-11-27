@@ -1,6 +1,6 @@
 import { User } from "@/models/types";
 import { UserRole } from "@/models/types";
-import { Avatar } from "@/components/ui/avatar";
+import { NetworkPlexus } from "@/components/ui/network-score-badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -61,12 +61,9 @@ const UserMenuDropdown = ({ currentUser, isAdmin }: UserMenuDropdownProps) => {
       className="relative h-8 w-8 rounded-full"
       onClick={handleAvatarClick}
     >
-      <Avatar 
-        userId={currentUser.id} 
-        size={32}
-        className="ring-1 ring-primary/20"
-        isAdmin={isAdmin}
-      />
+      <div className="ring-1 ring-primary/20 rounded-full p-0.5">
+        <NetworkPlexus />
+      </div>
       {unreadCount > 0 && (
         <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground ring-2 ring-background">
           {unreadCount > 9 ? '9+' : unreadCount}
