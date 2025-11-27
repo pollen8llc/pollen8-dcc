@@ -10,15 +10,11 @@ import { getContactCount, getCategories } from "@/services/rel8t/contactService"
 import { Calendar, Users, Heart, Upload, Zap, Building2, MessageSquare, Clock, CheckCircle, Globe, ChevronDown } from "lucide-react";
 import OutreachList from "@/components/rel8t/OutreachList";
 import { Rel8Header } from "@/components/rel8t/Rel8Header";
-import { useModuleCompletion } from "@/hooks/useModuleCompletion";
 import NetworkMapGlobe from "@/components/rel8t/NetworkMapGlobe";
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isNetworkMapOpen, setIsNetworkMapOpen] = useState(false);
-  const {
-    rel8_complete,
-    loading: completionLoading
-  } = useModuleCompletion();
 
   // Get outreach status counts with shorter staleTime
   const {
@@ -54,13 +50,6 @@ const Dashboard = () => {
   const handleBuildRapport = () => {
     navigate("/rel8/wizard");
   };
-
-  // Check REL8 setup status - only use database state
-  useEffect(() => {
-    if (!completionLoading && rel8_complete === false) {
-      navigate("/rel8/setup");
-    }
-  }, [completionLoading, rel8_complete, navigate]);
 
   // Quick stats calculations
   const quickStats = {
