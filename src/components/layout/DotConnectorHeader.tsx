@@ -62,16 +62,16 @@ export const DotConnectorHeader: React.FC<DotConnectorHeaderProps> = ({
                  <Avatar userId={currentUser?.id} size={96} />
                </div>
                 
-                {/* Profile Info */}
-                <div className="flex-1 min-w-0 text-center sm:text-left">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
-                    <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
-                      {getFullName()}
-                    </h1>
-                    <Badge variant="secondary" className="text-sm font-medium self-center sm:self-auto">
-                      {currentUser?.role}
-                    </Badge>
-                  </div>
+                 {/* Profile Info */}
+                 <div className="flex-1 min-w-0 text-center sm:text-left">
+                   <div className="flex flex-col gap-2 mb-3">
+                     <h1 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
+                       {getFullName()}
+                     </h1>
+                     <Badge variant="secondary" className="text-sm font-medium self-center sm:self-start w-fit">
+                       {currentUser?.role}
+                     </Badge>
+                   </div>
                   
                   <div className="flex items-center gap-3 justify-center sm:justify-start flex-wrap">
                     {currentUser?.location && (
