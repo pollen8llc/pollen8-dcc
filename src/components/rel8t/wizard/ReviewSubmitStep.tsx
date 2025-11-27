@@ -112,7 +112,8 @@ export const ReviewSubmitStep = ({
           status: 'pending' as OutreachStatus,
           due_date: dueDate.toISOString(),
           outreach_channel: trigger.outreach_channel,
-          channel_details: trigger.channel_details
+          channel_details: trigger.channel_details,
+          trigger_id: trigger.id
         };
         
         return await createOutreach(outreach, contactIds);
