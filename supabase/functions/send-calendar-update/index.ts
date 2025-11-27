@@ -279,10 +279,10 @@ const handler = async (req: Request): Promise<Response> => {
       .insert({
         outreach_id: outreachId,
         user_id: outreach.user_id,
-        sync_type: 'outbound_update',
-        sync_direction: 'outbound',
+        sync_type: updateType,
         email_source: 'rel8_system',
-        status: status.toLowerCase(),
+        sequence: newSequence,
+        raw_ics: icsContent,
         changes: {
           update_type: updateType,
           new_sequence: newSequence,
