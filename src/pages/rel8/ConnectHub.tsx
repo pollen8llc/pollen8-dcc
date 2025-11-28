@@ -77,7 +77,7 @@ const ConnectHub = () => {
 
           <Card 
             className="relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer group bg-card/40 backdrop-blur-md border-border/50 hover:shadow-lg hover:shadow-primary/10"
-            onClick={() => navigate('/rel8/relationships')}
+            onClick={() => navigate('/rel8')}
           >
             <CardHeader className="space-y-2 p-5">
               <div className="flex items-center gap-3">
