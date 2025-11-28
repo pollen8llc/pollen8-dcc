@@ -90,7 +90,7 @@ serve(async (req) => {
       location: contact.location,
       bio: notes || contact.notes,
       role: 'MEMBER',
-      invited_by: contact.user_id // Set the organizer who invited them
+      invited_by: contact.invited_by || contact.user_id // Prefer explicit invited_by, fall back to organizer
     };
 
     if (isNewUser) {
@@ -107,7 +107,7 @@ serve(async (req) => {
       // Update existing profile with invited_by
       const { error: profileError } = await supabaseAdmin
         .from('profiles')
-        .update({ invited_by: contact.user_id })
+        .update({ invited_by: contact.invited_by || contact.user_id }) // Prefer explicit invited_by, fall back to organizer
         .eq('user_id', authUser.id);
 
       if (profileError) {
