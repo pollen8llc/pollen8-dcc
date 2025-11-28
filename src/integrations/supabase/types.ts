@@ -2251,6 +2251,7 @@ export type Database = {
           id: string
           industry: string | null
           interests: string[] | null
+          invited_by: string | null
           last_contact_date: string | null
           last_introduction_date: string | null
           location: string | null
@@ -2273,6 +2274,7 @@ export type Database = {
           id?: string
           industry?: string | null
           interests?: string[] | null
+          invited_by?: string | null
           last_contact_date?: string | null
           last_introduction_date?: string | null
           location?: string | null
@@ -2295,6 +2297,7 @@ export type Database = {
           id?: string
           industry?: string | null
           interests?: string[] | null
+          invited_by?: string | null
           last_contact_date?: string | null
           last_introduction_date?: string | null
           location?: string | null
