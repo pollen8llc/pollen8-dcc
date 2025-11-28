@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Upload, UserPlus, Search, Link2 } from "lucide-react";
+import { Users, Upload, UserPlus, Network, Link2 } from "lucide-react";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
 import { DotConnectorHeader } from "@/components/layout/DotConnectorHeader";
 
@@ -77,17 +77,17 @@ const ConnectHub = () => {
 
           <Card 
             className="relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer group bg-card/40 backdrop-blur-md border-border/50 hover:shadow-lg hover:shadow-primary/10"
-            onClick={() => navigate('/rel8/connect/find')}
+            onClick={() => navigate('/rel8/relationships')}
           >
             <CardHeader className="space-y-2 p-5">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <Search className="h-5 w-5" />
+                  <Network className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-lg">Find Contacts</CardTitle>
+                <CardTitle className="text-lg">Manage Network</CardTitle>
               </div>
               <CardDescription className="text-sm">
-                Search and discover contacts in the network
+                View and manage your outreach tasks and relationships
               </CardDescription>
             </CardHeader>
           </Card>
