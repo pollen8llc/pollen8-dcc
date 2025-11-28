@@ -307,32 +307,44 @@ const AppRoutes = () => {
           {/* REL8 routes - Protected from service providers */}
           <Route path="/rel8" element={
             <NonServiceProviderRoute>
-              <Rel8Dashboard />
+              <ProtectedRoute>
+                <Rel8Dashboard />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/contacts" element={
             <NonServiceProviderRoute>
-              <Contacts />
+              <ProtectedRoute>
+                <Contacts />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/contacts/create" element={
             <NonServiceProviderRoute>
-              <ContactCreate />
+              <ProtectedRoute>
+                <ContactCreate />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/contacts/:id/edit" element={
             <NonServiceProviderRoute>
-              <ContactEdit />
+              <ProtectedRoute>
+                <ContactEdit />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/contactprofile/:id" element={
             <NonServiceProviderRoute>
-              <ContactProfile />
+              <ProtectedRoute>
+                <ContactProfile />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/categories" element={
             <NonServiceProviderRoute>
-              <Categories />
+              <ProtectedRoute>
+                <Categories />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/triggers" element={
@@ -344,12 +356,16 @@ const AppRoutes = () => {
           } />
           <Route path="/rel8/settings" element={
             <NonServiceProviderRoute>
-              <Rel8Settings />
+              <ProtectedRoute>
+                <Rel8Settings />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/wizard" element={
             <NonServiceProviderRoute>
-              <RelationshipWizard />
+              <ProtectedRoute>
+                <RelationshipWizard />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/triggers/wizard" element={
@@ -361,44 +377,60 @@ const AppRoutes = () => {
           } />
           <Route path="/rel8/test-email" element={
             <NonServiceProviderRoute>
-              <EmailTest />
+              <ProtectedRoute>
+                <EmailTest />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/build-rapport" element={
             <NonServiceProviderRoute>
-              <BuildRapport />
+              <ProtectedRoute>
+                <BuildRapport />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/notifications" element={
             <NonServiceProviderRoute>
-              <Notifications />
+              <ProtectedRoute>
+                <Notifications />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
 
           {/* REL8 Connect Hub and Sub-pages */}
           <Route path="/rel8/connect" element={
             <NonServiceProviderRoute>
-              <ConnectHub />
+              <ProtectedRoute>
+                <ConnectHub />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/connect/create" element={
             <NonServiceProviderRoute>
-              <ConnectCreate />
+              <ProtectedRoute>
+                <ConnectCreate />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/connect/import" element={
             <NonServiceProviderRoute>
-              <ConnectImport />
+              <ProtectedRoute>
+                <ConnectImport />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/connect/find" element={
             <NonServiceProviderRoute>
-              <ConnectFind />
+              <ProtectedRoute>
+                <ConnectFind />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
           <Route path="/rel8/invites" element={
             <NonServiceProviderRoute>
-              <InvitesPage />
+              <ProtectedRoute>
+                <InvitesPage />
+              </ProtectedRoute>
             </NonServiceProviderRoute>
           } />
 
