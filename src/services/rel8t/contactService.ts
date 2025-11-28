@@ -49,7 +49,7 @@ export interface ContactAffiliation {
 }
 
 export const getContacts = async (options?: { searchQuery?: string }): Promise<Contact[]> => {
-  let query = supabase.from("rms_contacts").select(`*,category:category_id(id,name,color),affiliations:rms_contact_affiliations!contact_id(id,contact_id,user_id,affiliation_type,affiliated_user_id,relationship,created_at,updated_at)`);
+  let query = supabase.from("rms_contacts").select(`*,category:category_id(id,name,color),affiliations:rms_contact_affiliations!contact_id(id,contact_id,user_id,affiliation_type,affiliated_user_id,relationship,created_at,updated_at)`).neq('status', 'pending');
   let searchQuery = "";
   if (options && typeof options === "object" && "searchQuery" in options) {
     searchQuery = options.searchQuery || "";
@@ -64,7 +64,7 @@ export const getContacts = async (options?: { searchQuery?: string }): Promise<C
 };
 
 export const getContactCount = async (): Promise<number> => {
-  const { count, error } = await supabase.from("rms_contacts").select("*", { count: 'exact', head: true });
+  const { count, error } = await supabase.from("rms_contacts").select("*", { count: 'exact', head: true }).neq('status', 'pending');
   if (error) throw new Error(error.message);
   return count || 0;
 };
@@ -172,5 +172,35 @@ export const updateCategory = async (id: string, category: Partial<ContactCatego
 
 export const deleteCategory = async (id: string): Promise<void> => {
   const { error } = await supabase.from("rms_contact_categories").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+};
+
+export const approveContact = async (contactId: string): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contacts")
+    .update({ status: 'active' })
+    .eq("id", contactId)
+    .eq("status", "pending");
+  
+  if (error) throw new Error(error.message);
+  
+  // Increment rel8_contacts iota when contact is approved
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    await supabase.rpc('increment_iota_metric', {
+      p_user_id: user.id,
+      p_metric_type: 'rel8_contacts',
+      p_increment: 1
+    });
+  }
+};
+
+export const rejectContact = async (contactId: string): Promise<void> => {
+  const { error } = await supabase
+    .from("rms_contacts")
+    .delete()
+    .eq("id", contactId)
+    .eq("status", "pending");
+  
   if (error) throw new Error(error.message);
 };

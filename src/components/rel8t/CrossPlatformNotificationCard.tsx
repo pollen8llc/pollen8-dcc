@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Bell, User, Building2 } from "lucide-react";
+import { Trash2, Bell, User, Building2, Check, X } from "lucide-react";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -26,11 +26,15 @@ interface CrossPlatformNotificationCardProps {
     metadata: any;
   };
   onDelete: (id: string) => void;
+  onApprove?: (contactId: string) => void;
+  onReject?: (contactId: string) => void;
 }
 
 export const CrossPlatformNotificationCard = ({ 
   notification, 
-  onDelete 
+  onDelete,
+  onApprove,
+  onReject
 }: CrossPlatformNotificationCardProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isMobile = useIsMobile();
@@ -122,6 +126,28 @@ export const CrossPlatformNotificationCard = ({
                   </span>
                 </div>
               </div>
+
+              {/* Approve/Reject Actions for invite_contact */}
+              {notification.notification_type === 'invite_contact' && notification.metadata?.contact_id && (
+                <div className="flex gap-2 mt-3 pt-3 border-t border-border/30">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1 text-green-500 border-green-500/30 hover:bg-green-500/10 hover:text-green-400 hover:border-green-500/50 transition-all"
+                    onClick={() => onApprove?.(notification.metadata.contact_id)}
+                  >
+                    <Check className="h-4 w-4 mr-1.5" /> Approve
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all"
+                    onClick={() => onReject?.(notification.metadata.contact_id)}
+                  >
+                    <X className="h-4 w-4 mr-1.5" /> Reject
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

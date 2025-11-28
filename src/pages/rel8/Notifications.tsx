@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
@@ -16,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CrossPlatformNotificationCard } from "@/components/rel8t/CrossPlatformNotificationCard";
+import { approveContact, rejectContact } from "@/services/rel8t/contactService";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -458,6 +457,8 @@ export default function Notifications() {
           key={item.id}
           notification={item}
           onDelete={(id) => deleteNotificationMutation.mutate(id)}
+          onApprove={(contactId) => approveContactMutation.mutate(contactId)}
+          onReject={(contactId) => rejectContactMutation.mutate(contactId)}
         />
       );
     }
@@ -734,6 +735,8 @@ export default function Notifications() {
                       key={notification.id}
                       notification={notification}
                       onDelete={(id) => deleteNotificationMutation.mutate(id)}
+                      onApprove={(contactId) => approveContactMutation.mutate(contactId)}
+                      onReject={(contactId) => rejectContactMutation.mutate(contactId)}
                     />
                   ))}
                 </div>
