@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { Rel8OnlyNavigation } from "@/components/rel8t/Rel8OnlyNavigation";
@@ -168,6 +170,49 @@ export default function Notifications() {
       console.error("Delete sync log mutation error:", error);
       toast({
         title: "Failed to delete",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Approve contact mutation
+  const approveContactMutation = useMutation({
+    mutationFn: async (contactId: string) => {
+      await approveContact(contactId);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Contact approved",
+        description: "Contact has been added to your list."
+      });
+      queryClient.invalidateQueries({ queryKey: ["cross-platform-notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to approve contact",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Reject contact mutation
+  const rejectContactMutation = useMutation({
+    mutationFn: async (contactId: string) => {
+      await rejectContact(contactId);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Contact rejected",
+        description: "Contact has been removed."
+      });
+      queryClient.invalidateQueries({ queryKey: ["cross-platform-notifications"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to reject contact",
         description: error.message,
         variant: "destructive"
       });
