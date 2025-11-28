@@ -127,26 +127,58 @@ export const CrossPlatformNotificationCard = ({
                 </div>
               </div>
 
-              {/* Approve/Reject Actions for invite_contact */}
+              {/* Contact Details for invite_contact */}
               {notification.notification_type === 'invite_contact' && notification.metadata?.contact_id && (
-                <div className="flex gap-2 mt-3 pt-3 border-t border-border/30">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1 text-green-500 border-green-500/30 hover:bg-green-500/10 hover:text-green-400 hover:border-green-500/50 transition-all"
-                    onClick={() => onApprove?.(notification.metadata.contact_id)}
-                  >
-                    <Check className="h-4 w-4 mr-1.5" /> Approve
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all"
-                    onClick={() => onReject?.(notification.metadata.contact_id)}
-                  >
-                    <X className="h-4 w-4 mr-1.5" /> Reject
-                  </Button>
-                </div>
+                <>
+                  <div className="mt-3 pt-3 border-t border-border/30 space-y-2">
+                    <div className="text-xs space-y-1.5">
+                      {notification.metadata.contact_email && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">Email:</span>
+                          <span className="text-foreground font-medium">{notification.metadata.contact_email}</span>
+                        </div>
+                      )}
+                      {notification.metadata.contact_phone && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">Phone:</span>
+                          <span className="text-foreground font-medium">{notification.metadata.contact_phone}</span>
+                        </div>
+                      )}
+                      {notification.metadata.contact_tags && notification.metadata.contact_tags.length > 0 && (
+                        <div className="flex items-start gap-2">
+                          <span className="text-muted-foreground shrink-0">Tags:</span>
+                          <div className="flex flex-wrap gap-1">
+                            {notification.metadata.contact_tags.map((tag: string, idx: number) => (
+                              <span key={idx} className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-[10px]">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Approve/Reject Actions */}
+                  <div className="flex gap-2 mt-3">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1 text-green-500 border-green-500/30 hover:bg-green-500/10 hover:text-green-400 hover:border-green-500/50 transition-all"
+                      onClick={() => onApprove?.(notification.metadata.contact_id)}
+                    >
+                      <Check className="h-4 w-4 mr-1.5" /> Approve
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all"
+                      onClick={() => onReject?.(notification.metadata.contact_id)}
+                    >
+                      <X className="h-4 w-4 mr-1.5" /> Reject
+                    </Button>
+                  </div>
+                </>
               )}
             </div>
           </div>

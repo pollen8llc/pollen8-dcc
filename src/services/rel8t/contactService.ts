@@ -176,13 +176,14 @@ export const deleteCategory = async (id: string): Promise<void> => {
 };
 
 export const approveContact = async (contactId: string): Promise<void> => {
-  const { error } = await supabase
+  // Update contact status to active
+  const { error: contactError } = await supabase
     .from("rms_contacts")
     .update({ status: 'active' })
     .eq("id", contactId)
     .eq("status", "pending");
   
-  if (error) throw new Error(error.message);
+  if (contactError) throw new Error(contactError.message);
   
   // Increment rel8_contacts iota when contact is approved
   const { data: { user } } = await supabase.auth.getUser();
@@ -193,14 +194,39 @@ export const approveContact = async (contactId: string): Promise<void> => {
       p_increment: 1
     });
   }
+  
+  // Delete the associated notification
+  const { error: notificationError } = await supabase
+    .from("cross_platform_notifications")
+    .delete()
+    .eq("notification_type", "invite_contact")
+    .eq("metadata->>contact_id", contactId);
+  
+  if (notificationError) {
+    console.error("Error deleting notification:", notificationError);
+    // Don't throw - contact approval succeeded, notification deletion is optional
+  }
 };
 
 export const rejectContact = async (contactId: string): Promise<void> => {
-  const { error } = await supabase
+  // Delete the contact
+  const { error: contactError } = await supabase
     .from("rms_contacts")
     .delete()
     .eq("id", contactId)
     .eq("status", "pending");
   
-  if (error) throw new Error(error.message);
+  if (contactError) throw new Error(contactError.message);
+  
+  // Also delete the associated notification
+  const { error: notificationError } = await supabase
+    .from("cross_platform_notifications")
+    .delete()
+    .eq("notification_type", "invite_contact")
+    .eq("metadata->>contact_id", contactId);
+  
+  if (notificationError) {
+    console.error("Error deleting notification:", notificationError);
+    // Don't throw - contact deletion succeeded, notification deletion is optional
+  }
 };
