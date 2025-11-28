@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type NotificationStatus = "all" | "sent" | "pending" | "failed";
-type NotificationView = "all" | "platform" | "emails" | "calendar";
+type NotificationView = "all" | "platform" | "emails" | "calendar" | "inbound";
 
 export default function Notifications() {
   const navigate = useNavigate();
@@ -718,6 +718,12 @@ export default function Notifications() {
                       <span>Outreach Tasks</span>
                     </div>
                   </SelectItem>
+                  <SelectItem value="inbound">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span>Inbound Contacts</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -864,6 +870,41 @@ export default function Notifications() {
                     <h3 className="text-lg font-semibold mb-2">No outreach tasks</h3>
                     <p className="text-muted-foreground text-center text-sm mb-6">
                       Outreach tasks with calendar sync will appear here
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+
+          {/* INBOUND CONTACTS VIEW */}
+          {activeView === "inbound" && (
+            <>
+              {platformNotificationsLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+              ) : platformNotifications && platformNotifications.filter(n => n.notification_type === 'invite_contact').length > 0 ? (
+                <div className="space-y-3">
+                  {platformNotifications
+                    .filter(n => n.notification_type === 'invite_contact')
+                    .map((notification) => (
+                      <CrossPlatformNotificationCard
+                        key={notification.id}
+                        notification={notification}
+                        onDelete={(id) => deleteNotificationMutation.mutate(id)}
+                        onApprove={(contactId) => approveContactMutation.mutate(contactId)}
+                        onReject={(contactId) => rejectContactMutation.mutate(contactId)}
+                      />
+                    ))}
+                </div>
+              ) : (
+                <Card className="glass-morphism border-0 backdrop-blur-md">
+                  <CardContent className="flex flex-col items-center justify-center py-16">
+                    <User className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No inbound contacts</h3>
+                    <p className="text-muted-foreground text-center text-sm mb-6">
+                      Contacts submitted via invite links will appear here for approval
                     </p>
                   </CardContent>
                 </Card>
