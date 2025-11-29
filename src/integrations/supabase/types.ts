@@ -2244,10 +2244,15 @@ export type Database = {
       }
       rms_contacts: {
         Row: {
+          anniversary: string | null
+          anniversary_type: string | null
           bio: string | null
+          birthday: string | null
           category_id: string | null
           created_at: string
           email: string | null
+          events_attended: string[] | null
+          how_we_met: string | null
           id: string
           industry: string | null
           interests: string[] | null
@@ -2256,21 +2261,33 @@ export type Database = {
           last_introduction_date: string | null
           location: string | null
           name: string
+          next_followup_date: string | null
           notes: string | null
           organization: string | null
           phone: string | null
+          preferred_channel: string | null
+          preferred_name: string | null
+          professional_goals: string | null
+          rapport_status: string | null
           role: string | null
           source: string | null
           status: string | null
           tags: string[] | null
+          upcoming_event: string | null
+          upcoming_event_date: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          anniversary?: string | null
+          anniversary_type?: string | null
           bio?: string | null
+          birthday?: string | null
           category_id?: string | null
           created_at?: string
           email?: string | null
+          events_attended?: string[] | null
+          how_we_met?: string | null
           id?: string
           industry?: string | null
           interests?: string[] | null
@@ -2279,21 +2296,33 @@ export type Database = {
           last_introduction_date?: string | null
           location?: string | null
           name: string
+          next_followup_date?: string | null
           notes?: string | null
           organization?: string | null
           phone?: string | null
+          preferred_channel?: string | null
+          preferred_name?: string | null
+          professional_goals?: string | null
+          rapport_status?: string | null
           role?: string | null
           source?: string | null
           status?: string | null
           tags?: string[] | null
+          upcoming_event?: string | null
+          upcoming_event_date?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          anniversary?: string | null
+          anniversary_type?: string | null
           bio?: string | null
+          birthday?: string | null
           category_id?: string | null
           created_at?: string
           email?: string | null
+          events_attended?: string[] | null
+          how_we_met?: string | null
           id?: string
           industry?: string | null
           interests?: string[] | null
@@ -2302,13 +2331,20 @@ export type Database = {
           last_introduction_date?: string | null
           location?: string | null
           name?: string
+          next_followup_date?: string | null
           notes?: string | null
           organization?: string | null
           phone?: string | null
+          preferred_channel?: string | null
+          preferred_name?: string | null
+          professional_goals?: string | null
+          rapport_status?: string | null
           role?: string | null
           source?: string | null
           status?: string | null
           tags?: string[] | null
+          upcoming_event?: string | null
+          upcoming_event_date?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -23,6 +23,19 @@ export interface Contact {
   last_contact_date?: string;
   category?: ContactCategory;
   affiliations?: ContactAffiliation[];
+  // New fields for comprehensive profile management
+  preferred_name?: string;
+  next_followup_date?: string;
+  rapport_status?: string;
+  preferred_channel?: string;
+  birthday?: string;
+  anniversary?: string;
+  anniversary_type?: string;
+  upcoming_event?: string;
+  upcoming_event_date?: string;
+  professional_goals?: string;
+  how_we_met?: string;
+  events_attended?: string[];
 }
 
 export interface ContactCategory {

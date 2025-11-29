@@ -6,7 +6,7 @@ import { ContactHeader } from '@/components/rel8t/ContactHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import ProfileCard from '@/components/connections/ProfileCard';
-import { Mail, Phone, MapPin, Building2, Tag, Heart, Loader2, User, UserPlus } from 'lucide-react';
+import { Mail, Phone, MapPin, Building2, Tag, Heart, Loader2, User, UserPlus, Clock, Cake, Calendar, Target, Users, MessageSquare } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getContactById } from "@/services/rel8t/contactService";
 import { format } from "date-fns";
@@ -81,6 +81,24 @@ export default function ContactProfile() {
       }
     })) || [];
 
+  const getRapportStatusColor = (status?: string) => {
+    switch (status) {
+      case 'green': return 'bg-green-500';
+      case 'red': return 'bg-red-500';
+      case 'yellow':
+      default: return 'bg-yellow-500';
+    }
+  };
+
+  const getRapportStatusText = (status?: string) => {
+    switch (status) {
+      case 'green': return 'Strong Relationship';
+      case 'red': return 'Cold / Needs Attention';
+      case 'yellow':
+      default: return 'Warm / Neutral';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Rel8Header />
@@ -88,7 +106,7 @@ export default function ContactProfile() {
       <div className="container mx-auto max-w-6xl px-4 py-6 space-y-6 animate-fade-in">
         <ContactHeader
           contactId={contact.id}
-          name={contact.name}
+          name={contact.preferred_name || contact.name}
           category={contact.category?.name || "Uncategorized"}
           status={(contact.status || "active") as "active" | "inactive"}
           tags={contact.tags || []}
@@ -100,17 +118,48 @@ export default function ContactProfile() {
           onDelete={handleDelete}
         />
 
-        {/* Basic Information */}
+        {/* Personal Identity & Context */}
         <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5 text-primary" />
-              Contact Information
+              Personal Identity & Context
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Column 1 */}
+              <div className="space-y-3 md:space-y-4">
+                <div className="flex items-start gap-3">
+                  <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Full Name</div>
+                    <div className="text-sm md:text-base font-medium">{contact.name}</div>
+                  </div>
+                </div>
+                
+                {contact.preferred_name && (
+                  <div className="flex items-start gap-3">
+                    <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                    <div>
+                      <div className="text-xs md:text-sm text-muted-foreground">Preferred Name</div>
+                      <div className="text-sm md:text-base">{contact.preferred_name}</div>
+                    </div>
+                  </div>
+                )}
+                
+                {contact.location && (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                    <div>
+                      <div className="text-xs md:text-sm text-muted-foreground">Location</div>
+                      <div className="text-sm md:text-base">{contact.location}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Column 2 */}
               <div className="space-y-3 md:space-y-4">
                 {contact.email && (
                   <div className="flex items-start gap-3">
@@ -121,6 +170,7 @@ export default function ContactProfile() {
                     </div>
                   </div>
                 )}
+                
                 {contact.phone && (
                   <div className="flex items-start gap-3">
                     <Phone className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
@@ -131,109 +181,21 @@ export default function ContactProfile() {
                   </div>
                 )}
               </div>
-
-              {/* Column 2 */}
-              <div className="space-y-3 md:space-y-4">
-                {contact.location && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Location</div>
-                      <div className="text-sm md:text-base">{contact.location}</div>
-                    </div>
-                  </div>
-                )}
-                {contact.organization && (
-                  <div className="flex items-start gap-3">
-                    <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Organization</div>
-                      <div className="text-sm md:text-base">{contact.organization}</div>
-                    </div>
-                  </div>
-                )}
-                {contact.role && (
-                  <div className="flex items-start gap-3">
-                    <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Role</div>
-                      <div className="text-sm md:text-base">{contact.role}</div>
-                    </div>
-                  </div>
-                )}
-                {contact.industry && (
-                  <div className="flex items-start gap-3">
-                    <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
-                    <div>
-                      <div className="text-xs md:text-sm text-muted-foreground">Industry</div>
-                      <div className="text-sm md:text-base">{contact.industry}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
             
-            {contact.notes && (
-              <div className="pt-3 md:pt-4 border-t border-border/50">
-                <h4 className="font-semibold mb-2 text-sm md:text-base">Notes</h4>
-                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.notes}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Teal separator */}
-        {contact.bio && (
-          <div className="h-px bg-gradient-to-r from-transparent via-[#00eada] to-transparent opacity-50" />
-        )}
-
-        {/* Bio - Glassmorphic Card */}
-        {contact.bio && (
-          <Card 
-            className="relative overflow-hidden glass-morphism border-0 backdrop-blur-md" 
-            style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)' }}
-          >
-            <CardContent className="p-6">
-              <h4 className="font-semibold mb-3 text-sm md:text-base">Bio</h4>
-              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.bio}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Details */}
-        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5 text-primary" />
-              Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {contact.tags && contact.tags.length > 0 && (
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Tags</h4>
-                <div className="flex flex-wrap gap-2">
-                  {contact.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="hover:scale-105 transition-transform">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {contact.category && (
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Category</h4>
-                <Badge variant="outline" style={{ borderColor: contact.category.color }} className="hover:scale-105 transition-transform">
-                  {contact.category.name}
-                </Badge>
+            {contact.bio && (
+              <div className="pt-3 md:pt-4 border-t border-border/50 mt-4">
+                <h4 className="font-semibold mb-2 text-sm md:text-base">Bio</h4>
+                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.bio}</p>
               </div>
             )}
             
             {contact.interests && contact.interests.length > 0 && (
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Interests</h4>
+              <div className="pt-3 md:pt-4 border-t border-border/50 mt-4">
+                <h4 className="font-semibold mb-2 text-sm md:text-base flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  Hobbies / Interests
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {contact.interests.map((interest) => (
                     <Badge key={interest} variant="outline" className="hover:scale-105 transition-transform">
@@ -246,52 +208,243 @@ export default function ContactProfile() {
           </CardContent>
         </Card>
 
-        {/* Contact Status & Activity */}
+        {/* Engagement & Follow-Up */}
         <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-primary" />
-              Contact Status & Activity
+              <Clock className="h-5 w-5 text-primary" />
+              Engagement & Follow-Up
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="status" className="border-border/50">
-                <AccordionTrigger className="hover:text-primary">Contact Status</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-2">
-                    <p className="text-sm">
-                      <span className="font-semibold">Status:</span> {contact.status || "Active"}
-                    </p>
-                    {contact.last_contact_date && (
-                      <p className="text-sm">
-                        <span className="font-semibold">Last Contact:</span>{" "}
-                        {format(new Date(contact.last_contact_date), "MMM d, yyyy")}
-                      </p>
-                    )}
-                    {contact.last_introduction_date && (
-                      <p className="text-sm">
-                        <span className="font-semibold">Last Introduction:</span>{" "}
-                        {format(new Date(contact.last_introduction_date), "MMM d, yyyy")}
-                      </p>
-                    )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {contact.last_introduction_date && (
+                <div className="flex items-start gap-3">
+                  <Clock className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Last Time You Spoke</div>
+                    <div className="text-sm md:text-base">{format(new Date(contact.last_introduction_date), "MMM d, yyyy")}</div>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                </div>
+              )}
+              
+              {contact.next_followup_date && (
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Next Follow-Up</div>
+                    <div className="text-sm md:text-base">{format(new Date(contact.next_followup_date), "MMM d, yyyy")}</div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-start gap-3">
+                <Heart className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                <div>
+                  <div className="text-xs md:text-sm text-muted-foreground">Rapport Status</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`inline-block w-3 h-3 rounded-full ${getRapportStatusColor(contact.rapport_status)}`} />
+                    <span className="text-sm md:text-base">{getRapportStatusText(contact.rapport_status)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {contact.preferred_channel && (
+                <div className="flex items-start gap-3">
+                  <MessageSquare className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Preferred Channel</div>
+                    <div className="text-sm md:text-base capitalize">{contact.preferred_channel}</div>
+                  </div>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Associated Contacts */}
+        {/* Relevant Dates */}
+        {(contact.birthday || contact.anniversary || contact.upcoming_event) && (
+          <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Cake className="h-5 w-5 text-primary" />
+                Relevant Dates
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                {contact.birthday && (
+                  <div className="flex items-start gap-3">
+                    <Cake className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                    <div>
+                      <div className="text-xs md:text-sm text-muted-foreground">Birthday</div>
+                      <div className="text-sm md:text-base">{format(new Date(contact.birthday), "MMM d, yyyy")}</div>
+                    </div>
+                  </div>
+                )}
+                
+                {contact.anniversary && (
+                  <div className="flex items-start gap-3">
+                    <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                    <div>
+                      <div className="text-xs md:text-sm text-muted-foreground">
+                        Anniversary {contact.anniversary_type && `(${contact.anniversary_type})`}
+                      </div>
+                      <div className="text-sm md:text-base">{format(new Date(contact.anniversary), "MMM d, yyyy")}</div>
+                    </div>
+                  </div>
+                )}
+                
+                {contact.upcoming_event && (
+                  <div className="flex items-start gap-3 md:col-span-2">
+                    <Calendar className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                    <div>
+                      <div className="text-xs md:text-sm text-muted-foreground">Upcoming Event</div>
+                      <div className="text-sm md:text-base font-medium">{contact.upcoming_event}</div>
+                      {contact.upcoming_event_date && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {format(new Date(contact.upcoming_event_date), "MMM d, yyyy")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Professional */}
         <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-primary" />
-              Associated Contacts ({associatedContacts.length})
+              <Building2 className="h-5 w-5 text-primary" />
+              Professional
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {associatedContacts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
+              {contact.organization && (
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Current Company</div>
+                    <div className="text-sm md:text-base">{contact.organization}</div>
+                  </div>
+                </div>
+              )}
+              
+              {contact.role && (
+                <div className="flex items-start gap-3">
+                  <User className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Role / Title</div>
+                    <div className="text-sm md:text-base">{contact.role}</div>
+                  </div>
+                </div>
+              )}
+              
+              {contact.industry && (
+                <div className="flex items-start gap-3">
+                  <Building2 className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Industry / Category</div>
+                    <div className="text-sm md:text-base">{contact.industry}</div>
+                  </div>
+                </div>
+              )}
+              
+              {contact.category && (
+                <div className="flex items-start gap-3">
+                  <Tag className="h-4 w-4 md:h-5 md:w-5 text-primary/70 mt-1" />
+                  <div>
+                    <div className="text-xs md:text-sm text-muted-foreground">Relationship Category</div>
+                    <Badge variant="outline" style={{ borderColor: contact.category.color }}>
+                      {contact.category.name}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {contact.professional_goals && (
+              <div className="pt-3 md:pt-4 border-t border-border/50">
+                <h4 className="font-semibold mb-2 text-sm md:text-base flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Professional Goals / Current Focus
+                </h4>
+                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.professional_goals}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Social Graph / Community Context */}
+        <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Social Graph / Community Context
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {contact.how_we_met && (
+              <div>
+                <h4 className="font-semibold mb-2 text-sm md:text-base">How You Met / Shared Context</h4>
+                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.how_we_met}</p>
+              </div>
+            )}
+            
+            {contact.events_attended && contact.events_attended.length > 0 && (
+              <div>
+                <h4 className="font-semibold mb-2 text-sm md:text-base">Events They Attend</h4>
+                <div className="flex flex-wrap gap-2">
+                  {contact.events_attended.map((event) => (
+                    <Badge key={event} variant="secondary" className="hover:scale-105 transition-transform">
+                      {event}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {contact.tags && contact.tags.length > 0 && (
+              <div>
+                <h4 className="font-semibold mb-2 text-sm md:text-base">Tags</h4>
+                <div className="flex flex-wrap gap-2">
+                  {contact.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="hover:scale-105 transition-transform">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Additional Notes */}
+        {contact.notes && (
+          <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
+            <CardHeader>
+              <CardTitle>Additional Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{contact.notes}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Associated Contacts */}
+        {associatedContacts.length > 0 && (
+          <Card className="glass-morphism bg-card/80 backdrop-blur-sm border-primary/20 hover:shadow-lg transition-all">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-primary" />
+                Associated Contacts ({associatedContacts.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {associatedContacts.map((assocContact) => (
                   <div 
@@ -303,13 +456,9 @@ export default function ContactProfile() {
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No associated contacts
-              </p>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
