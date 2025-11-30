@@ -11,6 +11,15 @@ export interface NormalizedContact {
   role?: string;
   location?: string;
   notes?: string;
+  // New fields for expanded data model
+  preferred_name?: string;
+  industry?: string;
+  birthday?: string;
+  professional_goals?: string;
+  how_we_met?: string;
+  bio?: string;
+  interests?: string[];
+  tags?: string[];
 }
 
 export interface ValidationResult {
@@ -29,6 +38,14 @@ export interface ServiceContact {
   location?: string;
   category_id?: string;
   tags?: string[];
+  // New fields
+  preferred_name?: string;
+  industry?: string;
+  birthday?: string;
+  professional_goals?: string;
+  how_we_met?: string;
+  bio?: string;
+  interests?: string[];
 }
 
 export class DataNormalizer {
@@ -66,6 +83,16 @@ export class DataNormalizer {
     contact.role = this.normalizeText(rawData.role);
     contact.location = this.normalizeText(rawData.location);
     contact.notes = this.normalizeText(rawData.notes);
+    contact.preferred_name = this.normalizeText(rawData.preferred_name || rawData.nickname);
+    contact.industry = this.normalizeText(rawData.industry);
+    contact.birthday = this.normalizeDate(rawData.birthday || rawData.dob);
+    contact.professional_goals = this.normalizeText(rawData.professional_goals || rawData.goals);
+    contact.how_we_met = this.normalizeText(rawData.how_we_met || rawData.met_at || rawData.source);
+    contact.bio = this.normalizeText(rawData.bio || rawData.about);
+
+    // Handle arrays
+    contact.interests = this.normalizeArray(rawData.interests);
+    contact.tags = this.normalizeArray(rawData.tags);
 
     return contact;
   }
@@ -79,7 +106,14 @@ export class DataNormalizer {
       role: normalized.role || undefined,
       notes: normalized.notes || undefined,
       location: normalized.location || undefined,
-      tags: []
+      preferred_name: normalized.preferred_name || undefined,
+      industry: normalized.industry || undefined,
+      birthday: normalized.birthday || undefined,
+      professional_goals: normalized.professional_goals || undefined,
+      how_we_met: normalized.how_we_met || undefined,
+      bio: normalized.bio || undefined,
+      interests: normalized.interests || [],
+      tags: normalized.tags || []
     };
   }
 
@@ -167,6 +201,29 @@ export class DataNormalizer {
 
   private static capitalizeWords(text: string): string {
     return text.toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase());
+  }
+
+  private static normalizeDate(date?: string): string {
+    if (!date) return '';
+    
+    // Try to parse and format date to YYYY-MM-DD
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) return '';
+    
+    return parsedDate.toISOString().split('T')[0];
+  }
+
+  private static normalizeArray(value?: string | string[]): string[] {
+    if (!value) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(value)) return value.map(v => v.trim()).filter(Boolean);
+    
+    // If it's a string, split by common delimiters
+    return value
+      .split(/[,;|]/)
+      .map(item => item.trim())
+      .filter(Boolean);
   }
 
   static validateContact(contact: NormalizedContact): ValidationResult {

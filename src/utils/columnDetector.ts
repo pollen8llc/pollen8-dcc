@@ -47,6 +47,37 @@ export class ColumnDetector {
     notes: [
       'notes', 'note', 'comments', 'description', 'memo', 'remarks',
       'comment', 'additional info', 'additional_info', 'extra'
+    ],
+    preferred_name: [
+      'preferred name', 'nickname', 'goes by', 'alias', 'preferred_name',
+      'nick', 'known as', 'called'
+    ],
+    industry: [
+      'industry', 'sector', 'market', 'vertical', 'field', 'domain',
+      'business type', 'industry_type'
+    ],
+    birthday: [
+      'birthday', 'birth date', 'dob', 'date of birth', 'birthdate',
+      'birth_date', 'date_of_birth', 'bday'
+    ],
+    professional_goals: [
+      'goals', 'professional goals', 'focus', 'objectives', 'priorities',
+      'working on', 'current focus', 'professional_goals', 'career_goals'
+    ],
+    how_we_met: [
+      'how we met', 'met at', 'introduction', 'source', 'referred by',
+      'how_we_met', 'met_at', 'introduced by', 'connection source'
+    ],
+    bio: [
+      'bio', 'biography', 'about', 'summary', 'profile', 'description',
+      'background', 'about me'
+    ],
+    interests: [
+      'interests', 'hobbies', 'likes', 'passions', 'activities',
+      'interested in', 'enjoys'
+    ],
+    tags: [
+      'tags', 'tag', 'labels', 'categories', 'keywords', 'metadata'
     ]
   };
 
@@ -165,7 +196,15 @@ export class ColumnDetector {
       organization: 'Organization/Company',
       role: 'Job Title/Role',
       location: 'Location/Address',
-      notes: 'Notes/Comments'
+      notes: 'Notes/Comments',
+      preferred_name: 'Preferred Name/Nickname',
+      industry: 'Industry',
+      birthday: 'Birthday',
+      professional_goals: 'Professional Goals',
+      how_we_met: 'How You Met',
+      bio: 'Bio/About',
+      interests: 'Interests',
+      tags: 'Tags'
     };
     return displayNames[field] || field;
   }
