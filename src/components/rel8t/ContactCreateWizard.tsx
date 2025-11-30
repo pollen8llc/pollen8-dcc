@@ -7,7 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Loc8Dialog } from "@/components/ui/loc8-dialog";
 import { Loc8DialogTrigger } from "@/components/ui/loc8-dialog-trigger";
-import { ArrowLeft, ArrowRight, Check, Tag as TagIcon, Heart } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ArrowLeft, ArrowRight, Check, Tag as TagIcon, Heart, CalendarIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,22 +24,39 @@ interface ContactCreateWizardProps {
 const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreateWizardProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [values, setValues] = useState({
+    // Step 1: Personal Identity & Contact
     email: "",
     name: "",
+    preferred_name: "",
     phone: "",
     location: "",
+    // Step 2: Professional Info
     organization: "",
     role: "",
+    industry: "",
     category_id: undefined,
-    bio: "",
+    professional_goals: "",
     status: "active" as 'active' | 'inactive',
+    how_we_met: "",
+    // Step 3: Engagement & Additional
+    bio: "",
     interests: [] as string[],
     tags: [] as string[],
-    notes: ""
+    notes: "",
+    rapport_status: "yellow" as 'red' | 'yellow' | 'green',
+    preferred_channel: "",
+    birthday: "",
+    anniversary: "",
+    anniversary_type: "",
+    upcoming_event: "",
+    upcoming_event_date: "",
+    next_followup_date: "",
+    events_attended: [] as string[]
   });
 
   const [tagInput, setTagInput] = useState("");
   const [interestInput, setInterestInput] = useState("");
+  const [eventInput, setEventInput] = useState("");
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
 
   // Fetch categories
@@ -50,6 +71,22 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
         .select("*")
         .eq("user_id", user.id)
         .order("name");
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch industries from lexicon
+  const { data: industries = [] } = useQuery({
+    queryKey: ["industries"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lexicon")
+        .select("*")
+        .eq("term_type", "industry")
+        .eq("is_active", true)
+        .order("term");
 
       if (error) throw error;
       return data || [];
@@ -92,6 +129,22 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
     setValues({ ...values, interests: values.interests.filter(interest => interest !== interestToRemove) });
   };
 
+  const handleEventKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (!eventInput.trim()) return;
+      const newEvent = eventInput.trim();
+      if (!values.events_attended.includes(newEvent)) {
+        setValues({ ...values, events_attended: [...values.events_attended, newEvent] });
+      }
+      setEventInput("");
+    }
+  };
+
+  const removeEvent = (eventToRemove: string) => {
+    setValues({ ...values, events_attended: values.events_attended.filter(event => event !== eventToRemove) });
+  };
+
   const canProceed = () => {
     if (currentStep === 1) {
       return values.email.trim() !== "" && values.name.trim() !== "";
@@ -127,12 +180,25 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
       location: values.location.trim() || null,
       bio: values.bio.trim() || null,
       notes: values.notes.trim() || null,
+      preferred_name: values.preferred_name.trim() || null,
+      industry: values.industry || null,
+      professional_goals: values.professional_goals.trim() || null,
+      how_we_met: values.how_we_met.trim() || null,
+      preferred_channel: values.preferred_channel || null,
+      birthday: values.birthday || null,
+      anniversary: values.anniversary || null,
+      anniversary_type: values.anniversary_type.trim() || null,
+      upcoming_event: values.upcoming_event.trim() || null,
+      upcoming_event_date: values.upcoming_event_date || null,
+      next_followup_date: values.next_followup_date || null,
       // Add source tracking
       source: "wizard",
       // Keep arrays and status as-is (they're already proper format)
       tags: values.tags,
       interests: values.interests,
-      status: values.status
+      events_attended: values.events_attended,
+      status: values.status,
+      rapport_status: values.rapport_status
     };
     
     onSubmit(sanitizedValues);
@@ -171,6 +237,18 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
                 placeholder="John Doe"
                 className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all"
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="preferred_name" className="text-sm font-medium text-foreground/70 pl-2">Preferred Name / Nickname</Label>
+              <Input
+                id="preferred_name"
+                name="preferred_name"
+                value={values.preferred_name}
+                onChange={handleChange}
+                placeholder="How they like to be called"
+                className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all"
               />
             </div>
 
@@ -236,6 +314,25 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="industry" className="text-sm font-medium text-foreground/70 pl-2">Industry</Label>
+              <Select
+                value={values.industry || ""}
+                onValueChange={(value) => setValues({ ...values, industry: value })}
+              >
+                <SelectTrigger className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all">
+                  <SelectValue placeholder="Select an industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  {industries.map((industry) => (
+                    <SelectItem key={industry.id} value={industry.id}>
+                      {industry.term}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="category_id" className="text-sm font-medium text-foreground/70 pl-2">Category</Label>
               <Select
                 value={values.category_id || ""}
@@ -255,6 +352,18 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="professional_goals" className="text-sm font-medium text-foreground/70 pl-2">Professional Goals / Current Focus</Label>
+              <Textarea
+                id="professional_goals"
+                name="professional_goals"
+                value={values.professional_goals}
+                onChange={handleChange}
+                placeholder="What are they working on or focused on?"
+                className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg min-h-[80px] transition-all"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="status" className="text-sm font-medium text-foreground/70 pl-2">Status</Label>
               <Select
                 value={values.status}
@@ -268,6 +377,18 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="how_we_met" className="text-sm font-medium text-foreground/70 pl-2">How You Met</Label>
+              <Input
+                id="how_we_met"
+                name="how_we_met"
+                value={values.how_we_met}
+                onChange={handleChange}
+                placeholder="e.g., Tech Conference 2024, Mutual friend intro"
+                className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all"
+              />
             </div>
           </div>
         )}
@@ -337,6 +458,225 @@ const ContactCreateWizard = ({ onSubmit, onCancel, isSubmitting }: ContactCreate
                     onClick={() => removeTag(tag)}
                   >
                     {tag} ×
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground/70 pl-2">Rapport Status</Label>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant={values.rapport_status === 'red' ? 'default' : 'outline'}
+                  onClick={() => setValues({ ...values, rapport_status: 'red' })}
+                  className={cn(
+                    "flex-1 h-12",
+                    values.rapport_status === 'red' && "bg-red-500 hover:bg-red-600 text-white"
+                  )}
+                >
+                  🔴 Cold
+                </Button>
+                <Button
+                  type="button"
+                  variant={values.rapport_status === 'yellow' ? 'default' : 'outline'}
+                  onClick={() => setValues({ ...values, rapport_status: 'yellow' })}
+                  className={cn(
+                    "flex-1 h-12",
+                    values.rapport_status === 'yellow' && "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  )}
+                >
+                  🟡 Warm
+                </Button>
+                <Button
+                  type="button"
+                  variant={values.rapport_status === 'green' ? 'default' : 'outline'}
+                  onClick={() => setValues({ ...values, rapport_status: 'green' })}
+                  className={cn(
+                    "flex-1 h-12",
+                    values.rapport_status === 'green' && "bg-green-500 hover:bg-green-600 text-white"
+                  )}
+                >
+                  🟢 Hot
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="preferred_channel" className="text-sm font-medium text-foreground/70 pl-2">Preferred Contact Channel</Label>
+              <Select
+                value={values.preferred_channel}
+                onValueChange={(value) => setValues({ ...values, preferred_channel: value })}
+              >
+                <SelectTrigger className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all">
+                  <SelectValue placeholder="Select preferred channel" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="text">Text/SMS</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
+                  <SelectItem value="twitter">Twitter/X</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground/70 pl-2">Birthday</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-12 bg-background/90 backdrop-blur-lg border-2 border-primary/30 hover:border-primary/60 rounded-xl shadow-lg",
+                      !values.birthday && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {values.birthday ? format(new Date(values.birthday), "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={values.birthday ? new Date(values.birthday) : undefined}
+                    onSelect={(date) => setValues({ ...values, birthday: date ? format(date, 'yyyy-MM-dd') : '' })}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground/70 pl-2">Anniversary</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-12 bg-background/90 backdrop-blur-lg border-2 border-primary/30 hover:border-primary/60 rounded-xl shadow-lg",
+                        !values.anniversary && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {values.anniversary ? format(new Date(values.anniversary), "PP") : "Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={values.anniversary ? new Date(values.anniversary) : undefined}
+                      onSelect={(date) => setValues({ ...values, anniversary: date ? format(date, 'yyyy-MM-dd') : '' })}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="anniversary_type" className="text-sm font-medium text-foreground/70 pl-2">Type</Label>
+                <Input
+                  id="anniversary_type"
+                  name="anniversary_type"
+                  value={values.anniversary_type}
+                  onChange={handleChange}
+                  placeholder="e.g., Wedding, Work"
+                  className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="upcoming_event" className="text-sm font-medium text-foreground/70 pl-2">Upcoming Event</Label>
+                <Input
+                  id="upcoming_event"
+                  name="upcoming_event"
+                  value={values.upcoming_event}
+                  onChange={handleChange}
+                  placeholder="e.g., Conference name"
+                  className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground/70 pl-2">Event Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-12 bg-background/90 backdrop-blur-lg border-2 border-primary/30 hover:border-primary/60 rounded-xl shadow-lg",
+                        !values.upcoming_event_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {values.upcoming_event_date ? format(new Date(values.upcoming_event_date), "PP") : "Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={values.upcoming_event_date ? new Date(values.upcoming_event_date) : undefined}
+                      onSelect={(date) => setValues({ ...values, upcoming_event_date: date ? format(date, 'yyyy-MM-dd') : '' })}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground/70 pl-2">Next Follow-Up Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-12 bg-background/90 backdrop-blur-lg border-2 border-primary/30 hover:border-primary/60 rounded-xl shadow-lg",
+                      !values.next_followup_date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {values.next_followup_date ? format(new Date(values.next_followup_date), "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={values.next_followup_date ? new Date(values.next_followup_date) : undefined}
+                    onSelect={(date) => setValues({ ...values, next_followup_date: date ? format(date, 'yyyy-MM-dd') : '' })}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="events_attended" className="text-sm font-medium text-foreground/70 pl-2">Events Attended Together</Label>
+              <Input
+                id="events_attended"
+                name="events_attended"
+                value={eventInput}
+                onChange={(e) => setEventInput(e.target.value)}
+                onKeyDown={handleEventKeyDown}
+                placeholder="Type and press Enter to add events"
+                className="bg-background/90 backdrop-blur-lg border-2 border-primary/30 focus:border-primary/60 rounded-xl shadow-lg h-12 transition-all"
+              />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {values.events_attended.map((event, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-destructive/80 backdrop-blur-sm"
+                    onClick={() => removeEvent(event)}
+                  >
+                    {event} ×
                   </Badge>
                 ))}
               </div>
