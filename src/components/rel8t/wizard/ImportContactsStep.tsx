@@ -88,19 +88,16 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
       }
 
       setCsvData(parsed);
-      console.log('📊 CSV Data set:', { headers: parsed.headers, rowCount: parsed.rows.length });
 
       // Auto-detect column mappings
       const detection = ColumnDetector.detectColumns(parsed.headers);
       setMappings(detection.mappings);
-      console.log('🎯 Mappings detected:', detection.mappings.length);
 
       toast({
         title: "File processed successfully",
         description: `Found ${parsed.headers.length} columns and ${parsed.rows.length} rows. ${detection.mappings.length} columns auto-mapped.`
       });
 
-      console.log('🔄 Switching to mapping step');
       setCurrentStep('mapping');
     } catch (error) {
       console.error('Error parsing file:', error);
@@ -218,10 +215,7 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
     setProcessedData(null);
   };
 
-  console.log('🔍 Render state:', { currentStep, hasCsvData: !!csvData, hasProcessedData: !!processedData });
-
   if (currentStep === 'mapping' && csvData) {
-    console.log('✅ Rendering ColumnMappingStep');
     return (
       <ColumnMappingStep
         headers={csvData.headers}
