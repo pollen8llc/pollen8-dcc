@@ -78,6 +78,42 @@ export class ColumnDetector {
     ],
     tags: [
       'tags', 'tag', 'labels', 'categories', 'keywords', 'metadata'
+    ],
+    status: [
+      'status', 'contact status', 'relationship status', 'active status'
+    ],
+    rapport_status: [
+      'rapport status', 'rapport', 'relationship strength', 'connection strength',
+      'rapport level', 'engagement level'
+    ],
+    preferred_channel: [
+      'preferred channel', 'contact method', 'reach via', 'communication channel',
+      'preferred contact', 'best way to reach', 'contact preference'
+    ],
+    next_followup_date: [
+      'next followup', 'follow up date', 'next contact', 'scheduled followup',
+      'next touch', 'followup date', 'next follow-up'
+    ],
+    last_contact_date: [
+      'last contact', 'last spoke', 'last interaction', 'contacted on',
+      'last touch', 'previous contact', 'last reached out'
+    ],
+    anniversary: [
+      'anniversary', 'work anniversary', 'membership date', 'join date',
+      'anniversary date'
+    ],
+    anniversary_type: [
+      'anniversary type', 'milestone type', 'event type'
+    ],
+    upcoming_event: [
+      'upcoming event', 'next event', 'scheduled event', 'future event'
+    ],
+    upcoming_event_date: [
+      'event date', 'upcoming event date', 'next event date', 'scheduled date'
+    ],
+    events_attended: [
+      'events attended', 'attended events', 'past events', 'event history',
+      'events', 'conferences attended'
     ]
   };
 
@@ -204,7 +240,17 @@ export class ColumnDetector {
       how_we_met: 'How You Met',
       bio: 'Bio/About',
       interests: 'Interests',
-      tags: 'Tags'
+      tags: 'Tags',
+      status: 'Status',
+      rapport_status: 'Rapport Status',
+      preferred_channel: 'Preferred Channel',
+      next_followup_date: 'Next Follow-up Date',
+      last_contact_date: 'Last Contact Date',
+      anniversary: 'Anniversary',
+      anniversary_type: 'Anniversary Type',
+      upcoming_event: 'Upcoming Event',
+      upcoming_event_date: 'Upcoming Event Date',
+      events_attended: 'Events Attended'
     };
     return displayNames[field] || field;
   }

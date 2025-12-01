@@ -39,6 +39,34 @@ export const ContactPreviewStep: React.FC<ContactPreviewStepProps> = ({
         {contact.organization && <div>🏢 {contact.organization}</div>}
         {contact.role && <div>💼 {contact.role}</div>}
         {contact.location && <div>📍 {contact.location}</div>}
+        {contact.industry && <div>🏭 {contact.industry}</div>}
+        {contact.preferred_name && <div>👤 Preferred: {contact.preferred_name}</div>}
+        {contact.birthday && <div>🎂 {contact.birthday}</div>}
+        {contact.rapport_status && (
+          <div className="flex items-center gap-1">
+            {contact.rapport_status === 'green' && '🟢'}
+            {contact.rapport_status === 'yellow' && '🟡'}
+            {contact.rapport_status === 'red' && '🔴'}
+            Rapport: {contact.rapport_status}
+          </div>
+        )}
+        {contact.preferred_channel && <div>💬 Prefers: {contact.preferred_channel}</div>}
+        {contact.how_we_met && <div>🤝 Met: {contact.how_we_met}</div>}
+        {contact.bio && <div>📝 {contact.bio.substring(0, 100)}{contact.bio.length > 100 ? '...' : ''}</div>}
+        {contact.interests && contact.interests.length > 0 && (
+          <div className="flex items-center gap-1 flex-wrap">
+            ⭐ {contact.interests.map((interest, i) => (
+              <Badge key={i} variant="secondary" className="text-xs">{interest}</Badge>
+            ))}
+          </div>
+        )}
+        {contact.tags && contact.tags.length > 0 && (
+          <div className="flex items-center gap-1 flex-wrap">
+            🏷️ {contact.tags.map((tag, i) => (
+              <Badge key={i} variant="outline" className="text-xs">{tag}</Badge>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

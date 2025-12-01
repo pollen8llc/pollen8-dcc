@@ -23,7 +23,12 @@ export const ColumnMappingStep: React.FC<ColumnMappingStepProps> = ({
   onBack
 }) => {
   const availableFields = [
-    'name', 'email', 'phone', 'organization', 'role', 'location', 'notes'
+    'name', 'email', 'phone', 'organization', 'role', 'location', 'notes',
+    'preferred_name', 'bio', 'interests', 'tags',
+    'industry', 'professional_goals', 'status',
+    'rapport_status', 'preferred_channel', 'next_followup_date', 'last_contact_date',
+    'birthday', 'anniversary', 'anniversary_type', 'upcoming_event', 'upcoming_event_date',
+    'how_we_met', 'events_attended'
   ];
 
   const updateMapping = (sourceIndex: number, targetField: string) => {

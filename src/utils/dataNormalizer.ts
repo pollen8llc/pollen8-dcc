@@ -20,6 +20,16 @@ export interface NormalizedContact {
   bio?: string;
   interests?: string[];
   tags?: string[];
+  status?: string;
+  rapport_status?: string;
+  preferred_channel?: string;
+  next_followup_date?: string;
+  last_contact_date?: string;
+  anniversary?: string;
+  anniversary_type?: string;
+  upcoming_event?: string;
+  upcoming_event_date?: string;
+  events_attended?: string[];
 }
 
 export interface ValidationResult {
@@ -46,6 +56,17 @@ export interface ServiceContact {
   how_we_met?: string;
   bio?: string;
   interests?: string[];
+  source?: string;
+  status?: string;
+  rapport_status?: string;
+  preferred_channel?: string;
+  next_followup_date?: string;
+  last_contact_date?: string;
+  anniversary?: string;
+  anniversary_type?: string;
+  upcoming_event?: string;
+  upcoming_event_date?: string;
+  events_attended?: string[];
 }
 
 export class DataNormalizer {
@@ -93,6 +114,18 @@ export class DataNormalizer {
     // Handle arrays
     contact.interests = this.normalizeArray(rawData.interests);
     contact.tags = this.normalizeArray(rawData.tags);
+    contact.events_attended = this.normalizeArray(rawData.events_attended);
+
+    // Handle additional fields
+    contact.status = this.normalizeText(rawData.status);
+    contact.rapport_status = this.normalizeRapportStatus(rawData.rapport_status);
+    contact.preferred_channel = this.normalizeText(rawData.preferred_channel);
+    contact.next_followup_date = this.normalizeDate(rawData.next_followup_date);
+    contact.last_contact_date = this.normalizeDate(rawData.last_contact_date);
+    contact.anniversary = this.normalizeDate(rawData.anniversary);
+    contact.anniversary_type = this.normalizeText(rawData.anniversary_type);
+    contact.upcoming_event = this.normalizeText(rawData.upcoming_event);
+    contact.upcoming_event_date = this.normalizeDate(rawData.upcoming_event_date);
 
     return contact;
   }
@@ -113,7 +146,18 @@ export class DataNormalizer {
       how_we_met: normalized.how_we_met || undefined,
       bio: normalized.bio || undefined,
       interests: normalized.interests || [],
-      tags: normalized.tags || []
+      tags: normalized.tags || [],
+      source: 'csv_import',
+      status: normalized.status || undefined,
+      rapport_status: normalized.rapport_status || undefined,
+      preferred_channel: normalized.preferred_channel || undefined,
+      next_followup_date: normalized.next_followup_date || undefined,
+      last_contact_date: normalized.last_contact_date || undefined,
+      anniversary: normalized.anniversary || undefined,
+      anniversary_type: normalized.anniversary_type || undefined,
+      upcoming_event: normalized.upcoming_event || undefined,
+      upcoming_event_date: normalized.upcoming_event_date || undefined,
+      events_attended: normalized.events_attended || []
     };
   }
 
@@ -258,11 +302,25 @@ export class DataNormalizer {
       errors.push('Contact must have either an email address or phone number');
     }
 
+    // Validate rapport_status if provided
+    if (contact.rapport_status && !['red', 'yellow', 'green'].includes(contact.rapport_status.toLowerCase())) {
+      errors.push('Rapport status must be red, yellow, or green');
+    }
+
     return {
       isValid: errors.length === 0,
       errors,
       warnings
     };
+  }
+
+  private static normalizeRapportStatus(value?: string): string | undefined {
+    if (!value) return undefined;
+    const normalized = value.trim().toLowerCase();
+    if (['red', 'yellow', 'green'].includes(normalized)) {
+      return normalized;
+    }
+    return undefined;
   }
 
   static generateContactHash(contact: NormalizedContact): string {
