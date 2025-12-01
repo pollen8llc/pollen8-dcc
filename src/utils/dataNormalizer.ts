@@ -131,33 +131,37 @@ export class DataNormalizer {
   }
 
   static transformToServiceContact(normalized: NormalizedContact): ServiceContact {
+    // Helper to convert empty strings to undefined
+    const cleanValue = (val: string | undefined) => val && val.trim() ? val.trim() : undefined;
+    const cleanArray = (arr: string[] | undefined) => arr && arr.length > 0 ? arr : undefined;
+    
     return {
       name: normalized.name,
-      email: normalized.email || undefined,
-      phone: normalized.phone || undefined,
-      organization: normalized.organization || undefined,
-      role: normalized.role || undefined,
-      notes: normalized.notes || undefined,
-      location: normalized.location || undefined,
-      preferred_name: normalized.preferred_name || undefined,
-      industry: normalized.industry || undefined,
-      birthday: normalized.birthday || undefined,
-      professional_goals: normalized.professional_goals || undefined,
-      how_we_met: normalized.how_we_met || undefined,
-      bio: normalized.bio || undefined,
-      interests: normalized.interests || [],
-      tags: normalized.tags || [],
+      email: cleanValue(normalized.email),
+      phone: cleanValue(normalized.phone),
+      organization: cleanValue(normalized.organization),
+      role: cleanValue(normalized.role),
+      notes: cleanValue(normalized.notes),
+      location: cleanValue(normalized.location),
+      preferred_name: cleanValue(normalized.preferred_name),
+      industry: cleanValue(normalized.industry),
+      birthday: cleanValue(normalized.birthday),
+      professional_goals: cleanValue(normalized.professional_goals),
+      how_we_met: cleanValue(normalized.how_we_met),
+      bio: cleanValue(normalized.bio),
+      interests: cleanArray(normalized.interests),
+      tags: cleanArray(normalized.tags),
       source: 'csv_import',
-      status: normalized.status || undefined,
-      rapport_status: normalized.rapport_status || undefined,
-      preferred_channel: normalized.preferred_channel || undefined,
-      next_followup_date: normalized.next_followup_date || undefined,
-      last_contact_date: normalized.last_contact_date || undefined,
-      anniversary: normalized.anniversary || undefined,
-      anniversary_type: normalized.anniversary_type || undefined,
-      upcoming_event: normalized.upcoming_event || undefined,
-      upcoming_event_date: normalized.upcoming_event_date || undefined,
-      events_attended: normalized.events_attended || []
+      status: cleanValue(normalized.status) || 'active',
+      rapport_status: cleanValue(normalized.rapport_status),
+      preferred_channel: cleanValue(normalized.preferred_channel),
+      next_followup_date: cleanValue(normalized.next_followup_date),
+      last_contact_date: cleanValue(normalized.last_contact_date),
+      anniversary: cleanValue(normalized.anniversary),
+      anniversary_type: cleanValue(normalized.anniversary_type),
+      upcoming_event: cleanValue(normalized.upcoming_event),
+      upcoming_event_date: cleanValue(normalized.upcoming_event_date),
+      events_attended: cleanArray(normalized.events_attended)
     };
   }
 
@@ -274,21 +278,21 @@ export class DataNormalizer {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // Name validation
+    // Name validation (only required field)
     if (!contact.name || contact.name.trim().length < 2) {
       errors.push('Name must be at least 2 characters long');
     }
 
-    // Email validation
-    if (contact.email) {
+    // Email validation (optional but validate if provided)
+    if (contact.email && contact.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(contact.email)) {
         errors.push('Invalid email format');
       }
     }
 
-    // Phone validation
-    if (contact.phone) {
+    // Phone validation (optional but validate if provided)
+    if (contact.phone && contact.phone.trim()) {
       const phoneRegex = /^[\d\s\-\(\)\+\.ext]+$/;
       if (!phoneRegex.test(contact.phone)) {
         errors.push('Invalid phone number format');
@@ -297,9 +301,9 @@ export class DataNormalizer {
       }
     }
 
-    // Require either email or phone
+    // Warn if both email and phone are missing (but don't error)
     if (!contact.email && !contact.phone) {
-      errors.push('Contact must have either an email address or phone number');
+      warnings.push('Contact has no email or phone number');
     }
 
     // Validate rapport_status if provided
