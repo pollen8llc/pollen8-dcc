@@ -155,12 +155,13 @@ export class DataNormalizer {
       status: cleanValue(normalized.status) || 'active',
       rapport_status: cleanValue(normalized.rapport_status),
       preferred_channel: cleanValue(normalized.preferred_channel),
-      next_followup_date: cleanValue(normalized.next_followup_date),
-      last_contact_date: cleanValue(normalized.last_contact_date),
-      anniversary: cleanValue(normalized.anniversary),
+      // Timestamps need ISO format, dates need YYYY-MM-DD
+      next_followup_date: this.normalizeTimestamp(normalized.next_followup_date) || undefined,
+      last_contact_date: this.normalizeTimestamp(normalized.last_contact_date) || undefined,
+      anniversary: this.normalizeDate(normalized.anniversary) || undefined,
       anniversary_type: cleanValue(normalized.anniversary_type),
       upcoming_event: cleanValue(normalized.upcoming_event),
-      upcoming_event_date: cleanValue(normalized.upcoming_event_date),
+      upcoming_event_date: this.normalizeTimestamp(normalized.upcoming_event_date) || undefined,
       events_attended: cleanArray(normalized.events_attended)
     };
   }
@@ -252,13 +253,21 @@ export class DataNormalizer {
   }
 
   private static normalizeDate(date?: string): string {
-    if (!date) return '';
-    
-    // Try to parse and format date to YYYY-MM-DD
-    const parsedDate = new Date(date);
-    if (isNaN(parsedDate.getTime())) return '';
-    
-    return parsedDate.toISOString().split('T')[0];
+    if (!date || !date.trim()) return '';
+    const parsed = new Date(date.trim());
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().split('T')[0]; // YYYY-MM-DD for date columns
+    }
+    return ''; // Empty if invalid - DB won't accept bad dates
+  }
+
+  private static normalizeTimestamp(date?: string): string {
+    if (!date || !date.trim()) return '';
+    const parsed = new Date(date.trim());
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString(); // Full ISO format for timestamp with time zone
+    }
+    return ''; // Empty if invalid - DB won't accept bad timestamps
   }
 
   private static normalizeArray(value?: string | string[]): string[] {

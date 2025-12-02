@@ -219,6 +219,7 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
     return (
       <ColumnMappingStep
         headers={csvData.headers}
+        sampleRows={csvData.rows.slice(0, 5)}
         mappings={mappings}
         onMappingChange={setMappings}
         onNext={handleMappingNext}
