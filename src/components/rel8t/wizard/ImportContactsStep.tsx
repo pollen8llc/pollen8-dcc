@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Upload, FileText, AlertCircle, RotateCcw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -10,14 +10,13 @@ import { CSVParser, ParsedCSVData } from '@/utils/csvParser';
 import { VCardParser } from '@/utils/vCardParser';
 import { ColumnDetector, ColumnMapping } from '@/utils/columnDetector';
 import { DataNormalizer, NormalizedContact, ValidationResult } from '@/utils/dataNormalizer';
-import { ColumnMappingStep } from './ColumnMappingStep';
 import { ContactPreviewStep } from './ContactPreviewStep';
 
 interface ImportContactsStepProps {
   onNext: (data: { importedContacts: NormalizedContact[] }) => void;
 }
 
-type ImportStep = 'upload' | 'mapping' | 'preview';
+type ImportStep = 'upload' | 'preview';
 
 interface ProcessedData {
   validContacts: NormalizedContact[];
@@ -89,7 +88,7 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
 
       setCsvData(parsed);
 
-      // Auto-detect column mappings
+      // Auto-detect column mappings (only name, email, phone)
       const detection = ColumnDetector.detectColumns(parsed.headers);
       setMappings(detection.mappings);
 
@@ -98,7 +97,8 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
         description: `Found ${parsed.headers.length} columns and ${parsed.rows.length} rows. ${detection.mappings.length} columns auto-mapped.`
       });
 
-      setCurrentStep('mapping');
+      // Process contacts and skip directly to preview
+      processContacts(parsed, detection.mappings);
     } catch (error) {
       console.error('Error parsing file:', error);
       toast({
@@ -106,7 +106,6 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
         description: "There was an error reading the file. Please check the file format.",
         variant: "destructive"
       });
-    } finally {
       setIsProcessing(false);
     }
   }, []);
@@ -123,43 +122,33 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
     multiple: false
   });
 
-  const handleMappingNext = () => {
-    if (!csvData) return;
-
-    setIsProcessing(true);
-
+  const processContacts = useCallback((data: ParsedCSVData, currentMappings: ColumnMapping[]) => {
     try {
-      // Process contacts with current mappings
       const validContacts: NormalizedContact[] = [];
       const rejectedContacts: { contact: NormalizedContact; validation: ValidationResult; rowNumber: number }[] = [];
       const duplicateContacts: { contact: NormalizedContact; duplicateOf: number; rowNumber: number }[] = [];
       const contactHashes = new Map<string, number>();
 
-      csvData.rows.forEach((row, rowIndex) => {
-        // Map row data to fields
+      data.rows.forEach((row, rowIndex) => {
         const rawContact: { [key: string]: string } = {};
-        mappings.forEach(mapping => {
+        currentMappings.forEach(mapping => {
           if (row[mapping.sourceIndex]) {
             rawContact[mapping.targetField] = row[mapping.sourceIndex];
           }
         });
 
-        // Normalize contact data
         const normalizedContact = DataNormalizer.normalizeContact(rawContact);
-        
-        // Validate contact
         const validation = DataNormalizer.validateContact(normalizedContact);
         
         if (!validation.isValid) {
           rejectedContacts.push({
             contact: normalizedContact,
             validation,
-            rowNumber: rowIndex + 2 // +2 because row 0 is headers and we want 1-based indexing
+            rowNumber: rowIndex + 2
           });
           return;
         }
 
-        // Check for duplicates
         const contactHash = DataNormalizer.generateContactHash(normalizedContact);
         const existingIndex = contactHashes.get(contactHash);
         
@@ -172,23 +161,17 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
           return;
         }
 
-        // Add to valid contacts
         contactHashes.set(contactHash, rowIndex);
         validContacts.push(normalizedContact);
       });
 
-      setProcessedData({
-        validContacts,
-        rejectedContacts,
-        duplicateContacts
-      });
+      setProcessedData({ validContacts, rejectedContacts, duplicateContacts });
+      setCurrentStep('preview');
 
       toast({
         title: "Contacts processed",
         description: `${validContacts.length} valid, ${rejectedContacts.length} rejected, ${duplicateContacts.length} duplicates found.`
       });
-
-      setCurrentStep('preview');
     } catch (error) {
       console.error('Error processing contacts:', error);
       toast({
@@ -198,6 +181,14 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
       });
     } finally {
       setIsProcessing(false);
+    }
+  }, []);
+
+  const handleMappingChange = (newMappings: ColumnMapping[]) => {
+    setMappings(newMappings);
+    if (csvData) {
+      setIsProcessing(true);
+      processContacts(csvData, newMappings);
     }
   };
 
@@ -215,27 +206,18 @@ export const ImportContactsStep: React.FC<ImportContactsStepProps> = ({ onNext }
     setProcessedData(null);
   };
 
-  if (currentStep === 'mapping' && csvData) {
-    return (
-      <ColumnMappingStep
-        headers={csvData.headers}
-        sampleRows={csvData.rows.slice(0, 5)}
-        mappings={mappings}
-        onMappingChange={setMappings}
-        onNext={handleMappingNext}
-        onBack={() => setCurrentStep('upload')}
-      />
-    );
-  }
-
-  if (currentStep === 'preview' && processedData) {
+  if (currentStep === 'preview' && processedData && csvData) {
     return (
       <ContactPreviewStep
         validContacts={processedData.validContacts}
         rejectedContacts={processedData.rejectedContacts}
         duplicateContacts={processedData.duplicateContacts}
         onImport={handleImport}
-        onBack={() => setCurrentStep('mapping')}
+        onBack={handleReset}
+        headers={csvData.headers}
+        sampleRows={csvData.rows.slice(0, 5)}
+        mappings={mappings}
+        onMappingChange={handleMappingChange}
       />
     );
   }
