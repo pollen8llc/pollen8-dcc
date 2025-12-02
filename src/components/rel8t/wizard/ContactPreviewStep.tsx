@@ -5,8 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckCircle2, AlertTriangle, Users, UserX } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { CheckCircle2, AlertTriangle, Users, UserX, Settings2 } from 'lucide-react';
 import { NormalizedContact, ValidationResult } from '@/utils/dataNormalizer';
+import { ColumnMapping } from '@/utils/columnDetector';
+import { ColumnMappingStep } from './ColumnMappingStep';
 
 interface ContactPreviewStepProps {
   validContacts: NormalizedContact[];
@@ -14,6 +17,10 @@ interface ContactPreviewStepProps {
   duplicateContacts: { contact: NormalizedContact; duplicateOf: number; rowNumber: number }[];
   onImport: () => void;
   onBack: () => void;
+  headers?: string[];
+  sampleRows?: string[][];
+  mappings?: ColumnMapping[];
+  onMappingChange?: (mappings: ColumnMapping[]) => void;
 }
 
 export const ContactPreviewStep: React.FC<ContactPreviewStepProps> = ({
@@ -21,9 +28,18 @@ export const ContactPreviewStep: React.FC<ContactPreviewStepProps> = ({
   rejectedContacts,
   duplicateContacts,
   onImport,
-  onBack
+  onBack,
+  headers,
+  sampleRows,
+  mappings,
+  onMappingChange
 }) => {
   const [activeTab, setActiveTab] = useState('valid');
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const handleMappingChange = (newMappings: ColumnMapping[]) => {
+    onMappingChange?.(newMappings);
+  };
 
   const renderContact = (contact: NormalizedContact, index: number, showRowNumber?: number) => (
     <div key={index} className="p-3 border rounded-lg space-y-2">
@@ -116,28 +132,58 @@ export const ContactPreviewStep: React.FC<ContactPreviewStepProps> = ({
     </div>
   );
 
+  const showMappingConfig = headers && sampleRows && mappings && onMappingChange;
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Import Summary
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Import Summary
+            </CardTitle>
+            {showMappingConfig && (
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Settings2 className="h-4 w-4" />
+                    Configure Mapping
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Column Mapping Configuration</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <ColumnMappingStep
+                      headers={headers}
+                      sampleRows={sampleRows}
+                      mappings={mappings}
+                      onMappingChange={handleMappingChange}
+                      onNext={() => setIsSheetOpen(false)}
+                      onBack={() => setIsSheetOpen(false)}
+                      isEmbedded
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="text-center p-4 bg-green-50 rounded-lg">
+            <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
               <div className="text-2xl font-bold text-green-600">{validContacts.length}</div>
-              <div className="text-sm text-green-800">Valid Contacts</div>
+              <div className="text-sm text-green-800 dark:text-green-200">Valid Contacts</div>
             </div>
-            <div className="text-center p-4 bg-red-50 rounded-lg">
+            <div className="text-center p-4 bg-red-50 dark:bg-red-950/20 rounded-lg">
               <div className="text-2xl font-bold text-red-600">{rejectedContacts.length}</div>
-              <div className="text-sm text-red-800">Rejected</div>
+              <div className="text-sm text-red-800 dark:text-red-200">Rejected</div>
             </div>
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
+            <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">{duplicateContacts.length}</div>
-              <div className="text-sm text-yellow-800">Duplicates</div>
+              <div className="text-sm text-yellow-800 dark:text-yellow-200">Duplicates</div>
             </div>
           </div>
         </CardContent>
@@ -243,7 +289,7 @@ export const ContactPreviewStep: React.FC<ContactPreviewStepProps> = ({
 
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
-          Back to Mapping
+          Upload Different File
         </Button>
         <Button 
           onClick={onImport}

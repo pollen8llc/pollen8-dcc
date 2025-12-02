@@ -14,6 +14,7 @@ interface ColumnMappingStepProps {
   onMappingChange: (mappings: ColumnMapping[]) => void;
   onNext: () => void;
   onBack: () => void;
+  isEmbedded?: boolean;
 }
 
 // Field metadata for validation and format hints
@@ -120,7 +121,8 @@ export const ColumnMappingStep: React.FC<ColumnMappingStepProps> = ({
   mappings,
   onMappingChange,
   onNext,
-  onBack
+  onBack,
+  isEmbedded = false
 }) => {
   const availableFields = [
     'name', 'email', 'phone', 'organization', 'role', 'location', 'notes',
@@ -221,6 +223,90 @@ export const ColumnMappingStep: React.FC<ColumnMappingStepProps> = ({
   const requiredFieldsMapped = mappings.some(m => m.targetField === 'name') || 
                                mappings.some(m => m.targetField === 'email');
 
+  if (isEmbedded) {
+    return (
+      <div className="space-y-4">
+        <p className="text-muted-foreground text-sm">
+          Map CSV columns to contact fields. At least one name or email field is required.
+        </p>
+        
+        <div className="space-y-3">
+          {headers.map((header, index) => {
+            const sampleValues = getSampleValues(index);
+            const currentMapping = getCurrentMapping(index);
+            
+            return (
+              <div key={index} className="p-3 border rounded-lg space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <span className="font-medium text-sm truncate">{header}</span>
+                    {getConfidenceBadge(index)}
+                  </div>
+                  
+                  <Select
+                    value={currentMapping}
+                    onValueChange={(value) => updateMapping(index, value)}
+                  >
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Select field..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="skip">Skip this column</SelectItem>
+                      {availableFields.map(field => (
+                        <SelectItem 
+                          key={field} 
+                          value={field}
+                          disabled={isFieldMapped(field) && currentMapping !== field}
+                        >
+                          {ColumnDetector.getFieldDisplayName(field)}
+                          {isFieldMapped(field) && currentMapping !== field && ' (mapped)'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {sampleValues.length > 0 && (
+                  <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                    <span className="font-medium">Sample: </span>
+                    {sampleValues.slice(0, 2).map((val, i) => (
+                      <span key={i}>
+                        <code className="bg-background px-1 rounded">{val.length > 20 ? val.slice(0, 20) + '...' : val}</code>
+                        {i < sampleValues.length - 1 && i < 1 && ', '}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {currentMapping && (
+                  <div className="flex items-center justify-between text-xs">
+                    {getFormatHint(index)}
+                    {getValidationIndicator(index)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {!requiredFieldsMapped && (
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <span className="text-sm text-amber-800 dark:text-amber-200">
+              Please map at least one name or email field.
+            </span>
+          </div>
+        )}
+
+        <div className="flex justify-end pt-4">
+          <Button onClick={onNext} disabled={!requiredFieldsMapped}>
+            Apply Mapping
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -242,7 +328,6 @@ export const ColumnMappingStep: React.FC<ColumnMappingStepProps> = ({
               
               return (
                 <div key={index} className="p-4 border rounded-lg space-y-2">
-                  {/* Header row */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium">{header}</span>
@@ -272,7 +357,6 @@ export const ColumnMappingStep: React.FC<ColumnMappingStepProps> = ({
                     </Select>
                   </div>
 
-                  {/* Sample values */}
                   {sampleValues.length > 0 && (
                     <div className="text-sm text-muted-foreground bg-muted/50 rounded px-2 py-1">
                       <span className="font-medium">Sample: </span>
@@ -285,7 +369,6 @@ export const ColumnMappingStep: React.FC<ColumnMappingStepProps> = ({
                     </div>
                   )}
 
-                  {/* Validation and format hint */}
                   {currentMapping && (
                     <div className="flex items-center justify-between text-sm">
                       {getFormatHint(index)}

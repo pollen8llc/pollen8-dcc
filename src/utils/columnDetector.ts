@@ -15,6 +15,7 @@ export interface DetectionResult {
 }
 
 export class ColumnDetector {
+  // Only auto-detect essential fields - name, email, phone
   private static readonly FIELD_PATTERNS = {
     name: [
       'name', 'full name', 'fullname', 'contact name', 'display name',
@@ -31,89 +32,6 @@ export class ColumnDetector {
       'mobile phone', 'work phone', 'home phone', 'cell phone',
       'phone_number', 'mobile_phone', 'work_phone', 'home_phone',
       'cell_phone', 'telephone_number'
-    ],
-    organization: [
-      'organization', 'company', 'org', 'business', 'employer', 'work',
-      'company name', 'organization_name', 'company_name', 'workplace'
-    ],
-    role: [
-      'role', 'title', 'job title', 'position', 'job', 'work title',
-      'designation', 'job_title', 'work_title', 'position_title'
-    ],
-    location: [
-      'location', 'address', 'city', 'country', 'region', 'state',
-      'street', 'zip', 'postal', 'area', 'place'
-    ],
-    notes: [
-      'notes', 'note', 'comments', 'description', 'memo', 'remarks',
-      'comment', 'additional info', 'additional_info', 'extra'
-    ],
-    preferred_name: [
-      'preferred name', 'nickname', 'goes by', 'alias', 'preferred_name',
-      'nick', 'known as', 'called'
-    ],
-    industry: [
-      'industry', 'sector', 'market', 'vertical', 'field', 'domain',
-      'business type', 'industry_type'
-    ],
-    birthday: [
-      'birthday', 'birth date', 'dob', 'date of birth', 'birthdate',
-      'birth_date', 'date_of_birth', 'bday'
-    ],
-    professional_goals: [
-      'goals', 'professional goals', 'focus', 'objectives', 'priorities',
-      'working on', 'current focus', 'professional_goals', 'career_goals'
-    ],
-    how_we_met: [
-      'how we met', 'met at', 'introduction', 'source', 'referred by',
-      'how_we_met', 'met_at', 'introduced by', 'connection source'
-    ],
-    bio: [
-      'bio', 'biography', 'about', 'summary', 'profile', 'description',
-      'background', 'about me'
-    ],
-    interests: [
-      'interests', 'hobbies', 'likes', 'passions', 'activities',
-      'interested in', 'enjoys'
-    ],
-    tags: [
-      'tags', 'tag', 'labels', 'categories', 'keywords', 'metadata'
-    ],
-    status: [
-      'status', 'contact status', 'relationship status', 'active status'
-    ],
-    rapport_status: [
-      'rapport status', 'rapport', 'relationship strength', 'connection strength',
-      'rapport level', 'engagement level'
-    ],
-    preferred_channel: [
-      'preferred channel', 'contact method', 'reach via', 'communication channel',
-      'preferred contact', 'best way to reach', 'contact preference'
-    ],
-    next_followup_date: [
-      'next followup', 'follow up date', 'next contact', 'scheduled followup',
-      'next touch', 'followup date', 'next follow-up'
-    ],
-    last_contact_date: [
-      'last contact', 'last spoke', 'last interaction', 'contacted on',
-      'last touch', 'previous contact', 'last reached out'
-    ],
-    anniversary: [
-      'anniversary', 'work anniversary', 'membership date', 'join date',
-      'anniversary date'
-    ],
-    anniversary_type: [
-      'anniversary type', 'milestone type', 'event type'
-    ],
-    upcoming_event: [
-      'upcoming event', 'next event', 'scheduled event', 'future event'
-    ],
-    upcoming_event_date: [
-      'event date', 'upcoming event date', 'next event date', 'scheduled date'
-    ],
-    events_attended: [
-      'events attended', 'attended events', 'past events', 'event history',
-      'events', 'conferences attended'
     ]
   };
 
