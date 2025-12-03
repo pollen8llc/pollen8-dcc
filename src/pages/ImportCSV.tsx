@@ -8,11 +8,13 @@ import { createContact } from "@/services/rel8t/contactService";
 import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, UserPlus, Send, Search, Link2 } from "lucide-react";
+import { Upload, UserPlus, Send, Search, Link2, Mail } from "lucide-react";
 import { InviteMethodTabs } from "@/components/invites/InviteMethodTabs";
 import { InviteMetricsCard } from "@/components/invites/InviteMetricsCard";
 import { useInvites } from "@/hooks/useInvites";
 import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { GoogleContactsIntegrationStep } from "@/components/rel8t/wizard/GoogleContactsIntegrationStep";
 
 const ImportCSV = () => {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ const ImportCSV = () => {
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInvalidating, setIsInvalidating] = useState(false);
+  const [showGoogleImport, setShowGoogleImport] = useState(false);
 
   const isRel8Import = location.pathname.includes('/rel8');
   const backPath = isRel8Import ? '/rel8/contacts' : '/imports';
@@ -132,7 +135,7 @@ const ImportCSV = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary/30"
             onClick={() => navigate(isRel8Import ? '/rel8/contacts/new' : '/contacts/new')}
@@ -147,6 +150,16 @@ const ImportCSV = () => {
             <CardContent className="p-3 text-center">
               <Upload className="h-5 w-5 text-primary mx-auto mb-1" />
               <h3 className="font-medium text-xs">Import Files</h3>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary/30"
+            onClick={() => setShowGoogleImport(true)}
+          >
+            <CardContent className="p-3 text-center">
+              <Mail className="h-5 w-5 text-primary mx-auto mb-1" />
+              <h3 className="font-medium text-xs">Gmail Contacts</h3>
             </CardContent>
           </Card>
 
@@ -173,6 +186,24 @@ const ImportCSV = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Google Contacts Import Sheet */}
+        <Sheet open={showGoogleImport} onOpenChange={setShowGoogleImport}>
+          <SheetContent className="sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle>Import Google Contacts</SheetTitle>
+            </SheetHeader>
+            <div className="mt-6">
+              <GoogleContactsIntegrationStep 
+                onComplete={() => {
+                  queryClient.invalidateQueries({ queryKey: ["contacts"] });
+                  setShowGoogleImport(false);
+                  navigate(successPath);
+                }}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
 
         {isRel8Import && (
           <>

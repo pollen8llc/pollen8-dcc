@@ -462,6 +462,95 @@ export type Database = {
         }
         Relationships: []
       }
+      google_import_history: {
+        Row: {
+          contacts_imported: number | null
+          created_at: string | null
+          duplicates_found: number | null
+          errors_count: number | null
+          id: string
+          import_data: Json | null
+          import_status: string | null
+          integration_id: string | null
+          user_id: string
+        }
+        Insert: {
+          contacts_imported?: number | null
+          created_at?: string | null
+          duplicates_found?: number | null
+          errors_count?: number | null
+          id?: string
+          import_data?: Json | null
+          import_status?: string | null
+          integration_id?: string | null
+          user_id: string
+        }
+        Update: {
+          contacts_imported?: number | null
+          created_at?: string | null
+          duplicates_found?: number | null
+          errors_count?: number | null
+          id?: string
+          import_data?: Json | null
+          import_status?: string | null
+          integration_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_import_history_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "google_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_integrations: {
+        Row: {
+          access_token: string
+          connected_at: string | null
+          created_at: string | null
+          google_email: string | null
+          google_user_id: string | null
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          refresh_token: string | null
+          token_expires_at: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          connected_at?: string | null
+          created_at?: string | null
+          google_email?: string | null
+          google_user_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          refresh_token?: string | null
+          token_expires_at: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          connected_at?: string | null
+          created_at?: string | null
+          google_email?: string | null
+          google_user_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       invites: {
         Row: {
           code: string
