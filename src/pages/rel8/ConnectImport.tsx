@@ -9,12 +9,15 @@ import { DataNormalizer, NormalizedContact } from "@/utils/dataNormalizer";
 import { ImportContactsStep } from "@/components/rel8t/wizard/ImportContactsStep";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Upload } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { ArrowLeft, Upload, Mail } from "lucide-react";
+import { GoogleContactsIntegrationStep } from "@/components/rel8t/wizard/GoogleContactsIntegrationStep";
 
 const ConnectImport = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showGoogleImport, setShowGoogleImport] = useState(false);
 
   const handleImportComplete = async (importedContacts: NormalizedContact[]) => {
     setIsProcessing(true);
@@ -71,7 +74,7 @@ const ConnectImport = () => {
             <div>
               <h1 className="text-2xl font-bold">Import Contacts</h1>
               <p className="text-sm text-muted-foreground">
-                Upload contacts from CSV, vCard, or Excel files
+                Upload contacts from CSV, vCard, Excel files, or Google
               </p>
             </div>
           </div>
@@ -80,6 +83,46 @@ const ConnectImport = () => {
             Back to Connect
           </Button>
         </div>
+
+        {/* Import Options */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className="border-primary/50 bg-primary/5">
+            <CardContent className="p-4 text-center">
+              <Upload className="h-6 w-6 text-primary mx-auto mb-2" />
+              <h3 className="font-medium text-sm">File Import</h3>
+              <p className="text-xs text-muted-foreground">CSV, vCard, Excel</p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-primary/30"
+            onClick={() => setShowGoogleImport(true)}
+          >
+            <CardContent className="p-4 text-center">
+              <Mail className="h-6 w-6 text-primary mx-auto mb-2" />
+              <h3 className="font-medium text-sm">Gmail Contacts</h3>
+              <p className="text-xs text-muted-foreground">Import from Google</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Google Contacts Import Sheet */}
+        <Sheet open={showGoogleImport} onOpenChange={setShowGoogleImport}>
+          <SheetContent className="sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle>Import Google Contacts</SheetTitle>
+            </SheetHeader>
+            <div className="mt-6">
+              <GoogleContactsIntegrationStep 
+                onComplete={() => {
+                  queryClient.invalidateQueries({ queryKey: ["contacts"] });
+                  setShowGoogleImport(false);
+                  navigate('/rel8/contacts');
+                }}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
         
         <Card className="glass-morphism border-0 backdrop-blur-md">
           <CardHeader className="border-b border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
