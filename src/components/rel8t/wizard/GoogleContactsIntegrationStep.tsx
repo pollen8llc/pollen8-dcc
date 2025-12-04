@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Mail, CheckCircle2, AlertCircle, Users, RefreshCw } from 'lucide-react';
+import { Loader2, Mail, CheckCircle2, Users, RefreshCw } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 
 interface GoogleContactsIntegrationStepProps {
@@ -16,9 +16,6 @@ interface ImportSummary {
   duplicates: number;
   errors: number;
 }
-
-const GOOGLE_CLIENT_ID = ''; // User must configure this
-const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
 
 export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationStepProps> = ({ 
   onComplete 
@@ -69,21 +66,20 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
         throw new Error('Please sign in to connect Google Contacts');
       }
 
-      // Build OAuth URL
+      // Get OAuth URL from edge function
       const redirectUri = `${window.location.origin}/rel8/connect/import`;
       const state = btoa(JSON.stringify({ 
         userId: currentUser?.id,
         redirectUri 
       }));
       
-      const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-      authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
-      authUrl.searchParams.set('redirect_uri', redirectUri);
-      authUrl.searchParams.set('response_type', 'code');
-      authUrl.searchParams.set('scope', GOOGLE_SCOPES);
-      authUrl.searchParams.set('access_type', 'offline');
-      authUrl.searchParams.set('prompt', 'consent');
-      authUrl.searchParams.set('state', state);
+      const { data: urlData, error: urlError } = await supabase.functions.invoke('google-auth-url', {
+        body: { redirectUri, state }
+      });
+
+      if (urlError || !urlData?.authUrl) {
+        throw new Error(urlError?.message || urlData?.error || 'Failed to get OAuth URL');
+      }
 
       // Open OAuth popup
       const width = 500;
@@ -92,7 +88,7 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
       const top = window.screenY + (window.outerHeight - height) / 2;
       
       const popup = window.open(
-        authUrl.toString(),
+        urlData.authUrl,
         'Google OAuth',
         `width=${width},height=${height},left=${left},top=${top}`
       );
@@ -350,19 +346,6 @@ export const GoogleContactsIntegrationStep: React.FC<GoogleContactsIntegrationSt
           </Button>
         </div>
 
-        {!GOOGLE_CLIENT_ID && (
-          <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-3">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-yellow-600">Configuration Required</p>
-                <p className="text-muted-foreground">
-                  Google OAuth credentials need to be configured. Please add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to your Supabase secrets.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
